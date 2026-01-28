@@ -10,6 +10,7 @@
     <ProjectReference Include="..\..\src\Agibuild.Avalonia.WebView.Core\Agibuild.Avalonia.WebView.Core.csproj" />
     <ProjectReference Include="..\..\src\Agibuild.Avalonia.WebView.Adapters.Abstractions\Agibuild.Avalonia.WebView.Adapters.Abstractions.csproj" />
     <ProjectReference Include="..\..\src\Agibuild.Avalonia.WebView.DependencyInjection\Agibuild.Avalonia.WebView.DependencyInjection.csproj" />
+    <ProjectReference Include="..\Agibuild.Avalonia.WebView.Testing\Agibuild.Avalonia.WebView.Testing.csproj" />
   </ItemGroup>
 
   <ItemGroup>

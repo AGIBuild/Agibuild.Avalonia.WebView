@@ -1,4 +1,4 @@
-using Agibuild.Avalonia.WebView.Adapters;
+using Agibuild.Avalonia.WebView.Adapters.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Agibuild.Avalonia.WebView.DependencyInjection;

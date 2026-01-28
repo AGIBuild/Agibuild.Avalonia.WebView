@@ -1,8 +1,8 @@
 using Agibuild.Avalonia.WebView;
 
-namespace Agibuild.Avalonia.WebView.Tests;
+namespace Agibuild.Avalonia.WebView.Testing;
 
-internal sealed class TestWebViewHost : IWebView
+public sealed class TestWebViewHost : IWebView
 {
     public Uri Source { get; set; } = new Uri("about:blank");
     public bool CanGoBack => false;

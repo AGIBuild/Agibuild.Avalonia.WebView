@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Agibuild.Avalonia.WebView.Integration.Tests\Agibuild.Avalonia.WebView.Integration.Tests\Agibuild.Avalonia.WebView.Integration.Tests.csproj" />
+    <ProjectReference Include="..\Agibuild.Avalonia.WebView.Testing\Agibuild.Avalonia.WebView.Testing.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia.Headless.XUnit" Version="11.3.11" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.11" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk">
+      <Version>18.0.1</Version>
+    </PackageReference>
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+      <Version>3.1.5</Version>
+    </PackageReference>
+  </ItemGroup>
+</Project>

@@ -24,7 +24,7 @@ Platform implementations are intentionally deferred; only adapter skeletons and 
   - `Agibuild.Avalonia.WebView.Adapters.Abstractions` for adapter interfaces and adapter lifecycle contracts.
   - `Agibuild.Avalonia.WebView.Adapters.Windows`, `Agibuild.Avalonia.WebView.Adapters.MacOS`, `Agibuild.Avalonia.WebView.Adapters.Android`, `Agibuild.Avalonia.WebView.Adapters.Gtk` as empty platform skeletons.
   - `Agibuild.Avalonia.WebView.DependencyInjection` for DI integration and registrations.
-  - `Agibuild.Avalonia.WebView.Tests` for contract tests and mocks.
+  - `Agibuild.Avalonia.WebView.UnitTests` for contract tests and mocks.
   - Alternative considered: single library with conditional compilation. Rejected to avoid platform coupling and to keep tests platform-free.
 
 - Dependency direction is enforced as one-way:

@@ -24,9 +24,12 @@
     "ExecutableTarget": {
       "type": "string",
       "enum": [
+        "AllTests",
         "Ci",
         "Compile",
-        "Test"
+        "IntegrationTests",
+        "Test",
+        "UnitTests"
       ]
     },
     "Verbosity": {

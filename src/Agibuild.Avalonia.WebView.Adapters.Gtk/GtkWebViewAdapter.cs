@@ -1,6 +1,6 @@
 using Avalonia.Platform;
 using Agibuild.Avalonia.WebView;
-using Agibuild.Avalonia.WebView.Adapters;
+using Agibuild.Avalonia.WebView.Adapters.Abstractions;
 
 namespace Agibuild.Avalonia.WebView.Adapters.Gtk;
 

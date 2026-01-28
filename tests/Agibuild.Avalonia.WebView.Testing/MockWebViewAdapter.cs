@@ -1,8 +1,8 @@
 using Avalonia.Platform;
 using Agibuild.Avalonia.WebView;
-using Agibuild.Avalonia.WebView.Adapters;
+using Agibuild.Avalonia.WebView.Adapters.Abstractions;
 
-namespace Agibuild.Avalonia.WebView.Tests;
+namespace Agibuild.Avalonia.WebView.Testing;
 
 public sealed class MockWebViewAdapter : IWebViewAdapter
 {

@@ -1,0 +1,30 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Agibuild.Avalonia.WebView.Integration.Tests.ViewModels"
+             mc:Ignorable="d"
+             x:Class="Agibuild.Avalonia.WebView.Integration.Tests.Views.WebViewTestView"
+             x:DataType="vm:WebViewTestViewModel">
+  <StackPanel Spacing="8">
+    <TextBlock Text="WebView Functional Tests" FontSize="16" />
+
+    <TextBox x:Name="AddressTextBox" Text="{Binding Address}" />
+    <Button x:Name="NavigateButton" Content="Navigate" Command="{Binding NavigateCommand}" />
+
+    <TextBox x:Name="HtmlTextBox" Text="{Binding HtmlContent}" AcceptsReturn="True" Height="80" />
+    <Button x:Name="NavigateHtmlButton" Content="Navigate Html" Command="{Binding NavigateHtmlCommand}" />
+
+    <TextBox x:Name="ScriptTextBox" Text="{Binding Script}" />
+    <Button x:Name="InvokeScriptButton" Content="Invoke Script" Command="{Binding InvokeScriptCommand}" />
+
+    <TextBlock Text="Last Navigation:" />
+    <TextBlock x:Name="LastNavigationText" Text="{Binding LastNavigation}" />
+
+    <TextBlock Text="Script Result:" />
+    <TextBlock x:Name="ScriptResultText" Text="{Binding ScriptResult}" />
+
+    <TextBlock Text="Last Event:" />
+    <TextBlock x:Name="LastEventText" Text="{Binding LastEvent}" />
+  </StackPanel>
+</UserControl>

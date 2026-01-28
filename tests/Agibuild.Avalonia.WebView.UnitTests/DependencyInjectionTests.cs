@@ -1,9 +1,10 @@
-using Agibuild.Avalonia.WebView.Adapters;
+using Agibuild.Avalonia.WebView.Adapters.Abstractions;
 using Agibuild.Avalonia.WebView.DependencyInjection;
+using Agibuild.Avalonia.WebView.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
-namespace Agibuild.Avalonia.WebView.Tests;
+namespace Agibuild.Avalonia.WebView.UnitTests;
 
 public sealed class DependencyInjectionTests
 {

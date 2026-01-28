@@ -1,22 +1,38 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.0.31903.59
+# Visual Studio Version 18
+VisualStudioVersion = 18.2.11415.280
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agibuild.Avalonia.WebView.Core", "src\\Agibuild.Avalonia.WebView.Core\\Agibuild.Avalonia.WebView.Core.csproj", "{22334029-B509-4A8B-B005-8B74981FF707}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agibuild.Avalonia.WebView.Core", "src\Agibuild.Avalonia.WebView.Core\Agibuild.Avalonia.WebView.Core.csproj", "{22334029-B509-4A8B-B005-8B74981FF707}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agibuild.Avalonia.WebView.Adapters.Abstractions", "src\\Agibuild.Avalonia.WebView.Adapters.Abstractions\\Agibuild.Avalonia.WebView.Adapters.Abstractions.csproj", "{2A0C8A60-16E3-4652-9507-B7335BB3531B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agibuild.Avalonia.WebView.Adapters.Abstractions", "src\Agibuild.Avalonia.WebView.Adapters.Abstractions\Agibuild.Avalonia.WebView.Adapters.Abstractions.csproj", "{2A0C8A60-16E3-4652-9507-B7335BB3531B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agibuild.Avalonia.WebView.Adapters.Windows", "src\\Agibuild.Avalonia.WebView.Adapters.Windows\\Agibuild.Avalonia.WebView.Adapters.Windows.csproj", "{BD2070C6-6268-4D1F-97DC-E66FC2672422}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agibuild.Avalonia.WebView.Adapters.Windows", "src\Agibuild.Avalonia.WebView.Adapters.Windows\Agibuild.Avalonia.WebView.Adapters.Windows.csproj", "{BD2070C6-6268-4D1F-97DC-E66FC2672422}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agibuild.Avalonia.WebView.Adapters.MacOS", "src\\Agibuild.Avalonia.WebView.Adapters.MacOS\\Agibuild.Avalonia.WebView.Adapters.MacOS.csproj", "{243860EA-904C-40C3-BE4F-90232B7B7F5D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agibuild.Avalonia.WebView.Adapters.MacOS", "src\Agibuild.Avalonia.WebView.Adapters.MacOS\Agibuild.Avalonia.WebView.Adapters.MacOS.csproj", "{243860EA-904C-40C3-BE4F-90232B7B7F5D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agibuild.Avalonia.WebView.Adapters.Android", "src\\Agibuild.Avalonia.WebView.Adapters.Android\\Agibuild.Avalonia.WebView.Adapters.Android.csproj", "{8E2B6BDE-C585-4942-AA52-9C680043AB44}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agibuild.Avalonia.WebView.Adapters.Android", "src\Agibuild.Avalonia.WebView.Adapters.Android\Agibuild.Avalonia.WebView.Adapters.Android.csproj", "{8E2B6BDE-C585-4942-AA52-9C680043AB44}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agibuild.Avalonia.WebView.Adapters.Gtk", "src\\Agibuild.Avalonia.WebView.Adapters.Gtk\\Agibuild.Avalonia.WebView.Adapters.Gtk.csproj", "{8D4BB0AB-3B23-48AD-A226-3944DB2CD893}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agibuild.Avalonia.WebView.Adapters.Gtk", "src\Agibuild.Avalonia.WebView.Adapters.Gtk\Agibuild.Avalonia.WebView.Adapters.Gtk.csproj", "{8D4BB0AB-3B23-48AD-A226-3944DB2CD893}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agibuild.Avalonia.WebView.DependencyInjection", "src\\Agibuild.Avalonia.WebView.DependencyInjection\\Agibuild.Avalonia.WebView.DependencyInjection.csproj", "{ED758D6F-99ED-4FB0-B75E-B27C1F370EAC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agibuild.Avalonia.WebView.DependencyInjection", "src\Agibuild.Avalonia.WebView.DependencyInjection\Agibuild.Avalonia.WebView.DependencyInjection.csproj", "{ED758D6F-99ED-4FB0-B75E-B27C1F370EAC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agibuild.Avalonia.WebView.Tests", "tests\\Agibuild.Avalonia.WebView.Tests\\Agibuild.Avalonia.WebView.Tests.csproj", "{0711072B-F46A-485F-88C7-2C9093DA23E7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agibuild.Avalonia.WebView.Testing", "tests\Agibuild.Avalonia.WebView.Testing\Agibuild.Avalonia.WebView.Testing.csproj", "{FBF4A619-A096-4FCD-909F-E13FDFC9363F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agibuild.Avalonia.WebView.Integration.Tests.Automation", "tests\Agibuild.Avalonia.WebView.Integration.Tests.Automation\Agibuild.Avalonia.WebView.Integration.Tests.Automation.csproj", "{E5DC3187-6409-48B4-A323-0E6D4A9DF203}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{29533BD3-81D4-4131-A1F2-9F382B7F1C07}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agibuild.Avalonia.WebView.Integration.Tests", "tests\Agibuild.Avalonia.WebView.Integration.Tests\Agibuild.Avalonia.WebView.Integration.Tests\Agibuild.Avalonia.WebView.Integration.Tests.csproj", "{0A80EF3B-E2C6-4285-B2BA-5777DE79B7D0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agibuild.Avalonia.WebView.Integration.Tests.Android", "tests\Agibuild.Avalonia.WebView.Integration.Tests\Agibuild.Avalonia.WebView.Integration.Tests.Android\Agibuild.Avalonia.WebView.Integration.Tests.Android.csproj", "{159DC060-6483-4F40-A0E9-D0A0F497530F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agibuild.Avalonia.WebView.Integration.Tests.Desktop", "tests\Agibuild.Avalonia.WebView.Integration.Tests\Agibuild.Avalonia.WebView.Integration.Tests.Desktop\Agibuild.Avalonia.WebView.Integration.Tests.Desktop.csproj", "{B6F3AD4C-4844-43F4-A8FF-F65608AE28DE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agibuild.Avalonia.WebView.Integration.Tests.iOS", "tests\Agibuild.Avalonia.WebView.Integration.Tests\Agibuild.Avalonia.WebView.Integration.Tests.iOS\Agibuild.Avalonia.WebView.Integration.Tests.iOS.csproj", "{605E8BC9-8778-4D27-AA9D-5AEA02843DD7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agibuild.Avalonia.WebView.Integration.Tests.Browser", "tests\Agibuild.Avalonia.WebView.Integration.Tests\Agibuild.Avalonia.WebView.Integration.Tests.Browser\Agibuild.Avalonia.WebView.Integration.Tests.Browser.csproj", "{951450EF-93E8-4551-AECF-C5F70049DDDA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agibuild.Avalonia.WebView.UnitTests", "tests\Agibuild.Avalonia.WebView.UnitTests\Agibuild.Avalonia.WebView.UnitTests.csproj", "{045ADEFC-8151-04AB-84A6-CC8F547D95A8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -52,9 +68,57 @@ Global
 		{ED758D6F-99ED-4FB0-B75E-B27C1F370EAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ED758D6F-99ED-4FB0-B75E-B27C1F370EAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ED758D6F-99ED-4FB0-B75E-B27C1F370EAC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0711072B-F46A-485F-88C7-2C9093DA23E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0711072B-F46A-485F-88C7-2C9093DA23E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0711072B-F46A-485F-88C7-2C9093DA23E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0711072B-F46A-485F-88C7-2C9093DA23E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FBF4A619-A096-4FCD-909F-E13FDFC9363F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FBF4A619-A096-4FCD-909F-E13FDFC9363F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FBF4A619-A096-4FCD-909F-E13FDFC9363F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FBF4A619-A096-4FCD-909F-E13FDFC9363F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E5DC3187-6409-48B4-A323-0E6D4A9DF203}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E5DC3187-6409-48B4-A323-0E6D4A9DF203}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E5DC3187-6409-48B4-A323-0E6D4A9DF203}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E5DC3187-6409-48B4-A323-0E6D4A9DF203}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0A80EF3B-E2C6-4285-B2BA-5777DE79B7D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A80EF3B-E2C6-4285-B2BA-5777DE79B7D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0A80EF3B-E2C6-4285-B2BA-5777DE79B7D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0A80EF3B-E2C6-4285-B2BA-5777DE79B7D0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{159DC060-6483-4F40-A0E9-D0A0F497530F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{159DC060-6483-4F40-A0E9-D0A0F497530F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{159DC060-6483-4F40-A0E9-D0A0F497530F}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{159DC060-6483-4F40-A0E9-D0A0F497530F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{159DC060-6483-4F40-A0E9-D0A0F497530F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{159DC060-6483-4F40-A0E9-D0A0F497530F}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{B6F3AD4C-4844-43F4-A8FF-F65608AE28DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6F3AD4C-4844-43F4-A8FF-F65608AE28DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B6F3AD4C-4844-43F4-A8FF-F65608AE28DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B6F3AD4C-4844-43F4-A8FF-F65608AE28DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{605E8BC9-8778-4D27-AA9D-5AEA02843DD7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{605E8BC9-8778-4D27-AA9D-5AEA02843DD7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{605E8BC9-8778-4D27-AA9D-5AEA02843DD7}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{605E8BC9-8778-4D27-AA9D-5AEA02843DD7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{605E8BC9-8778-4D27-AA9D-5AEA02843DD7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{605E8BC9-8778-4D27-AA9D-5AEA02843DD7}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{951450EF-93E8-4551-AECF-C5F70049DDDA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{951450EF-93E8-4551-AECF-C5F70049DDDA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{951450EF-93E8-4551-AECF-C5F70049DDDA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{951450EF-93E8-4551-AECF-C5F70049DDDA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{045ADEFC-8151-04AB-84A6-CC8F547D95A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{045ADEFC-8151-04AB-84A6-CC8F547D95A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{045ADEFC-8151-04AB-84A6-CC8F547D95A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{045ADEFC-8151-04AB-84A6-CC8F547D95A8}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{FBF4A619-A096-4FCD-909F-E13FDFC9363F} = {29533BD3-81D4-4131-A1F2-9F382B7F1C07}
+		{E5DC3187-6409-48B4-A323-0E6D4A9DF203} = {29533BD3-81D4-4131-A1F2-9F382B7F1C07}
+		{0A80EF3B-E2C6-4285-B2BA-5777DE79B7D0} = {29533BD3-81D4-4131-A1F2-9F382B7F1C07}
+		{159DC060-6483-4F40-A0E9-D0A0F497530F} = {29533BD3-81D4-4131-A1F2-9F382B7F1C07}
+		{B6F3AD4C-4844-43F4-A8FF-F65608AE28DE} = {29533BD3-81D4-4131-A1F2-9F382B7F1C07}
+		{605E8BC9-8778-4D27-AA9D-5AEA02843DD7} = {29533BD3-81D4-4131-A1F2-9F382B7F1C07}
+		{951450EF-93E8-4551-AECF-C5F70049DDDA} = {29533BD3-81D4-4131-A1F2-9F382B7F1C07}
+		{045ADEFC-8151-04AB-84A6-CC8F547D95A8} = {29533BD3-81D4-4131-A1F2-9F382B7F1C07}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C362CE2E-275A-4392-B5A1-CA3A6612BDBF}
 	EndGlobalSection
 EndGlobal

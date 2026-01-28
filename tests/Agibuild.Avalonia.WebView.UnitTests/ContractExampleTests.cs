@@ -1,6 +1,7 @@
+using Agibuild.Avalonia.WebView.Testing;
 using Xunit;
 
-namespace Agibuild.Avalonia.WebView.Tests;
+namespace Agibuild.Avalonia.WebView.UnitTests;
 
 public sealed class ContractExampleTests
 {

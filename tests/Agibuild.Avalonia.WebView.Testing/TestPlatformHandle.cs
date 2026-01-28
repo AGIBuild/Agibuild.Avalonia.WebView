@@ -1,8 +1,8 @@
 using Avalonia.Platform;
 
-namespace Agibuild.Avalonia.WebView.Tests;
+namespace Agibuild.Avalonia.WebView.Testing;
 
-internal sealed class TestPlatformHandle : IPlatformHandle
+public sealed class TestPlatformHandle : IPlatformHandle
 {
     public TestPlatformHandle(IntPtr handle, string handleDescriptor)
     {

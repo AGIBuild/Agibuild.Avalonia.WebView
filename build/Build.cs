@@ -23,17 +23,38 @@ class Build : NukeBuild
             }
         });
 
-    Target Test => _ => _
+    AbsolutePath UnitTestsProject =>
+        TestsDirectory / "Agibuild.Avalonia.WebView.UnitTests" / "Agibuild.Avalonia.WebView.UnitTests.csproj";
+
+    AbsolutePath IntegrationTestsProject =>
+        TestsDirectory / "Agibuild.Avalonia.WebView.Integration.Tests.Automation" / "Agibuild.Avalonia.WebView.Integration.Tests.Automation.csproj";
+
+    Target UnitTests => _ => _
         .DependsOn(Compile)
         .Executes(() =>
         {
             DotNetTest(s => s
-                .SetProjectFile(TestsDirectory / "Agibuild.Avalonia.WebView.Tests" / "Agibuild.Avalonia.WebView.Tests.csproj")
+                .SetProjectFile(UnitTestsProject)
                 .SetConfiguration(Configuration));
         });
 
+    Target IntegrationTests => _ => _
+        .DependsOn(Compile)
+        .Executes(() =>
+        {
+            DotNetTest(s => s
+                .SetProjectFile(IntegrationTestsProject)
+                .SetConfiguration(Configuration));
+        });
+
+    Target AllTests => _ => _
+        .DependsOn(UnitTests, IntegrationTests);
+
+    Target Test => _ => _
+        .DependsOn(AllTests);
+
     Target Ci => _ => _
-        .DependsOn(Test);
+        .DependsOn(AllTests);
 
     AbsolutePath SrcDirectory => RootDirectory / "src";
     AbsolutePath TestsDirectory => RootDirectory / "tests";
@@ -45,7 +66,7 @@ class Build : NukeBuild
             SrcDirectory / "Agibuild.Avalonia.WebView.Core" / "Agibuild.Avalonia.WebView.Core.csproj",
             SrcDirectory / "Agibuild.Avalonia.WebView.Adapters.Abstractions" / "Agibuild.Avalonia.WebView.Adapters.Abstractions.csproj",
             SrcDirectory / "Agibuild.Avalonia.WebView.DependencyInjection" / "Agibuild.Avalonia.WebView.DependencyInjection.csproj",
-            TestsDirectory / "Agibuild.Avalonia.WebView.Tests" / "Agibuild.Avalonia.WebView.Tests.csproj"
+            TestsDirectory / "Agibuild.Avalonia.WebView.UnitTests" / "Agibuild.Avalonia.WebView.UnitTests.csproj"
         };
 
         if (IncludeAllAdapters)

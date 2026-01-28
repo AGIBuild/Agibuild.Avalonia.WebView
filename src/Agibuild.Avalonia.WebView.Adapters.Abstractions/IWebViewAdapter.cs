@@ -1,7 +1,6 @@
 using Avalonia.Platform;
-using Agibuild.Avalonia.WebView;
 
-namespace Agibuild.Avalonia.WebView.Adapters;
+namespace Agibuild.Avalonia.WebView.Adapters.Abstractions;
 
 public interface IWebViewAdapter
 {
