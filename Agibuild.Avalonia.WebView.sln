@@ -1,0 +1,60 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agibuild.Avalonia.WebView.Core", "src\\Agibuild.Avalonia.WebView.Core\\Agibuild.Avalonia.WebView.Core.csproj", "{22334029-B509-4A8B-B005-8B74981FF707}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agibuild.Avalonia.WebView.Adapters.Abstractions", "src\\Agibuild.Avalonia.WebView.Adapters.Abstractions\\Agibuild.Avalonia.WebView.Adapters.Abstractions.csproj", "{2A0C8A60-16E3-4652-9507-B7335BB3531B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agibuild.Avalonia.WebView.Adapters.Windows", "src\\Agibuild.Avalonia.WebView.Adapters.Windows\\Agibuild.Avalonia.WebView.Adapters.Windows.csproj", "{BD2070C6-6268-4D1F-97DC-E66FC2672422}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agibuild.Avalonia.WebView.Adapters.MacOS", "src\\Agibuild.Avalonia.WebView.Adapters.MacOS\\Agibuild.Avalonia.WebView.Adapters.MacOS.csproj", "{243860EA-904C-40C3-BE4F-90232B7B7F5D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agibuild.Avalonia.WebView.Adapters.Android", "src\\Agibuild.Avalonia.WebView.Adapters.Android\\Agibuild.Avalonia.WebView.Adapters.Android.csproj", "{8E2B6BDE-C585-4942-AA52-9C680043AB44}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agibuild.Avalonia.WebView.Adapters.Gtk", "src\\Agibuild.Avalonia.WebView.Adapters.Gtk\\Agibuild.Avalonia.WebView.Adapters.Gtk.csproj", "{8D4BB0AB-3B23-48AD-A226-3944DB2CD893}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agibuild.Avalonia.WebView.DependencyInjection", "src\\Agibuild.Avalonia.WebView.DependencyInjection\\Agibuild.Avalonia.WebView.DependencyInjection.csproj", "{ED758D6F-99ED-4FB0-B75E-B27C1F370EAC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agibuild.Avalonia.WebView.Tests", "tests\\Agibuild.Avalonia.WebView.Tests\\Agibuild.Avalonia.WebView.Tests.csproj", "{0711072B-F46A-485F-88C7-2C9093DA23E7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{22334029-B509-4A8B-B005-8B74981FF707}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22334029-B509-4A8B-B005-8B74981FF707}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22334029-B509-4A8B-B005-8B74981FF707}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{22334029-B509-4A8B-B005-8B74981FF707}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2A0C8A60-16E3-4652-9507-B7335BB3531B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2A0C8A60-16E3-4652-9507-B7335BB3531B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2A0C8A60-16E3-4652-9507-B7335BB3531B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2A0C8A60-16E3-4652-9507-B7335BB3531B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BD2070C6-6268-4D1F-97DC-E66FC2672422}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD2070C6-6268-4D1F-97DC-E66FC2672422}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD2070C6-6268-4D1F-97DC-E66FC2672422}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD2070C6-6268-4D1F-97DC-E66FC2672422}.Release|Any CPU.Build.0 = Release|Any CPU
+		{243860EA-904C-40C3-BE4F-90232B7B7F5D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{243860EA-904C-40C3-BE4F-90232B7B7F5D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{243860EA-904C-40C3-BE4F-90232B7B7F5D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{243860EA-904C-40C3-BE4F-90232B7B7F5D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E2B6BDE-C585-4942-AA52-9C680043AB44}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E2B6BDE-C585-4942-AA52-9C680043AB44}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E2B6BDE-C585-4942-AA52-9C680043AB44}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E2B6BDE-C585-4942-AA52-9C680043AB44}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8D4BB0AB-3B23-48AD-A226-3944DB2CD893}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D4BB0AB-3B23-48AD-A226-3944DB2CD893}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D4BB0AB-3B23-48AD-A226-3944DB2CD893}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D4BB0AB-3B23-48AD-A226-3944DB2CD893}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED758D6F-99ED-4FB0-B75E-B27C1F370EAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED758D6F-99ED-4FB0-B75E-B27C1F370EAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED758D6F-99ED-4FB0-B75E-B27C1F370EAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED758D6F-99ED-4FB0-B75E-B27C1F370EAC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0711072B-F46A-485F-88C7-2C9093DA23E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0711072B-F46A-485F-88C7-2C9093DA23E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0711072B-F46A-485F-88C7-2C9093DA23E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0711072B-F46A-485F-88C7-2C9093DA23E7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
