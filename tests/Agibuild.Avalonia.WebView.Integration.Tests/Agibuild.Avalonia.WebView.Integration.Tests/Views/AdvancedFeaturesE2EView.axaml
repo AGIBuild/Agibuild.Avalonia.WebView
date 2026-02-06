@@ -27,13 +27,16 @@
           <Border BorderThickness="1" BorderBrush="CornflowerBlue" CornerRadius="6" Padding="8">
             <StackPanel Spacing="4">
               <TextBlock Text="M2: Environment Options" FontWeight="Bold" FontSize="13" />
+              <TextBlock Text="Apply &amp; Reload: recreates WebView to apply options" FontSize="10" Foreground="Gray" />
+              <TextBlock TextWrapping="Wrap" FontSize="10" Foreground="DimGray"
+                         Text="DevTools: After enabling, open Safari → Develop → [app name] to inspect. Enable 'Show features for web developers' in Safari Settings → Advanced if Develop menu is missing." />
 
               <Grid ColumnDefinitions="*,*" Margin="0,4,0,0">
-                <Button Grid.Column="0" Content="Enable DevTools"
-                        Command="{Binding InitWithDevToolsCommand}"
+                <Button Grid.Column="0" Content="DevTools (Apply)"
+                        Command="{Binding ApplyDevToolsAndReloadCommand}"
                         HorizontalAlignment="Stretch" Margin="0,0,2,0" />
-                <Button Grid.Column="1" Content="Ephemeral Session"
-                        Command="{Binding InitWithEphemeralCommand}"
+                <Button Grid.Column="1" Content="Ephemeral (Apply)"
+                        Command="{Binding ApplyEphemeralAndReloadCommand}"
                         HorizontalAlignment="Stretch" Margin="2,0,0,0" />
               </Grid>
 
@@ -123,8 +126,8 @@
                     Background="Transparent"
                     ResizeDirection="Columns" />
 
-      <!-- Right: WebView for M2 feature verification -->
-      <Border Grid.Column="2" BorderThickness="1" BorderBrush="Gray">
+      <!-- Right: WebView for M2 feature verification (named host for Apply & Reload) -->
+      <Border x:Name="WebViewHost" Grid.Column="2" BorderThickness="1" BorderBrush="Gray">
         <agw:WebView x:Name="WebViewControl" Source="https://www.bing.com" />
       </Border>
     </Grid>

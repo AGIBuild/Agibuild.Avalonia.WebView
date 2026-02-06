@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Agibuild.Avalonia.WebView.Integration.Tests.Controls;
 
 namespace Agibuild.Avalonia.WebView.Integration.Tests.ViewModels;
 
@@ -30,6 +29,12 @@ public partial class AdvancedFeaturesE2EViewModel : ViewModelBase
 
     /// <summary>Set by the view once the WebView control is available.</summary>
     public WebView? WebViewControl { get; set; }
+
+    /// <summary>
+    /// Fired when the ViewModel needs the View to recreate the WebView control
+    /// (e.g., after changing environment options that require a fresh adapter).
+    /// </summary>
+    public event Action? RequestWebViewRecreation;
 
     public void OnWebViewLoaded()
     {
@@ -218,43 +223,62 @@ public partial class AdvancedFeaturesE2EViewModel : ViewModelBase
     //  Section 1: M2 Environment Options
     // ---------------------------------------------------------------------------
 
+    /// <summary>
+    /// Apply &amp; Reload: Sets environment options with DevTools enabled and
+    /// recreates the WebView so the new options take effect immediately.
+    /// </summary>
     [RelayCommand]
-    private void InitWithDevTools()
+    private void ApplyDevToolsAndReload()
     {
         try
         {
-            WebViewEnvironment.Initialize(null, new WebViewEnvironmentOptions
+            WebViewEnvironment.Options = new WebViewEnvironmentOptions
             {
                 EnableDevTools = true,
-                UseEphemeralSession = false
-            });
+                UseEphemeralSession = WebViewEnvironment.Options.UseEphemeralSession,
+                CustomUserAgent = WebViewEnvironment.Options.CustomUserAgent
+            };
             RefreshEnvironmentInfo();
-            LogLine("[M2] Initialized with DevTools ENABLED.");
-            Status = "Environment: DevTools enabled.";
+            LogLine("[M2] DevTools ENABLED. Recreating WebView to apply...");
+            LogLine("[M2] To open Web Inspector: Safari → Develop menu → select this app's WebView.");
+            LogLine("[M2] If 'Develop' menu is missing: Safari → Settings → Advanced → enable 'Show features for web developers'.");
+            Status = "DevTools enabled. Use Safari → Develop menu to inspect.";
+
+            // Signal the View to recreate the WebView control.
+            RequestWebViewRecreation?.Invoke();
         }
         catch (Exception ex)
         {
             LogLine($"[M2] Error: {ex.Message}");
+            Status = $"Error: {ex.Message}";
         }
     }
 
+    /// <summary>
+    /// Apply &amp; Reload: Sets environment options with ephemeral session and
+    /// recreates the WebView.
+    /// </summary>
     [RelayCommand]
-    private void InitWithEphemeral()
+    private void ApplyEphemeralAndReload()
     {
         try
         {
-            WebViewEnvironment.Initialize(null, new WebViewEnvironmentOptions
+            WebViewEnvironment.Options = new WebViewEnvironmentOptions
             {
-                EnableDevTools = false,
-                UseEphemeralSession = true
-            });
+                EnableDevTools = WebViewEnvironment.Options.EnableDevTools,
+                UseEphemeralSession = true,
+                CustomUserAgent = WebViewEnvironment.Options.CustomUserAgent
+            };
             RefreshEnvironmentInfo();
-            LogLine("[M2] Initialized with Ephemeral Session.");
-            Status = "Environment: Ephemeral session enabled.";
+            LogLine("[M2] Ephemeral session ENABLED. Recreating WebView to apply...");
+            Status = "Ephemeral session enabled — recreating WebView...";
+
+            RequestWebViewRecreation?.Invoke();
         }
         catch (Exception ex)
         {
             LogLine($"[M2] Error: {ex.Message}");
+            Status = $"Error: {ex.Message}";
         }
     }
 
@@ -287,12 +311,12 @@ public partial class AdvancedFeaturesE2EViewModel : ViewModelBase
             if (actual?.Contains(ua) == true)
             {
                 Status = "UserAgent SET and VERIFIED via JS.";
-                LogLine("[M2] ✓ UserAgent verification PASSED.");
+                LogLine("[M2] UserAgent verification PASSED.");
             }
             else
             {
                 Status = "UserAgent set but JS verification showed different value (may be platform-specific).";
-                LogLine($"[M2] ⚠ JS returned: {actual}");
+                LogLine($"[M2] JS returned: {actual}");
             }
         }
         catch (Exception ex)
@@ -329,7 +353,7 @@ public partial class AdvancedFeaturesE2EViewModel : ViewModelBase
     }
 
     // ---------------------------------------------------------------------------
-    //  Section 2: WebDialog
+    //  Section 2: WebDialog (direct AvaloniaWebDialog usage)
     // ---------------------------------------------------------------------------
 
     [RelayCommand]
@@ -341,9 +365,7 @@ public partial class AdvancedFeaturesE2EViewModel : ViewModelBase
             LogLine($"[Dialog] Opening WebDialog to: {url}");
             Status = "Opening WebDialog...";
 
-            var dispatcher = new AvaloniaWebViewDispatcher();
-            var factory = new AvaloniaWebDialogFactory(dispatcher);
-            using var dialog = factory.Create();
+            using var dialog = new AvaloniaWebDialog();
 
             dialog.Title = "E2E Test Dialog";
             dialog.Resize(900, 700);
@@ -357,10 +379,7 @@ public partial class AdvancedFeaturesE2EViewModel : ViewModelBase
 
             // Wait for user to close the dialog.
             var tcs = new TaskCompletionSource();
-            dialog.Closing += (_, _) =>
-            {
-                tcs.TrySetResult();
-            };
+            dialog.Closing += (_, _) => tcs.TrySetResult();
 
             await tcs.Task;
             LogLine("[Dialog] User closed the dialog.");
@@ -381,9 +400,7 @@ public partial class AdvancedFeaturesE2EViewModel : ViewModelBase
             LogLine("[Dialog] Opening ephemeral WebDialog...");
             Status = "Opening ephemeral dialog...";
 
-            var dispatcher = new AvaloniaWebViewDispatcher();
-            var factory = new AvaloniaWebDialogFactory(dispatcher);
-            using var dialog = factory.Create(new WebViewEnvironmentOptions { UseEphemeralSession = true });
+            using var dialog = new AvaloniaWebDialog(new WebViewEnvironmentOptions { UseEphemeralSession = true });
 
             dialog.Title = "Ephemeral Dialog (No Cookies Persist)";
             dialog.Resize(900, 700);
@@ -421,7 +438,7 @@ public partial class AdvancedFeaturesE2EViewModel : ViewModelBase
             Status = "Running OAuth flow...";
 
             // Use a real OAuth-like flow:
-            // AuthorizeUri → navigate to httpbin.org which will redirect.
+            // AuthorizeUri -> navigate to httpbin.org which will redirect.
             // For a real test, the user should see the auth page, then we detect callback.
             var authorizeUri = new Uri("https://httpbin.org/redirect-to?url=https%3A%2F%2Fexample.com%2Fcallback%3Fcode%3Dtest123&status_code=302");
             var callbackUri = new Uri("https://example.com/callback");
@@ -434,8 +451,7 @@ public partial class AdvancedFeaturesE2EViewModel : ViewModelBase
                 Timeout = TimeSpan.FromSeconds(30)
             };
 
-            var dispatcher = new AvaloniaWebViewDispatcher();
-            var factory = new AvaloniaWebDialogFactory(dispatcher);
+            var factory = new AvaloniaWebDialogFactory();
             var broker = new WebAuthBroker(factory);
 
             var owner = new E2ETopLevelWindow();
@@ -486,8 +502,7 @@ public partial class AdvancedFeaturesE2EViewModel : ViewModelBase
                 Timeout = TimeSpan.FromSeconds(60)
             };
 
-            var dispatcher = new AvaloniaWebViewDispatcher();
-            var factory = new AvaloniaWebDialogFactory(dispatcher);
+            var factory = new AvaloniaWebDialogFactory();
             var broker = new WebAuthBroker(factory);
 
             var owner = new E2ETopLevelWindow();
@@ -538,34 +553,6 @@ public partial class AdvancedFeaturesE2EViewModel : ViewModelBase
         {
             Dispatcher.UIThread.Post(() => Log += line);
         }
-    }
-}
-
-/// <summary>
-/// Simple IWebViewDispatcher implementation using Avalonia's Dispatcher.
-/// </summary>
-internal sealed class AvaloniaWebViewDispatcher : IWebViewDispatcher
-{
-    public bool CheckAccess() => Dispatcher.UIThread.CheckAccess();
-
-    public Task InvokeAsync(Action action)
-    {
-        return Dispatcher.UIThread.InvokeAsync(action).GetTask();
-    }
-
-    public Task<T> InvokeAsync<T>(Func<T> func)
-    {
-        return Dispatcher.UIThread.InvokeAsync(func).GetTask();
-    }
-
-    public async Task InvokeAsync(Func<Task> func)
-    {
-        await Dispatcher.UIThread.InvokeAsync(func);
-    }
-
-    public async Task<T> InvokeAsync<T>(Func<Task<T>> func)
-    {
-        return await Dispatcher.UIThread.InvokeAsync(func);
     }
 }
 
