@@ -4,15 +4,25 @@ using Agibuild.Avalonia.WebView.Adapters.Abstractions;
 
 namespace Agibuild.Avalonia.WebView.Testing;
 
-internal sealed class MockWebViewAdapter : IWebViewAdapter
+internal class MockWebViewAdapter : IWebViewAdapter
 {
     private IWebViewAdapterHost? _host;
     private bool _initialized;
     private bool _attached;
     private bool _detached;
 
+    // In-memory cookie store keyed by "name|domain|path" (used by MockWebViewAdapterWithCookies)
+    protected readonly Dictionary<string, WebViewCookie> CookieStore = new();
+
+    /// <summary>Creates a mock without cookie support. Use <see cref="CreateWithCookies"/> for cookie-enabled mock.</summary>
+    public static MockWebViewAdapter Create() => new();
+
+    /// <summary>Creates a mock that also implements <see cref="ICookieAdapter"/>.</summary>
+    public static MockWebViewAdapterWithCookies CreateWithCookies() => new();
+
     public Guid? LastNavigationId { get; private set; }
     public Uri? LastNavigationUri { get; private set; }
+    public Uri? LastBaseUrl { get; private set; }
     public int? LastNavigateThreadId { get; private set; }
     public int? LastNavigateToStringThreadId { get; private set; }
     public int? LastInvokeScriptThreadId { get; private set; }
@@ -71,19 +81,47 @@ internal sealed class MockWebViewAdapter : IWebViewAdapter
         DetachCallCount++;
     }
 
+    /// <summary>
+    /// When true, NavigateAsync automatically raises NavigationCompleted(Success)
+    /// and then calls <see cref="OnNavigationAutoCompleted"/> if set.
+    /// Useful for integration-style tests like WebAuthBroker flows.
+    /// </summary>
+    public bool AutoCompleteNavigation { get; set; }
+
+    /// <summary>Callback invoked after auto-completing navigation. Use to simulate post-navigation events.</summary>
+    public Action? OnNavigationAutoCompleted { get; set; }
+
     public Task NavigateAsync(Guid navigationId, Uri uri)
     {
         LastNavigateThreadId = Environment.CurrentManagedThreadId;
         LastNavigationId = navigationId;
         LastNavigationUri = uri;
+
+        if (AutoCompleteNavigation)
+        {
+            RaiseNavigationCompleted(NavigationCompletedStatus.Success);
+            OnNavigationAutoCompleted?.Invoke();
+        }
+
         return Task.CompletedTask;
     }
 
     public Task NavigateToStringAsync(Guid navigationId, string html)
+        => NavigateToStringAsync(navigationId, html, baseUrl: null);
+
+    public Task NavigateToStringAsync(Guid navigationId, string html, Uri? baseUrl)
     {
         LastNavigateToStringThreadId = Environment.CurrentManagedThreadId;
         LastNavigationId = navigationId;
         LastNavigationUri = null;
+        LastBaseUrl = baseUrl;
+
+        if (AutoCompleteNavigation)
+        {
+            RaiseNavigationCompleted(NavigationCompletedStatus.Success);
+            OnNavigationAutoCompleted?.Invoke();
+        }
+
         return Task.CompletedTask;
     }
 
@@ -227,5 +265,74 @@ internal sealed class MockWebViewAdapter : IWebViewAdapter
         }
 
         WebMessageReceived?.Invoke(this, new WebMessageReceivedEventArgs(body, origin, channelId, protocolVersion));
+    }
+
+    public void RaiseWebResourceRequested()
+    {
+        if (_detached) return;
+        WebResourceRequested?.Invoke(this, new WebResourceRequestedEventArgs());
+    }
+
+    public void RaiseEnvironmentRequested()
+    {
+        if (_detached) return;
+        EnvironmentRequested?.Invoke(this, new EnvironmentRequestedEventArgs());
+    }
+
+    protected static string CookieKey(string name, string domain, string path) => $"{name}|{domain}|{path}";
+
+    /// <summary>Creates a mock that supports environment options.</summary>
+    public static MockWebViewAdapterWithOptions CreateWithOptions() => new();
+}
+
+/// <summary>Mock adapter that also implements <see cref="IWebViewAdapterOptions"/> for environment options testing.</summary>
+internal sealed class MockWebViewAdapterWithOptions : MockWebViewAdapter, IWebViewAdapterOptions
+{
+    public IWebViewEnvironmentOptions? AppliedOptions { get; private set; }
+    public string? AppliedUserAgent { get; private set; }
+    public int ApplyOptionsCallCount { get; private set; }
+    public int SetUserAgentCallCount { get; private set; }
+
+    public void ApplyEnvironmentOptions(IWebViewEnvironmentOptions options)
+    {
+        ApplyOptionsCallCount++;
+        AppliedOptions = options;
+    }
+
+    public void SetCustomUserAgent(string? userAgent)
+    {
+        SetUserAgentCallCount++;
+        AppliedUserAgent = userAgent;
+    }
+}
+
+/// <summary>Mock adapter that also implements <see cref="ICookieAdapter"/> for cookie management testing.</summary>
+internal sealed class MockWebViewAdapterWithCookies : MockWebViewAdapter, ICookieAdapter
+{
+    public Task<IReadOnlyList<WebViewCookie>> GetCookiesAsync(Uri uri)
+    {
+        var host = uri.Host;
+        var result = CookieStore.Values
+            .Where(c => c.Domain.EndsWith(host, StringComparison.OrdinalIgnoreCase) || host.EndsWith(c.Domain, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        return Task.FromResult<IReadOnlyList<WebViewCookie>>(result);
+    }
+
+    public Task SetCookieAsync(WebViewCookie cookie)
+    {
+        CookieStore[CookieKey(cookie.Name, cookie.Domain, cookie.Path)] = cookie;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteCookieAsync(WebViewCookie cookie)
+    {
+        CookieStore.Remove(CookieKey(cookie.Name, cookie.Domain, cookie.Path));
+        return Task.CompletedTask;
+    }
+
+    public Task ClearAllCookiesAsync()
+    {
+        CookieStore.Clear();
+        return Task.CompletedTask;
     }
 }

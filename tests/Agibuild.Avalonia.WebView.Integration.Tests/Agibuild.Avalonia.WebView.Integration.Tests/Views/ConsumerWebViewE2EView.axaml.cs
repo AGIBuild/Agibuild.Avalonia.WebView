@@ -32,4 +32,15 @@ public partial class ConsumerWebViewE2EView : UserControl
             vm.GoToAddressCommand.Execute(null);
         }
     }
+
+    private void OnScriptKeyDown(object? sender, KeyEventArgs e)
+    {
+        // Ctrl+Enter or Cmd+Enter to run script
+        if (e.Key == Key.Enter
+            && (e.KeyModifiers.HasFlag(KeyModifiers.Control) || e.KeyModifiers.HasFlag(KeyModifiers.Meta))
+            && DataContext is ConsumerWebViewE2EViewModel vm)
+        {
+            vm.RunScriptCommand.Execute(null);
+        }
+    }
 }

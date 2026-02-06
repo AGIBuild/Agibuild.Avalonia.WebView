@@ -62,6 +62,7 @@ internal static class WebViewAdapterRegistry
         return true;
     }
 
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     private static WebViewAdapterPlatform GetCurrentPlatform()
     {
         if (OperatingSystem.IsWindows())

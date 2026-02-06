@@ -45,6 +45,7 @@ internal sealed class AndroidWebViewAdapter : IWebViewAdapter
 
     public Task NavigateAsync(Guid navigationId, Uri uri) => throw new PlatformNotSupportedException("WebView is not yet supported on Android.");
     public Task NavigateToStringAsync(Guid navigationId, string html) => throw new PlatformNotSupportedException("WebView is not yet supported on Android.");
+    public Task NavigateToStringAsync(Guid navigationId, string html, Uri? baseUrl) => throw new PlatformNotSupportedException("WebView is not yet supported on Android.");
     public Task<string?> InvokeScriptAsync(string script) => throw new PlatformNotSupportedException("WebView is not yet supported on Android.");
 
     public bool GoBack(Guid navigationId) => throw new PlatformNotSupportedException("WebView is not yet supported on Android.");

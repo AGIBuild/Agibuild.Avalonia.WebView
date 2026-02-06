@@ -10,6 +10,7 @@ namespace Agibuild.Avalonia.WebView.Integration.Tests.ViewModels
             WebViewTest = new WebViewTestViewModel(new MockWebViewAdapter());
             WkWebViewSmoke = new WkWebViewSmokeViewModel();
             ConsumerE2E = new ConsumerWebViewE2EViewModel();
+            AdvancedE2E = new AdvancedFeaturesE2EViewModel();
         }
 
         [ObservableProperty]
@@ -23,5 +24,7 @@ namespace Agibuild.Avalonia.WebView.Integration.Tests.ViewModels
         public WkWebViewSmokeViewModel WkWebViewSmoke { get; }
 
         public ConsumerWebViewE2EViewModel ConsumerE2E { get; }
+
+        public AdvancedFeaturesE2EViewModel AdvancedE2E { get; }
     }
 }

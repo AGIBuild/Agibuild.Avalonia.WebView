@@ -16,13 +16,11 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
     /// Creates a new <see cref="IWebView"/> using the default platform adapter for the current OS.
     /// This is the recommended entry-point; callers never need to reference the internal adapter types.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     public static IWebView CreateDefault(IWebViewDispatcher dispatcher)
         => CreateDefault(dispatcher, NullLogger<WebViewCore>.Instance);
 
-    /// <summary>
-    /// Creates a new <see cref="IWebView"/> using the default platform adapter,
-    /// with an <see cref="ILogger"/> for diagnostics.
-    /// </summary>
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     public static IWebView CreateDefault(IWebViewDispatcher dispatcher, ILogger<WebViewCore> logger)
     {
         ArgumentNullException.ThrowIfNull(dispatcher);
@@ -30,20 +28,14 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         return new WebViewCore(WebViewAdapterFactory.CreateDefaultAdapter(), dispatcher, logger);
     }
 
-    /// <summary>
-    /// Creates a <see cref="WebViewCore"/> for use by the Avalonia <c>WebView</c> control.
-    /// Returns the concrete type so the control can call <see cref="Attach"/> / <see cref="Detach"/>.
-    /// </summary>
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     internal static WebViewCore CreateForControl(IWebViewDispatcher dispatcher, ILogger<WebViewCore>? logger = null)
     {
         ArgumentNullException.ThrowIfNull(dispatcher);
         return new WebViewCore(WebViewAdapterFactory.CreateDefaultAdapter(), dispatcher, logger ?? NullLogger<WebViewCore>.Instance);
     }
 
-    /// <summary>
-    /// Attaches the underlying native WebView to the given platform handle.
-    /// Must be called on the UI thread after construction.
-    /// </summary>
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     internal void Attach(global::Avalonia.Platform.IPlatformHandle parentHandle)
     {
         _logger.LogDebug("Attach: parentHandle.HandleDescriptor={Descriptor}", parentHandle.HandleDescriptor);
@@ -51,9 +43,7 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         _logger.LogDebug("Attach: completed");
     }
 
-    /// <summary>
-    /// Detaches the underlying native WebView. Safe to call multiple times.
-    /// </summary>
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     internal void Detach()
     {
         _logger.LogDebug("Detach: begin");
@@ -67,6 +57,8 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
     // Only accessed on the UI thread (all paths go through _dispatcher).
     private NavigationOperation? _activeNavigation;
     private Uri _source;
+
+    private readonly ICookieManager? _cookieManager;
 
     private bool _webMessageBridgeEnabled;
     private IWebMessagePolicy? _webMessagePolicy;
@@ -91,6 +83,20 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
 
         _adapter.Initialize(this);
         _logger.LogDebug("Adapter initialized");
+
+        // Apply global environment options if adapter supports them.
+        if (_adapter is IWebViewAdapterOptions adapterOptions)
+        {
+            var envOptions = WebViewEnvironment.Options;
+            adapterOptions.ApplyEnvironmentOptions(envOptions);
+            _logger.LogDebug("Environment options applied: DevTools={DevTools}, Ephemeral={Ephemeral}, UA={UA}",
+                envOptions.EnableDevTools, envOptions.UseEphemeralSession, envOptions.CustomUserAgent ?? "(default)");
+        }
+
+        _cookieManager = adapter is ICookieAdapter cookieAdapter
+            ? new RuntimeCookieManager(cookieAdapter, this, _dispatcher, _logger)
+            : null;
+        _logger.LogDebug("Cookie support: {Supported}", _cookieManager is not null);
 
         _adapter.NavigationCompleted += OnAdapterNavigationCompleted;
         _adapter.NewWindowRequested += OnAdapterNewWindowRequested;
@@ -172,13 +178,17 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
     }
 
     public Task NavigateToStringAsync(string html)
+        => NavigateToStringAsync(html, baseUrl: null);
+
+    public Task NavigateToStringAsync(string html, Uri? baseUrl)
     {
         ArgumentNullException.ThrowIfNull(html);
-        _logger.LogDebug("NavigateToStringAsync: html length={Length}", html.Length);
+        var requestUri = baseUrl ?? AboutBlank;
+        _logger.LogDebug("NavigateToStringAsync: html length={Length}, baseUrl={BaseUrl}", html.Length, baseUrl);
 
         return InvokeAsyncOnUiThread(() => StartNavigationCoreAsync(
-            requestUri: AboutBlank,
-            adapterInvoke: navigationId => _adapter.NavigateToStringAsync(navigationId, html)));
+            requestUri: requestUri,
+            adapterInvoke: navigationId => _adapter.NavigateToStringAsync(navigationId, html, baseUrl)));
     }
 
     public Task<string?> InvokeScriptAsync(string script)
@@ -406,9 +416,30 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         return new NativeNavigationStartingDecision(IsAllowed: true, NavigationId: navigationId);
     }
 
-    public ICookieManager? TryGetCookieManager() => null;
+    public ICookieManager? TryGetCookieManager() => _cookieManager;
 
     public ICommandManager? TryGetCommandManager() => null;
+
+    /// <summary>
+    /// Delegates to the adapter's <see cref="INativeWebViewHandleProvider.TryGetWebViewHandle()"/>
+    /// if the adapter supports it; otherwise returns <c>null</c>.
+    /// </summary>
+    public global::Avalonia.Platform.IPlatformHandle? TryGetWebViewHandle()
+        => (_adapter as INativeWebViewHandleProvider)?.TryGetWebViewHandle();
+
+    /// <summary>
+    /// Sets the custom User-Agent string at runtime.
+    /// Pass <c>null</c> to revert to the platform default.
+    /// </summary>
+    public void SetCustomUserAgent(string? userAgent)
+    {
+        ThrowIfDisposed();
+        if (_adapter is IWebViewAdapterOptions adapterOptions)
+        {
+            adapterOptions.SetCustomUserAgent(userAgent);
+            _logger.LogDebug("CustomUserAgent set to: {UA}", userAgent ?? "(default)");
+        }
+    }
 
     public void EnableWebMessageBridge(WebMessageBridgeOptions options)
     {
@@ -588,11 +619,27 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
 
         if (_dispatcher.CheckAccess())
         {
-            NewWindowRequested?.Invoke(this, e);
+            HandleNewWindowRequestedOnUiThread(e);
             return;
         }
 
-        _ = _dispatcher.InvokeAsync(() => NewWindowRequested?.Invoke(this, e));
+        _ = _dispatcher.InvokeAsync(() => HandleNewWindowRequestedOnUiThread(e));
+    }
+
+    private void HandleNewWindowRequestedOnUiThread(NewWindowRequestedEventArgs e)
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        NewWindowRequested?.Invoke(this, e);
+
+        if (!e.Handled && e.Uri is not null)
+        {
+            _logger.LogDebug("NewWindowRequested: unhandled, navigating in-view to {Uri}", e.Uri);
+            _ = NavigateAsync(e.Uri);
+        }
     }
 
     private void OnAdapterWebMessageReceived(object? sender, WebMessageReceivedEventArgs e)
@@ -722,11 +769,15 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
 
         if (status == NavigationCompletedStatus.Failure)
         {
-            operation.TrySetFault(new WebViewNavigationException(
-                message: "Navigation failed.",
-                navigationId: operation.NavigationId,
-                requestUri: operation.RequestUri,
-                innerException: error));
+            // Preserve categorized exception subclasses from the adapter (Network, SSL, Timeout).
+            var faultException = error is WebViewNavigationException navEx
+                ? navEx
+                : new WebViewNavigationException(
+                    message: "Navigation failed.",
+                    navigationId: operation.NavigationId,
+                    requestUri: operation.RequestUri,
+                    innerException: error);
+            operation.TrySetFault(faultException);
         }
         else
         {
@@ -753,6 +804,64 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
     private void SetSourceInternal(Uri uri)
     {
         _source = uri;
+    }
+
+    /// <summary>
+    /// Runtime wrapper around <see cref="ICookieAdapter"/> that adds lifecycle guards and dispatcher marshaling.
+    /// </summary>
+    private sealed class RuntimeCookieManager : ICookieManager
+    {
+        private readonly ICookieAdapter _cookieAdapter;
+        private readonly WebViewCore _owner;
+        private readonly IWebViewDispatcher _dispatcher;
+        private readonly ILogger _logger;
+
+        public RuntimeCookieManager(ICookieAdapter cookieAdapter, WebViewCore owner, IWebViewDispatcher dispatcher, ILogger logger)
+        {
+            _cookieAdapter = cookieAdapter;
+            _owner = owner;
+            _dispatcher = dispatcher;
+            _logger = logger;
+        }
+
+        public Task<IReadOnlyList<WebViewCookie>> GetCookiesAsync(Uri uri)
+        {
+            ArgumentNullException.ThrowIfNull(uri);
+            ThrowIfOwnerDisposed();
+            _logger.LogDebug("CookieManager.GetCookiesAsync: {Uri}", uri);
+            return _cookieAdapter.GetCookiesAsync(uri);
+        }
+
+        public Task SetCookieAsync(WebViewCookie cookie)
+        {
+            ArgumentNullException.ThrowIfNull(cookie);
+            ThrowIfOwnerDisposed();
+            _logger.LogDebug("CookieManager.SetCookieAsync: {Name}@{Domain}", cookie.Name, cookie.Domain);
+            return _cookieAdapter.SetCookieAsync(cookie);
+        }
+
+        public Task DeleteCookieAsync(WebViewCookie cookie)
+        {
+            ArgumentNullException.ThrowIfNull(cookie);
+            ThrowIfOwnerDisposed();
+            _logger.LogDebug("CookieManager.DeleteCookieAsync: {Name}@{Domain}", cookie.Name, cookie.Domain);
+            return _cookieAdapter.DeleteCookieAsync(cookie);
+        }
+
+        public Task ClearAllCookiesAsync()
+        {
+            ThrowIfOwnerDisposed();
+            _logger.LogDebug("CookieManager.ClearAllCookiesAsync");
+            return _cookieAdapter.ClearAllCookiesAsync();
+        }
+
+        private void ThrowIfOwnerDisposed()
+        {
+            if (_owner._disposed)
+            {
+                throw new ObjectDisposedException(nameof(WebViewCore));
+            }
+        }
     }
 
     private sealed class NavigationOperation

@@ -28,10 +28,12 @@
         "CiPublish",
         "Clean",
         "Compile",
+        "Coverage",
         "IntegrationTests",
         "Pack",
         "Publish",
         "Restore",
+        "Start",
         "Test",
         "UnitTests"
       ]
@@ -110,6 +112,11 @@
         "Configuration": {
           "type": "string",
           "description": "Configuration (Debug / Release). Default: Release on CI, Debug locally"
+        },
+        "CoverageThreshold": {
+          "type": "integer",
+          "description": "Minimum line coverage percentage (0-100). Default: 90",
+          "format": "int32"
         },
         "NuGetApiKey": {
           "type": "string",

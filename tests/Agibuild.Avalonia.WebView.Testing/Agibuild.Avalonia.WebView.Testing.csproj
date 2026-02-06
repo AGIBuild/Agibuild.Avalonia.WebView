@@ -8,6 +8,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Agibuild.Avalonia.WebView.Core\Agibuild.Avalonia.WebView.Core.csproj" />
     <ProjectReference Include="..\..\src\Agibuild.Avalonia.WebView.Adapters.Abstractions\Agibuild.Avalonia.WebView.Adapters.Abstractions.csproj" />
+    <ProjectReference Include="..\..\src\Agibuild.Avalonia.WebView.Runtime\Agibuild.Avalonia.WebView.Runtime.csproj" />
   </ItemGroup>
 
   <ItemGroup>

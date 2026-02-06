@@ -29,7 +29,10 @@ jobs:
           dotnet-version: '10.0.x'
           dotnet-quality: 'preview'
 
-      - name: Run CI (Compile + UnitTests + Pack)
+      - name: Install ReportGenerator
+        run: dotnet tool install --global dotnet-reportgenerator-globaltool || true
+
+      - name: Run CI (Compile + Coverage + Pack)
         run: ./build.sh --target Ci --configuration Release
 
       - name: Upload NuGet package
@@ -47,6 +50,14 @@ jobs:
           path: artifacts/test-results/
           if-no-files-found: ignore
 
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report-macos
+          path: artifacts/coverage-report/
+          if-no-files-found: ignore
+
   # ────────────────────────────── Build & Test (Windows) ────────────────────────
   build-windows:
     name: Build & Test (Windows)
@@ -60,7 +71,11 @@ jobs:
           dotnet-version: '10.0.x'
           dotnet-quality: 'preview'
 
-      - name: Run CI (Compile + UnitTests + Pack)
+      - name: Install ReportGenerator
+        run: dotnet tool install --global dotnet-reportgenerator-globaltool 2>$null; $true
+        shell: pwsh
+
+      - name: Run CI (Compile + Coverage + Pack)
         run: ./build.ps1 -Target Ci -Configuration Release
 
       - name: Upload test results
@@ -69,6 +84,14 @@ jobs:
         with:
           name: test-results-windows
           path: artifacts/test-results/
+          if-no-files-found: ignore
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report-windows
+          path: artifacts/coverage-report/
           if-no-files-found: ignore
 
   # ────────────────────────────── Build & Test (Linux) ─────────────────────────
@@ -84,7 +107,10 @@ jobs:
           dotnet-version: '10.0.x'
           dotnet-quality: 'preview'
 
-      - name: Run CI (Compile + UnitTests + Pack)
+      - name: Install ReportGenerator
+        run: dotnet tool install --global dotnet-reportgenerator-globaltool || true
+
+      - name: Run CI (Compile + Coverage + Pack)
         run: ./build.sh --target Ci --configuration Release
 
       - name: Upload test results
@@ -93,4 +119,12 @@ jobs:
         with:
           name: test-results-linux
           path: artifacts/test-results/
+          if-no-files-found: ignore
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report-linux
+          path: artifacts/coverage-report/
           if-no-files-found: ignore

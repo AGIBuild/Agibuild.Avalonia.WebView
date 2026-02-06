@@ -37,6 +37,7 @@ public interface IWebView : IDisposable
 
     Task NavigateAsync(Uri uri);
     Task NavigateToStringAsync(string html);
+    Task NavigateToStringAsync(string html, Uri? baseUrl);
     Task<string?> InvokeScriptAsync(string script);
 
     bool GoBack();
@@ -127,7 +128,14 @@ public interface IWebMessageDropDiagnosticsSink
 
 public interface IWebViewEnvironmentOptions
 {
+    /// <summary>Enable browser developer tools (Inspector). Platform-specific: macOS requires 13.3+.</summary>
     bool EnableDevTools { get; set; }
+
+    /// <summary>Override the default User-Agent string. Null means use the platform default.</summary>
+    string? CustomUserAgent { get; set; }
+
+    /// <summary>Use an ephemeral (non-persistent) data store. Cookies and storage are discarded when the WebView is disposed.</summary>
+    bool UseEphemeralSession { get; set; }
 }
 
 public interface INativeWebViewHandleProvider
@@ -135,10 +143,14 @@ public interface INativeWebViewHandleProvider
     IPlatformHandle? TryGetWebViewHandle();
 }
 
-/// <summary>Placeholder — cookie management is not yet implemented.</summary>
+/// <summary>Cookie management for the WebView instance.</summary>
 [Experimental("AGWV001")]
 public interface ICookieManager
 {
+    Task<IReadOnlyList<WebViewCookie>> GetCookiesAsync(Uri uri);
+    Task SetCookieAsync(WebViewCookie cookie);
+    Task DeleteCookieAsync(WebViewCookie cookie);
+    Task ClearAllCookiesAsync();
 }
 
 /// <summary>Placeholder — command management is not yet implemented.</summary>
@@ -147,16 +159,36 @@ public interface ICommandManager
 {
 }
 
-/// <summary>Placeholder — top-level window abstraction is not yet implemented.</summary>
-[Experimental("AGWV003")]
+/// <summary>Abstraction for a top-level window that can serve as an owner for dialogs.</summary>
 public interface ITopLevelWindow
 {
+    /// <summary>The underlying platform handle for the window.</summary>
+    IPlatformHandle? PlatformHandle { get; }
+}
+
+/// <summary>Factory for creating <see cref="IWebDialog"/> instances.</summary>
+public interface IWebDialogFactory
+{
+    /// <summary>
+    /// Creates a new WebDialog with optional environment options.
+    /// The dialog is not shown until <see cref="IWebDialog.Show()"/> is called.
+    /// </summary>
+    IWebDialog Create(IWebViewEnvironmentOptions? options = null);
 }
 
 public sealed class AuthOptions
 {
+    /// <summary>The OAuth authorization URL to navigate to.</summary>
+    public Uri? AuthorizeUri { get; set; }
+
+    /// <summary>The expected callback/redirect URI. Navigation to this URI completes the flow.</summary>
     public Uri? CallbackUri { get; set; }
+
+    /// <summary>Use an ephemeral (non-persistent) data store for the authentication dialog.</summary>
     public bool UseEphemeralSession { get; set; } = true;
+
+    /// <summary>Optional timeout for the authentication flow. Default: no timeout.</summary>
+    public TimeSpan? Timeout { get; set; }
 }
 
 public sealed class WebAuthResult
@@ -273,10 +305,40 @@ public sealed class WebMessageReceivedEventArgs : EventArgs
     public int ProtocolVersion { get; }
 }
 
-/// <summary>Placeholder — web resource request interception is not yet implemented.</summary>
+/// <summary>
+/// Raised when a registered custom-scheme request is intercepted.
+/// The handler can supply a response body, content type, and status code.
+/// Only custom schemes registered via <see cref="IWebView"/> are intercepted;
+/// standard http/https requests cannot be intercepted on all platforms.
+/// </summary>
 [Experimental("AGWV004")]
 public sealed class WebResourceRequestedEventArgs : EventArgs
 {
+    public WebResourceRequestedEventArgs() { }
+
+    public WebResourceRequestedEventArgs(Uri requestUri, string method)
+    {
+        RequestUri = requestUri;
+        Method = method;
+    }
+
+    /// <summary>The URI of the intercepted request.</summary>
+    public Uri? RequestUri { get; init; }
+
+    /// <summary>HTTP method (GET, POST, etc.).</summary>
+    public string Method { get; init; } = "GET";
+
+    /// <summary>Set by the handler to provide a response body (UTF-8 string).</summary>
+    public string? ResponseBody { get; set; }
+
+    /// <summary>Set by the handler to provide a response content type. Default: text/html.</summary>
+    public string ResponseContentType { get; set; } = "text/html";
+
+    /// <summary>Set by the handler to provide an HTTP status code. Default: 200.</summary>
+    public int ResponseStatusCode { get; set; } = 200;
+
+    /// <summary>Set to true to indicate the request has been handled and a response is provided.</summary>
+    public bool Handled { get; set; }
 }
 
 /// <summary>Placeholder — environment requested event is not yet implemented.</summary>
@@ -297,6 +359,43 @@ public class WebViewNavigationException : Exception
     public Guid NavigationId { get; }
     public Uri RequestUri { get; }
 }
+
+/// <summary>Navigation failed due to a network connectivity issue (DNS, unreachable host, connection lost, no internet).</summary>
+public class WebViewNetworkException : WebViewNavigationException
+{
+    public WebViewNetworkException(string message, Guid navigationId, Uri requestUri, Exception? innerException = null)
+        : base(message, navigationId, requestUri, innerException)
+    {
+    }
+}
+
+/// <summary>Navigation failed due to a TLS/certificate issue.</summary>
+public class WebViewSslException : WebViewNavigationException
+{
+    public WebViewSslException(string message, Guid navigationId, Uri requestUri, Exception? innerException = null)
+        : base(message, navigationId, requestUri, innerException)
+    {
+    }
+}
+
+/// <summary>Navigation failed due to a request timeout.</summary>
+public class WebViewTimeoutException : WebViewNavigationException
+{
+    public WebViewTimeoutException(string message, Guid navigationId, Uri requestUri, Exception? innerException = null)
+        : base(message, navigationId, requestUri, innerException)
+    {
+    }
+}
+
+/// <summary>Represents a cookie associated with a WebView instance.</summary>
+public sealed record WebViewCookie(
+    string Name,
+    string Value,
+    string Domain,
+    string Path,
+    DateTimeOffset? Expires,
+    bool IsSecure,
+    bool IsHttpOnly);
 
 public class WebViewScriptException : Exception
 {

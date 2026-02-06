@@ -25,8 +25,10 @@ public sealed class WebAuthBrokerWithSemantics : IWebAuthBroker
         // Clone to avoid mutating the caller's input; enforce ephemeral session.
         var effectiveOptions = new AuthOptions
         {
+            AuthorizeUri = options.AuthorizeUri,
             CallbackUri = options.CallbackUri,
-            UseEphemeralSession = true
+            UseEphemeralSession = true,
+            Timeout = options.Timeout
         };
 
         var result = await _inner.AuthenticateAsync(owner, effectiveOptions).ConfigureAwait(false);

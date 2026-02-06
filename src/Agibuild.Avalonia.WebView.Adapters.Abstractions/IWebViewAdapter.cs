@@ -3,6 +3,25 @@ using Agibuild.Avalonia.WebView;
 
 namespace Agibuild.Avalonia.WebView.Adapters.Abstractions;
 
+internal interface ICookieAdapter
+{
+    Task<IReadOnlyList<WebViewCookie>> GetCookiesAsync(Uri uri);
+    Task SetCookieAsync(WebViewCookie cookie);
+    Task DeleteCookieAsync(WebViewCookie cookie);
+    Task ClearAllCookiesAsync();
+}
+
+/// <summary>
+/// Optional interface for adapters that support environment options (DevTools, UserAgent, Ephemeral).
+/// Runtime checks for this via <c>adapter as IWebViewAdapterOptions</c>.
+/// Must be called before <see cref="IWebViewAdapter.Attach"/>.
+/// </summary>
+internal interface IWebViewAdapterOptions
+{
+    void ApplyEnvironmentOptions(IWebViewEnvironmentOptions options);
+    void SetCustomUserAgent(string? userAgent);
+}
+
 internal interface IWebViewAdapter
 {
     void Initialize(IWebViewAdapterHost host);
@@ -11,6 +30,7 @@ internal interface IWebViewAdapter
 
     Task NavigateAsync(Guid navigationId, Uri uri);
     Task NavigateToStringAsync(Guid navigationId, string html);
+    Task NavigateToStringAsync(Guid navigationId, string html, Uri? baseUrl);
     Task<string?> InvokeScriptAsync(string script);
 
     bool GoBack(Guid navigationId);

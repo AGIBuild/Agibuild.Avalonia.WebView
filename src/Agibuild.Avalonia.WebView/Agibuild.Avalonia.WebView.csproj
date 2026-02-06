@@ -8,8 +8,9 @@
     <IsPackable>true</IsPackable>
     <PackageId>Agibuild.Avalonia.WebView</PackageId>
     <Version>0.0.0-dev</Version>
-    <Authors>Agibuild</Authors>
-    <Description>Agibuild Avalonia WebView - single package distribution.</Description>
+    <Description>Cross-platform WebView control for Avalonia UI with native platform adapters (WKWebView on macOS, WebView2 on Windows, WebKitGTK on Linux). Provides embedded WebView, popup dialog, and OAuth authentication flows.</Description>
+    <PackageTags>avalonia;webview;wkwebview;webview2;cross-platform;macos;windows;linux</PackageTags>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
 
     <!-- Build output (Agibuild.Avalonia.WebView.dll) is included in lib/net10.0/ automatically. -->
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
@@ -44,6 +45,9 @@
     <None Include="buildTransitive/Agibuild.Avalonia.WebView.targets"
           Pack="true"
           PackagePath="buildTransitive/Agibuild.Avalonia.WebView.targets" />
+    <None Include="..\..\LICENSE.txt"
+          Pack="true"
+          PackagePath="" />
   </ItemGroup>
 
   <ItemGroup>

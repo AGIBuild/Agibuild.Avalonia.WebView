@@ -9,7 +9,7 @@ using Agibuild.Avalonia.WebView.Adapters.Abstractions;
 namespace Agibuild.Avalonia.WebView.Adapters.MacOS;
 
 [SupportedOSPlatform("macos")]
-internal sealed class MacOSWebViewAdapter : IWebViewAdapter
+internal sealed class MacOSWebViewAdapter : IWebViewAdapter, INativeWebViewHandleProvider, ICookieAdapter, IWebViewAdapterOptions
 {
     private static bool DiagnosticsEnabled
         => string.Equals(Environment.GetEnvironmentVariable("AGIBUILD_WEBVIEW_DIAG"), "1", StringComparison.Ordinal);
@@ -201,12 +201,15 @@ internal sealed class MacOSWebViewAdapter : IWebViewAdapter
     }
 
     public Task NavigateToStringAsync(Guid navigationId, string html)
+        => NavigateToStringAsync(navigationId, html, baseUrl: null);
+
+    public Task NavigateToStringAsync(Guid navigationId, string html, Uri? baseUrl)
     {
         ArgumentNullException.ThrowIfNull(html);
         ThrowIfNotAttached();
 
-        lock (_navLock) { BeginApiNavigation(navigationId, requestUri: new Uri("about:blank")); }
-        NativeMethods.LoadHtml(_native, html, baseUrl: null);
+        lock (_navLock) { BeginApiNavigation(navigationId, requestUri: baseUrl ?? new Uri("about:blank")); }
+        NativeMethods.LoadHtml(_native, html, baseUrl: baseUrl?.AbsoluteUri);
         return Task.CompletedTask;
     }
 
@@ -249,6 +252,216 @@ internal sealed class MacOSWebViewAdapter : IWebViewAdapter
         ThrowIfNotAttached();
         NativeMethods.Stop(_native);
         return true;
+    }
+
+    public IPlatformHandle? TryGetWebViewHandle()
+    {
+        if (!_attached || _detached) return null;
+
+        var ptr = NativeMethods.GetWebViewHandle(_native);
+        return ptr == IntPtr.Zero ? null : new PlatformHandle(ptr, "WKWebView");
+    }
+
+    // ---------- IWebViewAdapterOptions ----------
+
+    public void ApplyEnvironmentOptions(IWebViewEnvironmentOptions options)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        ThrowIfNotInitialized();
+
+        if (_attached)
+        {
+            throw new InvalidOperationException("Environment options must be applied before Attach.");
+        }
+
+        NativeMethods.SetEnableDevTools(_native, options.EnableDevTools);
+        NativeMethods.SetEphemeral(_native, options.UseEphemeralSession);
+
+        if (options.CustomUserAgent is not null)
+        {
+            NativeMethods.SetUserAgent(_native, options.CustomUserAgent);
+        }
+    }
+
+    public void SetCustomUserAgent(string? userAgent)
+    {
+        ThrowIfNotInitialized();
+        NativeMethods.SetUserAgent(_native, userAgent);
+    }
+
+    // ---------- ICookieAdapter ----------
+
+    public Task<IReadOnlyList<WebViewCookie>> GetCookiesAsync(Uri uri)
+    {
+        ThrowIfNotAttachedForCookies();
+        var tcs = new TaskCompletionSource<IReadOnlyList<WebViewCookie>>();
+        var tcsHandle = GCHandle.Alloc(tcs);
+
+        NativeMethods.CookiesGet(_native, uri.AbsoluteUri, static (context, jsonUtf8) =>
+        {
+            var h = GCHandle.FromIntPtr(context);
+            var t = (TaskCompletionSource<IReadOnlyList<WebViewCookie>>)h.Target!;
+            h.Free();
+
+            try
+            {
+                var json = NativeMethods.PtrToString(jsonUtf8);
+                var cookies = ParseCookiesJson(json);
+                t.TrySetResult(cookies);
+            }
+            catch (Exception ex)
+            {
+                t.TrySetException(ex);
+            }
+        }, GCHandle.ToIntPtr(tcsHandle));
+
+        return tcs.Task;
+    }
+
+    public Task SetCookieAsync(WebViewCookie cookie)
+    {
+        ThrowIfNotAttachedForCookies();
+        var tcs = new TaskCompletionSource();
+        var tcsHandle = GCHandle.Alloc(tcs);
+        var expiresUnix = cookie.Expires.HasValue ? cookie.Expires.Value.ToUnixTimeSeconds() : -1.0;
+
+        NativeMethods.CookieSet(_native,
+            cookie.Name, cookie.Value, cookie.Domain, cookie.Path,
+            expiresUnix, cookie.IsSecure, cookie.IsHttpOnly,
+            static (context, success, errorUtf8) =>
+            {
+                var h = GCHandle.FromIntPtr(context);
+                var t = (TaskCompletionSource)h.Target!;
+                h.Free();
+
+                if (success)
+                    t.TrySetResult();
+                else
+                    t.TrySetException(new InvalidOperationException(NativeMethods.PtrToString(errorUtf8)));
+            }, GCHandle.ToIntPtr(tcsHandle));
+
+        return tcs.Task;
+    }
+
+    public Task DeleteCookieAsync(WebViewCookie cookie)
+    {
+        ThrowIfNotAttachedForCookies();
+        var tcs = new TaskCompletionSource();
+        var tcsHandle = GCHandle.Alloc(tcs);
+
+        NativeMethods.CookieDelete(_native,
+            cookie.Name, cookie.Domain, cookie.Path,
+            static (context, success, errorUtf8) =>
+            {
+                var h = GCHandle.FromIntPtr(context);
+                var t = (TaskCompletionSource)h.Target!;
+                h.Free();
+
+                if (success)
+                    t.TrySetResult();
+                else
+                    t.TrySetException(new InvalidOperationException(NativeMethods.PtrToString(errorUtf8)));
+            }, GCHandle.ToIntPtr(tcsHandle));
+
+        return tcs.Task;
+    }
+
+    public Task ClearAllCookiesAsync()
+    {
+        ThrowIfNotAttachedForCookies();
+        var tcs = new TaskCompletionSource();
+        var tcsHandle = GCHandle.Alloc(tcs);
+
+        NativeMethods.CookiesClearAll(_native,
+            static (context, success, errorUtf8) =>
+            {
+                var h = GCHandle.FromIntPtr(context);
+                var t = (TaskCompletionSource)h.Target!;
+                h.Free();
+
+                if (success)
+                    t.TrySetResult();
+                else
+                    t.TrySetException(new InvalidOperationException(NativeMethods.PtrToString(errorUtf8)));
+            }, GCHandle.ToIntPtr(tcsHandle));
+
+        return tcs.Task;
+    }
+
+    private void ThrowIfNotAttachedForCookies()
+    {
+        if (_detached)
+            throw new ObjectDisposedException(nameof(MacOSWebViewAdapter));
+        if (!_attached)
+            throw new InvalidOperationException("Adapter is not attached.");
+    }
+
+    /// <summary>
+    /// Parses a JSON array of cookie objects produced by the native shim.
+    /// Uses simple string parsing to avoid a System.Text.Json dependency.
+    /// </summary>
+    private static IReadOnlyList<WebViewCookie> ParseCookiesJson(string json)
+    {
+        var cookies = new List<WebViewCookie>();
+        if (string.IsNullOrWhiteSpace(json) || json == "[]") return cookies;
+
+        // Each cookie is a JSON object within the array.
+        // We parse manually to avoid System.Text.Json dependency in the adapter.
+        int idx = 0;
+        while (idx < json.Length)
+        {
+            int objStart = json.IndexOf('{', idx);
+            if (objStart < 0) break;
+            int objEnd = json.IndexOf('}', objStart);
+            if (objEnd < 0) break;
+
+            var obj = json.Substring(objStart, objEnd - objStart + 1);
+            idx = objEnd + 1;
+
+            var name = ExtractJsonString(obj, "name");
+            var value = ExtractJsonString(obj, "value");
+            var domain = ExtractJsonString(obj, "domain");
+            var path = ExtractJsonString(obj, "path");
+            var expiresStr = ExtractJsonRaw(obj, "expires");
+            var isSecure = ExtractJsonRaw(obj, "isSecure") == "true";
+            var isHttpOnly = ExtractJsonRaw(obj, "isHttpOnly") == "true";
+
+            DateTimeOffset? expires = null;
+            if (double.TryParse(expiresStr, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var unix) && unix > 0)
+            {
+                expires = DateTimeOffset.FromUnixTimeSeconds((long)unix);
+            }
+
+            cookies.Add(new WebViewCookie(name, value, domain, path, expires, isSecure, isHttpOnly));
+        }
+
+        return cookies;
+    }
+
+    private static string ExtractJsonString(string json, string key)
+    {
+        var needle = $"\"{key}\":\"";
+        var start = json.IndexOf(needle, StringComparison.Ordinal);
+        if (start < 0) return string.Empty;
+        start += needle.Length;
+        var end = start;
+        while (end < json.Length)
+        {
+            if (json[end] == '"' && (end == start || json[end - 1] != '\\')) break;
+            end++;
+        }
+        return json.Substring(start, end - start).Replace("\\\"", "\"").Replace("\\\\", "\\");
+    }
+
+    private static string ExtractJsonRaw(string json, string key)
+    {
+        var needle = $"\"{key}\":";
+        var start = json.IndexOf(needle, StringComparison.Ordinal);
+        if (start < 0) return string.Empty;
+        start += needle.Length;
+        var end = start;
+        while (end < json.Length && json[end] != ',' && json[end] != '}') end++;
+        return json.Substring(start, end - start).Trim();
     }
 
     private void BeginApiNavigation(Guid navigationId, Uri requestUri)
@@ -510,7 +723,7 @@ internal sealed class MacOSWebViewAdapter : IWebViewAdapter
 
     private void OnNavigationCompletedNative(string? url, int status, long errorCode, string? errorMessage)
     {
-        // status: 0=Success, 1=Failure, 2=Canceled
+        // status: 0=Success, 1=Failure, 2=Canceled, 3=Timeout, 4=Network, 5=Ssl
         var requestUri = (url is not null && Uri.TryCreate(url, UriKind.Absolute, out var parsed))
             ? parsed
             : null;
@@ -528,7 +741,18 @@ internal sealed class MacOSWebViewAdapter : IWebViewAdapter
         }
 
         var msg = string.IsNullOrWhiteSpace(errorMessage) ? $"Navigation failed (code={errorCode})." : errorMessage!;
-        OnNavigationTerminal(NavigationCompletedStatus.Failure, error: new Exception(msg), requestUriOverride: requestUri);
+        var navId = _activeNavigationId;
+        var navUri = requestUri ?? _activeRequestUri ?? new Uri("about:blank");
+
+        Exception error = status switch
+        {
+            3 => new WebViewTimeoutException(msg, navId, navUri),
+            4 => new WebViewNetworkException(msg, navId, navUri),
+            5 => new WebViewSslException(msg, navId, navUri),
+            _ => new WebViewNavigationException(msg, navId, navUri),
+        };
+
+        OnNavigationTerminal(NavigationCompletedStatus.Failure, error: error, requestUriOverride: requestUri);
     }
 
     private void OnScriptResultNative(ulong requestId, string? result, string? errorMessage)
@@ -697,6 +921,48 @@ internal sealed class MacOSWebViewAdapter : IWebViewAdapter
         [DllImport(LibraryName, EntryPoint = "ag_wk_can_go_forward", CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAs(UnmanagedType.I1)]
         internal static extern bool CanGoForward(IntPtr handle);
+
+        [DllImport(LibraryName, EntryPoint = "ag_wk_get_webview_handle", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern IntPtr GetWebViewHandle(IntPtr handle);
+
+        // Cookie management
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        internal delegate void CookiesGetCb(IntPtr context, IntPtr jsonUtf8);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        internal delegate void CookieOpCb(IntPtr context, [MarshalAs(UnmanagedType.I1)] bool success, IntPtr errorUtf8);
+
+        [DllImport(LibraryName, EntryPoint = "ag_wk_cookies_get", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void CookiesGet(IntPtr handle, [MarshalAs(UnmanagedType.LPUTF8Str)] string url, CookiesGetCb callback, IntPtr context);
+
+        [DllImport(LibraryName, EntryPoint = "ag_wk_cookie_set", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void CookieSet(IntPtr handle,
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string name,
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string value,
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string domain,
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string path,
+            double expiresUnix, [MarshalAs(UnmanagedType.I1)] bool isSecure, [MarshalAs(UnmanagedType.I1)] bool isHttpOnly,
+            CookieOpCb callback, IntPtr context);
+
+        [DllImport(LibraryName, EntryPoint = "ag_wk_cookie_delete", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void CookieDelete(IntPtr handle,
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string name,
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string domain,
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string path,
+            CookieOpCb callback, IntPtr context);
+
+        [DllImport(LibraryName, EntryPoint = "ag_wk_cookies_clear_all", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void CookiesClearAll(IntPtr handle, CookieOpCb callback, IntPtr context);
+
+        // M2: Environment options
+        [DllImport(LibraryName, EntryPoint = "ag_wk_set_enable_dev_tools", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void SetEnableDevTools(IntPtr handle, [MarshalAs(UnmanagedType.I1)] bool enable);
+
+        [DllImport(LibraryName, EntryPoint = "ag_wk_set_ephemeral", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void SetEphemeral(IntPtr handle, [MarshalAs(UnmanagedType.I1)] bool ephemeral);
+
+        [DllImport(LibraryName, EntryPoint = "ag_wk_set_user_agent", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void SetUserAgent(IntPtr handle, [MarshalAs(UnmanagedType.LPUTF8Str)] string? userAgent);
     }
 }
 

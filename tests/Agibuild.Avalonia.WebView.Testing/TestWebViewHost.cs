@@ -19,6 +19,7 @@ public sealed class TestWebViewHost : IWebView
 
     public Task NavigateAsync(Uri uri) => Task.CompletedTask;
     public Task NavigateToStringAsync(string html) => Task.CompletedTask;
+    public Task NavigateToStringAsync(string html, Uri? baseUrl) => Task.CompletedTask;
     public Task<string?> InvokeScriptAsync(string script) => Task.FromResult<string?>(null);
 
     public bool GoBack() => false;

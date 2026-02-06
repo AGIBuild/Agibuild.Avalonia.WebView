@@ -1,0 +1,132 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Agibuild.Avalonia.WebView.Integration.Tests.ViewModels"
+             xmlns:agw="using:Agibuild.Avalonia.WebView"
+             mc:Ignorable="d"
+             x:Class="Agibuild.Avalonia.WebView.Integration.Tests.Views.AdvancedFeaturesE2EView"
+             x:DataType="vm:AdvancedFeaturesE2EViewModel">
+
+  <DockPanel Margin="8">
+
+    <!-- Top: Status bar -->
+    <StackPanel DockPanel.Dock="Top" Spacing="4" Margin="0,0,0,8">
+      <TextBlock Text="Advanced Features E2E (M2 / Dialog / Auth)" FontSize="16" FontWeight="Bold" />
+      <TextBlock Text="{Binding Status}" Foreground="Gray" />
+    </StackPanel>
+
+    <!-- Main area: left panel + splitter + right WebView -->
+    <Grid ColumnDefinitions="320,Auto,*">
+
+      <!-- Left: controls panel (scrollable) -->
+      <ScrollViewer Grid.Column="0">
+        <StackPanel Spacing="8" Margin="0,0,8,0">
+
+          <!-- ===== Section 1: M2 Environment Options ===== -->
+          <Border BorderThickness="1" BorderBrush="CornflowerBlue" CornerRadius="6" Padding="8">
+            <StackPanel Spacing="4">
+              <TextBlock Text="M2: Environment Options" FontWeight="Bold" FontSize="13" />
+
+              <Grid ColumnDefinitions="*,*" Margin="0,4,0,0">
+                <Button Grid.Column="0" Content="Enable DevTools"
+                        Command="{Binding InitWithDevToolsCommand}"
+                        HorizontalAlignment="Stretch" Margin="0,0,2,0" />
+                <Button Grid.Column="1" Content="Ephemeral Session"
+                        Command="{Binding InitWithEphemeralCommand}"
+                        HorizontalAlignment="Stretch" Margin="2,0,0,0" />
+              </Grid>
+
+              <TextBlock Text="Current Options:" FontSize="11" Foreground="Gray" Margin="0,4,0,0" />
+              <TextBox IsReadOnly="True" Text="{Binding EnvironmentInfo}"
+                       FontFamily="Menlo,Consolas,monospace" FontSize="11"
+                       MinHeight="50" AcceptsReturn="True" />
+            </StackPanel>
+          </Border>
+
+          <!-- ===== Section 2: Custom UserAgent ===== -->
+          <Border BorderThickness="1" BorderBrush="CornflowerBlue" CornerRadius="6" Padding="8">
+            <StackPanel Spacing="4">
+              <TextBlock Text="M2: Custom User-Agent" FontWeight="Bold" FontSize="13" />
+
+              <TextBox Text="{Binding UserAgentInput, Mode=TwoWay}"
+                       Watermark="Enter custom User-Agent string"
+                       FontFamily="Menlo,Consolas,monospace" FontSize="11" />
+
+              <Grid ColumnDefinitions="*,*">
+                <Button Grid.Column="0" Content="Set UserAgent"
+                        Command="{Binding SetUserAgentCommand}"
+                        HorizontalAlignment="Stretch" Margin="0,0,2,0" />
+                <Button Grid.Column="1" Content="Reset Default"
+                        Command="{Binding ResetUserAgentCommand}"
+                        HorizontalAlignment="Stretch" Margin="2,0,0,0" />
+              </Grid>
+            </StackPanel>
+          </Border>
+
+          <!-- ===== Section 3: WebDialog ===== -->
+          <Border BorderThickness="1" BorderBrush="ForestGreen" CornerRadius="6" Padding="8">
+            <StackPanel Spacing="4">
+              <TextBlock Text="WebDialog" FontWeight="Bold" FontSize="13" />
+
+              <TextBox Text="{Binding DialogUrl, Mode=TwoWay}"
+                       Watermark="URL to open in dialog"
+                       FontFamily="Menlo,Consolas,monospace" FontSize="11" />
+
+              <Button Content="Open WebDialog"
+                      Command="{Binding OpenDialogCommand}"
+                      HorizontalAlignment="Stretch" />
+              <Button Content="Open Ephemeral Dialog"
+                      Command="{Binding OpenEphemeralDialogCommand}"
+                      HorizontalAlignment="Stretch" />
+            </StackPanel>
+          </Border>
+
+          <!-- ===== Section 4: AuthFlow ===== -->
+          <Border BorderThickness="1" BorderBrush="Coral" CornerRadius="6" Padding="8">
+            <StackPanel Spacing="4">
+              <TextBlock Text="AuthFlow (OAuth)" FontWeight="Bold" FontSize="13" />
+
+              <Button Content="Test OAuth Flow (auto-redirect)"
+                      Command="{Binding TestAuthFlowCommand}"
+                      HorizontalAlignment="Stretch" />
+              <Button Content="Test Cancel (close dialog)"
+                      Command="{Binding TestAuthCancelCommand}"
+                      HorizontalAlignment="Stretch" />
+
+              <TextBlock Text="Result:" FontSize="11" Foreground="Gray" Margin="0,4,0,0" />
+              <TextBox IsReadOnly="True" Text="{Binding AuthResult}"
+                       FontFamily="Menlo,Consolas,monospace" FontSize="11"
+                       MinHeight="40" AcceptsReturn="True" />
+            </StackPanel>
+          </Border>
+
+          <!-- ===== Log ===== -->
+          <Grid ColumnDefinitions="*,Auto" Margin="0,4,0,2">
+            <TextBlock Grid.Column="0" Text="Log:" FontWeight="Bold" />
+            <Button Grid.Column="1" Content="Clear" FontSize="11" Padding="8,2"
+                    Command="{Binding ClearLogCommand}" />
+          </Grid>
+
+          <TextBox IsReadOnly="True"
+                   Text="{Binding Log}"
+                   FontFamily="Menlo,Consolas,monospace" FontSize="11"
+                   TextWrapping="Wrap"
+                   AcceptsReturn="True"
+                   MinHeight="120" />
+
+        </StackPanel>
+      </ScrollViewer>
+
+      <!-- GridSplitter -->
+      <GridSplitter Grid.Column="1" Width="6"
+                    Background="Transparent"
+                    ResizeDirection="Columns" />
+
+      <!-- Right: WebView for M2 feature verification -->
+      <Border Grid.Column="2" BorderThickness="1" BorderBrush="Gray">
+        <agw:WebView x:Name="WebViewControl" Source="https://www.bing.com" />
+      </Border>
+    </Grid>
+  </DockPanel>
+</UserControl>

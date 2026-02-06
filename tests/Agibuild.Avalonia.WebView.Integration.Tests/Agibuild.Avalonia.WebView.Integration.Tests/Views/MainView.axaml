@@ -27,6 +27,9 @@
       <TabItem Header="Consumer E2E">
         <views:ConsumerWebViewE2EView DataContext="{Binding ConsumerE2E}" />
       </TabItem>
+      <TabItem Header="Advanced Features">
+        <views:AdvancedFeaturesE2EView DataContext="{Binding AdvancedE2E}" />
+      </TabItem>
     </TabControl>
   </DockPanel>
 </UserControl>

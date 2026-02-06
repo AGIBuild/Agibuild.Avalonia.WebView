@@ -103,6 +103,38 @@ public class WebView : NativeControlHost
         return _core!.NavigateToStringAsync(html);
     }
 
+    public Task NavigateToStringAsync(string html, Uri? baseUrl)
+    {
+        ArgumentNullException.ThrowIfNull(html);
+        EnsureCore();
+        return _core!.NavigateToStringAsync(html, baseUrl);
+    }
+
+    /// <summary>
+    /// Returns a cookie manager if the underlying adapter supports it; otherwise <c>null</c>.
+    /// </summary>
+    public ICookieManager? TryGetCookieManager()
+    {
+        return _core?.TryGetCookieManager();
+    }
+
+    /// <summary>
+    /// Returns the underlying platform WebView handle, or <c>null</c> if not available.
+    /// </summary>
+    public IPlatformHandle? TryGetWebViewHandle()
+    {
+        return _core?.TryGetWebViewHandle();
+    }
+
+    /// <summary>
+    /// Sets the custom User-Agent string at runtime.
+    /// Pass <c>null</c> to revert to the platform default.
+    /// </summary>
+    public void SetCustomUserAgent(string? userAgent)
+    {
+        _core?.SetCustomUserAgent(userAgent);
+    }
+
     public Task<string?> InvokeScriptAsync(string script)
     {
         ArgumentNullException.ThrowIfNull(script);

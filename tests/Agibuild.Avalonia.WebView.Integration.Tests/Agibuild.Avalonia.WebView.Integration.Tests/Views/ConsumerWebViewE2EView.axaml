@@ -10,36 +10,107 @@
 
   <DockPanel Margin="8">
 
-    <!-- Top: Title + Status -->
-    <StackPanel DockPanel.Dock="Top" Spacing="4" Margin="0,0,0,8">
-      <TextBlock Text="Consumer WebView E2E" FontSize="16" />
-      <TextBlock Text="{Binding Status}" />
+    <!-- Top: Status bar -->
+    <StackPanel DockPanel.Dock="Top" Spacing="4" Margin="0,0,0,4">
+      <TextBlock Text="Consumer WebView E2E" FontSize="16" FontWeight="Bold" />
+      <TextBlock Text="{Binding Status}" Foreground="Gray" />
     </StackPanel>
 
-    <!-- Top: Address bar -->
-    <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="0,0,0,8">
-      <TextBox Grid.Column="0"
+    <!-- Top: Navigation toolbar -->
+    <Grid DockPanel.Dock="Top" ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,*,Auto,Auto" Margin="0,0,0,4">
+      <!-- Back / Forward / Refresh / Stop -->
+      <Button Grid.Column="0" Content="◀" ToolTip.Tip="Back"
+              Command="{Binding GoBackCommand}"
+              IsEnabled="{Binding CanGoBack}"
+              MinWidth="36" HorizontalContentAlignment="Center" />
+      <Button Grid.Column="1" Content="▶" ToolTip.Tip="Forward"
+              Command="{Binding GoForwardCommand}"
+              IsEnabled="{Binding CanGoForward}"
+              Margin="2,0,0,0" MinWidth="36" HorizontalContentAlignment="Center" />
+      <Button Grid.Column="2" Content="⟳" ToolTip.Tip="Refresh"
+              Command="{Binding DoRefreshCommand}"
+              Margin="2,0,0,0" MinWidth="36" HorizontalContentAlignment="Center" />
+      <Button Grid.Column="3" Content="✕" ToolTip.Tip="Stop"
+              Command="{Binding DoStopCommand}"
+              Margin="2,0,4,0" MinWidth="36" HorizontalContentAlignment="Center" />
+
+      <!-- Loading indicator -->
+      <TextBlock Grid.Column="4" Text="⏳ Loading…"
+                 IsVisible="{Binding IsPageLoading}"
+                 VerticalAlignment="Center" Foreground="DodgerBlue"
+                 Margin="0,0,8,0" />
+
+      <!-- Address bar -->
+      <TextBox Grid.Column="5"
                Text="{Binding AddressText, Mode=TwoWay}"
-               Watermark="Enter URL and press Enter or click Go"
+               Watermark="Enter URL and press Enter"
                KeyDown="OnAddressKeyDown" />
-      <Button Grid.Column="1" Content="Go" Margin="4,0,0,0"
+      <Button Grid.Column="6" Content="Go" Margin="4,0,0,0"
               Command="{Binding GoToAddressCommand}" />
+
+      <!-- Home button -->
+      <Button Grid.Column="7" Content="🏠" ToolTip.Tip="Home (bing.com)"
+              Command="{Binding GoHomeCommand}"
+              Margin="2,0,0,0" MinWidth="36" HorizontalContentAlignment="Center" />
     </Grid>
 
     <!-- Bottom: status line -->
     <TextBlock DockPanel.Dock="Bottom"
-               Text="E2E target: bing.com — also supports free browsing via address bar."
-               Margin="0,8,0,0" />
+               Text="E2E target: bing.com | Use toolbar for manual testing, left panel for JS/HTML/E2E"
+               Margin="0,4,0,0" Foreground="Gray" FontSize="11" />
 
-    <!-- Main area: left log + splitter + right WebView -->
-    <Grid ColumnDefinitions="250,Auto,*">
+    <!-- Main area: left panel + splitter + right WebView -->
+    <Grid ColumnDefinitions="280,Auto,*">
 
-      <!-- Left: controls + log -->
+      <!-- Left: controls panel -->
       <DockPanel Grid.Column="0">
-        <Button DockPanel.Dock="Top" Content="Run E2E Tests"
-                Command="{Binding RunAllCommand}" Margin="0,0,0,4" />
-        <TextBlock DockPanel.Dock="Top" Text="Log:" FontWeight="Bold" Margin="0,0,0,2" />
 
+        <!-- E2E button -->
+        <Button DockPanel.Dock="Top" Content="▶ Run E2E Tests"
+                Command="{Binding RunAllCommand}" Margin="0,0,0,4" />
+
+        <!-- JS Execution panel -->
+        <Border DockPanel.Dock="Top" BorderThickness="1" BorderBrush="LightGray"
+                CornerRadius="4" Padding="4" Margin="0,0,0,4">
+          <StackPanel Spacing="4">
+            <TextBlock Text="JavaScript" FontWeight="SemiBold" FontSize="12" />
+            <TextBox Text="{Binding ScriptInput, Mode=TwoWay}"
+                     Watermark="e.g. document.title"
+                     AcceptsReturn="True" MinHeight="48"
+                     FontFamily="Menlo,Consolas,monospace" FontSize="11"
+                     KeyDown="OnScriptKeyDown" />
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock Grid.Column="0" Text="{Binding ScriptResult}"
+                         FontFamily="Menlo,Consolas,monospace" FontSize="11"
+                         Foreground="Green" TextWrapping="Wrap" />
+              <Button Grid.Column="1" Content="Run" MinWidth="50"
+                      Command="{Binding RunScriptCommand}" />
+            </Grid>
+          </StackPanel>
+        </Border>
+
+        <!-- Load HTML panel -->
+        <Border DockPanel.Dock="Top" BorderThickness="1" BorderBrush="LightGray"
+                CornerRadius="4" Padding="4" Margin="0,0,0,4">
+          <StackPanel Spacing="4">
+            <TextBlock Text="Load HTML" FontWeight="SemiBold" FontSize="12" />
+            <TextBox Text="{Binding HtmlInput, Mode=TwoWay}"
+                     Watermark="&lt;html&gt;&lt;body&gt;Hello&lt;/body&gt;&lt;/html&gt;"
+                     AcceptsReturn="True" MinHeight="48"
+                     FontFamily="Menlo,Consolas,monospace" FontSize="11" />
+            <Button Content="Load HTML" HorizontalAlignment="Right"
+                    Command="{Binding LoadHtmlCommand}" />
+          </StackPanel>
+        </Border>
+
+        <!-- Log header + clear -->
+        <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="0,0,0,2">
+          <TextBlock Grid.Column="0" Text="Log:" FontWeight="Bold" />
+          <Button Grid.Column="1" Content="Clear" FontSize="11" Padding="8,2"
+                  Command="{Binding ClearLogCommand}" />
+        </Grid>
+
+        <!-- Log output -->
         <TextBox IsReadOnly="True"
                  Text="{Binding Log}"
                  FontFamily="Menlo,Consolas,monospace" FontSize="11"

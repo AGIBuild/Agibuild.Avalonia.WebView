@@ -70,6 +70,26 @@ void ag_wk_stop(ag_wk_handle handle);
 
 bool ag_wk_can_go_back(ag_wk_handle handle);
 bool ag_wk_can_go_forward(ag_wk_handle handle);
+void* ag_wk_get_webview_handle(ag_wk_handle handle);
+
+// Cookie management callbacks
+typedef void (*ag_wk_cookies_get_cb)(void* context, const char* json_utf8);
+typedef void (*ag_wk_cookie_op_cb)(void* context, bool success, const char* error_utf8);
+
+void ag_wk_cookies_get(ag_wk_handle handle, const char* url_utf8, ag_wk_cookies_get_cb callback, void* context);
+void ag_wk_cookie_set(ag_wk_handle handle,
+    const char* name, const char* value, const char* domain, const char* path,
+    double expires_unix, bool is_secure, bool is_http_only,
+    ag_wk_cookie_op_cb callback, void* context);
+void ag_wk_cookie_delete(ag_wk_handle handle,
+    const char* name, const char* domain, const char* path,
+    ag_wk_cookie_op_cb callback, void* context);
+void ag_wk_cookies_clear_all(ag_wk_handle handle, ag_wk_cookie_op_cb callback, void* context);
+
+// M2: Environment options — call before ag_wk_attach.
+void ag_wk_set_enable_dev_tools(ag_wk_handle handle, bool enable);
+void ag_wk_set_ephemeral(ag_wk_handle handle, bool ephemeral);
+void ag_wk_set_user_agent(ag_wk_handle handle, const char* ua_utf8_or_null);
 
 } // extern "C"
 
@@ -127,6 +147,7 @@ struct shim_state
     __strong NSView* parent_view { nil };
     __strong WKWebView* web_view { nil };
     __strong WKUserContentController* user_content_controller { nil };
+    __strong WKWebsiteDataStore* data_store { nil }; // non-nil after attach
 
     __strong ShimNavigationDelegate* nav_delegate { nil };
     __strong ShimMessageHandler* msg_handler { nil };
@@ -135,6 +156,11 @@ struct shim_state
     __strong NSMutableDictionary<NSNumber*, policy_decision_block>* pending_policy { nil };
 
     std::atomic<bool> detached { false };
+
+    // M2 options — set before attach.
+    bool opt_enable_dev_tools { false };
+    bool opt_ephemeral { false };
+    __strong NSString* opt_user_agent { nil };
 };
 
 static void run_on_main(void (^block)(void))
@@ -151,17 +177,43 @@ static void run_on_main(void (^block)(void))
     dispatch_sync(dispatch_get_main_queue(), block);
 }
 
+// Status codes: 0=Success, 1=Failure, 2=Canceled, 3=Timeout, 4=Network, 5=Ssl
 static int map_error_status(NSError* error)
 {
-    if (error == nil) return 1;
+    if (error == nil) return 1; // Failure (no error object but called from failure path)
 
-    // NSURLErrorCancelled == -999 under NSURLErrorDomain
-    if ([[error domain] isEqualToString:NSURLErrorDomain] && [error code] == NSURLErrorCancelled)
+    if (![[error domain] isEqualToString:NSURLErrorDomain])
     {
-        return 2; // Canceled
+        return 1; // Failure — non-URL error domain
     }
 
-    return 1; // Failure
+    NSInteger code = [error code];
+
+    // Canceled
+    if (code == NSURLErrorCancelled) return 2;
+
+    // Timeout
+    if (code == NSURLErrorTimedOut) return 3;
+
+    // Network connectivity errors
+    if (code == NSURLErrorCannotFindHost ||
+        code == NSURLErrorCannotConnectToHost ||
+        code == NSURLErrorNetworkConnectionLost ||
+        code == NSURLErrorNotConnectedToInternet)
+    {
+        return 4;
+    }
+
+    // SSL/TLS certificate errors
+    if (code == NSURLErrorServerCertificateHasBadDate ||
+        code == NSURLErrorServerCertificateUntrusted ||
+        code == NSURLErrorServerCertificateHasUnknownRoot ||
+        code == NSURLErrorServerCertificateNotYetValid)
+    {
+        return 5;
+    }
+
+    return 1; // Failure — uncategorized
 }
 
 @implementation ShimNavigationDelegate
@@ -333,8 +385,34 @@ bool ag_wk_attach(ag_wk_handle handle, void* nsview_ptr)
             WKWebViewConfiguration* cfg = [[WKWebViewConfiguration alloc] init];
             cfg.userContentController = s->user_content_controller;
 
+            // M2: Ephemeral data store (non-persistent cookies/storage).
+            if (s->opt_ephemeral)
+            {
+                s->data_store = [WKWebsiteDataStore nonPersistentDataStore];
+                cfg.websiteDataStore = s->data_store;
+            }
+            else
+            {
+                s->data_store = [WKWebsiteDataStore defaultDataStore];
+            }
+
             s->web_view = [[WKWebView alloc] initWithFrame:parent.bounds configuration:cfg];
             s->web_view.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
+
+            // M2: DevTools (inspectable) — requires macOS 13.3+.
+            if (s->opt_enable_dev_tools)
+            {
+                if (@available(macOS 13.3, *))
+                {
+                    s->web_view.inspectable = YES;
+                }
+            }
+
+            // M2: Custom User-Agent.
+            if (s->opt_user_agent != nil)
+            {
+                s->web_view.customUserAgent = s->opt_user_agent;
+            }
 
             s->nav_delegate = [[ShimNavigationDelegate alloc] init];
             s->nav_delegate.state = s;
@@ -601,6 +679,228 @@ bool ag_wk_can_go_forward(ag_wk_handle handle)
         value = (s->web_view != nil) ? (bool)s->web_view.canGoForward : false;
     });
     return value;
+}
+
+void* ag_wk_get_webview_handle(ag_wk_handle handle)
+{
+    if (!handle) return nullptr;
+    auto* s = (shim_state*)handle;
+    if (s->detached.load()) return nullptr;
+
+    __block void* ptr = nullptr;
+    run_on_main(^{
+        ptr = (__bridge void*)s->web_view;
+    });
+    return ptr;
+}
+
+// ---------- Cookie management ----------
+
+static WKHTTPCookieStore* get_cookie_store(shim_state* s)
+{
+    // Use the data store assigned during attach (may be ephemeral).
+    WKWebsiteDataStore* store = s->data_store ?: [WKWebsiteDataStore defaultDataStore];
+    return store.httpCookieStore;
+}
+
+static NSString* cookie_to_json(NSHTTPCookie* c)
+{
+    // Escape for JSON: replace \ with \\, " with \"
+    NSString* (^esc)(NSString*) = ^NSString*(NSString* str) {
+        str = [str stringByReplacingOccurrencesOfString:@"\\" withString:@"\\\\"];
+        str = [str stringByReplacingOccurrencesOfString:@"\"" withString:@"\\\""];
+        return str;
+    };
+
+    double expiresUnix = c.expiresDate ? [c.expiresDate timeIntervalSince1970] : -1.0;
+
+    return [NSString stringWithFormat:
+        @"{\"name\":\"%@\",\"value\":\"%@\",\"domain\":\"%@\",\"path\":\"%@\",\"expires\":%.3f,\"isSecure\":%@,\"isHttpOnly\":%@}",
+        esc(c.name ?: @""), esc(c.value ?: @""), esc(c.domain ?: @""), esc(c.path ?: @"/"),
+        expiresUnix,
+        c.isSecure ? @"true" : @"false",
+        c.isHTTPOnly ? @"true" : @"false"];
+}
+
+void ag_wk_cookies_get(ag_wk_handle handle, const char* url_utf8, ag_wk_cookies_get_cb callback, void* context)
+{
+    if (!handle || !callback) return;
+    auto* s = (shim_state*)handle;
+    if (s->detached.load()) { callback(context, "[]"); return; }
+
+    NSString* urlStr = url_utf8 ? [NSString stringWithUTF8String:url_utf8] : nil;
+    NSURL* filterUrl = urlStr ? [NSURL URLWithString:urlStr] : nil;
+
+    WKHTTPCookieStore* store = get_cookie_store(s);
+    [store getAllCookies:^(NSArray<NSHTTPCookie*>* cookies) {
+        NSMutableArray<NSString*>* items = [NSMutableArray new];
+        for (NSHTTPCookie* c in cookies)
+        {
+            // Filter by URL domain if provided
+            if (filterUrl)
+            {
+                NSString* host = filterUrl.host;
+                if (host && ![c.domain hasSuffix:host] && ![host hasSuffix:c.domain])
+                {
+                    continue;
+                }
+            }
+            [items addObject:cookie_to_json(c)];
+        }
+        NSString* json = [NSString stringWithFormat:@"[%@]", [items componentsJoinedByString:@","]];
+        callback(context, utf8_or_empty(json));
+    }];
+}
+
+void ag_wk_cookie_set(ag_wk_handle handle,
+    const char* name, const char* value, const char* domain, const char* path,
+    double expires_unix, bool is_secure, bool is_http_only,
+    ag_wk_cookie_op_cb callback, void* context)
+{
+    if (!handle || !callback) return;
+    auto* s = (shim_state*)handle;
+    if (s->detached.load()) { callback(context, false, "Detached"); return; }
+
+    NSMutableDictionary* props = [NSMutableDictionary dictionary];
+    props[NSHTTPCookieName] = name ? [NSString stringWithUTF8String:name] : @"";
+    props[NSHTTPCookieValue] = value ? [NSString stringWithUTF8String:value] : @"";
+    props[NSHTTPCookieDomain] = domain ? [NSString stringWithUTF8String:domain] : @"";
+    props[NSHTTPCookiePath] = path ? [NSString stringWithUTF8String:path] : @"/";
+
+    if (expires_unix > 0)
+    {
+        props[NSHTTPCookieExpires] = [NSDate dateWithTimeIntervalSince1970:expires_unix];
+    }
+    if (is_secure)
+    {
+        props[NSHTTPCookieSecure] = @"TRUE";
+    }
+
+    // Note: NSHTTPCookie does not support setting httpOnly via properties dictionary;
+    // WKHTTPCookieStore respects the cookie as-is from the dictionary.
+
+    NSHTTPCookie* cookie = [NSHTTPCookie cookieWithProperties:props];
+    if (!cookie)
+    {
+        callback(context, false, "Invalid cookie properties");
+        return;
+    }
+
+    WKHTTPCookieStore* store = get_cookie_store(s);
+    [store setCookie:cookie completionHandler:^{
+        callback(context, true, nullptr);
+    }];
+}
+
+void ag_wk_cookie_delete(ag_wk_handle handle,
+    const char* name, const char* domain, const char* path,
+    ag_wk_cookie_op_cb callback, void* context)
+{
+    if (!handle || !callback) return;
+    auto* s = (shim_state*)handle;
+    if (s->detached.load()) { callback(context, false, "Detached"); return; }
+
+    NSString* nameStr = name ? [NSString stringWithUTF8String:name] : @"";
+    NSString* domainStr = domain ? [NSString stringWithUTF8String:domain] : @"";
+    NSString* pathStr = path ? [NSString stringWithUTF8String:path] : @"/";
+
+    WKHTTPCookieStore* store = get_cookie_store(s);
+    [store getAllCookies:^(NSArray<NSHTTPCookie*>* cookies) {
+        NSHTTPCookie* target = nil;
+        for (NSHTTPCookie* c in cookies)
+        {
+            if ([c.name isEqualToString:nameStr] &&
+                [c.domain isEqualToString:domainStr] &&
+                [c.path isEqualToString:pathStr])
+            {
+                target = c;
+                break;
+            }
+        }
+
+        if (!target)
+        {
+            callback(context, true, nullptr); // Not found is not an error
+            return;
+        }
+
+        [store deleteCookie:target completionHandler:^{
+            callback(context, true, nullptr);
+        }];
+    }];
+}
+
+void ag_wk_cookies_clear_all(ag_wk_handle handle, ag_wk_cookie_op_cb callback, void* context)
+{
+    if (!handle || !callback) return;
+    auto* s = (shim_state*)handle;
+    if (s->detached.load()) { callback(context, false, "Detached"); return; }
+
+    WKHTTPCookieStore* store = get_cookie_store(s);
+    [store getAllCookies:^(NSArray<NSHTTPCookie*>* cookies) {
+        if (cookies.count == 0)
+        {
+            callback(context, true, nullptr);
+            return;
+        }
+
+        __block NSInteger remaining = (NSInteger)cookies.count;
+        for (NSHTTPCookie* c in cookies)
+        {
+            [store deleteCookie:c completionHandler:^{
+                if (--remaining == 0)
+                {
+                    callback(context, true, nullptr);
+                }
+            }];
+        }
+    }];
+}
+
+// ---------- M2: Environment options ----------
+
+void ag_wk_set_enable_dev_tools(ag_wk_handle handle, bool enable)
+{
+    if (!handle) return;
+    auto* s = (shim_state*)handle;
+    s->opt_enable_dev_tools = enable;
+}
+
+void ag_wk_set_ephemeral(ag_wk_handle handle, bool ephemeral)
+{
+    if (!handle) return;
+    auto* s = (shim_state*)handle;
+    s->opt_ephemeral = ephemeral;
+}
+
+void ag_wk_set_user_agent(ag_wk_handle handle, const char* ua_utf8_or_null)
+{
+    if (!handle) return;
+    auto* s = (shim_state*)handle;
+
+    if (ua_utf8_or_null == nullptr)
+    {
+        s->opt_user_agent = nil;
+        // Also update live WebView if already attached.
+        run_on_main(^{
+            if (s->web_view != nil && !s->detached.load())
+            {
+                s->web_view.customUserAgent = nil;
+            }
+        });
+        return;
+    }
+
+    NSString* ua = [NSString stringWithUTF8String:ua_utf8_or_null];
+    s->opt_user_agent = ua;
+
+    // Also update live WebView if already attached.
+    run_on_main(^{
+        if (s->web_view != nil && !s->detached.load())
+        {
+            s->web_view.customUserAgent = ua;
+        }
+    });
 }
 
 } // extern "C"

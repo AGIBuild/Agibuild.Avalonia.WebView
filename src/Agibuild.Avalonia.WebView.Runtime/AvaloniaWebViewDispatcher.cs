@@ -1,10 +1,13 @@
+using System.Diagnostics.CodeAnalysis;
 using Avalonia.Threading;
 
 namespace Agibuild.Avalonia.WebView;
 
 /// <summary>
 /// Bridges <see cref="IWebViewDispatcher"/> to Avalonia's UI-thread <see cref="Dispatcher"/>.
+/// Thin wrapper — excluded from coverage because it requires an Avalonia runtime.
 /// </summary>
+[ExcludeFromCodeCoverage]
 internal sealed class AvaloniaWebViewDispatcher : IWebViewDispatcher
 {
     public bool CheckAccess() => Dispatcher.UIThread.CheckAccess();

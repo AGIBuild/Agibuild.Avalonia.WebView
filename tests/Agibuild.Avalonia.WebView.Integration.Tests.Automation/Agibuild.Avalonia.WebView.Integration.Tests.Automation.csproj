@@ -9,6 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Agibuild.Avalonia.WebView.Integration.Tests\Agibuild.Avalonia.WebView.Integration.Tests\Agibuild.Avalonia.WebView.Integration.Tests.csproj" />
     <ProjectReference Include="..\Agibuild.Avalonia.WebView.Testing\Agibuild.Avalonia.WebView.Testing.csproj" />
+    <ProjectReference Include="..\..\src\Agibuild.Avalonia.WebView.Runtime\Agibuild.Avalonia.WebView.Runtime.csproj" />
   </ItemGroup>
 
   <ItemGroup>

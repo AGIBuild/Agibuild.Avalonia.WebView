@@ -21,7 +21,9 @@
     <InternalsVisibleTo Include="Agibuild.Avalonia.WebView" />
     <InternalsVisibleTo Include="Agibuild.Avalonia.WebView.DependencyInjection" />
     <InternalsVisibleTo Include="Agibuild.Avalonia.WebView.UnitTests" />
+    <InternalsVisibleTo Include="Agibuild.Avalonia.WebView.Testing" />
     <InternalsVisibleTo Include="Agibuild.Avalonia.WebView.Integration.Tests" />
+    <InternalsVisibleTo Include="Agibuild.Avalonia.WebView.Integration.Tests.Automation" />
   </ItemGroup>
 
 </Project>

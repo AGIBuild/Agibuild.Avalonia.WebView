@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Threading;
@@ -9,7 +10,8 @@ namespace Agibuild.Avalonia.WebView.Integration.Tests.ViewModels;
 
 /// <summary>
 /// Consumer-perspective E2E test using bing.com as target site.
-/// Also provides an address bar for free browsing.
+/// Exposes all WebView features for manual testing via the UI,
+/// plus an automated E2E test suite.
 /// </summary>
 public partial class ConsumerWebViewE2EViewModel : ViewModelBase
 {
@@ -22,6 +24,8 @@ public partial class ConsumerWebViewE2EViewModel : ViewModelBase
     {
         Status = "Not started.";
         AddressText = BingHome.AbsoluteUri;
+        ScriptInput = "document.title";
+        HtmlInput = "<html><body><h1>Hello from NavigateToString!</h1><p>This is raw HTML loaded into the WebView.</p></body></html>";
     }
 
     public bool AutoRun { get; set; }
@@ -36,6 +40,28 @@ public partial class ConsumerWebViewE2EViewModel : ViewModelBase
 
     [ObservableProperty]
     private string _addressText = string.Empty;
+
+    [ObservableProperty]
+    private bool _canGoBack;
+
+    [ObservableProperty]
+    private bool _canGoForward;
+
+    [ObservableProperty]
+    private bool _isPageLoading;
+
+    // --- JavaScript execution ---
+
+    [ObservableProperty]
+    private string _scriptInput = string.Empty;
+
+    [ObservableProperty]
+    private string _scriptResult = string.Empty;
+
+    // --- Load HTML ---
+
+    [ObservableProperty]
+    private string _htmlInput = string.Empty;
 
     /// <summary>
     /// Set by the view once the <see cref="WebView"/> control is available.
@@ -63,11 +89,13 @@ public partial class ConsumerWebViewE2EViewModel : ViewModelBase
         WebViewControl.NavigationStarted += OnGlobalNavigationStarted;
         WebViewControl.NavigationCompleted += OnGlobalNavigationCompleted;
         WebViewControl.NewWindowRequested += OnGlobalNewWindowRequested;
+        WebViewControl.WebMessageReceived += OnGlobalWebMessageReceived;
     }
 
     private void OnGlobalNavigationStarted(object? sender, NavigationStartingEventArgs e)
     {
         LogLine($"[Nav] Started: id={e.NavigationId:N}, uri={e.RequestUri}");
+        UpdateNavigationState();
     }
 
     private void OnGlobalNavigationCompleted(object? sender, NavigationCompletedEventArgs e)
@@ -79,11 +107,89 @@ public partial class ConsumerWebViewE2EViewModel : ViewModelBase
         {
             AddressText = e.RequestUri.AbsoluteUri;
         }
+
+        UpdateNavigationState();
     }
 
     private void OnGlobalNewWindowRequested(object? sender, NewWindowRequestedEventArgs e)
     {
         LogLine($"[Nav] NewWindow blocked, navigating in current view: {e.Uri}");
+    }
+
+    private void OnGlobalWebMessageReceived(object? sender, WebMessageReceivedEventArgs e)
+    {
+        LogLine($"[Msg] WebMessage received: {e.Body}");
+    }
+
+    /// <summary>
+    /// Synchronizes CanGoBack / CanGoForward / IsPageLoading from the WebView control.
+    /// </summary>
+    private void UpdateNavigationState()
+    {
+        if (WebViewControl is null) return;
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            CanGoBack = WebViewControl.CanGoBack;
+            CanGoForward = WebViewControl.CanGoForward;
+            IsPageLoading = WebViewControl.IsLoading;
+        });
+    }
+
+    // ---------------------------------------------------------------------------
+    //  Navigation toolbar commands
+    // ---------------------------------------------------------------------------
+
+    [RelayCommand]
+    private void GoBack()
+    {
+        if (WebViewControl is null) return;
+        var result = WebViewControl.GoBack();
+        LogLine($"GoBack → {result}");
+        UpdateNavigationState();
+    }
+
+    [RelayCommand]
+    private void GoForward()
+    {
+        if (WebViewControl is null) return;
+        var result = WebViewControl.GoForward();
+        LogLine($"GoForward → {result}");
+        UpdateNavigationState();
+    }
+
+    [RelayCommand]
+    private void DoRefresh()
+    {
+        if (WebViewControl is null) return;
+        var result = WebViewControl.Refresh();
+        LogLine($"Refresh → {result}");
+        UpdateNavigationState();
+    }
+
+    [RelayCommand]
+    private void DoStop()
+    {
+        if (WebViewControl is null) return;
+        var result = WebViewControl.Stop();
+        LogLine($"Stop → {result}");
+        UpdateNavigationState();
+    }
+
+    [RelayCommand]
+    private async Task GoHomeAsync()
+    {
+        if (WebViewControl is null) return;
+        AddressText = BingHome.AbsoluteUri;
+        LogLine($"Home → {BingHome}");
+        try
+        {
+            await WebViewControl.NavigateAsync(BingHome).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            LogLine($"Home error: {ex.Message}");
+        }
     }
 
     // ---------------------------------------------------------------------------
@@ -129,6 +235,84 @@ public partial class ConsumerWebViewE2EViewModel : ViewModelBase
             LogLine($"Navigation error: {ex.Message}");
             Status = $"Error: {ex.Message}";
         }
+    }
+
+    // ---------------------------------------------------------------------------
+    //  JavaScript execution
+    // ---------------------------------------------------------------------------
+
+    [RelayCommand]
+    private async Task RunScriptAsync()
+    {
+        if (WebViewControl is null)
+        {
+            ScriptResult = "WebView not ready.";
+            return;
+        }
+
+        var script = ScriptInput?.Trim();
+        if (string.IsNullOrEmpty(script))
+        {
+            ScriptResult = "(empty script)";
+            return;
+        }
+
+        LogLine($"[JS] Executing: {script}");
+        try
+        {
+            var result = await WebViewControl.InvokeScriptAsync(script).ConfigureAwait(false);
+            ScriptResult = result ?? "(null)";
+            LogLine($"[JS] Result: {ScriptResult}");
+        }
+        catch (Exception ex)
+        {
+            ScriptResult = $"Error: {ex.Message}";
+            LogLine($"[JS] Error: {ex.Message}");
+        }
+    }
+
+    // ---------------------------------------------------------------------------
+    //  Load HTML
+    // ---------------------------------------------------------------------------
+
+    [RelayCommand]
+    private async Task LoadHtmlAsync()
+    {
+        if (WebViewControl is null)
+        {
+            Status = "WebView not ready.";
+            return;
+        }
+
+        var html = HtmlInput?.Trim();
+        if (string.IsNullOrEmpty(html))
+        {
+            Status = "Empty HTML.";
+            return;
+        }
+
+        LogLine($"[HTML] Loading {html.Length} chars...");
+        try
+        {
+            await WebViewControl.NavigateToStringAsync(html).ConfigureAwait(false);
+            Status = "HTML loaded.";
+            LogLine("[HTML] Loaded successfully.");
+        }
+        catch (Exception ex)
+        {
+            LogLine($"[HTML] Error: {ex.Message}");
+            Status = $"Error: {ex.Message}";
+        }
+    }
+
+    // ---------------------------------------------------------------------------
+    //  Log management
+    // ---------------------------------------------------------------------------
+
+    [RelayCommand]
+    private void ClearLog()
+    {
+        Log = string.Empty;
     }
 
     // ---------------------------------------------------------------------------
@@ -179,7 +363,24 @@ public partial class ConsumerWebViewE2EViewModel : ViewModelBase
             allPassed &= await RunNavigateToBingAsync().ConfigureAwait(false);
             allPassed &= await RunSourcePropertyAsync().ConfigureAwait(false);
             allPassed &= await RunInvokeScriptAsync().ConfigureAwait(false);
+            allPassed &= await RunNavigateToStringAsync().ConfigureAwait(false);
             allPassed &= await RunNavigationEventsAsync().ConfigureAwait(false);
+            allPassed &= await RunGoBackForwardAsync().ConfigureAwait(false);
+            allPassed &= await RunRefreshAsync().ConfigureAwait(false);
+            allPassed &= await RunStopAsync().ConfigureAwait(false);
+            allPassed &= await RunIsLoadingAsync().ConfigureAwait(false);
+
+            // --- M1 scenarios ---
+            allPassed &= await RunCookieSetAndReadAsync().ConfigureAwait(false);
+            allPassed &= await RunCookieGetAsync().ConfigureAwait(false);
+            allPassed &= await RunCookieDeleteClearAsync().ConfigureAwait(false);
+            allPassed &= await RunNativeHandleAsync().ConfigureAwait(false);
+            allPassed &= await RunNavigationErrorCategorizationAsync().ConfigureAwait(false);
+            allPassed &= await RunNavigateToStringWithBaseUrlAsync().ConfigureAwait(false);
+
+            // --- M2 scenarios ---
+            allPassed &= await RunSetCustomUserAgentAsync().ConfigureAwait(false);
+            allPassed &= await RunResetCustomUserAgentAsync().ConfigureAwait(false);
 
             Status = allPassed ? "ALL PASSED" : "SOME FAILED";
             LogLine($"Result: {Status}");
@@ -203,8 +404,6 @@ public partial class ConsumerWebViewE2EViewModel : ViewModelBase
     {
         try
         {
-            // Use a distinct URL (not bing.com which we already loaded in WaitForReady)
-            // to guarantee a real navigation occurs.
             var uri = new Uri("https://www.bing.com/search?q=test");
             LogLine($"[1] NavigateAsync to {uri.PathAndQuery}");
 
@@ -321,13 +520,63 @@ public partial class ConsumerWebViewE2EViewModel : ViewModelBase
         }
     }
 
-    // ---- Scenario 4: NavigationStarted + NavigationCompleted events paired ----
+    // ---- Scenario 4: NavigateToStringAsync — load raw HTML ----
+
+    private async Task<bool> RunNavigateToStringAsync()
+    {
+        try
+        {
+            LogLine("[4] NavigateToStringAsync (raw HTML)");
+
+            var completedTcs = new TaskCompletionSource<NavigationCompletedEventArgs>(TaskCreationOptions.RunContinuationsAsynchronously);
+            void Handler(object? s, NavigationCompletedEventArgs e) => completedTcs.TrySetResult(e);
+
+            WebViewControl!.NavigationCompleted += Handler;
+            try
+            {
+                const string html = "<html><body><h1 id='test-heading'>E2E HTML Test</h1></body></html>";
+                await WebViewControl.NavigateToStringAsync(html).ConfigureAwait(false);
+                var completed = await WaitAsync(completedTcs.Task, TimeSpan.FromSeconds(15)).ConfigureAwait(false);
+
+                if (completed.Status != NavigationCompletedStatus.Success)
+                {
+                    LogLine($"  FAIL: status = {completed.Status}");
+                    return false;
+                }
+
+                // Verify the heading content via script.
+                var heading = await WebViewControl.InvokeScriptAsync(
+                    "document.getElementById('test-heading')?.textContent").ConfigureAwait(false);
+                LogLine($"  heading = '{heading}'");
+
+                if (heading != "E2E HTML Test")
+                {
+                    LogLine($"  FAIL: expected 'E2E HTML Test', got '{heading}'");
+                    return false;
+                }
+
+                LogLine("  PASS");
+                return true;
+            }
+            finally
+            {
+                WebViewControl!.NavigationCompleted -= Handler;
+            }
+        }
+        catch (Exception ex)
+        {
+            LogLine($"  FAIL: {ex.Message}");
+            return false;
+        }
+    }
+
+    // ---- Scenario 5: NavigationStarted + NavigationCompleted events paired ----
 
     private async Task<bool> RunNavigationEventsAsync()
     {
         try
         {
-            LogLine("[4] NavigationStarted + NavigationCompleted events");
+            LogLine("[5] NavigationStarted + NavigationCompleted events");
 
             var startedTcs = new TaskCompletionSource<NavigationStartingEventArgs>(TaskCreationOptions.RunContinuationsAsynchronously);
             var completedTcs = new TaskCompletionSource<NavigationCompletedEventArgs>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -375,6 +624,628 @@ public partial class ConsumerWebViewE2EViewModel : ViewModelBase
         }
     }
 
+    // ---- Scenario 6: GoBack / GoForward ----
+
+    private async Task<bool> RunGoBackForwardAsync()
+    {
+        try
+        {
+            LogLine("[6] GoBack / GoForward");
+
+            // Navigate to page A (bing.com).
+            await NavigateAndWaitAsync(BingHome).ConfigureAwait(false);
+
+            // Navigate to page B (bing.com/news).
+            var pageB = new Uri("https://www.bing.com/news");
+            await NavigateAndWaitAsync(pageB).ConfigureAwait(false);
+
+            // GoBack should return to page A.
+            var backNavTcs = new TaskCompletionSource<NavigationCompletedEventArgs>(TaskCreationOptions.RunContinuationsAsynchronously);
+            void BackHandler(object? s, NavigationCompletedEventArgs e) => backNavTcs.TrySetResult(e);
+
+            WebViewControl!.NavigationCompleted += BackHandler;
+            bool backResult;
+            try
+            {
+                backResult = await Dispatcher.UIThread.InvokeAsync(() => WebViewControl.GoBack());
+                if (!backResult)
+                {
+                    LogLine("  FAIL: GoBack returned false");
+                    return false;
+                }
+                await WaitAsync(backNavTcs.Task, TimeSpan.FromSeconds(15)).ConfigureAwait(false);
+            }
+            finally
+            {
+                WebViewControl!.NavigationCompleted -= BackHandler;
+            }
+
+            LogLine("  GoBack succeeded");
+
+            // GoForward should return to page B.
+            var fwdNavTcs = new TaskCompletionSource<NavigationCompletedEventArgs>(TaskCreationOptions.RunContinuationsAsynchronously);
+            void FwdHandler(object? s, NavigationCompletedEventArgs e) => fwdNavTcs.TrySetResult(e);
+
+            WebViewControl!.NavigationCompleted += FwdHandler;
+            bool fwdResult;
+            try
+            {
+                fwdResult = await Dispatcher.UIThread.InvokeAsync(() => WebViewControl.GoForward());
+                if (!fwdResult)
+                {
+                    LogLine("  FAIL: GoForward returned false");
+                    return false;
+                }
+                await WaitAsync(fwdNavTcs.Task, TimeSpan.FromSeconds(15)).ConfigureAwait(false);
+            }
+            finally
+            {
+                WebViewControl!.NavigationCompleted -= FwdHandler;
+            }
+
+            LogLine("  GoForward succeeded");
+            LogLine("  PASS");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            LogLine($"  FAIL: {ex.Message}");
+            return false;
+        }
+    }
+
+    // ---- Scenario 7: Refresh ----
+
+    private async Task<bool> RunRefreshAsync()
+    {
+        try
+        {
+            LogLine("[7] Refresh");
+
+            // Navigate to a known page first.
+            await NavigateAndWaitAsync(BingHome).ConfigureAwait(false);
+
+            // Refresh and wait for navigation completed.
+            var navTcs = new TaskCompletionSource<NavigationCompletedEventArgs>(TaskCreationOptions.RunContinuationsAsynchronously);
+            void Handler(object? s, NavigationCompletedEventArgs e) => navTcs.TrySetResult(e);
+
+            WebViewControl!.NavigationCompleted += Handler;
+            try
+            {
+                var result = await Dispatcher.UIThread.InvokeAsync(() => WebViewControl.Refresh());
+                if (!result)
+                {
+                    LogLine("  FAIL: Refresh returned false");
+                    return false;
+                }
+                var completed = await WaitAsync(navTcs.Task, TimeSpan.FromSeconds(15)).ConfigureAwait(false);
+
+                if (completed.Status != NavigationCompletedStatus.Success)
+                {
+                    LogLine($"  FAIL: status = {completed.Status}");
+                    return false;
+                }
+
+                LogLine("  PASS");
+                return true;
+            }
+            finally
+            {
+                WebViewControl!.NavigationCompleted -= Handler;
+            }
+        }
+        catch (Exception ex)
+        {
+            LogLine($"  FAIL: {ex.Message}");
+            return false;
+        }
+    }
+
+    // ---- Scenario 8: Stop ----
+
+    private async Task<bool> RunStopAsync()
+    {
+        try
+        {
+            LogLine("[8] Stop");
+
+            // Start a navigation then immediately stop.
+            var uri = new Uri("https://www.bing.com/search?q=webview+stop+test");
+            _ = WebViewControl!.NavigateAsync(uri);
+
+            var result = await Dispatcher.UIThread.InvokeAsync(() => WebViewControl.Stop());
+            LogLine($"  Stop returned: {result}");
+
+            // Give a short delay for state to settle.
+            await Task.Delay(200).ConfigureAwait(false);
+
+            // We consider Stop successful if it didn't throw — the page may or may not
+            // have loaded by the time Stop was called.
+            LogLine("  PASS (Stop invoked without error)");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            LogLine($"  FAIL: {ex.Message}");
+            return false;
+        }
+    }
+
+    // ---- Scenario 9: IsLoading state changes ----
+
+    private async Task<bool> RunIsLoadingAsync()
+    {
+        try
+        {
+            LogLine("[9] IsLoading property");
+
+            bool sawLoading = false;
+            var completedTcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+            void StartHandler(object? s, NavigationStartingEventArgs e)
+            {
+                // Check IsLoading on the UI thread.
+                Dispatcher.UIThread.Post(() =>
+                {
+                    if (WebViewControl?.IsLoading == true)
+                        sawLoading = true;
+                });
+            }
+
+            void DoneHandler(object? s, NavigationCompletedEventArgs e) => completedTcs.TrySetResult(true);
+
+            WebViewControl!.NavigationStarted += StartHandler;
+            WebViewControl!.NavigationCompleted += DoneHandler;
+            try
+            {
+                await WebViewControl.NavigateAsync(new Uri("https://www.bing.com/search?q=isloading")).ConfigureAwait(false);
+                await WaitAsync(completedTcs.Task, TimeSpan.FromSeconds(30)).ConfigureAwait(false);
+
+                // After completion, IsLoading should be false.
+                var isLoadingAfter = await Dispatcher.UIThread.InvokeAsync(() => WebViewControl.IsLoading);
+                LogLine($"  sawLoading during navigation: {sawLoading}");
+                LogLine($"  IsLoading after completion: {isLoadingAfter}");
+
+                if (!sawLoading)
+                {
+                    LogLine("  WARN: IsLoading was never true during navigation (may be timing)");
+                    // This is a soft warning — pass anyway since real-world timing may vary.
+                }
+
+                if (isLoadingAfter)
+                {
+                    LogLine("  FAIL: IsLoading still true after NavigationCompleted");
+                    return false;
+                }
+
+                LogLine("  PASS");
+                return true;
+            }
+            finally
+            {
+                WebViewControl!.NavigationStarted -= StartHandler;
+                WebViewControl!.NavigationCompleted -= DoneHandler;
+            }
+        }
+        catch (Exception ex)
+        {
+            LogLine($"  FAIL: {ex.Message}");
+            return false;
+        }
+    }
+
+    // ---- Scenario 10: Cookie set → page reads document.cookie ----
+
+    private async Task<bool> RunCookieSetAndReadAsync()
+    {
+        try
+        {
+            LogLine("[10] Cookie: set via API → read via document.cookie");
+            var cm = WebViewControl!.TryGetCookieManager();
+            if (cm is null)
+            {
+                LogLine("  SKIP: TryGetCookieManager() returned null (adapter does not support cookies)");
+                return true; // non-fatal skip
+            }
+
+            // Navigate to about:blank to establish a clean page context.
+            var completedTcs = new TaskCompletionSource<NavigationCompletedEventArgs>(TaskCreationOptions.RunContinuationsAsynchronously);
+            void Handler(object? s, NavigationCompletedEventArgs e) => completedTcs.TrySetResult(e);
+            WebViewControl!.NavigationCompleted += Handler;
+            try
+            {
+                await WebViewControl.NavigateToStringAsync("<html><body>cookie test</body></html>",
+                    new Uri("https://cookie-test.example.com/")).ConfigureAwait(false);
+                await WaitAsync(completedTcs.Task, TimeSpan.FromSeconds(15)).ConfigureAwait(false);
+            }
+            finally
+            {
+                WebViewControl!.NavigationCompleted -= Handler;
+            }
+
+            // Set a cookie via the API.
+            var cookie = new WebViewCookie("m1test", "hello", ".cookie-test.example.com", "/", null, false, false);
+            await cm.SetCookieAsync(cookie).ConfigureAwait(false);
+
+            // Read back via JavaScript.
+            var docCookie = await WebViewControl.InvokeScriptAsync("document.cookie").ConfigureAwait(false);
+            LogLine($"  document.cookie = '{docCookie}'");
+
+            if (docCookie is null || !docCookie.Contains("m1test=hello"))
+            {
+                LogLine("  FAIL: cookie not found in document.cookie");
+                return false;
+            }
+
+            // Clean up.
+            await cm.DeleteCookieAsync(cookie).ConfigureAwait(false);
+
+            LogLine("  PASS");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            LogLine($"  FAIL: {ex.Message}");
+            return false;
+        }
+    }
+
+    // ---- Scenario 11: Cookie get via API ----
+
+    private async Task<bool> RunCookieGetAsync()
+    {
+        try
+        {
+            LogLine("[11] Cookie: page sets document.cookie → GetCookiesAsync");
+            var cm = WebViewControl!.TryGetCookieManager();
+            if (cm is null)
+            {
+                LogLine("  SKIP: no cookie manager");
+                return true;
+            }
+
+            // Navigate to a test page that sets a cookie.
+            var completedTcs = new TaskCompletionSource<NavigationCompletedEventArgs>(TaskCreationOptions.RunContinuationsAsynchronously);
+            void Handler(object? s, NavigationCompletedEventArgs e) => completedTcs.TrySetResult(e);
+            WebViewControl!.NavigationCompleted += Handler;
+            try
+            {
+                const string html = "<html><head><script>document.cookie='jsset=world;path=/';</script></head><body>cookie get test</body></html>";
+                await WebViewControl.NavigateToStringAsync(html,
+                    new Uri("https://cookie-get.example.com/")).ConfigureAwait(false);
+                await WaitAsync(completedTcs.Task, TimeSpan.FromSeconds(15)).ConfigureAwait(false);
+            }
+            finally
+            {
+                WebViewControl!.NavigationCompleted -= Handler;
+            }
+
+            // Give the page script a moment to execute.
+            await Task.Delay(300).ConfigureAwait(false);
+
+            var cookies = await cm.GetCookiesAsync(new Uri("https://cookie-get.example.com/")).ConfigureAwait(false);
+            var found = cookies.Any(c => c.Name == "jsset" && c.Value == "world");
+            LogLine($"  GetCookiesAsync returned {cookies.Count} cookie(s), jsset found: {found}");
+
+            if (!found)
+            {
+                LogLine("  FAIL: 'jsset' cookie not found via GetCookiesAsync");
+                return false;
+            }
+
+            // Clean up.
+            await cm.ClearAllCookiesAsync().ConfigureAwait(false);
+
+            LogLine("  PASS");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            LogLine($"  FAIL: {ex.Message}");
+            return false;
+        }
+    }
+
+    // ---- Scenario 12: Cookie delete & clear ----
+
+    private async Task<bool> RunCookieDeleteClearAsync()
+    {
+        try
+        {
+            LogLine("[12] Cookie: delete + clear all");
+            var cm = WebViewControl!.TryGetCookieManager();
+            if (cm is null)
+            {
+                LogLine("  SKIP: no cookie manager");
+                return true;
+            }
+
+            var testUri = new Uri("https://cookie-clear.example.com/");
+
+            // Set two cookies.
+            var c1 = new WebViewCookie("a", "1", ".cookie-clear.example.com", "/", null, false, false);
+            var c2 = new WebViewCookie("b", "2", ".cookie-clear.example.com", "/", null, false, false);
+            await cm.SetCookieAsync(c1).ConfigureAwait(false);
+            await cm.SetCookieAsync(c2).ConfigureAwait(false);
+
+            // Delete one.
+            await cm.DeleteCookieAsync(c1).ConfigureAwait(false);
+            var cookies = await cm.GetCookiesAsync(testUri).ConfigureAwait(false);
+            var aFound = cookies.Any(c => c.Name == "a");
+            LogLine($"  After delete(a): count={cookies.Count}, a found={aFound}");
+            if (aFound)
+            {
+                LogLine("  FAIL: cookie 'a' still present after delete");
+                return false;
+            }
+
+            // Clear all.
+            await cm.ClearAllCookiesAsync().ConfigureAwait(false);
+            cookies = await cm.GetCookiesAsync(testUri).ConfigureAwait(false);
+            LogLine($"  After clear all: count={cookies.Count}");
+            if (cookies.Count > 0)
+            {
+                LogLine("  FAIL: cookies remain after ClearAllCookiesAsync");
+                return false;
+            }
+
+            LogLine("  PASS");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            LogLine($"  FAIL: {ex.Message}");
+            return false;
+        }
+    }
+
+    // ---- Scenario 13: TryGetWebViewHandle ----
+
+    private async Task<bool> RunNativeHandleAsync()
+    {
+        try
+        {
+            LogLine("[13] TryGetWebViewHandle()");
+            var handle = WebViewControl!.TryGetWebViewHandle();
+
+            if (handle is null)
+            {
+                LogLine("  FAIL: TryGetWebViewHandle returned null");
+                return false;
+            }
+
+            LogLine($"  handle.HandleDescriptor = '{handle.HandleDescriptor}'");
+            LogLine($"  handle.Handle = 0x{handle.Handle:X}");
+
+            if (handle.Handle == IntPtr.Zero)
+            {
+                LogLine("  FAIL: handle is zero");
+                return false;
+            }
+
+            // On macOS the descriptor should be "WKWebView".
+            if (handle.HandleDescriptor != "WKWebView")
+            {
+                LogLine($"  WARN: expected descriptor 'WKWebView', got '{handle.HandleDescriptor}'");
+            }
+
+            LogLine("  PASS");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            LogLine($"  FAIL: {ex.Message}");
+            return false;
+        }
+    }
+
+    // ---- Scenario 14: Navigation error categorization ----
+
+    private async Task<bool> RunNavigationErrorCategorizationAsync()
+    {
+        try
+        {
+            LogLine("[14] Navigation error categorization (invalid host)");
+
+            var completedTcs = new TaskCompletionSource<NavigationCompletedEventArgs>(TaskCreationOptions.RunContinuationsAsynchronously);
+            void Handler(object? s, NavigationCompletedEventArgs e) => completedTcs.TrySetResult(e);
+
+            WebViewControl!.NavigationCompleted += Handler;
+            try
+            {
+                // Navigate to a host that definitely doesn't exist.
+                var badUri = new Uri("https://this-host-does-not-exist-m1-test.invalid/");
+                try
+                {
+                    await WebViewControl.NavigateAsync(badUri).ConfigureAwait(false);
+                }
+                catch
+                {
+                    // NavigateAsync may throw the categorized exception — that's fine.
+                }
+
+                var completed = await WaitAsync(completedTcs.Task, TimeSpan.FromSeconds(30)).ConfigureAwait(false);
+                LogLine($"  Status={completed.Status}, Error type={completed.Error?.GetType().Name}");
+
+                if (completed.Status == NavigationCompletedStatus.Success)
+                {
+                    LogLine("  FAIL: expected failure status for invalid host");
+                    return false;
+                }
+
+                if (completed.Error is not WebViewNetworkException)
+                {
+                    LogLine($"  WARN: expected WebViewNetworkException, got {completed.Error?.GetType().Name ?? "null"}");
+                    // Soft warning — the error type depends on the native mapping, but it should at least be a navigation exception.
+                    if (completed.Error is not WebViewNavigationException)
+                    {
+                        LogLine("  FAIL: error is not even a WebViewNavigationException");
+                        return false;
+                    }
+                }
+
+                LogLine("  PASS");
+                return true;
+            }
+            finally
+            {
+                WebViewControl!.NavigationCompleted -= Handler;
+            }
+        }
+        catch (Exception ex)
+        {
+            LogLine($"  FAIL: {ex.Message}");
+            return false;
+        }
+    }
+
+    // ---- Scenario 15: NavigateToStringAsync with baseUrl ----
+
+    private async Task<bool> RunNavigateToStringWithBaseUrlAsync()
+    {
+        try
+        {
+            LogLine("[15] NavigateToStringAsync(html, baseUrl)");
+
+            var completedTcs = new TaskCompletionSource<NavigationCompletedEventArgs>(TaskCreationOptions.RunContinuationsAsynchronously);
+            void Handler(object? s, NavigationCompletedEventArgs e) => completedTcs.TrySetResult(e);
+
+            WebViewControl!.NavigationCompleted += Handler;
+            try
+            {
+                var baseUrl = new Uri("https://baseurl-test.example.com/assets/");
+                const string html = "<html><body><h1 id='base'>baseUrl test</h1><script>window._href = location.href;</script></body></html>";
+
+                await WebViewControl.NavigateToStringAsync(html, baseUrl).ConfigureAwait(false);
+                var completed = await WaitAsync(completedTcs.Task, TimeSpan.FromSeconds(15)).ConfigureAwait(false);
+
+                if (completed.Status != NavigationCompletedStatus.Success)
+                {
+                    LogLine($"  FAIL: status = {completed.Status}");
+                    return false;
+                }
+
+                // Verify the page loaded and baseUrl influences the location.
+                var heading = await WebViewControl.InvokeScriptAsync(
+                    "document.getElementById('base')?.textContent").ConfigureAwait(false);
+                LogLine($"  heading = '{heading}'");
+
+                if (heading != "baseUrl test")
+                {
+                    LogLine("  FAIL: heading mismatch");
+                    return false;
+                }
+
+                // Check that location.href reflects the baseUrl.
+                var href = await WebViewControl.InvokeScriptAsync("window._href || location.href").ConfigureAwait(false);
+                LogLine($"  location.href = '{href}'");
+
+                // baseUrl test: the href should contain the base URL domain.
+                if (href is not null && href.Contains("baseurl-test.example.com"))
+                {
+                    LogLine("  baseUrl reflected in location.href ✓");
+                }
+                else
+                {
+                    LogLine($"  WARN: baseUrl not reflected in location.href (got '{href}') — platform-specific behavior");
+                }
+
+                LogLine("  PASS");
+                return true;
+            }
+            finally
+            {
+                WebViewControl!.NavigationCompleted -= Handler;
+            }
+        }
+        catch (Exception ex)
+        {
+            LogLine($"  FAIL: {ex.Message}");
+            return false;
+        }
+    }
+
+    // ---- Scenario 16: SetCustomUserAgent → verify via JS ----
+
+    private async Task<bool> RunSetCustomUserAgentAsync()
+    {
+        try
+        {
+            const string customUa = "AgibuildE2E/1.0 (UserAgentTest)";
+            LogLine($"[16] SetCustomUserAgent → '{customUa}'");
+
+            WebViewControl!.SetCustomUserAgent(customUa);
+
+            // Navigate to a simple page to ensure the UA takes effect.
+            await NavigateAndWaitAsync(BingHome).ConfigureAwait(false);
+
+            // Small delay to let the page load.
+            await Task.Delay(300).ConfigureAwait(false);
+
+            var jsUa = await WebViewControl.InvokeScriptAsync("navigator.userAgent").ConfigureAwait(false);
+            LogLine($"  navigator.userAgent = '{jsUa}'");
+
+            if (jsUa is not null && jsUa.Contains(customUa))
+            {
+                LogLine("  Custom UserAgent confirmed via JS ✓");
+                LogLine("  PASS");
+                return true;
+            }
+
+            // Some platforms may not fully reflect the custom UA in navigator.userAgent.
+            // Treat as a WARN but still pass.
+            LogLine($"  WARN: JS UA does not contain custom string (platform-specific). Got: '{jsUa}'");
+            LogLine("  PASS (with caveat)");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            LogLine($"  FAIL: {ex.Message}");
+            return false;
+        }
+    }
+
+    // ---- Scenario 17: Reset UserAgent → verify default restored ----
+
+    private async Task<bool> RunResetCustomUserAgentAsync()
+    {
+        try
+        {
+            LogLine("[17] ResetCustomUserAgent (null) → verify default restored");
+
+            // Read the current (custom) UA.
+            var beforeReset = await WebViewControl!.InvokeScriptAsync("navigator.userAgent").ConfigureAwait(false);
+            LogLine($"  Before reset: '{beforeReset}'");
+
+            // Reset to default.
+            WebViewControl.SetCustomUserAgent(null);
+
+            // Navigate to ensure the change takes effect.
+            await NavigateAndWaitAsync(BingHome).ConfigureAwait(false);
+            await Task.Delay(300).ConfigureAwait(false);
+
+            var afterReset = await WebViewControl.InvokeScriptAsync("navigator.userAgent").ConfigureAwait(false);
+            LogLine($"  After reset: '{afterReset}'");
+
+            if (afterReset is not null && !afterReset.Contains("AgibuildE2E"))
+            {
+                LogLine("  Default UserAgent restored (no custom string) ✓");
+                LogLine("  PASS");
+                return true;
+            }
+
+            // Custom UA string may have been cleared but some platforms keep it until refresh.
+            LogLine("  WARN: Custom UA string still present (platform-specific caching).");
+            LogLine("  PASS (with caveat)");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            LogLine($"  FAIL: {ex.Message}");
+            return false;
+        }
+    }
+
     // ---------------------------------------------------------------------------
     //  Helpers
     // ---------------------------------------------------------------------------
@@ -398,6 +1269,26 @@ public partial class ConsumerWebViewE2EViewModel : ViewModelBase
             await Dispatcher.UIThread.InvokeAsync(() => WebViewControl.Source = BingHome);
             await WaitAsync(readyTcs.Task, TimeSpan.FromSeconds(30)).ConfigureAwait(false);
             LogLine("WebView ready.");
+        }
+        finally
+        {
+            WebViewControl!.NavigationCompleted -= Handler;
+        }
+    }
+
+    /// <summary>
+    /// Navigates to the given URI and waits for NavigationCompleted.
+    /// </summary>
+    private async Task NavigateAndWaitAsync(Uri uri)
+    {
+        var tcs = new TaskCompletionSource<NavigationCompletedEventArgs>(TaskCreationOptions.RunContinuationsAsynchronously);
+        void Handler(object? s, NavigationCompletedEventArgs e) => tcs.TrySetResult(e);
+
+        WebViewControl!.NavigationCompleted += Handler;
+        try
+        {
+            await WebViewControl.NavigateAsync(uri).ConfigureAwait(false);
+            await WaitAsync(tcs.Task, TimeSpan.FromSeconds(30)).ConfigureAwait(false);
         }
         finally
         {

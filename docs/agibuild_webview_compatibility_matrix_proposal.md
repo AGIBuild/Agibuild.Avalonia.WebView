@@ -74,6 +74,43 @@
   - **WebMessage**：最小 JS→C# 消息闭环（`WebMessageReceived` 可触发）
 - **IT 自动运行入口**：桌面集成测试 App 支持 `--wk-smoke` 自动运行并以退出码表示成功/失败。
 
+#### 2.1.2 macOS WKWebView（Embedded）M1 验收标准（CT + IT 对齐）
+
+- **目标**：将 macOS adapter 从 M0 基线提升到生产就绪，覆盖 cookie 管理、new-window 回退、原生句柄访问、错误分类和 baseUrl 支持。
+- **CT（Contract Tests）**：新增 `ContractSemanticsV1CookieTests`、`ContractSemanticsV1NewWindowFallbackTests`、`ContractSemanticsV1ErrorCategorizationTests`、`ContractSemanticsV1BaseUrlTests`，覆盖：
+  - `TryGetCookieManager()` 在有/无 `ICookieAdapter` 时返回值
+  - Cookie CRUD（set/get/delete/clear）通过 mock 内存存储
+  - Cookie 操作在 dispose 后抛出 `ObjectDisposedException`
+  - `NewWindowRequested` 未处理时回退导航、`Handled=true` 时无回退、null URI 无动作
+  - `WebViewNetworkException`/`WebViewSslException`/`WebViewTimeoutException` 类型保留
+  - `NavigateToStringAsync(html, baseUrl)` 的 `Source` 和 `RequestUri` 语义
+- **IT（Integration Smoke - macOS）**：扩展冒烟场景，覆盖：
+  - Cookie set → 页面读取 `document.cookie` 验证
+  - Cookie get → 页面设置 cookie 后 `GetCookiesAsync` 验证
+  - Cookie delete/clear 验证
+  - `TryGetWebViewHandle()` 返回非 null 且 descriptor=`"WKWebView"`
+  - 导航到无效主机 → `NavigationCompleted.Error` 为 `WebViewNetworkException`
+  - `NavigateToStringAsync(html, baseUrl)` 相对资源解析验证
+
+##### Cookie 管理
+
+| Capability | macOS/WKWebView | 其他平台 | 说明 |
+|---|---|---|---|
+| `ICookieManager.GetCookiesAsync` | ✅ M1 | ❌ (null) | 通过 `WKHTTPCookieStore` |
+| `ICookieManager.SetCookieAsync` | ✅ M1 | ❌ (null) | |
+| `ICookieManager.DeleteCookieAsync` | ✅ M1 | ❌ (null) | |
+| `ICookieManager.ClearAllCookiesAsync` | ✅ M1 | ❌ (null) | |
+| Cookie 隔离模型 | 基于 `defaultDataStore` | - | 平台差异：共享 vs 每数据存储隔离 |
+
+##### 错误分类
+
+| 错误类型 | macOS NSURLError 映射 | 说明 |
+|---|---|---|
+| `WebViewTimeoutException` | `-1001` (NSURLErrorTimedOut) | |
+| `WebViewNetworkException` | `-1003`, `-1004`, `-1005`, `-1009` | DNS/连接/断网 |
+| `WebViewSslException` | `-1201` ~ `-1204` | 证书相关 |
+| `WebViewNavigationException` (base) | 其他所有 | 未分类错误 |
+
 ### 2.2 Events（契约语义优先）
 
 | Event | Level | Windows | macOS/iOS | Android | Linux (Dialog) | Test | Contract Requirements |

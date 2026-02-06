@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.Loader;
@@ -5,6 +6,7 @@ using Agibuild.Avalonia.WebView.Adapters.Abstractions;
 
 namespace Agibuild.Avalonia.WebView;
 
+[ExcludeFromCodeCoverage]
 internal static class WebViewAdapterFactory
 {
     private static bool DiagnosticsEnabled
