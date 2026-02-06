@@ -4,30 +4,51 @@ using Agibuild.Avalonia.WebView.Adapters.Abstractions;
 
 namespace Agibuild.Avalonia.WebView.Adapters.Windows;
 
-public sealed class WindowsWebViewAdapter : IWebViewAdapter
+internal sealed class WindowsWebViewAdapter : IWebViewAdapter
 {
     public bool CanGoBack => false;
     public bool CanGoForward => false;
 
-#pragma warning disable CS0067
-    public event EventHandler<NavigationStartingEventArgs>? NavigationStarted;
-    public event EventHandler<NavigationCompletedEventArgs>? NavigationCompleted;
-    public event EventHandler<NewWindowRequestedEventArgs>? NewWindowRequested;
-    public event EventHandler<WebMessageReceivedEventArgs>? WebMessageReceived;
-    public event EventHandler<WebResourceRequestedEventArgs>? WebResourceRequested;
-    public event EventHandler<EnvironmentRequestedEventArgs>? EnvironmentRequested;
-#pragma warning restore CS0067
+    public event EventHandler<NavigationCompletedEventArgs>? NavigationCompleted
+    {
+        add { }
+        remove { }
+    }
 
-    public void Initialize(IWebView host) => throw new NotSupportedException();
-    public void Attach(IPlatformHandle parentHandle) => throw new NotSupportedException();
-    public void Detach() => throw new NotSupportedException();
+    public event EventHandler<NewWindowRequestedEventArgs>? NewWindowRequested
+    {
+        add { }
+        remove { }
+    }
 
-    public Task NavigateAsync(Uri uri) => throw new NotSupportedException();
-    public Task NavigateToStringAsync(string html) => throw new NotSupportedException();
-    public Task<string?> InvokeScriptAsync(string script) => throw new NotSupportedException();
+    public event EventHandler<WebMessageReceivedEventArgs>? WebMessageReceived
+    {
+        add { }
+        remove { }
+    }
 
-    public bool GoBack() => throw new NotSupportedException();
-    public bool GoForward() => throw new NotSupportedException();
-    public bool Refresh() => throw new NotSupportedException();
-    public bool Stop() => throw new NotSupportedException();
+    public event EventHandler<WebResourceRequestedEventArgs>? WebResourceRequested
+    {
+        add { }
+        remove { }
+    }
+
+    public event EventHandler<EnvironmentRequestedEventArgs>? EnvironmentRequested
+    {
+        add { }
+        remove { }
+    }
+
+    public void Initialize(IWebViewAdapterHost host) => throw new PlatformNotSupportedException("WebView is not yet supported on Windows.");
+    public void Attach(IPlatformHandle parentHandle) => throw new PlatformNotSupportedException("WebView is not yet supported on Windows.");
+    public void Detach() => throw new PlatformNotSupportedException("WebView is not yet supported on Windows.");
+
+    public Task NavigateAsync(Guid navigationId, Uri uri) => throw new PlatformNotSupportedException("WebView is not yet supported on Windows.");
+    public Task NavigateToStringAsync(Guid navigationId, string html) => throw new PlatformNotSupportedException("WebView is not yet supported on Windows.");
+    public Task<string?> InvokeScriptAsync(string script) => throw new PlatformNotSupportedException("WebView is not yet supported on Windows.");
+
+    public bool GoBack(Guid navigationId) => throw new PlatformNotSupportedException("WebView is not yet supported on Windows.");
+    public bool GoForward(Guid navigationId) => throw new PlatformNotSupportedException("WebView is not yet supported on Windows.");
+    public bool Refresh(Guid navigationId) => throw new PlatformNotSupportedException("WebView is not yet supported on Windows.");
+    public bool Stop() => throw new PlatformNotSupportedException("WebView is not yet supported on Windows.");
 }

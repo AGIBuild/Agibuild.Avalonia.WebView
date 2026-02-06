@@ -13,8 +13,20 @@
     <vm:MainViewModel />
   </Design.DataContext>
 
-  <StackPanel Spacing="12">
-    <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" />
-    <views:WebViewTestView DataContext="{Binding WebViewTest}" />
-  </StackPanel>
+  <DockPanel>
+    <TextBlock DockPanel.Dock="Top" Text="{Binding Greeting}"
+               HorizontalAlignment="Center" Margin="0,8" />
+
+    <TabControl SelectedIndex="{Binding SelectedTabIndex}">
+      <TabItem Header="Mock Adapter">
+        <views:WebViewTestView DataContext="{Binding WebViewTest}" />
+      </TabItem>
+      <TabItem Header="macOS WK Smoke">
+        <views:WkWebViewSmokeView DataContext="{Binding WkWebViewSmoke}" />
+      </TabItem>
+      <TabItem Header="Consumer E2E">
+        <views:ConsumerWebViewE2EView DataContext="{Binding ConsumerE2E}" />
+      </TabItem>
+    </TabControl>
+  </DockPanel>
 </UserControl>

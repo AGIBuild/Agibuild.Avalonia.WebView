@@ -1,0 +1,96 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop, 'release/**']
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  NUKE_TELEMETRY_OPTOUT: true
+
+jobs:
+  # ────────────────────────────── Build & Test (macOS) ──────────────────────────
+  build-macos:
+    name: Build & Test (macOS)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+          dotnet-quality: 'preview'
+
+      - name: Run CI (Compile + UnitTests + Pack)
+        run: ./build.sh --target Ci --configuration Release
+
+      - name: Upload NuGet package
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuget-package-macos
+          path: artifacts/packages/*.nupkg
+          if-no-files-found: warn
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-macos
+          path: artifacts/test-results/
+          if-no-files-found: ignore
+
+  # ────────────────────────────── Build & Test (Windows) ────────────────────────
+  build-windows:
+    name: Build & Test (Windows)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+          dotnet-quality: 'preview'
+
+      - name: Run CI (Compile + UnitTests + Pack)
+        run: ./build.ps1 -Target Ci -Configuration Release
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-windows
+          path: artifacts/test-results/
+          if-no-files-found: ignore
+
+  # ────────────────────────────── Build & Test (Linux) ─────────────────────────
+  build-linux:
+    name: Build & Test (Linux)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+          dotnet-quality: 'preview'
+
+      - name: Run CI (Compile + UnitTests + Pack)
+        run: ./build.sh --target Ci --configuration Release
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-linux
+          path: artifacts/test-results/
+          if-no-files-found: ignore

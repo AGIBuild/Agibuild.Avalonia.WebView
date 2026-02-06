@@ -29,17 +29,16 @@ public partial class WebViewTestViewModel : ViewModelBase
     [ObservableProperty]
     private string? _lastEvent;
 
-    public WebViewTestViewModel(IWebViewAdapter adapter)
+    internal WebViewTestViewModel(IWebViewAdapter adapter)
     {
         _adapter = adapter;
-        _adapter.NavigationStarted += (_, _) => LastEvent = "NavigationStarted";
         _adapter.NavigationCompleted += (_, _) => LastEvent = "NavigationCompleted";
         _adapter.NewWindowRequested += (_, _) => LastEvent = "NewWindowRequested";
         _adapter.WebMessageReceived += (_, _) => LastEvent = "WebMessageReceived";
         _adapter.WebResourceRequested += (_, _) => LastEvent = "WebResourceRequested";
         _adapter.EnvironmentRequested += (_, _) => LastEvent = "EnvironmentRequested";
 
-        _adapter.Initialize(new TestWebViewHost());
+        _adapter.Initialize(new DummyAdapterHost());
         _adapter.Attach(new TestPlatformHandle(IntPtr.Zero, "test"));
     }
 
@@ -47,14 +46,14 @@ public partial class WebViewTestViewModel : ViewModelBase
     private async Task NavigateAsync()
     {
         var uri = new Uri(Address, UriKind.Absolute);
-        await _adapter.NavigateAsync(uri);
+        await _adapter.NavigateAsync(Guid.NewGuid(), uri);
         LastNavigation = uri.ToString();
     }
 
     [RelayCommand]
     private async Task NavigateHtmlAsync()
     {
-        await _adapter.NavigateToStringAsync(HtmlContent);
+        await _adapter.NavigateToStringAsync(Guid.NewGuid(), HtmlContent);
         LastNavigation = "html";
     }
 
@@ -62,5 +61,13 @@ public partial class WebViewTestViewModel : ViewModelBase
     private async Task InvokeScriptAsync()
     {
         ScriptResult = await _adapter.InvokeScriptAsync(Script);
+    }
+
+    private sealed class DummyAdapterHost : IWebViewAdapterHost
+    {
+        public Guid ChannelId { get; } = Guid.NewGuid();
+
+        public ValueTask<NativeNavigationStartingDecision> OnNativeNavigationStartingAsync(NativeNavigationStartingInfo info)
+            => ValueTask.FromResult(new NativeNavigationStartingDecision(IsAllowed: true, NavigationId: Guid.NewGuid()));
     }
 }

@@ -1,0 +1,13 @@
+<Project>
+  <!-- Ensure dynamically-loaded adapter assemblies aren't trimmed away. -->
+  <ItemGroup Condition="'$(PublishTrimmed)' == 'true'">
+    <TrimmerRootAssembly Include="Agibuild.Avalonia.WebView.Adapters.MacOS"
+                         Condition="$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('osx'))" />
+    <TrimmerRootAssembly Include="Agibuild.Avalonia.WebView.Adapters.Windows"
+                         Condition="$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('win'))" />
+    <TrimmerRootAssembly Include="Agibuild.Avalonia.WebView.Adapters.Gtk"
+                         Condition="$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('linux'))" />
+    <TrimmerRootAssembly Include="Agibuild.Avalonia.WebView.Adapters.Android"
+                         Condition="$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('android'))" />
+  </ItemGroup>
+</Project>

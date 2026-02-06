@@ -24,10 +24,14 @@
     "ExecutableTarget": {
       "type": "string",
       "enum": [
-        "AllTests",
         "Ci",
+        "CiPublish",
+        "Clean",
         "Compile",
         "IntegrationTests",
+        "Pack",
+        "Publish",
+        "Restore",
         "Test",
         "UnitTests"
       ]
@@ -104,19 +108,21 @@
     {
       "properties": {
         "Configuration": {
-          "type": "string"
+          "type": "string",
+          "description": "Configuration (Debug / Release). Default: Release on CI, Debug locally"
         },
-        "IncludeAllAdapters": {
-          "type": "boolean",
-          "description": "Include all adapter projects"
+        "NuGetApiKey": {
+          "type": "string",
+          "description": "NuGet API key for publish",
+          "default": "Secrets must be entered via 'nuke :secrets [profile]'"
         },
-        "IncludeAndroid": {
-          "type": "boolean",
-          "description": "Include Android adapter project"
+        "NuGetSource": {
+          "type": "string",
+          "description": "NuGet source URL for publish. Default: https://api.nuget.org/v3/index.json"
         },
-        "IncludeGtk": {
-          "type": "boolean",
-          "description": "Include Gtk adapter project"
+        "PackageVersion": {
+          "type": "string",
+          "description": "NuGet package version. Default: 0.0.0-dev"
         }
       }
     },

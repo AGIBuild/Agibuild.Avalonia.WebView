@@ -1,0 +1,61 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Agibuild.Avalonia.WebView.Integration.Tests.ViewModels"
+             xmlns:agw="using:Agibuild.Avalonia.WebView"
+             mc:Ignorable="d"
+             x:Class="Agibuild.Avalonia.WebView.Integration.Tests.Views.ConsumerWebViewE2EView"
+             x:DataType="vm:ConsumerWebViewE2EViewModel">
+
+  <DockPanel Margin="8">
+
+    <!-- Top: Title + Status -->
+    <StackPanel DockPanel.Dock="Top" Spacing="4" Margin="0,0,0,8">
+      <TextBlock Text="Consumer WebView E2E" FontSize="16" />
+      <TextBlock Text="{Binding Status}" />
+    </StackPanel>
+
+    <!-- Top: Address bar -->
+    <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="0,0,0,8">
+      <TextBox Grid.Column="0"
+               Text="{Binding AddressText, Mode=TwoWay}"
+               Watermark="Enter URL and press Enter or click Go"
+               KeyDown="OnAddressKeyDown" />
+      <Button Grid.Column="1" Content="Go" Margin="4,0,0,0"
+              Command="{Binding GoToAddressCommand}" />
+    </Grid>
+
+    <!-- Bottom: status line -->
+    <TextBlock DockPanel.Dock="Bottom"
+               Text="E2E target: bing.com — also supports free browsing via address bar."
+               Margin="0,8,0,0" />
+
+    <!-- Main area: left log + splitter + right WebView -->
+    <Grid ColumnDefinitions="250,Auto,*">
+
+      <!-- Left: controls + log -->
+      <DockPanel Grid.Column="0">
+        <Button DockPanel.Dock="Top" Content="Run E2E Tests"
+                Command="{Binding RunAllCommand}" Margin="0,0,0,4" />
+        <TextBlock DockPanel.Dock="Top" Text="Log:" FontWeight="Bold" Margin="0,0,0,2" />
+
+        <TextBox IsReadOnly="True"
+                 Text="{Binding Log}"
+                 FontFamily="Menlo,Consolas,monospace" FontSize="11"
+                 TextWrapping="Wrap"
+                 AcceptsReturn="True" />
+      </DockPanel>
+
+      <!-- GridSplitter -->
+      <GridSplitter Grid.Column="1" Width="6"
+                    Background="Transparent"
+                    ResizeDirection="Columns" />
+
+      <!-- Right: WebView fills remaining space -->
+      <Border Grid.Column="2" BorderThickness="1" BorderBrush="Gray">
+        <agw:WebView x:Name="WebViewControl" />
+      </Border>
+    </Grid>
+  </DockPanel>
+</UserControl>

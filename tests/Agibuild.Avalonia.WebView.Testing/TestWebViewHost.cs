@@ -7,15 +7,15 @@ public sealed class TestWebViewHost : IWebView
     public Uri Source { get; set; } = new Uri("about:blank");
     public bool CanGoBack => false;
     public bool CanGoForward => false;
+    public bool IsLoading => false;
+    public Guid ChannelId { get; } = Guid.NewGuid();
 
-#pragma warning disable CS0067
     public event EventHandler<NavigationStartingEventArgs>? NavigationStarted;
     public event EventHandler<NavigationCompletedEventArgs>? NavigationCompleted;
     public event EventHandler<NewWindowRequestedEventArgs>? NewWindowRequested;
     public event EventHandler<WebMessageReceivedEventArgs>? WebMessageReceived;
     public event EventHandler<WebResourceRequestedEventArgs>? WebResourceRequested;
     public event EventHandler<EnvironmentRequestedEventArgs>? EnvironmentRequested;
-#pragma warning restore CS0067
 
     public Task NavigateAsync(Uri uri) => Task.CompletedTask;
     public Task NavigateToStringAsync(string html) => Task.CompletedTask;
@@ -28,4 +28,6 @@ public sealed class TestWebViewHost : IWebView
 
     public ICookieManager? TryGetCookieManager() => null;
     public ICommandManager? TryGetCommandManager() => null;
+
+    public void Dispose() { /* No-op for test stub. */ }
 }

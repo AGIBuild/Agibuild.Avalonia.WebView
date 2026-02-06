@@ -9,4 +9,10 @@
     <ProjectReference Include="..\..\src\Agibuild.Avalonia.WebView.Core\Agibuild.Avalonia.WebView.Core.csproj" />
     <ProjectReference Include="..\..\src\Agibuild.Avalonia.WebView.Adapters.Abstractions\Agibuild.Avalonia.WebView.Adapters.Abstractions.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Agibuild.Avalonia.WebView.UnitTests" />
+    <InternalsVisibleTo Include="Agibuild.Avalonia.WebView.Integration.Tests" />
+    <InternalsVisibleTo Include="Agibuild.Avalonia.WebView.Integration.Tests.Automation" />
+  </ItemGroup>
 </Project>

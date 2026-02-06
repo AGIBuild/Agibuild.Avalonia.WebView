@@ -1,16 +1,19 @@
 [CmdletBinding()]
 param(
-    [string]$Target = "Compile",
-    [string]$Configuration = "Debug",
-    [switch]$IncludeAndroid,
-    [switch]$IncludeGtk,
-    [switch]$IncludeAllAdapters
+    [Parameter(Position = 0)]
+    [string[]]$Target,
+    [string]$Configuration,
+    [string]$PackageVersion,
+    [string]$NuGetSource,
+    [string]$NuGetApiKey
 )
 
-$parameters = @("--target", $Target, "--configuration", $Configuration)
+$parameters = @()
 
-if ($IncludeAndroid) { $parameters += "--include-android" }
-if ($IncludeGtk) { $parameters += "--include-gtk" }
-if ($IncludeAllAdapters) { $parameters += "--include-all-adapters" }
+if ($Target)           { $parameters += "--target"; $parameters += $Target }
+if ($Configuration)    { $parameters += "--configuration"; $parameters += $Configuration }
+if ($PackageVersion)   { $parameters += "--package-version"; $parameters += $PackageVersion }
+if ($NuGetSource)      { $parameters += "--nuget-source"; $parameters += $NuGetSource }
+if ($NuGetApiKey)      { $parameters += "--nuget-api-key"; $parameters += $NuGetApiKey }
 
 dotnet run --project "build/Build.csproj" -- @parameters

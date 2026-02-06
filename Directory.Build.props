@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <!-- Suppress experimental-API diagnostics for placeholder types defined in this solution. -->
+    <NoWarn>$(NoWarn);AGWV001;AGWV002;AGWV003;AGWV004;AGWV005</NoWarn>
+  </PropertyGroup>
+</Project>

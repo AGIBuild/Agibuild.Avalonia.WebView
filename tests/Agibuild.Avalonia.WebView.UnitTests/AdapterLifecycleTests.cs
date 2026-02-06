@@ -19,7 +19,7 @@ public sealed class AdapterLifecycleTests
     {
         var adapter = new MockWebViewAdapter();
 
-        adapter.Initialize(new TestWebViewHost());
+        adapter.Initialize(new DummyAdapterHost());
         Assert.Throws<InvalidOperationException>(() => adapter.Detach());
     }
 
@@ -30,7 +30,7 @@ public sealed class AdapterLifecycleTests
         var handle = new TestPlatformHandle(IntPtr.Zero, "test");
         var raised = false;
 
-        adapter.Initialize(new TestWebViewHost());
+        adapter.Initialize(new DummyAdapterHost());
         adapter.Attach(handle);
         adapter.Detach();
 
@@ -38,5 +38,13 @@ public sealed class AdapterLifecycleTests
         adapter.RaiseNavigationCompleted();
 
         Assert.False(raised);
+    }
+
+    private sealed class DummyAdapterHost : IWebViewAdapterHost
+    {
+        public Guid ChannelId { get; } = Guid.NewGuid();
+
+        public ValueTask<NativeNavigationStartingDecision> OnNativeNavigationStartingAsync(NativeNavigationStartingInfo info)
+            => ValueTask.FromResult(new NativeNavigationStartingDecision(IsAllowed: true, NavigationId: Guid.NewGuid()));
     }
 }

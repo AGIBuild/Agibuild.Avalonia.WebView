@@ -34,7 +34,7 @@
 ## 6. Dependency injection integration
 
 - [x] 6.1 Add dependency on `Microsoft.Extensions.DependencyInjection.Abstractions`
-- [x] 6.2 Implement `AddAgibuildAvaloniaWebView(IServiceCollection, Func<IServiceProvider, IWebViewAdapter>)` extension method
+- [x] 6.2 Implement `AddWebView(IServiceCollection, Func<IServiceProvider, IWebViewAdapter>)` extension method
 - [x] 6.3 Register and validate resolving the adapter factory (NOT a shared adapter instance) in a unit test
 
 ## 7. TDD harness and contract tests

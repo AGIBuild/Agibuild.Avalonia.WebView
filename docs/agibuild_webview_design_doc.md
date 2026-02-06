@@ -40,6 +40,10 @@ Agibuild.WebView
 │   ├─ AndroidWebViewAdapter
 │   └─ GtkWebViewAdapter
 │
+├── Runtime（语义层）
+│   ├─ WebViewCore（唯一契约语义实现者）
+│   └─ AdapterHost（native 导航拦截回调入口）
+│
 ├── Services
 │   ├─ ScriptInvoker
 │   ├─ MessageSerializer
@@ -51,6 +55,32 @@ Agibuild.WebView
     ├─ MockAdapters
     └─ IntegrationSpecs
 ```
+
+### 2.1 系统架构图（Full-control navigation）
+
+该图展示了“对网页内部任何导航都可拦截/可取消”的关键交互点：adapter 在 native 引擎触发“即将导航”时，**必须先回调 Runtime**；Runtime 统一触发对外 `IWebView.NavigationStarted` 并返回 allow/deny。
+
+```mermaid
+flowchart TD
+UserCode[UserCode] --> IWebView[IWebView_PublicAPI]
+IWebView --> Runtime[Runtime_WebViewCore]
+Runtime --> Dispatcher[IWebViewDispatcher]
+Runtime --> Adapter[IWebViewAdapter_Platform]
+Adapter --> Native[NativeWebView_Engine]
+
+Native --> Adapter
+Adapter -->|"OnNativeNavigationStartingAsync(info)"| Runtime
+Runtime -->|"NavigationStarted/Completed"| UserCode
+
+Adapter -->|"NavigationCompleted(NavigationId)"| Runtime
+Runtime -->|"WebMessagePolicy(ChannelId)"| Runtime
+Adapter -->|"WebMessageReceived(Origin,ChannelId,Protocol)"| Runtime
+```
+
+关键约束（v1）：
+- `IWebView.NavigationStarted` 是对外唯一契约 Started（可取消、携带 `NavigationId`）。
+- adapter 不暴露“Started 事件”作为契约入口；它只通过 `IWebViewAdapterHost` 回调询问是否允许导航，并用 host 下发的 `NavigationId` 上报 `NavigationCompleted`。
+- Redirect 使用 `CorrelationId` 关联为同一 `NavigationId`，并允许对外多次 `NavigationStarted`（同一 id，不同 `RequestUri`）以支持逐跳拦截。
 
 ---
 
@@ -159,11 +189,23 @@ public class NavigationStartingEventArgs : EventArgs
 ```csharp
 public interface IWebViewAdapter
 {
-    void Initialize(IWebView host);
-    Task NavigateAsync(Uri uri);
-    // … (forward/back/stop/refresh)
+    void Initialize(IWebViewAdapterHost host);
+    Task NavigateAsync(Guid navigationId, Uri uri);
+    Task NavigateToStringAsync(Guid navigationId, string html);
+
+    bool GoBack(Guid navigationId);
+    bool GoForward(Guid navigationId);
+    bool Refresh(Guid navigationId);
+    bool Stop();
 }
 ```
+
+### 5.1.1 设计要点：消除双 Started 源的歧义
+
+- `IWebView.NavigationStarted` 是对外唯一契约事件（可取消、可关联 NavigationId）。
+- adapter 不直接暴露“Started 事件”作为契约入口；相反，adapter 在 native 引擎触发“即将导航”时通过 `IWebViewAdapterHost` 回调 Runtime，让 Runtime 统一触发 `IWebView.NavigationStarted` 并做 allow/deny 决策。
+
+这样可以实现“网页内部触发的任何跳转都可拦截”，同时避免“adapter 层 started 钩子”与 `IWebView.NavigationStarted` 两套 Started 造成歧义与语义分叉。
 
 ### 5.2 Windows WebView2 示例
 - 实现 `IWebViewAdapter`
@@ -183,8 +225,15 @@ public interface IWebViewAdapter
 ```csharp
 public class MockWebViewAdapter : IWebViewAdapter
 {
-    public Task NavigateAsync(Uri uri) => Task.CompletedTask;
-    public Uri LastNavigation { get; private set; }
+    public Guid? LastNavigationId { get; private set; }
+    public Uri? LastNavigation { get; private set; }
+
+    public Task NavigateAsync(Guid navigationId, Uri uri)
+    {
+        LastNavigationId = navigationId;
+        LastNavigation = uri;
+        return Task.CompletedTask;
+    }
 }
 ```
 
@@ -194,7 +243,7 @@ public class MockWebViewAdapter : IWebViewAdapter
 [Test]
 public void WebView_OnWebMessageReceived_ShouldPassMessage()
 {
-    var webView = new WebViewCore(new MockAdapter());
+    var webView = new WebViewCore(new MockAdapter(), new TestDispatcher());
     string received = "";
     webView.WebMessageReceived += (_, e) => received = e.Body;
 

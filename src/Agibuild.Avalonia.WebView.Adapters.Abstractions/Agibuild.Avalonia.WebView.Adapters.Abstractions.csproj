@@ -12,4 +12,18 @@
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="11.3.11" />
   </ItemGroup>
+
+  <ItemGroup>
+    <!-- IWebViewAdapter + WebViewAdapterRegistry are internal SPI. -->
+    <InternalsVisibleTo Include="Agibuild.Avalonia.WebView.Runtime" />
+    <InternalsVisibleTo Include="Agibuild.Avalonia.WebView.DependencyInjection" />
+    <InternalsVisibleTo Include="Agibuild.Avalonia.WebView.Adapters.MacOS" />
+    <InternalsVisibleTo Include="Agibuild.Avalonia.WebView.Adapters.Windows" />
+    <InternalsVisibleTo Include="Agibuild.Avalonia.WebView.Adapters.Gtk" />
+    <InternalsVisibleTo Include="Agibuild.Avalonia.WebView.Adapters.Android" />
+    <InternalsVisibleTo Include="Agibuild.Avalonia.WebView.Testing" />
+    <InternalsVisibleTo Include="Agibuild.Avalonia.WebView.UnitTests" />
+    <InternalsVisibleTo Include="Agibuild.Avalonia.WebView.Integration.Tests" />
+    <InternalsVisibleTo Include="Agibuild.Avalonia.WebView.Integration.Tests.Automation" />
+  </ItemGroup>
 </Project>

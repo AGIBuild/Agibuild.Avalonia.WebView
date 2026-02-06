@@ -23,4 +23,24 @@
   <ItemGroup>
     <ProjectReference Include="..\Agibuild.Avalonia.WebView.Integration.Tests\Agibuild.Avalonia.WebView.Integration.Tests.csproj" />
   </ItemGroup>
+
+  <Target Name="CopyMacOSWebViewAdapterForSmoke"
+          AfterTargets="Build"
+          Condition="$([MSBuild]::IsOSPlatform('osx'))">
+    <ItemGroup>
+      <_MacAdapter Include="..\..\..\src\Agibuild.Avalonia.WebView.Adapters.MacOS\bin\$(Configuration)\net10.0\Agibuild.Avalonia.WebView.Adapters.MacOS.dll" />
+      <_MacShim Include="..\..\..\src\Agibuild.Avalonia.WebView.Adapters.MacOS\bin\$(Configuration)\net10.0\runtimes\osx\native\libAgibuildWebViewWk.dylib" />
+    </ItemGroup>
+
+    <Exec Command="dotnet build &quot;..\..\..\src\Agibuild.Avalonia.WebView.Adapters.MacOS\Agibuild.Avalonia.WebView.Adapters.MacOS.csproj&quot; -c $(Configuration)" />
+
+    <Copy SourceFiles="@(_MacAdapter)"
+          DestinationFolder="$(OutDir)"
+          SkipUnchangedFiles="true" />
+
+    <MakeDir Directories="$(OutDir)runtimes/osx/native/" />
+    <Copy SourceFiles="@(_MacShim)"
+          DestinationFolder="$(OutDir)runtimes/osx/native/"
+          SkipUnchangedFiles="true" />
+  </Target>
 </Project>

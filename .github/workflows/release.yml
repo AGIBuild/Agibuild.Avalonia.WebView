@@ -1,0 +1,137 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']      # Triggered by version tags like v1.0.0, v0.1.0-preview.1
+  workflow_dispatch:   # Allow manual triggering
+    inputs:
+      version:
+        description: 'Package version (e.g. 1.0.0, 0.1.0-preview.1)'
+        required: true
+      publish_target:
+        description: 'Publish target'
+        type: choice
+        options:
+          - nuget.org
+          - github
+        default: nuget.org
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  NUKE_TELEMETRY_OPTOUT: true
+
+jobs:
+  # ────────────────────────────── Determine Version ────────────────────────────
+  version:
+    name: Determine Version
+    runs-on: ubuntu-latest
+    outputs:
+      package_version: ${{ steps.version.outputs.version }}
+    steps:
+      - id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "version=${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
+          else
+            # Extract version from tag (strip leading 'v')
+            TAG="${GITHUB_REF#refs/tags/v}"
+            echo "version=${TAG}" >> "$GITHUB_OUTPUT"
+          fi
+
+  # ────────────────────────────── Build on macOS (primary, produces .nupkg) ────
+  build:
+    name: Build & Pack (macOS)
+    needs: version
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+          dotnet-quality: 'preview'
+
+      - name: Run full CI pipeline
+        run: |
+          ./build.sh \
+            --target Ci \
+            --configuration Release \
+            --package-version ${{ needs.version.outputs.package_version }}
+
+      - name: Upload NuGet package
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuget-package
+          path: artifacts/packages/*.nupkg
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-release
+          path: artifacts/test-results/
+          if-no-files-found: ignore
+
+  # ────────────────────────────── Publish to NuGet ─────────────────────────────
+  publish:
+    name: Publish to NuGet
+    needs: [version, build]
+    runs-on: ubuntu-latest
+    if: >
+      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v'))
+      || (github.event_name == 'workflow_dispatch' && github.event.inputs.publish_target == 'nuget.org')
+    environment: nuget
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+          dotnet-quality: 'preview'
+
+      - name: Download NuGet package
+        uses: actions/download-artifact@v4
+        with:
+          name: nuget-package
+          path: artifacts/packages
+
+      - name: Push to NuGet.org
+        run: |
+          dotnet nuget push "artifacts/packages/*.nupkg" \
+            --source https://api.nuget.org/v3/index.json \
+            --api-key ${{ secrets.NUGET_API_KEY }} \
+            --skip-duplicate
+
+  # ────────────────────────────── GitHub Release ───────────────────────────────
+  github-release:
+    name: Create GitHub Release
+    needs: [version, build]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download NuGet package
+        uses: actions/download-artifact@v4
+        with:
+          name: nuget-package
+          path: artifacts/packages
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ needs.version.outputs.package_version }}
+          draft: false
+          prerelease: ${{ contains(needs.version.outputs.package_version, '-') }}
+          files: artifacts/packages/*.nupkg
+          generate_release_notes: true

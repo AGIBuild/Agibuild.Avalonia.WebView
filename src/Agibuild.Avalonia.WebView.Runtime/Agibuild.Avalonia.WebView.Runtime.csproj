@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Agibuild.Avalonia.WebView.Core\Agibuild.Avalonia.WebView.Core.csproj" />
+    <ProjectReference Include="..\Agibuild.Avalonia.WebView.Adapters.Abstractions\Agibuild.Avalonia.WebView.Adapters.Abstractions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.3.11" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- WebViewAdapterFactory and WebViewCore internals. -->
+    <InternalsVisibleTo Include="Agibuild.Avalonia.WebView" />
+    <InternalsVisibleTo Include="Agibuild.Avalonia.WebView.DependencyInjection" />
+    <InternalsVisibleTo Include="Agibuild.Avalonia.WebView.UnitTests" />
+    <InternalsVisibleTo Include="Agibuild.Avalonia.WebView.Integration.Tests" />
+  </ItemGroup>
+
+</Project>

@@ -2,6 +2,7 @@
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latest</LangVersion>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
   </PropertyGroup>
@@ -25,6 +26,12 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\Agibuild.Avalonia.WebView.Core\Agibuild.Avalonia.WebView.Core.csproj" />
     <ProjectReference Include="..\..\..\src\Agibuild.Avalonia.WebView.Adapters.Abstractions\Agibuild.Avalonia.WebView.Adapters.Abstractions.csproj" />
+    <ProjectReference Include="..\..\..\src\Agibuild.Avalonia.WebView.Runtime\Agibuild.Avalonia.WebView.Runtime.csproj" />
+    <ProjectReference Include="..\..\..\src\Agibuild.Avalonia.WebView\Agibuild.Avalonia.WebView.csproj" />
     <ProjectReference Include="..\..\Agibuild.Avalonia.WebView.Testing\Agibuild.Avalonia.WebView.Testing.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Agibuild.Avalonia.WebView.Integration.Tests.Automation" />
   </ItemGroup>
 </Project>

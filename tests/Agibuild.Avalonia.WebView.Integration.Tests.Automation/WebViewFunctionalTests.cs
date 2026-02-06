@@ -64,7 +64,7 @@ public sealed class WebViewFunctionalTests
     }
 
     [AvaloniaFact]
-    public void Navigation_started_event_updates_state()
+    public void Navigation_completed_event_updates_state()
     {
         var adapter = new MockWebViewAdapter();
         var viewModel = new WebViewTestViewModel(adapter);
@@ -72,9 +72,12 @@ public sealed class WebViewFunctionalTests
         var window = new Window { Content = view };
 
         window.Show();
-        adapter.RaiseNavigationStarted(new Uri("https://example.test"));
+        var uri = new Uri("https://example.test");
+        var navId = Guid.NewGuid();
+        adapter.NavigateAsync(navId, uri).GetAwaiter().GetResult();
+        adapter.RaiseNavigationCompleted(navId, uri, NavigationCompletedStatus.Success);
 
-        Assert.Equal("NavigationStarted", viewModel.LastEvent);
+        Assert.Equal("NavigationCompleted", viewModel.LastEvent);
         window.Close();
     }
 }

@@ -6,20 +6,17 @@ namespace Agibuild.Avalonia.WebView.UnitTests;
 public sealed class ContractExampleTests
 {
     [Fact]
-    public void Navigation_started_can_be_canceled()
+    public async Task NavigationStarted_can_be_canceled()
     {
+        var dispatcher = new TestDispatcher();
         var adapter = new MockWebViewAdapter();
-        var handle = new TestPlatformHandle(IntPtr.Zero, "test");
+        var webView = new WebViewCore(adapter, dispatcher);
 
-        adapter.Initialize(new TestWebViewHost());
-        adapter.Attach(handle);
+        webView.NavigationStarted += (_, args) => args.Cancel = true;
 
-        adapter.NavigationStarted += (_, args) => args.Cancel = true;
+        await webView.NavigateAsync(new Uri("https://example.test"));
 
-        var eventArgs = adapter.RaiseNavigationStarted(new Uri("https://example.test"));
-
-        Assert.NotNull(eventArgs);
-        Assert.True(eventArgs!.Cancel);
+        Assert.Null(adapter.LastNavigateThreadId);
     }
 
     [Fact]

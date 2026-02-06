@@ -11,10 +11,10 @@ The project SHALL depend only on `Microsoft.Extensions.DependencyInjection.Abstr
 
 ### Requirement: IServiceCollection extension entrypoint
 The DI project SHALL provide an extension method:
-`IServiceCollection AddAgibuildAvaloniaWebView(this IServiceCollection services, Func<IServiceProvider, IWebViewAdapter> adapterFactory)`
+`IServiceCollection AddWebView(this IServiceCollection services, Func<IServiceProvider, IWebViewAdapter> adapterFactory)`
 The method SHALL register the `adapterFactory` so it can be resolved as a factory delegate (NOT as a shared `IWebViewAdapter` instance).
 The DI integration SHALL ensure each WebView instance can obtain a fresh adapter instance via the registered factory.
 
 #### Scenario: Adapter factory can be registered
-- **WHEN** a consumer calls `AddAgibuildAvaloniaWebView` with a factory delegate
+- **WHEN** a consumer calls `AddWebView` with a factory delegate
 - **THEN** the factory delegate can be resolved from the service provider and used to create an `IWebViewAdapter`

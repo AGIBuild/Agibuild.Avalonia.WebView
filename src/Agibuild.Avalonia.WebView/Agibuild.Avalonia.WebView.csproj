@@ -1,0 +1,99 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Agibuild.Avalonia.WebView</RootNamespace>
+
+    <IsPackable>true</IsPackable>
+    <PackageId>Agibuild.Avalonia.WebView</PackageId>
+    <Version>0.0.0-dev</Version>
+    <Authors>Agibuild</Authors>
+    <Description>Agibuild Avalonia WebView - single package distribution.</Description>
+
+    <!-- Build output (Agibuild.Avalonia.WebView.dll) is included in lib/net10.0/ automatically. -->
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <!-- Build-time references — PrivateAssets=all keeps them out of NuGet dependency metadata. -->
+  <ItemGroup>
+    <ProjectReference Include="..\Agibuild.Avalonia.WebView.Core\Agibuild.Avalonia.WebView.Core.csproj" PrivateAssets="all" />
+    <ProjectReference Include="..\Agibuild.Avalonia.WebView.Adapters.Abstractions\Agibuild.Avalonia.WebView.Adapters.Abstractions.csproj" PrivateAssets="all" />
+    <ProjectReference Include="..\Agibuild.Avalonia.WebView.Runtime\Agibuild.Avalonia.WebView.Runtime.csproj" PrivateAssets="all" />
+    <ProjectReference Include="..\Agibuild.Avalonia.WebView.DependencyInjection\Agibuild.Avalonia.WebView.DependencyInjection.csproj" PrivateAssets="all" />
+    <PackageReference Include="Avalonia" Version="11.3.11" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Compile-time assets (dependency DLLs manually packed). -->
+    <None Include="..\Agibuild.Avalonia.WebView.Core\bin\$(Configuration)\net10.0\Agibuild.Avalonia.WebView.Core.dll"
+          Pack="true"
+          PackagePath="lib/net10.0/" />
+    <None Include="..\Agibuild.Avalonia.WebView.Adapters.Abstractions\bin\$(Configuration)\net10.0\Agibuild.Avalonia.WebView.Adapters.Abstractions.dll"
+          Pack="true"
+          PackagePath="lib/net10.0/" />
+    <None Include="..\Agibuild.Avalonia.WebView.Runtime\bin\$(Configuration)\net10.0\Agibuild.Avalonia.WebView.Runtime.dll"
+          Pack="true"
+          PackagePath="lib/net10.0/" />
+    <None Include="..\Agibuild.Avalonia.WebView.DependencyInjection\bin\$(Configuration)\net10.0\Agibuild.Avalonia.WebView.DependencyInjection.dll"
+          Pack="true"
+          PackagePath="lib/net10.0/" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="buildTransitive/Agibuild.Avalonia.WebView.targets"
+          Pack="true"
+          PackagePath="buildTransitive/Agibuild.Avalonia.WebView.targets" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Runtime-only Windows adapter -->
+    <None Include="..\Agibuild.Avalonia.WebView.Adapters.Windows\bin\$(Configuration)\net10.0\Agibuild.Avalonia.WebView.Adapters.Windows.dll"
+          Pack="true"
+          PackagePath="runtimes/win/lib/net10.0/" />
+
+    <!-- Runtime-only Linux (GTK) adapter -->
+    <None Include="..\Agibuild.Avalonia.WebView.Adapters.Gtk\bin\$(Configuration)\net10.0\Agibuild.Avalonia.WebView.Adapters.Gtk.dll"
+          Pack="true"
+          PackagePath="runtimes/linux/lib/net10.0/" />
+
+    <!-- Runtime-only Android adapter (requires Android workload for build) -->
+    <None Include="..\Agibuild.Avalonia.WebView.Adapters.Android\bin\$(Configuration)\net10.0-android\Agibuild.Avalonia.WebView.Adapters.Android.dll"
+          Pack="true"
+          PackagePath="runtimes/android/lib/net10.0-android/"
+          Condition="Exists('..\Agibuild.Avalonia.WebView.Adapters.Android\bin\$(Configuration)\net10.0-android\Agibuild.Avalonia.WebView.Adapters.Android.dll')" />
+  </ItemGroup>
+
+  <!--
+    macOS assets: Use Exists() conditions so that pre-built artifacts from a macOS CI leg
+    are included when packing on any platform.
+  -->
+  <ItemGroup>
+    <!-- Runtime-only macOS adapter -->
+    <None Include="..\Agibuild.Avalonia.WebView.Adapters.MacOS\bin\$(Configuration)\net10.0\Agibuild.Avalonia.WebView.Adapters.MacOS.dll"
+          Pack="true"
+          PackagePath="runtimes/osx/lib/net10.0/"
+          Condition="Exists('..\Agibuild.Avalonia.WebView.Adapters.MacOS\bin\$(Configuration)\net10.0\Agibuild.Avalonia.WebView.Adapters.MacOS.dll')" />
+
+    <!-- Runtime-only native shim -->
+    <None Include="..\Agibuild.Avalonia.WebView.Adapters.MacOS\bin\$(Configuration)\net10.0\runtimes\osx\native\libAgibuildWebViewWk.dylib"
+          Pack="true"
+          PackagePath="runtimes/osx/native/"
+          Condition="Exists('..\Agibuild.Avalonia.WebView.Adapters.MacOS\bin\$(Configuration)\net10.0\runtimes\osx\native\libAgibuildWebViewWk.dylib')" />
+  </ItemGroup>
+
+  <Target Name="BuildPackInputs" BeforeTargets="GenerateNuspec">
+    <Exec Command="dotnet build &quot;..\Agibuild.Avalonia.WebView.Core\Agibuild.Avalonia.WebView.Core.csproj&quot; -c $(Configuration)" />
+    <Exec Command="dotnet build &quot;..\Agibuild.Avalonia.WebView.Adapters.Abstractions\Agibuild.Avalonia.WebView.Adapters.Abstractions.csproj&quot; -c $(Configuration)" />
+    <Exec Command="dotnet build &quot;..\Agibuild.Avalonia.WebView.Runtime\Agibuild.Avalonia.WebView.Runtime.csproj&quot; -c $(Configuration)" />
+    <Exec Command="dotnet build &quot;..\Agibuild.Avalonia.WebView.DependencyInjection\Agibuild.Avalonia.WebView.DependencyInjection.csproj&quot; -c $(Configuration)" />
+    <Exec Command="dotnet build &quot;..\Agibuild.Avalonia.WebView.Adapters.Windows\Agibuild.Avalonia.WebView.Adapters.Windows.csproj&quot; -c $(Configuration)" />
+    <Exec Command="dotnet build &quot;..\Agibuild.Avalonia.WebView.Adapters.Gtk\Agibuild.Avalonia.WebView.Adapters.Gtk.csproj&quot; -c $(Configuration)" />
+    <!-- macOS: requires macOS host for native shim compilation -->
+    <Exec Command="dotnet build &quot;..\Agibuild.Avalonia.WebView.Adapters.MacOS\Agibuild.Avalonia.WebView.Adapters.MacOS.csproj&quot; -c $(Configuration)"
+          Condition="$([MSBuild]::IsOSPlatform('osx'))" />
+    <!-- Android: requires Android workload; IgnoreExitCode to allow pack without it -->
+    <Exec Command="dotnet build &quot;..\Agibuild.Avalonia.WebView.Adapters.Android\Agibuild.Avalonia.WebView.Adapters.Android.csproj&quot; -c $(Configuration)"
+          IgnoreExitCode="true" />
+  </Target>
+</Project>

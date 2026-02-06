@@ -5,6 +5,8 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
+using Avalonia.Threading;
+using System;
 using System.Linq;
 
 namespace Agibuild.Avalonia.WebView.Integration.Tests
@@ -23,10 +25,26 @@ namespace Agibuild.Avalonia.WebView.Integration.Tests
                 // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
                 // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
                 DisableAvaloniaDataAnnotationValidation();
-                desktop.MainWindow = new MainWindow
+
+                var args = desktop.Args ?? Array.Empty<string>();
+                var mainVm = new MainViewModel();
+
+                if (args.Contains("--wk-smoke"))
                 {
-                    DataContext = new MainViewModel()
-                };
+                    mainVm.SelectedTabIndex = 1;
+                    mainVm.WkWebViewSmoke.AutoRun = true;
+                    mainVm.WkWebViewSmoke.AutoRunCompleted += exitCode =>
+                        Dispatcher.UIThread.Post(() => desktop.Shutdown(exitCode));
+                }
+                else if (args.Contains("--consumer-e2e"))
+                {
+                    mainVm.SelectedTabIndex = 2;
+                    mainVm.ConsumerE2E.AutoRun = true;
+                    mainVm.ConsumerE2E.AutoRunCompleted += exitCode =>
+                        Dispatcher.UIThread.Post(() => desktop.Shutdown(exitCode));
+                }
+
+                desktop.MainWindow = new MainWindow { DataContext = mainVm };
             }
             else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform)
             {

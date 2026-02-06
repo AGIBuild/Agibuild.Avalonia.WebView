@@ -1,0 +1,47 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Agibuild.Avalonia.WebView.Integration.Tests.ViewModels"
+             xmlns:controls="using:Agibuild.Avalonia.WebView.Integration.Tests.Controls"
+             mc:Ignorable="d"
+             x:Class="Agibuild.Avalonia.WebView.Integration.Tests.Views.WkWebViewSmokeView"
+             x:DataType="vm:WkWebViewSmokeViewModel">
+  <Grid RowDefinitions="Auto,Auto,*,Auto" ColumnDefinitions="*,*"
+        RowSpacing="8" ColumnSpacing="8">
+    <TextBlock Grid.Row="0" Grid.ColumnSpan="2"
+               Text="macOS WKWebView Smoke (M0)"
+               FontSize="16" />
+
+    <TextBlock Grid.Row="1" Grid.ColumnSpan="2"
+               Text="{Binding Status}" />
+
+    <StackPanel Grid.Row="2" Grid.Column="0" Spacing="8">
+      <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <Button Content="Initialize" Command="{Binding InitializeCommand}" />
+          <Button Content="Run All" Command="{Binding RunAllCommand}" />
+          <Button Content="Link" Command="{Binding RunLinkClickCommand}" />
+          <Button Content="302" Command="{Binding RunRedirect302Command}" />
+          <Button Content="location" Command="{Binding RunWindowLocationCommand}" />
+          <Button Content="Cancel" Command="{Binding RunCancelCommand}" />
+          <Button Content="Script" Command="{Binding RunScriptCommand}" />
+          <Button Content="Message" Command="{Binding RunMessageCommand}" />
+        </StackPanel>
+      </ScrollViewer>
+
+      <TextBlock Text="Log:" FontWeight="Bold" />
+      <ScrollViewer Height="220">
+        <TextBlock Text="{Binding Log}" FontFamily="Menlo" FontSize="11" />
+      </ScrollViewer>
+    </StackPanel>
+
+    <Border Grid.Row="2" Grid.Column="1" BorderThickness="1" BorderBrush="Gray">
+      <controls:AdapterNativeControlHost x:Name="NativeHost" />
+    </Border>
+
+    <TextBlock Grid.Row="3" Grid.ColumnSpan="2"
+               Text="Tip: build &amp; run Desktop app as net10.0-macos to enable WK." />
+  </Grid>
+</UserControl>
+
