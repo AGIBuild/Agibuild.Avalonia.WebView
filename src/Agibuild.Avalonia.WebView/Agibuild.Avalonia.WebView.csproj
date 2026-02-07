@@ -108,21 +108,24 @@
           Condition="Exists('..\Agibuild.Avalonia.WebView.Adapters.Gtk\bin\$(Configuration)\net10.0\runtimes\linux-x64\native\libAgibuildWebViewGtk.so')" />
   </ItemGroup>
 
+  <!-- Build adapter dependencies before packing. Uses forward slashes for cross-platform compatibility. -->
   <Target Name="BuildPackInputs" BeforeTargets="GenerateNuspec">
-    <Exec Command="dotnet build &quot;..\Agibuild.Avalonia.WebView.Core\Agibuild.Avalonia.WebView.Core.csproj&quot; -c $(Configuration)" />
-    <Exec Command="dotnet build &quot;..\Agibuild.Avalonia.WebView.Adapters.Abstractions\Agibuild.Avalonia.WebView.Adapters.Abstractions.csproj&quot; -c $(Configuration)" />
-    <Exec Command="dotnet build &quot;..\Agibuild.Avalonia.WebView.Runtime\Agibuild.Avalonia.WebView.Runtime.csproj&quot; -c $(Configuration)" />
-    <Exec Command="dotnet build &quot;..\Agibuild.Avalonia.WebView.DependencyInjection\Agibuild.Avalonia.WebView.DependencyInjection.csproj&quot; -c $(Configuration)" />
-    <Exec Command="dotnet build &quot;..\Agibuild.Avalonia.WebView.Adapters.Windows\Agibuild.Avalonia.WebView.Adapters.Windows.csproj&quot; -c $(Configuration)" />
-    <Exec Command="dotnet build &quot;..\Agibuild.Avalonia.WebView.Adapters.Gtk\Agibuild.Avalonia.WebView.Adapters.Gtk.csproj&quot; -c $(Configuration)" />
+    <Exec Command="dotnet build &quot;../Agibuild.Avalonia.WebView.Core/Agibuild.Avalonia.WebView.Core.csproj&quot; -c $(Configuration)" />
+    <Exec Command="dotnet build &quot;../Agibuild.Avalonia.WebView.Adapters.Abstractions/Agibuild.Avalonia.WebView.Adapters.Abstractions.csproj&quot; -c $(Configuration)" />
+    <Exec Command="dotnet build &quot;../Agibuild.Avalonia.WebView.Runtime/Agibuild.Avalonia.WebView.Runtime.csproj&quot; -c $(Configuration)" />
+    <Exec Command="dotnet build &quot;../Agibuild.Avalonia.WebView.DependencyInjection/Agibuild.Avalonia.WebView.DependencyInjection.csproj&quot; -c $(Configuration)" />
+    <Exec Command="dotnet build &quot;../Agibuild.Avalonia.WebView.Adapters.Windows/Agibuild.Avalonia.WebView.Adapters.Windows.csproj&quot; -c $(Configuration)" />
+    <!-- GTK: native shim might fail to compile if dev libs are missing; IgnoreExitCode to allow pack without it -->
+    <Exec Command="dotnet build &quot;../Agibuild.Avalonia.WebView.Adapters.Gtk/Agibuild.Avalonia.WebView.Adapters.Gtk.csproj&quot; -c $(Configuration)"
+          IgnoreExitCode="true" />
     <!-- macOS: requires macOS host for native shim compilation -->
-    <Exec Command="dotnet build &quot;..\Agibuild.Avalonia.WebView.Adapters.MacOS\Agibuild.Avalonia.WebView.Adapters.MacOS.csproj&quot; -c $(Configuration)"
+    <Exec Command="dotnet build &quot;../Agibuild.Avalonia.WebView.Adapters.MacOS/Agibuild.Avalonia.WebView.Adapters.MacOS.csproj&quot; -c $(Configuration)"
           Condition="$([MSBuild]::IsOSPlatform('osx'))" />
     <!-- Android: requires Android workload; IgnoreExitCode to allow pack without it -->
-    <Exec Command="dotnet build &quot;..\Agibuild.Avalonia.WebView.Adapters.Android\Agibuild.Avalonia.WebView.Adapters.Android.csproj&quot; -c $(Configuration)"
+    <Exec Command="dotnet build &quot;../Agibuild.Avalonia.WebView.Adapters.Android/Agibuild.Avalonia.WebView.Adapters.Android.csproj&quot; -c $(Configuration)"
           IgnoreExitCode="true" />
     <!-- iOS: requires macOS host + iOS workload; IgnoreExitCode to allow pack without it -->
-    <Exec Command="dotnet build &quot;..\Agibuild.Avalonia.WebView.Adapters.iOS\Agibuild.Avalonia.WebView.Adapters.iOS.csproj&quot; -c $(Configuration)"
+    <Exec Command="dotnet build &quot;../Agibuild.Avalonia.WebView.Adapters.iOS/Agibuild.Avalonia.WebView.Adapters.iOS.csproj&quot; -c $(Configuration)"
           Condition="$([MSBuild]::IsOSPlatform('osx'))"
           IgnoreExitCode="true" />
   </Target>
