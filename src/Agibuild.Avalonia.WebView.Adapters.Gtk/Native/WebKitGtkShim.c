@@ -720,8 +720,9 @@ static void on_cookies_get_finish(WebKitCookieManager* manager, GAsyncResult* re
         gboolean secure = soup_cookie_get_secure(c);
         gboolean http_only = soup_cookie_get_http_only(c);
 
-        SoupDate* expires = soup_cookie_get_expires(c);
-        double expires_unix = expires ? (double)soup_date_to_time_t(expires) : -1.0;
+        /* libsoup3 (webkit2gtk-4.1): soup_cookie_get_expires returns GDateTime* instead of SoupDate*. */
+        GDateTime* expires = soup_cookie_get_expires(c);
+        double expires_unix = expires ? (double)g_date_time_to_unix(expires) : -1.0;
 
         g_string_append_printf(json,
             "{\"name\":\"%s\",\"value\":\"%s\",\"domain\":\"%s\",\"path\":\"%s\","
