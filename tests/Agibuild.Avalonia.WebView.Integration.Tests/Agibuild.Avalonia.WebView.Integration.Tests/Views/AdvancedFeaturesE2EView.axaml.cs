@@ -1,4 +1,7 @@
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
+using Avalonia.Input;
+using Avalonia.Interactivity;
 using Agibuild.Avalonia.WebView.Integration.Tests.ViewModels;
 
 namespace Agibuild.Avalonia.WebView.Integration.Tests.Views;
@@ -9,6 +12,10 @@ public partial class AdvancedFeaturesE2EView : UserControl
     {
         InitializeComponent();
         DataContextChanged += OnDataContextChanged;
+
+        // Hide native WebView when tools drawer opens (native controls render above Avalonia UI)
+        var toolsToggle = this.FindControl<ToggleButton>("ToolsToggle");
+        toolsToggle?.IsCheckedChanged += (_, _) => SyncWebViewVisibility();
     }
 
     private void OnDataContextChanged(object? sender, System.EventArgs e)
@@ -22,7 +29,6 @@ public partial class AdvancedFeaturesE2EView : UserControl
                 vm.OnWebViewLoaded();
             }
 
-            // Subscribe to Apply & Reload: recreate WebView when environment options change.
             vm.RequestWebViewRecreation += () =>
             {
                 RecreateWebView(vm);
@@ -30,20 +36,13 @@ public partial class AdvancedFeaturesE2EView : UserControl
         }
     }
 
-    /// <summary>
-    /// Removes the existing WebView and creates a fresh one so that newly set
-    /// <see cref="WebViewEnvironment.Options"/> (e.g. DevTools, EphemeralSession)
-    /// are picked up during <c>NativeControlHost.CreateNativeControlCore</c>.
-    /// </summary>
     private void RecreateWebView(AdvancedFeaturesE2EViewModel vm)
     {
         var host = this.FindControl<Border>("WebViewHost");
         if (host is null) return;
 
-        // Remove old WebView (triggers DestroyNativeControlCore → dispose adapter).
         host.Child = null;
 
-        // Create a fresh WebView that will pick up the new global environment options.
         var newWebView = new WebView
         {
             Source = new System.Uri("https://www.bing.com")
@@ -52,5 +51,31 @@ public partial class AdvancedFeaturesE2EView : UserControl
         host.Child = newWebView;
         vm.WebViewControl = newWebView;
         vm.OnWebViewLoaded();
+    }
+
+    private void OnCloseToolsPanel(object? sender, RoutedEventArgs e)
+    {
+        var toggle = this.FindControl<ToggleButton>("ToolsToggle");
+        if (toggle is not null)
+            toggle.IsChecked = false;
+    }
+
+    private void OnOverlayDismiss(object? sender, PointerPressedEventArgs e)
+    {
+        var toggle = this.FindControl<ToggleButton>("ToolsToggle");
+        if (toggle is not null)
+            toggle.IsChecked = false;
+    }
+
+    /// <summary>
+    /// Hide the WebView native control when the tools overlay is open,
+    /// because NativeControlHost always renders above Avalonia's managed UI.
+    /// </summary>
+    private void SyncWebViewVisibility()
+    {
+        var toggle = this.FindControl<ToggleButton>("ToolsToggle");
+        var host = this.FindControl<Border>("WebViewHost");
+        if (toggle is not null && host is not null)
+            host.IsVisible = toggle.IsChecked != true;
     }
 }

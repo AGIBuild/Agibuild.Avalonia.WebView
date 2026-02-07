@@ -7,7 +7,8 @@ internal enum WebViewAdapterPlatform
     Windows,
     MacOS,
     Android,
-    Gtk
+    Gtk,
+    iOS
 }
 
 internal sealed record WebViewAdapterRegistration(
@@ -68,6 +69,12 @@ internal static class WebViewAdapterRegistry
         if (OperatingSystem.IsWindows())
         {
             return WebViewAdapterPlatform.Windows;
+        }
+
+        // iOS check must come before macOS because IsMacOS() returns true on Mac Catalyst.
+        if (OperatingSystem.IsIOS())
+        {
+            return WebViewAdapterPlatform.iOS;
         }
 
         if (OperatingSystem.IsMacOS())

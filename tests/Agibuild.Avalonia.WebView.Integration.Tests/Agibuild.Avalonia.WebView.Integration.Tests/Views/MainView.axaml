@@ -3,36 +3,121 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:Agibuild.Avalonia.WebView.Integration.Tests.ViewModels"
-             xmlns:views="using:Agibuild.Avalonia.WebView.Integration.Tests.Views"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Agibuild.Avalonia.WebView.Integration.Tests.Views.MainView"
              x:DataType="vm:MainViewModel">
   <Design.DataContext>
-    <!-- This only sets the DataContext for the previewer in an IDE,
-         to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
     <vm:MainViewModel />
   </Design.DataContext>
 
-  <DockPanel>
-    <TextBlock DockPanel.Dock="Top" Text="{Binding Greeting}"
-               HorizontalAlignment="Center" Margin="0,8" />
+  <DockPanel Background="{StaticResource SurfaceBgBrush}">
 
-    <TabControl SelectedIndex="{Binding SelectedTabIndex}">
-      <TabItem Header="Mock Adapter">
-        <views:WebViewTestView DataContext="{Binding WebViewTest}" />
-      </TabItem>
-      <TabItem Header="macOS WK Smoke">
-        <views:WkWebViewSmokeView DataContext="{Binding WkWebViewSmoke}" />
-      </TabItem>
-      <TabItem Header="Win WV2 Smoke">
-        <views:WebView2SmokeView DataContext="{Binding WebView2Smoke}" />
-      </TabItem>
-      <TabItem Header="Consumer E2E">
-        <views:ConsumerWebViewE2EView DataContext="{Binding ConsumerE2E}" />
-      </TabItem>
-      <TabItem Header="Advanced Features">
-        <views:AdvancedFeaturesE2EView DataContext="{Binding AdvancedE2E}" />
-      </TabItem>
-    </TabControl>
+    <!-- ════════════ Top Header Bar ════════════ -->
+    <Border DockPanel.Dock="Top" Height="48">
+      <Border.Background>
+        <LinearGradientBrush StartPoint="0%,50%" EndPoint="100%,50%">
+          <GradientStop Color="#1E40AF" Offset="0" />
+          <GradientStop Color="#2563EB" Offset="0.5" />
+          <GradientStop Color="#0EA5E9" Offset="1" />
+        </LinearGradientBrush>
+      </Border.Background>
+      <Grid ColumnDefinitions="Auto,Auto,*,Auto" Margin="8,0">
+        <ToggleButton x:Name="NavToggle" Grid.Column="0"
+                      Content="&#x2630;" FontSize="20"
+                      Foreground="White" Padding="8,4"
+                      Background="Transparent" BorderThickness="0"
+                      VerticalAlignment="Center" />
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"
+                    VerticalAlignment="Center" Margin="8,0,0,0">
+          <TextBlock Text="&#x1F310;" FontSize="20" VerticalAlignment="Center" />
+          <TextBlock Text="Agibuild WebView" FontSize="16" FontWeight="Bold"
+                     Foreground="White" VerticalAlignment="Center" />
+        </StackPanel>
+        <Border Grid.Column="3" Background="#30FFFFFF" CornerRadius="10"
+                Padding="8,3" VerticalAlignment="Center">
+          <TextBlock Text="E2E Demo" FontSize="10" FontWeight="SemiBold"
+                     Foreground="White" />
+        </Border>
+      </Grid>
+    </Border>
+
+    <!-- ════════════ Content + Overlay Drawer ════════════ -->
+    <Panel>
+
+      <!-- Lazy page host: only one view at a time -->
+      <ContentControl x:Name="PageHost" />
+
+      <!-- Overlay backdrop -->
+      <Border IsVisible="{Binding #NavToggle.IsChecked}"
+              Background="#40000000" ZIndex="10"
+              PointerPressed="OnOverlayDismiss" />
+
+      <!-- Navigation drawer -->
+      <Border IsVisible="{Binding #NavToggle.IsChecked}"
+              HorizontalAlignment="Left" Width="260"
+              Background="White" ZIndex="11">
+        <DockPanel>
+          <Border DockPanel.Dock="Top" Padding="16,16,16,12">
+            <StackPanel Spacing="4">
+              <TextBlock Text="Navigation" Classes="subheading" />
+              <TextBlock Text="Select a test module" Classes="caption" />
+            </StackPanel>
+          </Border>
+          <Border DockPanel.Dock="Top" Height="1" Background="{StaticResource BorderDefaultBrush}" />
+
+          <ListBox x:Name="NavList"
+                   SelectedIndex="{Binding SelectedTabIndex}"
+                   SelectionChanged="OnNavSelectionChanged"
+                   Background="Transparent"
+                   Margin="8,8">
+            <ListBox.Styles>
+              <Style Selector="ListBoxItem">
+                <Setter Property="CornerRadius" Value="8" />
+                <Setter Property="Padding" Value="12,10" />
+                <Setter Property="Margin" Value="0,1" />
+              </Style>
+            </ListBox.Styles>
+
+            <ListBoxItem>
+              <StackPanel Spacing="2">
+                <TextBlock Text="Mock Adapter" FontWeight="SemiBold" FontSize="13" />
+                <TextBlock Text="Unit test with mock adapter" Classes="caption" />
+              </StackPanel>
+            </ListBoxItem>
+            <ListBoxItem>
+              <StackPanel Spacing="2">
+                <TextBlock Text="macOS WKWebView" FontWeight="SemiBold" FontSize="13" />
+                <TextBlock Text="Native WKWebView smoke test" Classes="caption" />
+              </StackPanel>
+            </ListBoxItem>
+            <ListBoxItem>
+              <StackPanel Spacing="2">
+                <TextBlock Text="Windows WebView2" FontWeight="SemiBold" FontSize="13" />
+                <TextBlock Text="Edge WebView2 smoke test" Classes="caption" />
+              </StackPanel>
+            </ListBoxItem>
+            <ListBoxItem>
+              <StackPanel Spacing="2">
+                <TextBlock Text="Consumer E2E" FontWeight="SemiBold" FontSize="13" />
+                <TextBlock Text="Full browser navigation" Classes="caption" />
+              </StackPanel>
+            </ListBoxItem>
+            <ListBoxItem>
+              <StackPanel Spacing="2">
+                <TextBlock Text="Advanced Features" FontWeight="SemiBold" FontSize="13" />
+                <TextBlock Text="Dialog, Auth, Environment" Classes="caption" />
+              </StackPanel>
+            </ListBoxItem>
+            <ListBoxItem>
+              <StackPanel Spacing="2">
+                <TextBlock Text="Nav Intercept" FontWeight="SemiBold" FontSize="13" />
+                <TextBlock Text="Block, allow, redirect links" Classes="caption" />
+              </StackPanel>
+            </ListBoxItem>
+          </ListBox>
+        </DockPanel>
+      </Border>
+
+    </Panel>
   </DockPanel>
 </UserControl>

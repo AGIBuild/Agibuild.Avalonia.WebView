@@ -3,6 +3,7 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Webkit;
+using AndroidX.Activity;
 using Avalonia.Platform;
 using Agibuild.Avalonia.WebView;
 using Agibuild.Avalonia.WebView.Adapters.Abstractions;
@@ -30,6 +31,10 @@ internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHan
     private AdapterWebChromeClient? _webChromeClient;
     private AndroidJsBridge? _jsBridge;
     private Handler? _mainHandler;
+    private OnBackPressedCallback? _backCallback;
+
+    // Signals when InitializeWebView has completed on the UI thread.
+    private readonly TaskCompletionSource _webViewReady = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
     // Navigation state
     private readonly object _navLock = new();
@@ -123,6 +128,13 @@ internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHan
 
     private void InitializeWebView(ViewGroup parentView)
     {
+        // Guard against race: Detach() may have been called before this posted action executes.
+        if (_detached)
+        {
+            _webViewReady.TrySetCanceled();
+            return;
+        }
+
         try
         {
             var context = parentView.Context
@@ -161,13 +173,20 @@ internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHan
                 ViewGroup.LayoutParams.MatchParent);
             parentView.AddView(_webView);
 
+            // Register system back key handler: GoBack in WebView when history exists.
+            RegisterBackCallback(parentView.Context);
+
             if (DiagnosticsEnabled)
             {
                 Console.WriteLine("[Agibuild.WebView] Android WebView initialized successfully.");
             }
+
+            _webViewReady.TrySetResult();
         }
         catch (Exception ex)
         {
+            _webViewReady.TrySetException(ex);
+
             if (DiagnosticsEnabled)
             {
                 Console.WriteLine($"[Agibuild.WebView] Android WebView initialization failed: {ex.Message}");
@@ -187,47 +206,126 @@ internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHan
         _detached = true;
         _attached = false;
 
-        RunOnUiThread(() =>
+        // Cancel any pending _webViewReady waiters so navigation methods don't hang.
+        _webViewReady.TrySetCanceled();
+
+        // Clear navigation state immediately (no UI thread needed).
+        lock (_navLock)
+        {
+            _apiNavUrls.Clear();
+            _apiNavIdByUrl.Clear();
+            _completedNavIds.Clear();
+            _pendingApiNavigation = false;
+            _hasActiveNavigation = false;
+        }
+
+        // Remove back-key callback to prevent leaking the Activity reference.
+        _backCallback?.Remove();
+        _backCallback = null;
+
+        // Capture references for the cleanup closure.
+        var webView = _webView;
+        var jsBridge = _jsBridge;
+
+        // Null out references immediately so no further calls can use them.
+        _webView = null;
+        _webViewClient = null;
+        _webChromeClient = null;
+        _jsBridge = null;
+
+        // Post WebView teardown asynchronously to avoid blocking the Avalonia render pass.
+        // Android WebView.Destroy() can be slow (5s+) when content is loaded.
+        PostOnUiThread(() =>
         {
             try
             {
-                if (_webView is not null)
+                if (webView is not null)
                 {
-                    _webView.StopLoading();
-                    _webView.SetWebViewClient(null!);
-                    _webView.SetWebChromeClient(null!);
+                    webView.StopLoading();
+                    webView.SetWebViewClient(null!);
+                    webView.SetWebChromeClient(null!);
 
-                    if (_jsBridge is not null)
+                    if (jsBridge is not null)
                     {
-                        _webView.RemoveJavascriptInterface("__agibuildBridge");
+                        webView.RemoveJavascriptInterface("__agibuildBridge");
                     }
 
                     // Remove from parent
-                    if (_webView.Parent is ViewGroup parent)
+                    if (webView.Parent is ViewGroup parent)
                     {
-                        parent.RemoveView(_webView);
+                        parent.RemoveView(webView);
                     }
 
-                    _webView.Destroy();
+                    webView.Destroy();
                 }
             }
-            finally
+            catch
             {
-                _webView = null;
-                _webViewClient = null;
-                _webChromeClient = null;
-                _jsBridge = null;
-
-                lock (_navLock)
-                {
-                    _apiNavUrls.Clear();
-                    _apiNavIdByUrl.Clear();
-                    _completedNavIds.Clear();
-                    _pendingApiNavigation = false;
-                    _hasActiveNavigation = false;
-                }
+                // Swallow exceptions during teardown — the control is already detached.
             }
         });
+    }
+
+    private void RegisterBackCallback(global::Android.Content.Context? context)
+    {
+        // Walk up to the ComponentActivity that owns this view.
+        var activity = context as ComponentActivity
+                       ?? (context as global::Android.Content.ContextWrapper)
+                           ?.BaseContext as ComponentActivity;
+
+        if (activity is null) return;
+
+        _backCallback = new WebViewBackCallback(this);
+        activity.OnBackPressedDispatcher.AddCallback(activity, _backCallback);
+    }
+
+    /// <summary>
+    /// Updates <see cref="_backCallback"/> enabled state so the system back key
+    /// is only intercepted when the WebView can actually go back.
+    /// Called from <see cref="AdapterWebViewClient.OnPageFinished"/>.
+    /// </summary>
+    internal void SyncBackCallbackEnabled()
+    {
+        if (_backCallback is not null)
+        {
+            _backCallback.Enabled = _webView?.CanGoBack() ?? false;
+        }
+    }
+
+    /// <summary>
+    /// <see cref="OnBackPressedCallback"/> that delegates to the WebView's GoBack().
+    /// </summary>
+    private sealed class WebViewBackCallback : OnBackPressedCallback
+    {
+        private readonly AndroidWebViewAdapter _adapter;
+
+        public WebViewBackCallback(AndroidWebViewAdapter adapter) : base(false)
+        {
+            _adapter = adapter;
+        }
+
+        public override void HandleOnBackPressed()
+        {
+            var wv = _adapter._webView;
+            if (wv is not null && wv.CanGoBack())
+            {
+                wv.GoBack();
+            }
+            else
+            {
+                // Nothing to go back to — disable ourselves so the system handles the back press.
+                Enabled = false;
+                // Re-dispatch: the framework will call the next callback or finish the Activity.
+                _adapter._mainHandler?.Post(() =>
+                {
+                    // Trigger back press again; we're now disabled so it won't loop.
+                    if (_adapter._webView?.Context is ComponentActivity act)
+                    {
+                        act.OnBackPressedDispatcher.OnBackPressed();
+                    }
+                });
+            }
+        }
     }
 
     private void ApplyPendingOptions()
@@ -247,38 +345,38 @@ internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHan
 
     // ==================== Navigation — API-initiated ====================
 
-    public Task NavigateAsync(Guid navigationId, Uri uri)
+    public async Task NavigateAsync(Guid navigationId, Uri uri)
     {
         ArgumentNullException.ThrowIfNull(uri);
         ThrowIfNotAttached();
 
+        // Wait for the native WebView to be created (Attach posts asynchronously).
+        await _webViewReady.Task.ConfigureAwait(false);
+
         lock (_navLock) { BeginApiNavigation(navigationId, uri.AbsoluteUri); }
 
         RunOnUiThread(() => _webView?.LoadUrl(uri.AbsoluteUri));
-        return Task.CompletedTask;
     }
 
     public Task NavigateToStringAsync(Guid navigationId, string html)
         => NavigateToStringAsync(navigationId, html, baseUrl: null);
 
-    public Task NavigateToStringAsync(Guid navigationId, string html, Uri? baseUrl)
+    public async Task NavigateToStringAsync(Guid navigationId, string html, Uri? baseUrl)
     {
         ArgumentNullException.ThrowIfNull(html);
         ThrowIfNotAttached();
 
-        if (baseUrl is null)
-        {
-            lock (_navLock) { BeginApiNavigation(navigationId, "data:text/html"); }
-            RunOnUiThread(() => _webView?.LoadData(html, "text/html", "UTF-8"));
-        }
-        else
-        {
-            lock (_navLock) { BeginApiNavigation(navigationId, baseUrl.AbsoluteUri); }
-            RunOnUiThread(() => _webView?.LoadDataWithBaseURL(
-                baseUrl.AbsoluteUri, html, "text/html", "UTF-8", null));
-        }
+        // Wait for the native WebView to be created (Attach posts asynchronously).
+        await _webViewReady.Task.ConfigureAwait(false);
 
-        return Task.CompletedTask;
+        // Always use LoadDataWithBaseURL — Android's LoadData has known encoding bugs
+        // with '%', '#', non-ASCII characters, and emoji in HTML content.
+        var baseUrlStr = baseUrl?.AbsoluteUri;
+        var navKey = baseUrlStr ?? "data:text/html";
+
+        lock (_navLock) { BeginApiNavigation(navigationId, navKey); }
+        RunOnUiThread(() => _webView?.LoadDataWithBaseURL(
+            baseUrlStr, html, "text/html", "UTF-8", null));
     }
 
     // ==================== Navigation — commands ====================
@@ -319,10 +417,13 @@ internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHan
 
     // ==================== Script execution ====================
 
-    public Task<string?> InvokeScriptAsync(string script)
+    public async Task<string?> InvokeScriptAsync(string script)
     {
         ArgumentNullException.ThrowIfNull(script);
         ThrowIfNotAttached();
+
+        // Wait for the native WebView to be created (Attach posts asynchronously).
+        await _webViewReady.Task.ConfigureAwait(false);
 
         if (_webView is null)
         {
@@ -336,7 +437,7 @@ internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHan
             _webView.EvaluateJavascript(script, new ScriptResultCallback(tcs));
         });
 
-        return tcs.Task;
+        return await tcs.Task.ConfigureAwait(false);
     }
 
     // ==================== ICookieAdapter ====================
@@ -661,6 +762,9 @@ internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHan
             _navigationError = null;
             RaiseNavigationCompleted(navigationId, requestUri, NavigationCompletedStatus.Success, error: null);
         }
+
+        // Update back-key callback state after each navigation finishes.
+        SyncBackCallbackEnabled();
     }
 
     internal void OnReceivedError(AWebView? view, IWebResourceRequest? request, WebResourceError? error)

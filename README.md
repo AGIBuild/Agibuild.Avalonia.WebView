@@ -1,7 +1,5 @@
 # Agibuild.Avalonia.WebView
 
-[![CI](https://github.com/AgibuilDev/Agibuild.Avalonia.WebView/actions/workflows/ci.yml/badge.svg)](https://github.com/AgibuilDev/Agibuild.Avalonia.WebView/actions/workflows/ci.yml)
-[![Release](https://github.com/AgibuilDev/Agibuild.Avalonia.WebView/actions/workflows/release.yml/badge.svg)](https://github.com/AgibuilDev/Agibuild.Avalonia.WebView/actions/workflows/release.yml)
 [![NuGet](https://img.shields.io/nuget/v/Agibuild.Avalonia.WebView?logo=nuget&color=blue)](https://www.nuget.org/packages/Agibuild.Avalonia.WebView)
 [![NuGet Downloads](https://img.shields.io/nuget/dt/Agibuild.Avalonia.WebView?logo=nuget&color=green)](https://www.nuget.org/packages/Agibuild.Avalonia.WebView)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE.txt)
@@ -10,10 +8,11 @@ Cross-platform WebView control for [Avalonia UI](https://avaloniaui.net/) with n
 
 | Platform | Engine | Status |
 |----------|--------|--------|
-| macOS | WKWebView | ![Stable](https://img.shields.io/badge/Stable-brightgreen) |
+| macOS | WKWebView | ![Preview](https://img.shields.io/badge/Preview-orange) |
 | Windows | WebView2 | ![Preview](https://img.shields.io/badge/Preview-orange) |
-| Linux | WebKitGTK | ![Preview](https://img.shields.io/badge/Preview-orange) |
-| Android | Android WebView | ![Planned](https://img.shields.io/badge/Planned-lightgrey) |
+| Linux | WebKitGTK | ![Untested](https://img.shields.io/badge/Untested-yellow) |
+| iOS | WKWebView | ![Preview](https://img.shields.io/badge/Preview-orange) |
+| Android | Android WebView | ![Preview](https://img.shields.io/badge/Preview-orange) |
 
 ## Installation
 

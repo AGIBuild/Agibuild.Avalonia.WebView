@@ -79,4 +79,63 @@ public sealed class WebViewAdapterRegistryTests
             Assert.Contains("No WebView adapter registered", reason);
         }
     }
+
+    [Fact]
+    public void Register_iOS_platform_succeeds()
+    {
+        // Verify that the new iOS enum value can be registered without issues.
+        var reg = new WebViewAdapterRegistration(
+            WebViewAdapterPlatform.iOS, "wkwebview-ios-test",
+            () => new MockWebViewAdapter(), Priority: 100);
+
+        WebViewAdapterRegistry.Register(reg);
+    }
+
+    [Fact]
+    public void Register_iOS_and_Gtk_same_adapterId_different_platforms_both_succeed()
+    {
+        // Different platforms can share the same adapter-id string — no collision.
+        var iosReg = new WebViewAdapterRegistration(
+            WebViewAdapterPlatform.iOS, "cross-platform-id",
+            () => new MockWebViewAdapter(), Priority: 50);
+        var gtkReg = new WebViewAdapterRegistration(
+            WebViewAdapterPlatform.Gtk, "cross-platform-id",
+            () => new MockWebViewAdapter(), Priority: 50);
+
+        WebViewAdapterRegistry.Register(iosReg);
+        WebViewAdapterRegistry.Register(gtkReg);
+    }
+
+    [Fact]
+    public void Register_all_platform_enum_values_are_accepted()
+    {
+        var platforms = new[]
+        {
+            WebViewAdapterPlatform.Windows,
+            WebViewAdapterPlatform.MacOS,
+            WebViewAdapterPlatform.Android,
+            WebViewAdapterPlatform.Gtk,
+            WebViewAdapterPlatform.iOS,
+        };
+
+        foreach (var platform in platforms)
+        {
+            var adapterId = $"enum-test-{platform}";
+            var reg = new WebViewAdapterRegistration(
+                platform, adapterId, () => new MockWebViewAdapter());
+
+            WebViewAdapterRegistry.Register(reg);
+        }
+    }
+
+    [Fact]
+    public void WebViewAdapterPlatform_iOS_has_distinct_value()
+    {
+        // Ensure iOS enum value is distinct from all other platform values.
+        var ios = WebViewAdapterPlatform.iOS;
+        Assert.NotEqual(WebViewAdapterPlatform.Windows, ios);
+        Assert.NotEqual(WebViewAdapterPlatform.MacOS, ios);
+        Assert.NotEqual(WebViewAdapterPlatform.Android, ios);
+        Assert.NotEqual(WebViewAdapterPlatform.Gtk, ios);
+    }
 }

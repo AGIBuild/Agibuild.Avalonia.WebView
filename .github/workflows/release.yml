@@ -2,11 +2,11 @@ name: Release
 
 on:
   push:
-    tags: ['v*']      # Triggered by version tags like v1.0.0, v0.1.0-preview.1
+    tags: ['v*']      # Triggered by version tags like v1.0.0, v0.2.1-preview
   workflow_dispatch:   # Allow manual triggering
     inputs:
       version:
-        description: 'Package version override (e.g. 1.0.0, 0.1.0-preview.1). Leave empty to use MinVer auto-calculated version.'
+        description: 'Package version override (e.g. 1.0.0, 0.2.1-preview). Leave empty to use MinVer auto-calculated version.'
         required: false
       publish_target:
         description: 'Publish target'

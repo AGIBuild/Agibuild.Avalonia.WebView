@@ -6,130 +6,168 @@
              xmlns:agw="using:Agibuild.Avalonia.WebView"
              mc:Ignorable="d"
              x:Class="Agibuild.Avalonia.WebView.Integration.Tests.Views.AdvancedFeaturesE2EView"
-             x:DataType="vm:AdvancedFeaturesE2EViewModel">
+             x:DataType="vm:AdvancedFeaturesE2EViewModel"
+             Background="{StaticResource SurfaceBgBrush}">
 
-  <DockPanel Margin="8">
+  <DockPanel>
 
-    <!-- Top: Status bar -->
-    <StackPanel DockPanel.Dock="Top" Spacing="4" Margin="0,0,0,8">
-      <TextBlock Text="Advanced Features E2E (M2 / Dialog / Auth)" FontSize="16" FontWeight="Bold" />
-      <TextBlock Text="{Binding Status}" Foreground="Gray" />
-    </StackPanel>
-
-    <!-- Main area: left panel + splitter + right WebView -->
-    <Grid ColumnDefinitions="320,Auto,*">
-
-      <!-- Left: controls panel (scrollable) -->
-      <ScrollViewer Grid.Column="0">
-        <StackPanel Spacing="8" Margin="0,0,8,0">
-
-          <!-- ===== Section 1: M2 Environment Options ===== -->
-          <Border BorderThickness="1" BorderBrush="CornflowerBlue" CornerRadius="6" Padding="8">
-            <StackPanel Spacing="4">
-              <TextBlock Text="M2: Environment Options" FontWeight="Bold" FontSize="13" />
-              <TextBlock Text="Apply &amp; Reload: recreates WebView to apply options" FontSize="10" Foreground="Gray" />
-              <TextBlock TextWrapping="Wrap" FontSize="10" Foreground="DimGray"
-                         Text="DevTools: After enabling, open Safari → Develop → [app name] to inspect. Enable 'Show features for web developers' in Safari Settings → Advanced if Develop menu is missing." />
-
-              <Grid ColumnDefinitions="*,*" Margin="0,4,0,0">
-                <Button Grid.Column="0" Content="DevTools (Apply)"
-                        Command="{Binding ApplyDevToolsAndReloadCommand}"
-                        HorizontalAlignment="Stretch" Margin="0,0,2,0" />
-                <Button Grid.Column="1" Content="Ephemeral (Apply)"
-                        Command="{Binding ApplyEphemeralAndReloadCommand}"
-                        HorizontalAlignment="Stretch" Margin="2,0,0,0" />
-              </Grid>
-
-              <TextBlock Text="Current Options:" FontSize="11" Foreground="Gray" Margin="0,4,0,0" />
-              <TextBox IsReadOnly="True" Text="{Binding EnvironmentInfo}"
-                       FontFamily="Menlo,Consolas,monospace" FontSize="11"
-                       MinHeight="50" AcceptsReturn="True" />
-            </StackPanel>
-          </Border>
-
-          <!-- ===== Section 2: Custom UserAgent ===== -->
-          <Border BorderThickness="1" BorderBrush="CornflowerBlue" CornerRadius="6" Padding="8">
-            <StackPanel Spacing="4">
-              <TextBlock Text="M2: Custom User-Agent" FontWeight="Bold" FontSize="13" />
-
-              <TextBox Text="{Binding UserAgentInput, Mode=TwoWay}"
-                       Watermark="Enter custom User-Agent string"
-                       FontFamily="Menlo,Consolas,monospace" FontSize="11" />
-
-              <Grid ColumnDefinitions="*,*">
-                <Button Grid.Column="0" Content="Set UserAgent"
-                        Command="{Binding SetUserAgentCommand}"
-                        HorizontalAlignment="Stretch" Margin="0,0,2,0" />
-                <Button Grid.Column="1" Content="Reset Default"
-                        Command="{Binding ResetUserAgentCommand}"
-                        HorizontalAlignment="Stretch" Margin="2,0,0,0" />
-              </Grid>
-            </StackPanel>
-          </Border>
-
-          <!-- ===== Section 3: WebDialog ===== -->
-          <Border BorderThickness="1" BorderBrush="ForestGreen" CornerRadius="6" Padding="8">
-            <StackPanel Spacing="4">
-              <TextBlock Text="WebDialog" FontWeight="Bold" FontSize="13" />
-
-              <TextBox Text="{Binding DialogUrl, Mode=TwoWay}"
-                       Watermark="URL to open in dialog"
-                       FontFamily="Menlo,Consolas,monospace" FontSize="11" />
-
-              <Button Content="Open WebDialog"
-                      Command="{Binding OpenDialogCommand}"
-                      HorizontalAlignment="Stretch" />
-              <Button Content="Open Ephemeral Dialog"
-                      Command="{Binding OpenEphemeralDialogCommand}"
-                      HorizontalAlignment="Stretch" />
-            </StackPanel>
-          </Border>
-
-          <!-- ===== Section 4: AuthFlow ===== -->
-          <Border BorderThickness="1" BorderBrush="Coral" CornerRadius="6" Padding="8">
-            <StackPanel Spacing="4">
-              <TextBlock Text="AuthFlow (OAuth)" FontWeight="Bold" FontSize="13" />
-
-              <Button Content="Test OAuth Flow (auto-redirect)"
-                      Command="{Binding TestAuthFlowCommand}"
-                      HorizontalAlignment="Stretch" />
-              <Button Content="Test Cancel (close dialog)"
-                      Command="{Binding TestAuthCancelCommand}"
-                      HorizontalAlignment="Stretch" />
-
-              <TextBlock Text="Result:" FontSize="11" Foreground="Gray" Margin="0,4,0,0" />
-              <TextBox IsReadOnly="True" Text="{Binding AuthResult}"
-                       FontFamily="Menlo,Consolas,monospace" FontSize="11"
-                       MinHeight="40" AcceptsReturn="True" />
-            </StackPanel>
-          </Border>
-
-          <!-- ===== Log ===== -->
-          <Grid ColumnDefinitions="*,Auto" Margin="0,4,0,2">
-            <TextBlock Grid.Column="0" Text="Log:" FontWeight="Bold" />
-            <Button Grid.Column="1" Content="Clear" FontSize="11" Padding="8,2"
-                    Command="{Binding ClearLogCommand}" />
-          </Grid>
-
-          <TextBox IsReadOnly="True"
-                   Text="{Binding Log}"
-                   FontFamily="Menlo,Consolas,monospace" FontSize="11"
-                   TextWrapping="Wrap"
-                   AcceptsReturn="True"
-                   MinHeight="120" />
-
+    <!-- ════════════ Toolbar ════════════ -->
+    <Border DockPanel.Dock="Top" Background="White"
+            BorderThickness="0,0,0,1" BorderBrush="{StaticResource BorderDefaultBrush}"
+            Padding="6,4">
+      <Grid ColumnDefinitions="Auto,Auto,*,Auto">
+        <ToggleButton x:Name="ToolsToggle" Grid.Column="0"
+                      Content="&#x2630;" ToolTip.Tip="Tools"
+                      FontSize="16" Padding="8,6"
+                      Background="Transparent" BorderThickness="0"
+                      CornerRadius="8" VerticalAlignment="Center" />
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"
+                    VerticalAlignment="Center" Margin="8,0">
+          <TextBlock Text="Advanced Features" FontWeight="SemiBold" FontSize="14"
+                     Foreground="{StaticResource TextPrimaryBrush}" />
         </StackPanel>
-      </ScrollViewer>
+        <Border Grid.Column="3" CornerRadius="6" Padding="8,4"
+                Background="#F0F9FF" Margin="0,0,4,0" VerticalAlignment="Center">
+          <TextBlock Text="{Binding Status}" Classes="caption" />
+        </Border>
+      </Grid>
+    </Border>
 
-      <!-- GridSplitter -->
-      <GridSplitter Grid.Column="1" Width="6"
-                    Background="Transparent"
-                    ResizeDirection="Columns" />
+    <!-- ════════════ Main area: WebView + Overlay Drawer (no SplitView) ════════════ -->
+    <Panel>
 
-      <!-- Right: WebView for M2 feature verification (named host for Apply & Reload) -->
-      <Border x:Name="WebViewHost" Grid.Column="2" BorderThickness="1" BorderBrush="Gray">
+      <!-- WebView fills all space -->
+      <Border x:Name="WebViewHost" ClipToBounds="True">
         <agw:WebView x:Name="WebViewControl" Source="https://www.bing.com" />
       </Border>
-    </Grid>
+
+      <!-- Overlay backdrop -->
+      <Border IsVisible="{Binding #ToolsToggle.IsChecked}"
+              Background="#40000000" ZIndex="10"
+              PointerPressed="OnOverlayDismiss" />
+
+      <!-- Tools drawer -->
+      <Border IsVisible="{Binding #ToolsToggle.IsChecked}"
+              HorizontalAlignment="Left" Width="310"
+              Background="White" ZIndex="11"
+              BorderThickness="0,0,1,0" BorderBrush="{StaticResource BorderDefaultBrush}">
+        <DockPanel>
+          <Border DockPanel.Dock="Top" Padding="16,12">
+            <Grid ColumnDefinitions="*,Auto">
+              <StackPanel Spacing="2">
+                <TextBlock Text="Feature Controls" Classes="subheading" />
+                <TextBlock Text="Environment, Dialog &amp; Auth" Classes="caption" />
+              </StackPanel>
+              <Button Grid.Column="1" Classes="toolbar-btn"
+                      Content="&#x2715;" FontSize="14"
+                      Click="OnCloseToolsPanel" />
+            </Grid>
+          </Border>
+          <Border DockPanel.Dock="Top" Height="1" Background="{StaticResource BorderDefaultBrush}" />
+
+          <ScrollViewer Margin="12,8,12,12">
+            <StackPanel Spacing="12">
+
+              <!-- Environment Options -->
+              <Border Classes="card" BorderBrush="{StaticResource BrandPrimaryBrush}">
+                <StackPanel Spacing="8">
+                  <TextBlock Text="Environment Options" Classes="subheading" />
+                  <TextBlock TextWrapping="Wrap" Classes="caption"
+                             Text="Recreates WebView to apply. DevTools: Safari → Develop" />
+                  <Grid ColumnDefinitions="*,*" Margin="0,4,0,0">
+                    <Button Grid.Column="0" Content="DevTools"
+                            Command="{Binding ApplyDevToolsAndReloadCommand}"
+                            HorizontalAlignment="Stretch" Margin="0,0,3,0"
+                            CornerRadius="8" Padding="8,8" FontSize="12" />
+                    <Button Grid.Column="1" Content="Ephemeral"
+                            Command="{Binding ApplyEphemeralAndReloadCommand}"
+                            HorizontalAlignment="Stretch" Margin="3,0,0,0"
+                            CornerRadius="8" Padding="8,8" FontSize="12" />
+                  </Grid>
+                  <TextBox IsReadOnly="True" Classes="mono"
+                           Text="{Binding EnvironmentInfo}"
+                           MinHeight="40" AcceptsReturn="True" Background="#F8FAFC" />
+                </StackPanel>
+              </Border>
+
+              <!-- Custom User-Agent -->
+              <Border Classes="card" BorderBrush="{StaticResource BrandAccentBrush}">
+                <StackPanel Spacing="8">
+                  <TextBlock Text="Custom User-Agent" Classes="subheading" />
+                  <TextBox Classes="mono"
+                           Text="{Binding UserAgentInput, Mode=TwoWay}"
+                           Watermark="Custom UA string" />
+                  <Grid ColumnDefinitions="*,*">
+                    <Button Grid.Column="0" Content="Set UA"
+                            Command="{Binding SetUserAgentCommand}"
+                            HorizontalAlignment="Stretch" Margin="0,0,3,0"
+                            CornerRadius="8" Padding="8,8" FontSize="12" />
+                    <Button Grid.Column="1" Content="Reset"
+                            Command="{Binding ResetUserAgentCommand}"
+                            HorizontalAlignment="Stretch" Margin="3,0,0,0"
+                            CornerRadius="8" Padding="8,8" FontSize="12" />
+                  </Grid>
+                </StackPanel>
+              </Border>
+
+              <!-- WebDialog -->
+              <Border Classes="card" BorderBrush="{StaticResource BrandSuccessBrush}">
+                <StackPanel Spacing="8">
+                  <TextBlock Text="WebDialog" Classes="subheading" />
+                  <TextBox Classes="mono"
+                           Text="{Binding DialogUrl, Mode=TwoWay}"
+                           Watermark="URL for dialog" />
+                  <Button Content="Open WebDialog" Classes="primary"
+                          Command="{Binding OpenDialogCommand}"
+                          HorizontalAlignment="Stretch" FontSize="12" />
+                  <Button Content="Open Ephemeral"
+                          Command="{Binding OpenEphemeralDialogCommand}"
+                          HorizontalAlignment="Stretch"
+                          CornerRadius="8" Padding="12,8" FontSize="12" />
+                </StackPanel>
+              </Border>
+
+              <!-- AuthFlow -->
+              <Border Classes="card" BorderBrush="{StaticResource BrandWarningBrush}">
+                <StackPanel Spacing="8">
+                  <TextBlock Text="AuthFlow (OAuth)" Classes="subheading" />
+                  <Button Content="Test OAuth Flow" Classes="primary"
+                          Command="{Binding TestAuthFlowCommand}"
+                          HorizontalAlignment="Stretch" FontSize="12" />
+                  <Button Content="Test Cancel"
+                          Command="{Binding TestAuthCancelCommand}"
+                          HorizontalAlignment="Stretch"
+                          CornerRadius="8" Padding="12,8" FontSize="12" />
+                  <Border Background="#FFFBEB" CornerRadius="6" Padding="8,6"
+                          IsVisible="{Binding AuthResult, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                    <TextBlock Text="{Binding AuthResult}"
+                               FontFamily="Menlo,Consolas,monospace" FontSize="11"
+                               TextWrapping="Wrap" />
+                  </Border>
+                </StackPanel>
+              </Border>
+
+              <!-- Log -->
+              <Border Classes="card">
+                <DockPanel>
+                  <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="0,0,0,8">
+                    <TextBlock Text="Log" Classes="subheading" />
+                    <Button Grid.Column="1" Content="Clear" FontSize="11"
+                            Padding="8,4" CornerRadius="6"
+                            Command="{Binding ClearLogCommand}" />
+                  </Grid>
+                  <TextBox IsReadOnly="True" Classes="mono"
+                           Text="{Binding Log}"
+                           TextWrapping="Wrap" AcceptsReturn="True"
+                           MinHeight="120" Background="#F8FAFC" />
+                </DockPanel>
+              </Border>
+
+            </StackPanel>
+          </ScrollViewer>
+        </DockPanel>
+      </Border>
+
+    </Panel>
   </DockPanel>
 </UserControl>

@@ -6,43 +6,148 @@
              xmlns:controls="using:Agibuild.Avalonia.WebView.Integration.Tests.Controls"
              mc:Ignorable="d"
              x:Class="Agibuild.Avalonia.WebView.Integration.Tests.Views.WkWebViewSmokeView"
-             x:DataType="vm:WkWebViewSmokeViewModel">
-  <Grid RowDefinitions="Auto,Auto,*,Auto" ColumnDefinitions="*,*"
-        RowSpacing="8" ColumnSpacing="8">
-    <TextBlock Grid.Row="0" Grid.ColumnSpan="2"
-               Text="macOS WKWebView Smoke (M0)"
-               FontSize="16" />
+             x:DataType="vm:WkWebViewSmokeViewModel"
+             Background="{StaticResource SurfaceBgBrush}">
 
-    <TextBlock Grid.Row="1" Grid.ColumnSpan="2"
-               Text="{Binding Status}" />
+  <DockPanel>
 
-    <StackPanel Grid.Row="2" Grid.Column="0" Spacing="8">
-      <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
-        <StackPanel Orientation="Horizontal" Spacing="8">
-          <Button Content="Initialize" Command="{Binding InitializeCommand}" />
-          <Button Content="Run All" Command="{Binding RunAllCommand}" />
-          <Button Content="Link" Command="{Binding RunLinkClickCommand}" />
-          <Button Content="302" Command="{Binding RunRedirect302Command}" />
-          <Button Content="location" Command="{Binding RunWindowLocationCommand}" />
-          <Button Content="Cancel" Command="{Binding RunCancelCommand}" />
-          <Button Content="Script" Command="{Binding RunScriptCommand}" />
-          <Button Content="Message" Command="{Binding RunMessageCommand}" />
+    <!-- ════════════ Toolbar ════════════ -->
+    <Border DockPanel.Dock="Top" Background="White"
+            BorderThickness="0,0,0,1" BorderBrush="{StaticResource BorderDefaultBrush}"
+            Padding="6,4">
+      <Grid ColumnDefinitions="Auto,*,Auto">
+        <ToggleButton x:Name="ToolsToggle" Grid.Column="0"
+                      Content="&#x2630;" ToolTip.Tip="Controls &amp; Log"
+                      FontSize="16" Padding="8,6"
+                      Background="Transparent" BorderThickness="0"
+                      CornerRadius="8" VerticalAlignment="Center" />
+
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"
+                    VerticalAlignment="Center" Margin="8,0">
+          <TextBlock Text="&#x1F34E; WKWebView Smoke" FontWeight="SemiBold" FontSize="14"
+                     Foreground="{StaticResource TextPrimaryBrush}" />
+          <TextBlock Text="M0" Classes="caption" VerticalAlignment="Center" />
         </StackPanel>
-      </ScrollViewer>
 
-      <TextBlock Text="Log:" FontWeight="Bold" />
-      <TextBox Text="{Binding Log}" FontFamily="Menlo,Consolas" FontSize="11"
-               IsReadOnly="True" AcceptsReturn="True"
-               Height="220" TextWrapping="Wrap"
-               BorderThickness="0" Background="Transparent" />
-    </StackPanel>
-
-    <Border Grid.Row="2" Grid.Column="1" BorderThickness="1" BorderBrush="Gray">
-      <controls:AdapterNativeControlHost x:Name="NativeHost" />
+        <Border Grid.Column="2" CornerRadius="6" Padding="8,4"
+                Background="#F0F9FF" Margin="0,0,4,0" VerticalAlignment="Center">
+          <TextBlock Text="{Binding Status}" Classes="caption" />
+        </Border>
+      </Grid>
     </Border>
 
-    <TextBlock Grid.Row="3" Grid.ColumnSpan="2"
-               Text="Tip: build &amp; run Desktop app as net10.0-macos to enable WK." />
-  </Grid>
-</UserControl>
+    <!-- ════════════ Tip bar ════════════ -->
+    <Border DockPanel.Dock="Bottom" Background="White"
+            BorderThickness="0,1,0,0" BorderBrush="{StaticResource BorderDefaultBrush}"
+            Padding="8,4">
+      <Border CornerRadius="4" Padding="6,2" Background="#F1F5F9">
+        <TextBlock Text="Tip: build &amp; run Desktop app as net10.0-macos to enable WK."
+                   Classes="caption" />
+      </Border>
+    </Border>
 
+    <!-- ════════════ Main area: NativeHost + Overlay Drawer ════════════ -->
+    <Panel>
+
+      <!-- NativeControlHost fills all space -->
+      <Border x:Name="NativeHostContainer" ClipToBounds="True"
+              BorderThickness="0">
+        <controls:AdapterNativeControlHost x:Name="NativeHost" />
+      </Border>
+
+      <!-- Overlay backdrop -->
+      <Border IsVisible="{Binding #ToolsToggle.IsChecked}"
+              Background="#40000000" ZIndex="10"
+              PointerPressed="OnOverlayDismiss" />
+
+      <!-- Tools drawer -->
+      <Border IsVisible="{Binding #ToolsToggle.IsChecked}"
+              HorizontalAlignment="Left" Width="300"
+              Background="White" ZIndex="11"
+              BorderThickness="0,0,1,0" BorderBrush="{StaticResource BorderDefaultBrush}">
+        <DockPanel>
+          <Border DockPanel.Dock="Top" Padding="16,12">
+            <Grid ColumnDefinitions="*,Auto">
+              <StackPanel Spacing="2">
+                <TextBlock Text="Controls &amp; Log" Classes="subheading" />
+                <TextBlock Text="Run smoke tests" Classes="caption" />
+              </StackPanel>
+              <Button Grid.Column="1" Classes="toolbar-btn"
+                      Content="&#x2715;" FontSize="14"
+                      Click="OnCloseToolsPanel" />
+            </Grid>
+          </Border>
+          <Border DockPanel.Dock="Top" Height="1" Background="{StaticResource BorderDefaultBrush}" />
+
+          <ScrollViewer Margin="12,8,12,12">
+            <StackPanel Spacing="12">
+
+              <!-- Quick Actions -->
+              <Border Classes="card" BorderBrush="{StaticResource BrandPrimaryBrush}">
+                <StackPanel Spacing="8">
+                  <TextBlock Text="Quick Actions" Classes="subheading" />
+                  <WrapPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
+                    <WrapPanel.Styles>
+                      <Style Selector="Button">
+                        <Setter Property="Margin" Value="0,0,6,6" />
+                        <Setter Property="CornerRadius" Value="8" />
+                        <Setter Property="Padding" Value="12,8" />
+                        <Setter Property="FontSize" Value="12" />
+                      </Style>
+                    </WrapPanel.Styles>
+                    <Button Content="&#x26A1; Initialize" Classes="primary"
+                            Command="{Binding InitializeCommand}" />
+                    <Button Content="&#x25B6; Run All"
+                            Command="{Binding RunAllCommand}" />
+                  </WrapPanel>
+                </StackPanel>
+              </Border>
+
+              <!-- Individual Tests -->
+              <Border Classes="card" BorderBrush="{StaticResource BrandAccentBrush}">
+                <StackPanel Spacing="8">
+                  <TextBlock Text="Individual Tests" Classes="subheading" />
+                  <WrapPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
+                    <WrapPanel.Styles>
+                      <Style Selector="Button">
+                        <Setter Property="Margin" Value="0,0,6,6" />
+                        <Setter Property="CornerRadius" Value="8" />
+                        <Setter Property="Padding" Value="12,8" />
+                        <Setter Property="FontSize" Value="12" />
+                      </Style>
+                    </WrapPanel.Styles>
+                    <Button Content="&#x1F517; Link"
+                            Command="{Binding RunLinkClickCommand}" />
+                    <Button Content="&#x21AA; 302"
+                            Command="{Binding RunRedirect302Command}" />
+                    <Button Content="&#x1F4CD; location"
+                            Command="{Binding RunWindowLocationCommand}" />
+                    <Button Content="&#x1F6AB; Cancel"
+                            Command="{Binding RunCancelCommand}" />
+                    <Button Content="&#x1F4DC; Script"
+                            Command="{Binding RunScriptCommand}" />
+                    <Button Content="&#x1F4E8; Message"
+                            Command="{Binding RunMessageCommand}" />
+                  </WrapPanel>
+                </StackPanel>
+              </Border>
+
+              <!-- Log -->
+              <Border Classes="card">
+                <DockPanel>
+                  <TextBlock DockPanel.Dock="Top" Text="Log" Classes="subheading" Margin="0,0,0,8" />
+                  <TextBox IsReadOnly="True" Classes="mono"
+                           Text="{Binding Log}"
+                           TextWrapping="Wrap" AcceptsReturn="True"
+                           MinHeight="180" Background="#F8FAFC" />
+                </DockPanel>
+              </Border>
+
+            </StackPanel>
+          </ScrollViewer>
+        </DockPanel>
+      </Border>
+
+    </Panel>
+  </DockPanel>
+</UserControl>

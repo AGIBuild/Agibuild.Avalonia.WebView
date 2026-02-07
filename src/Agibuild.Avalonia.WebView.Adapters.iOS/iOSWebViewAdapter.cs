@@ -1,13 +1,15 @@
 using System.Collections.Concurrent;
-using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using Avalonia.Platform;
 using Agibuild.Avalonia.WebView;
 using Agibuild.Avalonia.WebView.Adapters.Abstractions;
+using ObjCRuntime;
 
-namespace Agibuild.Avalonia.WebView.Adapters.Gtk;
+namespace Agibuild.Avalonia.WebView.Adapters.iOS;
 
-internal sealed class GtkWebViewAdapter : IWebViewAdapter, INativeWebViewHandleProvider, ICookieAdapter, IWebViewAdapterOptions
+[SupportedOSPlatform("ios")]
+internal sealed class iOSWebViewAdapter : IWebViewAdapter, INativeWebViewHandleProvider, ICookieAdapter, IWebViewAdapterOptions
 {
     private static bool DiagnosticsEnabled
         => string.Equals(Environment.GetEnvironmentVariable("AGIBUILD_WEBVIEW_DIAG"), "1", StringComparison.Ordinal);
@@ -21,13 +23,14 @@ internal sealed class GtkWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
     // Native shim state
     private IntPtr _native;
     private GCHandle _selfHandle;
-    private NativeMethods.AgGtkCallbacks _callbacks;
+    private NativeMethods.AgWkCallbacks _callbacks;
     private NativeMethods.PolicyRequestCb? _policyCb;
     private NativeMethods.NavigationCompletedCb? _navCompletedCb;
     private NativeMethods.ScriptResultCb? _scriptResultCb;
     private NativeMethods.MessageCb? _messageCb;
 
-    // Lock protects navigation state
+    // Lock protects navigation state accessed from both native callbacks
+    // (which may run on background threads after an await) and API methods (UI thread).
     private readonly object _navLock = new();
 
     // Navigation state — guarded by _navLock
@@ -36,7 +39,7 @@ internal sealed class GtkWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
     private bool _activeNavigationCompleted;
     private bool _apiNavigationActive;
 
-    // Native-initiated main-frame correlation state — guarded by _navLock
+    // Native-initiated main-frame correlation state (redirect chain) — guarded by _navLock
     private bool _nativeCorrelationActive;
     private Guid _nativeCorrelationId;
 
@@ -76,31 +79,13 @@ internal sealed class GtkWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
 
         _selfHandle = GCHandle.Alloc(this);
 
-        _policyCb = (userData, requestId, urlUtf8, isMainFrame, isNewWindow, navigationType) =>
-        {
-            var self = NativeMethods.FromUserData(userData);
-            self?.OnPolicyRequest(requestId, NativeMethods.PtrToString(urlUtf8), isMainFrame, isNewWindow, navigationType);
-        };
+        // Use pre-created static delegates (AOT-compatible via [MonoPInvokeCallback]).
+        _policyCb = PolicyRequestTrampoline;
+        _navCompletedCb = NavigationCompletedTrampoline;
+        _scriptResultCb = ScriptResultTrampoline;
+        _messageCb = MessageTrampoline;
 
-        _navCompletedCb = (userData, urlUtf8, status, errorCode, errorMessageUtf8) =>
-        {
-            var self = NativeMethods.FromUserData(userData);
-            self?.OnNavigationCompletedNative(NativeMethods.PtrToString(urlUtf8), status, errorCode, NativeMethods.PtrToString(errorMessageUtf8));
-        };
-
-        _scriptResultCb = (userData, requestId, resultUtf8, errorMessageUtf8) =>
-        {
-            var self = NativeMethods.FromUserData(userData);
-            self?.OnScriptResultNative(requestId, NativeMethods.PtrToStringNullable(resultUtf8), NativeMethods.PtrToStringNullable(errorMessageUtf8));
-        };
-
-        _messageCb = (userData, bodyUtf8, originUtf8) =>
-        {
-            var self = NativeMethods.FromUserData(userData);
-            self?.OnMessageNative(NativeMethods.PtrToString(bodyUtf8), NativeMethods.PtrToString(originUtf8));
-        };
-
-        _callbacks = new NativeMethods.AgGtkCallbacks
+        _callbacks = new NativeMethods.AgWkCallbacks
         {
             on_policy_request = Marshal.GetFunctionPointerForDelegate(_policyCb),
             on_navigation_completed = Marshal.GetFunctionPointerForDelegate(_navCompletedCb),
@@ -111,7 +96,7 @@ internal sealed class GtkWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
         _native = NativeMethods.Create(ref _callbacks, GCHandle.ToIntPtr(_selfHandle));
         if (_native == IntPtr.Zero)
         {
-            throw new InvalidOperationException("Failed to create native WebKitGTK shim instance.");
+            throw new InvalidOperationException("Failed to create native WKWebView shim instance.");
         }
     }
 
@@ -135,12 +120,14 @@ internal sealed class GtkWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
             throw new ArgumentException("Parent handle must be non-zero.", nameof(parentHandle));
         }
 
-        // On Linux/X11, Avalonia NativeControlHost provides an X11 Window ID (XID).
-        var xid = (ulong)parentHandle.Handle;
-
-        if (!NativeMethods.Attach(_native, xid))
+        if (!OperatingSystem.IsIOS())
         {
-            throw new InvalidOperationException("Native WebKitGTK shim failed to attach. Ensure the parent handle is a valid X11 Window ID and webkit2gtk-4.1 is installed.");
+            throw new PlatformNotSupportedException("WKWebView iOS adapter can only be used on iOS.");
+        }
+
+        if (!NativeMethods.Attach(_native, parentHandle.Handle))
+        {
+            throw new InvalidOperationException("Native WKWebView shim failed to attach. Ensure the parent handle is a UIView.");
         }
 
         _attached = true;
@@ -172,7 +159,7 @@ internal sealed class GtkWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
 
             foreach (var kvp in _scriptTcsById)
             {
-                kvp.Value.TrySetException(new ObjectDisposedException(nameof(GtkWebViewAdapter)));
+                kvp.Value.TrySetException(new ObjectDisposedException(nameof(iOSWebViewAdapter)));
             }
             _scriptTcsById.Clear();
 
@@ -254,7 +241,7 @@ internal sealed class GtkWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
         if (!_attached || _detached) return null;
 
         var ptr = NativeMethods.GetWebViewHandle(_native);
-        return ptr == IntPtr.Zero ? null : new PlatformHandle(ptr, "WebKitWebView");
+        return ptr == IntPtr.Zero ? null : new PlatformHandle(ptr, "WKWebView.iOS");
     }
 
     // ---------- IWebViewAdapterOptions ----------
@@ -292,24 +279,7 @@ internal sealed class GtkWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
         var tcs = new TaskCompletionSource<IReadOnlyList<WebViewCookie>>();
         var tcsHandle = GCHandle.Alloc(tcs);
 
-        NativeMethods.CookiesGet(_native, uri.AbsoluteUri, static (context, jsonUtf8) =>
-        {
-            var h = GCHandle.FromIntPtr(context);
-            var t = (TaskCompletionSource<IReadOnlyList<WebViewCookie>>)h.Target!;
-            h.Free();
-
-            try
-            {
-                var json = NativeMethods.PtrToString(jsonUtf8);
-                var cookies = ParseCookiesJson(json);
-                t.TrySetResult(cookies);
-            }
-            catch (Exception ex)
-            {
-                t.TrySetException(ex);
-            }
-        }, GCHandle.ToIntPtr(tcsHandle));
-
+        NativeMethods.CookiesGet(_native, uri.AbsoluteUri, CookiesGetTrampoline, GCHandle.ToIntPtr(tcsHandle));
         return tcs.Task;
     }
 
@@ -323,18 +293,7 @@ internal sealed class GtkWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
         NativeMethods.CookieSet(_native,
             cookie.Name, cookie.Value, cookie.Domain, cookie.Path,
             expiresUnix, cookie.IsSecure, cookie.IsHttpOnly,
-            static (context, success, errorUtf8) =>
-            {
-                var h = GCHandle.FromIntPtr(context);
-                var t = (TaskCompletionSource)h.Target!;
-                h.Free();
-
-                if (success)
-                    t.TrySetResult();
-                else
-                    t.TrySetException(new InvalidOperationException(NativeMethods.PtrToString(errorUtf8)));
-            }, GCHandle.ToIntPtr(tcsHandle));
-
+            CookieOpTrampoline, GCHandle.ToIntPtr(tcsHandle));
         return tcs.Task;
     }
 
@@ -346,18 +305,7 @@ internal sealed class GtkWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
 
         NativeMethods.CookieDelete(_native,
             cookie.Name, cookie.Domain, cookie.Path,
-            static (context, success, errorUtf8) =>
-            {
-                var h = GCHandle.FromIntPtr(context);
-                var t = (TaskCompletionSource)h.Target!;
-                h.Free();
-
-                if (success)
-                    t.TrySetResult();
-                else
-                    t.TrySetException(new InvalidOperationException(NativeMethods.PtrToString(errorUtf8)));
-            }, GCHandle.ToIntPtr(tcsHandle));
-
+            CookieOpTrampoline, GCHandle.ToIntPtr(tcsHandle));
         return tcs.Task;
     }
 
@@ -367,32 +315,21 @@ internal sealed class GtkWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
         var tcs = new TaskCompletionSource();
         var tcsHandle = GCHandle.Alloc(tcs);
 
-        NativeMethods.CookiesClearAll(_native,
-            static (context, success, errorUtf8) =>
-            {
-                var h = GCHandle.FromIntPtr(context);
-                var t = (TaskCompletionSource)h.Target!;
-                h.Free();
-
-                if (success)
-                    t.TrySetResult();
-                else
-                    t.TrySetException(new InvalidOperationException(NativeMethods.PtrToString(errorUtf8)));
-            }, GCHandle.ToIntPtr(tcsHandle));
-
+        NativeMethods.CookiesClearAll(_native, CookieOpTrampoline, GCHandle.ToIntPtr(tcsHandle));
         return tcs.Task;
     }
 
     private void ThrowIfNotAttachedForCookies()
     {
         if (_detached)
-            throw new ObjectDisposedException(nameof(GtkWebViewAdapter));
+            throw new ObjectDisposedException(nameof(iOSWebViewAdapter));
         if (!_attached)
             throw new InvalidOperationException("Adapter is not attached.");
     }
 
     /// <summary>
     /// Parses a JSON array of cookie objects produced by the native shim.
+    /// Uses simple string parsing to avoid a System.Text.Json dependency.
     /// </summary>
     private static IReadOnlyList<WebViewCookie> ParseCookiesJson(string json)
     {
@@ -550,6 +487,7 @@ internal sealed class GtkWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
             navigationType = 5;
         }
 
+        // LinkActivated=0, FormSubmitted=1, BackForward=2, Reload=3, FormResubmitted=4, Other=5
         if (navigationType is 0 or 1 or 4)
         {
             _nativeCorrelationId = Guid.NewGuid();
@@ -585,7 +523,7 @@ internal sealed class GtkWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
 
         if (_detached)
         {
-            throw new ObjectDisposedException(nameof(GtkWebViewAdapter));
+            throw new ObjectDisposedException(nameof(iOSWebViewAdapter));
         }
 
         if (!_attached || _native == IntPtr.Zero)
@@ -606,7 +544,72 @@ internal sealed class GtkWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
         }
     }
 
-    // ==== Native callbacks ====
+    // ==== AOT-safe static trampolines for native callbacks ====
+    // iOS does not allow JIT. All delegates passed to native code must be
+    // static methods with [MonoPInvokeCallback] so the AOT compiler can
+    // generate the native-to-managed wrappers at build time.
+
+    [MonoPInvokeCallback(typeof(NativeMethods.PolicyRequestCb))]
+    private static void PolicyRequestTrampoline(IntPtr userData, ulong requestId, IntPtr urlUtf8, byte isMainFrame, byte isNewWindow, int navigationType)
+    {
+        var self = NativeMethods.FromUserData(userData);
+        self?.OnPolicyRequest(requestId, NativeMethods.PtrToString(urlUtf8), isMainFrame != 0, isNewWindow != 0, navigationType);
+    }
+
+    [MonoPInvokeCallback(typeof(NativeMethods.NavigationCompletedCb))]
+    private static void NavigationCompletedTrampoline(IntPtr userData, IntPtr urlUtf8, int status, long errorCode, IntPtr errorMessageUtf8)
+    {
+        var self = NativeMethods.FromUserData(userData);
+        self?.OnNavigationCompletedNative(NativeMethods.PtrToString(urlUtf8), status, errorCode, NativeMethods.PtrToString(errorMessageUtf8));
+    }
+
+    [MonoPInvokeCallback(typeof(NativeMethods.ScriptResultCb))]
+    private static void ScriptResultTrampoline(IntPtr userData, ulong requestId, IntPtr resultUtf8, IntPtr errorMessageUtf8)
+    {
+        var self = NativeMethods.FromUserData(userData);
+        self?.OnScriptResultNative(requestId, NativeMethods.PtrToStringNullable(resultUtf8), NativeMethods.PtrToStringNullable(errorMessageUtf8));
+    }
+
+    [MonoPInvokeCallback(typeof(NativeMethods.MessageCb))]
+    private static void MessageTrampoline(IntPtr userData, IntPtr bodyUtf8, IntPtr originUtf8)
+    {
+        var self = NativeMethods.FromUserData(userData);
+        self?.OnMessageNative(NativeMethods.PtrToString(bodyUtf8), NativeMethods.PtrToString(originUtf8));
+    }
+
+    [MonoPInvokeCallback(typeof(NativeMethods.CookiesGetCb))]
+    private static void CookiesGetTrampoline(IntPtr context, IntPtr jsonUtf8)
+    {
+        var h = GCHandle.FromIntPtr(context);
+        var t = (TaskCompletionSource<IReadOnlyList<WebViewCookie>>)h.Target!;
+        h.Free();
+
+        try
+        {
+            var json = NativeMethods.PtrToString(jsonUtf8);
+            var cookies = ParseCookiesJson(json);
+            t.TrySetResult(cookies);
+        }
+        catch (Exception ex)
+        {
+            t.TrySetException(ex);
+        }
+    }
+
+    [MonoPInvokeCallback(typeof(NativeMethods.CookieOpCb))]
+    private static void CookieOpTrampoline(IntPtr context, bool success, IntPtr errorUtf8)
+    {
+        var h = GCHandle.FromIntPtr(context);
+        var t = (TaskCompletionSource)h.Target!;
+        h.Free();
+
+        if (success)
+            t.TrySetResult();
+        else
+            t.TrySetException(new InvalidOperationException(NativeMethods.PtrToString(errorUtf8)));
+    }
+
+    // ==== Native callbacks (called from native shim) ====
 
     private void OnPolicyRequest(ulong requestId, string? url, bool isMainFrame, bool isNewWindow, int navigationType)
     {
@@ -750,7 +753,7 @@ internal sealed class GtkWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
 
         if (_detached)
         {
-            tcs.TrySetException(new ObjectDisposedException(nameof(GtkWebViewAdapter)));
+            tcs.TrySetException(new ObjectDisposedException(nameof(iOSWebViewAdapter)));
             return;
         }
 
@@ -775,43 +778,11 @@ internal sealed class GtkWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
     }
 
     // ==== Native interop ====
+    // On iOS, the native shim is statically linked; use DllImport("__Internal").
 
     private static class NativeMethods
     {
-        private const string LibraryName = "AgibuildWebViewGtk";
-
-        static NativeMethods()
-        {
-            NativeLibrary.SetDllImportResolver(typeof(NativeMethods).Assembly, Resolve);
-        }
-
-        private static IntPtr Resolve(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
-        {
-            if (!string.Equals(libraryName, LibraryName, StringComparison.Ordinal))
-            {
-                return IntPtr.Zero;
-            }
-
-            var baseDir = AppContext.BaseDirectory;
-
-            // Probe runtimes/linux-x64/native/
-            var candidate = Path.Combine(baseDir, "runtimes", "linux-x64", "native", "libAgibuildWebViewGtk.so");
-            if (File.Exists(candidate))
-            {
-                return NativeLibrary.Load(candidate);
-            }
-
-            // Fallback: probe next to app.
-            var flat = Path.Combine(baseDir, "libAgibuildWebViewGtk.so");
-            if (File.Exists(flat))
-            {
-                return NativeLibrary.Load(flat);
-            }
-
-            return IntPtr.Zero;
-        }
-
-        internal static GtkWebViewAdapter? FromUserData(IntPtr userData)
+        internal static iOSWebViewAdapter? FromUserData(IntPtr userData)
         {
             if (userData == IntPtr.Zero)
             {
@@ -821,7 +792,7 @@ internal sealed class GtkWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
             try
             {
                 var handle = GCHandle.FromIntPtr(userData);
-                return handle.Target as GtkWebViewAdapter;
+                return handle.Target as iOSWebViewAdapter;
             }
             catch
             {
@@ -836,10 +807,7 @@ internal sealed class GtkWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
             => ptr == IntPtr.Zero ? null : Marshal.PtrToStringUTF8(ptr);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        internal delegate void PolicyRequestCb(IntPtr userData, ulong requestId, IntPtr urlUtf8,
-            [MarshalAs(UnmanagedType.I1)] bool isMainFrame,
-            [MarshalAs(UnmanagedType.I1)] bool isNewWindow,
-            int navigationType);
+        internal delegate void PolicyRequestCb(IntPtr userData, ulong requestId, IntPtr urlUtf8, byte isMainFrame, byte isNewWindow, int navigationType);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         internal delegate void NavigationCompletedCb(IntPtr userData, IntPtr urlUtf8, int status, long errorCode, IntPtr errorMessageUtf8);
@@ -851,7 +819,7 @@ internal sealed class GtkWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
         internal delegate void MessageCb(IntPtr userData, IntPtr bodyUtf8, IntPtr originUtf8);
 
         [StructLayout(LayoutKind.Sequential)]
-        internal struct AgGtkCallbacks
+        internal struct AgWkCallbacks
         {
             public IntPtr on_policy_request;
             public IntPtr on_navigation_completed;
@@ -866,61 +834,61 @@ internal sealed class GtkWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         internal delegate void CookieOpCb(IntPtr context, [MarshalAs(UnmanagedType.I1)] bool success, IntPtr errorUtf8);
 
-        [DllImport(LibraryName, EntryPoint = "ag_gtk_create", CallingConvention = CallingConvention.Cdecl)]
-        internal static extern IntPtr Create(ref AgGtkCallbacks callbacks, IntPtr userData);
+        [DllImport("__Internal", EntryPoint = "ag_wk_create", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern IntPtr Create(ref AgWkCallbacks callbacks, IntPtr userData);
 
-        [DllImport(LibraryName, EntryPoint = "ag_gtk_destroy", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("__Internal", EntryPoint = "ag_wk_destroy", CallingConvention = CallingConvention.Cdecl)]
         internal static extern void Destroy(IntPtr handle);
 
-        [DllImport(LibraryName, EntryPoint = "ag_gtk_attach", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("__Internal", EntryPoint = "ag_wk_attach", CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAs(UnmanagedType.I1)]
-        internal static extern bool Attach(IntPtr handle, ulong x11WindowId);
+        internal static extern bool Attach(IntPtr handle, IntPtr uiViewPtr);
 
-        [DllImport(LibraryName, EntryPoint = "ag_gtk_detach", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("__Internal", EntryPoint = "ag_wk_detach", CallingConvention = CallingConvention.Cdecl)]
         internal static extern void Detach(IntPtr handle);
 
-        [DllImport(LibraryName, EntryPoint = "ag_gtk_policy_decide", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("__Internal", EntryPoint = "ag_wk_policy_decide", CallingConvention = CallingConvention.Cdecl)]
         internal static extern void PolicyDecide(IntPtr handle, ulong requestId, [MarshalAs(UnmanagedType.I1)] bool allow);
 
-        [DllImport(LibraryName, EntryPoint = "ag_gtk_navigate", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("__Internal", EntryPoint = "ag_wk_navigate", CallingConvention = CallingConvention.Cdecl)]
         internal static extern void Navigate(IntPtr handle, [MarshalAs(UnmanagedType.LPUTF8Str)] string url);
 
-        [DllImport(LibraryName, EntryPoint = "ag_gtk_load_html", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("__Internal", EntryPoint = "ag_wk_load_html", CallingConvention = CallingConvention.Cdecl)]
         internal static extern void LoadHtml(IntPtr handle, [MarshalAs(UnmanagedType.LPUTF8Str)] string html, [MarshalAs(UnmanagedType.LPUTF8Str)] string? baseUrl);
 
-        [DllImport(LibraryName, EntryPoint = "ag_gtk_eval_js", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("__Internal", EntryPoint = "ag_wk_eval_js", CallingConvention = CallingConvention.Cdecl)]
         internal static extern void EvalJs(IntPtr handle, ulong requestId, [MarshalAs(UnmanagedType.LPUTF8Str)] string script);
 
-        [DllImport(LibraryName, EntryPoint = "ag_gtk_go_back", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("__Internal", EntryPoint = "ag_wk_go_back", CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAs(UnmanagedType.I1)]
         internal static extern bool GoBack(IntPtr handle);
 
-        [DllImport(LibraryName, EntryPoint = "ag_gtk_go_forward", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("__Internal", EntryPoint = "ag_wk_go_forward", CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAs(UnmanagedType.I1)]
         internal static extern bool GoForward(IntPtr handle);
 
-        [DllImport(LibraryName, EntryPoint = "ag_gtk_reload", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("__Internal", EntryPoint = "ag_wk_reload", CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAs(UnmanagedType.I1)]
         internal static extern bool Reload(IntPtr handle);
 
-        [DllImport(LibraryName, EntryPoint = "ag_gtk_stop", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("__Internal", EntryPoint = "ag_wk_stop", CallingConvention = CallingConvention.Cdecl)]
         internal static extern void Stop(IntPtr handle);
 
-        [DllImport(LibraryName, EntryPoint = "ag_gtk_can_go_back", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("__Internal", EntryPoint = "ag_wk_can_go_back", CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAs(UnmanagedType.I1)]
         internal static extern bool CanGoBack(IntPtr handle);
 
-        [DllImport(LibraryName, EntryPoint = "ag_gtk_can_go_forward", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("__Internal", EntryPoint = "ag_wk_can_go_forward", CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAs(UnmanagedType.I1)]
         internal static extern bool CanGoForward(IntPtr handle);
 
-        [DllImport(LibraryName, EntryPoint = "ag_gtk_get_webview_handle", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("__Internal", EntryPoint = "ag_wk_get_webview_handle", CallingConvention = CallingConvention.Cdecl)]
         internal static extern IntPtr GetWebViewHandle(IntPtr handle);
 
-        [DllImport(LibraryName, EntryPoint = "ag_gtk_cookies_get", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("__Internal", EntryPoint = "ag_wk_cookies_get", CallingConvention = CallingConvention.Cdecl)]
         internal static extern void CookiesGet(IntPtr handle, [MarshalAs(UnmanagedType.LPUTF8Str)] string url, CookiesGetCb callback, IntPtr context);
 
-        [DllImport(LibraryName, EntryPoint = "ag_gtk_cookie_set", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("__Internal", EntryPoint = "ag_wk_cookie_set", CallingConvention = CallingConvention.Cdecl)]
         internal static extern void CookieSet(IntPtr handle,
             [MarshalAs(UnmanagedType.LPUTF8Str)] string name,
             [MarshalAs(UnmanagedType.LPUTF8Str)] string value,
@@ -929,23 +897,23 @@ internal sealed class GtkWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
             double expiresUnix, [MarshalAs(UnmanagedType.I1)] bool isSecure, [MarshalAs(UnmanagedType.I1)] bool isHttpOnly,
             CookieOpCb callback, IntPtr context);
 
-        [DllImport(LibraryName, EntryPoint = "ag_gtk_cookie_delete", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("__Internal", EntryPoint = "ag_wk_cookie_delete", CallingConvention = CallingConvention.Cdecl)]
         internal static extern void CookieDelete(IntPtr handle,
             [MarshalAs(UnmanagedType.LPUTF8Str)] string name,
             [MarshalAs(UnmanagedType.LPUTF8Str)] string domain,
             [MarshalAs(UnmanagedType.LPUTF8Str)] string path,
             CookieOpCb callback, IntPtr context);
 
-        [DllImport(LibraryName, EntryPoint = "ag_gtk_cookies_clear_all", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("__Internal", EntryPoint = "ag_wk_cookies_clear_all", CallingConvention = CallingConvention.Cdecl)]
         internal static extern void CookiesClearAll(IntPtr handle, CookieOpCb callback, IntPtr context);
 
-        [DllImport(LibraryName, EntryPoint = "ag_gtk_set_enable_dev_tools", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("__Internal", EntryPoint = "ag_wk_set_enable_dev_tools", CallingConvention = CallingConvention.Cdecl)]
         internal static extern void SetEnableDevTools(IntPtr handle, [MarshalAs(UnmanagedType.I1)] bool enable);
 
-        [DllImport(LibraryName, EntryPoint = "ag_gtk_set_ephemeral", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("__Internal", EntryPoint = "ag_wk_set_ephemeral", CallingConvention = CallingConvention.Cdecl)]
         internal static extern void SetEphemeral(IntPtr handle, [MarshalAs(UnmanagedType.I1)] bool ephemeral);
 
-        [DllImport(LibraryName, EntryPoint = "ag_gtk_set_user_agent", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("__Internal", EntryPoint = "ag_wk_set_user_agent", CallingConvention = CallingConvention.Cdecl)]
         internal static extern void SetUserAgent(IntPtr handle, [MarshalAs(UnmanagedType.LPUTF8Str)] string? userAgent);
     }
 }

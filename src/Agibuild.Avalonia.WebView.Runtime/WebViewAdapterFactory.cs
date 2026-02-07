@@ -39,6 +39,13 @@ internal static class WebViewAdapterFactory
 
     private static IEnumerable<string> GetCandidateAssemblyNamesForCurrentPlatform()
     {
+        // iOS check must come before macOS because IsMacOS() returns true on Mac Catalyst.
+        if (OperatingSystem.IsIOS())
+        {
+            yield return "Agibuild.Avalonia.WebView.Adapters.iOS";
+            yield break;
+        }
+
         if (OperatingSystem.IsMacOS())
         {
             yield return "Agibuild.Avalonia.WebView.Adapters.MacOS";

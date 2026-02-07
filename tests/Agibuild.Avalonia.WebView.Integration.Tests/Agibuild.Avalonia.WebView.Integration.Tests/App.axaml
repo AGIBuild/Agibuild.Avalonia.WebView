@@ -2,14 +2,119 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="using:Agibuild.Avalonia.WebView.Integration.Tests"
              x:Class="Agibuild.Avalonia.WebView.Integration.Tests.App"
-             RequestedThemeVariant="Default">
-             <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
+             RequestedThemeVariant="Light">
 
     <Application.DataTemplates>
         <local:ViewLocator/>
     </Application.DataTemplates>
 
+    <Application.Resources>
+        <!-- ════════════ Brand Color System ════════════ -->
+        <Color x:Key="BrandPrimary">#2563EB</Color>
+        <Color x:Key="BrandPrimaryDark">#1E40AF</Color>
+        <Color x:Key="BrandAccent">#06B6D4</Color>
+        <Color x:Key="BrandAccentLight">#67E8F9</Color>
+        <Color x:Key="BrandSuccess">#10B981</Color>
+        <Color x:Key="BrandWarning">#F59E0B</Color>
+        <Color x:Key="BrandDanger">#EF4444</Color>
+
+        <Color x:Key="SurfaceBg">#F1F5F9</Color>
+        <Color x:Key="SurfaceCard">#FFFFFF</Color>
+        <Color x:Key="SurfaceElevated">#FFFFFF</Color>
+
+        <Color x:Key="TextPrimary">#0F172A</Color>
+        <Color x:Key="TextSecondary">#64748B</Color>
+        <Color x:Key="TextOnBrand">#FFFFFF</Color>
+
+        <Color x:Key="BorderDefault">#E2E8F0</Color>
+        <Color x:Key="BorderSubtle">#F1F5F9</Color>
+
+        <SolidColorBrush x:Key="BrandPrimaryBrush" Color="{StaticResource BrandPrimary}" />
+        <SolidColorBrush x:Key="BrandPrimaryDarkBrush" Color="{StaticResource BrandPrimaryDark}" />
+        <SolidColorBrush x:Key="BrandAccentBrush" Color="{StaticResource BrandAccent}" />
+        <SolidColorBrush x:Key="BrandSuccessBrush" Color="{StaticResource BrandSuccess}" />
+        <SolidColorBrush x:Key="BrandWarningBrush" Color="{StaticResource BrandWarning}" />
+        <SolidColorBrush x:Key="BrandDangerBrush" Color="{StaticResource BrandDanger}" />
+        <SolidColorBrush x:Key="SurfaceBgBrush" Color="{StaticResource SurfaceBg}" />
+        <SolidColorBrush x:Key="SurfaceCardBrush" Color="{StaticResource SurfaceCard}" />
+        <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimary}" />
+        <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondary}" />
+        <SolidColorBrush x:Key="TextOnBrandBrush" Color="{StaticResource TextOnBrand}" />
+        <SolidColorBrush x:Key="BorderDefaultBrush" Color="{StaticResource BorderDefault}" />
+    </Application.Resources>
+
     <Application.Styles>
         <FluentTheme />
+
+        <!-- ════════════ Global Typography ════════════ -->
+        <Style Selector="TextBlock.heading">
+            <Setter Property="FontSize" Value="18" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+        </Style>
+        <Style Selector="TextBlock.subheading">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+        </Style>
+        <Style Selector="TextBlock.caption">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+        </Style>
+        <Style Selector="TextBlock.badge">
+            <Setter Property="FontSize" Value="10" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Padding" Value="6,2" />
+        </Style>
+
+        <!-- ════════════ Card Style ════════════ -->
+        <Style Selector="Border.card">
+            <Setter Property="Background" Value="{StaticResource SurfaceCardBrush}" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="{StaticResource BorderDefaultBrush}" />
+            <Setter Property="Padding" Value="12" />
+            <!-- BoxShadow removed: adds extra render layers, causes stack overflow on iOS -->
+        </Style>
+
+        <!-- ════════════ Toolbar Button ════════════ -->
+        <Style Selector="Button.toolbar-btn">
+            <Setter Property="MinWidth" Value="36" />
+            <Setter Property="MinHeight" Value="36" />
+            <Setter Property="Padding" Value="6" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="FontSize" Value="16" />
+        </Style>
+
+        <!-- ════════════ Primary Action Button ════════════ -->
+        <Style Selector="Button.primary">
+            <Setter Property="Background" Value="{StaticResource BrandPrimaryBrush}" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="16,8" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+
+        <!-- ════════════ Section Label ════════════ -->
+        <Style Selector="TextBlock.section-label">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+            <Setter Property="Margin" Value="0,4,0,4" />
+        </Style>
+
+        <!-- ════════════ Monospace TextBox ════════════ -->
+        <Style Selector="TextBox.mono">
+            <Setter Property="FontFamily" Value="Menlo,Consolas,Courier New,monospace" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="CornerRadius" Value="6" />
+        </Style>
+
     </Application.Styles>
 </Application>

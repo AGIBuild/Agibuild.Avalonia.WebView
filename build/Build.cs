@@ -45,9 +45,27 @@ class _Build : NukeBuild
     [Parameter("Android AVD name for emulator. Default: auto-detect first available AVD.")]
     readonly string? AndroidAvd = null;
 
+    [Parameter("iOS Simulator device name. Default: auto-detect first available iPhone simulator.")]
+    readonly string? iOSSimulator = null;
+
     [Parameter("Android SDK root path. Default: ~/Library/Android/sdk (macOS) or ANDROID_HOME env var.")]
-    readonly string AndroidSdkRoot = Environment.GetEnvironmentVariable("ANDROID_HOME")
-        ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Android", "sdk");
+    readonly string AndroidSdkRoot = ResolveAndroidSdkRoot();
+
+    static string ResolveAndroidSdkRoot()
+    {
+        // Try ANDROID_HOME first, then ANDROID_SDK_ROOT (both commonly used).
+        // Must check for non-empty because Nuke resolves empty env-var strings as valid values.
+        var home = Environment.GetEnvironmentVariable("ANDROID_HOME");
+        if (!string.IsNullOrEmpty(home) && Directory.Exists(home))
+            return home;
+
+        var sdkRoot = Environment.GetEnvironmentVariable("ANDROID_SDK_ROOT");
+        if (!string.IsNullOrEmpty(sdkRoot) && Directory.Exists(sdkRoot))
+            return sdkRoot;
+
+        // Fallback: default macOS Android Studio install location
+        return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Android", "sdk");
+    }
 
     // ──────────────────────────────── Paths ──────────────────────────────────────
 
@@ -82,6 +100,11 @@ class _Build : NukeBuild
         TestsDirectory / "Agibuild.Avalonia.WebView.Integration.Tests"
         / "Agibuild.Avalonia.WebView.Integration.Tests.Android"
         / "Agibuild.Avalonia.WebView.Integration.Tests.Android.csproj";
+
+    AbsolutePath E2EiOSProject =>
+        TestsDirectory / "Agibuild.Avalonia.WebView.Integration.Tests"
+        / "Agibuild.Avalonia.WebView.Integration.Tests.iOS"
+        / "Agibuild.Avalonia.WebView.Integration.Tests.iOS.csproj";
 
     AbsolutePath NugetPackageTestProject =>
         TestsDirectory / "Agibuild.Avalonia.WebView.Integration.NugetPackageTests"
@@ -305,6 +328,11 @@ class _Build : NukeBuild
                 / "Agibuild.Avalonia.WebView.Adapters.Android" / "bin" / Configuration
                 / "net10.0-android" / "Agibuild.Avalonia.WebView.Adapters.Android.dll";
 
+            // iOS adapter DLL existence check (requires iOS workload to build)
+            var iosAdapterPath = SrcDirectory
+                / "Agibuild.Avalonia.WebView.Adapters.iOS" / "bin" / Configuration
+                / "net10.0-ios" / "Agibuild.Avalonia.WebView.Adapters.iOS.dll";
+
             var conditionalFiles = new Dictionary<string, (string Description, bool ShouldExist)>
             {
                 ["lib/net10.0/Agibuild.Avalonia.WebView.Adapters.MacOS.dll"] =
@@ -313,6 +341,8 @@ class _Build : NukeBuild
                     ("macOS native shim", OperatingSystem.IsMacOS()),
                 ["runtimes/android/lib/net10.0-android36.0/Agibuild.Avalonia.WebView.Adapters.Android.dll"] =
                     ("Android adapter", File.Exists(androidAdapterPath)),
+                ["runtimes/ios/lib/net10.0-ios18.0/Agibuild.Avalonia.WebView.Adapters.iOS.dll"] =
+                    ("iOS adapter", File.Exists(iosAdapterPath)),
             };
 
             var errors = new List<string>();
@@ -519,35 +549,225 @@ class _Build : NukeBuild
                 Serilog.Log.Information("Emulator booted successfully ({Elapsed:F0}s).", stopwatch.Elapsed.TotalSeconds);
             }
 
-            // 5. Build the Android test APK
-            Serilog.Log.Information("Building Android test app...");
-            DotNetBuild(s => s
-                .SetProjectFile(E2EAndroidProject)
-                .SetConfiguration(Configuration));
+            // 5. Build and install the Android test app
+            //    Use -t:Install so .NET SDK handles Fast Deployment correctly
+            //    (assemblies are deployed to .__override__ on device, not embedded in APK in Debug).
+            Serilog.Log.Information("Building and installing Android test app...");
+            RunProcess("dotnet", $"build \"{E2EAndroidProject}\" --configuration {Configuration} -t:Install");
 
-            // 6. Find and install the APK
-            var apkDir = (AbsolutePath)(Path.GetDirectoryName(E2EAndroidProject)!)
-                         / "bin" / Configuration / "net10.0-android";
-            var apkFiles = apkDir.GlobFiles("*.apk")
-                .Where(f => !f.Name.Contains("-Signed", StringComparison.OrdinalIgnoreCase)
-                          || f.Name.Contains("-Signed", StringComparison.OrdinalIgnoreCase))
-                .OrderByDescending(f => f.Name.Contains("-Signed", StringComparison.OrdinalIgnoreCase))
-                .ToList();
-
-            // Prefer signed APK
-            var signedApk = apkFiles.FirstOrDefault(f => f.Name.Contains("-Signed", StringComparison.OrdinalIgnoreCase));
-            var apk = signedApk ?? apkFiles.FirstOrDefault();
-            Assert.NotNull(apk, $"No APK found in {apkDir}. Build may have failed.");
-
-            Serilog.Log.Information("Installing APK: {Apk}", apk!.Name);
-            RunProcess(adbPath, $"install -r \"{apk}\"");
-
-            // 7. Launch the app
+            // 6. Launch the app
             const string packageName = "com.CompanyName.Agibuild.Avalonia.WebView.Integration.Tests";
             Serilog.Log.Information("Launching {Package}...", packageName);
             RunProcess(adbPath, $"shell monkey -p {packageName} -c android.intent.category.LAUNCHER 1");
 
             Serilog.Log.Information("Android test app deployed and launched successfully.");
+        });
+
+    Target StartIOS => _ => _
+        .Description("Builds the iOS IT test app, deploys it to an iOS Simulator, and launches it.")
+        .Executes(() =>
+        {
+            if (!OperatingSystem.IsMacOS())
+            {
+                Assert.Fail("StartIOS requires macOS with Xcode installed.");
+            }
+
+            // 1. Resolve simulator device
+            var deviceName = iOSSimulator;
+            string deviceUdid;
+
+            if (string.IsNullOrEmpty(deviceName))
+            {
+                Serilog.Log.Information("No --i-o-s-simulator specified, detecting available simulators...");
+                var listJson = RunProcess("xcrun", "simctl list devices available --json", timeoutMs: 15_000);
+
+                // Parse JSON to find first iPhone simulator.
+                // The JSON has structure: { "devices": { "com.apple.CoreSimulator.SimRuntime.iOS-XX-X": [ { "name": "...", "udid": "...", "state": "..." } ] } }
+                var jsonDoc = System.Text.Json.JsonDocument.Parse(listJson);
+                var devicesObj = jsonDoc.RootElement.GetProperty("devices");
+
+                string? foundUdid = null;
+                string? foundName = null;
+                string? foundRuntime = null;
+
+                foreach (var runtime in devicesObj.EnumerateObject())
+                {
+                    // Only consider iOS runtimes
+                    if (!runtime.Name.Contains("iOS", StringComparison.OrdinalIgnoreCase))
+                        continue;
+
+                    foreach (var device in runtime.Value.EnumerateArray())
+                    {
+                        var name = device.GetProperty("name").GetString() ?? "";
+                        var udid = device.GetProperty("udid").GetString() ?? "";
+                        var isAvailable = device.TryGetProperty("isAvailable", out var avail) && avail.GetBoolean();
+
+                        if (!isAvailable) continue;
+
+                        // Prefer iPhone devices
+                        if (name.Contains("iPhone", StringComparison.OrdinalIgnoreCase))
+                        {
+                            foundUdid = udid;
+                            foundName = name;
+                            foundRuntime = runtime.Name;
+                            // Keep searching to pick the latest runtime (they're typically ordered)
+                        }
+                    }
+                }
+
+                if (foundUdid is null)
+                {
+                    Assert.Fail("No available iPhone simulator found. Create one in Xcode > Settings > Platforms.");
+                    return;
+                }
+
+                deviceUdid = foundUdid;
+                Serilog.Log.Information("Auto-selected simulator: {Name} ({Udid}) [{Runtime}]", foundName, deviceUdid, foundRuntime);
+            }
+            else
+            {
+                // Look up UDID by name
+                Serilog.Log.Information("Looking up simulator: {Name}...", deviceName);
+                var listJson = RunProcess("xcrun", "simctl list devices available --json", timeoutMs: 15_000);
+                var jsonDoc = System.Text.Json.JsonDocument.Parse(listJson);
+                var devicesObj = jsonDoc.RootElement.GetProperty("devices");
+
+                string? foundUdid = null;
+                foreach (var runtime in devicesObj.EnumerateObject())
+                {
+                    if (!runtime.Name.Contains("iOS", StringComparison.OrdinalIgnoreCase))
+                        continue;
+
+                    foreach (var device in runtime.Value.EnumerateArray())
+                    {
+                        var name = device.GetProperty("name").GetString() ?? "";
+                        var udid = device.GetProperty("udid").GetString() ?? "";
+                        var isAvailable = device.TryGetProperty("isAvailable", out var avail) && avail.GetBoolean();
+
+                        if (isAvailable && name.Equals(deviceName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            foundUdid = udid;
+                        }
+                    }
+                }
+
+                if (foundUdid is null)
+                {
+                    Assert.Fail($"Simulator '{deviceName}' not found or not available. Check `xcrun simctl list devices available`.");
+                    return;
+                }
+
+                deviceUdid = foundUdid;
+                Serilog.Log.Information("Found simulator: {Name} ({Udid})", deviceName, deviceUdid);
+            }
+
+            // 2. Boot the simulator if not already booted
+            var deviceState = RunProcess("xcrun", $"simctl list devices --json", timeoutMs: 10_000);
+            if (!deviceState.Contains($"\"{deviceUdid}\"") || !deviceState.Contains("\"state\" : \"Booted\""))
+            {
+                // Check specific device state
+                var stateJson = System.Text.Json.JsonDocument.Parse(deviceState);
+                var allDevices = stateJson.RootElement.GetProperty("devices");
+                var isBooted = false;
+
+                foreach (var runtime in allDevices.EnumerateObject())
+                {
+                    foreach (var device in runtime.Value.EnumerateArray())
+                    {
+                        var udid = device.GetProperty("udid").GetString();
+                        if (udid == deviceUdid)
+                        {
+                            var state = device.GetProperty("state").GetString();
+                            isBooted = string.Equals(state, "Booted", StringComparison.OrdinalIgnoreCase);
+                            break;
+                        }
+                    }
+                    if (isBooted) break;
+                }
+
+                if (!isBooted)
+                {
+                    Serilog.Log.Information("Booting simulator {Udid}...", deviceUdid);
+                    RunProcess("xcrun", $"simctl boot {deviceUdid}", timeoutMs: 30_000);
+
+                    // Open Simulator.app so the user can see it
+                    try { RunProcess("open", "-a Simulator", timeoutMs: 5_000); }
+                    catch { /* Simulator.app may already be open */ }
+
+                    // Wait briefly for boot to settle
+                    Thread.Sleep(3000);
+                    Serilog.Log.Information("Simulator booted.");
+                }
+                else
+                {
+                    Serilog.Log.Information("Simulator is already booted.");
+                }
+            }
+
+            // 3. Build the iOS test app for the simulator
+            Serilog.Log.Information("Building iOS test app...");
+            DotNetBuild(s => s
+                .SetProjectFile(E2EiOSProject)
+                .SetConfiguration(Configuration)
+                .SetRuntime("iossimulator-arm64"));
+
+            // 4. Find the .app bundle
+            var appDir = (AbsolutePath)(Path.GetDirectoryName(E2EiOSProject)!)
+                         / "bin" / Configuration / "net10.0-ios" / "iossimulator-arm64";
+            var appBundles = appDir.GlobDirectories("*.app").ToList();
+
+            if (!appBundles.Any())
+            {
+                // Try alternative output path
+                appDir = (AbsolutePath)(Path.GetDirectoryName(E2EiOSProject)!)
+                         / "bin" / Configuration / "net10.0-ios" / "iossimulator-x64";
+                appBundles = appDir.GlobDirectories("*.app").ToList();
+            }
+
+            Assert.NotEmpty(appBundles, $"No .app bundle found in {appDir}. Build may have failed.");
+            var appBundle = appBundles.First();
+            Serilog.Log.Information("Found app bundle: {App}", appBundle.Name);
+
+            // 5. Install the app on the simulator
+            Serilog.Log.Information("Installing app on simulator...");
+            RunProcess("xcrun", $"simctl install {deviceUdid} \"{appBundle}\"", timeoutMs: 120_000);
+
+            // 6. Launch the app (use Process.Start directly to avoid blocking on stdout)
+            const string bundleId = "companyName.Agibuild.Avalonia.WebView.Integration.Tests";
+            Serilog.Log.Information("Launching {BundleId}...", bundleId);
+            var launchProcess = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "xcrun",
+                    Arguments = $"simctl launch {deviceUdid} {bundleId}",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true,
+                }
+            };
+            launchProcess.Start();
+
+            // Wait for the launch process to finish (it prints the PID on success)
+            if (!launchProcess.WaitForExit(15_000))
+            {
+                // simctl launch sometimes hangs; kill it but the app may still have launched
+                try { launchProcess.Kill(); } catch { /* ignore */ }
+                Serilog.Log.Warning("simctl launch timed out, but the app may still be running. Check the simulator.");
+            }
+            else if (launchProcess.ExitCode == 0)
+            {
+                var launchOutput = launchProcess.StandardOutput.ReadToEnd().Trim();
+                Serilog.Log.Information("App launched successfully. {Output}", launchOutput);
+            }
+            else
+            {
+                var launchError = launchProcess.StandardError.ReadToEnd().Trim();
+                Serilog.Log.Warning("simctl launch exited with code {Code}: {Error}", launchProcess.ExitCode, launchError);
+            }
+
+            Serilog.Log.Information("iOS test app deployed and launched on simulator.");
         });
 
     Target NugetPackageTest => _ => _

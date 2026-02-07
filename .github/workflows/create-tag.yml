@@ -13,10 +13,10 @@ on:
           - major
         default: prerelease
       version:
-        description: 'Manual version override (e.g. 0.2.0-preview.1). Leave empty to auto-increment.'
+        description: 'Manual version override (e.g. 0.2.1-preview, 1.0.0). Leave empty to auto-increment.'
         required: false
       prerelease_label:
-        description: 'Prerelease label for auto-increment (e.g. preview, alpha, beta, rc)'
+        description: 'Prerelease label (e.g. preview, alpha, beta, rc). Used with prerelease/minor/major bumps.'
         required: false
         default: preview
 
@@ -52,8 +52,8 @@ jobs:
             LATEST_TAG=$(git tag --list 'v*' --sort=-v:refname | head -1 || true)
 
             if [ -z "$LATEST_TAG" ]; then
-              echo "No existing version tags found. Starting from v0.1.0-${PRE_LABEL}.1"
-              NEW_TAG="v0.1.0-${PRE_LABEL}.1"
+              echo "No existing version tags found. Starting from v0.1.0-${PRE_LABEL}"
+              NEW_TAG="v0.1.0-${PRE_LABEL}"
             else
               echo "Latest tag: ${LATEST_TAG}"
 
@@ -78,61 +78,51 @@ jobs:
               MINOR="${MINOR:-0}"
               PATCH="${PATCH:-0}"
 
-              # Parse prerelease number (last segment after the last dot)
-              if [ "$IS_PRERELEASE" = true ]; then
-                # e.g. "preview.1" -> EXISTING_LABEL="preview", PRE_NUM=1
-                PRE_NUM="${PRE_PART##*.}"
-                EXISTING_LABEL="${PRE_PART%.*}"
-              else
-                PRE_NUM=0
-                EXISTING_LABEL=""
-              fi
-
-              echo "Parsed: MAJOR=$MAJOR MINOR=$MINOR PATCH=$PATCH IS_PRERELEASE=$IS_PRERELEASE LABEL=$EXISTING_LABEL PRE_NUM=$PRE_NUM"
+              echo "Parsed: MAJOR=$MAJOR MINOR=$MINOR PATCH=$PATCH IS_PRERELEASE=$IS_PRERELEASE PRE_PART=$PRE_PART"
               echo "Bump: $BUMP, Prerelease label: $PRE_LABEL"
 
               # ── Calculate new version based on bump type ──────────────────
+              # Version format: {major}.{minor}.{patch}[-label]
+              #   -preview is a simple flag, NOT preview.N
+              #
+              # Bump behaviors:
+              #   prerelease: bump patch, add/keep -label
+              #     v0.2.0-preview -> v0.2.1-preview
+              #     v0.2.0         -> v0.2.1-preview
+              #   patch (release/promote): drop -label, or bump patch stable
+              #     v0.2.1-preview -> v0.2.1        (promote to stable)
+              #     v0.2.0         -> v0.2.1
+              #   minor: bump minor, keep prerelease state
+              #     v0.2.1-preview -> v0.3.0-preview
+              #     v0.2.0         -> v0.3.0
+              #   major: bump major, keep prerelease state
+              #     v0.2.1-preview -> v1.0.0-preview
+              #     v0.2.0         -> v1.0.0
               case "$BUMP" in
                 prerelease)
-                  if [ "$IS_PRERELEASE" = true ] && [ "$EXISTING_LABEL" = "$PRE_LABEL" ]; then
-                    # Same label: increment prerelease number
-                    # v0.1.0-preview.1 -> v0.1.0-preview.2
-                    NEW_PRE_NUM=$((PRE_NUM + 1))
-                    NEW_TAG="v${MAJOR}.${MINOR}.${PATCH}-${PRE_LABEL}.${NEW_PRE_NUM}"
-                  elif [ "$IS_PRERELEASE" = true ]; then
-                    # Different label: start at 1 with new label on same version
-                    # v0.1.0-alpha.3 -> v0.1.0-preview.1
-                    NEW_TAG="v${MAJOR}.${MINOR}.${PATCH}-${PRE_LABEL}.1"
-                  else
-                    # Stable release: bump patch and start prerelease
-                    # v0.2.0 -> v0.2.1-preview.1
-                    NEW_TAG="v${MAJOR}.${MINOR}.$((PATCH + 1))-${PRE_LABEL}.1"
-                  fi
+                  # Bump patch, add/keep -label
+                  NEW_TAG="v${MAJOR}.${MINOR}.$((PATCH + 1))-${PRE_LABEL}"
                   ;;
                 patch)
                   if [ "$IS_PRERELEASE" = true ]; then
-                    # v0.1.0-preview.1 -> v0.1.1-preview.1
-                    NEW_TAG="v${MAJOR}.${MINOR}.$((PATCH + 1))-${PRE_LABEL}.1"
+                    # Promote: drop prerelease label, keep same M.m.p
+                    NEW_TAG="v${MAJOR}.${MINOR}.${PATCH}"
                   else
-                    # v0.2.0 -> v0.2.1
+                    # Bump patch
                     NEW_TAG="v${MAJOR}.${MINOR}.$((PATCH + 1))"
                   fi
                   ;;
                 minor)
                   if [ "$IS_PRERELEASE" = true ]; then
-                    # v0.1.0-preview.1 -> v0.2.0-preview.1
-                    NEW_TAG="v${MAJOR}.$((MINOR + 1)).0-${PRE_LABEL}.1"
+                    NEW_TAG="v${MAJOR}.$((MINOR + 1)).0-${PRE_LABEL}"
                   else
-                    # v0.2.0 -> v0.3.0
                     NEW_TAG="v${MAJOR}.$((MINOR + 1)).0"
                   fi
                   ;;
                 major)
                   if [ "$IS_PRERELEASE" = true ]; then
-                    # v0.1.0-preview.1 -> v1.0.0-preview.1
-                    NEW_TAG="v$((MAJOR + 1)).0.0-${PRE_LABEL}.1"
+                    NEW_TAG="v$((MAJOR + 1)).0.0-${PRE_LABEL}"
                   else
-                    # v0.2.0 -> v1.0.0
                     NEW_TAG="v$((MAJOR + 1)).0.0"
                   fi
                   ;;

@@ -21,6 +21,7 @@
     <InternalsVisibleTo Include="Agibuild.Avalonia.WebView.Adapters.Windows" />
     <InternalsVisibleTo Include="Agibuild.Avalonia.WebView.Adapters.Gtk" />
     <InternalsVisibleTo Include="Agibuild.Avalonia.WebView.Adapters.Android" />
+    <InternalsVisibleTo Include="Agibuild.Avalonia.WebView.Adapters.iOS" />
     <InternalsVisibleTo Include="Agibuild.Avalonia.WebView.Testing" />
     <InternalsVisibleTo Include="Agibuild.Avalonia.WebView.UnitTests" />
     <InternalsVisibleTo Include="Agibuild.Avalonia.WebView.Integration.Tests" />

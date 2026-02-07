@@ -11,9 +11,11 @@
     <RepositoryUrl>https://github.com/AgibuilDev/Agibuild.Avalonia.WebView.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
 
-    <!-- MinVer: Git tag-driven versioning -->
+    <!-- MinVer: Git tag-driven versioning
+         Tag format: v{major}.{minor}.{patch}[-preview]
+         Examples: v0.2.0-preview, v0.2.1-preview, v1.0.0 -->
     <MinVerTagPrefix>v</MinVerTagPrefix>
-    <MinVerDefaultPreReleaseIdentifiers>preview.0</MinVerDefaultPreReleaseIdentifiers>
+    <MinVerDefaultPreReleaseIdentifiers>preview</MinVerDefaultPreReleaseIdentifiers>
     <MinVerMinimumMajorMinor>0.1</MinVerMinimumMajorMinor>
   </PropertyGroup>
 

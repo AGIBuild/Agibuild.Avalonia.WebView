@@ -12,6 +12,7 @@ namespace Agibuild.Avalonia.WebView.Integration.Tests.ViewModels
             WebView2Smoke = new WebView2SmokeViewModel();
             ConsumerE2E = new ConsumerWebViewE2EViewModel();
             AdvancedE2E = new AdvancedFeaturesE2EViewModel();
+            NavigationIntercept = new NavigationInterceptViewModel();
         }
 
         [ObservableProperty]
@@ -29,5 +30,7 @@ namespace Agibuild.Avalonia.WebView.Integration.Tests.ViewModels
         public ConsumerWebViewE2EViewModel ConsumerE2E { get; }
 
         public AdvancedFeaturesE2EViewModel AdvancedE2E { get; }
+
+        public NavigationInterceptViewModel NavigationIntercept { get; }
     }
 }

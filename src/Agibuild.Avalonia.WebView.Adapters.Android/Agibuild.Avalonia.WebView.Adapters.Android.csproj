@@ -11,4 +11,10 @@
     <ProjectReference Include="..\Agibuild.Avalonia.WebView.Core\Agibuild.Avalonia.WebView.Core.csproj" />
     <ProjectReference Include="..\Agibuild.Avalonia.WebView.Adapters.Abstractions\Agibuild.Avalonia.WebView.Adapters.Abstractions.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Xamarin.AndroidX.Activity" Version="1.12.2.1" />
+    <!-- Exclude JVM variant to resolve duplicate class conflict with the Android variant -->
+    <PackageReference Include="Xamarin.AndroidX.Compose.Runtime.Annotation.Jvm" Version="1.10.0.1" ExcludeAssets="all" PrivateAssets="all" />
+  </ItemGroup>
 </Project>

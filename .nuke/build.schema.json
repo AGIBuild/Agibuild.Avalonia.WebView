@@ -36,6 +36,7 @@
         "Restore",
         "Start",
         "StartAndroid",
+        "StartIOS",
         "Test",
         "UnitTests",
         "ValidatePackage"
@@ -128,6 +129,10 @@
           "type": "integer",
           "description": "Minimum line coverage percentage (0-100). Default: 90",
           "format": "int32"
+        },
+        "iOSSimulator": {
+          "type": "string",
+          "description": "iOS Simulator device name. Default: auto-detect first available iPhone simulator"
         },
         "NuGetApiKey": {
           "type": "string",

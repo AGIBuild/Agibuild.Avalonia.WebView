@@ -37,6 +37,7 @@ public class WebView : NativeControlHost
 
     private WebViewCore? _core;
     private bool _coreAttached;
+    private bool _adapterUnavailable;
     private ILoggerFactory? _loggerFactory;
 
     // ---------------------------------------------------------------------------
@@ -80,6 +81,12 @@ public class WebView : NativeControlHost
     /// <c>true</c> while a navigation is in progress.
     /// </summary>
     public bool IsLoading => _core?.IsLoading ?? false;
+
+    /// <summary>
+    /// <c>true</c> when a platform adapter is available and the WebView is functional.
+    /// <c>false</c> on platforms without a registered adapter (e.g. Android before the adapter is implemented).
+    /// </summary>
+    public bool IsAvailable => _core is not null && _coreAttached;
 
     /// <summary>
     /// The channel id for web message bridge isolation.
@@ -203,6 +210,14 @@ public class WebView : NativeControlHost
                 _ = _core.NavigateAsync(pendingSource);
             }
         }
+        catch (PlatformNotSupportedException)
+        {
+            // No adapter for this platform — degrade gracefully (empty control).
+            _core?.Dispose();
+            _core = null;
+            _coreAttached = false;
+            _adapterUnavailable = true;
+        }
         catch
         {
             _core?.Dispose();
@@ -251,6 +266,13 @@ public class WebView : NativeControlHost
     {
         if (_core is null)
         {
+            if (_adapterUnavailable)
+            {
+                throw new PlatformNotSupportedException(
+                    "No WebView adapter is available for the current platform. " +
+                    "WebView functionality is not supported.");
+            }
+
             throw new InvalidOperationException(
                 "WebView is not yet attached to the visual tree. " +
                 "Wait until the control is loaded before calling navigation methods.");

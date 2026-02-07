@@ -182,6 +182,63 @@ public sealed class CoverageGapTests
         Assert.Equal(a.GetHashCode(), b.GetHashCode());
     }
 
+    // ========================= WebViewAdapterRegistration record =========================
+
+    [Fact]
+    public void WebViewAdapterRegistration_value_equality()
+    {
+        Func<IWebViewAdapter> factory = () => new MockWebViewAdapter();
+        var a = new WebViewAdapterRegistration(WebViewAdapterPlatform.iOS, "wk-ios", factory, 100);
+        var b = new WebViewAdapterRegistration(WebViewAdapterPlatform.iOS, "wk-ios", factory, 100);
+
+        Assert.Equal(a, b);
+        Assert.Equal(a.GetHashCode(), b.GetHashCode());
+    }
+
+    [Fact]
+    public void WebViewAdapterRegistration_inequality_different_platform()
+    {
+        Func<IWebViewAdapter> factory = () => new MockWebViewAdapter();
+        var a = new WebViewAdapterRegistration(WebViewAdapterPlatform.iOS, "wk", factory, 100);
+        var b = new WebViewAdapterRegistration(WebViewAdapterPlatform.Gtk, "wk", factory, 100);
+
+        Assert.NotEqual(a, b);
+    }
+
+    [Fact]
+    public void WebViewAdapterRegistration_inequality_different_priority()
+    {
+        Func<IWebViewAdapter> factory = () => new MockWebViewAdapter();
+        var a = new WebViewAdapterRegistration(WebViewAdapterPlatform.iOS, "wk", factory, 100);
+        var b = new WebViewAdapterRegistration(WebViewAdapterPlatform.iOS, "wk", factory, 200);
+
+        Assert.NotEqual(a, b);
+    }
+
+    [Fact]
+    public void WebViewAdapterRegistration_ToString_contains_fields()
+    {
+        var reg = new WebViewAdapterRegistration(
+            WebViewAdapterPlatform.iOS, "wkwebview-ios", () => new MockWebViewAdapter(), 100);
+
+        var str = reg.ToString();
+        Assert.Contains("iOS", str);
+        Assert.Contains("wkwebview-ios", str);
+    }
+
+    [Fact]
+    public void WebViewAdapterRegistration_deconstruction()
+    {
+        Func<IWebViewAdapter> factory = () => new MockWebViewAdapter();
+        var reg = new WebViewAdapterRegistration(WebViewAdapterPlatform.Gtk, "webkitgtk", factory, 50);
+
+        var (platform, adapterId, f, priority) = reg;
+        Assert.Equal(WebViewAdapterPlatform.Gtk, platform);
+        Assert.Equal("webkitgtk", adapterId);
+        Assert.Same(factory, f);
+        Assert.Equal(50, priority);
+    }
+
     // ========================= WebViewCore — sub-frame auto-allow =========================
 
     [Fact]

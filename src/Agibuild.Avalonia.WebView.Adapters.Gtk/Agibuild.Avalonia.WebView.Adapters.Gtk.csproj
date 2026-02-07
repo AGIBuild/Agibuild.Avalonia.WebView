@@ -3,10 +3,38 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <!-- CA2255: ModuleInitializer is the correct pattern for adapter auto-registration. -->
+    <NoWarn>$(NoWarn);CA2255</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Agibuild.Avalonia.WebView.Core\Agibuild.Avalonia.WebView.Core.csproj" />
     <ProjectReference Include="..\Agibuild.Avalonia.WebView.Adapters.Abstractions\Agibuild.Avalonia.WebView.Adapters.Abstractions.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Native/WebKitGtkShim.c" />
+  </ItemGroup>
+
+  <!--
+    Build the native WebKitGTK shim on Linux.
+    Requires: libwebkit2gtk-4.1-dev, pkg-config
+    Output: runtimes/linux-x64/native/libAgibuildWebViewGtk.so
+  -->
+  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('linux'))">
+    <AgGtkShimLibName>libAgibuildWebViewGtk.so</AgGtkShimLibName>
+  </PropertyGroup>
+
+  <Target Name="BuildGtkShim" BeforeTargets="Build"
+          Condition="$([MSBuild]::IsOSPlatform('linux'))">
+    <PropertyGroup>
+      <_AgGtkShimOutDir>$(TargetDir)runtimes/linux-x64/native/</_AgGtkShimOutDir>
+      <_AgGtkShimOutPath>$(_AgGtkShimOutDir)$(AgGtkShimLibName)</_AgGtkShimOutPath>
+    </PropertyGroup>
+
+    <MakeDir Directories="$(_AgGtkShimOutDir)" />
+    <Exec Command="gcc -shared -fPIC &quot;$(MSBuildProjectDirectory)/Native/WebKitGtkShim.c&quot; -o &quot;$(_AgGtkShimOutPath)&quot; $(shell pkg-config --cflags --libs webkit2gtk-4.1 gtk+-3.0)"
+          WorkingDirectory="$(MSBuildProjectDirectory)"
+          IgnoreExitCode="true" />
+  </Target>
 </Project>
