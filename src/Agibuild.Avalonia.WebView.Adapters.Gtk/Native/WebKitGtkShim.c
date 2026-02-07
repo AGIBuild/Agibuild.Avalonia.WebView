@@ -89,6 +89,9 @@ typedef struct
 
 typedef void* ag_gtk_handle;
 
+/* Forward declarations */
+void ag_gtk_detach(ag_gtk_handle handle);
+
 /* ========== GTK thread safety ========== */
 
 static void ensure_gtk_init(void)
@@ -782,9 +785,13 @@ void ag_gtk_cookie_set(ag_gtk_handle handle,
 
     if (expires_unix > 0)
     {
-        SoupDate* date = soup_date_new_from_time_t((time_t)expires_unix);
-        soup_cookie_set_expires(cookie, date);
-        soup_date_free(date);
+        /* libsoup3 (used by webkit2gtk-4.1) replaced SoupDate with GDateTime. */
+        GDateTime* date = g_date_time_new_from_unix_utc(expires_unix);
+        if (date)
+        {
+            soup_cookie_set_expires(cookie, date);
+            g_date_time_unref(date);
+        }
     }
 
     soup_cookie_set_secure(cookie, is_secure);

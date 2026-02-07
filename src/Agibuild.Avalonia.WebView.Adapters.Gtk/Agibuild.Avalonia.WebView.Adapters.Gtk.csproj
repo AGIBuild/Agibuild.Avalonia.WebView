@@ -33,8 +33,11 @@
     </PropertyGroup>
 
     <MakeDir Directories="$(_AgGtkShimOutDir)" />
-    <Exec Command="gcc -shared -fPIC &quot;$(MSBuildProjectDirectory)/Native/WebKitGtkShim.c&quot; -o &quot;$(_AgGtkShimOutPath)&quot; `pkg-config --cflags --libs webkit2gtk-4.1 gtk+-3.0`"
+    <!-- IgnoreStandardErrorWarningFormat: prevent MSBuild from parsing gcc output as errors.
+         IgnoreExitCode: allow build to continue if native compilation fails (e.g. missing dev libs). -->
+    <Exec Command="gcc -shared -fPIC -w &quot;$(MSBuildProjectDirectory)/Native/WebKitGtkShim.c&quot; -o &quot;$(_AgGtkShimOutPath)&quot; `pkg-config --cflags --libs webkit2gtk-4.1 gtk+-3.0`"
           WorkingDirectory="$(MSBuildProjectDirectory)"
-          IgnoreExitCode="true" />
+          IgnoreExitCode="true"
+          IgnoreStandardErrorWarningFormat="true" />
   </Target>
 </Project>
