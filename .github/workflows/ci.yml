@@ -22,12 +22,17 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # MinVer needs full git history
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
           dotnet-quality: 'preview'
+
+      - name: Install .NET workloads
+        run: dotnet workload install android ios macos
 
       - name: Install ReportGenerator
         run: dotnet tool install --global dotnet-reportgenerator-globaltool || true
@@ -64,12 +69,18 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
           dotnet-quality: 'preview'
+
+      - name: Install .NET workloads
+        run: dotnet workload install android
+        shell: pwsh
 
       - name: Install ReportGenerator
         run: dotnet tool install --global dotnet-reportgenerator-globaltool 2>$null; $true
@@ -100,12 +111,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
           dotnet-quality: 'preview'
+
+      - name: Install .NET workloads
+        run: dotnet workload install android
 
       - name: Install ReportGenerator
         run: dotnet tool install --global dotnet-reportgenerator-globaltool || true

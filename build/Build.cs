@@ -122,12 +122,15 @@ class _Build : NukeBuild
         });
 
     Target Restore => _ => _
-        .Description("Restores NuGet packages for the solution.")
+        .Description("Restores NuGet packages for buildable projects (avoids failing on missing workloads).")
         .DependsOn(Clean)
         .Executes(() =>
         {
-            DotNetRestore(s => s
-                .SetProjectFile(SolutionFile));
+            foreach (var project in GetProjectsToBuild())
+            {
+                DotNetRestore(s => s
+                    .SetProjectFile(project));
+            }
         });
 
     Target Build => _ => _
@@ -890,8 +893,25 @@ class _Build : NukeBuild
             yield return SrcDirectory / "Agibuild.Avalonia.WebView.Adapters.MacOS" / "Agibuild.Avalonia.WebView.Adapters.MacOS.csproj";
         }
 
-        // Android adapter (requires Android workload — build failure is non-fatal for Pack)
-        yield return SrcDirectory / "Agibuild.Avalonia.WebView.Adapters.Android" / "Agibuild.Avalonia.WebView.Adapters.Android.csproj";
+        // Android adapter (requires Android workload)
+        if (HasDotNetWorkload("android"))
+        {
+            yield return SrcDirectory / "Agibuild.Avalonia.WebView.Adapters.Android" / "Agibuild.Avalonia.WebView.Adapters.Android.csproj";
+        }
+        else
+        {
+            Serilog.Log.Warning("Android workload not detected — skipping Android adapter build.");
+        }
+
+        // iOS adapter (requires macOS host + iOS workload)
+        if (OperatingSystem.IsMacOS() && HasDotNetWorkload("ios"))
+        {
+            yield return SrcDirectory / "Agibuild.Avalonia.WebView.Adapters.iOS" / "Agibuild.Avalonia.WebView.Adapters.iOS.csproj";
+        }
+        else if (OperatingSystem.IsMacOS())
+        {
+            Serilog.Log.Warning("iOS workload not detected — skipping iOS adapter build.");
+        }
 
         // Main packable project
         yield return SrcDirectory / "Agibuild.Avalonia.WebView" / "Agibuild.Avalonia.WebView.csproj";
@@ -899,5 +919,33 @@ class _Build : NukeBuild
         // Test projects
         yield return TestsDirectory / "Agibuild.Avalonia.WebView.Testing" / "Agibuild.Avalonia.WebView.Testing.csproj";
         yield return TestsDirectory / "Agibuild.Avalonia.WebView.UnitTests" / "Agibuild.Avalonia.WebView.UnitTests.csproj";
+    }
+
+    static bool HasDotNetWorkload(string platformKeyword)
+    {
+        try
+        {
+            var output = RunProcess("dotnet", "workload list", 30_000);
+            // Workload IDs can be 'android', 'maui-android', 'ios', 'maui-ios', etc.
+            // Match any installed workload whose ID contains the platform keyword as a component.
+            // Example: 'maui-android' matches keyword 'android'; 'ios' matches keyword 'ios'.
+            return output.Split('\n')
+                .Any(line =>
+                {
+                    var trimmed = line.TrimStart();
+                    // Skip header/separator lines
+                    if (trimmed.Length == 0 || trimmed.StartsWith('-') || trimmed.StartsWith("Installed") || trimmed.StartsWith("Workload") || trimmed.StartsWith("Use "))
+                        return false;
+                    // Extract the workload ID (first whitespace-delimited token)
+                    var id = trimmed.Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? "";
+                    // Match exact ID or as a hyphen-delimited component
+                    return id.Equals(platformKeyword, StringComparison.OrdinalIgnoreCase)
+                        || id.Split('-').Any(part => part.Equals(platformKeyword, StringComparison.OrdinalIgnoreCase));
+                });
+        }
+        catch
+        {
+            return false;
+        }
     }
 }
