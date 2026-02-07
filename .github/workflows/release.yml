@@ -111,12 +111,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download NuGet package
-        uses: actions/download-artifact@v4
-        with:
-          name: nuget-package
-          path: artifacts/packages
-
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -124,5 +118,4 @@ jobs:
           name: ${{ github.ref_name }}
           draft: false
           prerelease: ${{ contains(github.ref_name, '-') }}
-          files: artifacts/packages/*.nupkg
           generate_release_notes: true
