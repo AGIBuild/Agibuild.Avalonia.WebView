@@ -1,5 +1,7 @@
 # Agibuild.Avalonia.WebView
 
+[![CI](https://github.com/AGIBuild/Agibuild.Avalonia.WebView/actions/workflows/ci.yml/badge.svg)](https://github.com/AGIBuild/Agibuild.Avalonia.WebView/actions/workflows/ci.yml)
+[![Release](https://github.com/AGIBuild/Agibuild.Avalonia.WebView/actions/workflows/release.yml/badge.svg)](https://github.com/AGIBuild/Agibuild.Avalonia.WebView/actions/workflows/release.yml)
 [![NuGet](https://img.shields.io/nuget/v/Agibuild.Avalonia.WebView?logo=nuget&color=blue)](https://www.nuget.org/packages/Agibuild.Avalonia.WebView)
 [![NuGet Downloads](https://img.shields.io/nuget/dt/Agibuild.Avalonia.WebView?logo=nuget&color=green)](https://www.nuget.org/packages/Agibuild.Avalonia.WebView)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE.txt)
