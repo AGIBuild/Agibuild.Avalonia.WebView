@@ -92,48 +92,53 @@ public sealed class AvaloniaWebDialog : IWebDialog
     }
 
     // ==== IWebDialog — Window Management ====
+    // All window-management methods are thread-safe: if called from a non-UI thread
+    // the operation is marshalled to the Avalonia UI thread automatically.
 
     public string? Title
     {
         get => _window.Title;
-        set => _window.Title = value;
+        set => RunOnUIThread(() => _window.Title = value);
     }
 
     public bool CanUserResize
     {
         get => _window.CanResize;
-        set => _window.CanResize = value;
+        set => RunOnUIThread(() => _window.CanResize = value);
     }
 
     public void Show()
     {
         _shown = true;
-        _window.Show();
+        RunOnUIThread(() => _window.Show());
     }
 
     public bool Show(IPlatformHandle owner)
     {
         _shown = true;
-        _window.Show();
+        RunOnUIThread(() => _window.Show());
         return true;
     }
 
     public void Close()
     {
         if (_disposed) return;
-        _window.Close();
+        RunOnUIThread(() => _window.Close());
     }
 
     public bool Resize(int width, int height)
     {
-        _window.Width = width;
-        _window.Height = height;
+        RunOnUIThread(() =>
+        {
+            _window.Width = width;
+            _window.Height = height;
+        });
         return true;
     }
 
     public bool Move(int x, int y)
     {
-        _window.Position = new PixelPoint(x, y);
+        RunOnUIThread(() => _window.Position = new PixelPoint(x, y));
         return true;
     }
 
@@ -154,26 +159,29 @@ public sealed class AvaloniaWebDialog : IWebDialog
 
     public async Task NavigateAsync(Uri uri)
     {
-        await EnsureReadyAsync().ConfigureAwait(false);
-        await _webView.NavigateAsync(uri).ConfigureAwait(false);
+        // Do NOT use ConfigureAwait(false) here: _webView is an Avalonia UI control
+        // and must be accessed on the UI thread. Keeping the SynchronizationContext
+        // ensures the continuation runs on the Avalonia dispatcher.
+        await EnsureReadyAsync();
+        await _webView.NavigateAsync(uri);
     }
 
     public async Task NavigateToStringAsync(string html)
     {
-        await EnsureReadyAsync().ConfigureAwait(false);
-        await _webView.NavigateToStringAsync(html).ConfigureAwait(false);
+        await EnsureReadyAsync();
+        await _webView.NavigateToStringAsync(html);
     }
 
     public async Task NavigateToStringAsync(string html, Uri? baseUrl)
     {
-        await EnsureReadyAsync().ConfigureAwait(false);
-        await _webView.NavigateToStringAsync(html, baseUrl).ConfigureAwait(false);
+        await EnsureReadyAsync();
+        await _webView.NavigateToStringAsync(html, baseUrl);
     }
 
     public async Task<string?> InvokeScriptAsync(string script)
     {
-        await EnsureReadyAsync().ConfigureAwait(false);
-        return await _webView.InvokeScriptAsync(script).ConfigureAwait(false);
+        await EnsureReadyAsync();
+        return await _webView.InvokeScriptAsync(script);
     }
 
     public bool GoBack() => _webView.GoBack();
@@ -228,8 +236,11 @@ public sealed class AvaloniaWebDialog : IWebDialog
         _disposed = true;
 
         _readyTcs.TrySetResult(); // unblock any waiters
-        _window.Closing -= OnWindowClosing;
-        _window.Close();
+        RunOnUIThread(() =>
+        {
+            _window.Closing -= OnWindowClosing;
+            _window.Close();
+        });
     }
 
     // ==== Private ====
@@ -244,5 +255,17 @@ public sealed class AvaloniaWebDialog : IWebDialog
                 "The WebView needs to be attached to the visual tree first.");
         }
         return _readyTcs.Task;
+    }
+
+    /// <summary>
+    /// Executes <paramref name="action"/> on the Avalonia UI thread.
+    /// If already on the UI thread, runs synchronously; otherwise posts to the dispatcher.
+    /// </summary>
+    private static void RunOnUIThread(Action action)
+    {
+        if (Dispatcher.UIThread.CheckAccess())
+            action();
+        else
+            Dispatcher.UIThread.Post(action);
     }
 }

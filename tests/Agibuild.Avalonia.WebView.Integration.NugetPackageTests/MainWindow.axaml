@@ -1,9 +1,13 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        xmlns:agw="using:Agibuild.Avalonia.WebView"
         x:Class="Agibuild.Avalonia.WebView.Integration.NugetPackageTests.MainWindow"
-        Title="Agibuild.Avalonia.WebView.Integration.NugetPackageTests">
-    Welcome to Avalonia!
+        Title="NuGet Package Smoke Test" Width="800" Height="600">
+  <DockPanel>
+    <TextBlock x:Name="StatusText" DockPanel.Dock="Top" Margin="8"
+               FontSize="14" Foreground="Gray"
+               Text="Starting smoke test..." />
+    <!-- WebView created via XAML — relies on UseAgibuildWebView() DI initialization -->
+    <agw:WebView x:Name="WebViewControl" />
+  </DockPanel>
 </Window>

@@ -7,8 +7,8 @@
 
     <IsPackable>true</IsPackable>
     <PackageId>Agibuild.Avalonia.WebView</PackageId>
-    <Description>Cross-platform WebView control for Avalonia UI with native platform adapters (WKWebView on macOS, WebView2 on Windows, WebKitGTK on Linux). Provides embedded WebView, popup dialog, and OAuth authentication flows.</Description>
-    <PackageTags>avalonia;webview;wkwebview;webview2;cross-platform;macos;windows;linux</PackageTags>
+    <Description>Cross-platform WebView control for Avalonia UI with native platform adapters (WKWebView on macOS, WebView2 on Windows, WebKitGTK on Linux, Android WebView). Provides embedded WebView, popup dialog, and OAuth authentication flows.</Description>
+    <PackageTags>avalonia;webview;wkwebview;webview2;android;cross-platform;macos;windows;linux</PackageTags>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
 
@@ -23,6 +23,8 @@
     <ProjectReference Include="..\Agibuild.Avalonia.WebView.Runtime\Agibuild.Avalonia.WebView.Runtime.csproj" PrivateAssets="all" />
     <ProjectReference Include="..\Agibuild.Avalonia.WebView.DependencyInjection\Agibuild.Avalonia.WebView.DependencyInjection.csproj" PrivateAssets="all" />
     <PackageReference Include="Avalonia" Version="11.3.11" />
+    <!-- Transitive dependency from Runtime and DI projects (which use PrivateAssets=all). -->
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.2" />
   </ItemGroup>
 
   <ItemGroup>
@@ -53,36 +55,41 @@
           PackagePath="" />
   </ItemGroup>
 
+  <!--
+    Platform adapters: ALL managed DLLs go in lib/net10.0/ so the .NET runtime
+    resolves them alongside the core assemblies. Module initializers handle
+    platform detection — adapters on unsupported OSes simply skip registration.
+
+    IMPORTANT: Do NOT put managed DLLs in runtimes/{rid}/lib/ alongside lib/{tfm}/ entries —
+    the .NET host replaces lib/ runtime assets with runtimeTargets when RID matches,
+    which would drop the core assemblies from the TPA list.
+  -->
   <ItemGroup>
-    <!-- Runtime-only Windows adapter -->
+    <!-- Windows adapter (always built — stub on non-Windows) -->
     <None Include="..\Agibuild.Avalonia.WebView.Adapters.Windows\bin\$(Configuration)\net10.0\Agibuild.Avalonia.WebView.Adapters.Windows.dll"
           Pack="true"
-          PackagePath="runtimes/win/lib/net10.0/" />
+          PackagePath="lib/net10.0/" />
 
-    <!-- Runtime-only Linux (GTK) adapter -->
+    <!-- Linux (GTK) adapter (always built — stub on non-Linux) -->
     <None Include="..\Agibuild.Avalonia.WebView.Adapters.Gtk\bin\$(Configuration)\net10.0\Agibuild.Avalonia.WebView.Adapters.Gtk.dll"
           Pack="true"
-          PackagePath="runtimes/linux/lib/net10.0/" />
+          PackagePath="lib/net10.0/" />
 
-    <!-- Runtime-only Android adapter (requires Android workload for build) -->
+    <!-- macOS adapter (conditional — requires macOS build or pre-built artifacts) -->
+    <None Include="..\Agibuild.Avalonia.WebView.Adapters.MacOS\bin\$(Configuration)\net10.0\Agibuild.Avalonia.WebView.Adapters.MacOS.dll"
+          Pack="true"
+          PackagePath="lib/net10.0/"
+          Condition="Exists('..\Agibuild.Avalonia.WebView.Adapters.MacOS\bin\$(Configuration)\net10.0\Agibuild.Avalonia.WebView.Adapters.MacOS.dll')" />
+
+    <!-- Android adapter (different TFM — stays in runtimes/) -->
     <None Include="..\Agibuild.Avalonia.WebView.Adapters.Android\bin\$(Configuration)\net10.0-android\Agibuild.Avalonia.WebView.Adapters.Android.dll"
           Pack="true"
-          PackagePath="runtimes/android/lib/net10.0-android/"
+          PackagePath="runtimes/android/lib/net10.0-android36.0/"
           Condition="Exists('..\Agibuild.Avalonia.WebView.Adapters.Android\bin\$(Configuration)\net10.0-android\Agibuild.Avalonia.WebView.Adapters.Android.dll')" />
   </ItemGroup>
 
-  <!--
-    macOS assets: Use Exists() conditions so that pre-built artifacts from a macOS CI leg
-    are included when packing on any platform.
-  -->
+  <!-- Native assets stay in runtimes/ (these are NOT managed DLLs). -->
   <ItemGroup>
-    <!-- Runtime-only macOS adapter -->
-    <None Include="..\Agibuild.Avalonia.WebView.Adapters.MacOS\bin\$(Configuration)\net10.0\Agibuild.Avalonia.WebView.Adapters.MacOS.dll"
-          Pack="true"
-          PackagePath="runtimes/osx/lib/net10.0/"
-          Condition="Exists('..\Agibuild.Avalonia.WebView.Adapters.MacOS\bin\$(Configuration)\net10.0\Agibuild.Avalonia.WebView.Adapters.MacOS.dll')" />
-
-    <!-- Runtime-only native shim -->
     <None Include="..\Agibuild.Avalonia.WebView.Adapters.MacOS\bin\$(Configuration)\net10.0\runtimes\osx\native\libAgibuildWebViewWk.dylib"
           Pack="true"
           PackagePath="runtimes/osx/native/"

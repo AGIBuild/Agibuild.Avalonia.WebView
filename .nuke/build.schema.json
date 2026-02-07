@@ -30,6 +30,7 @@
         "Clean",
         "Coverage",
         "IntegrationTests",
+        "NugetPackageTest",
         "Pack",
         "Publish",
         "Restore",

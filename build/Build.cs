@@ -83,6 +83,10 @@ class _Build : NukeBuild
         / "Agibuild.Avalonia.WebView.Integration.Tests.Android"
         / "Agibuild.Avalonia.WebView.Integration.Tests.Android.csproj";
 
+    AbsolutePath NugetPackageTestProject =>
+        TestsDirectory / "Agibuild.Avalonia.WebView.Integration.NugetPackageTests"
+        / "Agibuild.Avalonia.WebView.Integration.NugetPackageTests.csproj";
+
     // ──────────────────────────────── Targets ────────────────────────────────────
 
     Target Clean => _ => _
@@ -285,9 +289,9 @@ class _Build : NukeBuild
                 ["lib/net10.0/Agibuild.Avalonia.WebView.Runtime.dll"] = "Runtime host",
                 ["lib/net10.0/Agibuild.Avalonia.WebView.DependencyInjection.dll"] = "DI extensions",
 
-                // Platform adapters (always built — stub adapters compile on all platforms)
-                ["runtimes/win/lib/net10.0/Agibuild.Avalonia.WebView.Adapters.Windows.dll"] = "Windows adapter",
-                ["runtimes/linux/lib/net10.0/Agibuild.Avalonia.WebView.Adapters.Gtk.dll"] = "Linux GTK adapter",
+                // Platform adapters (all in lib/net10.0/ to avoid runtimeTargets replacing runtime assets)
+                ["lib/net10.0/Agibuild.Avalonia.WebView.Adapters.Windows.dll"] = "Windows adapter",
+                ["lib/net10.0/Agibuild.Avalonia.WebView.Adapters.Gtk.dll"] = "Linux GTK adapter",
 
                 // Non-assembly required files
                 ["buildTransitive/Agibuild.Avalonia.WebView.targets"] = "MSBuild targets",
@@ -296,12 +300,19 @@ class _Build : NukeBuild
             };
 
             // ── Conditionally expected assemblies ─────────────────────────────────
+            // Android adapter DLL existence check (requires Android workload to build)
+            var androidAdapterPath = SrcDirectory
+                / "Agibuild.Avalonia.WebView.Adapters.Android" / "bin" / Configuration
+                / "net10.0-android" / "Agibuild.Avalonia.WebView.Adapters.Android.dll";
+
             var conditionalFiles = new Dictionary<string, (string Description, bool ShouldExist)>
             {
-                ["runtimes/osx/lib/net10.0/Agibuild.Avalonia.WebView.Adapters.MacOS.dll"] =
+                ["lib/net10.0/Agibuild.Avalonia.WebView.Adapters.MacOS.dll"] =
                     ("macOS adapter", OperatingSystem.IsMacOS()),
                 ["runtimes/osx/native/libAgibuildWebViewWk.dylib"] =
                     ("macOS native shim", OperatingSystem.IsMacOS()),
+                ["runtimes/android/lib/net10.0-android36.0/Agibuild.Avalonia.WebView.Adapters.Android.dll"] =
+                    ("Android adapter", File.Exists(androidAdapterPath)),
             };
 
             var errors = new List<string>();
@@ -539,6 +550,68 @@ class _Build : NukeBuild
             Serilog.Log.Information("Android test app deployed and launched successfully.");
         });
 
+    Target NugetPackageTest => _ => _
+        .Description("Packs, restores, builds, and runs the NuGet package integration smoke test end-to-end.")
+        .DependsOn(ValidatePackage)
+        .Executes(() =>
+        {
+            // 1. Purge all cached versions so *-* resolves to the freshly packed build
+            var cacheBase = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                ".nuget", "packages", "agibuild.avalonia.webview");
+            if (Directory.Exists(cacheBase))
+            {
+                Serilog.Log.Information("Clearing NuGet cache: {Path}", cacheBase);
+                Directory.Delete(cacheBase, recursive: true);
+            }
+
+            // 2. Clean previous build outputs to avoid stale DLLs
+            var testProjectDir = TestsDirectory / "Agibuild.Avalonia.WebView.Integration.NugetPackageTests";
+            var testBinDir = testProjectDir / "bin";
+            var testObjDir = testProjectDir / "obj";
+            if (Directory.Exists(testBinDir)) testBinDir.DeleteDirectory();
+            if (Directory.Exists(testObjDir)) testObjDir.DeleteDirectory();
+
+            // 3. Restore — nuget.config in the test project dir points to artifacts/packages
+            Serilog.Log.Information("Restoring NuGet package test project...");
+            DotNetRestore(s => s
+                .SetProjectFile(NugetPackageTestProject));
+
+            // 4. Build
+            DotNetBuild(s => s
+                .SetProjectFile(NugetPackageTestProject)
+                .SetConfiguration(Configuration)
+                .EnableNoRestore());
+
+            // 5. Run the smoke test (headless — auto-closes after verification)
+            Serilog.Log.Information("Running NuGet package smoke test...");
+            var resultFile = testProjectDir / "bin" / Configuration / "net10.0" / "smoke-test-result.txt";
+            if (File.Exists(resultFile)) File.Delete(resultFile);
+
+            DotNet(
+                $"run --project \"{NugetPackageTestProject}\" " +
+                $"--configuration {Configuration} --no-restore --no-build " +
+                $"-- --smoke-test",
+                workingDirectory: RootDirectory,
+                timeout: 60_000);
+
+            // 6. Verify the result file
+            if (!File.Exists(resultFile))
+            {
+                Assert.Fail($"Smoke test result file not found at {resultFile}.");
+            }
+
+            var result = File.ReadAllText(resultFile).Trim();
+            Serilog.Log.Information("Smoke test result: {Result}", result);
+
+            if (!result.StartsWith("PASSED", StringComparison.OrdinalIgnoreCase))
+            {
+                Assert.Fail($"NuGet package smoke test FAILED: {result}");
+            }
+
+            Serilog.Log.Information("NuGet package integration test PASSED.");
+        });
+
     Target Ci => _ => _
         .Description("Full CI pipeline: compile → coverage → pack → validate.")
         .DependsOn(Coverage, ValidatePackage);
@@ -596,6 +669,9 @@ class _Build : NukeBuild
         {
             yield return SrcDirectory / "Agibuild.Avalonia.WebView.Adapters.MacOS" / "Agibuild.Avalonia.WebView.Adapters.MacOS.csproj";
         }
+
+        // Android adapter (requires Android workload — build failure is non-fatal for Pack)
+        yield return SrcDirectory / "Agibuild.Avalonia.WebView.Adapters.Android" / "Agibuild.Avalonia.WebView.Adapters.Android.csproj";
 
         // Main packable project
         yield return SrcDirectory / "Agibuild.Avalonia.WebView" / "Agibuild.Avalonia.WebView.csproj";
