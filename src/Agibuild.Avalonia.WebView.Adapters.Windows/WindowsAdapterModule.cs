@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using System.Runtime.Versioning;
 using Agibuild.Avalonia.WebView.Adapters.Abstractions;
 
 namespace Agibuild.Avalonia.WebView.Adapters.Windows;
@@ -19,6 +20,12 @@ internal static class WindowsAdapterModule
             Console.WriteLine($"[Agibuild.WebView] Registry assembly: {typeof(WebViewAdapterRegistry).Assembly.FullName}");
         }
 
+        RegisterWindows();
+    }
+
+    [SupportedOSPlatform("windows")]
+    private static void RegisterWindows()
+    {
         WebViewAdapterRegistry.Register(new WebViewAdapterRegistration(
             Platform: WebViewAdapterPlatform.Windows,
             AdapterId: "webview2",

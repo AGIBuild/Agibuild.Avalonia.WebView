@@ -25,6 +25,12 @@ public static class AppBuilderExtensions
     /// </code>
     /// </example>
     /// </summary>
+    /// <summary>
+    /// Initializes the Agibuild WebView environment with default settings (no logging).
+    /// </summary>
+    public static AppBuilder UseAgibuildWebView(this AppBuilder builder)
+        => UseAgibuildWebView(builder, loggerFactory: null);
+
     public static AppBuilder UseAgibuildWebView(this AppBuilder builder, ILoggerFactory? loggerFactory)
     {
         ArgumentNullException.ThrowIfNull(builder);

@@ -6,8 +6,8 @@ on:
   workflow_dispatch:   # Allow manual triggering
     inputs:
       version:
-        description: 'Package version (e.g. 1.0.0, 0.1.0-preview.1)'
-        required: true
+        description: 'Package version override (e.g. 1.0.0, 0.1.0-preview.1). Leave empty to use MinVer auto-calculated version.'
+        required: false
       publish_target:
         description: 'Publish target'
         type: choice
@@ -26,30 +26,14 @@ env:
   NUKE_TELEMETRY_OPTOUT: true
 
 jobs:
-  # ────────────────────────────── Determine Version ────────────────────────────
-  version:
-    name: Determine Version
-    runs-on: ubuntu-latest
-    outputs:
-      package_version: ${{ steps.version.outputs.version }}
-    steps:
-      - id: version
-        run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "version=${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
-          else
-            # Extract version from tag (strip leading 'v')
-            TAG="${GITHUB_REF#refs/tags/v}"
-            echo "version=${TAG}" >> "$GITHUB_OUTPUT"
-          fi
-
   # ────────────────────────────── Build on macOS (primary, produces .nupkg) ────
   build:
     name: Build & Pack (macOS)
-    needs: version
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # MinVer needs full git history to calculate version
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -62,10 +46,11 @@ jobs:
 
       - name: Run full CI pipeline
         run: |
-          ./build.sh \
-            --target Ci \
-            --configuration Release \
-            --package-version ${{ needs.version.outputs.package_version }}
+          ARGS="--target Ci --configuration Release"
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            ARGS="$ARGS --package-version ${{ github.event.inputs.version }}"
+          fi
+          ./build.sh $ARGS
 
       - name: Upload NuGet package
         uses: actions/upload-artifact@v4
@@ -84,7 +69,7 @@ jobs:
   # ────────────────────────────── Publish to NuGet ─────────────────────────────
   publish:
     name: Publish to NuGet
-    needs: [version, build]
+    needs: build
     runs-on: ubuntu-latest
     if: >
       (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v'))
@@ -115,7 +100,7 @@ jobs:
   # ────────────────────────────── GitHub Release ───────────────────────────────
   github-release:
     name: Create GitHub Release
-    needs: [version, build]
+    needs: build
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     permissions:
@@ -133,8 +118,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
-          name: ${{ needs.version.outputs.package_version }}
+          name: ${{ github.ref_name }}
           draft: false
-          prerelease: ${{ contains(needs.version.outputs.package_version, '-') }}
+          prerelease: ${{ contains(github.ref_name, '-') }}
           files: artifacts/packages/*.nupkg
           generate_release_notes: true

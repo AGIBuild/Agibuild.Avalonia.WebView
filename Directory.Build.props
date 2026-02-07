@@ -10,5 +10,18 @@
     <PackageProjectUrl>https://github.com/AgibuilDev/Agibuild.Avalonia.WebView</PackageProjectUrl>
     <RepositoryUrl>https://github.com/AgibuilDev/Agibuild.Avalonia.WebView.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
+
+    <!-- MinVer: Git tag-driven versioning -->
+    <MinVerTagPrefix>v</MinVerTagPrefix>
+    <MinVerDefaultPreReleaseIdentifiers>preview.0</MinVerDefaultPreReleaseIdentifiers>
+    <MinVerMinimumMajorMinor>0.1</MinVerMinimumMajorMinor>
   </PropertyGroup>
+
+  <!-- MinVer package: conditional on CPM vs non-CPM projects -->
+  <ItemGroup Condition="'$(ManagePackageVersionsCentrally)' != 'true'">
+    <PackageReference Include="MinVer" Version="6.0.0" PrivateAssets="all" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(ManagePackageVersionsCentrally)' == 'true'">
+    <PackageReference Include="MinVer" PrivateAssets="all" />
+  </ItemGroup>
 </Project>

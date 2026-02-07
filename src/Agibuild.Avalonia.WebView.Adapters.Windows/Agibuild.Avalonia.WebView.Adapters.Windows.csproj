@@ -3,6 +3,9 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <!-- CA2255: ModuleInitializer is the correct pattern for adapter auto-registration.
+         MSB3277: WindowsBase version conflict from WebView2 SDK's WPF dependency — harmless on non-Windows. -->
+    <NoWarn>$(NoWarn);CA2255;MSB3277</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

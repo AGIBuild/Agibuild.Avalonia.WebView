@@ -1,0 +1,166 @@
+name: Create Version Tag
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: 'Version bump level (ignored when version is specified)'
+        type: choice
+        options:
+          - prerelease
+          - patch
+          - minor
+          - major
+        default: prerelease
+      version:
+        description: 'Manual version override (e.g. 0.2.0-preview.1). Leave empty to auto-increment.'
+        required: false
+      prerelease_label:
+        description: 'Prerelease label for auto-increment (e.g. preview, alpha, beta, rc)'
+        required: false
+        default: preview
+
+permissions:
+  contents: write
+
+jobs:
+  create-tag:
+    name: Create Version Tag
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Need full history for tag listing
+
+      - name: Calculate and create tag
+        run: |
+          set -euo pipefail
+
+          BUMP="${{ github.event.inputs.bump }}"
+          MANUAL_VERSION="${{ github.event.inputs.version }}"
+          PRE_LABEL="${{ github.event.inputs.prerelease_label }}"
+          PRE_LABEL="${PRE_LABEL:-preview}"
+
+          # ── If manual version specified, use it directly ──────────────────────
+          if [ -n "$MANUAL_VERSION" ]; then
+            # Strip leading 'v' if user accidentally included it
+            MANUAL_VERSION="${MANUAL_VERSION#v}"
+            NEW_TAG="v${MANUAL_VERSION}"
+            echo "Manual version specified: ${NEW_TAG}"
+          else
+            # ── Find latest version tag ───────────────────────────────────────
+            LATEST_TAG=$(git tag --list 'v*' --sort=-v:refname | head -1 || true)
+
+            if [ -z "$LATEST_TAG" ]; then
+              echo "No existing version tags found. Starting from v0.1.0-${PRE_LABEL}.1"
+              NEW_TAG="v0.1.0-${PRE_LABEL}.1"
+            else
+              echo "Latest tag: ${LATEST_TAG}"
+
+              # ── Parse version components ──────────────────────────────────
+              # Strip 'v' prefix
+              VERSION="${LATEST_TAG#v}"
+
+              # Split into release and prerelease parts
+              if [[ "$VERSION" == *-* ]]; then
+                RELEASE_PART="${VERSION%%-*}"
+                PRE_PART="${VERSION#*-}"
+                IS_PRERELEASE=true
+              else
+                RELEASE_PART="$VERSION"
+                PRE_PART=""
+                IS_PRERELEASE=false
+              fi
+
+              # Parse MAJOR.MINOR.PATCH
+              IFS='.' read -r MAJOR MINOR PATCH <<< "$RELEASE_PART"
+              MAJOR="${MAJOR:-0}"
+              MINOR="${MINOR:-0}"
+              PATCH="${PATCH:-0}"
+
+              # Parse prerelease number (last segment after the last dot)
+              if [ "$IS_PRERELEASE" = true ]; then
+                # e.g. "preview.1" -> EXISTING_LABEL="preview", PRE_NUM=1
+                PRE_NUM="${PRE_PART##*.}"
+                EXISTING_LABEL="${PRE_PART%.*}"
+              else
+                PRE_NUM=0
+                EXISTING_LABEL=""
+              fi
+
+              echo "Parsed: MAJOR=$MAJOR MINOR=$MINOR PATCH=$PATCH IS_PRERELEASE=$IS_PRERELEASE LABEL=$EXISTING_LABEL PRE_NUM=$PRE_NUM"
+              echo "Bump: $BUMP, Prerelease label: $PRE_LABEL"
+
+              # ── Calculate new version based on bump type ──────────────────
+              case "$BUMP" in
+                prerelease)
+                  if [ "$IS_PRERELEASE" = true ] && [ "$EXISTING_LABEL" = "$PRE_LABEL" ]; then
+                    # Same label: increment prerelease number
+                    # v0.1.0-preview.1 -> v0.1.0-preview.2
+                    NEW_PRE_NUM=$((PRE_NUM + 1))
+                    NEW_TAG="v${MAJOR}.${MINOR}.${PATCH}-${PRE_LABEL}.${NEW_PRE_NUM}"
+                  elif [ "$IS_PRERELEASE" = true ]; then
+                    # Different label: start at 1 with new label on same version
+                    # v0.1.0-alpha.3 -> v0.1.0-preview.1
+                    NEW_TAG="v${MAJOR}.${MINOR}.${PATCH}-${PRE_LABEL}.1"
+                  else
+                    # Stable release: bump patch and start prerelease
+                    # v0.2.0 -> v0.2.1-preview.1
+                    NEW_TAG="v${MAJOR}.${MINOR}.$((PATCH + 1))-${PRE_LABEL}.1"
+                  fi
+                  ;;
+                patch)
+                  if [ "$IS_PRERELEASE" = true ]; then
+                    # v0.1.0-preview.1 -> v0.1.1-preview.1
+                    NEW_TAG="v${MAJOR}.${MINOR}.$((PATCH + 1))-${PRE_LABEL}.1"
+                  else
+                    # v0.2.0 -> v0.2.1
+                    NEW_TAG="v${MAJOR}.${MINOR}.$((PATCH + 1))"
+                  fi
+                  ;;
+                minor)
+                  if [ "$IS_PRERELEASE" = true ]; then
+                    # v0.1.0-preview.1 -> v0.2.0-preview.1
+                    NEW_TAG="v${MAJOR}.$((MINOR + 1)).0-${PRE_LABEL}.1"
+                  else
+                    # v0.2.0 -> v0.3.0
+                    NEW_TAG="v${MAJOR}.$((MINOR + 1)).0"
+                  fi
+                  ;;
+                major)
+                  if [ "$IS_PRERELEASE" = true ]; then
+                    # v0.1.0-preview.1 -> v1.0.0-preview.1
+                    NEW_TAG="v$((MAJOR + 1)).0.0-${PRE_LABEL}.1"
+                  else
+                    # v0.2.0 -> v1.0.0
+                    NEW_TAG="v$((MAJOR + 1)).0.0"
+                  fi
+                  ;;
+                *)
+                  echo "ERROR: Unknown bump type: $BUMP"
+                  exit 1
+                  ;;
+              esac
+            fi
+          fi
+
+          # ── Validate tag doesn't already exist ────────────────────────────────
+          if git rev-parse "$NEW_TAG" >/dev/null 2>&1; then
+            echo "ERROR: Tag $NEW_TAG already exists!"
+            exit 1
+          fi
+
+          # ── Create and push tag ───────────────────────────────────────────────
+          echo "Creating tag: $NEW_TAG"
+          git tag "$NEW_TAG"
+          git push origin "$NEW_TAG"
+
+          echo "## Version Tag Created" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Field | Value |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|-------|-------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| **New Tag** | \`$NEW_TAG\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Bump | $BUMP |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Commit | \`$(git rev-parse --short HEAD)\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "The [Release workflow](../actions/workflows/release.yml) will be triggered automatically." >> "$GITHUB_STEP_SUMMARY"

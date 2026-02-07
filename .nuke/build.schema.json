@@ -24,10 +24,10 @@
     "ExecutableTarget": {
       "type": "string",
       "enum": [
+        "Build",
         "Ci",
         "CiPublish",
         "Clean",
-        "Compile",
         "Coverage",
         "IntegrationTests",
         "Pack",
@@ -35,7 +35,8 @@
         "Restore",
         "Start",
         "Test",
-        "UnitTests"
+        "UnitTests",
+        "ValidatePackage"
       ]
     },
     "Verbosity": {
@@ -129,7 +130,7 @@
         },
         "PackageVersion": {
           "type": "string",
-          "description": "NuGet package version. Default: 0.0.0-dev"
+          "description": "NuGet package version override. When set, overrides MinVer auto-calculated version"
         }
       }
     },

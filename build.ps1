@@ -14,6 +14,7 @@ if ($Target)           { $parameters += "--target"; $parameters += $Target }
 if ($Configuration)    { $parameters += "--configuration"; $parameters += $Configuration }
 if ($PackageVersion)   { $parameters += "--package-version"; $parameters += $PackageVersion }
 if ($NuGetSource)      { $parameters += "--nuget-source"; $parameters += $NuGetSource }
-if ($NuGetApiKey)      { $parameters += "--nuget-api-key"; $parameters += $NuGetApiKey }
+$effectiveApiKey = if ($NuGetApiKey) { $NuGetApiKey } else { $env:NUGET_API_KEY }
+if ($effectiveApiKey)  { $parameters += "--nuget-api-key"; $parameters += $effectiveApiKey }
 
 dotnet run --project "build/Build.csproj" -- @parameters

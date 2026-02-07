@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Xml.Linq;
 using Nuke.Common;
@@ -17,24 +18,24 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
     On = [GitHubActionsTrigger.Push, GitHubActionsTrigger.PullRequest],
     InvokedTargets = [nameof(Ci)],
     AutoGenerate = false)]
-class Build : NukeBuild
+class _Build : NukeBuild
 {
-    public static int Main() => Execute<Build>(x => x.Compile);
+    public static int Main() => Execute<_Build>(x => x.Build);
 
     // ──────────────────────────────── Parameters ────────────────────────────────
 
     [Parameter("Configuration (Debug / Release). Default: Release on CI, Debug locally.")]
     readonly string Configuration = IsServerBuild ? "Release" : "Debug";
 
-    [Parameter("NuGet package version. Default: 0.0.0-dev")]
-    readonly string PackageVersion = "0.0.0-dev";
+    [Parameter("NuGet package version override. When set, overrides MinVer auto-calculated version.")]
+    readonly string? PackageVersion = null;
 
     [Parameter("NuGet source URL for publish. Default: https://api.nuget.org/v3/index.json")]
     readonly string NuGetSource = "https://api.nuget.org/v3/index.json";
 
     [Parameter("NuGet API key for publish.")]
     [Secret]
-    readonly string? NuGetApiKey;
+    readonly string? NuGetApiKey = Environment.GetEnvironmentVariable("NUGET_API_KEY");
 
     [Parameter("Minimum line coverage percentage (0-100). Default: 90")]
     readonly int CoverageThreshold = 90;
@@ -88,7 +89,7 @@ class Build : NukeBuild
                 .SetProjectFile(SolutionFile));
         });
 
-    Target Compile => _ => _
+    Target Build => _ => _
         .Description("Builds all platform-appropriate projects.")
         .DependsOn(Restore)
         .Executes(() =>
@@ -104,7 +105,7 @@ class Build : NukeBuild
 
     Target UnitTests => _ => _
         .Description("Runs unit tests.")
-        .DependsOn(Compile)
+        .DependsOn(Build)
         .Executes(() =>
         {
             DotNetTest(s => s
@@ -118,7 +119,7 @@ class Build : NukeBuild
 
     Target Coverage => _ => _
         .Description("Runs unit tests with code coverage and enforces minimum threshold.")
-        .DependsOn(Compile)
+        .DependsOn(Build)
         .Executes(() =>
         {
             CoverageDirectory.CreateOrCleanDirectory();
@@ -202,7 +203,7 @@ class Build : NukeBuild
 
     Target IntegrationTests => _ => _
         .Description("Runs automated integration tests.")
-        .DependsOn(Compile)
+        .DependsOn(Build)
         .Executes(() =>
         {
             DotNetTest(s => s
@@ -220,19 +221,166 @@ class Build : NukeBuild
 
     Target Pack => _ => _
         .Description("Creates the NuGet package (.nupkg).")
-        .DependsOn(Compile)
+        .DependsOn(Build)
         .Produces(PackageOutputDirectory / "*.nupkg")
         .Executes(() =>
         {
             PackageOutputDirectory.CreateOrCleanDirectory();
 
-            DotNetPack(s => s
-                .SetProject(PackProject)
-                .SetConfiguration(Configuration)
-                .EnableNoRestore()
-                .EnableNoBuild()
-                .SetVersion(PackageVersion)
-                .SetOutputDirectory(PackageOutputDirectory));
+            DotNetPack(s =>
+            {
+                var settings = s
+                    .SetProject(PackProject)
+                    .SetConfiguration(Configuration)
+                    .EnableNoRestore()
+                    .EnableNoBuild()
+                    .SetOutputDirectory(PackageOutputDirectory);
+
+                if (!string.IsNullOrEmpty(PackageVersion))
+                    settings = settings.SetProperty("MinVerVersionOverride", PackageVersion);
+
+                return settings;
+            });
+        });
+
+    Target ValidatePackage => _ => _
+        .Description("Validates the NuGet package contains all expected assemblies and files.")
+        .DependsOn(Pack)
+        .Executes(() =>
+        {
+            var nupkgFiles = PackageOutputDirectory.GlobFiles("*.nupkg")
+                .Where(f => !f.Name.EndsWith(".symbols.nupkg"))
+                .ToList();
+
+            Assert.NotEmpty(nupkgFiles, "No .nupkg files found in output directory.");
+            var nupkgPath = nupkgFiles.First();
+            Serilog.Log.Information("Validating package: {Package}", nupkgPath.Name);
+
+            using var archive = ZipFile.OpenRead(nupkgPath);
+            var entries = archive.Entries
+                .Select(e => e.FullName.Replace('\\', '/'))
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            // ── Required assemblies (always present) ──────────────────────────────
+            var requiredFiles = new Dictionary<string, string>
+            {
+                // Core lib assemblies
+                ["lib/net10.0/Agibuild.Avalonia.WebView.dll"] = "Main assembly",
+                ["lib/net10.0/Agibuild.Avalonia.WebView.Core.dll"] = "Core contracts",
+                ["lib/net10.0/Agibuild.Avalonia.WebView.Adapters.Abstractions.dll"] = "Adapter abstractions",
+                ["lib/net10.0/Agibuild.Avalonia.WebView.Runtime.dll"] = "Runtime host",
+                ["lib/net10.0/Agibuild.Avalonia.WebView.DependencyInjection.dll"] = "DI extensions",
+
+                // Platform adapters (always built — stub adapters compile on all platforms)
+                ["runtimes/win/lib/net10.0/Agibuild.Avalonia.WebView.Adapters.Windows.dll"] = "Windows adapter",
+                ["runtimes/linux/lib/net10.0/Agibuild.Avalonia.WebView.Adapters.Gtk.dll"] = "Linux GTK adapter",
+
+                // Non-assembly required files
+                ["buildTransitive/Agibuild.Avalonia.WebView.targets"] = "MSBuild targets",
+                ["LICENSE.txt"] = "License file",
+                ["README.md"] = "Package readme",
+            };
+
+            // ── Conditionally expected assemblies ─────────────────────────────────
+            var conditionalFiles = new Dictionary<string, (string Description, bool ShouldExist)>
+            {
+                ["runtimes/osx/lib/net10.0/Agibuild.Avalonia.WebView.Adapters.MacOS.dll"] =
+                    ("macOS adapter", OperatingSystem.IsMacOS()),
+                ["runtimes/osx/native/libAgibuildWebViewWk.dylib"] =
+                    ("macOS native shim", OperatingSystem.IsMacOS()),
+            };
+
+            var errors = new List<string>();
+
+            // Check required files
+            foreach (var (path, description) in requiredFiles)
+            {
+                if (entries.Contains(path))
+                {
+                    Serilog.Log.Information("  OK: {Path} ({Description})", path, description);
+                }
+                else
+                {
+                    errors.Add($"MISSING (required): {path} — {description}");
+                    Serilog.Log.Error("  MISSING: {Path} ({Description})", path, description);
+                }
+            }
+
+            // Check conditional files
+            foreach (var (path, (description, shouldExist)) in conditionalFiles)
+            {
+                if (entries.Contains(path))
+                {
+                    Serilog.Log.Information("  OK: {Path} ({Description})", path, description);
+                }
+                else if (shouldExist)
+                {
+                    errors.Add($"MISSING (expected on this platform): {path} — {description}");
+                    Serilog.Log.Error("  MISSING: {Path} ({Description})", path, description);
+                }
+                else
+                {
+                    Serilog.Log.Information("  SKIP: {Path} ({Description} — not built on this platform)", path, description);
+                }
+            }
+
+            // Check for unexpected Agibuild DLLs (detect accidental inclusions)
+            var knownDlls = requiredFiles.Keys
+                .Concat(conditionalFiles.Keys)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            var unexpectedDlls = entries
+                .Where(e => e.EndsWith(".dll", StringComparison.OrdinalIgnoreCase)
+                         && e.Contains("Agibuild.", StringComparison.OrdinalIgnoreCase)
+                         && !knownDlls.Contains(e))
+                .ToList();
+
+            foreach (var dll in unexpectedDlls)
+            {
+                errors.Add($"UNEXPECTED: {dll} — not in the expected manifest");
+                Serilog.Log.Warning("  UNEXPECTED: {Path}", dll);
+            }
+
+            // Validate nuspec metadata
+            var nuspecEntry = archive.Entries.FirstOrDefault(e =>
+                e.FullName.EndsWith(".nuspec", StringComparison.OrdinalIgnoreCase));
+            if (nuspecEntry is not null)
+            {
+                using var stream = nuspecEntry.Open();
+                var nuspecDoc = XDocument.Load(stream);
+                var ns = nuspecDoc.Root?.GetDefaultNamespace() ?? XNamespace.None;
+                var metadata = nuspecDoc.Root?.Element(ns + "metadata");
+
+                var id = metadata?.Element(ns + "id")?.Value;
+                var version = metadata?.Element(ns + "version")?.Value;
+                var description = metadata?.Element(ns + "description")?.Value;
+
+                if (string.IsNullOrEmpty(id))
+                    errors.Add("NUSPEC: Missing <id>");
+                if (string.IsNullOrEmpty(version) || version == "0.0.0-dev" || version == "1.0.0")
+                    errors.Add($"NUSPEC: Invalid <version>: '{version}' — MinVer may not have run correctly");
+                if (string.IsNullOrEmpty(description))
+                    errors.Add("NUSPEC: Missing <description>");
+
+                Serilog.Log.Information("  Nuspec: id={Id}, version={Version}", id, version);
+            }
+            else
+            {
+                errors.Add("NUSPEC: No .nuspec file found in package");
+            }
+
+            // Summary
+            Serilog.Log.Information("Package validation: {Total} entries, {Errors} error(s)",
+                entries.Count, errors.Count);
+
+            if (errors.Count > 0)
+            {
+                Assert.Fail(
+                    "Package validation failed:\n" +
+                    string.Join("\n", errors.Select(e => $"  - {e}")));
+            }
+
+            Serilog.Log.Information("Package validation PASSED.");
         });
 
     Target Publish => _ => _
@@ -256,7 +404,7 @@ class Build : NukeBuild
 
     Target Start => _ => _
         .Description("Launches the E2E integration test desktop app.")
-        .DependsOn(Compile)
+        .DependsOn(Build)
         .Executes(() =>
         {
             DotNetRun(s => s
@@ -266,12 +414,12 @@ class Build : NukeBuild
         });
 
     Target Ci => _ => _
-        .Description("Full CI pipeline: compile → coverage → pack.")
-        .DependsOn(Coverage, Pack);
+        .Description("Full CI pipeline: compile → coverage → pack → validate.")
+        .DependsOn(Coverage, ValidatePackage);
 
     Target CiPublish => _ => _
-        .Description("Full CI/CD pipeline: compile → coverage → pack → publish.")
-        .DependsOn(Coverage, Publish);
+        .Description("Full CI/CD pipeline: compile → coverage → pack → validate → publish.")
+        .DependsOn(Coverage, ValidatePackage, Publish);
 
     // ──────────────────────────────── Helpers ────────────────────────────────────
 

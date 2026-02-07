@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using System.Runtime.Versioning;
 using Agibuild.Avalonia.WebView.Adapters.Abstractions;
 
 namespace Agibuild.Avalonia.WebView.Adapters.MacOS;
@@ -19,6 +20,12 @@ internal static class MacOSAdapterModule
             Console.WriteLine($"[Agibuild.WebView] Registry assembly: {typeof(WebViewAdapterRegistry).Assembly.FullName}");
         }
 
+        RegisterMacOS();
+    }
+
+    [SupportedOSPlatform("macos")]
+    private static void RegisterMacOS()
+    {
         WebViewAdapterRegistry.Register(new WebViewAdapterRegistration(
             Platform: WebViewAdapterPlatform.MacOS,
             AdapterId: "wkwebview",

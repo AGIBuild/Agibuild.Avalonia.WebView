@@ -10,12 +10,13 @@ public sealed class TestWebViewHost : IWebView
     public bool IsLoading => false;
     public Guid ChannelId { get; } = Guid.NewGuid();
 
-    public event EventHandler<NavigationStartingEventArgs>? NavigationStarted;
-    public event EventHandler<NavigationCompletedEventArgs>? NavigationCompleted;
-    public event EventHandler<NewWindowRequestedEventArgs>? NewWindowRequested;
-    public event EventHandler<WebMessageReceivedEventArgs>? WebMessageReceived;
-    public event EventHandler<WebResourceRequestedEventArgs>? WebResourceRequested;
-    public event EventHandler<EnvironmentRequestedEventArgs>? EnvironmentRequested;
+    // Empty accessors — test stub never raises these interface-required events.
+    public event EventHandler<NavigationStartingEventArgs>? NavigationStarted { add { } remove { } }
+    public event EventHandler<NavigationCompletedEventArgs>? NavigationCompleted { add { } remove { } }
+    public event EventHandler<NewWindowRequestedEventArgs>? NewWindowRequested { add { } remove { } }
+    public event EventHandler<WebMessageReceivedEventArgs>? WebMessageReceived { add { } remove { } }
+    public event EventHandler<WebResourceRequestedEventArgs>? WebResourceRequested { add { } remove { } }
+    public event EventHandler<EnvironmentRequestedEventArgs>? EnvironmentRequested { add { } remove { } }
 
     public Task NavigateAsync(Uri uri) => Task.CompletedTask;
     public Task NavigateToStringAsync(string html) => Task.CompletedTask;
