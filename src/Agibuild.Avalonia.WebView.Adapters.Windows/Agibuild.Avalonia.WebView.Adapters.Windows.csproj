@@ -9,4 +9,8 @@
     <ProjectReference Include="..\Agibuild.Avalonia.WebView.Core\Agibuild.Avalonia.WebView.Core.csproj" />
     <ProjectReference Include="..\Agibuild.Avalonia.WebView.Adapters.Abstractions\Agibuild.Avalonia.WebView.Adapters.Abstractions.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3719.77" />
+  </ItemGroup>
 </Project>

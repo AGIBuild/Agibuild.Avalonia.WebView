@@ -92,24 +92,39 @@
   - 导航到无效主机 → `NavigationCompleted.Error` 为 `WebViewNetworkException`
   - `NavigateToStringAsync(html, baseUrl)` 相对资源解析验证
 
+#### 2.1.3 Windows WebView2（Embedded）M0 验收标准（CT + IT 对齐）
+
+- **目标**：实现 Windows 平台 WebView2 适配器，覆盖全部 v1 契约语义（导航拦截/关联、脚本、消息桥接）及 M1 扩展能力（cookie 管理、错误分类、原生句柄、baseUrl 支持），实现与 macOS adapter 的完整对等。
+- **CT（Contract Tests）**：复用 M0/M1 全部 CT 用例（196 项），因 CT 为平台无关（MockAdapter），无需新增。
+- **IT（Integration Smoke - Windows）**：在 Windows 集成测试 App 中提供冒烟闭环，覆盖：
+  - **Link click**：DOM 点击链接触发主框架导航，验证 `NavigationStarted` + `NavigationCompleted` 同一 `NavigationId`
+  - **302 redirect**：重定向链路复用 `CorrelationId`，exactly-once completion
+  - **`window.location`**：脚本触发导航，验证原生拦截 + 成功完成
+  - **Cancel/deny**：handler 设置 `Cancel=true` → deny native step + `NavigationCompleted` status=`Canceled`
+  - **Script**：`InvokeScriptAsync` 执行 + `WebMessageReceived` 消息接收闭环
+  - **Cookie CRUD**：通过 `ICookieManager` 的 set/get/delete 验证（backed by `CoreWebView2CookieManager`）
+  - **Error categorization**：导航到不可达主机 → `WebViewNetworkException`
+  - **Native handle**：`TryGetWebViewHandle()` 返回非 null 且 descriptor=`"WebView2"`
+  - **baseUrl**：`NavigateToStringAsync(html, baseUrl)` 资源解析验证
+
 ##### Cookie 管理
 
-| Capability | macOS/WKWebView | 其他平台 | 说明 |
-|---|---|---|---|
-| `ICookieManager.GetCookiesAsync` | ✅ M1 | ❌ (null) | 通过 `WKHTTPCookieStore` |
-| `ICookieManager.SetCookieAsync` | ✅ M1 | ❌ (null) | |
-| `ICookieManager.DeleteCookieAsync` | ✅ M1 | ❌ (null) | |
-| `ICookieManager.ClearAllCookiesAsync` | ✅ M1 | ❌ (null) | |
-| Cookie 隔离模型 | 基于 `defaultDataStore` | - | 平台差异：共享 vs 每数据存储隔离 |
+| Capability | Windows/WebView2 | macOS/WKWebView | 其他平台 | 说明 |
+|---|---|---|---|---|
+| `ICookieManager.GetCookiesAsync` | ✅ M0 | ✅ M1 | ❌ (null) | Windows: `CoreWebView2CookieManager`; macOS: `WKHTTPCookieStore` |
+| `ICookieManager.SetCookieAsync` | ✅ M0 | ✅ M1 | ❌ (null) | |
+| `ICookieManager.DeleteCookieAsync` | ✅ M0 | ✅ M1 | ❌ (null) | |
+| `ICookieManager.ClearAllCookiesAsync` | ✅ M0 | ✅ M1 | ❌ (null) | Windows: `DeleteAllCookies` 同步+fire-and-forget |
+| Cookie 隔离模型 | 基于 `CoreWebView2Profile` | 基于 `defaultDataStore` | - | 平台差异：Windows 按 profile 隔离，macOS 共享 defaultDataStore |
 
 ##### 错误分类
 
-| 错误类型 | macOS NSURLError 映射 | 说明 |
+| 错误类型 | Windows `CoreWebView2WebErrorStatus` 映射 | macOS `NSURLError` 映射 |
 |---|---|---|
-| `WebViewTimeoutException` | `-1001` (NSURLErrorTimedOut) | |
-| `WebViewNetworkException` | `-1003`, `-1004`, `-1005`, `-1009` | DNS/连接/断网 |
-| `WebViewSslException` | `-1201` ~ `-1204` | 证书相关 |
-| `WebViewNavigationException` (base) | 其他所有 | 未分类错误 |
+| `WebViewTimeoutException` | `Timeout` | `-1001` (NSURLErrorTimedOut) |
+| `WebViewNetworkException` | `ConnectionAborted`, `ConnectionReset`, `Disconnected`, `CannotConnect`, `HostNameNotResolved` | `-1003`, `-1004`, `-1005`, `-1009` |
+| `WebViewSslException` | `CertificateCommonNameIsIncorrect`, `CertificateExpired`, `ClientCertificateContainsErrors`, `CertificateRevoked`, `CertificateIsInvalid` | `-1201` ~ `-1204` |
+| `WebViewNavigationException` (base) | 其他所有非成功状态 | 其他所有 |
 
 ### 2.2 Events（契约语义优先）
 
