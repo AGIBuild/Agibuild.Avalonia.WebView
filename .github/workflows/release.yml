@@ -44,8 +44,8 @@ jobs:
       - name: Install .NET workloads
         run: dotnet workload install android ios macos
 
-      - name: Install ReportGenerator
-        run: dotnet tool install --global dotnet-reportgenerator-globaltool || true
+      - name: Restore .NET tools
+        run: dotnet tool restore
 
       - name: Run full CI pipeline
         run: |

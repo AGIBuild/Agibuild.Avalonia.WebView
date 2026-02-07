@@ -34,8 +34,8 @@ jobs:
       - name: Install .NET workloads
         run: dotnet workload install android ios macos
 
-      - name: Install ReportGenerator
-        run: dotnet tool install --global dotnet-reportgenerator-globaltool || true
+      - name: Restore .NET tools
+        run: dotnet tool restore
 
       - name: Run CI (Compile + Coverage + Pack)
         run: ./build.sh --target Ci --configuration Release
@@ -82,9 +82,8 @@ jobs:
         run: dotnet workload install android
         shell: pwsh
 
-      - name: Install ReportGenerator
-        run: dotnet tool install --global dotnet-reportgenerator-globaltool 2>$null; $true
-        shell: pwsh
+      - name: Restore .NET tools
+        run: dotnet tool restore
 
       - name: Run CI (Compile + Coverage + Pack)
         run: ./build.ps1 -Target Ci -Configuration Release
@@ -123,8 +122,8 @@ jobs:
       - name: Install .NET workloads
         run: dotnet workload install android
 
-      - name: Install ReportGenerator
-        run: dotnet tool install --global dotnet-reportgenerator-globaltool || true
+      - name: Restore .NET tools
+        run: dotnet tool restore
 
       - name: Run CI (Compile + Coverage + Pack)
         run: ./build.sh --target Ci --configuration Release
