@@ -283,6 +283,9 @@ internal class MockWebViewAdapter : IWebViewAdapter
 
     /// <summary>Creates a mock that supports environment options.</summary>
     public static MockWebViewAdapterWithOptions CreateWithOptions() => new();
+
+    /// <summary>Creates a mock that supports native handle provider.</summary>
+    public static MockWebViewAdapterWithHandle CreateWithHandle() => new();
 }
 
 /// <summary>Mock adapter that also implements <see cref="IWebViewAdapterOptions"/> for environment options testing.</summary>
@@ -303,6 +306,19 @@ internal sealed class MockWebViewAdapterWithOptions : MockWebViewAdapter, IWebVi
     {
         SetUserAgentCallCount++;
         AppliedUserAgent = userAgent;
+    }
+}
+
+/// <summary>Mock adapter that also implements <see cref="INativeWebViewHandleProvider"/>.</summary>
+internal sealed class MockWebViewAdapterWithHandle : MockWebViewAdapter, INativeWebViewHandleProvider
+{
+    public IPlatformHandle? HandleToReturn { get; set; }
+    public int TryGetHandleCallCount { get; private set; }
+
+    public IPlatformHandle? TryGetWebViewHandle()
+    {
+        TryGetHandleCallCount++;
+        return HandleToReturn;
     }
 }
 

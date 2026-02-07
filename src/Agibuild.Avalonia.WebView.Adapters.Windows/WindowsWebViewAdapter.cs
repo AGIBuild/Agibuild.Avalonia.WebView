@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using Avalonia.Platform;
 using Agibuild.Avalonia.WebView;
@@ -22,10 +23,19 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
     private CoreWebView2Environment? _environment;
     private CoreWebView2Controller? _controller;
     private CoreWebView2? _webView;
+    private IntPtr _parentHwnd;
+
+    // Window subclass for resize tracking
+    private WndProcDelegate? _wndProcDelegate;
+    private IntPtr _originalWndProc;
 
     // Readiness: Attach starts async init; operations queue until ready.
     private TaskCompletionSource? _readyTcs;
     private readonly Queue<Action> _pendingOps = new();
+
+    // The SynchronizationContext captured during WebView2 initialization (UI thread).
+    // All COM calls must be dispatched to this context.
+    private SynchronizationContext? _uiSyncContext;
 
     // Navigation state
     private readonly object _navLock = new();
@@ -135,6 +145,8 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
 
         try
         {
+            RestoreParentWindowProc();
+
             if (_webView is not null)
             {
                 _webView.NavigationStarting -= OnNavigationStarting;
@@ -178,6 +190,13 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
             _environment = await CoreWebView2Environment.CreateAsync().ConfigureAwait(true);
             _controller = await _environment.CreateCoreWebView2ControllerAsync(parentHwnd).ConfigureAwait(true);
             _webView = _controller.CoreWebView2;
+            _parentHwnd = parentHwnd;
+            _uiSyncContext = SynchronizationContext.Current;
+
+            // Size the controller to fill the parent window and track future resizes.
+            UpdateControllerBounds();
+            _controller.IsVisible = true;
+            SubclassParentWindow();
 
             // Apply pending environment options
             ApplyPendingOptions();
@@ -510,37 +529,43 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
     public bool GoBack(Guid navigationId)
     {
         ThrowIfNotAttached();
-        if (_webView is null || !_webView.CanGoBack) return false;
-
-        lock (_navLock) { BeginApiNavigation(navigationId); }
-        _webView.GoBack();
-        return true;
+        return RunOnUiThread(() =>
+        {
+            if (_webView is null || !_webView.CanGoBack) return false;
+            lock (_navLock) { BeginApiNavigation(navigationId); }
+            _webView.GoBack();
+            return true;
+        });
     }
 
     public bool GoForward(Guid navigationId)
     {
         ThrowIfNotAttached();
-        if (_webView is null || !_webView.CanGoForward) return false;
-
-        lock (_navLock) { BeginApiNavigation(navigationId); }
-        _webView.GoForward();
-        return true;
+        return RunOnUiThread(() =>
+        {
+            if (_webView is null || !_webView.CanGoForward) return false;
+            lock (_navLock) { BeginApiNavigation(navigationId); }
+            _webView.GoForward();
+            return true;
+        });
     }
 
     public bool Refresh(Guid navigationId)
     {
         ThrowIfNotAttached();
-        if (_webView is null) return false;
-
-        lock (_navLock) { BeginApiNavigation(navigationId); }
-        _webView.Reload();
-        return true;
+        return RunOnUiThread(() =>
+        {
+            if (_webView is null) return false;
+            lock (_navLock) { BeginApiNavigation(navigationId); }
+            _webView.Reload();
+            return true;
+        });
     }
 
     public bool Stop()
     {
         ThrowIfNotAttached();
-        _webView?.Stop();
+        RunOnUiThread(() => _webView?.Stop());
         return true;
     }
 
@@ -565,16 +590,12 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
             }
         }
 
-        var result = await _webView.ExecuteScriptAsync(script).ConfigureAwait(false);
+        var jsonResult = await RunOnUiThreadAsync(async () =>
+            await _webView.ExecuteScriptAsync(script).ConfigureAwait(true)
+        ).ConfigureAwait(false);
 
-        // WebView2 returns JSON-encoded results. "null" for null/undefined, quoted strings, etc.
-        // Normalize: "null" → null to match v1 semantics.
-        if (string.Equals(result, "null", StringComparison.Ordinal))
-        {
-            return null;
-        }
-
-        return result;
+        // WebView2 returns JSON-encoded results — normalize to raw values per V1 contract.
+        return ScriptResultHelper.NormalizeJsonResult(jsonResult);
     }
 
     // ==================== WebMessage bridge ====================
@@ -625,7 +646,8 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
             if (string.Equals(requestedUri, _pendingBaseUrl.AbsoluteUri, StringComparison.OrdinalIgnoreCase))
             {
                 var html = _pendingBaseUrlHtml;
-                using var stream = new System.IO.MemoryStream(System.Text.Encoding.UTF8.GetBytes(html));
+                // Do not dispose the stream — WebView2 reads it asynchronously after this method returns.
+                var stream = new System.IO.MemoryStream(System.Text.Encoding.UTF8.GetBytes(html));
                 var response = _webView!.Environment.CreateWebResourceResponse(
                     stream, 200, "OK", "Content-Type: text/html; charset=utf-8");
                 e.Response = response;
@@ -639,66 +661,79 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
     public async Task<IReadOnlyList<WebViewCookie>> GetCookiesAsync(Uri uri)
     {
         ThrowIfNotAttachedForCookies();
-        var cookieManager = _webView!.CookieManager;
-        var cookies = await cookieManager.GetCookiesAsync(uri.AbsoluteUri).ConfigureAwait(false);
-
-        var result = new List<WebViewCookie>(cookies.Count);
-        for (var i = 0; i < cookies.Count; i++)
+        return await RunOnUiThreadAsync(async () =>
         {
-            var c = cookies[i];
-            DateTimeOffset? expires = c.Expires.Year > 1970
-                ? new DateTimeOffset(c.Expires)
-                : null;
+            var cookieManager = _webView!.CookieManager;
+            // Must stay on UI thread — CoreWebView2Cookie COM objects have thread affinity.
+            var cookies = await cookieManager.GetCookiesAsync(uri.AbsoluteUri).ConfigureAwait(true);
 
-            result.Add(new WebViewCookie(
-                c.Name, c.Value, c.Domain, c.Path,
-                expires, c.IsSecure, c.IsHttpOnly));
-        }
+            var result = new List<WebViewCookie>(cookies.Count);
+            for (var i = 0; i < cookies.Count; i++)
+            {
+                var c = cookies[i];
+                DateTimeOffset? expires = c.Expires.Year > 1970
+                    ? new DateTimeOffset(c.Expires)
+                    : null;
 
-        return result;
+                result.Add(new WebViewCookie(
+                    c.Name, c.Value, c.Domain, c.Path,
+                    expires, c.IsSecure, c.IsHttpOnly));
+            }
+
+            return (IReadOnlyList<WebViewCookie>)result;
+        }).ConfigureAwait(false);
     }
 
     public Task SetCookieAsync(WebViewCookie cookie)
     {
         ThrowIfNotAttachedForCookies();
-        var cookieManager = _webView!.CookieManager;
-        var wv2Cookie = cookieManager.CreateCookie(cookie.Name, cookie.Value, cookie.Domain, cookie.Path);
-
-        if (cookie.Expires.HasValue)
+        RunOnUiThread(() =>
         {
-            wv2Cookie.Expires = cookie.Expires.Value.UtcDateTime;
-        }
+            var cookieManager = _webView!.CookieManager;
+            var wv2Cookie = cookieManager.CreateCookie(cookie.Name, cookie.Value, cookie.Domain, cookie.Path);
 
-        wv2Cookie.IsSecure = cookie.IsSecure;
-        wv2Cookie.IsHttpOnly = cookie.IsHttpOnly;
+            if (cookie.Expires.HasValue)
+            {
+                wv2Cookie.Expires = cookie.Expires.Value.UtcDateTime;
+            }
 
-        cookieManager.AddOrUpdateCookie(wv2Cookie);
+            wv2Cookie.IsSecure = cookie.IsSecure;
+            wv2Cookie.IsHttpOnly = cookie.IsHttpOnly;
+
+            cookieManager.AddOrUpdateCookie(wv2Cookie);
+        });
         return Task.CompletedTask;
     }
 
     public async Task DeleteCookieAsync(WebViewCookie cookie)
     {
         ThrowIfNotAttachedForCookies();
-        var cookieManager = _webView!.CookieManager;
-
-        // Find matching cookie(s) by name, domain, path — then delete.
-        var allCookies = await cookieManager.GetCookiesAsync($"https://{cookie.Domain}{cookie.Path}").ConfigureAwait(false);
-        for (var i = 0; i < allCookies.Count; i++)
+        await RunOnUiThreadAsync(async () =>
         {
-            var c = allCookies[i];
-            if (string.Equals(c.Name, cookie.Name, StringComparison.Ordinal) &&
-                string.Equals(c.Domain, cookie.Domain, StringComparison.OrdinalIgnoreCase) &&
-                string.Equals(c.Path, cookie.Path, StringComparison.Ordinal))
+            var cookieManager = _webView!.CookieManager;
+
+            // Find matching cookie(s) by name, domain, path — then delete.
+            // Must stay on UI thread — CoreWebView2Cookie COM objects have thread affinity.
+            var allCookies = await cookieManager.GetCookiesAsync($"https://{cookie.Domain}{cookie.Path}").ConfigureAwait(true);
+            for (var i = 0; i < allCookies.Count; i++)
             {
-                cookieManager.DeleteCookie(c);
+                var c = allCookies[i];
+                if (string.Equals(c.Name, cookie.Name, StringComparison.Ordinal) &&
+                    string.Equals(c.Domain, cookie.Domain, StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(c.Path, cookie.Path, StringComparison.Ordinal))
+                {
+                    cookieManager.DeleteCookie(c);
+                }
             }
-        }
+
+            return true; // satisfy RunOnUiThreadAsync<T> signature
+        }).ConfigureAwait(false);
     }
 
     public Task ClearAllCookiesAsync()
     {
         ThrowIfNotAttachedForCookies();
-        _webView!.CookieManager.DeleteAllCookies();
+        RunOnUiThread(() => _webView!.CookieManager.DeleteAllCookies());
         return Task.CompletedTask;
     }
 
@@ -708,9 +743,11 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
     {
         if (!_attached || _detached || _controller is null) return null;
 
-        // Return the controller's parent window handle as a PlatformHandle.
-        var hwnd = _controller.ParentWindow;
-        return hwnd == IntPtr.Zero ? null : new PlatformHandle(hwnd, "WebView2");
+        return RunOnUiThread(() =>
+        {
+            var hwnd = _controller!.ParentWindow;
+            return hwnd == IntPtr.Zero ? null : new PlatformHandle(hwnd, "WebView2");
+        });
     }
 
     // ==================== IWebViewAdapterOptions ====================
@@ -722,12 +759,14 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
 
         if (_webView is not null)
         {
-            // Already initialized — apply directly.
-            _webView.Settings.AreDevToolsEnabled = options.EnableDevTools;
-            if (options.CustomUserAgent is not null)
+            RunOnUiThread(() =>
             {
-                _webView.Settings.UserAgent = options.CustomUserAgent;
-            }
+                _webView.Settings.AreDevToolsEnabled = options.EnableDevTools;
+                if (options.CustomUserAgent is not null)
+                {
+                    _webView.Settings.UserAgent = options.CustomUserAgent;
+                }
+            });
         }
         else
         {
@@ -741,7 +780,7 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
         ThrowIfNotInitialized();
         if (_webView is not null)
         {
-            _webView.Settings.UserAgent = userAgent ?? string.Empty;
+            RunOnUiThread(() => _webView.Settings.UserAgent = userAgent ?? string.Empty);
         }
     }
 
@@ -757,12 +796,65 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
     {
         if (_webView is not null)
         {
-            action();
+            RunOnUiThread(action);
         }
         else
         {
             _pendingOps.Enqueue(action);
         }
+    }
+
+    /// <summary>
+    /// Runs an action on the UI thread synchronously. If already on the UI thread, executes directly.
+    /// </summary>
+    private void RunOnUiThread(Action action)
+    {
+        if (_uiSyncContext is null || SynchronizationContext.Current == _uiSyncContext)
+        {
+            action();
+        }
+        else
+        {
+            _uiSyncContext.Send(_ => action(), null);
+        }
+    }
+
+    /// <summary>
+    /// Runs a function on the UI thread and returns its result. If already on the UI thread, executes directly.
+    /// </summary>
+    private T RunOnUiThread<T>(Func<T> func)
+    {
+        if (_uiSyncContext is null || SynchronizationContext.Current == _uiSyncContext)
+        {
+            return func();
+        }
+
+        T result = default!;
+        _uiSyncContext.Send(_ => result = func(), null);
+        return result;
+    }
+
+    /// <summary>
+    /// Runs an async function on the UI thread and returns a Task for its result.
+    /// </summary>
+    private Task<T> RunOnUiThreadAsync<T>(Func<Task<T>> func)
+    {
+        if (_uiSyncContext is null || SynchronizationContext.Current == _uiSyncContext)
+        {
+            return func();
+        }
+
+        var tcs = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
+        _uiSyncContext.Post(_ =>
+        {
+            func().ContinueWith(t =>
+            {
+                if (t.IsFaulted) tcs.TrySetException(t.Exception!.InnerExceptions);
+                else if (t.IsCanceled) tcs.TrySetCanceled();
+                else tcs.TrySetResult(t.Result);
+            }, TaskScheduler.Default);
+        }, null);
+        return tcs.Task;
     }
 
     private void RaiseNavigationCompleted(Guid navigationId, Uri requestUri, NavigationCompletedStatus status, Exception? error)
@@ -815,4 +907,74 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
             throw new InvalidOperationException("Adapter is not attached.");
         }
     }
+
+    private void UpdateControllerBounds()
+    {
+        if (_controller is null || _parentHwnd == IntPtr.Zero)
+        {
+            return;
+        }
+
+        if (GetClientRect(_parentHwnd, out var rect))
+        {
+            _controller.Bounds = new System.Drawing.Rectangle(0, 0, rect.Right - rect.Left, rect.Bottom - rect.Top);
+        }
+    }
+
+    // ==================== Parent window subclass for resize ====================
+
+    private delegate IntPtr WndProcDelegate(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
+    private const uint WM_SIZE = 0x0005;
+    private const int GWLP_WNDPROC = -4;
+
+    private void SubclassParentWindow()
+    {
+        if (_parentHwnd == IntPtr.Zero) return;
+
+        _wndProcDelegate = WndProc;
+        var newWndProc = Marshal.GetFunctionPointerForDelegate(_wndProcDelegate);
+        _originalWndProc = SetWindowLongPtr(_parentHwnd, GWLP_WNDPROC, newWndProc);
+    }
+
+    private void RestoreParentWindowProc()
+    {
+        if (_originalWndProc != IntPtr.Zero && _parentHwnd != IntPtr.Zero)
+        {
+            SetWindowLongPtr(_parentHwnd, GWLP_WNDPROC, _originalWndProc);
+            _originalWndProc = IntPtr.Zero;
+        }
+
+        _wndProcDelegate = null;
+    }
+
+    private IntPtr WndProc(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam)
+    {
+        if (msg == WM_SIZE)
+        {
+            UpdateControllerBounds();
+        }
+
+        return CallWindowProc(_originalWndProc, hWnd, msg, wParam, lParam);
+    }
+
+    // ==================== Win32 interop ====================
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct RECT
+    {
+        public int Left;
+        public int Top;
+        public int Right;
+        public int Bottom;
+    }
+
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool GetClientRect(IntPtr hWnd, out RECT lpRect);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern IntPtr SetWindowLongPtr(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr CallWindowProc(IntPtr lpPrevWndFunc, IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
 }

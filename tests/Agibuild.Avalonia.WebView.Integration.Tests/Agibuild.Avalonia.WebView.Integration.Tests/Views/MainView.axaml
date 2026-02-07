@@ -24,6 +24,9 @@
       <TabItem Header="macOS WK Smoke">
         <views:WkWebViewSmokeView DataContext="{Binding WkWebViewSmoke}" />
       </TabItem>
+      <TabItem Header="Win WV2 Smoke">
+        <views:WebView2SmokeView DataContext="{Binding WebView2Smoke}" />
+      </TabItem>
       <TabItem Header="Consumer E2E">
         <views:ConsumerWebViewE2EView DataContext="{Binding ConsumerE2E}" />
       </TabItem>

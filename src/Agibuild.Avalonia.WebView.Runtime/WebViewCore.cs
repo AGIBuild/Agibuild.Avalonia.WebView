@@ -425,7 +425,16 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
     /// if the adapter supports it; otherwise returns <c>null</c>.
     /// </summary>
     public global::Avalonia.Platform.IPlatformHandle? TryGetWebViewHandle()
-        => (_adapter as INativeWebViewHandleProvider)?.TryGetWebViewHandle();
+    {
+        if (_adapter is not INativeWebViewHandleProvider provider)
+        {
+            return null;
+        }
+
+        return _dispatcher.CheckAccess()
+            ? provider.TryGetWebViewHandle()
+            : _dispatcher.InvokeAsync(() => provider.TryGetWebViewHandle()).GetAwaiter().GetResult();
+    }
 
     /// <summary>
     /// Sets the custom User-Agent string at runtime.
@@ -436,7 +445,15 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         ThrowIfDisposed();
         if (_adapter is IWebViewAdapterOptions adapterOptions)
         {
-            adapterOptions.SetCustomUserAgent(userAgent);
+            if (_dispatcher.CheckAccess())
+            {
+                adapterOptions.SetCustomUserAgent(userAgent);
+            }
+            else
+            {
+                _ = _dispatcher.InvokeAsync(() => adapterOptions.SetCustomUserAgent(userAgent));
+            }
+
             _logger.LogDebug("CustomUserAgent set to: {UA}", userAgent ?? "(default)");
         }
     }
@@ -829,7 +846,9 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
             ArgumentNullException.ThrowIfNull(uri);
             ThrowIfOwnerDisposed();
             _logger.LogDebug("CookieManager.GetCookiesAsync: {Uri}", uri);
-            return _cookieAdapter.GetCookiesAsync(uri);
+            return _dispatcher.CheckAccess()
+                ? _cookieAdapter.GetCookiesAsync(uri)
+                : _dispatcher.InvokeAsync(() => _cookieAdapter.GetCookiesAsync(uri));
         }
 
         public Task SetCookieAsync(WebViewCookie cookie)
@@ -837,7 +856,9 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
             ArgumentNullException.ThrowIfNull(cookie);
             ThrowIfOwnerDisposed();
             _logger.LogDebug("CookieManager.SetCookieAsync: {Name}@{Domain}", cookie.Name, cookie.Domain);
-            return _cookieAdapter.SetCookieAsync(cookie);
+            return _dispatcher.CheckAccess()
+                ? _cookieAdapter.SetCookieAsync(cookie)
+                : _dispatcher.InvokeAsync(() => _cookieAdapter.SetCookieAsync(cookie));
         }
 
         public Task DeleteCookieAsync(WebViewCookie cookie)
@@ -845,14 +866,18 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
             ArgumentNullException.ThrowIfNull(cookie);
             ThrowIfOwnerDisposed();
             _logger.LogDebug("CookieManager.DeleteCookieAsync: {Name}@{Domain}", cookie.Name, cookie.Domain);
-            return _cookieAdapter.DeleteCookieAsync(cookie);
+            return _dispatcher.CheckAccess()
+                ? _cookieAdapter.DeleteCookieAsync(cookie)
+                : _dispatcher.InvokeAsync(() => _cookieAdapter.DeleteCookieAsync(cookie));
         }
 
         public Task ClearAllCookiesAsync()
         {
             ThrowIfOwnerDisposed();
             _logger.LogDebug("CookieManager.ClearAllCookiesAsync");
-            return _cookieAdapter.ClearAllCookiesAsync();
+            return _dispatcher.CheckAccess()
+                ? _cookieAdapter.ClearAllCookiesAsync()
+                : _dispatcher.InvokeAsync(() => _cookieAdapter.ClearAllCookiesAsync());
         }
 
         private void ThrowIfOwnerDisposed()

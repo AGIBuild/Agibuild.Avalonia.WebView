@@ -24,6 +24,11 @@
     <ProjectReference Include="..\Agibuild.Avalonia.WebView.Integration.Tests\Agibuild.Avalonia.WebView.Integration.Tests.csproj" />
   </ItemGroup>
 
+  <!-- Windows: use project reference so NuGet deps (WebView2) are in deps.json -->
+  <ItemGroup Condition="$([MSBuild]::IsOSPlatform('windows'))">
+    <ProjectReference Include="..\..\..\src\Agibuild.Avalonia.WebView.Adapters.Windows\Agibuild.Avalonia.WebView.Adapters.Windows.csproj" />
+  </ItemGroup>
+
   <Target Name="CopyMacOSWebViewAdapterForSmoke"
           AfterTargets="Build"
           Condition="$([MSBuild]::IsOSPlatform('osx'))">

@@ -36,16 +36,23 @@ namespace Agibuild.Avalonia.WebView.Integration.Tests
                     mainVm.WkWebViewSmoke.AutoRunCompleted += exitCode =>
                         Dispatcher.UIThread.Post(() => desktop.Shutdown(exitCode));
                 }
-                else if (args.Contains("--consumer-e2e"))
+                else if (args.Contains("--wv2-smoke"))
                 {
                     mainVm.SelectedTabIndex = 2;
+                    mainVm.WebView2Smoke.AutoRun = true;
+                    mainVm.WebView2Smoke.AutoRunCompleted += exitCode =>
+                        Dispatcher.UIThread.Post(() => desktop.Shutdown(exitCode));
+                }
+                else if (args.Contains("--consumer-e2e"))
+                {
+                    mainVm.SelectedTabIndex = 3;
                     mainVm.ConsumerE2E.AutoRun = true;
                     mainVm.ConsumerE2E.AutoRunCompleted += exitCode =>
                         Dispatcher.UIThread.Post(() => desktop.Shutdown(exitCode));
                 }
                 else if (args.Contains("--advanced-e2e"))
                 {
-                    mainVm.SelectedTabIndex = 3;
+                    mainVm.SelectedTabIndex = 4;
                     mainVm.AdvancedE2E.AutoRun = true;
                     mainVm.AdvancedE2E.AutoRunCompleted += exitCode =>
                         Dispatcher.UIThread.Post(() => desktop.Shutdown(exitCode));

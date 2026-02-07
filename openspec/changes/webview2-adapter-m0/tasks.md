@@ -70,16 +70,16 @@
 
 ## 13. Windows IT smoke tests
 
-- [ ] 13.1 Set up Windows-specific IT test infrastructure (loopback HTTP server, WebView2 test harness)
-- [ ] 13.2 IT: Link click navigation — verify `NavigationStarted` and `NavigationCompleted` for the same `NavigationId`
-- [ ] 13.3 IT: 302 redirect correlation — verify same `CorrelationId` across redirect chain and exactly-once completion
-- [ ] 13.4 IT: `window.location` script-driven navigation — verify native interception and successful completion
-- [ ] 13.5 IT: Cancellation via `Cancel=true` — verify native step denied and `NavigationCompleted` with `Canceled`
-- [ ] 13.6 IT: Script execution + WebMessage receive round-trip
-- [ ] 13.7 IT: Cookie CRUD — set, get, delete via `ICookieManager`, verify via page `document.cookie`
-- [ ] 13.8 IT: Navigate to unreachable host, verify `WebViewNetworkException`
-- [ ] 13.9 IT: `TryGetWebViewHandle()` returns non-null handle with descriptor `"WebView2"`
-- [ ] 13.10 IT: `NavigateToStringAsync(html, baseUrl)` — verify baseUrl load and heading content
+- [x] 13.1 Set up Windows-specific IT test infrastructure (loopback HTTP server, WebView2 test harness)
+- [x] 13.2 IT: Link click navigation — verify `NavigationStarted` and `NavigationCompleted` for the same `NavigationId`
+- [x] 13.3 IT: 302 redirect correlation — verify same `CorrelationId` across redirect chain and exactly-once completion
+- [x] 13.4 IT: `window.location` script-driven navigation — verify native interception and successful completion
+- [x] 13.5 IT: Cancellation via `Cancel=true` — verify native step denied and `NavigationCompleted` with `Canceled`
+- [x] 13.6 IT: Script execution + WebMessage receive round-trip
+- [x] 13.7 IT: Cookie CRUD — set, get, delete via `ICookieManager`, verify via page `document.cookie`
+- [x] 13.8 IT: Navigate to unreachable host, verify `WebViewNetworkException`
+- [x] 13.9 IT: `TryGetWebViewHandle()` returns non-null handle with descriptor `"WebView2"`
+- [x] 13.10 IT: `NavigateToStringAsync(html, baseUrl)` — verify baseUrl load and heading content
 
 ## 14. Compatibility matrix update
 
