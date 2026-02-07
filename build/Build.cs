@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Threading;
 using System.Xml.Linq;
 using Nuke.Common;
 using Nuke.Common.CI.GitHubActions;
@@ -40,6 +42,13 @@ class _Build : NukeBuild
     [Parameter("Minimum line coverage percentage (0-100). Default: 90")]
     readonly int CoverageThreshold = 90;
 
+    [Parameter("Android AVD name for emulator. Default: auto-detect first available AVD.")]
+    readonly string? AndroidAvd = null;
+
+    [Parameter("Android SDK root path. Default: ~/Library/Android/sdk (macOS) or ANDROID_HOME env var.")]
+    readonly string AndroidSdkRoot = Environment.GetEnvironmentVariable("ANDROID_HOME")
+        ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Android", "sdk");
+
     // ──────────────────────────────── Paths ──────────────────────────────────────
 
     AbsolutePath SrcDirectory => RootDirectory / "src";
@@ -68,6 +77,11 @@ class _Build : NukeBuild
         TestsDirectory / "Agibuild.Avalonia.WebView.Integration.Tests"
         / "Agibuild.Avalonia.WebView.Integration.Tests.Desktop"
         / "Agibuild.Avalonia.WebView.Integration.Tests.Desktop.csproj";
+
+    AbsolutePath E2EAndroidProject =>
+        TestsDirectory / "Agibuild.Avalonia.WebView.Integration.Tests"
+        / "Agibuild.Avalonia.WebView.Integration.Tests.Android"
+        / "Agibuild.Avalonia.WebView.Integration.Tests.Android.csproj";
 
     // ──────────────────────────────── Targets ────────────────────────────────────
 
@@ -413,6 +427,118 @@ class _Build : NukeBuild
                 .EnableNoRestore());
         });
 
+    Target StartAndroid => _ => _
+        .Description("Starts an Android emulator, builds the Android IT test app, and installs it.")
+        .Executes(() =>
+        {
+            var emulatorPath = Path.Combine(AndroidSdkRoot, "emulator", "emulator");
+            var adbPath = Path.Combine(AndroidSdkRoot, "platform-tools", "adb");
+
+            Assert.FileExists(emulatorPath, $"Android emulator not found at {emulatorPath}. Set --android-sdk-root.");
+            Assert.FileExists(adbPath, $"adb not found at {adbPath}. Set --android-sdk-root.");
+
+            // 1. Resolve AVD name
+            var avdName = AndroidAvd;
+            if (string.IsNullOrEmpty(avdName))
+            {
+                Serilog.Log.Information("No --android-avd specified, detecting available AVDs...");
+                var listResult = RunProcess(emulatorPath, "-list-avds");
+                var avds = listResult
+                    .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                    .Where(l => !l.StartsWith("INFO", StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+
+                Assert.NotEmpty(avds, "No Android AVDs found. Create one via Android Studio or `avdmanager`.");
+                avdName = avds.First();
+                Serilog.Log.Information("Auto-selected AVD: {Avd}", avdName);
+            }
+
+            // 2. Check if emulator is already running
+            var devicesOutput = RunProcess(adbPath, "devices");
+            var hasRunningEmulator = devicesOutput
+                .Split('\n')
+                .Any(l => l.StartsWith("emulator-", StringComparison.Ordinal) && l.Contains("device"));
+
+            if (hasRunningEmulator)
+            {
+                Serilog.Log.Information("Android emulator is already running, skipping launch.");
+            }
+            else
+            {
+                // 3. Start emulator in background
+                Serilog.Log.Information("Starting Android emulator: {Avd}...", avdName);
+                var emulatorProcess = new Process
+                {
+                    StartInfo = new ProcessStartInfo
+                    {
+                        FileName = emulatorPath,
+                        Arguments = $"-avd {avdName} -no-snapshot-load -no-audio",
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true,
+                    }
+                };
+                emulatorProcess.Start();
+
+                // 4. Wait for device to boot
+                Serilog.Log.Information("Waiting for emulator to boot...");
+                var timeout = TimeSpan.FromMinutes(3);
+                var stopwatch = Stopwatch.StartNew();
+                var booted = false;
+
+                while (stopwatch.Elapsed < timeout)
+                {
+                    Thread.Sleep(3000);
+                    try
+                    {
+                        var bootResult = RunProcess(adbPath, "shell getprop sys.boot_completed");
+                        if (bootResult.Trim() == "1")
+                        {
+                            booted = true;
+                            break;
+                        }
+                    }
+                    catch
+                    {
+                        // Device not ready yet
+                    }
+                }
+
+                Assert.True(booted, $"Emulator did not boot within {timeout.TotalMinutes} minutes.");
+                Serilog.Log.Information("Emulator booted successfully ({Elapsed:F0}s).", stopwatch.Elapsed.TotalSeconds);
+            }
+
+            // 5. Build the Android test APK
+            Serilog.Log.Information("Building Android test app...");
+            DotNetBuild(s => s
+                .SetProjectFile(E2EAndroidProject)
+                .SetConfiguration(Configuration));
+
+            // 6. Find and install the APK
+            var apkDir = (AbsolutePath)(Path.GetDirectoryName(E2EAndroidProject)!)
+                         / "bin" / Configuration / "net10.0-android";
+            var apkFiles = apkDir.GlobFiles("*.apk")
+                .Where(f => !f.Name.Contains("-Signed", StringComparison.OrdinalIgnoreCase)
+                          || f.Name.Contains("-Signed", StringComparison.OrdinalIgnoreCase))
+                .OrderByDescending(f => f.Name.Contains("-Signed", StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            // Prefer signed APK
+            var signedApk = apkFiles.FirstOrDefault(f => f.Name.Contains("-Signed", StringComparison.OrdinalIgnoreCase));
+            var apk = signedApk ?? apkFiles.FirstOrDefault();
+            Assert.NotNull(apk, $"No APK found in {apkDir}. Build may have failed.");
+
+            Serilog.Log.Information("Installing APK: {Apk}", apk!.Name);
+            RunProcess(adbPath, $"install -r \"{apk}\"");
+
+            // 7. Launch the app
+            const string packageName = "com.CompanyName.Agibuild.Avalonia.WebView.Integration.Tests";
+            Serilog.Log.Information("Launching {Package}...", packageName);
+            RunProcess(adbPath, $"shell monkey -p {packageName} -c android.intent.category.LAUNCHER 1");
+
+            Serilog.Log.Information("Android test app deployed and launched successfully.");
+        });
+
     Target Ci => _ => _
         .Description("Full CI pipeline: compile → coverage → pack → validate.")
         .DependsOn(Coverage, ValidatePackage);
@@ -422,6 +548,36 @@ class _Build : NukeBuild
         .DependsOn(Coverage, ValidatePackage, Publish);
 
     // ──────────────────────────────── Helpers ────────────────────────────────────
+
+    static string RunProcess(string fileName, string arguments, int timeoutMs = 30_000)
+    {
+        var psi = new ProcessStartInfo
+        {
+            FileName = fileName,
+            Arguments = arguments,
+            UseShellExecute = false,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            CreateNoWindow = true,
+        };
+
+        using var process = Process.Start(psi)!;
+        var output = process.StandardOutput.ReadToEnd();
+        var error = process.StandardError.ReadToEnd();
+
+        if (!process.WaitForExit(timeoutMs))
+        {
+            process.Kill();
+            throw new TimeoutException($"Process '{fileName} {arguments}' timed out after {timeoutMs}ms.");
+        }
+
+        if (process.ExitCode != 0 && !string.IsNullOrWhiteSpace(error))
+        {
+            Serilog.Log.Warning("Process stderr: {Error}", error.Trim());
+        }
+
+        return output;
+    }
 
     IEnumerable<AbsolutePath> GetProjectsToBuild()
     {

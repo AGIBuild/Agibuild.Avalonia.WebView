@@ -41,6 +41,28 @@ public sealed class WebViewAdapterRegistryTests
     }
 
     [Fact]
+    public void Register_null_AdapterId_throws_ArgumentNullException()
+    {
+        var reg = new WebViewAdapterRegistration(
+            WebViewAdapterPlatform.MacOS, null!, () => new MockWebViewAdapter());
+
+        Assert.Throws<ArgumentNullException>(() => WebViewAdapterRegistry.Register(reg));
+    }
+
+    [Fact]
+    public void Register_duplicate_registration_is_silently_ignored()
+    {
+        // Register the same (Platform, AdapterId) twice — second call should not throw.
+        var reg1 = new WebViewAdapterRegistration(
+            WebViewAdapterPlatform.Gtk, "dup-test", () => new MockWebViewAdapter(), Priority: 10);
+        var reg2 = new WebViewAdapterRegistration(
+            WebViewAdapterPlatform.Gtk, "dup-test", () => new MockWebViewAdapter(), Priority: 20);
+
+        WebViewAdapterRegistry.Register(reg1);
+        WebViewAdapterRegistry.Register(reg2); // Should not throw (TryAdd ignores duplicates).
+    }
+
+    [Fact]
     public void TryCreateForCurrentPlatform_creates_adapter_if_registered()
     {
         // This depends on whether an adapter is registered for the current platform.
@@ -54,6 +76,7 @@ public sealed class WebViewAdapterRegistryTests
         else
         {
             Assert.NotNull(reason);
+            Assert.Contains("No WebView adapter registered", reason);
         }
     }
 }

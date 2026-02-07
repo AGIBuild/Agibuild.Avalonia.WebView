@@ -34,6 +34,7 @@
         "Publish",
         "Restore",
         "Start",
+        "StartAndroid",
         "Test",
         "UnitTests",
         "ValidatePackage"
@@ -110,6 +111,14 @@
   "allOf": [
     {
       "properties": {
+        "AndroidAvd": {
+          "type": "string",
+          "description": "Android AVD name for emulator. Default: auto-detect first available AVD"
+        },
+        "AndroidSdkRoot": {
+          "type": "string",
+          "description": "Android SDK root path. Default: ~/Library/Android/sdk (macOS) or ANDROID_HOME env var"
+        },
         "Configuration": {
           "type": "string",
           "description": "Configuration (Debug / Release). Default: Release on CI, Debug locally"
