@@ -105,6 +105,38 @@ Adapters that do not implement `ICookieAdapter` SHALL NOT be required to provide
 - **WHEN** an adapter implements only `IWebViewAdapter`
 - **THEN** `TryGetCookieManager()` returns `null`
 
+### Requirement: Optional ICustomSchemeAdapter facet
+The adapter abstractions SHALL define an `ICustomSchemeAdapter` interface that adapters MAY implement alongside `IWebViewAdapter`:
+- `void RegisterCustomSchemes(IReadOnlyList<CustomSchemeRegistration> schemes)`
+
+The runtime SHALL detect `ICustomSchemeAdapter` support via type check at initialization.
+When registered custom schemes are requested by the WebView, the adapter SHALL raise `WebResourceRequested` with the request details.
+
+#### Scenario: Adapter implementing ICustomSchemeAdapter enables custom scheme interception
+- **WHEN** an adapter implements both `IWebViewAdapter` and `ICustomSchemeAdapter`
+- **THEN** the runtime calls `RegisterCustomSchemes` with the configured schemes
+- **AND** requests to those schemes raise `WebResourceRequested`
+
+### Requirement: Optional IDownloadAdapter facet
+The adapter abstractions SHALL define an `IDownloadAdapter` interface that adapters MAY implement alongside `IWebViewAdapter`:
+- `event EventHandler<DownloadRequestedEventArgs>? DownloadRequested`
+
+The runtime SHALL detect `IDownloadAdapter` support via type check and subscribe to the event.
+
+#### Scenario: Adapter implementing IDownloadAdapter enables download events
+- **WHEN** an adapter implements both `IWebViewAdapter` and `IDownloadAdapter`
+- **THEN** download events are propagated to consumers via `IWebView.DownloadRequested`
+
+### Requirement: Optional IPermissionAdapter facet
+The adapter abstractions SHALL define an `IPermissionAdapter` interface that adapters MAY implement alongside `IWebViewAdapter`:
+- `event EventHandler<PermissionRequestedEventArgs>? PermissionRequested`
+
+The runtime SHALL detect `IPermissionAdapter` support via type check and subscribe to the event.
+
+#### Scenario: Adapter implementing IPermissionAdapter enables permission events
+- **WHEN** an adapter implements both `IWebViewAdapter` and `IPermissionAdapter`
+- **THEN** permission events are propagated to consumers via `IWebView.PermissionRequested`
+
 ### Requirement: INativeWebViewHandleProvider is implementable by adapters
 Platform adapters MAY implement `INativeWebViewHandleProvider` to expose the underlying native WebView handle.
 The `HandleDescriptor` property of the returned `IPlatformHandle` SHALL identify the native type (e.g., `"WKWebView"`, `"WebView2"`).

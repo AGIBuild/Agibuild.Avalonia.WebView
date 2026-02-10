@@ -14,7 +14,7 @@ The `IWebView` interface SHALL define:
 - methods: `Task NavigateAsync(Uri uri)`, `Task NavigateToStringAsync(string html)`, `Task NavigateToStringAsync(string html, Uri? baseUrl)`, `Task<string?> InvokeScriptAsync(string script)`
 - commands: `bool GoBack()`, `bool GoForward()`, `bool Refresh()`, `bool Stop()`
 - accessors: `ICookieManager? TryGetCookieManager()`, `ICommandManager? TryGetCommandManager()`
-- events: `NavigationStarted`, `NavigationCompleted`, `NewWindowRequested`, `WebMessageReceived`, `WebResourceRequested`, `EnvironmentRequested`, `AdapterCreated`, `AdapterDestroyed`
+- events: `NavigationStarted`, `NavigationCompleted`, `NewWindowRequested`, `WebMessageReceived`, `WebResourceRequested`, `EnvironmentRequested`, `DownloadRequested`, `PermissionRequested`, `AdapterCreated`, `AdapterDestroyed`
 
 #### Scenario: IWebView members are available
 - **WHEN** a consumer reflects on `IWebView`
@@ -40,7 +40,7 @@ The `IWebAuthBroker` interface SHALL define:
 
 ### Requirement: Environment options and native handles
 The Core assembly SHALL define:
-- `IWebViewEnvironmentOptions` with `bool EnableDevTools { get; set; }`
+- `IWebViewEnvironmentOptions` with `bool EnableDevTools { get; set; }`, `IReadOnlyList<CustomSchemeRegistration>? CustomSchemes { get; set; }`
 - `INativeWebViewHandleProvider` with `IPlatformHandle? TryGetWebViewHandle()`
 - `IWindowsWebView2PlatformHandle` extending `IPlatformHandle` with `nint CoreWebView2Handle` and `nint CoreWebView2ControllerHandle`
 - `IAppleWKWebViewPlatformHandle` extending `IPlatformHandle` with `nint WKWebViewHandle`
@@ -57,7 +57,9 @@ The Core assembly SHALL define event args types:
 - `NavigationCompletedEventArgs` with `Guid NavigationId { get; }`, `Uri RequestUri { get; }`, `NavigationCompletedStatus Status { get; }`, and `Exception? Error { get; }`
 - `NewWindowRequestedEventArgs`
 - `WebMessageReceivedEventArgs` with `string Body { get; }`, `string Origin { get; }`, and `Guid ChannelId { get; }`
-- `WebResourceRequestedEventArgs`
+- `WebResourceRequestedEventArgs` with `Uri RequestUri { get; }`, `string Method { get; }`, `IReadOnlyDictionary<string, string>? RequestHeaders { get; }`, response properties (`Stream? ResponseBody`, `string? ResponseContentType`, `int? ResponseStatusCode`, `IDictionary<string, string>? ResponseHeaders`)
+- `DownloadRequestedEventArgs` with `Uri DownloadUri { get; }`, `string? SuggestedFileName { get; }`, `string? ContentType { get; }`, `long? ContentLength { get; }`, `string? DownloadPath { get; set; }`, `bool Cancel { get; set; }`, `bool Handled { get; set; }`
+- `PermissionRequestedEventArgs` with `WebViewPermissionKind PermissionKind { get; }`, `Uri? Origin { get; }`, `PermissionState State { get; set; }`
 - `EnvironmentRequestedEventArgs`
 - `AdapterCreatedEventArgs` with `IPlatformHandle? PlatformHandle { get; }`
 
@@ -65,10 +67,12 @@ The Core assembly SHALL define event args types:
 - **WHEN** a consumer references the event args types
 - **THEN** all listed types are present in the Core assembly
 
-### Requirement: Navigation and auth status enums
+### Requirement: Navigation, permission, and auth status enums
 The Core assembly SHALL define the enums:
 - `NavigationCompletedStatus` with members: `Success`, `Failure`, `Canceled`, `Superseded`
 - `WebAuthStatus` with members: `Success`, `UserCancel`, `Timeout`, `Error`
+- `WebViewPermissionKind` with members: `Unknown`, `Camera`, `Microphone`, `Geolocation`, `Notifications`
+- `PermissionState` with members: `Default`, `Allow`, `Deny`
 
 #### Scenario: Status enums are resolvable
 - **WHEN** a consumer references `NavigationCompletedStatus` and `WebAuthStatus`
