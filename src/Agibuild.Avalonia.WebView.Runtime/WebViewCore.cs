@@ -107,6 +107,31 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
             : null;
         _logger.LogDebug("Cookie support: {Supported}", _cookieManager is not null);
 
+        // Register custom schemes if adapter supports it.
+        if (_adapter is ICustomSchemeAdapter customSchemeAdapter)
+        {
+            var schemes = WebViewEnvironment.Options.CustomSchemes;
+            if (schemes.Count > 0)
+            {
+                customSchemeAdapter.RegisterCustomSchemes(schemes);
+                _logger.LogDebug("Custom schemes registered: {Count}", schemes.Count);
+            }
+        }
+
+        // Subscribe to download events if adapter supports it.
+        if (_adapter is IDownloadAdapter downloadAdapter)
+        {
+            downloadAdapter.DownloadRequested += OnAdapterDownloadRequested;
+            _logger.LogDebug("Download support: enabled");
+        }
+
+        // Subscribe to permission events if adapter supports it.
+        if (_adapter is IPermissionAdapter permissionAdapter)
+        {
+            permissionAdapter.PermissionRequested += OnAdapterPermissionRequested;
+            _logger.LogDebug("Permission support: enabled");
+        }
+
         _adapter.NavigationCompleted += OnAdapterNavigationCompleted;
         _adapter.NewWindowRequested += OnAdapterNewWindowRequested;
         _adapter.WebMessageReceived += OnAdapterWebMessageReceived;
@@ -148,6 +173,8 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
     public event EventHandler<WebMessageReceivedEventArgs>? WebMessageReceived;
     public event EventHandler<WebResourceRequestedEventArgs>? WebResourceRequested;
     public event EventHandler<EnvironmentRequestedEventArgs>? EnvironmentRequested;
+    public event EventHandler<DownloadRequestedEventArgs>? DownloadRequested;
+    public event EventHandler<PermissionRequestedEventArgs>? PermissionRequested;
     public event EventHandler<AdapterCreatedEventArgs>? AdapterCreated;
     public event EventHandler? AdapterDestroyed;
 
@@ -170,6 +197,11 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         _adapter.WebMessageReceived -= OnAdapterWebMessageReceived;
         _adapter.WebResourceRequested -= OnAdapterWebResourceRequested;
         _adapter.EnvironmentRequested -= OnAdapterEnvironmentRequested;
+
+        if (_adapter is IDownloadAdapter downloadAdapter)
+            downloadAdapter.DownloadRequested -= OnAdapterDownloadRequested;
+        if (_adapter is IPermissionAdapter permissionAdapter)
+            permissionAdapter.PermissionRequested -= OnAdapterPermissionRequested;
 
         if (_activeNavigation is not null)
         {
@@ -772,6 +804,36 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         }
 
         _ = _dispatcher.InvokeAsync(() => EnvironmentRequested?.Invoke(this, e));
+    }
+
+    private void OnAdapterDownloadRequested(object? sender, DownloadRequestedEventArgs e)
+    {
+        _logger.LogDebug("Event DownloadRequested: uri={Uri}, file={File}", e.DownloadUri, e.SuggestedFileName);
+
+        if (_disposed || _adapterDestroyed) return;
+
+        if (_dispatcher.CheckAccess())
+        {
+            DownloadRequested?.Invoke(this, e);
+            return;
+        }
+
+        _ = _dispatcher.InvokeAsync(() => DownloadRequested?.Invoke(this, e));
+    }
+
+    private void OnAdapterPermissionRequested(object? sender, PermissionRequestedEventArgs e)
+    {
+        _logger.LogDebug("Event PermissionRequested: kind={Kind}, origin={Origin}", e.PermissionKind, e.Origin);
+
+        if (_disposed || _adapterDestroyed) return;
+
+        if (_dispatcher.CheckAccess())
+        {
+            PermissionRequested?.Invoke(this, e);
+            return;
+        }
+
+        _ = _dispatcher.InvokeAsync(() => PermissionRequested?.Invoke(this, e));
     }
 
     private void CompleteActiveNavigation(NavigationCompletedStatus status, Exception? error)

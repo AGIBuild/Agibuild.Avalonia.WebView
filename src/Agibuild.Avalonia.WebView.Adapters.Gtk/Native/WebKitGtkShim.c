@@ -48,12 +48,37 @@ typedef void (*ag_gtk_message_cb)(
     const char* body_utf8,
     const char* origin_utf8);
 
+typedef void (*ag_gtk_download_cb)(
+    void* user_data,
+    const char* url_utf8,
+    const char* suggested_filename_utf8,
+    const char* mime_type_utf8,
+    int64_t content_length);
+
+typedef void (*ag_gtk_permission_cb)(
+    void* user_data,
+    int permission_kind, /* 0=Unknown, 1=Camera, 2=Microphone, 3=Geolocation, 6=Notifications */
+    const char* origin_utf8,
+    int* out_state); /* 0=Default, 1=Allow, 2=Deny */
+
+typedef bool (*ag_gtk_scheme_request_cb)(
+    void* user_data,
+    const char* url_utf8,
+    const char* method_utf8,
+    const void** out_response_data,
+    int64_t* out_response_length,
+    const char** out_mime_type_utf8,
+    int* out_status_code);
+
 struct ag_gtk_callbacks
 {
     ag_gtk_policy_request_cb on_policy_request;
     ag_gtk_nav_completed_cb on_navigation_completed;
     ag_gtk_script_result_cb on_script_result;
     ag_gtk_message_cb on_message;
+    ag_gtk_download_cb on_download;
+    ag_gtk_permission_cb on_permission;
+    ag_gtk_scheme_request_cb on_scheme_request;
 };
 
 /* ========== Cookie operation callbacks ========== */
@@ -84,6 +109,10 @@ typedef struct
     gboolean opt_enable_dev_tools;
     gboolean opt_ephemeral;
     char* opt_user_agent; /* owned, NULL if not set */
+
+    /* Custom scheme registrations — set before attach. */
+    char** custom_schemes; /* NULL-terminated array of scheme strings, owned */
+    int custom_scheme_count;
 
 } shim_state;
 
@@ -387,6 +416,121 @@ static void on_eval_js_finish(GObject* source, GAsyncResult* result, gpointer us
     webkit_javascript_result_unref(js_result);
 }
 
+/* ========== Custom scheme handler ========== */
+
+static void on_custom_scheme_request(WebKitURISchemeRequest* request, gpointer user_data)
+{
+    shim_state* s = (shim_state*)user_data;
+    if (atomic_load(&s->detached) || s->callbacks.on_scheme_request == NULL)
+    {
+        GError* err = g_error_new_literal(g_quark_from_string("ag-webkit"), 404, "Not handled");
+        webkit_uri_scheme_request_finish_error(request, err);
+        g_error_free(err);
+        return;
+    }
+
+    const char* uri = webkit_uri_scheme_request_get_uri(request);
+    const char* method = webkit_uri_scheme_request_get_http_method(request);
+
+    const void* response_data = NULL;
+    int64_t response_length = 0;
+    const char* mime_type = NULL;
+    int status_code = 0;
+
+    bool handled = s->callbacks.on_scheme_request(
+        s->user_data,
+        uri ? uri : "",
+        method ? method : "GET",
+        &response_data, &response_length, &mime_type, &status_code);
+
+    if (!handled || response_data == NULL)
+    {
+        GError* err = g_error_new_literal(g_quark_from_string("ag-webkit"), 404, "Not handled");
+        webkit_uri_scheme_request_finish_error(request, err);
+        g_error_free(err);
+        return;
+    }
+
+    GInputStream* stream = g_memory_input_stream_new_from_data(
+        g_memdup2(response_data, (gsize)response_length),
+        (gssize)response_length,
+        g_free);
+
+    webkit_uri_scheme_request_finish(request, stream, (gssize)response_length,
+        mime_type ? mime_type : "application/octet-stream");
+
+    g_object_unref(stream);
+}
+
+/* ========== Download signal handler ========== */
+
+static void on_download_started(WebKitWebContext* context, WebKitDownload* download, gpointer user_data)
+{
+    shim_state* s = (shim_state*)user_data;
+    if (atomic_load(&s->detached)) return;
+    if (s->callbacks.on_download == NULL) return;
+
+    WebKitURIRequest* request = webkit_download_get_request(download);
+    const char* url = request ? webkit_uri_request_get_uri(request) : "";
+
+    WebKitURIResponse* response = webkit_download_get_response(download);
+    const char* mime = response ? webkit_uri_response_get_mime_type(response) : "";
+    int64_t length = response ? (int64_t)webkit_uri_response_get_content_length(response) : -1;
+
+    const char* suggested = webkit_download_get_suggested_filename(download);
+    if (suggested == NULL) suggested = "";
+
+    s->callbacks.on_download(s->user_data, url, suggested, mime ? mime : "", length > 0 ? length : -1);
+}
+
+/* ========== Permission signal handler ========== */
+
+static gboolean on_permission_request(WebKitWebView* web_view, WebKitPermissionRequest* request, gpointer user_data)
+{
+    shim_state* s = (shim_state*)user_data;
+    if (atomic_load(&s->detached)) return FALSE;
+    if (s->callbacks.on_permission == NULL) return FALSE;
+
+    int kind = 0; /* Unknown */
+    if (WEBKIT_IS_MEDIA_KEY_SYSTEM_PERMISSION_REQUEST(request))
+    {
+        kind = 0;
+    }
+    else
+    {
+        /* Attempt to identify by type name since WebKitGTK doesn't
+           always expose all request types in older versions. */
+        const gchar* type_name = G_OBJECT_TYPE_NAME(request);
+        if (type_name != NULL)
+        {
+            if (g_str_has_prefix(type_name, "WebKitGeolocation"))
+                kind = 3; /* Geolocation */
+            else if (g_str_has_prefix(type_name, "WebKitNotification"))
+                kind = 6; /* Notifications */
+            else if (g_str_has_prefix(type_name, "WebKitUserMedia"))
+                kind = 1; /* Camera (media capture) */
+        }
+    }
+
+    /* Get origin from the main resource URI */
+    const char* uri = webkit_web_view_get_uri(web_view);
+    int state = 0; /* Default */
+    s->callbacks.on_permission(s->user_data, kind, uri ? uri : "", &state);
+
+    if (state == 1) /* Allow */
+    {
+        webkit_permission_request_allow(request);
+        return TRUE;
+    }
+    else if (state == 2) /* Deny */
+    {
+        webkit_permission_request_deny(request);
+        return TRUE;
+    }
+
+    return FALSE; /* Let WebKitGTK handle default behavior */
+}
+
 /* ========== Attach helper ========== */
 
 typedef struct
@@ -456,6 +600,23 @@ static void do_attach(void* data)
     g_signal_connect(s->web_view, "load-changed", G_CALLBACK(on_load_changed), s);
     g_signal_connect(s->web_view, "load-failed", G_CALLBACK(on_load_failed), s);
     g_signal_connect(s->web_view, "load-failed-with-tls-errors", G_CALLBACK(on_load_failed_tls), s);
+
+    /* Register custom URI schemes */
+    WebKitWebContext* web_context = webkit_web_view_get_context(s->web_view);
+    if (s->custom_schemes != NULL && s->callbacks.on_scheme_request != NULL)
+    {
+        for (int i = 0; i < s->custom_scheme_count; i++)
+        {
+            webkit_web_context_register_uri_scheme(web_context, s->custom_schemes[i],
+                on_custom_scheme_request, s, NULL);
+        }
+    }
+
+    /* Download signal */
+    g_signal_connect(web_context, "download-started", G_CALLBACK(on_download_started), s);
+
+    /* Permission signal */
+    g_signal_connect(s->web_view, "permission-request", G_CALLBACK(on_permission_request), s);
 
     /* Add WebView to the plug */
     gtk_container_add(GTK_CONTAINER(s->plug), GTK_WIDGET(s->web_view));
@@ -527,6 +688,18 @@ ag_gtk_handle ag_gtk_create(const struct ag_gtk_callbacks* callbacks, void* user
     return (ag_gtk_handle)s;
 }
 
+void ag_gtk_register_custom_scheme(ag_gtk_handle handle, const char* scheme_utf8)
+{
+    if (!handle || !scheme_utf8) return;
+    shim_state* s = (shim_state*)handle;
+
+    int new_count = s->custom_scheme_count + 1;
+    s->custom_schemes = (char**)realloc(s->custom_schemes, sizeof(char*) * (new_count + 1));
+    s->custom_schemes[s->custom_scheme_count] = strdup(scheme_utf8);
+    s->custom_schemes[new_count] = NULL; /* NULL-terminate */
+    s->custom_scheme_count = new_count;
+}
+
 void ag_gtk_destroy(ag_gtk_handle handle)
 {
     if (!handle) return;
@@ -537,6 +710,16 @@ void ag_gtk_destroy(ag_gtk_handle handle)
     {
         g_hash_table_destroy(s->pending_policy);
         s->pending_policy = NULL;
+    }
+
+    /* Free custom schemes */
+    if (s->custom_schemes != NULL)
+    {
+        for (int i = 0; i < s->custom_scheme_count; i++)
+        {
+            free(s->custom_schemes[i]);
+        }
+        free(s->custom_schemes);
     }
 
     free(s->opt_user_agent);

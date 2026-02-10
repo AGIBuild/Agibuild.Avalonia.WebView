@@ -41,18 +41,50 @@ typedef void (*ag_wk_message_cb)(
     const char* body_utf8,
     const char* origin_utf8);
 
+typedef void (*ag_wk_download_cb)(
+    void* user_data,
+    const char* url_utf8,
+    const char* suggested_filename_utf8,
+    const char* mime_type_utf8,
+    int64_t content_length);
+
+typedef void (*ag_wk_permission_cb)(
+    void* user_data,
+    int permission_kind, // 0=Unknown, 1=Camera, 2=Microphone
+    const char* origin_utf8,
+    int* out_state); // 0=Default, 1=Allow, 2=Deny
+
+// Custom scheme handler callback.
+// Called synchronously when the WebView requests a custom scheme URL.
+// C# sets response data via out params. Return true if handled.
+typedef bool (*ag_wk_scheme_request_cb)(
+    void* user_data,
+    const char* url_utf8,
+    const char* method_utf8,
+    // Out params — set by managed code
+    const void** out_response_data,
+    int64_t* out_response_length,
+    const char** out_mime_type_utf8, // C# allocates, native will NOT free
+    int* out_status_code);
+
 struct ag_wk_callbacks
 {
     ag_wk_policy_request_cb on_policy_request;
     ag_wk_nav_completed_cb on_navigation_completed;
     ag_wk_script_result_cb on_script_result;
     ag_wk_message_cb on_message;
+    ag_wk_download_cb on_download;
+    ag_wk_permission_cb on_permission;
+    ag_wk_scheme_request_cb on_scheme_request;
 };
 
 typedef void* ag_wk_handle;
 
 ag_wk_handle ag_wk_create(const ag_wk_callbacks* callbacks, void* user_data);
 void ag_wk_destroy(ag_wk_handle handle);
+
+// Register custom schemes (call before ag_wk_attach).
+void ag_wk_register_custom_scheme(ag_wk_handle handle, const char* scheme_utf8);
 
 bool ag_wk_attach(ag_wk_handle handle, void* nsview_ptr);
 void ag_wk_detach(ag_wk_handle handle);
@@ -139,6 +171,14 @@ struct shim_state;
 @property(nonatomic, assign) shim_state* state;
 @end
 
+@interface ShimUIDelegate : NSObject <WKUIDelegate>
+@property(nonatomic, assign) shim_state* state;
+@end
+
+@interface ShimSchemeHandler : NSObject <WKURLSchemeHandler>
+@property(nonatomic, assign) shim_state* state;
+@end
+
 struct shim_state
 {
     ag_wk_callbacks callbacks {};
@@ -151,6 +191,7 @@ struct shim_state
 
     __strong ShimNavigationDelegate* nav_delegate { nil };
     __strong ShimMessageHandler* msg_handler { nil };
+    __strong ShimUIDelegate* ui_delegate { nil };
 
     std::atomic<uint64_t> next_request_id { 1 };
     __strong NSMutableDictionary<NSNumber*, policy_decision_block>* pending_policy { nil };
@@ -161,6 +202,10 @@ struct shim_state
     bool opt_enable_dev_tools { false };
     bool opt_ephemeral { false };
     __strong NSString* opt_user_agent { nil };
+
+    // Custom scheme registrations — set before attach.
+    __strong NSMutableArray<NSString*>* custom_schemes { nil };
+    __strong ShimSchemeHandler* scheme_handler { nil };
 };
 
 static void run_on_main(void (^block)(void))
@@ -304,6 +349,103 @@ static int map_error_status(NSError* error)
     [self webView:webView didFailProvisionalNavigation:navigation withError:error];
 }
 
+- (void)webView:(WKWebView*)webView decidePolicyForNavigationResponse:(WKNavigationResponse*)navigationResponse decisionHandler:(void (^)(WKNavigationResponsePolicy))decisionHandler
+{
+    shim_state* s = self.state;
+    if (s == nullptr || s->detached.load())
+    {
+        decisionHandler(WKNavigationResponsePolicyAllow);
+        return;
+    }
+
+    // Check if this is a download (not rendered content)
+    if (!navigationResponse.canShowMIMEType || [navigationResponse.response isKindOfClass:[NSHTTPURLResponse class]])
+    {
+        NSHTTPURLResponse* httpResp = (NSHTTPURLResponse*)navigationResponse.response;
+        NSDictionary* headers = httpResp.allHeaderFields;
+        NSString* contentDisp = headers[@"Content-Disposition"];
+
+        if (!navigationResponse.canShowMIMEType || (contentDisp && [contentDisp containsString:@"attachment"]))
+        {
+            // This is a download
+            if (s->callbacks.on_download)
+            {
+                NSURL* url = navigationResponse.response.URL;
+                NSString* mime = navigationResponse.response.MIMEType ?: @"";
+                NSString* fileName = navigationResponse.response.suggestedFilename ?: @"";
+                int64_t length = (int64_t)navigationResponse.response.expectedContentLength;
+
+                s->callbacks.on_download(
+                    s->user_data,
+                    utf8_or_empty(url.absoluteString),
+                    utf8_or_empty(fileName),
+                    utf8_or_empty(mime),
+                    length > 0 ? length : -1);
+            }
+
+            if (@available(macOS 11.3, *))
+            {
+                decisionHandler(WKNavigationResponsePolicyDownload);
+            }
+            else
+            {
+                decisionHandler(WKNavigationResponsePolicyCancel);
+            }
+            return;
+        }
+    }
+
+    decisionHandler(WKNavigationResponsePolicyAllow);
+}
+
+@end
+
+@implementation ShimUIDelegate
+
+- (void)webView:(WKWebView*)webView requestMediaCapturePermissionForOrigin:(WKSecurityOrigin*)origin initiatedByFrame:(WKFrameInfo*)frame type:(WKMediaCaptureType)type decisionHandler:(void (^)(WKPermissionDecision))decisionHandler API_AVAILABLE(macos(12.0))
+{
+    shim_state* s = self.state;
+    if (s == nullptr || s->detached.load())
+    {
+        decisionHandler(WKPermissionDecisionPrompt);
+        return;
+    }
+
+    if (s->callbacks.on_permission)
+    {
+        int kind = 0; // Unknown
+        switch (type)
+        {
+            case WKMediaCaptureTypeCamera:
+                kind = 1; // Camera
+                break;
+            case WKMediaCaptureTypeMicrophone:
+                kind = 2; // Microphone
+                break;
+            case WKMediaCaptureTypeCameraAndMicrophone:
+                kind = 1; // Camera (primary)
+                break;
+        }
+
+        NSString* originStr = [NSString stringWithFormat:@"%@://%@", origin.protocol, origin.host];
+        int state = 0; // Default
+        s->callbacks.on_permission(s->user_data, kind, utf8_or_empty(originStr), &state);
+
+        if (state == 1) // Allow
+        {
+            decisionHandler(WKPermissionDecisionGrant);
+            return;
+        }
+        else if (state == 2) // Deny
+        {
+            decisionHandler(WKPermissionDecisionDeny);
+            return;
+        }
+    }
+
+    decisionHandler(WKPermissionDecisionPrompt);
+}
+
 @end
 
 @implementation ShimMessageHandler
@@ -332,6 +474,80 @@ static int map_error_status(NSError* error)
 
 @end
 
+@implementation ShimSchemeHandler
+
+- (void)webView:(WKWebView*)webView startURLSchemeTask:(id<WKURLSchemeTask>)urlSchemeTask
+{
+    shim_state* s = self.state;
+    if (s == nullptr || s->detached.load())
+    {
+        NSError* err = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorCancelled userInfo:nil];
+        @try { [urlSchemeTask didFailWithError:err]; } @catch (id) {}
+        return;
+    }
+
+    if (s->callbacks.on_scheme_request == nullptr)
+    {
+        NSError* err = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorFileDoesNotExist userInfo:nil];
+        @try { [urlSchemeTask didFailWithError:err]; } @catch (id) {}
+        return;
+    }
+
+    NSURL* url = urlSchemeTask.request.URL;
+    NSString* method = urlSchemeTask.request.HTTPMethod ?: @"GET";
+
+    const void* response_data = nullptr;
+    int64_t response_length = 0;
+    const char* mime_type = nullptr;
+    int status_code = 0;
+
+    bool handled = s->callbacks.on_scheme_request(
+        s->user_data,
+        utf8_or_empty(url.absoluteString),
+        utf8_or_empty(method),
+        &response_data, &response_length, &mime_type, &status_code);
+
+    if (!handled || response_data == nullptr)
+    {
+        NSError* err = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorFileDoesNotExist userInfo:nil];
+        @try { [urlSchemeTask didFailWithError:err]; } @catch (id) {}
+        return;
+    }
+
+    NSString* mimeStr = mime_type ? [NSString stringWithUTF8String:mime_type] : @"application/octet-stream";
+    if (status_code <= 0) status_code = 200;
+
+    NSData* data = [NSData dataWithBytes:response_data length:(NSUInteger)response_length];
+
+    NSDictionary* headers = @{
+        @"Content-Type": mimeStr,
+        @"Content-Length": [NSString stringWithFormat:@"%lld", response_length],
+        @"Access-Control-Allow-Origin": @"*"
+    };
+
+    NSHTTPURLResponse* response = [[NSHTTPURLResponse alloc] initWithURL:url
+                                                              statusCode:status_code
+                                                             HTTPVersion:@"HTTP/1.1"
+                                                            headerFields:headers];
+    @try
+    {
+        [urlSchemeTask didReceiveResponse:response];
+        [urlSchemeTask didReceiveData:data];
+        [urlSchemeTask didFinish];
+    }
+    @catch (id)
+    {
+        // Task may have been stopped
+    }
+}
+
+- (void)webView:(WKWebView*)webView stopURLSchemeTask:(id<WKURLSchemeTask>)urlSchemeTask
+{
+    // Nothing to do — our handler is synchronous.
+}
+
+@end
+
 extern "C" {
 
 ag_wk_handle ag_wk_create(const ag_wk_callbacks* callbacks, void* user_data)
@@ -343,6 +559,17 @@ ag_wk_handle ag_wk_create(const ag_wk_callbacks* callbacks, void* user_data)
     }
     s->user_data = user_data;
     return (ag_wk_handle)s;
+}
+
+void ag_wk_register_custom_scheme(ag_wk_handle handle, const char* scheme_utf8)
+{
+    if (!handle || !scheme_utf8) return;
+    auto* s = (shim_state*)handle;
+    if (s->custom_schemes == nil)
+    {
+        s->custom_schemes = [[NSMutableArray alloc] init];
+    }
+    [s->custom_schemes addObject:[NSString stringWithUTF8String:scheme_utf8]];
 }
 
 void ag_wk_destroy(ag_wk_handle handle)
@@ -385,6 +612,17 @@ bool ag_wk_attach(ag_wk_handle handle, void* nsview_ptr)
             WKWebViewConfiguration* cfg = [[WKWebViewConfiguration alloc] init];
             cfg.userContentController = s->user_content_controller;
 
+            // Register custom URL scheme handlers (must be done on configuration before WebView creation).
+            if (s->custom_schemes != nil && s->custom_schemes.count > 0 && s->callbacks.on_scheme_request)
+            {
+                s->scheme_handler = [[ShimSchemeHandler alloc] init];
+                s->scheme_handler.state = s;
+                for (NSString* scheme in s->custom_schemes)
+                {
+                    [cfg setURLSchemeHandler:s->scheme_handler forURLScheme:scheme];
+                }
+            }
+
             // M2: Ephemeral data store (non-persistent cookies/storage).
             if (s->opt_ephemeral)
             {
@@ -417,6 +655,10 @@ bool ag_wk_attach(ag_wk_handle handle, void* nsview_ptr)
             s->nav_delegate = [[ShimNavigationDelegate alloc] init];
             s->nav_delegate.state = s;
             s->web_view.navigationDelegate = s->nav_delegate;
+
+            s->ui_delegate = [[ShimUIDelegate alloc] init];
+            s->ui_delegate.state = s;
+            s->web_view.UIDelegate = s->ui_delegate;
 
             [parent addSubview:s->web_view];
             ok = true;
@@ -467,6 +709,8 @@ void ag_wk_detach(ag_wk_handle handle)
 
             s->nav_delegate = nil;
             s->msg_handler = nil;
+            s->ui_delegate = nil;
+            s->scheme_handler = nil;
             s->user_content_controller = nil;
             s->web_view = nil;
             s->parent_view = nil;

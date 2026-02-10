@@ -286,6 +286,18 @@ internal class MockWebViewAdapter : IWebViewAdapter
 
     /// <summary>Creates a mock that supports native handle provider.</summary>
     public static MockWebViewAdapterWithHandle CreateWithHandle() => new();
+
+    /// <summary>Creates a mock that supports custom scheme registration.</summary>
+    public static MockWebViewAdapterWithCustomSchemes CreateWithCustomSchemes() => new();
+
+    /// <summary>Creates a mock that supports download events.</summary>
+    public static MockWebViewAdapterWithDownload CreateWithDownload() => new();
+
+    /// <summary>Creates a mock that supports permission events.</summary>
+    public static MockWebViewAdapterWithPermission CreateWithPermission() => new();
+
+    /// <summary>Creates a mock that supports all three new facets.</summary>
+    public static MockWebViewAdapterFull CreateFull() => new();
 }
 
 /// <summary>Mock adapter that also implements <see cref="IWebViewAdapterOptions"/> for environment options testing.</summary>
@@ -347,6 +359,58 @@ public sealed record TestAndroidWebViewPlatformHandle(nint AndroidWebViewHandle)
 {
     public nint Handle => AndroidWebViewHandle;
     public string HandleDescriptor => "AndroidWebView";
+}
+
+/// <summary>Mock adapter that also implements <see cref="ICustomSchemeAdapter"/> for custom scheme testing.</summary>
+internal sealed class MockWebViewAdapterWithCustomSchemes : MockWebViewAdapter, ICustomSchemeAdapter
+{
+    public IReadOnlyList<CustomSchemeRegistration>? RegisteredSchemes { get; private set; }
+    public int RegisterCallCount { get; private set; }
+
+    public void RegisterCustomSchemes(IReadOnlyList<CustomSchemeRegistration> schemes)
+    {
+        RegisterCallCount++;
+        RegisteredSchemes = schemes;
+    }
+}
+
+/// <summary>Mock adapter that also implements <see cref="IDownloadAdapter"/> for download event testing.</summary>
+internal sealed class MockWebViewAdapterWithDownload : MockWebViewAdapter, IDownloadAdapter
+{
+    public event EventHandler<DownloadRequestedEventArgs>? DownloadRequested;
+
+    public void RaiseDownloadRequested(DownloadRequestedEventArgs args)
+        => DownloadRequested?.Invoke(this, args);
+}
+
+/// <summary>Mock adapter that also implements <see cref="IPermissionAdapter"/> for permission event testing.</summary>
+internal sealed class MockWebViewAdapterWithPermission : MockWebViewAdapter, IPermissionAdapter
+{
+    public event EventHandler<PermissionRequestedEventArgs>? PermissionRequested;
+
+    public void RaisePermissionRequested(PermissionRequestedEventArgs args)
+        => PermissionRequested?.Invoke(this, args);
+}
+
+/// <summary>Mock adapter that implements all new facets (ICustomSchemeAdapter, IDownloadAdapter, IPermissionAdapter).</summary>
+internal sealed class MockWebViewAdapterFull : MockWebViewAdapter, ICustomSchemeAdapter, IDownloadAdapter, IPermissionAdapter
+{
+    public IReadOnlyList<CustomSchemeRegistration>? RegisteredSchemes { get; private set; }
+    public int RegisterCallCount { get; private set; }
+    public event EventHandler<DownloadRequestedEventArgs>? DownloadRequested;
+    public event EventHandler<PermissionRequestedEventArgs>? PermissionRequested;
+
+    public void RegisterCustomSchemes(IReadOnlyList<CustomSchemeRegistration> schemes)
+    {
+        RegisterCallCount++;
+        RegisteredSchemes = schemes;
+    }
+
+    public void RaiseDownloadRequested(DownloadRequestedEventArgs args)
+        => DownloadRequested?.Invoke(this, args);
+
+    public void RaisePermissionRequested(PermissionRequestedEventArgs args)
+        => PermissionRequested?.Invoke(this, args);
 }
 
 /// <summary>Mock adapter that also implements <see cref="ICookieAdapter"/> for cookie management testing.</summary>

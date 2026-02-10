@@ -14,7 +14,8 @@ using AWebView = Android.Webkit.WebView;
 namespace Agibuild.Avalonia.WebView.Adapters.Android;
 
 [SupportedOSPlatform("android")]
-internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHandleProvider, ICookieAdapter, IWebViewAdapterOptions
+internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHandleProvider, ICookieAdapter, IWebViewAdapterOptions,
+    ICustomSchemeAdapter, IDownloadAdapter, IPermissionAdapter
 {
     private static bool DiagnosticsEnabled
         => string.Equals(System.Environment.GetEnvironmentVariable("AGIBUILD_WEBVIEW_DIAG"), "1", StringComparison.Ordinal);
@@ -68,10 +69,19 @@ internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHan
     public event EventHandler<NavigationCompletedEventArgs>? NavigationCompleted;
     public event EventHandler<NewWindowRequestedEventArgs>? NewWindowRequested;
     public event EventHandler<WebMessageReceivedEventArgs>? WebMessageReceived;
-    public event EventHandler<WebResourceRequestedEventArgs>? WebResourceRequested
+    public event EventHandler<DownloadRequestedEventArgs>? DownloadRequested;
+    public event EventHandler<PermissionRequestedEventArgs>? PermissionRequested;
+    public event EventHandler<WebResourceRequestedEventArgs>? WebResourceRequested;
+
+    private IReadOnlyList<CustomSchemeRegistration>? _customSchemes;
+    private HashSet<string>? _registeredSchemes;
+
+    public void RegisterCustomSchemes(IReadOnlyList<CustomSchemeRegistration> schemes)
     {
-        add { }
-        remove { }
+        _customSchemes = schemes;
+        _registeredSchemes = new HashSet<string>(
+            schemes.Select(s => s.SchemeName?.ToLowerInvariant() ?? string.Empty).Where(s => s.Length > 0),
+            StringComparer.OrdinalIgnoreCase);
     }
 
     public event EventHandler<EnvironmentRequestedEventArgs>? EnvironmentRequested
@@ -162,6 +172,9 @@ internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHan
             _webChromeClient = new AdapterWebChromeClient(this);
             _webView.SetWebChromeClient(_webChromeClient);
 
+            // Set up download listener
+            _webView.SetDownloadListener(new AdapterDownloadListener(this));
+
             // Set up JavaScript bridge for WebMessage receive path
             var channelId = _host?.ChannelId ?? Guid.Empty;
             _jsBridge = new AndroidJsBridge(this, channelId);
@@ -244,6 +257,7 @@ internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHan
                     webView.StopLoading();
                     webView.SetWebViewClient(null!);
                     webView.SetWebChromeClient(null!);
+                    webView.SetDownloadListener(null);
 
                     if (jsBridge is not null)
                     {
@@ -572,6 +586,50 @@ internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHan
     {
         // This is called from AdapterWebViewClient.ShouldOverrideUrlLoading
         // and only for navigations we need to intercept.
+    }
+
+    internal WebResourceResponse? HandleShouldInterceptRequest(IWebResourceRequest? request)
+    {
+        if (_detached || request?.Url is null || _registeredSchemes is null)
+            return null;
+
+        var scheme = request.Url.Scheme;
+        if (string.IsNullOrEmpty(scheme) || !_registeredSchemes.Contains(scheme))
+            return null;
+
+        if (!Uri.TryCreate(request.Url.ToString(), UriKind.Absolute, out var uri))
+            return null;
+
+        var headers = request.RequestHeaders is not null
+            ? new Dictionary<string, string>(request.RequestHeaders as IDictionary<string, string> ?? new Dictionary<string, string>())
+            : null;
+
+        var args = new WebResourceRequestedEventArgs(uri, request.Method ?? "GET", headers?.AsReadOnly());
+
+        WebResourceRequested?.Invoke(this, args);
+
+        if (!args.Handled || args.ResponseBody is null)
+            return null;
+
+        var mime = args.ResponseContentType ?? "application/octet-stream";
+        var statusCode = args.ResponseStatusCode > 0 ? args.ResponseStatusCode : 200;
+        var encoding = "UTF-8";
+
+        var responseHeaders = new Dictionary<string, string>
+        {
+            ["Access-Control-Allow-Origin"] = "*"
+        };
+        if (args.ResponseHeaders is not null)
+        {
+            foreach (var kvp in args.ResponseHeaders)
+            {
+                responseHeaders[kvp.Key] = kvp.Value;
+            }
+        }
+
+        return new WebResourceResponse(
+            mime, encoding, statusCode, "OK",
+            responseHeaders!, args.ResponseBody);
     }
 
     internal bool HandleShouldOverrideUrlLoading(AWebView? view, IWebResourceRequest? request)
@@ -1091,6 +1149,12 @@ internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHan
         public override bool ShouldOverrideUrlLoading(AWebView? view, IWebResourceRequest? request)
             => _adapter.HandleShouldOverrideUrlLoading(view, request);
 
+        public override WebResourceResponse? ShouldInterceptRequest(AWebView? view, IWebResourceRequest? request)
+        {
+            var response = _adapter.HandleShouldInterceptRequest(request);
+            return response ?? base.ShouldInterceptRequest(view, request);
+        }
+
         public override void OnPageStarted(AWebView? view, string? url, global::Android.Graphics.Bitmap? favicon)
         {
             base.OnPageStarted(view, url, favicon);
@@ -1131,6 +1195,80 @@ internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHan
 
             // Return false to indicate we're not providing a new WebView.
             return false;
+        }
+
+        public override void OnPermissionRequest(PermissionRequest? request)
+        {
+            if (request is null || _adapter._detached)
+            {
+                request?.Deny();
+                return;
+            }
+
+            var resources = request.GetResources() ?? [];
+            foreach (var resource in resources)
+            {
+                var kind = resource switch
+                {
+                    PermissionRequest.ResourceVideoCapture => WebViewPermissionKind.Camera,
+                    PermissionRequest.ResourceAudioCapture => WebViewPermissionKind.Microphone,
+                    PermissionRequest.ResourceMidiSysex => WebViewPermissionKind.Midi,
+                    _ => WebViewPermissionKind.Other
+                };
+
+                Uri.TryCreate(request.Origin?.ToString(), UriKind.Absolute, out var origin);
+                var args = new PermissionRequestedEventArgs(kind, origin);
+                _adapter.PermissionRequested?.Invoke(_adapter, args);
+
+                if (args.State == PermissionState.Deny)
+                {
+                    request.Deny();
+                    return;
+                }
+
+                if (args.State == PermissionState.Allow)
+                {
+                    // Check that Android runtime permissions are granted before allowing.
+                    if (HasRequiredRuntimePermissions(resources))
+                    {
+                        request.Grant(resources);
+                    }
+                    else
+                    {
+                        // Runtime permission not granted at system level; deny gracefully.
+                        // App should request runtime permissions via Activity before allowing WebView access.
+                        request.Deny();
+                    }
+                    return;
+                }
+            }
+
+            // Default: deny (Android has no built-in "ask user" for WebView permissions)
+            base.OnPermissionRequest(request);
+        }
+
+        private static bool HasRequiredRuntimePermissions(string[] resources)
+        {
+            var context = global::Android.App.Application.Context;
+            foreach (var resource in resources)
+            {
+                var manifestPermission = resource switch
+                {
+                    PermissionRequest.ResourceVideoCapture => global::Android.Manifest.Permission.Camera,
+                    PermissionRequest.ResourceAudioCapture => global::Android.Manifest.Permission.RecordAudio,
+                    _ => null
+                };
+
+                if (manifestPermission is not null)
+                {
+                    if (global::AndroidX.Core.Content.ContextCompat.CheckSelfPermission(context, manifestPermission)
+                        != global::Android.Content.PM.Permission.Granted)
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
         }
     }
 
@@ -1173,6 +1311,72 @@ internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHan
         {
             var result = value?.ToString();
             _tcs.TrySetResult(ScriptResultHelper.NormalizeJsonResult(result));
+        }
+    }
+
+    /// <summary>
+    /// DownloadListener that forwards download events to the adapter.
+    /// </summary>
+    private sealed class AdapterDownloadListener : JavaObject, IDownloadListener
+    {
+        private readonly AndroidWebViewAdapter _adapter;
+
+        public AdapterDownloadListener(AndroidWebViewAdapter adapter)
+        {
+            _adapter = adapter;
+        }
+
+        public void OnDownloadStart(string? url, string? userAgent, string? contentDisposition, string? mimetype, long contentLength)
+        {
+            if (_adapter._detached || string.IsNullOrEmpty(url)) return;
+
+            var uri = new Uri(url!);
+            var fileName = !string.IsNullOrEmpty(contentDisposition)
+                ? global::Android.Webkit.URLUtil.GuessFileName(url, contentDisposition, mimetype)
+                : System.IO.Path.GetFileName(uri.LocalPath);
+
+            var args = new DownloadRequestedEventArgs(
+                uri,
+                fileName,
+                mimetype,
+                contentLength > 0 ? contentLength : null);
+
+            _adapter.DownloadRequested?.Invoke(_adapter, args);
+
+            // If consumer handled or cancelled, nothing more to do.
+            if (args.Cancel || args.Handled) return;
+
+            // Default: use Android DownloadManager for unhandled downloads.
+            try
+            {
+                var context = _adapter._webView?.Context;
+                if (context is null) return;
+
+                var request = new global::Android.App.DownloadManager.Request(global::Android.Net.Uri.Parse(url));
+                request.SetMimeType(mimetype);
+                request.AddRequestHeader("User-Agent", userAgent ?? string.Empty);
+
+                if (!string.IsNullOrEmpty(args.DownloadPath))
+                {
+                    request.SetDestinationUri(global::Android.Net.Uri.FromFile(new Java.IO.File(args.DownloadPath)));
+                }
+                else
+                {
+                    request.SetNotificationVisibility(global::Android.App.DownloadVisibility.VisibleNotifyCompleted);
+                    if (!string.IsNullOrEmpty(fileName))
+                    {
+                        request.SetDestinationInExternalPublicDir(
+                            global::Android.OS.Environment.DirectoryDownloads, fileName);
+                    }
+                }
+
+                var downloadManager = (global::Android.App.DownloadManager?)context.GetSystemService(global::Android.Content.Context.DownloadService);
+                downloadManager?.Enqueue(request);
+            }
+            catch
+            {
+                // Best-effort download; ignore failures.
+            }
         }
     }
 

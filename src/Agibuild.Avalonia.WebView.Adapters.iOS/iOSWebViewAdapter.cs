@@ -9,7 +9,8 @@ using ObjCRuntime;
 namespace Agibuild.Avalonia.WebView.Adapters.iOS;
 
 [SupportedOSPlatform("ios")]
-internal sealed class iOSWebViewAdapter : IWebViewAdapter, INativeWebViewHandleProvider, ICookieAdapter, IWebViewAdapterOptions
+internal sealed class iOSWebViewAdapter : IWebViewAdapter, INativeWebViewHandleProvider, ICookieAdapter, IWebViewAdapterOptions,
+    ICustomSchemeAdapter, IDownloadAdapter, IPermissionAdapter
 {
     private static bool DiagnosticsEnabled
         => string.Equals(Environment.GetEnvironmentVariable("AGIBUILD_WEBVIEW_DIAG"), "1", StringComparison.Ordinal);
@@ -28,6 +29,15 @@ internal sealed class iOSWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
     private NativeMethods.NavigationCompletedCb? _navCompletedCb;
     private NativeMethods.ScriptResultCb? _scriptResultCb;
     private NativeMethods.MessageCb? _messageCb;
+    private NativeMethods.DownloadCb? _downloadCb;
+    private NativeMethods.PermissionCb? _permissionCb;
+    private NativeMethods.SchemeRequestCb? _schemeRequestCb;
+
+    // Pinned buffers for scheme responses
+    private byte[]? _schemeResponseData;
+    private GCHandle _schemeResponsePin;
+    private byte[]? _schemeMimeData;
+    private GCHandle _schemeMimePin;
 
     // Lock protects navigation state accessed from both native callbacks
     // (which may run on background threads after an await) and API methods (UI thread).
@@ -53,10 +63,23 @@ internal sealed class iOSWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
     public event EventHandler<NavigationCompletedEventArgs>? NavigationCompleted;
     public event EventHandler<NewWindowRequestedEventArgs>? NewWindowRequested;
     public event EventHandler<WebMessageReceivedEventArgs>? WebMessageReceived;
-    public event EventHandler<WebResourceRequestedEventArgs>? WebResourceRequested
+    public event EventHandler<DownloadRequestedEventArgs>? DownloadRequested;
+    public event EventHandler<PermissionRequestedEventArgs>? PermissionRequested;
+    public event EventHandler<WebResourceRequestedEventArgs>? WebResourceRequested;
+
+    private IReadOnlyList<CustomSchemeRegistration>? _customSchemes;
+
+    public void RegisterCustomSchemes(IReadOnlyList<CustomSchemeRegistration> schemes)
     {
-        add { }
-        remove { }
+        _customSchemes = schemes;
+        if (_native == IntPtr.Zero) return;
+        foreach (var scheme in schemes)
+        {
+            if (!string.IsNullOrEmpty(scheme.SchemeName))
+            {
+                NativeMethods.RegisterCustomScheme(_native, scheme.SchemeName);
+            }
+        }
     }
 
     public event EventHandler<EnvironmentRequestedEventArgs>? EnvironmentRequested
@@ -84,6 +107,12 @@ internal sealed class iOSWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
         _navCompletedCb = NavigationCompletedTrampoline;
         _scriptResultCb = ScriptResultTrampoline;
         _messageCb = MessageTrampoline;
+        _downloadCb = DownloadTrampoline;
+        unsafe
+        {
+            _permissionCb = PermissionTrampoline;
+            _schemeRequestCb = SchemeRequestTrampoline;
+        }
 
         _callbacks = new NativeMethods.AgWkCallbacks
         {
@@ -91,6 +120,9 @@ internal sealed class iOSWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
             on_navigation_completed = Marshal.GetFunctionPointerForDelegate(_navCompletedCb),
             on_script_result = Marshal.GetFunctionPointerForDelegate(_scriptResultCb),
             on_message = Marshal.GetFunctionPointerForDelegate(_messageCb),
+            on_download = Marshal.GetFunctionPointerForDelegate(_downloadCb),
+            on_permission = Marshal.GetFunctionPointerForDelegate(_permissionCb),
+            on_scheme_request = Marshal.GetFunctionPointerForDelegate(_schemeRequestCb),
         };
 
         _native = NativeMethods.Create(ref _callbacks, GCHandle.ToIntPtr(_selfHandle));
@@ -167,6 +199,9 @@ internal sealed class iOSWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
             {
                 _selfHandle.Free();
             }
+
+            if (_schemeResponsePin.IsAllocated) _schemeResponsePin.Free();
+            if (_schemeMimePin.IsAllocated) _schemeMimePin.Free();
 
             ClearNavigationState();
         }
@@ -584,6 +619,40 @@ internal sealed class iOSWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
         self?.OnMessageNative(NativeMethods.PtrToString(bodyUtf8), NativeMethods.PtrToString(originUtf8));
     }
 
+    [MonoPInvokeCallback(typeof(NativeMethods.DownloadCb))]
+    private static void DownloadTrampoline(IntPtr userData, IntPtr urlUtf8, IntPtr suggestedFileNameUtf8, IntPtr mimeTypeUtf8, long contentLength)
+    {
+        var self = NativeMethods.FromUserData(userData);
+        self?.OnDownloadNative(
+            NativeMethods.PtrToString(urlUtf8),
+            NativeMethods.PtrToString(suggestedFileNameUtf8),
+            NativeMethods.PtrToString(mimeTypeUtf8),
+            contentLength);
+    }
+
+    [MonoPInvokeCallback(typeof(NativeMethods.PermissionCb))]
+    private static unsafe void PermissionTrampoline(IntPtr userData, int permissionKind, IntPtr originUtf8, int* outState)
+    {
+        var self = NativeMethods.FromUserData(userData);
+        if (self is not null)
+        {
+            *outState = self.OnPermissionNative(permissionKind, NativeMethods.PtrToString(originUtf8));
+        }
+    }
+
+    [MonoPInvokeCallback(typeof(NativeMethods.SchemeRequestCb))]
+    private static unsafe bool SchemeRequestTrampoline(
+        IntPtr userData, IntPtr urlUtf8, IntPtr methodUtf8,
+        IntPtr* outResponseData, long* outResponseLength, IntPtr* outMimeTypeUtf8, int* outStatusCode)
+    {
+        var self = NativeMethods.FromUserData(userData);
+        if (self is null) return false;
+        return self.OnSchemeRequestNative(
+            NativeMethods.PtrToString(urlUtf8),
+            NativeMethods.PtrToString(methodUtf8),
+            outResponseData, outResponseLength, outMimeTypeUtf8, outStatusCode);
+    }
+
     [MonoPInvokeCallback(typeof(NativeMethods.CookiesGetCb))]
     private static void CookiesGetTrampoline(IntPtr context, IntPtr jsonUtf8)
     {
@@ -784,6 +853,79 @@ internal sealed class iOSWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
         RaiseWebMessageReceived(body ?? string.Empty, origin ?? string.Empty, channelId, protocolVersion: 1);
     }
 
+    private void OnDownloadNative(string? url, string? suggestedFileName, string? mimeType, long contentLength)
+    {
+        if (_detached) return;
+
+        if (string.IsNullOrEmpty(url) || !Uri.TryCreate(url, UriKind.Absolute, out var uri))
+            return;
+
+        var args = new DownloadRequestedEventArgs(
+            uri,
+            string.IsNullOrEmpty(suggestedFileName) ? null : suggestedFileName,
+            string.IsNullOrEmpty(mimeType) ? null : mimeType,
+            contentLength > 0 ? contentLength : null);
+
+        DownloadRequested?.Invoke(this, args);
+    }
+
+    private int OnPermissionNative(int permissionKind, string? origin)
+    {
+        if (_detached) return 0;
+
+        var kind = permissionKind switch
+        {
+            1 => WebViewPermissionKind.Camera,
+            2 => WebViewPermissionKind.Microphone,
+            _ => WebViewPermissionKind.Unknown
+        };
+
+        Uri.TryCreate(origin, UriKind.Absolute, out var originUri);
+        var args = new PermissionRequestedEventArgs(kind, originUri);
+        PermissionRequested?.Invoke(this, args);
+
+        return args.State switch
+        {
+            PermissionState.Allow => 1,
+            PermissionState.Deny => 2,
+            _ => 0
+        };
+    }
+
+    private unsafe bool OnSchemeRequestNative(
+        string? url, string? method,
+        IntPtr* outResponseData, long* outResponseLength, IntPtr* outMimeTypeUtf8, int* outStatusCode)
+    {
+        if (_detached) return false;
+        if (string.IsNullOrEmpty(url) || !Uri.TryCreate(url, UriKind.Absolute, out var uri))
+            return false;
+
+        var args = new WebResourceRequestedEventArgs(uri, method ?? "GET");
+        WebResourceRequested?.Invoke(this, args);
+
+        if (!args.Handled || args.ResponseBody is null)
+            return false;
+
+        if (_schemeResponsePin.IsAllocated) _schemeResponsePin.Free();
+        if (_schemeMimePin.IsAllocated) _schemeMimePin.Free();
+
+        using var ms = new MemoryStream();
+        args.ResponseBody.CopyTo(ms);
+        _schemeResponseData = ms.ToArray();
+        _schemeResponsePin = GCHandle.Alloc(_schemeResponseData, GCHandleType.Pinned);
+
+        *outResponseData = _schemeResponsePin.AddrOfPinnedObject();
+        *outResponseLength = _schemeResponseData.Length;
+        *outStatusCode = args.ResponseStatusCode > 0 ? args.ResponseStatusCode : 200;
+
+        var mime = args.ResponseContentType ?? "application/octet-stream";
+        _schemeMimeData = System.Text.Encoding.UTF8.GetBytes(mime + '\0');
+        _schemeMimePin = GCHandle.Alloc(_schemeMimeData, GCHandleType.Pinned);
+        *outMimeTypeUtf8 = _schemeMimePin.AddrOfPinnedObject();
+
+        return true;
+    }
+
     // ==== Native interop ====
     // On iOS, the native shim is statically linked; use DllImport("__Internal").
 
@@ -825,6 +967,23 @@ internal sealed class iOSWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         internal delegate void MessageCb(IntPtr userData, IntPtr bodyUtf8, IntPtr originUtf8);
 
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        internal delegate void DownloadCb(IntPtr userData, IntPtr urlUtf8, IntPtr suggestedFileNameUtf8, IntPtr mimeTypeUtf8, long contentLength);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        internal unsafe delegate void PermissionCb(IntPtr userData, int permissionKind, IntPtr originUtf8, int* outState);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        [return: MarshalAs(UnmanagedType.I1)]
+        internal unsafe delegate bool SchemeRequestCb(
+            IntPtr userData,
+            IntPtr urlUtf8,
+            IntPtr methodUtf8,
+            IntPtr* outResponseData,
+            long* outResponseLength,
+            IntPtr* outMimeTypeUtf8,
+            int* outStatusCode);
+
         [StructLayout(LayoutKind.Sequential)]
         internal struct AgWkCallbacks
         {
@@ -832,6 +991,9 @@ internal sealed class iOSWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
             public IntPtr on_navigation_completed;
             public IntPtr on_script_result;
             public IntPtr on_message;
+            public IntPtr on_download;
+            public IntPtr on_permission;
+            public IntPtr on_scheme_request;
         }
 
         // Cookie management
@@ -846,6 +1008,9 @@ internal sealed class iOSWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
 
         [DllImport("__Internal", EntryPoint = "ag_wk_destroy", CallingConvention = CallingConvention.Cdecl)]
         internal static extern void Destroy(IntPtr handle);
+
+        [DllImport("__Internal", EntryPoint = "ag_wk_register_custom_scheme", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void RegisterCustomScheme(IntPtr handle, [MarshalAs(UnmanagedType.LPUTF8Str)] string schemeUtf8);
 
         [DllImport("__Internal", EntryPoint = "ag_wk_attach", CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAs(UnmanagedType.I1)]

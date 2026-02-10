@@ -55,6 +55,12 @@ public interface IWebView : IDisposable
     event EventHandler<WebResourceRequestedEventArgs>? WebResourceRequested;
     event EventHandler<EnvironmentRequestedEventArgs>? EnvironmentRequested;
 
+    /// <summary>Raised when a file download is initiated. The handler can set <c>DownloadPath</c> or <c>Cancel</c>.</summary>
+    event EventHandler<DownloadRequestedEventArgs>? DownloadRequested;
+
+    /// <summary>Raised when web content requests a permission (camera, mic, geolocation, etc.).</summary>
+    event EventHandler<PermissionRequestedEventArgs>? PermissionRequested;
+
     /// <summary>Raised after the native adapter is attached and ready. The event args carry the typed platform handle.</summary>
     event EventHandler<AdapterCreatedEventArgs>? AdapterCreated;
 
@@ -142,6 +148,25 @@ public interface IWebViewEnvironmentOptions
 
     /// <summary>Use an ephemeral (non-persistent) data store. Cookies and storage are discarded when the WebView is disposed.</summary>
     bool UseEphemeralSession { get; set; }
+
+    /// <summary>
+    /// Custom URI schemes to register. Must be set before WebView creation.
+    /// Adapters that implement <c>ICustomSchemeAdapter</c> receive these during initialization.
+    /// </summary>
+    IReadOnlyList<CustomSchemeRegistration> CustomSchemes { get; }
+}
+
+/// <summary>Describes a custom URI scheme to register with the WebView.</summary>
+public sealed class CustomSchemeRegistration
+{
+    /// <summary>The scheme name (e.g., "app", "myprotocol"). Do not include "://".</summary>
+    public required string SchemeName { get; init; }
+
+    /// <summary>Whether URIs with this scheme include an authority/host component (e.g., <c>app://host/path</c>).</summary>
+    public bool HasAuthorityComponent { get; init; }
+
+    /// <summary>Whether to treat this scheme as a secure context (like HTTPS). Only effective when <see cref="HasAuthorityComponent"/> is true.</summary>
+    public bool TreatAsSecure { get; init; }
 }
 
 public interface INativeWebViewHandleProvider
@@ -345,18 +370,19 @@ public sealed class WebMessageReceivedEventArgs : EventArgs
 /// <summary>
 /// Raised when a registered custom-scheme request is intercepted.
 /// The handler can supply a response body, content type, and status code.
-/// Only custom schemes registered via <see cref="IWebView"/> are intercepted;
-/// standard http/https requests cannot be intercepted on all platforms.
+/// Custom schemes must be registered via <see cref="IWebViewEnvironmentOptions.CustomSchemes"/>
+/// before the WebView is created.
 /// </summary>
 [Experimental("AGWV004")]
 public sealed class WebResourceRequestedEventArgs : EventArgs
 {
     public WebResourceRequestedEventArgs() { }
 
-    public WebResourceRequestedEventArgs(Uri requestUri, string method)
+    public WebResourceRequestedEventArgs(Uri requestUri, string method, IReadOnlyDictionary<string, string>? requestHeaders = null)
     {
         RequestUri = requestUri;
         Method = method;
+        RequestHeaders = requestHeaders;
     }
 
     /// <summary>The URI of the intercepted request.</summary>
@@ -365,14 +391,20 @@ public sealed class WebResourceRequestedEventArgs : EventArgs
     /// <summary>HTTP method (GET, POST, etc.).</summary>
     public string Method { get; init; } = "GET";
 
-    /// <summary>Set by the handler to provide a response body (UTF-8 string).</summary>
-    public string? ResponseBody { get; set; }
+    /// <summary>Request headers from the intercepted request. May be null if not available on the platform.</summary>
+    public IReadOnlyDictionary<string, string>? RequestHeaders { get; init; }
+
+    /// <summary>Set by the handler to provide a response body as a stream (supports binary content).</summary>
+    public Stream? ResponseBody { get; set; }
 
     /// <summary>Set by the handler to provide a response content type. Default: text/html.</summary>
     public string ResponseContentType { get; set; } = "text/html";
 
     /// <summary>Set by the handler to provide an HTTP status code. Default: 200.</summary>
     public int ResponseStatusCode { get; set; } = 200;
+
+    /// <summary>Set by the handler to provide custom response headers.</summary>
+    public IDictionary<string, string>? ResponseHeaders { get; set; }
 
     /// <summary>Set to true to indicate the request has been handled and a response is provided.</summary>
     public bool Handled { get; set; }
@@ -382,6 +414,84 @@ public sealed class WebResourceRequestedEventArgs : EventArgs
 [Experimental("AGWV005")]
 public sealed class EnvironmentRequestedEventArgs : EventArgs
 {
+}
+
+/// <summary>Raised when a file download is initiated by the web content.</summary>
+public sealed class DownloadRequestedEventArgs : EventArgs
+{
+    public DownloadRequestedEventArgs(Uri downloadUri, string? suggestedFileName = null, string? contentType = null, long? contentLength = null)
+    {
+        DownloadUri = downloadUri;
+        SuggestedFileName = suggestedFileName;
+        ContentType = contentType;
+        ContentLength = contentLength;
+    }
+
+    /// <summary>The URL of the resource being downloaded.</summary>
+    public Uri DownloadUri { get; }
+
+    /// <summary>Suggested filename from Content-Disposition header or URL path.</summary>
+    public string? SuggestedFileName { get; }
+
+    /// <summary>MIME type of the download content.</summary>
+    public string? ContentType { get; }
+
+    /// <summary>Content length in bytes, or null if unknown.</summary>
+    public long? ContentLength { get; }
+
+    /// <summary>Set by consumer to specify the save file path.</summary>
+    public string? DownloadPath { get; set; }
+
+    /// <summary>Set to true by consumer to cancel the download.</summary>
+    public bool Cancel { get; set; }
+
+    /// <summary>Set to true by consumer to indicate the download is fully handled externally.</summary>
+    public bool Handled { get; set; }
+}
+
+/// <summary>The type of permission being requested by web content.</summary>
+public enum WebViewPermissionKind
+{
+    Unknown = 0,
+    Camera,
+    Microphone,
+    Geolocation,
+    Notifications,
+    ClipboardRead,
+    ClipboardWrite,
+    Midi,
+    Sensors,
+    Other
+}
+
+/// <summary>The decision for a permission request.</summary>
+public enum PermissionState
+{
+    /// <summary>Let the platform handle it (show native dialog or apply default policy).</summary>
+    Default = 0,
+    /// <summary>Grant the permission.</summary>
+    Allow,
+    /// <summary>Deny the permission.</summary>
+    Deny
+}
+
+/// <summary>Raised when web content requests a permission (camera, microphone, geolocation, etc.).</summary>
+public sealed class PermissionRequestedEventArgs : EventArgs
+{
+    public PermissionRequestedEventArgs(WebViewPermissionKind permissionKind, Uri? origin = null)
+    {
+        PermissionKind = permissionKind;
+        Origin = origin;
+    }
+
+    /// <summary>The type of permission being requested.</summary>
+    public WebViewPermissionKind PermissionKind { get; }
+
+    /// <summary>The origin (scheme + host) of the page requesting the permission.</summary>
+    public Uri? Origin { get; }
+
+    /// <summary>Set by consumer to Allow, Deny, or leave as Default for platform behavior.</summary>
+    public PermissionState State { get; set; } = PermissionState.Default;
 }
 
 /// <summary>Event args for the <see cref="IWebView.AdapterCreated"/> event, carrying the typed native platform handle.</summary>

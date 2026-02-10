@@ -117,6 +117,18 @@ public sealed class WebDialog : IWebDialog
         remove => _core.EnvironmentRequested -= value;
     }
 
+    public event EventHandler<DownloadRequestedEventArgs>? DownloadRequested
+    {
+        add => _core.DownloadRequested += value;
+        remove => _core.DownloadRequested -= value;
+    }
+
+    public event EventHandler<PermissionRequestedEventArgs>? PermissionRequested
+    {
+        add => _core.PermissionRequested += value;
+        remove => _core.PermissionRequested -= value;
+    }
+
     public event EventHandler<AdapterCreatedEventArgs>? AdapterCreated
     {
         add => _core.AdapterCreated += value;

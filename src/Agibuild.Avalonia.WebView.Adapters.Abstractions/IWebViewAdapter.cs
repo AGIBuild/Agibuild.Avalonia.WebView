@@ -22,6 +22,34 @@ internal interface IWebViewAdapterOptions
     void SetCustomUserAgent(string? userAgent);
 }
 
+/// <summary>
+/// Optional interface for adapters that support custom URI scheme registration.
+/// Runtime checks for this via <c>adapter as ICustomSchemeAdapter</c>.
+/// <see cref="RegisterCustomSchemes"/> is called before <see cref="IWebViewAdapter.Attach"/>.
+/// </summary>
+internal interface ICustomSchemeAdapter
+{
+    void RegisterCustomSchemes(IReadOnlyList<CustomSchemeRegistration> schemes);
+}
+
+/// <summary>
+/// Optional interface for adapters that support download interception.
+/// Runtime checks for this via <c>adapter as IDownloadAdapter</c>.
+/// </summary>
+internal interface IDownloadAdapter
+{
+    event EventHandler<DownloadRequestedEventArgs>? DownloadRequested;
+}
+
+/// <summary>
+/// Optional interface for adapters that support permission request interception.
+/// Runtime checks for this via <c>adapter as IPermissionAdapter</c>.
+/// </summary>
+internal interface IPermissionAdapter
+{
+    event EventHandler<PermissionRequestedEventArgs>? PermissionRequested;
+}
+
 internal interface IWebViewAdapter
 {
     void Initialize(IWebViewAdapterHost host);

@@ -142,6 +142,28 @@ public class WebView : NativeControlHost
         _core?.SetCustomUserAgent(userAgent);
     }
 
+    /// <summary>
+    /// Enables the WebMessage bridge with the specified policy options.
+    /// After this call, incoming <c>WebMessageReceived</c> events are filtered by origin, protocol, and channel.
+    /// Must be called on the UI thread after the control is attached.
+    /// </summary>
+    public void EnableWebMessageBridge(WebMessageBridgeOptions options)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        EnsureCore();
+        _core!.EnableWebMessageBridge(options);
+    }
+
+    /// <summary>
+    /// Disables the WebMessage bridge. Subsequent incoming web messages will be silently dropped.
+    /// Must be called on the UI thread.
+    /// </summary>
+    public void DisableWebMessageBridge()
+    {
+        EnsureCore();
+        _core!.DisableWebMessageBridge();
+    }
+
     public Task<string?> InvokeScriptAsync(string script)
     {
         ArgumentNullException.ThrowIfNull(script);
@@ -181,6 +203,8 @@ public class WebView : NativeControlHost
     public event EventHandler<WebMessageReceivedEventArgs>? WebMessageReceived;
     public event EventHandler<WebResourceRequestedEventArgs>? WebResourceRequested;
     public event EventHandler<EnvironmentRequestedEventArgs>? EnvironmentRequested;
+    public event EventHandler<DownloadRequestedEventArgs>? DownloadRequested;
+    public event EventHandler<PermissionRequestedEventArgs>? PermissionRequested;
     public event EventHandler<AdapterCreatedEventArgs>? AdapterCreated;
     public event EventHandler? AdapterDestroyed;
 
@@ -293,6 +317,8 @@ public class WebView : NativeControlHost
         _core.WebMessageReceived += OnCoreWebMessageReceived;
         _core.WebResourceRequested += OnCoreWebResourceRequested;
         _core.EnvironmentRequested += OnCoreEnvironmentRequested;
+        _core.DownloadRequested += OnCoreDownloadRequested;
+        _core.PermissionRequested += OnCorePermissionRequested;
         _core.AdapterCreated += OnCoreAdapterCreated;
         _core.AdapterDestroyed += OnCoreAdapterDestroyed;
     }
@@ -307,6 +333,8 @@ public class WebView : NativeControlHost
         _core.WebMessageReceived -= OnCoreWebMessageReceived;
         _core.WebResourceRequested -= OnCoreWebResourceRequested;
         _core.EnvironmentRequested -= OnCoreEnvironmentRequested;
+        _core.DownloadRequested -= OnCoreDownloadRequested;
+        _core.PermissionRequested -= OnCorePermissionRequested;
         _core.AdapterCreated -= OnCoreAdapterCreated;
         _core.AdapterDestroyed -= OnCoreAdapterDestroyed;
     }
@@ -344,6 +372,12 @@ public class WebView : NativeControlHost
 
     private void OnCoreEnvironmentRequested(object? sender, EnvironmentRequestedEventArgs e)
         => EnvironmentRequested?.Invoke(this, e);
+
+    private void OnCoreDownloadRequested(object? sender, DownloadRequestedEventArgs e)
+        => DownloadRequested?.Invoke(this, e);
+
+    private void OnCorePermissionRequested(object? sender, PermissionRequestedEventArgs e)
+        => PermissionRequested?.Invoke(this, e);
 
     private void OnCoreAdapterCreated(object? sender, AdapterCreatedEventArgs e)
         => AdapterCreated?.Invoke(this, e);

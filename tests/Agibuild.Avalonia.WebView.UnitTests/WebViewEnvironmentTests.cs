@@ -4,6 +4,7 @@ using Xunit;
 
 namespace Agibuild.Avalonia.WebView.UnitTests;
 
+[Collection("WebViewEnvironmentState")]
 public sealed class WebViewEnvironmentTests : IDisposable
 {
     public WebViewEnvironmentTests()

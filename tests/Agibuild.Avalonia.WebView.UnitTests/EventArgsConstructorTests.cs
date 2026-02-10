@@ -165,18 +165,21 @@ public sealed class EventArgsConstructorTests
     [Fact]
     public void WebResourceRequestedEventArgs_response_properties_settable()
     {
+        using var stream = new MemoryStream("{\"ok\":true}"u8.ToArray());
         var args = new WebResourceRequestedEventArgs(new Uri("https://example.test"), "GET")
         {
-            ResponseBody = "{\"ok\":true}",
+            ResponseBody = stream,
             ResponseContentType = "application/json",
             ResponseStatusCode = 404,
+            ResponseHeaders = new Dictionary<string, string> { ["X-Custom"] = "test" },
             Handled = true
         };
 
-        Assert.Equal("{\"ok\":true}", args.ResponseBody);
+        Assert.Same(stream, args.ResponseBody);
         Assert.Equal("application/json", args.ResponseContentType);
         Assert.Equal(404, args.ResponseStatusCode);
         Assert.True(args.Handled);
+        Assert.Equal("test", args.ResponseHeaders!["X-Custom"]);
     }
 
     [Fact]
@@ -184,6 +187,105 @@ public sealed class EventArgsConstructorTests
     {
         var args = new EnvironmentRequestedEventArgs();
         Assert.NotNull(args);
+    }
+
+    // --- CustomSchemeRegistration ---
+
+    [Fact]
+    public void CustomSchemeRegistration_defaults()
+    {
+        var reg = new CustomSchemeRegistration { SchemeName = "app" };
+        Assert.Equal("app", reg.SchemeName);
+        Assert.False(reg.HasAuthorityComponent);
+        Assert.False(reg.TreatAsSecure);
+    }
+
+    [Fact]
+    public void CustomSchemeRegistration_with_authority()
+    {
+        var reg = new CustomSchemeRegistration { SchemeName = "custom", HasAuthorityComponent = true, TreatAsSecure = true };
+        Assert.Equal("custom", reg.SchemeName);
+        Assert.True(reg.HasAuthorityComponent);
+        Assert.True(reg.TreatAsSecure);
+    }
+
+    // --- DownloadRequestedEventArgs ---
+
+    [Fact]
+    public void DownloadRequestedEventArgs_ctor_sets_properties()
+    {
+        var uri = new Uri("https://example.test/file.pdf");
+        var args = new DownloadRequestedEventArgs(uri, "file.pdf", "application/pdf", 1024);
+
+        Assert.Equal(uri, args.DownloadUri);
+        Assert.Equal("file.pdf", args.SuggestedFileName);
+        Assert.Equal("application/pdf", args.ContentType);
+        Assert.Equal(1024, args.ContentLength);
+        Assert.Null(args.DownloadPath);
+        Assert.False(args.Cancel);
+        Assert.False(args.Handled);
+    }
+
+    [Fact]
+    public void DownloadRequestedEventArgs_consumer_can_set_path_and_cancel()
+    {
+        var args = new DownloadRequestedEventArgs(new Uri("https://example.test/f.zip"));
+        args.DownloadPath = "/tmp/f.zip";
+        Assert.Equal("/tmp/f.zip", args.DownloadPath);
+
+        args.Cancel = true;
+        Assert.True(args.Cancel);
+
+        args.Handled = true;
+        Assert.True(args.Handled);
+    }
+
+    // --- PermissionRequestedEventArgs ---
+
+    [Fact]
+    public void PermissionRequestedEventArgs_defaults()
+    {
+        var args = new PermissionRequestedEventArgs(WebViewPermissionKind.Camera);
+        Assert.Equal(WebViewPermissionKind.Camera, args.PermissionKind);
+        Assert.Null(args.Origin);
+        Assert.Equal(PermissionState.Default, args.State);
+    }
+
+    [Fact]
+    public void PermissionRequestedEventArgs_with_origin()
+    {
+        var origin = new Uri("https://example.test");
+        var args = new PermissionRequestedEventArgs(WebViewPermissionKind.Geolocation, origin);
+        Assert.Equal(WebViewPermissionKind.Geolocation, args.PermissionKind);
+        Assert.Equal(origin, args.Origin);
+    }
+
+    [Fact]
+    public void PermissionRequestedEventArgs_consumer_can_set_state()
+    {
+        var args = new PermissionRequestedEventArgs(WebViewPermissionKind.Microphone);
+        args.State = PermissionState.Allow;
+        Assert.Equal(PermissionState.Allow, args.State);
+
+        args.State = PermissionState.Deny;
+        Assert.Equal(PermissionState.Deny, args.State);
+    }
+
+    [Fact]
+    public void WebViewPermissionKind_enum_values()
+    {
+        Assert.Equal(0, (int)WebViewPermissionKind.Unknown);
+        Assert.Equal(1, (int)WebViewPermissionKind.Camera);
+        Assert.Equal(2, (int)WebViewPermissionKind.Microphone);
+        Assert.Equal(3, (int)WebViewPermissionKind.Geolocation);
+    }
+
+    [Fact]
+    public void PermissionState_enum_values()
+    {
+        Assert.Equal(0, (int)PermissionState.Default);
+        Assert.Equal(1, (int)PermissionState.Allow);
+        Assert.Equal(2, (int)PermissionState.Deny);
     }
 
     // --- WebAuthCallbackMatcher ---

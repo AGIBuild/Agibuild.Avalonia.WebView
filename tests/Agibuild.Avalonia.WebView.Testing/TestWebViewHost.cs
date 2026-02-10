@@ -17,6 +17,8 @@ public sealed class TestWebViewHost : IWebView
     public event EventHandler<WebMessageReceivedEventArgs>? WebMessageReceived { add { } remove { } }
     public event EventHandler<WebResourceRequestedEventArgs>? WebResourceRequested { add { } remove { } }
     public event EventHandler<EnvironmentRequestedEventArgs>? EnvironmentRequested { add { } remove { } }
+    public event EventHandler<DownloadRequestedEventArgs>? DownloadRequested { add { } remove { } }
+    public event EventHandler<PermissionRequestedEventArgs>? PermissionRequested { add { } remove { } }
     public event EventHandler<AdapterCreatedEventArgs>? AdapterCreated { add { } remove { } }
     public event EventHandler? AdapterDestroyed { add { } remove { } }
 

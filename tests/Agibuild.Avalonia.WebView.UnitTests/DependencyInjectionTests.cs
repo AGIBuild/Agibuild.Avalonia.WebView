@@ -6,6 +6,7 @@ using Xunit;
 
 namespace Agibuild.Avalonia.WebView.UnitTests;
 
+[Collection("WebViewEnvironmentState")]
 public sealed class DependencyInjectionTests : IDisposable
 {
     public DependencyInjectionTests()

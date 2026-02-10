@@ -232,6 +232,18 @@ public sealed class AvaloniaWebDialog : IWebDialog
         remove => _webView.EnvironmentRequested -= value;
     }
 
+    public event EventHandler<DownloadRequestedEventArgs>? DownloadRequested
+    {
+        add => _webView.DownloadRequested += value;
+        remove => _webView.DownloadRequested -= value;
+    }
+
+    public event EventHandler<PermissionRequestedEventArgs>? PermissionRequested
+    {
+        add => _webView.PermissionRequested += value;
+        remove => _webView.PermissionRequested -= value;
+    }
+
     public event EventHandler<AdapterCreatedEventArgs>? AdapterCreated
     {
         add => _webView.AdapterCreated += value;

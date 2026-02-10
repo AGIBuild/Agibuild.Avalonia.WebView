@@ -8,7 +8,8 @@ using Microsoft.Web.WebView2.Core;
 namespace Agibuild.Avalonia.WebView.Adapters.Windows;
 
 [SupportedOSPlatform("windows")]
-internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHandleProvider, ICookieAdapter, IWebViewAdapterOptions
+internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHandleProvider, ICookieAdapter, IWebViewAdapterOptions,
+    ICustomSchemeAdapter, IDownloadAdapter, IPermissionAdapter
 {
     private static bool DiagnosticsEnabled
         => string.Equals(Environment.GetEnvironmentVariable("AGIBUILD_WEBVIEW_DIAG"), "1", StringComparison.Ordinal);
@@ -67,22 +68,30 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
     // Environment options (stored before Attach, applied after WebView2 init)
     private IWebViewEnvironmentOptions? _pendingOptions;
 
+    // Custom scheme registrations (stored before Attach, applied during env creation)
+    private IReadOnlyList<CustomSchemeRegistration>? _customSchemes;
+
     public bool CanGoBack => _webView?.CanGoBack ?? false;
     public bool CanGoForward => _webView?.CanGoForward ?? false;
 
     public event EventHandler<NavigationCompletedEventArgs>? NavigationCompleted;
     public event EventHandler<NewWindowRequestedEventArgs>? NewWindowRequested;
     public event EventHandler<WebMessageReceivedEventArgs>? WebMessageReceived;
-    public event EventHandler<WebResourceRequestedEventArgs>? WebResourceRequested
-    {
-        add { }
-        remove { }
-    }
+    public event EventHandler<WebResourceRequestedEventArgs>? WebResourceRequested;
+    public event EventHandler<DownloadRequestedEventArgs>? DownloadRequested;
+    public event EventHandler<PermissionRequestedEventArgs>? PermissionRequested;
 
     public event EventHandler<EnvironmentRequestedEventArgs>? EnvironmentRequested
     {
         add { }
         remove { }
+    }
+
+    // ==================== ICustomSchemeAdapter ====================
+
+    public void RegisterCustomSchemes(IReadOnlyList<CustomSchemeRegistration> schemes)
+    {
+        _customSchemes = schemes;
     }
 
     // ==================== Lifecycle ====================
@@ -154,6 +163,8 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
                 _webView.NewWindowRequested -= OnNewWindowRequested;
                 _webView.WebMessageReceived -= OnWebMessageReceived;
                 _webView.WebResourceRequested -= OnWebResourceRequested;
+                _webView.DownloadStarting -= OnDownloadStarting;
+                _webView.PermissionRequested -= OnPermissionRequested;
             }
 
             _controller?.Close();
@@ -207,6 +218,18 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
             _webView.NewWindowRequested += OnNewWindowRequested;
             _webView.WebMessageReceived += OnWebMessageReceived;
             _webView.WebResourceRequested += OnWebResourceRequested;
+            _webView.DownloadStarting += OnDownloadStarting;
+            _webView.PermissionRequested += OnPermissionRequested;
+
+            // Register custom scheme filters for WebResourceRequested
+            if (_customSchemes is { Count: > 0 })
+            {
+                foreach (var scheme in _customSchemes)
+                {
+                    var filter = $"{scheme.SchemeName}://*";
+                    _webView.AddWebResourceRequestedFilter(filter, CoreWebView2WebResourceContext.All);
+                }
+            }
 
             // Inject WebMessage channel routing script
             var channelId = _host?.ChannelId ?? Guid.Empty;
@@ -633,13 +656,13 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
         e.Handled = true;
     }
 
-    // ==================== WebResourceRequested (for baseUrl intercept) ====================
+    // ==================== WebResourceRequested ====================
 
     private void OnWebResourceRequested(object? sender, CoreWebView2WebResourceRequestedEventArgs e)
     {
         if (_detached) return;
 
-        // Handle baseUrl intercept.
+        // Handle baseUrl intercept first (internal).
         if (_pendingBaseUrlHtml is not null && _pendingBaseUrl is not null)
         {
             var requestedUri = e.Request.Uri;
@@ -654,7 +677,93 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
                 return;
             }
         }
+
+        // Raise the public WebResourceRequested event for custom scheme requests.
+        Uri.TryCreate(e.Request.Uri, UriKind.Absolute, out var uri);
+        var headers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        var headerIter = e.Request.Headers.GetEnumerator();
+        while (headerIter.MoveNext())
+        {
+            headers[headerIter.Current.Key] = headerIter.Current.Value;
+        }
+
+        var args = new WebResourceRequestedEventArgs(uri!, e.Request.Method, headers);
+        SafeRaise(() => WebResourceRequested?.Invoke(this, args));
+
+        if (args.Handled && args.ResponseBody is not null)
+        {
+            var headerBuilder = $"Content-Type: {args.ResponseContentType}";
+            if (args.ResponseHeaders is { Count: > 0 })
+            {
+                foreach (var kvp in args.ResponseHeaders)
+                {
+                    headerBuilder += $"\r\n{kvp.Key}: {kvp.Value}";
+                }
+            }
+
+            var response = _webView!.Environment.CreateWebResourceResponse(
+                args.ResponseBody, args.ResponseStatusCode, "OK", headerBuilder);
+            e.Response = response;
+        }
     }
+
+    // ==================== IDownloadAdapter ====================
+
+    private void OnDownloadStarting(object? sender, CoreWebView2DownloadStartingEventArgs e)
+    {
+        if (_detached) return;
+
+        var uri = new Uri(e.DownloadOperation.Uri);
+        var args = new DownloadRequestedEventArgs(
+            uri,
+            e.ResultFilePath != null ? System.IO.Path.GetFileName(e.ResultFilePath) : null,
+            e.DownloadOperation.MimeType,
+            e.DownloadOperation.TotalBytesToReceive > 0 ? (long)e.DownloadOperation.TotalBytesToReceive : null);
+
+        SafeRaise(() => DownloadRequested?.Invoke(this, args));
+
+        if (args.Cancel)
+        {
+            e.Cancel = true;
+        }
+        else if (!string.IsNullOrEmpty(args.DownloadPath))
+        {
+            e.ResultFilePath = args.DownloadPath;
+        }
+
+        e.Handled = args.Handled;
+    }
+
+    // ==================== IPermissionAdapter ====================
+
+    private void OnPermissionRequested(object? sender, CoreWebView2PermissionRequestedEventArgs e)
+    {
+        if (_detached) return;
+
+        var kind = MapPermissionKind(e.PermissionKind);
+        Uri.TryCreate(e.Uri, UriKind.Absolute, out var origin);
+
+        var args = new PermissionRequestedEventArgs(kind, origin);
+        SafeRaise(() => PermissionRequested?.Invoke(this, args));
+
+        e.State = args.State switch
+        {
+            PermissionState.Allow => CoreWebView2PermissionState.Allow,
+            PermissionState.Deny => CoreWebView2PermissionState.Deny,
+            _ => CoreWebView2PermissionState.Default
+        };
+    }
+
+    private static WebViewPermissionKind MapPermissionKind(CoreWebView2PermissionKind kind) => kind switch
+    {
+        CoreWebView2PermissionKind.Camera => WebViewPermissionKind.Camera,
+        CoreWebView2PermissionKind.Microphone => WebViewPermissionKind.Microphone,
+        CoreWebView2PermissionKind.Geolocation => WebViewPermissionKind.Geolocation,
+        CoreWebView2PermissionKind.Notifications => WebViewPermissionKind.Notifications,
+        CoreWebView2PermissionKind.ClipboardRead => WebViewPermissionKind.ClipboardRead,
+        CoreWebView2PermissionKind.MidiSystemExclusiveMessages => WebViewPermissionKind.Midi,
+        _ => WebViewPermissionKind.Other
+    };
 
     // ==================== ICookieAdapter ====================
 

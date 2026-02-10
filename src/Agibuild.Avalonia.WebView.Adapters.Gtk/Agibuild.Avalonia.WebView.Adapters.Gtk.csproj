@@ -3,6 +3,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <!-- CA2255: ModuleInitializer is the correct pattern for adapter auto-registration. -->
     <NoWarn>$(NoWarn);CA2255</NoWarn>
   </PropertyGroup>

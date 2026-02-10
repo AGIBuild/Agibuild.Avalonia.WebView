@@ -4,6 +4,7 @@
     <SupportedOSPlatformVersion>15.0</SupportedOSPlatformVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <!-- CA2255: ModuleInitializer is the correct pattern for adapter auto-registration.
          CA1416: Platform-specific API usage is guarded by OperatingSystem.IsIOS(). -->
     <NoWarn>$(NoWarn);CA2255;CA1416</NoWarn>

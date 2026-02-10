@@ -8,6 +8,7 @@ namespace Agibuild.Avalonia.WebView.UnitTests;
 /// Contract tests for M2 environment options: DevTools, UserAgent, Ephemeral.
 /// Verifies that WebViewCore passes options to adapters implementing IWebViewAdapterOptions.
 /// </summary>
+[Collection("WebViewEnvironmentState")]
 public sealed class ContractSemanticsV1EnvironmentOptionsTests
 {
     private readonly TestDispatcher _dispatcher = new();

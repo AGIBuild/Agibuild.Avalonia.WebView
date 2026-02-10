@@ -10,6 +10,7 @@ public sealed class WebViewEnvironmentOptions : IWebViewEnvironmentOptions
     public bool EnableDevTools { get; set; }
     public string? CustomUserAgent { get; set; }
     public bool UseEphemeralSession { get; set; }
+    public IReadOnlyList<CustomSchemeRegistration> CustomSchemes { get; set; } = [];
 }
 
 /// <summary>

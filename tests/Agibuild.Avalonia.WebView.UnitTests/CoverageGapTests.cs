@@ -404,6 +404,268 @@ public sealed class CoverageGapTests
         dialog.Dispose();
     }
 
+    // ========================= WebDialog — DownloadRequested / PermissionRequested event accessors =========================
+
+    [Fact]
+    public void WebDialog_DownloadRequested_event_subscribe_unsubscribe()
+    {
+        var host = new MockDialogHost();
+        var downloadAdapter = MockWebViewAdapter.CreateWithDownload();
+        var dialog = new WebDialog(host, downloadAdapter, _dispatcher);
+
+        bool raised = false;
+        EventHandler<DownloadRequestedEventArgs> handler = (_, _) => raised = true;
+
+        dialog.DownloadRequested += handler;
+        downloadAdapter.RaiseDownloadRequested(new DownloadRequestedEventArgs(
+            new Uri("https://example.com/file.zip"), "file.zip", "application/zip", 1024));
+        Assert.True(raised);
+
+        raised = false;
+        dialog.DownloadRequested -= handler;
+        downloadAdapter.RaiseDownloadRequested(new DownloadRequestedEventArgs(
+            new Uri("https://example.com/file2.zip"), "file2.zip", "application/zip", 2048));
+        Assert.False(raised);
+
+        dialog.Dispose();
+    }
+
+    [Fact]
+    public void WebDialog_PermissionRequested_event_subscribe_unsubscribe()
+    {
+        var host = new MockDialogHost();
+        var permAdapter = MockWebViewAdapter.CreateWithPermission();
+        var dialog = new WebDialog(host, permAdapter, _dispatcher);
+
+        bool raised = false;
+        EventHandler<PermissionRequestedEventArgs> handler = (_, _) => raised = true;
+
+        dialog.PermissionRequested += handler;
+        permAdapter.RaisePermissionRequested(new PermissionRequestedEventArgs(
+            WebViewPermissionKind.Camera, new Uri("https://example.com")));
+        Assert.True(raised);
+
+        raised = false;
+        dialog.PermissionRequested -= handler;
+        permAdapter.RaisePermissionRequested(new PermissionRequestedEventArgs(
+            WebViewPermissionKind.Camera, new Uri("https://example.com")));
+        Assert.False(raised);
+
+        dialog.Dispose();
+    }
+
+    // ========================= WebDialog — AdapterDestroyed event =========================
+
+    [Fact]
+    public void WebDialog_AdapterDestroyed_event_raised_on_dispose()
+    {
+        var host = new MockDialogHost();
+        var adapter = MockWebViewAdapter.Create();
+        var dialog = new WebDialog(host, adapter, _dispatcher);
+
+        bool raised = false;
+        EventHandler handler = (_, _) => raised = true;
+
+        dialog.AdapterDestroyed += handler;
+        dialog.Dispose();
+
+        Assert.True(raised);
+    }
+
+    [Fact]
+    public void WebDialog_AdapterDestroyed_event_unsubscribe()
+    {
+        var host = new MockDialogHost();
+        var adapter = MockWebViewAdapter.Create();
+        var dialog = new WebDialog(host, adapter, _dispatcher);
+
+        bool raised = false;
+        EventHandler handler = (_, _) => raised = true;
+
+        dialog.AdapterDestroyed += handler;
+        dialog.AdapterDestroyed -= handler;
+        dialog.Dispose();
+
+        Assert.False(raised);
+    }
+
+    // ========================= WebViewCore — NavigationCompleted ID mismatch =========================
+
+    [Fact]
+    public async Task NavigationCompleted_id_mismatch_is_ignored()
+    {
+        var (core, adapter) = CreateCoreWithAdapter();
+
+        NavigationCompletedEventArgs? completedArgs = null;
+        core.NavigationCompleted += (_, e) => completedArgs = e;
+
+        var navTask = core.NavigateAsync(new Uri("https://example.test"));
+        var navId = adapter.LastNavigationId!.Value;
+
+        // Raise NavigationCompleted with a DIFFERENT ID
+        adapter.RaiseNavigationCompleted(Guid.NewGuid(), new Uri("https://wrong.test"),
+            NavigationCompletedStatus.Success);
+
+        // Should be ignored — no event fired
+        Assert.Null(completedArgs);
+
+        // Now complete with correct ID
+        adapter.RaiseNavigationCompleted(navId, new Uri("https://example.test"),
+            NavigationCompletedStatus.Success);
+        await navTask;
+        Assert.NotNull(completedArgs);
+    }
+
+    // ========================= WebViewCore — NewWindowRequested unhandled navigates =========================
+
+    [Fact]
+    public void NewWindowRequested_unhandled_navigates_in_view()
+    {
+        var (core, adapter) = CreateCoreWithAdapter();
+
+        // Don't subscribe to NewWindowRequested — it will be unhandled
+        adapter.RaiseNewWindowRequested(new Uri("https://popup.test/page"));
+
+        // Adapter should have received a navigate call for the popup URI
+        Assert.NotNull(adapter.LastNavigationUri);
+        Assert.Equal("https://popup.test/page", adapter.LastNavigationUri!.ToString());
+    }
+
+    // ========================= WebViewCore — NavigationCompleted after dispose =========================
+
+    [Fact]
+    public void NavigationCompleted_after_dispose_is_ignored()
+    {
+        var (core, adapter) = CreateCoreWithAdapter();
+
+        NavigationCompletedEventArgs? completedArgs = null;
+        core.NavigationCompleted += (_, e) => completedArgs = e;
+
+        core.Dispose();
+
+        adapter.RaiseNavigationCompleted(Guid.NewGuid(), new Uri("https://disposed.test"),
+            NavigationCompletedStatus.Success);
+
+        Assert.Null(completedArgs);
+    }
+
+    // ========================= WebViewCore — NewWindowRequested after dispose =========================
+
+    [Fact]
+    public void NewWindowRequested_after_dispose_is_ignored()
+    {
+        var (core, adapter) = CreateCoreWithAdapter();
+
+        NewWindowRequestedEventArgs? newWindowArgs = null;
+        core.NewWindowRequested += (_, e) => newWindowArgs = e;
+
+        core.Dispose();
+
+        adapter.RaiseNewWindowRequested(new Uri("https://disposed-popup.test"));
+
+        Assert.Null(newWindowArgs);
+    }
+
+    // ========================= WebViewCore — WebResourceRequested after dispose =========================
+
+    [Fact]
+    public void WebResourceRequested_after_dispose_is_ignored()
+    {
+        var (core, adapter) = CreateCoreWithAdapter();
+
+        WebResourceRequestedEventArgs? resourceArgs = null;
+        core.WebResourceRequested += (_, e) => resourceArgs = e;
+
+        core.Dispose();
+
+        adapter.RaiseWebResourceRequested();
+
+        Assert.Null(resourceArgs);
+    }
+
+    // ========================= WebViewCore — EnvironmentRequested after dispose =========================
+
+    [Fact]
+    public void EnvironmentRequested_after_dispose_is_ignored()
+    {
+        var (core, adapter) = CreateCoreWithAdapter();
+
+        EnvironmentRequestedEventArgs? envArgs = null;
+        core.EnvironmentRequested += (_, e) => envArgs = e;
+
+        core.Dispose();
+
+        adapter.RaiseEnvironmentRequested();
+
+        Assert.Null(envArgs);
+    }
+
+    // ========================= WebViewCore — WebMessageReceived with bridge not enabled =========================
+
+    [Fact]
+    public void WebMessageReceived_bridge_not_enabled_drops_message()
+    {
+        var (core, adapter) = CreateCoreWithAdapter();
+
+        WebMessageReceivedEventArgs? msgArgs = null;
+        core.WebMessageReceived += (_, e) => msgArgs = e;
+
+        // Don't enable bridge — message should be dropped
+        adapter.RaiseWebMessage("hello", "https://origin.test", Guid.NewGuid());
+
+        Assert.Null(msgArgs);
+    }
+
+    // ========================= WebViewCore — WebMessageReceived after dispose =========================
+
+    [Fact]
+    public void WebMessageReceived_after_dispose_is_ignored()
+    {
+        var (core, adapter) = CreateCoreWithAdapter();
+
+        WebMessageReceivedEventArgs? msgArgs = null;
+        core.WebMessageReceived += (_, e) => msgArgs = e;
+
+        core.Dispose();
+
+        adapter.RaiseWebMessage("hello", "https://origin.test", Guid.NewGuid());
+
+        Assert.Null(msgArgs);
+    }
+
+    // ========================= WebViewCore — Command navigation superseding =========================
+
+    [Fact]
+    public async Task Command_navigation_supersedes_active_navigation()
+    {
+        var (core, adapter) = CreateCoreWithAdapter();
+
+        NavigationCompletedEventArgs? supersededArgs = null;
+        core.NavigationCompleted += (_, e) =>
+        {
+            if (e.Status == NavigationCompletedStatus.Superseded)
+                supersededArgs = e;
+        };
+
+        // Start a navigation
+        var navTask1 = core.NavigateAsync(new Uri("https://first.test"));
+        Assert.True(core.IsLoading);
+
+        adapter.GoBackAccepted = true;
+        adapter.CanGoBack = true;
+
+        // GoBack while first navigation is active — should supersede it
+        core.GoBack();
+
+        // First navigation should complete with Superseded
+        Assert.NotNull(supersededArgs);
+        Assert.Equal(NavigationCompletedStatus.Superseded, supersededArgs!.Status);
+
+        // Clean up — complete the back navigation
+        adapter.RaiseNavigationCompleted();
+        await navTask1;
+    }
+
     // ========================= WebDialog — Source setter =========================
 
     [Fact]
@@ -503,7 +765,223 @@ public sealed class CoverageGapTests
         Assert.NotNull(completedArgs.Error);
     }
 
+    // ========================= Off-thread dispatch paths =========================
+
+    [Fact]
+    public async Task NavigationCompleted_off_thread_dispatches_to_ui()
+    {
+        var (core, adapter) = CreateCoreWithAdapter();
+
+        NavigationCompletedEventArgs? completedArgs = null;
+        core.NavigationCompleted += (_, e) => completedArgs = e;
+
+        var navTask = core.NavigateAsync(new Uri("https://offthread.test"));
+        var navId = adapter.LastNavigationId!.Value;
+
+        // Raise from a separate thread so CheckAccess() returns false
+        RunOnBackgroundThread(() =>
+        {
+            adapter.RaiseNavigationCompleted(navId, new Uri("https://offthread.test"),
+                NavigationCompletedStatus.Success);
+        });
+
+        // Drain dispatcher queue (we're still on the original "UI" thread)
+        _dispatcher.RunAll();
+        await navTask;
+
+        Assert.NotNull(completedArgs);
+        Assert.Equal(NavigationCompletedStatus.Success, completedArgs!.Status);
+    }
+
+    [Fact]
+    public void NewWindowRequested_off_thread_dispatches_to_ui()
+    {
+        var (core, adapter) = CreateCoreWithAdapter();
+
+        NewWindowRequestedEventArgs? windowArgs = null;
+        core.NewWindowRequested += (_, e) =>
+        {
+            windowArgs = e;
+            e.Handled = true;
+        };
+
+        RunOnBackgroundThread(() =>
+        {
+            adapter.RaiseNewWindowRequested(new Uri("https://popup-offthread.test"));
+        });
+
+        _dispatcher.RunAll();
+
+        Assert.NotNull(windowArgs);
+        Assert.Equal("https://popup-offthread.test/", windowArgs!.Uri!.ToString());
+    }
+
+    [Fact]
+    public void WebResourceRequested_off_thread_dispatches_to_ui()
+    {
+        var (core, adapter) = CreateCoreWithAdapter();
+
+        WebResourceRequestedEventArgs? resourceArgs = null;
+        core.WebResourceRequested += (_, e) => resourceArgs = e;
+
+        RunOnBackgroundThread(() =>
+        {
+            adapter.RaiseWebResourceRequested();
+        });
+
+        _dispatcher.RunAll();
+
+        Assert.NotNull(resourceArgs);
+    }
+
+    [Fact]
+    public void EnvironmentRequested_off_thread_dispatches_to_ui()
+    {
+        var (core, adapter) = CreateCoreWithAdapter();
+
+        EnvironmentRequestedEventArgs? envArgs = null;
+        core.EnvironmentRequested += (_, e) => envArgs = e;
+
+        RunOnBackgroundThread(() =>
+        {
+            adapter.RaiseEnvironmentRequested();
+        });
+
+        _dispatcher.RunAll();
+
+        Assert.NotNull(envArgs);
+    }
+
+    [Fact]
+    public void DownloadRequested_off_thread_dispatches_to_ui()
+    {
+        var downloadAdapter = MockWebViewAdapter.CreateWithDownload();
+        var core = new WebViewCore(downloadAdapter, _dispatcher);
+
+        DownloadRequestedEventArgs? dlArgs = null;
+        core.DownloadRequested += (_, e) => dlArgs = e;
+
+        RunOnBackgroundThread(() =>
+        {
+            downloadAdapter.RaiseDownloadRequested(new DownloadRequestedEventArgs(
+                new Uri("https://example.com/file.zip"), "file.zip", "application/zip", 1024));
+        });
+
+        _dispatcher.RunAll();
+
+        Assert.NotNull(dlArgs);
+        Assert.Equal("file.zip", dlArgs!.SuggestedFileName);
+    }
+
+    [Fact]
+    public void PermissionRequested_off_thread_dispatches_to_ui()
+    {
+        var permAdapter = MockWebViewAdapter.CreateWithPermission();
+        var core = new WebViewCore(permAdapter, _dispatcher);
+
+        PermissionRequestedEventArgs? permArgs = null;
+        core.PermissionRequested += (_, e) => permArgs = e;
+
+        RunOnBackgroundThread(() =>
+        {
+            permAdapter.RaisePermissionRequested(new PermissionRequestedEventArgs(
+                WebViewPermissionKind.Microphone, new Uri("https://example.com")));
+        });
+
+        _dispatcher.RunAll();
+
+        Assert.NotNull(permArgs);
+        Assert.Equal(WebViewPermissionKind.Microphone, permArgs!.PermissionKind);
+    }
+
+    // ========================= Off-thread dispatch + disposed (marshal then dispose) =========================
+
+    [Fact]
+    public async Task NavigationCompleted_off_thread_then_disposed_is_ignored()
+    {
+        var (core, adapter) = CreateCoreWithAdapter();
+
+        NavigationCompletedEventArgs? completedArgs = null;
+        core.NavigationCompleted += (_, e) => completedArgs = e;
+
+        var navTask = core.NavigateAsync(new Uri("https://offthread-dispose.test"));
+        var navId = adapter.LastNavigationId!.Value;
+
+        // Raise from background thread to enqueue
+        RunOnBackgroundThread(() =>
+        {
+            adapter.RaiseNavigationCompleted(navId, new Uri("https://offthread-dispose.test"),
+                NavigationCompletedStatus.Success);
+        });
+
+        // Dispose BEFORE draining — the on-UI-thread handler should see _disposed
+        core.Dispose();
+        _dispatcher.RunAll();
+
+        // NavigationCompleted event should NOT have been raised to consumer (ignored on UI thread)
+        Assert.Null(completedArgs);
+
+        // But the navTask was faulted by Dispose
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => navTask);
+    }
+
+    [Fact]
+    public void NewWindowRequested_off_thread_then_disposed_is_ignored()
+    {
+        var (core, adapter) = CreateCoreWithAdapter();
+
+        NewWindowRequestedEventArgs? windowArgs = null;
+        core.NewWindowRequested += (_, e) => windowArgs = e;
+
+        RunOnBackgroundThread(() =>
+        {
+            adapter.RaiseNewWindowRequested(new Uri("https://popup-dispose.test"));
+        });
+
+        core.Dispose();
+        _dispatcher.RunAll();
+
+        Assert.Null(windowArgs);
+    }
+
+    [Fact]
+    public void WebMessageReceived_off_thread_then_disposed_is_ignored()
+    {
+        var (core, adapter) = CreateCoreWithAdapter();
+
+        WebMessageReceivedEventArgs? msgArgs = null;
+        core.WebMessageReceived += (_, e) => msgArgs = e;
+
+        RunOnBackgroundThread(() =>
+        {
+            adapter.RaiseWebMessage("hello", "https://origin.test", Guid.NewGuid());
+        });
+
+        core.Dispose();
+        _dispatcher.RunAll();
+
+        Assert.Null(msgArgs);
+    }
+
     // ========================= Helpers =========================
+
+    /// <summary>
+    /// Runs an action on a separate thread and blocks until it completes.
+    /// After this method returns, we're guaranteed to be back on the original (UI) thread.
+    /// </summary>
+    private static void RunOnBackgroundThread(Action action)
+    {
+        Exception? bgException = null;
+        var thread = new Thread(() =>
+        {
+            try { action(); }
+            catch (Exception ex) { bgException = ex; }
+        });
+        thread.Start();
+        thread.Join();
+        if (bgException is not null)
+            throw new AggregateException("Background thread threw an exception", bgException);
+    }
 
     private (WebViewCore Core, MockWebViewAdapter Adapter) CreateCoreWithAdapter()
     {
