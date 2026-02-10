@@ -3,18 +3,7 @@ name: Release
 on:
   push:
     tags: ['v*']      # Triggered by version tags like v1.0.0, v0.2.1-preview
-  workflow_dispatch:   # Allow manual triggering
-    inputs:
-      version:
-        description: 'Package version override (e.g. 1.0.0, 0.2.1-preview). Leave empty to use MinVer auto-calculated version.'
-        required: false
-      publish_target:
-        description: 'Publish target'
-        type: choice
-        options:
-          - nuget.org
-          - github
-        default: nuget.org
+  workflow_dispatch:   # Allow manual triggering (select a tag from the UI)
 
 concurrency:
   group: release-${{ github.ref }}
@@ -48,12 +37,7 @@ jobs:
         run: dotnet tool restore
 
       - name: Run full CI pipeline
-        run: |
-          ARGS="--target Ci --configuration Release"
-          if [ -n "${{ github.event.inputs.version }}" ]; then
-            ARGS="$ARGS --package-version ${{ github.event.inputs.version }}"
-          fi
-          ./build.sh $ARGS
+        run: ./build.sh --target Ci --configuration Release
 
       - name: Upload NuGet package
         uses: actions/upload-artifact@v4
@@ -74,9 +58,7 @@ jobs:
     name: Publish to NuGet
     needs: build
     runs-on: ubuntu-latest
-    if: >
-      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v'))
-      || (github.event_name == 'workflow_dispatch' && github.event.inputs.publish_target == 'nuget.org')
+    if: startsWith(github.ref, 'refs/tags/v')
     environment: nuget
     steps:
       - uses: actions/checkout@v4
@@ -105,7 +87,7 @@ jobs:
     name: Create GitHub Release
     needs: build
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v')
     permissions:
       contents: write
     steps:
