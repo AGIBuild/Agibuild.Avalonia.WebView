@@ -9,13 +9,14 @@ using CommunityToolkit.Mvvm.Input;
 namespace Agibuild.Avalonia.WebView.Integration.Tests.ViewModels;
 
 /// <summary>
-/// Consumer-perspective E2E test using bing.com as target site.
+/// Consumer-perspective E2E test using github.com as target site.
 /// Exposes all WebView features for manual testing via the UI,
 /// plus an automated E2E test suite.
 /// </summary>
 public partial class ConsumerWebViewE2EViewModel : ViewModelBase
 {
-    private static readonly Uri BingHome = new("https://www.bing.com");
+    private static readonly Uri TestHome = new("https://github.com");
+    private static readonly Uri TestPageB = new("https://github.com/explore");
 
     private int _autoRunStarted;
     private int _runAllInProgress;
@@ -23,7 +24,7 @@ public partial class ConsumerWebViewE2EViewModel : ViewModelBase
     public ConsumerWebViewE2EViewModel()
     {
         Status = "Not started.";
-        AddressText = BingHome.AbsoluteUri;
+        AddressText = TestHome.AbsoluteUri;
         ScriptInput = "document.title";
         HtmlInput = "<html><body><h1>Hello from NavigateToString!</h1><p>This is raw HTML loaded into the WebView.</p></body></html>";
     }
@@ -180,11 +181,11 @@ public partial class ConsumerWebViewE2EViewModel : ViewModelBase
     private async Task GoHomeAsync()
     {
         if (WebViewControl is null) return;
-        AddressText = BingHome.AbsoluteUri;
-        LogLine($"Home → {BingHome}");
+        AddressText = TestHome.AbsoluteUri;
+        LogLine($"Home → {TestHome}");
         try
         {
-            await WebViewControl.NavigateAsync(BingHome).ConfigureAwait(false);
+            await WebViewControl.NavigateAsync(TestHome).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -316,7 +317,7 @@ public partial class ConsumerWebViewE2EViewModel : ViewModelBase
     }
 
     // ---------------------------------------------------------------------------
-    //  E2E test suite (bing.com)
+    //  E2E test suite (github.com)
     // ---------------------------------------------------------------------------
 
     [RelayCommand]
@@ -348,8 +349,8 @@ public partial class ConsumerWebViewE2EViewModel : ViewModelBase
                 return false;
             }
 
-            Status = "Running consumer E2E scenarios (bing.com)...";
-            LogLine("=== Consumer WebView E2E (bing.com) ===");
+            Status = "Running consumer E2E scenarios (github.com)...";
+            LogLine("=== Consumer WebView E2E (github.com) ===");
 
             // Wait for the WebView to become attached by navigating via Source property first.
             await WaitForWebViewReadyAsync().ConfigureAwait(false);
@@ -360,7 +361,7 @@ public partial class ConsumerWebViewE2EViewModel : ViewModelBase
 
             var allPassed = true;
 
-            allPassed &= await RunNavigateToBingAsync().ConfigureAwait(false);
+            allPassed &= await RunNavigateAsync().ConfigureAwait(false);
             allPassed &= await RunSourcePropertyAsync().ConfigureAwait(false);
             allPassed &= await RunInvokeScriptAsync().ConfigureAwait(false);
             allPassed &= await RunNavigateToStringAsync().ConfigureAwait(false);
@@ -398,13 +399,13 @@ public partial class ConsumerWebViewE2EViewModel : ViewModelBase
         }
     }
 
-    // ---- Scenario 1: NavigateAsync to bing.com/search ----
+    // ---- Scenario 1: NavigateAsync to github.com/search ----
 
-    private async Task<bool> RunNavigateToBingAsync()
+    private async Task<bool> RunNavigateAsync()
     {
         try
         {
-            var uri = new Uri("https://www.bing.com/search?q=test");
+            var uri = new Uri("https://github.com/search?q=test&type=repositories");
             LogLine($"[1] NavigateAsync to {uri.PathAndQuery}");
 
             var completedTcs = new TaskCompletionSource<NavigationCompletedEventArgs>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -438,13 +439,13 @@ public partial class ConsumerWebViewE2EViewModel : ViewModelBase
         }
     }
 
-    // ---- Scenario 2: Source property → bing.com/maps ----
+    // ---- Scenario 2: Source property → github.com/explore ----
 
     private async Task<bool> RunSourcePropertyAsync()
     {
         try
         {
-            LogLine("[2] Source property navigation (bing.com/maps)");
+            LogLine("[2] Source property navigation (github.com/explore)");
 
             var completedTcs = new TaskCompletionSource<NavigationCompletedEventArgs>(TaskCreationOptions.RunContinuationsAsynchronously);
             void Handler(object? s, NavigationCompletedEventArgs e) => completedTcs.TrySetResult(e);
@@ -453,7 +454,7 @@ public partial class ConsumerWebViewE2EViewModel : ViewModelBase
             try
             {
                 await Dispatcher.UIThread.InvokeAsync(() =>
-                    WebViewControl.Source = new Uri("https://www.bing.com/maps"));
+                    WebViewControl.Source = TestPageB);
                 var completed = await WaitAsync(completedTcs.Task, TimeSpan.FromSeconds(30)).ConfigureAwait(false);
 
                 if (completed.Status != NavigationCompletedStatus.Success)
@@ -486,14 +487,14 @@ public partial class ConsumerWebViewE2EViewModel : ViewModelBase
         {
             LogLine("[3] InvokeScriptAsync (document.title)");
 
-            // Navigate to bing.com first to ensure a fresh page.
+            // Navigate to github.com first to ensure a fresh page.
             var navTcs = new TaskCompletionSource<NavigationCompletedEventArgs>(TaskCreationOptions.RunContinuationsAsynchronously);
             void NavHandler(object? s, NavigationCompletedEventArgs e) => navTcs.TrySetResult(e);
 
             WebViewControl!.NavigationCompleted += NavHandler;
             try
             {
-                await WebViewControl.NavigateAsync(BingHome).ConfigureAwait(false);
+                await WebViewControl.NavigateAsync(TestHome).ConfigureAwait(false);
                 await WaitAsync(navTcs.Task, TimeSpan.FromSeconds(30)).ConfigureAwait(false);
             }
             finally
@@ -588,7 +589,7 @@ public partial class ConsumerWebViewE2EViewModel : ViewModelBase
             WebViewControl!.NavigationCompleted += DoneHandler;
             try
             {
-                await WebViewControl.NavigateAsync(new Uri("https://www.bing.com/images")).ConfigureAwait(false);
+                await WebViewControl.NavigateAsync(new Uri("https://github.com/trending")).ConfigureAwait(false);
 
                 var started = await WaitAsync(startedTcs.Task, TimeSpan.FromSeconds(15)).ConfigureAwait(false);
                 LogLine($"  NavigationStarted: id={started.NavigationId}");
@@ -632,11 +633,11 @@ public partial class ConsumerWebViewE2EViewModel : ViewModelBase
         {
             LogLine("[6] GoBack / GoForward");
 
-            // Navigate to page A (bing.com).
-            await NavigateAndWaitAsync(BingHome).ConfigureAwait(false);
+            // Navigate to page A (github.com).
+            await NavigateAndWaitAsync(TestHome).ConfigureAwait(false);
 
-            // Navigate to page B (bing.com/news).
-            var pageB = new Uri("https://www.bing.com/news");
+            // Navigate to page B (github.com/topics).
+            var pageB = new Uri("https://github.com/topics");
             await NavigateAndWaitAsync(pageB).ConfigureAwait(false);
 
             // GoBack should return to page A.
@@ -703,7 +704,7 @@ public partial class ConsumerWebViewE2EViewModel : ViewModelBase
             LogLine("[7] Refresh");
 
             // Navigate to a known page first.
-            await NavigateAndWaitAsync(BingHome).ConfigureAwait(false);
+            await NavigateAndWaitAsync(TestHome).ConfigureAwait(false);
 
             // Refresh and wait for navigation completed.
             var navTcs = new TaskCompletionSource<NavigationCompletedEventArgs>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -750,7 +751,7 @@ public partial class ConsumerWebViewE2EViewModel : ViewModelBase
             LogLine("[8] Stop");
 
             // Start a navigation then immediately stop.
-            var uri = new Uri("https://www.bing.com/search?q=webview+stop+test");
+            var uri = new Uri("https://github.com/search?q=webview+stop+test");
             _ = WebViewControl!.NavigateAsync(uri);
 
             var result = await Dispatcher.UIThread.InvokeAsync(() => WebViewControl.Stop());
@@ -798,7 +799,7 @@ public partial class ConsumerWebViewE2EViewModel : ViewModelBase
             WebViewControl!.NavigationCompleted += DoneHandler;
             try
             {
-                await WebViewControl.NavigateAsync(new Uri("https://www.bing.com/search?q=isloading")).ConfigureAwait(false);
+                await WebViewControl.NavigateAsync(new Uri("https://github.com/search?q=isloading")).ConfigureAwait(false);
                 await WaitAsync(completedTcs.Task, TimeSpan.FromSeconds(30)).ConfigureAwait(false);
 
                 // After completion, IsLoading should be false.
@@ -1177,7 +1178,7 @@ public partial class ConsumerWebViewE2EViewModel : ViewModelBase
             WebViewControl!.SetCustomUserAgent(customUa);
 
             // Navigate to a simple page to ensure the UA takes effect.
-            await NavigateAndWaitAsync(BingHome).ConfigureAwait(false);
+            await NavigateAndWaitAsync(TestHome).ConfigureAwait(false);
 
             // Small delay to let the page load.
             await Task.Delay(300).ConfigureAwait(false);
@@ -1221,7 +1222,7 @@ public partial class ConsumerWebViewE2EViewModel : ViewModelBase
             WebViewControl.SetCustomUserAgent(null);
 
             // Navigate to ensure the change takes effect.
-            await NavigateAndWaitAsync(BingHome).ConfigureAwait(false);
+            await NavigateAndWaitAsync(TestHome).ConfigureAwait(false);
             await Task.Delay(300).ConfigureAwait(false);
 
             var afterReset = await WebViewControl.InvokeScriptAsync("navigator.userAgent").ConfigureAwait(false);
@@ -1251,7 +1252,7 @@ public partial class ConsumerWebViewE2EViewModel : ViewModelBase
     // ---------------------------------------------------------------------------
 
     /// <summary>
-    /// Sets Source to bing.com and waits for the first NavigationCompleted,
+    /// Sets Source to the test home page and waits for the first NavigationCompleted,
     /// ensuring the WebView is attached to the visual tree and fully ready.
     /// </summary>
     private async Task WaitForWebViewReadyAsync()
@@ -1266,7 +1267,7 @@ public partial class ConsumerWebViewE2EViewModel : ViewModelBase
         try
         {
             // Source property defers navigation until the control is attached.
-            await Dispatcher.UIThread.InvokeAsync(() => WebViewControl.Source = BingHome);
+            await Dispatcher.UIThread.InvokeAsync(() => WebViewControl.Source = TestHome);
             await WaitAsync(readyTcs.Task, TimeSpan.FromSeconds(30)).ConfigureAwait(false);
             LogLine("WebView ready.");
         }

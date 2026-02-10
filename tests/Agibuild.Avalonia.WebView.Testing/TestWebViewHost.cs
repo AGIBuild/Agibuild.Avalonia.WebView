@@ -17,6 +17,8 @@ public sealed class TestWebViewHost : IWebView
     public event EventHandler<WebMessageReceivedEventArgs>? WebMessageReceived { add { } remove { } }
     public event EventHandler<WebResourceRequestedEventArgs>? WebResourceRequested { add { } remove { } }
     public event EventHandler<EnvironmentRequestedEventArgs>? EnvironmentRequested { add { } remove { } }
+    public event EventHandler<AdapterCreatedEventArgs>? AdapterCreated { add { } remove { } }
+    public event EventHandler? AdapterDestroyed { add { } remove { } }
 
     public Task NavigateAsync(Uri uri) => Task.CompletedTask;
     public Task NavigateToStringAsync(string html) => Task.CompletedTask;

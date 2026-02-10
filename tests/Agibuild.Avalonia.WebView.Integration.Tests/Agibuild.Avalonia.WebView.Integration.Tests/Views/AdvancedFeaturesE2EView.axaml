@@ -38,7 +38,7 @@
 
       <!-- WebView fills all space -->
       <Border x:Name="WebViewHost" ClipToBounds="True">
-        <agw:WebView x:Name="WebViewControl" Source="https://www.bing.com" />
+        <agw:WebView x:Name="WebViewControl" Source="https://github.com" />
       </Border>
 
       <!-- Overlay backdrop -->

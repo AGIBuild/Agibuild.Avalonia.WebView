@@ -741,13 +741,25 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
 
     public IPlatformHandle? TryGetWebViewHandle()
     {
-        if (!_attached || _detached || _controller is null) return null;
+        if (!_attached || _detached || _controller is null || _webView is null) return null;
 
         return RunOnUiThread(() =>
         {
-            var hwnd = _controller!.ParentWindow;
-            return hwnd == IntPtr.Zero ? null : new PlatformHandle(hwnd, "WebView2");
+            if (_controller is null || _webView is null) return null;
+            var hwnd = _controller.ParentWindow;
+            if (hwnd == IntPtr.Zero) return null;
+
+            // Marshal.GetIUnknownForObject returns a ref-counted COM pointer.
+            var coreWebView2Ptr = Marshal.GetIUnknownForObject(_webView);
+            var controllerPtr = Marshal.GetIUnknownForObject(_controller);
+            return (IPlatformHandle?)new WindowsWebView2PlatformHandle(hwnd, coreWebView2Ptr, controllerPtr);
         });
+    }
+
+    /// <summary>Typed platform handle for Windows WebView2.</summary>
+    private sealed record WindowsWebView2PlatformHandle(nint Handle, nint CoreWebView2Handle, nint CoreWebView2ControllerHandle) : IWindowsWebView2PlatformHandle
+    {
+        public string HandleDescriptor => "WebView2";
     }
 
     // ==================== IWebViewAdapterOptions ====================

@@ -465,10 +465,12 @@ class _Build : NukeBuild
         .DependsOn(Build)
         .Executes(() =>
         {
+            DotNetRestore(s => s
+                .SetProjectFile(E2EDesktopProject));
+
             DotNetRun(s => s
                 .SetProjectFile(E2EDesktopProject)
-                .SetConfiguration(Configuration)
-                .EnableNoRestore());
+                .SetConfiguration(Configuration));
         });
 
     Target StartAndroid => _ => _
@@ -919,6 +921,7 @@ class _Build : NukeBuild
         // Test projects
         yield return TestsDirectory / "Agibuild.Avalonia.WebView.Testing" / "Agibuild.Avalonia.WebView.Testing.csproj";
         yield return TestsDirectory / "Agibuild.Avalonia.WebView.UnitTests" / "Agibuild.Avalonia.WebView.UnitTests.csproj";
+        yield return IntegrationTestsProject;
     }
 
     static bool HasDotNetWorkload(string platformKeyword)

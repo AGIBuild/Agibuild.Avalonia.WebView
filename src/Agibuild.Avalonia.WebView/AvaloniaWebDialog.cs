@@ -163,24 +163,28 @@ public sealed class AvaloniaWebDialog : IWebDialog
         // and must be accessed on the UI thread. Keeping the SynchronizationContext
         // ensures the continuation runs on the Avalonia dispatcher.
         await EnsureReadyAsync();
+        ThrowIfDisposed();
         await _webView.NavigateAsync(uri);
     }
 
     public async Task NavigateToStringAsync(string html)
     {
         await EnsureReadyAsync();
+        ThrowIfDisposed();
         await _webView.NavigateToStringAsync(html);
     }
 
     public async Task NavigateToStringAsync(string html, Uri? baseUrl)
     {
         await EnsureReadyAsync();
+        ThrowIfDisposed();
         await _webView.NavigateToStringAsync(html, baseUrl);
     }
 
     public async Task<string?> InvokeScriptAsync(string script)
     {
         await EnsureReadyAsync();
+        ThrowIfDisposed();
         return await _webView.InvokeScriptAsync(script);
     }
 
@@ -228,6 +232,18 @@ public sealed class AvaloniaWebDialog : IWebDialog
         remove => _webView.EnvironmentRequested -= value;
     }
 
+    public event EventHandler<AdapterCreatedEventArgs>? AdapterCreated
+    {
+        add => _webView.AdapterCreated += value;
+        remove => _webView.AdapterCreated -= value;
+    }
+
+    public event EventHandler? AdapterDestroyed
+    {
+        add => _webView.AdapterDestroyed += value;
+        remove => _webView.AdapterDestroyed -= value;
+    }
+
     // ==== IDisposable ====
 
     public void Dispose()
@@ -247,6 +263,7 @@ public sealed class AvaloniaWebDialog : IWebDialog
 
     private Task EnsureReadyAsync()
     {
+        ThrowIfDisposed();
         if (_readyTcs.Task.IsCompleted) return Task.CompletedTask;
         if (!_shown)
         {
@@ -255,6 +272,11 @@ public sealed class AvaloniaWebDialog : IWebDialog
                 "The WebView needs to be attached to the visual tree first.");
         }
         return _readyTcs.Task;
+    }
+
+    private void ThrowIfDisposed()
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
     }
 
     /// <summary>

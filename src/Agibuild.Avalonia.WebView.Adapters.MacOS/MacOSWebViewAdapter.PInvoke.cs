@@ -259,7 +259,14 @@ internal sealed class MacOSWebViewAdapter : IWebViewAdapter, INativeWebViewHandl
         if (!_attached || _detached) return null;
 
         var ptr = NativeMethods.GetWebViewHandle(_native);
-        return ptr == IntPtr.Zero ? null : new PlatformHandle(ptr, "WKWebView");
+        return ptr == IntPtr.Zero ? null : new AppleWKWebViewPlatformHandle(ptr);
+    }
+
+    /// <summary>Typed platform handle for Apple WKWebView (macOS).</summary>
+    private sealed record AppleWKWebViewPlatformHandle(nint WKWebViewHandle) : IAppleWKWebViewPlatformHandle
+    {
+        public nint Handle => WKWebViewHandle;
+        public string HandleDescriptor => "WKWebView";
     }
 
     // ---------- IWebViewAdapterOptions ----------

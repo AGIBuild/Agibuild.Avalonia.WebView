@@ -519,8 +519,14 @@ internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHan
     {
         if (!_attached || _detached || _webView is null) return null;
 
-        // Return a PlatformHandle wrapping the Android WebView's native handle.
-        return new PlatformHandle(_webView.Handle, "AndroidWebView");
+        return new AndroidWebViewPlatformHandle(_webView.Handle);
+    }
+
+    /// <summary>Typed platform handle for Android WebView.</summary>
+    private sealed record AndroidWebViewPlatformHandle(nint AndroidWebViewHandle) : IAndroidWebViewPlatformHandle
+    {
+        public nint Handle => AndroidWebViewHandle;
+        public string HandleDescriptor => "AndroidWebView";
     }
 
     // ==================== IWebViewAdapterOptions ====================

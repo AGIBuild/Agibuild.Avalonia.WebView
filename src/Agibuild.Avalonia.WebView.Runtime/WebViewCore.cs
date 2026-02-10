@@ -41,18 +41,27 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         _logger.LogDebug("Attach: parentHandle.HandleDescriptor={Descriptor}", parentHandle.HandleDescriptor);
         _adapter.Attach(parentHandle);
         _logger.LogDebug("Attach: completed");
+
+        // Raise AdapterCreated after successful attach, before any pending navigation.
+        var handle = TryGetWebViewHandle();
+        _logger.LogDebug("AdapterCreated: raising with handle={HasHandle}", handle is not null);
+        AdapterCreated?.Invoke(this, new AdapterCreatedEventArgs(handle));
     }
 
     [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     internal void Detach()
     {
         _logger.LogDebug("Detach: begin");
+        RaiseAdapterDestroyedOnce();
         _adapter.Detach();
         _logger.LogDebug("Detach: completed");
     }
 
     // Volatile: checked off-UI-thread in adapter callbacks before dispatching.
     private volatile bool _disposed;
+
+    // Guards at-most-once firing of AdapterDestroyed.
+    private bool _adapterDestroyed;
 
     // Only accessed on the UI thread (all paths go through _dispatcher).
     private NavigationOperation? _activeNavigation;
@@ -139,6 +148,8 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
     public event EventHandler<WebMessageReceivedEventArgs>? WebMessageReceived;
     public event EventHandler<WebResourceRequestedEventArgs>? WebResourceRequested;
     public event EventHandler<EnvironmentRequestedEventArgs>? EnvironmentRequested;
+    public event EventHandler<AdapterCreatedEventArgs>? AdapterCreated;
+    public event EventHandler? AdapterDestroyed;
 
     public void Dispose()
     {
@@ -148,6 +159,10 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         }
 
         _logger.LogDebug("Dispose: begin");
+
+        // Raise AdapterDestroyed if not already raised during Detach().
+        RaiseAdapterDestroyedOnce();
+
         _disposed = true;
 
         _adapter.NavigationCompleted -= OnAdapterNavigationCompleted;
@@ -423,9 +438,15 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
     /// <summary>
     /// Delegates to the adapter's <see cref="INativeWebViewHandleProvider.TryGetWebViewHandle()"/>
     /// if the adapter supports it; otherwise returns <c>null</c>.
+    /// Returns <c>null</c> after <see cref="AdapterDestroyed"/> has been raised.
     /// </summary>
     public global::Avalonia.Platform.IPlatformHandle? TryGetWebViewHandle()
     {
+        if (_adapterDestroyed)
+        {
+            return null;
+        }
+
         if (_adapter is not INativeWebViewHandleProvider provider)
         {
             return null;
@@ -576,9 +597,9 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         _logger.LogDebug("Adapter.NavigationCompleted received: id={NavigationId}, status={Status}, uri={Uri}",
             e.NavigationId, e.Status, e.RequestUri);
 
-        if (_disposed)
+        if (_disposed || _adapterDestroyed)
         {
-            _logger.LogDebug("Adapter.NavigationCompleted: ignored (disposed)");
+            _logger.LogDebug("Adapter.NavigationCompleted: ignored (disposed or destroyed)");
             return;
         }
 
@@ -628,9 +649,9 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
     {
         _logger.LogDebug("Event NewWindowRequested: uri={Uri}", e.Uri);
 
-        if (_disposed)
+        if (_disposed || _adapterDestroyed)
         {
-            _logger.LogDebug("NewWindowRequested: ignored (disposed)");
+            _logger.LogDebug("NewWindowRequested: ignored (disposed or destroyed)");
             return;
         }
 
@@ -663,9 +684,9 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
     {
         _logger.LogDebug("Event WebMessageReceived: origin={Origin}, channelId={ChannelId}", e.Origin, e.ChannelId);
 
-        if (_disposed)
+        if (_disposed || _adapterDestroyed)
         {
-            _logger.LogDebug("WebMessageReceived: ignored (disposed)");
+            _logger.LogDebug("WebMessageReceived: ignored (disposed or destroyed)");
             return;
         }
 
@@ -721,7 +742,7 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
     {
         _logger.LogDebug("Event WebResourceRequested");
 
-        if (_disposed)
+        if (_disposed || _adapterDestroyed)
         {
             return;
         }
@@ -739,7 +760,7 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
     {
         _logger.LogDebug("Event EnvironmentRequested");
 
-        if (_disposed)
+        if (_disposed || _adapterDestroyed)
         {
             return;
         }
@@ -800,6 +821,18 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         {
             operation.TrySetSuccess();
         }
+    }
+
+    private void RaiseAdapterDestroyedOnce()
+    {
+        if (_adapterDestroyed)
+        {
+            return;
+        }
+
+        _adapterDestroyed = true;
+        _logger.LogDebug("AdapterDestroyed: raising");
+        AdapterDestroyed?.Invoke(this, EventArgs.Empty);
     }
 
     private void ThrowIfNotOnUiThread(string apiName)

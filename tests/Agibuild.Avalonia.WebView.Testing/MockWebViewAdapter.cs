@@ -322,6 +322,33 @@ internal sealed class MockWebViewAdapterWithHandle : MockWebViewAdapter, INative
     }
 }
 
+/// <summary>A test typed platform handle implementing <see cref="IWindowsWebView2PlatformHandle"/> for pattern-matching tests.</summary>
+public sealed record TestWindowsWebView2PlatformHandle(nint Handle, nint CoreWebView2Handle, nint CoreWebView2ControllerHandle) : IWindowsWebView2PlatformHandle
+{
+    public string HandleDescriptor => "WebView2";
+}
+
+/// <summary>A test typed platform handle implementing <see cref="IAppleWKWebViewPlatformHandle"/> for pattern-matching tests.</summary>
+public sealed record TestAppleWKWebViewPlatformHandle(nint WKWebViewHandle) : IAppleWKWebViewPlatformHandle
+{
+    public nint Handle => WKWebViewHandle;
+    public string HandleDescriptor => "WKWebView";
+}
+
+/// <summary>A test typed platform handle implementing <see cref="IGtkWebViewPlatformHandle"/> for pattern-matching tests.</summary>
+public sealed record TestGtkWebViewPlatformHandle(nint WebKitWebViewHandle) : IGtkWebViewPlatformHandle
+{
+    public nint Handle => WebKitWebViewHandle;
+    public string HandleDescriptor => "WebKitGTK";
+}
+
+/// <summary>A test typed platform handle implementing <see cref="IAndroidWebViewPlatformHandle"/> for pattern-matching tests.</summary>
+public sealed record TestAndroidWebViewPlatformHandle(nint AndroidWebViewHandle) : IAndroidWebViewPlatformHandle
+{
+    public nint Handle => AndroidWebViewHandle;
+    public string HandleDescriptor => "AndroidWebView";
+}
+
 /// <summary>Mock adapter that also implements <see cref="ICookieAdapter"/> for cookie management testing.</summary>
 internal sealed class MockWebViewAdapterWithCookies : MockWebViewAdapter, ICookieAdapter
 {

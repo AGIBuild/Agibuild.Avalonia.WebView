@@ -54,6 +54,12 @@ public interface IWebView : IDisposable
     event EventHandler<WebMessageReceivedEventArgs>? WebMessageReceived;
     event EventHandler<WebResourceRequestedEventArgs>? WebResourceRequested;
     event EventHandler<EnvironmentRequestedEventArgs>? EnvironmentRequested;
+
+    /// <summary>Raised after the native adapter is attached and ready. The event args carry the typed platform handle.</summary>
+    event EventHandler<AdapterCreatedEventArgs>? AdapterCreated;
+
+    /// <summary>Raised before the native adapter is detached/destroyed. After this event, <see cref="INativeWebViewHandleProvider.TryGetWebViewHandle"/> returns <c>null</c>.</summary>
+    event EventHandler? AdapterDestroyed;
 }
 
 public interface IWebDialog : IWebView
@@ -141,6 +147,37 @@ public interface IWebViewEnvironmentOptions
 public interface INativeWebViewHandleProvider
 {
     IPlatformHandle? TryGetWebViewHandle();
+}
+
+/// <summary>Typed platform handle for Windows WebView2. Cast from <see cref="IPlatformHandle"/> returned by <see cref="INativeWebViewHandleProvider"/>.</summary>
+public interface IWindowsWebView2PlatformHandle : IPlatformHandle
+{
+    /// <summary>Pointer to the <c>ICoreWebView2</c> COM object.</summary>
+    nint CoreWebView2Handle { get; }
+
+    /// <summary>Pointer to the <c>ICoreWebView2Controller</c> COM object.</summary>
+    nint CoreWebView2ControllerHandle { get; }
+}
+
+/// <summary>Typed platform handle for Apple WKWebView (macOS and iOS).</summary>
+public interface IAppleWKWebViewPlatformHandle : IPlatformHandle
+{
+    /// <summary>Objective-C pointer to the <c>WKWebView</c> instance.</summary>
+    nint WKWebViewHandle { get; }
+}
+
+/// <summary>Typed platform handle for GTK WebKitWebView (Linux).</summary>
+public interface IGtkWebViewPlatformHandle : IPlatformHandle
+{
+    /// <summary>Pointer to the <c>WebKitWebView</c> GObject instance.</summary>
+    nint WebKitWebViewHandle { get; }
+}
+
+/// <summary>Typed platform handle for Android WebView.</summary>
+public interface IAndroidWebViewPlatformHandle : IPlatformHandle
+{
+    /// <summary>JNI handle to the Android <c>WebView</c> instance.</summary>
+    nint AndroidWebViewHandle { get; }
 }
 
 /// <summary>Cookie management for the WebView instance.</summary>
@@ -345,6 +382,21 @@ public sealed class WebResourceRequestedEventArgs : EventArgs
 [Experimental("AGWV005")]
 public sealed class EnvironmentRequestedEventArgs : EventArgs
 {
+}
+
+/// <summary>Event args for the <see cref="IWebView.AdapterCreated"/> event, carrying the typed native platform handle.</summary>
+public sealed class AdapterCreatedEventArgs : EventArgs
+{
+    public AdapterCreatedEventArgs(IPlatformHandle? platformHandle)
+    {
+        PlatformHandle = platformHandle;
+    }
+
+    /// <summary>
+    /// The typed native WebView handle, or <c>null</c> if the adapter does not support handle exposure.
+    /// Cast to a platform-specific interface (e.g. <see cref="IWindowsWebView2PlatformHandle"/>) for typed access.
+    /// </summary>
+    public IPlatformHandle? PlatformHandle { get; }
 }
 
 public class WebViewNavigationException : Exception

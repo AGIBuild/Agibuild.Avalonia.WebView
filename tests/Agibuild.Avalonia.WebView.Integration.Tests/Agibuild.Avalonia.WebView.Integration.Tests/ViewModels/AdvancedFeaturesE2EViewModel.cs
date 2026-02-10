@@ -180,7 +180,7 @@ public partial class AdvancedFeaturesE2EViewModel : ViewModelBase
         try
         {
             await Dispatcher.UIThread.InvokeAsync(() =>
-                WebViewControl.Source = new Uri("https://www.bing.com"));
+                WebViewControl.Source = new Uri("https://github.com"));
 
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
             var completed = await Task.WhenAny(readyTcs.Task, Task.Delay(Timeout.InfiniteTimeSpan, cts.Token));
@@ -214,7 +214,7 @@ public partial class AdvancedFeaturesE2EViewModel : ViewModelBase
     private string _environmentInfo = "(not initialized)";
 
     [ObservableProperty]
-    private string _dialogUrl = "https://www.bing.com";
+    private string _dialogUrl = "https://github.com";
 
     [ObservableProperty]
     private string _authResult = "(not tested)";
@@ -361,7 +361,7 @@ public partial class AdvancedFeaturesE2EViewModel : ViewModelBase
     {
         try
         {
-            var url = DialogUrl?.Trim() ?? "https://www.bing.com";
+            var url = DialogUrl?.Trim() ?? "https://github.com";
             LogLine($"[Dialog] Opening WebDialog to: {url}");
             Status = "Opening WebDialog...";
 
@@ -406,7 +406,7 @@ public partial class AdvancedFeaturesE2EViewModel : ViewModelBase
             dialog.Resize(900, 700);
             dialog.Show();
 
-            await dialog.NavigateAsync(new Uri("https://www.bing.com"));
+            await dialog.NavigateAsync(new Uri("https://github.com"));
             LogLine("[Dialog] Ephemeral dialog shown. Cookies will NOT persist after close.");
 
             Status = "Ephemeral dialog open. Close it to continue.";
@@ -496,7 +496,7 @@ public partial class AdvancedFeaturesE2EViewModel : ViewModelBase
             // Navigate to a page that won't redirect — user must close dialog.
             var options = new AuthOptions
             {
-                AuthorizeUri = new Uri("https://www.bing.com"),
+                AuthorizeUri = new Uri("https://github.com/login/oauth/authorize"),
                 CallbackUri = new Uri("https://example.com/callback"),
                 UseEphemeralSession = true,
                 Timeout = TimeSpan.FromSeconds(60)

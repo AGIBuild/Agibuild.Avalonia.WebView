@@ -166,6 +166,10 @@ WebViewEnvironment.Initialize(loggerFactory, new WebViewEnvironmentOptions
 });
 ```
 
+## Testing
+
+Spec-driven contract tests cover the runtime layer against mock adapters — no native browser needed. Line coverage **92%+**, branch coverage **84%+**.
+
 ## License
 
 [MIT](LICENSE.txt)

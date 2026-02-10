@@ -181,6 +181,8 @@ public class WebView : NativeControlHost
     public event EventHandler<WebMessageReceivedEventArgs>? WebMessageReceived;
     public event EventHandler<WebResourceRequestedEventArgs>? WebResourceRequested;
     public event EventHandler<EnvironmentRequestedEventArgs>? EnvironmentRequested;
+    public event EventHandler<AdapterCreatedEventArgs>? AdapterCreated;
+    public event EventHandler? AdapterDestroyed;
 
     // ---------------------------------------------------------------------------
     //  NativeControlHost lifecycle
@@ -198,12 +200,14 @@ public class WebView : NativeControlHost
                          ?? (ILogger<WebViewCore>)NullLogger<WebViewCore>.Instance;
 
             _core = WebViewCore.CreateForControl(dispatcher, logger);
+
+            // Subscribe before Attach so we receive AdapterCreated raised during Attach().
+            SubscribeCoreEvents();
+
             _core.Attach(handle);
             _coreAttached = true;
 
-            SubscribeCoreEvents();
-
-            // If Source was set before attachment, navigate now.
+            // If Source was set before attachment, navigate now (after AdapterCreated).
             var pendingSource = Source;
             if (pendingSource is not null)
             {
@@ -289,6 +293,8 @@ public class WebView : NativeControlHost
         _core.WebMessageReceived += OnCoreWebMessageReceived;
         _core.WebResourceRequested += OnCoreWebResourceRequested;
         _core.EnvironmentRequested += OnCoreEnvironmentRequested;
+        _core.AdapterCreated += OnCoreAdapterCreated;
+        _core.AdapterDestroyed += OnCoreAdapterDestroyed;
     }
 
     private void UnsubscribeCoreEvents()
@@ -301,6 +307,8 @@ public class WebView : NativeControlHost
         _core.WebMessageReceived -= OnCoreWebMessageReceived;
         _core.WebResourceRequested -= OnCoreWebResourceRequested;
         _core.EnvironmentRequested -= OnCoreEnvironmentRequested;
+        _core.AdapterCreated -= OnCoreAdapterCreated;
+        _core.AdapterDestroyed -= OnCoreAdapterDestroyed;
     }
 
     private void OnCoreNavigationStarted(object? sender, NavigationStartingEventArgs e)
@@ -336,4 +344,10 @@ public class WebView : NativeControlHost
 
     private void OnCoreEnvironmentRequested(object? sender, EnvironmentRequestedEventArgs e)
         => EnvironmentRequested?.Invoke(this, e);
+
+    private void OnCoreAdapterCreated(object? sender, AdapterCreatedEventArgs e)
+        => AdapterCreated?.Invoke(this, e);
+
+    private void OnCoreAdapterDestroyed(object? sender, EventArgs e)
+        => AdapterDestroyed?.Invoke(this, EventArgs.Empty);
 }

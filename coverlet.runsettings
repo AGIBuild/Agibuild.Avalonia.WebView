@@ -27,7 +27,7 @@
             ExcludeFromCodeCoverage
           </ExcludeByAttribute>
           <SingleHit>false</SingleHit>
-          <UseSourceLink>true</UseSourceLink>
+          <UseSourceLink>false</UseSourceLink>
           <IncludeTestAssembly>false</IncludeTestAssembly>
         </Configuration>
       </DataCollector>

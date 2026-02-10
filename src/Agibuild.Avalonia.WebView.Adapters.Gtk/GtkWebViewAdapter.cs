@@ -254,7 +254,14 @@ internal sealed class GtkWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
         if (!_attached || _detached) return null;
 
         var ptr = NativeMethods.GetWebViewHandle(_native);
-        return ptr == IntPtr.Zero ? null : new PlatformHandle(ptr, "WebKitWebView");
+        return ptr == IntPtr.Zero ? null : new GtkWebViewPlatformHandle(ptr);
+    }
+
+    /// <summary>Typed platform handle for GTK WebKitWebView.</summary>
+    private sealed record GtkWebViewPlatformHandle(nint WebKitWebViewHandle) : IGtkWebViewPlatformHandle
+    {
+        public nint Handle => WebKitWebViewHandle;
+        public string HandleDescriptor => "WebKitGTK";
     }
 
     // ---------- IWebViewAdapterOptions ----------

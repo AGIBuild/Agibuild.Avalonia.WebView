@@ -117,6 +117,18 @@ public sealed class WebDialog : IWebDialog
         remove => _core.EnvironmentRequested -= value;
     }
 
+    public event EventHandler<AdapterCreatedEventArgs>? AdapterCreated
+    {
+        add => _core.AdapterCreated += value;
+        remove => _core.AdapterCreated -= value;
+    }
+
+    public event EventHandler? AdapterDestroyed
+    {
+        add => _core.AdapterDestroyed += value;
+        remove => _core.AdapterDestroyed -= value;
+    }
+
     public void Dispose()
     {
         if (_disposed) return;

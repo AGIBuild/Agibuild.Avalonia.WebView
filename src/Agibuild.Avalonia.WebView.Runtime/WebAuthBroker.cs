@@ -53,38 +53,48 @@ public sealed class WebAuthBroker : IWebAuthBroker
         // Monitor dialog close (user cancel).
         dialog.Closing += OnClosing;
 
-        // Show the dialog.
-        if (owner.PlatformHandle is not null)
-        {
-            dialog.Show(owner.PlatformHandle);
-        }
-        else
-        {
-            dialog.Show();
-        }
-
-        // Navigate to the authorize URL.
-        await dialog.NavigateAsync(options.AuthorizeUri).ConfigureAwait(false);
-
-        // Apply timeout if specified.
-        using var cts = options.Timeout.HasValue
-            ? new CancellationTokenSource(options.Timeout.Value)
-            : new CancellationTokenSource();
-
-        if (options.Timeout.HasValue)
-        {
-            cts.Token.Register(() =>
-            {
-                tcs.TrySetResult(new WebAuthResult
-                {
-                    Status = WebAuthStatus.Timeout,
-                    Error = $"Authentication timed out after {options.Timeout.Value.TotalSeconds}s."
-                });
-            });
-        }
-
         try
         {
+            // Show the dialog.
+            if (owner.PlatformHandle is not null)
+            {
+                dialog.Show(owner.PlatformHandle);
+            }
+            else
+            {
+                dialog.Show();
+            }
+
+            // Navigate to the authorize URL.
+            // If the user closes the dialog while navigation is in progress,
+            // WebViewCore.Dispose() faults the active navigation with
+            // ObjectDisposedException — treat this as UserCancel.
+            try
+            {
+                await dialog.NavigateAsync(options.AuthorizeUri).ConfigureAwait(false);
+            }
+            catch (ObjectDisposedException)
+            {
+                return new WebAuthResult { Status = WebAuthStatus.UserCancel };
+            }
+
+            // Apply timeout if specified.
+            using var cts = options.Timeout.HasValue
+                ? new CancellationTokenSource(options.Timeout.Value)
+                : new CancellationTokenSource();
+
+            if (options.Timeout.HasValue)
+            {
+                cts.Token.Register(() =>
+                {
+                    tcs.TrySetResult(new WebAuthResult
+                    {
+                        Status = WebAuthStatus.Timeout,
+                        Error = $"Authentication timed out after {options.Timeout.Value.TotalSeconds}s."
+                    });
+                });
+            }
+
             return await tcs.Task.ConfigureAwait(false);
         }
         finally

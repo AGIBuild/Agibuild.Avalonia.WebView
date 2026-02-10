@@ -45,7 +45,7 @@ public partial class AdvancedFeaturesE2EView : UserControl
 
         var newWebView = new WebView
         {
-            Source = new System.Uri("https://www.bing.com")
+            Source = new System.Uri("https://github.com")
         };
 
         host.Child = newWebView;
