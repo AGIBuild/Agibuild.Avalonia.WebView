@@ -34,6 +34,8 @@ jobs:
           fetch-depth: 0  # Need full history for tag listing
 
       - name: Calculate and create tag
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
 
