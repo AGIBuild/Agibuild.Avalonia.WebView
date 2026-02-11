@@ -5,6 +5,10 @@ on:
     tags: ['v*']      # Triggered by version tags like v1.0.0, v0.2.1-preview
   workflow_dispatch:   # Allow manual triggering (select a tag from the UI)
 
+permissions:
+  contents: write
+  actions: read
+
 concurrency:
   group: release-${{ github.ref }}
   cancel-in-progress: false
@@ -88,8 +92,6 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
-    permissions:
-      contents: write
     steps:
       - uses: actions/checkout@v4
 
