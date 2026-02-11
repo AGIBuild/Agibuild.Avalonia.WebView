@@ -34,6 +34,9 @@ public sealed class TestWebViewHost : IWebView
 
     public ICookieManager? TryGetCookieManager() => null;
     public ICommandManager? TryGetCommandManager() => null;
+    public IWebViewRpcService? Rpc => null;
+    public Task<byte[]> CaptureScreenshotAsync() => Task.FromException<byte[]>(new NotSupportedException());
+    public Task<byte[]> PrintToPdfAsync(PdfPrintOptions? options = null) => Task.FromException<byte[]>(new NotSupportedException());
 
     public void Dispose() { /* No-op for test stub. */ }
 }

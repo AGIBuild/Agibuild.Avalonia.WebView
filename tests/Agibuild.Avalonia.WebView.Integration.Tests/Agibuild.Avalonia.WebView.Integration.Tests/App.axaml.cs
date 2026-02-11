@@ -57,6 +57,13 @@ namespace Agibuild.Avalonia.WebView.Integration.Tests
                     mainVm.AdvancedE2E.AutoRunCompleted += exitCode =>
                         Dispatcher.UIThread.Post(() => desktop.Shutdown(exitCode));
                 }
+                else if (args.Contains("--feature-e2e"))
+                {
+                    mainVm.SelectedTabIndex = 6;
+                    mainVm.FeatureE2E.AutoRun = true;
+                    mainVm.FeatureE2E.AutoRunCompleted += exitCode =>
+                        Dispatcher.UIThread.Post(() => desktop.Shutdown(exitCode));
+                }
 
                 desktop.MainWindow = new MainWindow { DataContext = mainVm };
             }

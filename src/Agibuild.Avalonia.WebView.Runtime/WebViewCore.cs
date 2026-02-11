@@ -68,10 +68,14 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
     private Uri _source;
 
     private readonly ICookieManager? _cookieManager;
+    private readonly ICommandManager? _commandManager;
+    private readonly IScreenshotAdapter? _screenshotAdapter;
+    private readonly IPrintAdapter? _printAdapter;
 
     private bool _webMessageBridgeEnabled;
     private IWebMessagePolicy? _webMessagePolicy;
     private IWebMessageDropDiagnosticsSink? _webMessageDropDiagnosticsSink;
+    private WebViewRpcService? _rpcService;
 
     internal WebViewCore(IWebViewAdapter adapter, IWebViewDispatcher dispatcher)
         : this(adapter, dispatcher, NullLogger<WebViewCore>.Instance)
@@ -131,6 +135,20 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
             permissionAdapter.PermissionRequested += OnAdapterPermissionRequested;
             _logger.LogDebug("Permission support: enabled");
         }
+
+        // Detect command support.
+        _commandManager = _adapter is ICommandAdapter commandAdapter
+            ? new RuntimeCommandManager(commandAdapter)
+            : null;
+        _logger.LogDebug("Command support: {Supported}", _commandManager is not null);
+
+        // Detect screenshot support.
+        _screenshotAdapter = _adapter as IScreenshotAdapter;
+        _logger.LogDebug("Screenshot support: {Supported}", _screenshotAdapter is not null);
+
+        // Detect print support.
+        _printAdapter = _adapter as IPrintAdapter;
+        _logger.LogDebug("Print support: {Supported}", _printAdapter is not null);
 
         _adapter.NavigationCompleted += OnAdapterNavigationCompleted;
         _adapter.NewWindowRequested += OnAdapterNewWindowRequested;
@@ -465,7 +483,25 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
 
     public ICookieManager? TryGetCookieManager() => _cookieManager;
 
-    public ICommandManager? TryGetCommandManager() => null;
+    public ICommandManager? TryGetCommandManager() => _commandManager;
+
+    public IWebViewRpcService? Rpc => _rpcService;
+
+    public Task<byte[]> CaptureScreenshotAsync()
+    {
+        ThrowIfDisposed();
+        if (_screenshotAdapter is null)
+            throw new NotSupportedException("The current WebView adapter does not support screenshot capture.");
+        return _screenshotAdapter.CaptureScreenshotAsync();
+    }
+
+    public Task<byte[]> PrintToPdfAsync(PdfPrintOptions? options = null)
+    {
+        ThrowIfDisposed();
+        if (_printAdapter is null)
+            throw new NotSupportedException("The current WebView adapter does not support PDF printing.");
+        return _printAdapter.PrintToPdfAsync(options);
+    }
 
     /// <summary>
     /// Delegates to the adapter's <see cref="INativeWebViewHandleProvider.TryGetWebViewHandle()"/>
@@ -520,6 +556,10 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         _webMessageBridgeEnabled = true;
         _webMessagePolicy = new DefaultWebMessagePolicy(options.AllowedOrigins, options.ProtocolVersion, ChannelId);
         _webMessageDropDiagnosticsSink = options.DropDiagnosticsSink;
+        _rpcService ??= new WebViewRpcService(script => InvokeScriptAsync(script), _logger);
+
+        // Inject RPC JS stub.
+        _ = InvokeScriptAsync(WebViewRpcService.JsStub);
 
         _logger.LogDebug("WebMessageBridge enabled: originCount={Count}, protocol={Protocol}",
             options.AllowedOrigins?.Count ?? 0, options.ProtocolVersion);
@@ -533,6 +573,7 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         _webMessageBridgeEnabled = false;
         _webMessagePolicy = null;
         _webMessageDropDiagnosticsSink = null;
+        _rpcService = null;
 
         _logger.LogDebug("WebMessageBridge disabled");
     }
@@ -760,6 +801,13 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         var decision = policy.Evaluate(in envelope);
         if (decision.IsAllowed)
         {
+            // Try RPC dispatch first.
+            if (_rpcService is not null && _rpcService.TryProcessMessage(e.Body))
+            {
+                _logger.LogDebug("WebMessageReceived: handled as RPC message");
+                return;
+            }
+
             _logger.LogDebug("WebMessageReceived: policy allowed, forwarding");
             WebMessageReceived?.Invoke(this, e);
             return;
@@ -982,6 +1030,26 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
                 throw new ObjectDisposedException(nameof(WebViewCore));
             }
         }
+    }
+
+    /// <summary>
+    /// Runtime wrapper around <see cref="ICommandAdapter"/> that delegates editing commands.
+    /// </summary>
+    private sealed class RuntimeCommandManager : ICommandManager
+    {
+        private readonly ICommandAdapter _commandAdapter;
+
+        public RuntimeCommandManager(ICommandAdapter commandAdapter)
+        {
+            _commandAdapter = commandAdapter;
+        }
+
+        public void Copy() => _commandAdapter.ExecuteCommand(WebViewCommand.Copy);
+        public void Cut() => _commandAdapter.ExecuteCommand(WebViewCommand.Cut);
+        public void Paste() => _commandAdapter.ExecuteCommand(WebViewCommand.Paste);
+        public void SelectAll() => _commandAdapter.ExecuteCommand(WebViewCommand.SelectAll);
+        public void Undo() => _commandAdapter.ExecuteCommand(WebViewCommand.Undo);
+        public void Redo() => _commandAdapter.ExecuteCommand(WebViewCommand.Redo);
     }
 
     private sealed class NavigationOperation

@@ -8,7 +8,7 @@ using Agibuild.Avalonia.WebView.Adapters.Abstractions;
 namespace Agibuild.Avalonia.WebView.Adapters.Gtk;
 
 internal sealed class GtkWebViewAdapter : IWebViewAdapter, INativeWebViewHandleProvider, ICookieAdapter, IWebViewAdapterOptions,
-    ICustomSchemeAdapter, IDownloadAdapter, IPermissionAdapter
+    ICustomSchemeAdapter, IDownloadAdapter, IPermissionAdapter, ICommandAdapter, IScreenshotAdapter /* IPrintAdapter: GTK WebKitGTK lacks a direct PDF export API */
 {
     private static bool DiagnosticsEnabled
         => string.Equals(Environment.GetEnvironmentVariable("AGIBUILD_WEBVIEW_DIAG"), "1", StringComparison.Ordinal);
@@ -1112,5 +1112,59 @@ internal sealed class GtkWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
 
         [DllImport(LibraryName, EntryPoint = "ag_gtk_set_user_agent", CallingConvention = CallingConvention.Cdecl)]
         internal static extern void SetUserAgent(IntPtr handle, [MarshalAs(UnmanagedType.LPUTF8Str)] string? userAgent);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        internal delegate void ScreenshotCb(IntPtr context, IntPtr pngData, uint pngLen);
+
+        [DllImport(LibraryName, EntryPoint = "ag_gtk_capture_screenshot", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void CaptureScreenshot(IntPtr handle, ScreenshotCb callback, IntPtr context);
+    }
+
+    // ==================== ICommandAdapter ====================
+
+    public void ExecuteCommand(WebViewCommand command)
+    {
+        if (_native == IntPtr.Zero) return;
+        var jsCommand = command switch
+        {
+            WebViewCommand.Copy => "document.execCommand('copy')",
+            WebViewCommand.Cut => "document.execCommand('cut')",
+            WebViewCommand.Paste => "document.execCommand('paste')",
+            WebViewCommand.SelectAll => "document.execCommand('selectAll')",
+            WebViewCommand.Undo => "document.execCommand('undo')",
+            WebViewCommand.Redo => "document.execCommand('redo')",
+            _ => null
+        };
+        if (jsCommand is not null)
+            NativeMethods.EvalJs(_native, 0, jsCommand);
+    }
+
+    // ==================== IScreenshotAdapter ====================
+
+    public Task<byte[]> CaptureScreenshotAsync()
+    {
+        ThrowIfNotAttached();
+        var tcs = new TaskCompletionSource<byte[]>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var handle = GCHandle.Alloc(tcs);
+
+        NativeMethods.CaptureScreenshot(_native, OnScreenshotComplete, GCHandle.ToIntPtr(handle));
+        return tcs.Task;
+    }
+
+    private static void OnScreenshotComplete(IntPtr context, IntPtr pngData, uint pngLen)
+    {
+        var handle = GCHandle.FromIntPtr(context);
+        var tcs = (TaskCompletionSource<byte[]>)handle.Target!;
+        handle.Free();
+
+        if (pngData == IntPtr.Zero || pngLen == 0)
+        {
+            tcs.TrySetException(new InvalidOperationException("Screenshot capture failed."));
+            return;
+        }
+
+        var buffer = new byte[pngLen];
+        Marshal.Copy(pngData, buffer, 0, (int)pngLen);
+        tcs.TrySetResult(buffer);
     }
 }

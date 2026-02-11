@@ -58,6 +58,7 @@ namespace Agibuild.Avalonia.WebView.Integration.Tests.Views
                 3 => new ConsumerWebViewE2EView { DataContext = _vm.ConsumerE2E },
                 4 => new AdvancedFeaturesE2EView { DataContext = _vm.AdvancedE2E },
                 5 => new NavigationInterceptView { DataContext = _vm.NavigationIntercept },
+                6 => new FeatureE2EView { DataContext = _vm.FeatureE2E },
                 _ => null
             };
         }

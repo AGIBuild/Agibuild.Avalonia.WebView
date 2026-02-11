@@ -1,4 +1,5 @@
 using System.Runtime.Versioning;
+using Android.Graphics;
 using Android.OS;
 using Android.Runtime;
 using Android.Views;
@@ -15,7 +16,7 @@ namespace Agibuild.Avalonia.WebView.Adapters.Android;
 
 [SupportedOSPlatform("android")]
 internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHandleProvider, ICookieAdapter, IWebViewAdapterOptions,
-    ICustomSchemeAdapter, IDownloadAdapter, IPermissionAdapter
+    ICustomSchemeAdapter, IDownloadAdapter, IPermissionAdapter, ICommandAdapter, IScreenshotAdapter /* IPrintAdapter: Android lacks headless PDF export */
 {
     private static bool DiagnosticsEnabled
         => string.Equals(System.Environment.GetEnvironmentVariable("AGIBUILD_WEBVIEW_DIAG"), "1", StringComparison.Ordinal);
@@ -1396,5 +1397,42 @@ internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHan
         {
             _tcs.TrySetResult();
         }
+    }
+
+    // ==================== ICommandAdapter ====================
+
+    public void ExecuteCommand(WebViewCommand command)
+    {
+        if (_webView is null) return;
+        var jsCommand = command switch
+        {
+            WebViewCommand.Copy => "document.execCommand('copy')",
+            WebViewCommand.Cut => "document.execCommand('cut')",
+            WebViewCommand.Paste => "document.execCommand('paste')",
+            WebViewCommand.SelectAll => "document.execCommand('selectAll')",
+            WebViewCommand.Undo => "document.execCommand('undo')",
+            WebViewCommand.Redo => "document.execCommand('redo')",
+            _ => null
+        };
+        if (jsCommand is not null)
+            _webView.EvaluateJavascript(jsCommand, null);
+    }
+
+    // ==================== IScreenshotAdapter ====================
+
+    public Task<byte[]> CaptureScreenshotAsync()
+    {
+        if (_webView is null)
+            throw new InvalidOperationException("WebView is not initialized.");
+
+        var bitmap = Bitmap.CreateBitmap(_webView.Width, _webView.Height, Bitmap.Config.Argb8888!);
+        var canvas = new Canvas(bitmap!);
+        _webView.Draw(canvas);
+
+        using var stream = new MemoryStream();
+        bitmap.Compress(Bitmap.CompressFormat.Png!, 100, stream);
+        bitmap.Dispose();
+
+        return Task.FromResult(stream.ToArray());
     }
 }

@@ -1252,35 +1252,40 @@ public partial class ConsumerWebViewE2EViewModel : ViewModelBase
     // ---------------------------------------------------------------------------
 
     /// <summary>
-    /// Sets Source to the test home page and waits for the first NavigationCompleted,
-    /// ensuring the WebView is attached to the visual tree and fully ready.
+    /// Navigates to about:blank to confirm the WebView is attached and functional,
+    /// then navigates to the test home page.  The readiness check uses about:blank
+    /// because it loads instantly — external sites like github.com can take 30-60 s.
     /// </summary>
     private async Task WaitForWebViewReadyAsync()
     {
         LogLine("Waiting for WebView to become ready...");
 
-        var readyTcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        // Step 1: navigate to about:blank to verify the WebView is attached and responsive.
+        var blankTcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        void BlankHandler(object? s, NavigationCompletedEventArgs e) => blankTcs.TrySetResult(true);
 
-        void Handler(object? s, NavigationCompletedEventArgs e) => readyTcs.TrySetResult(true);
-
-        WebViewControl!.NavigationCompleted += Handler;
+        WebViewControl!.NavigationCompleted += BlankHandler;
         try
         {
-            // Source property defers navigation until the control is attached.
-            await Dispatcher.UIThread.InvokeAsync(() => WebViewControl.Source = TestHome);
-            await WaitAsync(readyTcs.Task, TimeSpan.FromSeconds(30)).ConfigureAwait(false);
-            LogLine("WebView ready.");
+            await Dispatcher.UIThread.InvokeAsync(() => WebViewControl.Source = new Uri("about:blank"));
+            await WaitAsync(blankTcs.Task, TimeSpan.FromSeconds(10)).ConfigureAwait(false);
         }
         finally
         {
-            WebViewControl!.NavigationCompleted -= Handler;
+            WebViewControl!.NavigationCompleted -= BlankHandler;
         }
+
+        LogLine("WebView attached (about:blank). Navigating to test home...");
+
+        // Step 2: navigate to the real test home page with a generous timeout.
+        await NavigateAndWaitAsync(TestHome, TimeSpan.FromSeconds(60)).ConfigureAwait(false);
+        LogLine("WebView ready.");
     }
 
     /// <summary>
     /// Navigates to the given URI and waits for NavigationCompleted.
     /// </summary>
-    private async Task NavigateAndWaitAsync(Uri uri)
+    private async Task NavigateAndWaitAsync(Uri uri, TimeSpan? timeout = null)
     {
         var tcs = new TaskCompletionSource<NavigationCompletedEventArgs>(TaskCreationOptions.RunContinuationsAsynchronously);
         void Handler(object? s, NavigationCompletedEventArgs e) => tcs.TrySetResult(e);
@@ -1289,7 +1294,7 @@ public partial class ConsumerWebViewE2EViewModel : ViewModelBase
         try
         {
             await WebViewControl.NavigateAsync(uri).ConfigureAwait(false);
-            await WaitAsync(tcs.Task, TimeSpan.FromSeconds(30)).ConfigureAwait(false);
+            await WaitAsync(tcs.Task, timeout ?? TimeSpan.FromSeconds(30)).ConfigureAwait(false);
         }
         finally
         {

@@ -194,7 +194,10 @@ public sealed class AvaloniaWebDialog : IWebDialog
     public bool Stop() => _webView.Stop();
 
     public ICookieManager? TryGetCookieManager() => _webView.TryGetCookieManager();
-    public ICommandManager? TryGetCommandManager() => null;
+    public ICommandManager? TryGetCommandManager() => _webView.TryGetCommandManager();
+    public IWebViewRpcService? Rpc => _webView.Rpc;
+    public Task<byte[]> CaptureScreenshotAsync() => _webView.CaptureScreenshotAsync();
+    public Task<byte[]> PrintToPdfAsync(PdfPrintOptions? options = null) => _webView.PrintToPdfAsync(options);
 
     public event EventHandler<NavigationStartingEventArgs>? NavigationStarted
     {

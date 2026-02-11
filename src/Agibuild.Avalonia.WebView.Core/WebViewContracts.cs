@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Text.Json;
 using Avalonia.Platform;
 
 namespace Agibuild.Avalonia.WebView;
@@ -47,6 +48,24 @@ public interface IWebView : IDisposable
 
     ICookieManager? TryGetCookieManager();
     ICommandManager? TryGetCommandManager();
+
+    /// <summary>
+    /// Gets the RPC service for bidirectional JS ↔ C# method calls.
+    /// Returns <c>null</c> until the WebMessage bridge is enabled.
+    /// </summary>
+    IWebViewRpcService? Rpc { get; }
+
+    /// <summary>
+    /// Captures a screenshot of the current viewport as a PNG byte array.
+    /// Throws <see cref="NotSupportedException"/> if the adapter does not support screenshots.
+    /// </summary>
+    Task<byte[]> CaptureScreenshotAsync();
+
+    /// <summary>
+    /// Prints the current page to a PDF byte array.
+    /// Throws <see cref="NotSupportedException"/> if the adapter does not support printing.
+    /// </summary>
+    Task<byte[]> PrintToPdfAsync(PdfPrintOptions? options = null);
 
     event EventHandler<NavigationStartingEventArgs>? NavigationStarted;
     event EventHandler<NavigationCompletedEventArgs>? NavigationCompleted;
@@ -215,10 +234,61 @@ public interface ICookieManager
     Task ClearAllCookiesAsync();
 }
 
-/// <summary>Placeholder — command management is not yet implemented.</summary>
-[Experimental("AGWV002")]
+/// <summary>Options for PDF printing.</summary>
+public sealed class PdfPrintOptions
+{
+    /// <summary>Whether to print in landscape orientation.</summary>
+    public bool Landscape { get; set; }
+    /// <summary>Page width in inches (default: 8.5 = US Letter).</summary>
+    public double PageWidth { get; set; } = 8.5;
+    /// <summary>Page height in inches (default: 11.0 = US Letter).</summary>
+    public double PageHeight { get; set; } = 11.0;
+    /// <summary>Top margin in inches.</summary>
+    public double MarginTop { get; set; } = 0.4;
+    /// <summary>Bottom margin in inches.</summary>
+    public double MarginBottom { get; set; } = 0.4;
+    /// <summary>Left margin in inches.</summary>
+    public double MarginLeft { get; set; } = 0.4;
+    /// <summary>Right margin in inches.</summary>
+    public double MarginRight { get; set; } = 0.4;
+    /// <summary>Scale factor (1.0 = 100%).</summary>
+    public double Scale { get; set; } = 1.0;
+    /// <summary>Whether to print background colors and images.</summary>
+    public bool PrintBackground { get; set; } = true;
+}
+
+/// <summary>Standard editing commands supported by WebView.</summary>
+public enum WebViewCommand
+{
+    /// <summary>Copy selected content to clipboard.</summary>
+    Copy,
+    /// <summary>Cut selected content to clipboard.</summary>
+    Cut,
+    /// <summary>Paste clipboard content.</summary>
+    Paste,
+    /// <summary>Select all content.</summary>
+    SelectAll,
+    /// <summary>Undo the last editing action.</summary>
+    Undo,
+    /// <summary>Redo the last undone editing action.</summary>
+    Redo
+}
+
+/// <summary>Provides programmatic access to standard editing commands on a WebView.</summary>
 public interface ICommandManager
 {
+    /// <summary>Copies the current selection to the clipboard.</summary>
+    void Copy();
+    /// <summary>Cuts the current selection to the clipboard.</summary>
+    void Cut();
+    /// <summary>Pastes clipboard content at the current position.</summary>
+    void Paste();
+    /// <summary>Selects all content in the WebView.</summary>
+    void SelectAll();
+    /// <summary>Undoes the last editing action.</summary>
+    void Undo();
+    /// <summary>Redoes the last undone editing action.</summary>
+    void Redo();
 }
 
 /// <summary>Abstraction for a top-level window that can serve as an owner for dialogs.</summary>
@@ -565,4 +635,37 @@ public class WebViewScriptException : Exception
         : base(message, innerException)
     {
     }
+}
+
+/// <summary>
+/// Bidirectional JSON-RPC 2.0 service for JS ↔ C# method calls over the WebMessage bridge.
+/// </summary>
+public interface IWebViewRpcService
+{
+    /// <summary>Registers an async C# handler callable from JS.</summary>
+    void Handle(string method, Func<JsonElement?, Task<object?>> handler);
+
+    /// <summary>Registers a synchronous C# handler callable from JS.</summary>
+    void Handle(string method, Func<JsonElement?, object?> handler);
+
+    /// <summary>Removes a previously registered handler.</summary>
+    void RemoveHandler(string method);
+
+    /// <summary>Calls a JS-side handler and returns the raw result.</summary>
+    Task<JsonElement> InvokeAsync(string method, object? args = null);
+
+    /// <summary>Calls a JS-side handler and deserializes the result.</summary>
+    Task<T?> InvokeAsync<T>(string method, object? args = null);
+}
+
+/// <summary>Exception thrown when an RPC call fails.</summary>
+public class WebViewRpcException : Exception
+{
+    public WebViewRpcException(int code, string message) : base(message)
+    {
+        Code = code;
+    }
+
+    /// <summary>JSON-RPC error code.</summary>
+    public int Code { get; }
 }

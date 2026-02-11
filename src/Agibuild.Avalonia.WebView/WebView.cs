@@ -126,6 +126,42 @@ public class WebView : NativeControlHost
     }
 
     /// <summary>
+    /// Returns a command manager if the underlying adapter supports it; otherwise <c>null</c>.
+    /// </summary>
+    public ICommandManager? TryGetCommandManager()
+    {
+        return _core?.TryGetCommandManager();
+    }
+
+    /// <summary>
+    /// Gets the RPC service for bidirectional JS ↔ C# method calls.
+    /// Returns <c>null</c> until the WebMessage bridge is enabled.
+    /// </summary>
+    public IWebViewRpcService? Rpc => _core?.Rpc;
+
+    /// <summary>
+    /// Captures a screenshot of the current viewport as a PNG byte array.
+    /// Throws <see cref="NotSupportedException"/> if the adapter does not support screenshots.
+    /// </summary>
+    public Task<byte[]> CaptureScreenshotAsync()
+    {
+        if (_core is null)
+            throw new InvalidOperationException("WebView is not initialized.");
+        return _core.CaptureScreenshotAsync();
+    }
+
+    /// <summary>
+    /// Prints the current page to a PDF byte array.
+    /// Throws <see cref="NotSupportedException"/> if the adapter does not support printing.
+    /// </summary>
+    public Task<byte[]> PrintToPdfAsync(PdfPrintOptions? options = null)
+    {
+        if (_core is null)
+            throw new InvalidOperationException("WebView is not initialized.");
+        return _core.PrintToPdfAsync(options);
+    }
+
+    /// <summary>
     /// Returns the underlying platform WebView handle, or <c>null</c> if not available.
     /// </summary>
     public IPlatformHandle? TryGetWebViewHandle()

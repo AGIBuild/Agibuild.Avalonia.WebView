@@ -10,7 +10,7 @@ namespace Agibuild.Avalonia.WebView.Adapters.MacOS;
 
 [SupportedOSPlatform("macos")]
 internal sealed class MacOSWebViewAdapter : IWebViewAdapter, INativeWebViewHandleProvider, ICookieAdapter, IWebViewAdapterOptions,
-    ICustomSchemeAdapter, IDownloadAdapter, IPermissionAdapter
+    ICustomSchemeAdapter, IDownloadAdapter, IPermissionAdapter, ICommandAdapter, IScreenshotAdapter, IPrintAdapter
 {
     private static bool DiagnosticsEnabled
         => string.Equals(Environment.GetEnvironmentVariable("AGIBUILD_WEBVIEW_DIAG"), "1", StringComparison.Ordinal);
@@ -1131,6 +1131,95 @@ internal sealed class MacOSWebViewAdapter : IWebViewAdapter, INativeWebViewHandl
 
         [DllImport(LibraryName, EntryPoint = "ag_wk_set_user_agent", CallingConvention = CallingConvention.Cdecl)]
         internal static extern void SetUserAgent(IntPtr handle, [MarshalAs(UnmanagedType.LPUTF8Str)] string? userAgent);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        internal delegate void ScreenshotCb(IntPtr context, IntPtr pngData, uint pngLen);
+
+        [DllImport(LibraryName, EntryPoint = "ag_wk_capture_screenshot", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void CaptureScreenshot(IntPtr handle, ScreenshotCb callback, IntPtr context);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        internal delegate void PdfCb(IntPtr context, IntPtr pdfData, uint pdfLen);
+
+        [DllImport(LibraryName, EntryPoint = "ag_wk_print_to_pdf", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void PrintToPdf(IntPtr handle, PdfCb callback, IntPtr context);
+    }
+
+    // ==================== ICommandAdapter ====================
+
+    public void ExecuteCommand(WebViewCommand command)
+    {
+        if (_native == IntPtr.Zero) return;
+        var jsCommand = command switch
+        {
+            WebViewCommand.Copy => "document.execCommand('copy')",
+            WebViewCommand.Cut => "document.execCommand('cut')",
+            WebViewCommand.Paste => "document.execCommand('paste')",
+            WebViewCommand.SelectAll => "document.execCommand('selectAll')",
+            WebViewCommand.Undo => "document.execCommand('undo')",
+            WebViewCommand.Redo => "document.execCommand('redo')",
+            _ => null
+        };
+        if (jsCommand is not null)
+            NativeMethods.EvalJs(_native, 0, jsCommand);
+    }
+
+    // ==================== IScreenshotAdapter ====================
+
+    public Task<byte[]> CaptureScreenshotAsync()
+    {
+        ThrowIfNotAttached();
+        var tcs = new TaskCompletionSource<byte[]>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var handle = GCHandle.Alloc(tcs);
+
+        NativeMethods.CaptureScreenshot(_native, OnScreenshotComplete, GCHandle.ToIntPtr(handle));
+        return tcs.Task;
+    }
+
+    private static void OnScreenshotComplete(IntPtr context, IntPtr pngData, uint pngLen)
+    {
+        var handle = GCHandle.FromIntPtr(context);
+        var tcs = (TaskCompletionSource<byte[]>)handle.Target!;
+        handle.Free();
+
+        if (pngData == IntPtr.Zero || pngLen == 0)
+        {
+            tcs.TrySetException(new InvalidOperationException("Screenshot capture failed."));
+            return;
+        }
+
+        var buffer = new byte[pngLen];
+        Marshal.Copy(pngData, buffer, 0, (int)pngLen);
+        tcs.TrySetResult(buffer);
+    }
+
+    // ==================== IPrintAdapter ====================
+
+    public Task<byte[]> PrintToPdfAsync(PdfPrintOptions? options)
+    {
+        ThrowIfNotAttached();
+        var tcs = new TaskCompletionSource<byte[]>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var handle = GCHandle.Alloc(tcs);
+
+        NativeMethods.PrintToPdf(_native, OnPdfComplete, GCHandle.ToIntPtr(handle));
+        return tcs.Task;
+    }
+
+    private static void OnPdfComplete(IntPtr context, IntPtr pdfData, uint pdfLen)
+    {
+        var handle = GCHandle.FromIntPtr(context);
+        var tcs = (TaskCompletionSource<byte[]>)handle.Target!;
+        handle.Free();
+
+        if (pdfData == IntPtr.Zero || pdfLen == 0)
+        {
+            tcs.TrySetException(new InvalidOperationException("PDF printing failed."));
+            return;
+        }
+
+        var buffer = new byte[pdfLen];
+        Marshal.Copy(pdfData, buffer, 0, (int)pdfLen);
+        tcs.TrySetResult(buffer);
     }
 }
 

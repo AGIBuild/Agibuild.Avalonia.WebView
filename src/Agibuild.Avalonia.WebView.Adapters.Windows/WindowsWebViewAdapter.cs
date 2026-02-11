@@ -9,7 +9,7 @@ namespace Agibuild.Avalonia.WebView.Adapters.Windows;
 
 [SupportedOSPlatform("windows")]
 internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHandleProvider, ICookieAdapter, IWebViewAdapterOptions,
-    ICustomSchemeAdapter, IDownloadAdapter, IPermissionAdapter
+    ICustomSchemeAdapter, IDownloadAdapter, IPermissionAdapter, ICommandAdapter, IScreenshotAdapter, IPrintAdapter
 {
     private static bool DiagnosticsEnabled
         => string.Equals(Environment.GetEnvironmentVariable("AGIBUILD_WEBVIEW_DIAG"), "1", StringComparison.Ordinal);
@@ -1079,6 +1079,74 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
     }
 
     // ==================== Win32 interop ====================
+
+    // ==================== Command execution ====================
+
+    public void ExecuteCommand(WebViewCommand command)
+    {
+        if (_webView is null) return;
+        var jsCommand = command switch
+        {
+            WebViewCommand.Copy => "document.execCommand('copy')",
+            WebViewCommand.Cut => "document.execCommand('cut')",
+            WebViewCommand.Paste => "document.execCommand('paste')",
+            WebViewCommand.SelectAll => "document.execCommand('selectAll')",
+            WebViewCommand.Undo => "document.execCommand('undo')",
+            WebViewCommand.Redo => "document.execCommand('redo')",
+            _ => null
+        };
+        if (jsCommand is not null)
+            _ = _webView.ExecuteScriptAsync(jsCommand);
+    }
+
+    // ==================== Screenshot capture ====================
+
+    public async Task<byte[]> CaptureScreenshotAsync()
+    {
+        ThrowIfNotAttached();
+        if (_webView is null)
+            throw new InvalidOperationException("WebView is not initialized.");
+
+        using var stream = new MemoryStream();
+        await _webView.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Png, stream);
+        return stream.ToArray();
+    }
+
+    // ==================== PDF printing ====================
+
+    public async Task<byte[]> PrintToPdfAsync(PdfPrintOptions? options)
+    {
+        ThrowIfNotAttached();
+        if (_webView is null)
+            throw new InvalidOperationException("WebView is not initialized.");
+
+        var settings = _webView.Environment.CreatePrintSettings();
+        if (options is not null)
+        {
+            settings.Orientation = options.Landscape
+                ? CoreWebView2PrintOrientation.Landscape
+                : CoreWebView2PrintOrientation.Portrait;
+            settings.PageWidth = options.PageWidth;
+            settings.PageHeight = options.PageHeight;
+            settings.MarginTop = options.MarginTop;
+            settings.MarginBottom = options.MarginBottom;
+            settings.MarginLeft = options.MarginLeft;
+            settings.MarginRight = options.MarginRight;
+            settings.ScaleFactor = options.Scale;
+            settings.ShouldPrintBackgrounds = options.PrintBackground;
+        }
+
+        var tempPath = Path.Combine(Path.GetTempPath(), $"webview_print_{Guid.NewGuid():N}.pdf");
+        try
+        {
+            await _webView.PrintToPdfAsync(tempPath, settings);
+            return await File.ReadAllBytesAsync(tempPath);
+        }
+        finally
+        {
+            try { File.Delete(tempPath); } catch { /* best effort */ }
+        }
+    }
 
     [StructLayout(LayoutKind.Sequential)]
     private struct RECT

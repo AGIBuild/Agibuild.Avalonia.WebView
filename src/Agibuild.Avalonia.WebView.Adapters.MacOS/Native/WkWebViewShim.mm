@@ -1147,5 +1147,66 @@ void ag_wk_set_user_agent(ag_wk_handle handle, const char* ua_utf8_or_null)
     });
 }
 
+// ======================== Screenshot capture ========================
+
+typedef void (*ag_wk_screenshot_cb)(void* context, const void* png_data, uint32_t png_len);
+
+void ag_wk_capture_screenshot(ag_wk_handle handle, ag_wk_screenshot_cb callback, void* context)
+{
+    auto* s = (shim_state*)handle;
+    run_on_main(^{
+        if (s->web_view == nil || s->detached.load())
+        {
+            callback(context, nullptr, 0);
+            return;
+        }
+
+        WKSnapshotConfiguration* config = [[WKSnapshotConfiguration alloc] init];
+        [s->web_view takeSnapshotWithConfiguration:config completionHandler:^(NSImage* _Nullable image, NSError* _Nullable error) {
+            if (error != nil || image == nil)
+            {
+                callback(context, nullptr, 0);
+                return;
+            }
+
+            NSBitmapImageRep* rep = [[NSBitmapImageRep alloc] initWithData:[image TIFFRepresentation]];
+            NSData* pngData = [rep representationUsingType:NSBitmapImageFileTypePNG properties:@{}];
+            callback(context, pngData.bytes, (uint32_t)pngData.length);
+        }];
+    });
+}
+
+// ======================== Print to PDF ========================
+
+typedef void (*ag_wk_pdf_cb)(void* context, const void* pdf_data, uint32_t pdf_len);
+
+void ag_wk_print_to_pdf(ag_wk_handle handle, ag_wk_pdf_cb callback, void* context)
+{
+    auto* s = (shim_state*)handle;
+    run_on_main(^{
+        if (s->web_view == nil || s->detached.load())
+        {
+            callback(context, nullptr, 0);
+            return;
+        }
+
+        if (@available(macOS 11.3, *))
+        {
+            [s->web_view createPDFWithConfiguration:nil completionHandler:^(NSData* _Nullable pdfData, NSError* _Nullable error) {
+                if (error != nil || pdfData == nil)
+                {
+                    callback(context, nullptr, 0);
+                    return;
+                }
+                callback(context, pdfData.bytes, (uint32_t)pdfData.length);
+            }];
+        }
+        else
+        {
+            callback(context, nullptr, 0);
+        }
+    });
+}
+
 } // extern "C"
 

@@ -80,6 +80,9 @@ public sealed class WebDialog : IWebDialog
 
     public ICookieManager? TryGetCookieManager() => _core.TryGetCookieManager();
     public ICommandManager? TryGetCommandManager() => _core.TryGetCommandManager();
+    public IWebViewRpcService? Rpc => _core.Rpc;
+    public Task<byte[]> CaptureScreenshotAsync() => _core.CaptureScreenshotAsync();
+    public Task<byte[]> PrintToPdfAsync(PdfPrintOptions? options = null) => _core.PrintToPdfAsync(options);
 
     public event EventHandler<NavigationStartingEventArgs>? NavigationStarted
     {

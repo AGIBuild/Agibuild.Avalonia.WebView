@@ -29,6 +29,12 @@ internal class MockWebViewAdapter : IWebViewAdapter
     public string? ScriptResult { get; set; }
     public Exception? ScriptException { get; set; }
 
+    /// <summary>Optional callback invoked on every InvokeScriptAsync call. Return value overrides ScriptResult.</summary>
+    public Func<string, string?>? ScriptCallback { get; set; }
+
+    /// <summary>The last script passed to InvokeScriptAsync.</summary>
+    public string? LastScript { get; private set; }
+
     public bool CanGoBack { get; set; }
     public bool CanGoForward { get; set; }
 
@@ -128,10 +134,16 @@ internal class MockWebViewAdapter : IWebViewAdapter
     public Task<string?> InvokeScriptAsync(string script)
     {
         LastInvokeScriptThreadId = Environment.CurrentManagedThreadId;
+        LastScript = script;
 
         if (ScriptException is not null)
         {
             return Task.FromException<string?>(ScriptException);
+        }
+
+        if (ScriptCallback is not null)
+        {
+            return Task.FromResult(ScriptCallback(script));
         }
 
         return Task.FromResult(ScriptResult);
@@ -244,6 +256,13 @@ internal class MockWebViewAdapter : IWebViewAdapter
         NavigationCompleted?.Invoke(this, args);
     }
 
+    /// <summary>Raises NavigationCompleted with exact args (no auto-fill).</summary>
+    public void RaiseNavigationCompletedRaw(NavigationCompletedEventArgs args)
+    {
+        if (_detached) return;
+        NavigationCompleted?.Invoke(this, args);
+    }
+
     public void RaiseNavigationCompleted(NavigationCompletedStatus status, Exception? error = null)
     {
         var navigationId = LastNavigationId ?? Guid.Empty;
@@ -298,6 +317,15 @@ internal class MockWebViewAdapter : IWebViewAdapter
 
     /// <summary>Creates a mock that supports all three new facets.</summary>
     public static MockWebViewAdapterFull CreateFull() => new();
+
+    /// <summary>Creates a mock that supports editing commands.</summary>
+    public static MockWebViewAdapterWithCommands CreateWithCommands() => new();
+
+    /// <summary>Creates a mock that supports screenshot capture.</summary>
+    public static MockWebViewAdapterWithScreenshot CreateWithScreenshot() => new();
+
+    /// <summary>Creates a mock that supports PDF printing.</summary>
+    public static MockWebViewAdapterWithPrint CreateWithPrint() => new();
 }
 
 /// <summary>Mock adapter that also implements <see cref="IWebViewAdapterOptions"/> for environment options testing.</summary>
@@ -411,6 +439,43 @@ internal sealed class MockWebViewAdapterFull : MockWebViewAdapter, ICustomScheme
 
     public void RaisePermissionRequested(PermissionRequestedEventArgs args)
         => PermissionRequested?.Invoke(this, args);
+}
+
+/// <summary>Mock adapter that also implements <see cref="ICommandAdapter"/> for command manager testing.</summary>
+internal sealed class MockWebViewAdapterWithCommands : MockWebViewAdapter, ICommandAdapter
+{
+    public List<WebViewCommand> ExecutedCommands { get; } = new();
+
+    public void ExecuteCommand(WebViewCommand command)
+    {
+        ExecutedCommands.Add(command);
+    }
+}
+
+/// <summary>Mock adapter that also implements <see cref="IScreenshotAdapter"/> for screenshot testing.</summary>
+internal sealed class MockWebViewAdapterWithScreenshot : MockWebViewAdapter, IScreenshotAdapter
+{
+    public byte[] ScreenshotResult { get; set; } = new byte[] { 0x89, 0x50, 0x4E, 0x47 }; // PNG magic
+
+    public Task<byte[]> CaptureScreenshotAsync()
+    {
+        return Task.FromResult(ScreenshotResult);
+    }
+}
+
+/// <summary>Mock adapter that also implements <see cref="IPrintAdapter"/> for PDF printing testing.</summary>
+internal sealed class MockWebViewAdapterWithPrint : MockWebViewAdapter, IPrintAdapter
+{
+    public byte[] PdfResult { get; set; } = new byte[] { 0x25, 0x50, 0x44, 0x46 }; // %PDF magic
+
+    /// <summary>The last options passed to <see cref="PrintToPdfAsync"/>.</summary>
+    public PdfPrintOptions? LastPrintOptions { get; private set; }
+
+    public Task<byte[]> PrintToPdfAsync(PdfPrintOptions? options)
+    {
+        LastPrintOptions = options;
+        return Task.FromResult(PdfResult);
+    }
 }
 
 /// <summary>Mock adapter that also implements <see cref="ICookieAdapter"/> for cookie management testing.</summary>

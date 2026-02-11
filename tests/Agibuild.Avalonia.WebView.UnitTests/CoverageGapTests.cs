@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Agibuild.Avalonia.WebView;
 using Agibuild.Avalonia.WebView.Adapters.Abstractions;
 using Agibuild.Avalonia.WebView.Testing;
@@ -487,6 +488,315 @@ public sealed class CoverageGapTests
         dialog.Dispose();
 
         Assert.False(raised);
+    }
+
+    // ========================= Branch coverage — WebViewCore ctor null checks =========================
+
+    [Fact]
+    public void WebViewCore_ctor_null_adapter_throws()
+    {
+        Assert.Throws<ArgumentNullException>(() => new WebViewCore(null!, _dispatcher));
+    }
+
+    [Fact]
+    public void WebViewCore_ctor_null_dispatcher_throws()
+    {
+        var adapter = MockWebViewAdapter.Create();
+        Assert.Throws<ArgumentNullException>(() => new WebViewCore(adapter, null!));
+    }
+
+    [Fact]
+    public void WebViewCore_ctor_null_logger_uses_NullLogger()
+    {
+        var adapter = MockWebViewAdapter.Create();
+        // Pass null logger via internal ctor — should not throw
+        using var core = new WebViewCore(adapter, _dispatcher,
+            null!);
+        Assert.NotNull(core);
+    }
+
+    // ========================= Branch coverage — on-thread event dispatch (Download/Permission) =========================
+
+    [Fact]
+    public void Branch_DownloadRequested_on_thread_raises_directly()
+    {
+        var adapter = MockWebViewAdapter.CreateWithDownload();
+        using var core = new WebViewCore(adapter, _dispatcher);
+
+        DownloadRequestedEventArgs? received = null;
+        core.DownloadRequested += (_, e) => received = e;
+
+        var args = new DownloadRequestedEventArgs(new Uri("https://example.com/file.zip"), "file.zip");
+        adapter.RaiseDownloadRequested(args);
+
+        Assert.NotNull(received);
+    }
+
+    [Fact]
+    public void Branch_PermissionRequested_on_thread_raises_directly()
+    {
+        var adapter = MockWebViewAdapter.CreateWithPermission();
+        using var core = new WebViewCore(adapter, _dispatcher);
+
+        PermissionRequestedEventArgs? received = null;
+        core.PermissionRequested += (_, e) => received = e;
+
+        var args = new PermissionRequestedEventArgs(WebViewPermissionKind.Camera, new Uri("https://example.com"));
+        adapter.RaisePermissionRequested(args);
+
+        Assert.NotNull(received);
+    }
+
+    // Note: WebViewCore line 712 (Failure + null error) is unreachable —
+    // NavigationCompletedEventArgs ctor throws if status=Failure and error=null.
+
+    // ========================= Branch coverage — WebMessage on-UI dispatch with RPC not matching =========================
+
+    [Fact]
+    public void WebMessage_on_thread_non_rpc_forwards_to_consumer()
+    {
+        var adapter = MockWebViewAdapter.Create();
+        using var core = new WebViewCore(adapter, _dispatcher);
+        core.EnableWebMessageBridge(new WebMessageBridgeOptions { AllowedOrigins = new HashSet<string> { "*" } });
+
+        WebMessageReceivedEventArgs? received = null;
+        core.WebMessageReceived += (_, e) => received = e;
+
+        // Send a non-RPC message (no "jsonrpc" field)
+        adapter.RaiseWebMessage("""{"type":"custom","data":"hello"}""", "*", core.ChannelId);
+
+        Assert.NotNull(received);
+        Assert.Contains("custom", received!.Body);
+    }
+
+    [Fact]
+    public void WebMessage_policy_denied_fires_diagnostics()
+    {
+        var adapter = MockWebViewAdapter.Create();
+        using var core = new WebViewCore(adapter, _dispatcher);
+
+        var drops = new List<WebMessageDropDiagnostic>();
+        core.EnableWebMessageBridge(new WebMessageBridgeOptions
+        {
+            AllowedOrigins = new HashSet<string> { "https://allowed.com" },
+            DropDiagnosticsSink = new TestDropSink(drops)
+        });
+
+        // Send from a non-allowed origin
+        adapter.RaiseWebMessage("hello", "https://evil.com", core.ChannelId);
+
+        Assert.Single(drops);
+    }
+
+    // ========================= Branch coverage — EnableWebMessageBridge AllowedOrigins null count =========================
+
+    [Fact]
+    public void EnableWebMessageBridge_twice_reuses_rpc_service()
+    {
+        var adapter = MockWebViewAdapter.Create();
+        using var core = new WebViewCore(adapter, _dispatcher);
+        core.EnableWebMessageBridge(new WebMessageBridgeOptions { AllowedOrigins = new HashSet<string> { "*" } });
+        var rpc1 = core.Rpc;
+        core.EnableWebMessageBridge(new WebMessageBridgeOptions { AllowedOrigins = new HashSet<string> { "*" } });
+        var rpc2 = core.Rpc;
+        Assert.Same(rpc1, rpc2);
+    }
+
+    // CompleteActiveNavigation null-operation branch already covered by
+    // NavigationCompleted_with_no_active_navigation_is_ignored
+
+    private sealed class TestDropSink : IWebMessageDropDiagnosticsSink
+    {
+        private readonly List<WebMessageDropDiagnostic> _drops;
+        public TestDropSink(List<WebMessageDropDiagnostic> drops) => _drops = drops;
+        public void OnMessageDropped(in WebMessageDropDiagnostic diagnostic) => _drops.Add(diagnostic);
+    }
+
+    // ========================= Branch coverage — Download/Permission off-thread =========================
+
+    [Fact]
+    public void Branch_DownloadRequested_off_thread_dispatches_to_ui()
+    {
+        var adapter = MockWebViewAdapter.CreateWithDownload();
+        using var core = new WebViewCore(adapter, _dispatcher);
+
+        DownloadRequestedEventArgs? received = null;
+        core.DownloadRequested += (_, e) => received = e;
+
+        RunOnBackgroundThread(() =>
+        {
+            adapter.RaiseDownloadRequested(new DownloadRequestedEventArgs(
+                new Uri("https://dl.test/file.zip"), "file.zip"));
+        });
+
+        _dispatcher.RunAll();
+        Assert.NotNull(received);
+    }
+
+    [Fact]
+    public void Branch_PermissionRequested_off_thread_dispatches_to_ui()
+    {
+        var adapter = MockWebViewAdapter.CreateWithPermission();
+        using var core = new WebViewCore(adapter, _dispatcher);
+
+        PermissionRequestedEventArgs? received = null;
+        core.PermissionRequested += (_, e) => received = e;
+
+        RunOnBackgroundThread(() =>
+        {
+            adapter.RaisePermissionRequested(new PermissionRequestedEventArgs(
+                WebViewPermissionKind.Camera, new Uri("https://perm.test")));
+        });
+
+        _dispatcher.RunAll();
+        Assert.NotNull(received);
+    }
+
+    [Fact]
+    public void Branch_DownloadRequested_after_dispose_is_ignored()
+    {
+        var adapter = MockWebViewAdapter.CreateWithDownload();
+        using var core = new WebViewCore(adapter, _dispatcher);
+
+        DownloadRequestedEventArgs? received = null;
+        core.DownloadRequested += (_, e) => received = e;
+        core.Dispose();
+
+        adapter.RaiseDownloadRequested(new DownloadRequestedEventArgs(
+            new Uri("https://dl.test/file.zip"), "file.zip"));
+        Assert.Null(received);
+    }
+
+    [Fact]
+    public void Branch_PermissionRequested_after_dispose_is_ignored()
+    {
+        var adapter = MockWebViewAdapter.CreateWithPermission();
+        using var core = new WebViewCore(adapter, _dispatcher);
+
+        PermissionRequestedEventArgs? received = null;
+        core.PermissionRequested += (_, e) => received = e;
+        core.Dispose();
+
+        adapter.RaisePermissionRequested(new PermissionRequestedEventArgs(
+            WebViewPermissionKind.Camera, new Uri("https://perm.test")));
+        Assert.Null(received);
+    }
+
+    // ========================= Branch coverage — WebMessage off-thread dispatch =========================
+
+    [Fact]
+    public void Branch_WebMessage_off_thread_dispatches_to_ui()
+    {
+        var adapter = MockWebViewAdapter.Create();
+        using var core = new WebViewCore(adapter, _dispatcher);
+        core.EnableWebMessageBridge(new WebMessageBridgeOptions { AllowedOrigins = new HashSet<string> { "*" } });
+
+        WebMessageReceivedEventArgs? received = null;
+        core.WebMessageReceived += (_, e) => received = e;
+
+        RunOnBackgroundThread(() =>
+        {
+            adapter.RaiseWebMessage("{\"type\":\"bg\"}", "*", core.ChannelId);
+        });
+
+        _dispatcher.RunAll();
+        Assert.NotNull(received);
+    }
+
+    // ========================= Branch coverage — NativeNavigation redirect cancel =========================
+
+    [Fact]
+    public async Task Branch_NativeNavigation_redirect_cancel_completes_navigation()
+    {
+        var (core, adapter) = CreateCoreWithAdapter();
+
+        NavigationCompletedEventArgs? completedArgs = null;
+        core.NavigationCompleted += (_, e) => completedArgs = e;
+
+        var navTask = core.NavigateAsync(new Uri("https://redirect.test/page"));
+        var navId = adapter.LastNavigationId!.Value;
+
+        // Subscribe and cancel any redirect navigation
+        core.NavigationStarted += (_, e) => e.Cancel = true;
+
+        // Simulate a redirect to a different URL with the same correlation ID
+        var decision = await adapter.SimulateNativeNavigationStartingAsync(
+            new Uri("https://redirect.test/other"),
+            correlationId: navId);
+
+        Assert.False(decision.IsAllowed);
+        Assert.NotNull(completedArgs);
+        Assert.Equal(NavigationCompletedStatus.Canceled, completedArgs!.Status);
+
+        // Canceled navigations still resolve successfully (not faulted)
+        await navTask;
+    }
+
+    // ========================= WebDialog — new APIs =========================
+
+    [Fact]
+    public void WebDialog_TryGetCommandManager_returns_null_for_basic_adapter()
+    {
+        var host = new MockDialogHost();
+        var adapter = MockWebViewAdapter.Create();
+        using var dialog = new WebDialog(host, adapter, _dispatcher);
+        Assert.Null(dialog.TryGetCommandManager());
+    }
+
+    [Fact]
+    public void WebDialog_TryGetCommandManager_returns_value_for_command_adapter()
+    {
+        var host = new MockDialogHost();
+        var adapter = MockWebViewAdapter.CreateWithCommands();
+        using var dialog = new WebDialog(host, adapter, _dispatcher);
+        Assert.NotNull(dialog.TryGetCommandManager());
+    }
+
+    [Fact]
+    public async Task WebDialog_CaptureScreenshotAsync_throws_when_unsupported()
+    {
+        var host = new MockDialogHost();
+        var adapter = MockWebViewAdapter.Create();
+        using var dialog = new WebDialog(host, adapter, _dispatcher);
+        await Assert.ThrowsAsync<NotSupportedException>(() => dialog.CaptureScreenshotAsync());
+    }
+
+    [Fact]
+    public async Task WebDialog_CaptureScreenshotAsync_with_screenshot_adapter()
+    {
+        var host = new MockDialogHost();
+        var adapter = MockWebViewAdapter.CreateWithScreenshot();
+        using var dialog = new WebDialog(host, adapter, _dispatcher);
+        var data = await dialog.CaptureScreenshotAsync();
+        Assert.NotEmpty(data);
+    }
+
+    [Fact]
+    public async Task WebDialog_PrintToPdfAsync_throws_when_unsupported()
+    {
+        var host = new MockDialogHost();
+        var adapter = MockWebViewAdapter.Create();
+        using var dialog = new WebDialog(host, adapter, _dispatcher);
+        await Assert.ThrowsAsync<NotSupportedException>(() => dialog.PrintToPdfAsync());
+    }
+
+    [Fact]
+    public async Task WebDialog_PrintToPdfAsync_with_print_adapter()
+    {
+        var host = new MockDialogHost();
+        var adapter = MockWebViewAdapter.CreateWithPrint();
+        using var dialog = new WebDialog(host, adapter, _dispatcher);
+        var data = await dialog.PrintToPdfAsync();
+        Assert.NotEmpty(data);
+    }
+
+    [Fact]
+    public void WebDialog_Rpc_is_null_without_bridge()
+    {
+        var host = new MockDialogHost();
+        var adapter = MockWebViewAdapter.Create();
+        using var dialog = new WebDialog(host, adapter, _dispatcher);
+        Assert.Null(dialog.Rpc);
     }
 
     // ========================= WebViewCore — NavigationCompleted ID mismatch =========================
@@ -1059,5 +1369,525 @@ public sealed class CoverageGapTests
             OnDialogCreated?.Invoke(dialog, adapter);
             return dialog;
         }
+    }
+
+    // ========================= ICommandManager & ICommandAdapter =========================
+
+    [Fact]
+    public void ICommandManager_has_all_six_methods()
+    {
+        var methods = typeof(ICommandManager).GetMethods();
+        Assert.Contains(methods, m => m.Name == "Copy");
+        Assert.Contains(methods, m => m.Name == "Cut");
+        Assert.Contains(methods, m => m.Name == "Paste");
+        Assert.Contains(methods, m => m.Name == "SelectAll");
+        Assert.Contains(methods, m => m.Name == "Undo");
+        Assert.Contains(methods, m => m.Name == "Redo");
+    }
+
+    [Fact]
+    public void ICommandAdapter_facet_detected_by_core()
+    {
+        var adapter = MockWebViewAdapter.CreateWithCommands();
+        Assert.IsAssignableFrom<ICommandAdapter>(adapter);
+    }
+
+    [Theory]
+    [InlineData(WebViewCommand.Copy)]
+    [InlineData(WebViewCommand.Cut)]
+    [InlineData(WebViewCommand.Paste)]
+    [InlineData(WebViewCommand.SelectAll)]
+    [InlineData(WebViewCommand.Undo)]
+    [InlineData(WebViewCommand.Redo)]
+    public void WebViewCommand_enum_has_expected_value(WebViewCommand command)
+    {
+        Assert.True(Enum.IsDefined(typeof(WebViewCommand), command));
+    }
+
+    [Fact]
+    public void TryGetCommandManager_returns_non_null_with_ICommandAdapter()
+    {
+        var adapter = MockWebViewAdapter.CreateWithCommands();
+        using var core = new WebViewCore(adapter, _dispatcher);
+        var mgr = core.TryGetCommandManager();
+        Assert.NotNull(mgr);
+    }
+
+    [Fact]
+    public void TryGetCommandManager_returns_null_without_ICommandAdapter()
+    {
+        var adapter = MockWebViewAdapter.Create();
+        using var core = new WebViewCore(adapter, _dispatcher);
+        var mgr = core.TryGetCommandManager();
+        Assert.Null(mgr);
+    }
+
+    [Theory]
+    [InlineData(WebViewCommand.Copy)]
+    [InlineData(WebViewCommand.Cut)]
+    [InlineData(WebViewCommand.Paste)]
+    [InlineData(WebViewCommand.SelectAll)]
+    [InlineData(WebViewCommand.Undo)]
+    [InlineData(WebViewCommand.Redo)]
+    public void CommandManager_delegates_to_adapter(WebViewCommand command)
+    {
+        var adapter = MockWebViewAdapter.CreateWithCommands();
+        using var core = new WebViewCore(adapter, _dispatcher);
+        var mgr = core.TryGetCommandManager()!;
+
+        switch (command)
+        {
+            case WebViewCommand.Copy: mgr.Copy(); break;
+            case WebViewCommand.Cut: mgr.Cut(); break;
+            case WebViewCommand.Paste: mgr.Paste(); break;
+            case WebViewCommand.SelectAll: mgr.SelectAll(); break;
+            case WebViewCommand.Undo: mgr.Undo(); break;
+            case WebViewCommand.Redo: mgr.Redo(); break;
+        }
+
+        Assert.Single(adapter.ExecutedCommands);
+        Assert.Equal(command, adapter.ExecutedCommands[0]);
+    }
+
+    // ========================= IScreenshotAdapter =========================
+
+    [Fact]
+    public void IScreenshotAdapter_facet_detected()
+    {
+        var adapter = MockWebViewAdapter.CreateWithScreenshot();
+        Assert.IsAssignableFrom<IScreenshotAdapter>(adapter);
+    }
+
+    [Fact]
+    public async Task CaptureScreenshotAsync_throws_when_unsupported()
+    {
+        var adapter = MockWebViewAdapter.Create();
+        using var core = new WebViewCore(adapter, _dispatcher);
+        await Assert.ThrowsAsync<NotSupportedException>(() => core.CaptureScreenshotAsync());
+    }
+
+    [Fact]
+    public async Task CaptureScreenshotAsync_returns_data_with_IScreenshotAdapter()
+    {
+        var adapter = MockWebViewAdapter.CreateWithScreenshot();
+        using var core = new WebViewCore(adapter, _dispatcher);
+        var result = await core.CaptureScreenshotAsync();
+        Assert.NotNull(result);
+        Assert.True(result.Length > 0);
+        // PNG magic bytes
+        Assert.Equal(0x89, result[0]);
+        Assert.Equal(0x50, result[1]);
+    }
+
+    // ========================= IPrintAdapter & PdfPrintOptions =========================
+
+    [Fact]
+    public void PdfPrintOptions_has_sensible_defaults()
+    {
+        var opts = new PdfPrintOptions();
+        Assert.False(opts.Landscape);
+        Assert.Equal(8.5, opts.PageWidth);
+        Assert.Equal(11.0, opts.PageHeight);
+        Assert.Equal(0.4, opts.MarginTop);
+        Assert.Equal(0.4, opts.MarginBottom);
+        Assert.Equal(0.4, opts.MarginLeft);
+        Assert.Equal(0.4, opts.MarginRight);
+        Assert.Equal(1.0, opts.Scale);
+        Assert.True(opts.PrintBackground);
+    }
+
+    [Fact]
+    public void IPrintAdapter_facet_detected()
+    {
+        var adapter = MockWebViewAdapter.CreateWithPrint();
+        Assert.IsAssignableFrom<IPrintAdapter>(adapter);
+    }
+
+    [Fact]
+    public async Task PrintToPdfAsync_throws_when_unsupported()
+    {
+        var adapter = MockWebViewAdapter.Create();
+        using var core = new WebViewCore(adapter, _dispatcher);
+        await Assert.ThrowsAsync<NotSupportedException>(() => core.PrintToPdfAsync());
+    }
+
+    [Fact]
+    public async Task PrintToPdfAsync_returns_data_with_IPrintAdapter()
+    {
+        var adapter = MockWebViewAdapter.CreateWithPrint();
+        using var core = new WebViewCore(adapter, _dispatcher);
+        var result = await core.PrintToPdfAsync();
+        Assert.NotNull(result);
+        Assert.True(result.Length > 0);
+        // %PDF magic bytes
+        Assert.Equal(0x25, result[0]);
+        Assert.Equal(0x50, result[1]);
+    }
+
+    // ========================= IWebViewRpcService =========================
+
+    [Fact]
+    public void Rpc_is_null_before_bridge_enabled()
+    {
+        var adapter = MockWebViewAdapter.Create();
+        using var core = new WebViewCore(adapter, _dispatcher);
+        Assert.Null(core.Rpc);
+    }
+
+    [Fact]
+    public void Rpc_is_non_null_after_bridge_enabled()
+    {
+        var adapter = MockWebViewAdapter.Create();
+        using var core = new WebViewCore(adapter, _dispatcher);
+        core.EnableWebMessageBridge(new WebMessageBridgeOptions { AllowedOrigins = new HashSet<string> { "*" } });
+        Assert.NotNull(core.Rpc);
+    }
+
+    [Fact]
+    public void Rpc_disable_bridge_clears_rpc()
+    {
+        var adapter = MockWebViewAdapter.Create();
+        using var core = new WebViewCore(adapter, _dispatcher);
+        core.EnableWebMessageBridge(new WebMessageBridgeOptions { AllowedOrigins = new HashSet<string> { "*" } });
+        Assert.NotNull(core.Rpc);
+        core.DisableWebMessageBridge();
+        Assert.Null(core.Rpc);
+    }
+
+    [Fact]
+    public void Rpc_handler_registration_and_removal()
+    {
+        var rpc = CreateTestRpcService(out _);
+        rpc.Handle("test.method", _ => Task.FromResult<object?>(42));
+
+        var request = """{"jsonrpc":"2.0","id":"1","method":"test.method","params":null}""";
+        Assert.True(rpc.TryProcessMessage(request));
+
+        rpc.RemoveHandler("test.method");
+        Assert.True(rpc.TryProcessMessage(request));
+    }
+
+    [Fact]
+    public void Rpc_sync_handler_dispatches_and_sends_response()
+    {
+        var rpc = CreateTestRpcService(out var scripts);
+        rpc.Handle("math.add", args =>
+        {
+            var a = args!.Value.GetProperty("a").GetInt32();
+            var b = args!.Value.GetProperty("b").GetInt32();
+            return a + b;
+        });
+
+        var request = """{"jsonrpc":"2.0","id":"sync-1","method":"math.add","params":{"a":3,"b":4}}""";
+        rpc.TryProcessMessage(request);
+        Thread.Sleep(100);
+        Assert.Contains(scripts, s => s.Contains("_onResponse") && s.Contains("sync-1"));
+    }
+
+    [Fact]
+    public void Rpc_async_handler_dispatches()
+    {
+        var rpc = CreateTestRpcService(out var scripts);
+        rpc.Handle("async.echo", async args =>
+        {
+            await Task.Yield();
+            return args?.GetProperty("msg").GetString();
+        });
+
+        var request = """{"jsonrpc":"2.0","id":"async-1","method":"async.echo","params":{"msg":"hello"}}""";
+        rpc.TryProcessMessage(request);
+        Thread.Sleep(200);
+        Assert.Contains(scripts, s => s.Contains("_onResponse") && s.Contains("async-1"));
+    }
+
+    [Fact]
+    public void Rpc_unknown_method_sends_error()
+    {
+        var rpc = CreateTestRpcService(out var scripts);
+        var request = """{"jsonrpc":"2.0","id":"unk-1","method":"nonexistent","params":null}""";
+        rpc.TryProcessMessage(request);
+        Thread.Sleep(100);
+        Assert.Contains(scripts, s => s.Contains("-32601"));
+    }
+
+    [Fact]
+    public void Rpc_handler_exception_sends_error()
+    {
+        var rpc = CreateTestRpcService(out var scripts);
+        rpc.Handle("bad.handler", _ => throw new InvalidOperationException("Boom"));
+
+        var request = """{"jsonrpc":"2.0","id":"err-1","method":"bad.handler","params":null}""";
+        rpc.TryProcessMessage(request);
+        Thread.Sleep(100);
+        Assert.Contains(scripts, s => s.Contains("Boom"));
+    }
+
+    [Fact]
+    public async Task Rpc_InvokeAsync_resolves_on_response()
+    {
+        var rpc = CreateTestRpcService(out var scripts);
+        var task = rpc.InvokeAsync("js.getTheme");
+        Assert.False(task.IsCompleted);
+
+        Thread.Sleep(50);
+        Assert.NotEmpty(scripts);
+        var callId = ExtractRpcId(scripts[0]);
+
+        var response = "{\"jsonrpc\":\"2.0\",\"id\":\"" + callId + "\",\"result\":\"dark\"}";
+        rpc.TryProcessMessage(response);
+
+        var result = await task;
+        Assert.Equal(JsonValueKind.String, result.ValueKind);
+        Assert.Equal("dark", result.GetString());
+    }
+
+    [Fact]
+    public async Task Rpc_InvokeAsync_T_deserializes()
+    {
+        var rpc = CreateTestRpcService(out var scripts);
+        var task = rpc.InvokeAsync<int>("js.getCount");
+
+        Thread.Sleep(50);
+        var callId = ExtractRpcId(scripts[0]);
+
+        rpc.TryProcessMessage("{\"jsonrpc\":\"2.0\",\"id\":\"" + callId + "\",\"result\":42}");
+        Assert.Equal(42, await task);
+    }
+
+    [Fact]
+    public async Task Rpc_InvokeAsync_error_throws()
+    {
+        var rpc = CreateTestRpcService(out var scripts);
+        var task = rpc.InvokeAsync("js.fail");
+
+        Thread.Sleep(50);
+        var callId = ExtractRpcId(scripts[0]);
+
+        rpc.TryProcessMessage("{\"jsonrpc\":\"2.0\",\"id\":\"" + callId + "\",\"error\":{\"code\":-32603,\"message\":\"JS error\"}}");
+
+        var ex = await Assert.ThrowsAsync<WebViewRpcException>(() => task);
+        Assert.Equal(-32603, ex.Code);
+    }
+
+    [Fact]
+    public async Task Rpc_response_no_result_no_error_sets_default()
+    {
+        var rpc = CreateTestRpcService(out var scripts);
+        var task = rpc.InvokeAsync("js.void");
+
+        Thread.Sleep(50);
+        var callId = ExtractRpcId(scripts[0]);
+
+        var json = "{\"jsonrpc\":\"2.0\",\"id\":\"" + callId + "\"}";
+        Assert.True(rpc.TryProcessMessage(json));
+        await task; // should complete with default
+    }
+
+    [Fact]
+    public async Task Rpc_error_no_code_defaults_to_32603()
+    {
+        var rpc = CreateTestRpcService(out var scripts);
+        var task = rpc.InvokeAsync("js.x");
+
+        Thread.Sleep(50);
+        var callId = ExtractRpcId(scripts[0]);
+
+        var json = "{\"jsonrpc\":\"2.0\",\"id\":\"" + callId + "\",\"error\":{\"message\":\"oops\"}}";
+        rpc.TryProcessMessage(json);
+        var ex = await Assert.ThrowsAsync<WebViewRpcException>(() => task);
+        Assert.Equal(-32603, ex.Code);
+    }
+
+    [Fact]
+    public void Rpc_non_jsonrpc_message_ignored()
+    {
+        var rpc = CreateTestRpcService(out _);
+        Assert.False(rpc.TryProcessMessage("not json"));
+        Assert.False(rpc.TryProcessMessage("""{"hello":"world"}"""));
+        Assert.False(rpc.TryProcessMessage(""));
+    }
+
+    [Fact]
+    public void Rpc_orphan_response_not_handled()
+    {
+        var rpc = CreateTestRpcService(out _);
+        Assert.False(rpc.TryProcessMessage("""{"jsonrpc":"2.0","id":"orphan","result":"x"}"""));
+    }
+
+    [Fact]
+    public void Rpc_request_without_params()
+    {
+        var rpc = CreateTestRpcService(out var scripts);
+        rpc.Handle("noparams", args =>
+        {
+            Assert.Null(args);
+            return "ok";
+        });
+
+        rpc.TryProcessMessage("""{"jsonrpc":"2.0","id":"np-1","method":"noparams"}""");
+        Thread.Sleep(100);
+        Assert.Contains(scripts, s => s.Contains("np-1"));
+    }
+
+    [Fact]
+    public void WebViewRpcException_has_code()
+    {
+        var ex = new WebViewRpcException(-32601, "Method not found");
+        Assert.Equal(-32601, ex.Code);
+        Assert.Equal("Method not found", ex.Message);
+    }
+
+    [Fact]
+    public void Rpc_JsStub_contains_key_identifiers()
+    {
+        Assert.Contains("__agRpc", WebViewRpcService.JsStub);
+        Assert.Contains("invoke", WebViewRpcService.JsStub);
+        Assert.Contains("_dispatch", WebViewRpcService.JsStub);
+        Assert.Contains("_onResponse", WebViewRpcService.JsStub);
+    }
+
+    [Fact]
+    public void Rpc_message_routed_through_WebViewCore()
+    {
+        var adapter = MockWebViewAdapter.Create();
+        using var core = new WebViewCore(adapter, _dispatcher);
+        core.EnableWebMessageBridge(new WebMessageBridgeOptions { AllowedOrigins = new HashSet<string> { "*" } });
+
+        core.Rpc!.Handle("core.ping", _ => "pong");
+
+        adapter.RaiseWebMessage(
+            """{"jsonrpc":"2.0","id":"r1","method":"core.ping","params":null}""",
+            "*", core.ChannelId);
+        _dispatcher.RunAll();
+    }
+
+    // ========================= Branch coverage — RPC uncovered branches =========================
+
+    [Fact]
+    public async Task Branch_Rpc_InvokeAsync_with_args_serializes_params()
+    {
+        var rpc = CreateTestRpcService(out var scripts);
+        var task = rpc.InvokeAsync("js.greet", new { name = "Alice" });
+
+        Thread.Sleep(50);
+        Assert.NotEmpty(scripts);
+        var callId = ExtractRpcId(scripts[0]);
+        // The script should contain the params
+        Assert.Contains("Alice", scripts[0]);
+
+        rpc.TryProcessMessage("{\"jsonrpc\":\"2.0\",\"id\":\"" + callId + "\",\"result\":\"Hello Alice\"}");
+        var result = await task;
+        Assert.Equal("Hello Alice", result.GetString());
+    }
+
+    [Fact]
+    public void Branch_Rpc_TryProcessMessage_null_id_is_ignored()
+    {
+        var rpc = CreateTestRpcService(out _);
+        // null id — the id property is JSON null
+        var result = rpc.TryProcessMessage("{\"jsonrpc\":\"2.0\",\"id\":null,\"method\":\"test\"}");
+        // id is null string → _pendingCalls won't match, then method check still runs
+        // but method is not null so it dispatches (and finds no handler → sends error)
+        Assert.True(result);
+    }
+
+    [Fact]
+    public void Branch_Rpc_TryProcessMessage_null_method_is_ignored()
+    {
+        var rpc = CreateTestRpcService(out _);
+        // id is present but method is JSON null
+        var result = rpc.TryProcessMessage("{\"jsonrpc\":\"2.0\",\"id\":\"x\",\"method\":null}");
+        // method is null → falls through, returns false
+        Assert.False(result);
+    }
+
+    [Fact]
+    public async Task Branch_Rpc_InvokeAsync_error_without_code_uses_default()
+    {
+        var rpc = CreateTestRpcService(out var scripts);
+        var task = rpc.InvokeAsync("js.fail");
+
+        Thread.Sleep(50);
+        var callId = ExtractRpcId(scripts[0]);
+
+        // Error without "code" property — default -32603 should be used
+        rpc.TryProcessMessage("{\"jsonrpc\":\"2.0\",\"id\":\"" + callId + "\",\"error\":{\"message\":\"oops\"}}");
+
+        var ex = await Assert.ThrowsAsync<WebViewRpcException>(() => task);
+        Assert.Equal(-32603, ex.Code);
+        Assert.Equal("oops", ex.Message);
+    }
+
+    [Fact]
+    public async Task Branch_Rpc_InvokeAsync_error_without_message_uses_default()
+    {
+        var rpc = CreateTestRpcService(out var scripts);
+        var task = rpc.InvokeAsync("js.fail2");
+
+        Thread.Sleep(50);
+        var callId = ExtractRpcId(scripts[0]);
+
+        // Error with code but no "message" — default "RPC error" should be used
+        rpc.TryProcessMessage("{\"jsonrpc\":\"2.0\",\"id\":\"" + callId + "\",\"error\":{\"code\":-1}}");
+
+        var ex = await Assert.ThrowsAsync<WebViewRpcException>(() => task);
+        Assert.Equal(-1, ex.Code);
+        Assert.Equal("RPC error", ex.Message);
+    }
+
+    [Fact]
+    public void Branch_Rpc_handler_returns_null_sends_null_result()
+    {
+        var rpc = CreateTestRpcService(out var scripts);
+        rpc.Handle("void.method", _ => Task.FromResult<object?>(null));
+
+        rpc.TryProcessMessage("{\"jsonrpc\":\"2.0\",\"id\":\"v1\",\"method\":\"void.method\",\"params\":null}");
+        Thread.Sleep(100);
+        // The response should contain "v1" and null result
+        Assert.Contains(scripts, s => s.Contains("v1"));
+    }
+
+    [Fact]
+    public void Branch_Rpc_TryProcessMessage_malformed_json_returns_false()
+    {
+        var rpc = CreateTestRpcService(out _);
+        Assert.False(rpc.TryProcessMessage("not-json!!!"));
+    }
+
+    [Fact]
+    public async Task Branch_Rpc_InvokeAsync_T_null_result_returns_default()
+    {
+        var rpc = CreateTestRpcService(out var scripts);
+        var task = rpc.InvokeAsync<string>("js.nullResult");
+
+        Thread.Sleep(50);
+        var callId = ExtractRpcId(scripts[0]);
+
+        // Response with null result
+        rpc.TryProcessMessage("{\"jsonrpc\":\"2.0\",\"id\":\"" + callId + "\",\"result\":null}");
+
+        var result = await task;
+        Assert.Null(result);
+    }
+
+    private static string ExtractRpcId(string script)
+    {
+        // script looks like: window.__agRpc && window.__agRpc._dispatch("...escaped json...")
+        var start = script.IndexOf("_dispatch(") + "_dispatch(".Length;
+        var end = script.LastIndexOf(')');
+        var jsonString = script[start..end];
+        // jsonString is a JSON-serialized string; deserialize it to get the inner JSON
+        var innerJson = JsonSerializer.Deserialize<string>(jsonString)!;
+        using var doc = JsonDocument.Parse(innerJson);
+        return doc.RootElement.GetProperty("id").GetString()!;
+    }
+
+    private static WebViewRpcService CreateTestRpcService(out List<string> capturedScripts)
+    {
+        var scripts = new List<string>();
+        capturedScripts = scripts;
+        return new WebViewRpcService(
+            script => { scripts.Add(script); return Task.FromResult<string?>(null); },
+            Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance);
     }
 }

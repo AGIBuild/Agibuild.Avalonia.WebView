@@ -50,6 +50,36 @@ internal interface IPermissionAdapter
     event EventHandler<PermissionRequestedEventArgs>? PermissionRequested;
 }
 
+/// <summary>
+/// Optional interface for adapters that support editing commands (copy, paste, etc.).
+/// Runtime checks for this via <c>adapter as ICommandAdapter</c>.
+/// </summary>
+internal interface ICommandAdapter
+{
+    /// <summary>Executes a standard editing command on the WebView.</summary>
+    void ExecuteCommand(WebViewCommand command);
+}
+
+/// <summary>
+/// Optional interface for adapters that support screenshot capture.
+/// Runtime checks for this via <c>adapter as IScreenshotAdapter</c>.
+/// </summary>
+internal interface IScreenshotAdapter
+{
+    /// <summary>Captures the current viewport as a PNG byte array.</summary>
+    Task<byte[]> CaptureScreenshotAsync();
+}
+
+/// <summary>
+/// Optional interface for adapters that support PDF printing.
+/// Runtime checks for this via <c>adapter as IPrintAdapter</c>.
+/// </summary>
+internal interface IPrintAdapter
+{
+    /// <summary>Prints the current page to a PDF byte array.</summary>
+    Task<byte[]> PrintToPdfAsync(PdfPrintOptions? options);
+}
+
 internal interface IWebViewAdapter
 {
     void Initialize(IWebViewAdapterHost host);

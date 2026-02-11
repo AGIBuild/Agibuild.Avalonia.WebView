@@ -1070,3 +1070,118 @@ void ag_gtk_set_user_agent(ag_gtk_handle handle, const char* ua_utf8_or_null)
         webkit_settings_set_user_agent(settings, ua_utf8_or_null);
     }
 }
+
+/* ========== Screenshot capture ========== */
+
+typedef void (*ag_gtk_screenshot_cb)(void* context, const void* png_data, uint32_t png_len);
+
+typedef struct {
+    ag_gtk_screenshot_cb callback;
+    void* context;
+} screenshot_ctx;
+
+static cairo_status_t png_write_to_byte_array(void* closure, const unsigned char* data, unsigned int length)
+{
+    GByteArray* array = (GByteArray*)closure;
+    g_byte_array_append(array, data, length);
+    return CAIRO_STATUS_SUCCESS;
+}
+
+static void on_snapshot_ready(GObject* source, GAsyncResult* result, gpointer user_data)
+{
+    screenshot_ctx* ctx = (screenshot_ctx*)user_data;
+    GError* error = NULL;
+    cairo_surface_t* surface = webkit_web_view_get_snapshot_finish(
+        WEBKIT_WEB_VIEW(source), result, &error);
+
+    if (error != NULL || surface == NULL)
+    {
+        if (error) g_error_free(error);
+        ctx->callback(ctx->context, NULL, 0);
+        free(ctx);
+        return;
+    }
+
+    GByteArray* array = g_byte_array_new();
+    cairo_status_t status = cairo_surface_write_to_png_stream(surface, png_write_to_byte_array, array);
+    cairo_surface_destroy(surface);
+
+    if (status != CAIRO_STATUS_SUCCESS || array->len == 0)
+    {
+        g_byte_array_free(array, TRUE);
+        ctx->callback(ctx->context, NULL, 0);
+        free(ctx);
+        return;
+    }
+
+    ctx->callback(ctx->context, array->data, (uint32_t)array->len);
+    g_byte_array_free(array, TRUE);
+    free(ctx);
+}
+
+void ag_gtk_capture_screenshot(ag_gtk_handle handle, ag_gtk_screenshot_cb callback, void* context)
+{
+    if (!handle)
+    {
+        callback(context, NULL, 0);
+        return;
+    }
+    shim_state* s = (shim_state*)handle;
+    if (s->web_view == NULL || atomic_load(&s->detached))
+    {
+        callback(context, NULL, 0);
+        return;
+    }
+
+    screenshot_ctx* ctx = (screenshot_ctx*)malloc(sizeof(screenshot_ctx));
+    ctx->callback = callback;
+    ctx->context = context;
+
+    webkit_web_view_get_snapshot(
+        s->web_view,
+        WEBKIT_SNAPSHOT_REGION_VISIBLE,
+        WEBKIT_SNAPSHOT_OPTIONS_NONE,
+        NULL,
+        on_snapshot_ready,
+        ctx);
+}
+
+/* ========== Print to PDF ========== */
+
+typedef void (*ag_gtk_pdf_cb)(void* context, const void* pdf_data, uint32_t pdf_len);
+
+typedef struct {
+    ag_gtk_pdf_cb callback;
+    void* context;
+} pdf_ctx;
+
+static void on_print_finished(WebKitPrintOperation* operation, gpointer user_data)
+{
+    (void)operation;
+    pdf_ctx* ctx = (pdf_ctx*)user_data;
+    /* WebKitPrintOperation doesn't give us the bytes directly.
+       For headless PDF, we use webkit_web_view_save which gives HTML.
+       GTK's webkit doesn't have a direct createPDF API like WebKit2.
+       We'll report unsupported for now and let the runtime throw. */
+    ctx->callback(ctx->context, NULL, 0);
+    free(ctx);
+}
+
+void ag_gtk_print_to_pdf(ag_gtk_handle handle, ag_gtk_pdf_cb callback, void* context)
+{
+    if (!handle)
+    {
+        callback(context, NULL, 0);
+        return;
+    }
+    shim_state* s = (shim_state*)handle;
+    if (s->web_view == NULL || atomic_load(&s->detached))
+    {
+        callback(context, NULL, 0);
+        return;
+    }
+
+    /* GTK WebKitGTK doesn't provide a direct PDF export API.
+       Report as unsupported to let the runtime throw NotSupportedException. */
+    callback(context, NULL, 0);
+}

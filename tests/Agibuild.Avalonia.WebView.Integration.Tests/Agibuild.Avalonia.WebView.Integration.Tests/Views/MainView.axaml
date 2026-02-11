@@ -114,6 +114,12 @@
                 <TextBlock Text="Block, allow, redirect links" Classes="caption" />
               </StackPanel>
             </ListBoxItem>
+            <ListBoxItem>
+              <StackPanel Spacing="2">
+                <TextBlock Text="Feature E2E" FontWeight="SemiBold" FontSize="13" />
+                <TextBlock Text="Commands, Screenshot, PDF, RPC" Classes="caption" />
+              </StackPanel>
+            </ListBoxItem>
           </ListBox>
         </DockPanel>
       </Border>
