@@ -9,7 +9,8 @@ namespace Agibuild.Avalonia.WebView.Adapters.Windows;
 
 [SupportedOSPlatform("windows")]
 internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHandleProvider, ICookieAdapter, IWebViewAdapterOptions,
-    ICustomSchemeAdapter, IDownloadAdapter, IPermissionAdapter, ICommandAdapter, IScreenshotAdapter, IPrintAdapter
+    ICustomSchemeAdapter, IDownloadAdapter, IPermissionAdapter, ICommandAdapter, IScreenshotAdapter, IPrintAdapter,
+    IFindInPageAdapter, IZoomAdapter, IPreloadScriptAdapter, IContextMenuAdapter
 {
     private static bool DiagnosticsEnabled
         => string.Equals(Environment.GetEnvironmentVariable("AGIBUILD_WEBVIEW_DIAG"), "1", StringComparison.Ordinal);
@@ -1166,4 +1167,82 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
 
     [DllImport("user32.dll")]
     private static extern IntPtr CallWindowProc(IntPtr lpPrevWndFunc, IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
+
+    // ==================== IFindInPageAdapter ====================
+
+    public async Task<FindInPageResult> FindAsync(string text, FindInPageOptions? options)
+    {
+        ThrowIfNotAttached();
+        if (_webView is null)
+            throw new InvalidOperationException("WebView is not initialized.");
+
+        var caseSensitive = options?.CaseSensitive ?? false;
+        var forward = options?.Forward ?? true;
+
+        // WebView2 has built-in find API via ICoreWebView2Find (Edge 131+).
+        // Fallback to JavaScript-based approach for broad compatibility.
+        var escapedText = text.Replace("\\", "\\\\").Replace("'", "\\'").Replace("\n", "\\n");
+        var flags = caseSensitive ? "g" : "gi";
+        var countScript = $"(function(){{var re=new RegExp('{escapedText}'.replace(/[.*+?^${{}}()|[\\]\\\\]/g,'\\\\$&'),'{flags}'),"
+            + $"m=document.body.innerText.match(re);return m?m.length:0;}})()";
+
+        var countResult = await _webView.ExecuteScriptAsync(countScript);
+        var totalMatches = int.TryParse(countResult, out var c) ? c : 0;
+
+        var forwardStr = forward ? "false" : "true"; // window.find 3rd param is "backwards"
+        var csStr = caseSensitive ? "true" : "false";
+        var findScript = $"window.find('{escapedText}',{csStr},{forwardStr},true,false,true,false)";
+        var findResult = await _webView.ExecuteScriptAsync(findScript);
+        var activeIndex = findResult == "true" ? 0 : -1;
+
+        return new FindInPageResult
+        {
+            ActiveMatchIndex = activeIndex,
+            TotalMatches = totalMatches
+        };
+    }
+
+    public void StopFind(bool clearHighlights = true)
+    {
+        if (_webView is null || _detached) return;
+        _ = _webView.ExecuteScriptAsync("window.getSelection().removeAllRanges()");
+    }
+
+    // ==================== IZoomAdapter ====================
+
+    public event EventHandler<double>? ZoomFactorChanged;
+
+    public double ZoomFactor
+    {
+        get => _controller?.ZoomFactor ?? 1.0;
+        set
+        {
+            if (_controller is null || _detached) return;
+            _controller.ZoomFactor = value;
+            ZoomFactorChanged?.Invoke(this, value);
+        }
+    }
+
+    // ==================== IPreloadScriptAdapter ====================
+
+    public string AddPreloadScript(string javaScript)
+    {
+        ThrowIfNotAttached();
+        if (_webView is null)
+            throw new InvalidOperationException("WebView is not initialized.");
+        // WebView2's AddScriptToExecuteOnDocumentCreatedAsync returns a script ID
+        var task = _webView.AddScriptToExecuteOnDocumentCreatedAsync(javaScript);
+        task.Wait(); // block — called from UI thread during init, safe for WebView2
+        return task.Result;
+    }
+
+    public void RemovePreloadScript(string scriptId)
+    {
+        if (_webView is null || _detached) return;
+        _webView.RemoveScriptToExecuteOnDocumentCreated(scriptId);
+    }
+
+    // ==================== IContextMenuAdapter ====================
+
+    public event EventHandler<ContextMenuRequestedEventArgs>? ContextMenuRequested;
 }

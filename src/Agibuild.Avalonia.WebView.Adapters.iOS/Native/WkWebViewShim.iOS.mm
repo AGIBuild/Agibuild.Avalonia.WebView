@@ -1162,4 +1162,115 @@ void ag_wk_print_to_pdf(ag_wk_handle handle, ag_wk_pdf_cb callback, void* contex
     });
 }
 
+// ======================== Zoom ========================
+
+double ag_wk_get_zoom(ag_wk_handle handle)
+{
+    auto* s = (shim_state*)handle;
+    if (s->web_view == nil || s->detached.load()) return 1.0;
+    // iOS WKWebView doesn't have pageZoom; use JavaScript document.body.style.zoom
+    // For simplicity, store zoom in a tag-like mechanism via JS
+    return 1.0; // Placeholder; real zoom tracked via JS
+}
+
+void ag_wk_set_zoom(ag_wk_handle handle, double zoom_factor)
+{
+    auto* s = (shim_state*)handle;
+    run_on_main(^{
+        if (s->web_view == nil || s->detached.load()) return;
+        // iOS WKWebView lacks pageZoom; apply via CSS zoom
+        NSString* script = [NSString stringWithFormat:@"document.body.style.zoom='%f'", zoom_factor];
+        [s->web_view evaluateJavaScript:script completionHandler:nil];
+    });
+}
+
+// ======================== Find in Page ========================
+
+typedef void (*ag_wk_find_cb)(void* context, int32_t active_match_index, int32_t total_matches);
+
+void ag_wk_find_text(ag_wk_handle handle, const char* text, bool case_sensitive, bool forward, ag_wk_find_cb callback, void* context)
+{
+    auto* s = (shim_state*)handle;
+    NSString* searchText = [NSString stringWithUTF8String:text];
+    run_on_main(^{
+        if (s->web_view == nil || s->detached.load())
+        {
+            callback(context, -1, 0);
+            return;
+        }
+
+        NSString* escapedText = [searchText stringByReplacingOccurrencesOfString:@"\\" withString:@"\\\\"];
+        escapedText = [escapedText stringByReplacingOccurrencesOfString:@"'" withString:@"\\'"];
+        escapedText = [escapedText stringByReplacingOccurrencesOfString:@"\n" withString:@"\\n"];
+
+        NSString* caseSensitiveStr = case_sensitive ? @"true" : @"false";
+        NSString* forwardStr = forward ? @"true" : @"false";
+
+        NSString* countScript = [NSString stringWithFormat:
+            @"(function(){"
+            "var text='%@',cs=%@,re=new RegExp(text.replace(/[.*+?^${}()|[\\]\\\\]/g,'\\\\$&'),cs?'g':'gi'),"
+            "m=document.body.innerText.match(re);"
+            "return m?m.length:0;"
+            "})()",
+            escapedText, caseSensitiveStr];
+
+        [s->web_view evaluateJavaScript:countScript completionHandler:^(id _Nullable result, NSError* _Nullable error) {
+            int32_t totalMatches = 0;
+            if (result != nil && [result isKindOfClass:[NSNumber class]])
+            {
+                totalMatches = [result intValue];
+            }
+
+            NSString* findScript = [NSString stringWithFormat:
+                @"window.find('%@',%@,%@,true,false,true,false)",
+                escapedText, caseSensitiveStr, forwardStr];
+
+            [s->web_view evaluateJavaScript:findScript completionHandler:^(id _Nullable findResult, NSError* _Nullable findError) {
+                int32_t activeIndex = (findResult != nil && [findResult boolValue]) ? 0 : -1;
+                callback(context, activeIndex, totalMatches);
+            }];
+        }];
+    });
+}
+
+void ag_wk_stop_find(ag_wk_handle handle)
+{
+    auto* s = (shim_state*)handle;
+    run_on_main(^{
+        if (s->web_view == nil || s->detached.load()) return;
+        [s->web_view evaluateJavaScript:@"window.getSelection().removeAllRanges()" completionHandler:nil];
+    });
+}
+
+// ======================== Preload Scripts ========================
+
+static std::atomic<int64_t> g_script_id_counter{0};
+
+const char* ag_wk_add_user_script(ag_wk_handle handle, const char* js)
+{
+    if (!handle || !js) return nullptr;
+    auto* s = (shim_state*)handle;
+    if (s->web_view == nil || s->detached.load()) return nullptr;
+
+    NSString* source = [NSString stringWithUTF8String:js];
+    WKUserScript* script = [[WKUserScript alloc]
+        initWithSource:source
+        injectionTime:WKUserScriptInjectionTimeAtDocumentStart
+        forMainFrameOnly:YES];
+
+    int64_t id = g_script_id_counter.fetch_add(1) + 1;
+    NSString* scriptId = [NSString stringWithFormat:@"preload_%lld", id];
+
+    [s->web_view.configuration.userContentController addUserScript:script];
+    return strdup(scriptId.UTF8String);
+}
+
+void ag_wk_remove_all_user_scripts(ag_wk_handle handle)
+{
+    if (!handle) return;
+    auto* s = (shim_state*)handle;
+    if (s->web_view == nil || s->detached.load()) return;
+    [s->web_view.configuration.userContentController removeAllUserScripts];
+}
+
 } // extern "C"

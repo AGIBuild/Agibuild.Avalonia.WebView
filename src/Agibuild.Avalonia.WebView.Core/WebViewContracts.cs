@@ -173,6 +173,12 @@ public interface IWebViewEnvironmentOptions
     /// Adapters that implement <c>ICustomSchemeAdapter</c> receive these during initialization.
     /// </summary>
     IReadOnlyList<CustomSchemeRegistration> CustomSchemes { get; }
+
+    /// <summary>
+    /// JavaScript snippets to inject at document start on every new page load.
+    /// These are applied globally to all new WebView instances.
+    /// </summary>
+    IReadOnlyList<string> PreloadScripts { get; }
 }
 
 /// <summary>Describes a custom URI scheme to register with the WebView.</summary>
@@ -255,6 +261,58 @@ public sealed class PdfPrintOptions
     public double Scale { get; set; } = 1.0;
     /// <summary>Whether to print background colors and images.</summary>
     public bool PrintBackground { get; set; } = true;
+}
+
+/// <summary>Options for in-page text search.</summary>
+/// <summary>Media type at the context menu hit-test location.</summary>
+public enum ContextMenuMediaType
+{
+    /// <summary>No media element at the location.</summary>
+    None,
+    /// <summary>An image element.</summary>
+    Image,
+    /// <summary>A video element.</summary>
+    Video,
+    /// <summary>An audio element.</summary>
+    Audio
+}
+
+/// <summary>Event args for context menu interception.</summary>
+public sealed class ContextMenuRequestedEventArgs : EventArgs
+{
+    /// <summary>X coordinate of the context menu trigger (CSS pixels).</summary>
+    public double X { get; init; }
+    /// <summary>Y coordinate of the context menu trigger (CSS pixels).</summary>
+    public double Y { get; init; }
+    /// <summary>The URI of the link at the location, if any.</summary>
+    public Uri? LinkUri { get; init; }
+    /// <summary>The selected text at the location, if any.</summary>
+    public string? SelectionText { get; init; }
+    /// <summary>The media type at the location.</summary>
+    public ContextMenuMediaType MediaType { get; init; }
+    /// <summary>The source URI of the media element, if any.</summary>
+    public Uri? MediaSourceUri { get; init; }
+    /// <summary>Whether the element at the location is editable.</summary>
+    public bool IsEditable { get; init; }
+    /// <summary>Set to true to suppress the native context menu.</summary>
+    public bool Handled { get; set; }
+}
+
+public sealed class FindInPageOptions
+{
+    /// <summary>Whether the search is case-sensitive. Default: false.</summary>
+    public bool CaseSensitive { get; init; }
+    /// <summary>Search direction. True = forward (default), false = backward.</summary>
+    public bool Forward { get; init; } = true;
+}
+
+/// <summary>Result of an in-page text search.</summary>
+public sealed class FindInPageResult : EventArgs
+{
+    /// <summary>Zero-based index of the currently highlighted match.</summary>
+    public int ActiveMatchIndex { get; init; }
+    /// <summary>Total number of matches found on the page.</summary>
+    public int TotalMatches { get; init; }
 }
 
 /// <summary>Standard editing commands supported by WebView.</summary>

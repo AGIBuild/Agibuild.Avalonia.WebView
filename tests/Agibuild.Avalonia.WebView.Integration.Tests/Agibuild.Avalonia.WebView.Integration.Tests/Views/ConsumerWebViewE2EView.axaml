@@ -11,166 +11,119 @@
 
   <DockPanel>
 
-    <!-- ════════════ Toolbar ════════════ -->
+    <!-- ════════════ Top Toolbar (always visible) ════════════ -->
     <Border DockPanel.Dock="Top" Background="White"
             BorderThickness="0,0,0,1" BorderBrush="{StaticResource BorderDefaultBrush}"
             Padding="6,4">
-      <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,*,Auto,Auto" RowDefinitions="Auto">
+      <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto,Auto">
+        <!-- Toggle left panel -->
         <ToggleButton x:Name="ToolsToggle" Grid.Column="0"
+                      IsChecked="True"
                       Content="&#x2630;" ToolTip.Tip="Tools"
-                      FontSize="16" Padding="8,6"
+                      FontSize="14" Padding="8,5"
                       Background="Transparent" BorderThickness="0"
-                      CornerRadius="8" VerticalAlignment="Center" />
+                      CornerRadius="6" VerticalAlignment="Center" />
 
-        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="2" Margin="4,0,0,0">
+        <!-- Nav buttons -->
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="2" Margin="4,0">
           <Button Classes="toolbar-btn" Content="&#x25C0;" ToolTip.Tip="Back"
                   Command="{Binding GoBackCommand}" IsEnabled="{Binding CanGoBack}" />
           <Button Classes="toolbar-btn" Content="&#x25B6;" ToolTip.Tip="Forward"
                   Command="{Binding GoForwardCommand}" IsEnabled="{Binding CanGoForward}" />
           <Button Classes="toolbar-btn" Content="&#x27F3;" ToolTip.Tip="Refresh"
                   Command="{Binding DoRefreshCommand}" />
-          <Button Classes="toolbar-btn" Content="&#x2715;" ToolTip.Tip="Stop"
-                  Command="{Binding DoStopCommand}" />
         </StackPanel>
 
-        <TextBlock Grid.Column="2" Text="&#x23F3; Loading..."
+        <TextBlock Grid.Column="2" Text="&#x23F3;" FontSize="12"
                    IsVisible="{Binding IsPageLoading}"
-                   VerticalAlignment="Center" Foreground="{StaticResource BrandAccentBrush}"
-                   FontSize="11" Margin="4,0" />
+                   Foreground="{StaticResource BrandAccentBrush}"
+                   VerticalAlignment="Center" Margin="4,0" />
 
-        <Panel Grid.Column="3" />
-        <Panel Grid.Column="4" />
-        <Panel Grid.Column="5" />
-
-        <Border Grid.Column="6" CornerRadius="10"
+        <!-- Address bar -->
+        <Border Grid.Column="3" CornerRadius="8"
                 BorderThickness="1" BorderBrush="{StaticResource BorderDefaultBrush}"
-                Background="#F8FAFC" Padding="0" Margin="4,2">
+                Background="#F8FAFC" Margin="4,2">
           <TextBox Text="{Binding AddressText, Mode=TwoWay}"
-                   Watermark="&#x1F50D;  Enter URL..."
-                   FontSize="12" Padding="10,6"
+                   Watermark="Enter URL..."
+                   FontSize="12" Padding="8,5"
                    Background="Transparent" BorderThickness="0"
-                   CornerRadius="10" KeyDown="OnAddressKeyDown" />
+                   CornerRadius="8" KeyDown="OnAddressKeyDown" />
         </Border>
 
-        <StackPanel Grid.Column="7" Orientation="Horizontal" Spacing="2" Margin="4,0,0,0">
-          <Button Classes="toolbar-btn" Content="&#x1F3E0;" ToolTip.Tip="Home"
-                  Command="{Binding GoHomeCommand}" />
-          <Button Content="Go" Padding="10,6" CornerRadius="8"
-                  FontSize="12" FontWeight="SemiBold"
-                  Command="{Binding GoToAddressCommand}" />
-        </StackPanel>
+        <Button Grid.Column="4" Content="Go" Padding="10,5" CornerRadius="6"
+                FontSize="12" Command="{Binding GoToAddressCommand}" Margin="4,0" />
 
-        <Button Grid.Column="8" Classes="primary"
+        <Button Grid.Column="5" Classes="primary"
                 Content="&#x25B6; E2E"
                 Command="{Binding RunAllCommand}"
-                Margin="4,0,0,0" Padding="12,6" FontSize="12" />
+                Padding="10,5" FontSize="11" />
       </Grid>
     </Border>
 
     <!-- ════════════ Status bar ════════════ -->
     <Border DockPanel.Dock="Bottom" Background="White"
             BorderThickness="0,1,0,0" BorderBrush="{StaticResource BorderDefaultBrush}"
-            Padding="8,4">
-      <Border CornerRadius="4" Padding="6,2" Background="#F1F5F9">
-        <TextBlock Text="{Binding Status}" Classes="caption" />
-      </Border>
+            Padding="8,3">
+      <TextBlock Text="{Binding Status}" Classes="caption" />
     </Border>
 
-    <!-- ════════════ Main area: WebView + Overlay Drawer (no SplitView) ════════════ -->
-    <Panel>
+    <!-- ════════════ Content: Left Panel + WebView ════════════ -->
+    <Grid ColumnDefinitions="Auto,*">
 
-      <!-- WebView fills all space (hidden when overlay is open; native controls render above Avalonia UI) -->
-      <Border x:Name="WebViewContainer" ClipToBounds="True">
-        <agw:WebView x:Name="WebViewControl" />
-      </Border>
-
-      <!-- Overlay backdrop -->
-      <Border IsVisible="{Binding #ToolsToggle.IsChecked}"
-              Background="#40000000" ZIndex="10"
-              PointerPressed="OnOverlayDismiss" />
-
-      <!-- Tools drawer -->
-      <Border IsVisible="{Binding #ToolsToggle.IsChecked}"
-              HorizontalAlignment="Left" Width="300"
-              Background="White" ZIndex="11"
+      <!-- Left tools panel (inline, collapsible) -->
+      <Border Grid.Column="0" Width="260"
+              IsVisible="{Binding #ToolsToggle.IsChecked}"
+              Background="White"
               BorderThickness="0,0,1,0" BorderBrush="{StaticResource BorderDefaultBrush}">
-        <DockPanel>
-          <Border DockPanel.Dock="Top" Padding="16,12">
-            <Grid ColumnDefinitions="*,Auto">
-              <StackPanel Spacing="2">
-                <TextBlock Text="Developer Tools" Classes="subheading" />
-                <TextBlock Text="JS, HTML &amp; Logs" Classes="caption" />
+        <ScrollViewer Margin="10,8">
+          <StackPanel Spacing="10">
+
+            <!-- JavaScript -->
+            <Border Classes="card">
+              <StackPanel Spacing="6">
+                <TextBlock Text="JavaScript" Classes="subheading" />
+                <TextBox Classes="mono"
+                         Text="{Binding ScriptInput, Mode=TwoWay}"
+                         Watermark="document.title"
+                         AcceptsReturn="True" MinHeight="50"
+                         KeyDown="OnScriptKeyDown" />
+                <Grid ColumnDefinitions="*,Auto">
+                  <Border Grid.Column="0" Background="#F0FDF4" CornerRadius="6"
+                          Padding="6,3"
+                          IsVisible="{Binding ScriptResult, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                    <TextBlock Text="{Binding ScriptResult}"
+                               FontFamily="Menlo,Consolas,monospace" FontSize="11"
+                               Foreground="{StaticResource BrandSuccessBrush}"
+                               TextWrapping="Wrap" />
+                  </Border>
+                  <Button Grid.Column="1" Classes="primary"
+                          Content="Run" Padding="10,5" FontSize="11"
+                          Command="{Binding RunScriptCommand}" Margin="6,0,0,0" />
+                </Grid>
               </StackPanel>
-              <Button Grid.Column="1" Classes="toolbar-btn"
-                      Content="&#x2715;" FontSize="14"
-                      Click="OnCloseToolsPanel" />
-            </Grid>
-          </Border>
-          <Border DockPanel.Dock="Top" Height="1" Background="{StaticResource BorderDefaultBrush}" />
+            </Border>
 
-          <ScrollViewer Margin="12,8,12,12">
-            <StackPanel Spacing="12">
+            <!-- Load HTML -->
+            <Border Classes="card">
+              <StackPanel Spacing="6">
+                <TextBlock Text="Load HTML" Classes="subheading" />
+                <TextBox Classes="mono"
+                         Text="{Binding HtmlInput, Mode=TwoWay}"
+                         Watermark="&lt;html&gt;...&lt;/html&gt;"
+                         AcceptsReturn="True" MinHeight="50" />
+                <Button Classes="primary" Content="Load HTML"
+                        HorizontalAlignment="Right" Padding="10,5" FontSize="11"
+                        Command="{Binding LoadHtmlCommand}" />
+              </StackPanel>
+            </Border>
 
-              <!-- JavaScript -->
-              <Border Classes="card">
-                <StackPanel Spacing="8">
-                  <TextBlock Text="JavaScript" Classes="subheading" />
-                  <TextBox Classes="mono"
-                           Text="{Binding ScriptInput, Mode=TwoWay}"
-                           Watermark="document.title"
-                           AcceptsReturn="True" MinHeight="56"
-                           KeyDown="OnScriptKeyDown" />
-                  <Grid ColumnDefinitions="*,Auto">
-                    <Border Grid.Column="0" Background="#F0FDF4" CornerRadius="6"
-                            Padding="8,4"
-                            IsVisible="{Binding ScriptResult, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-                      <TextBlock Text="{Binding ScriptResult}"
-                                 FontFamily="Menlo,Consolas,monospace" FontSize="11"
-                                 Foreground="{StaticResource BrandSuccessBrush}"
-                                 TextWrapping="Wrap" />
-                    </Border>
-                    <Button Grid.Column="1" Classes="primary"
-                            Content="Run" Padding="12,6" FontSize="12"
-                            Command="{Binding RunScriptCommand}" Margin="8,0,0,0" />
-                  </Grid>
-                </StackPanel>
-              </Border>
-
-              <!-- Load HTML -->
-              <Border Classes="card">
-                <StackPanel Spacing="8">
-                  <TextBlock Text="Load HTML" Classes="subheading" />
-                  <TextBox Classes="mono"
-                           Text="{Binding HtmlInput, Mode=TwoWay}"
-                           Watermark="&lt;html&gt;...&lt;/html&gt;"
-                           AcceptsReturn="True" MinHeight="56" />
-                  <Button Classes="primary" Content="Load HTML"
-                          HorizontalAlignment="Right" Padding="12,6" FontSize="12"
-                          Command="{Binding LoadHtmlCommand}" />
-                </StackPanel>
-              </Border>
-
-              <!-- Log -->
-              <Border Classes="card">
-                <DockPanel>
-                  <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="0,0,0,8">
-                    <TextBlock Text="Log" Classes="subheading" />
-                    <Button Grid.Column="1" Content="Clear" FontSize="11"
-                            Padding="8,4" CornerRadius="6"
-                            Command="{Binding ClearLogCommand}" />
-                  </Grid>
-                  <TextBox IsReadOnly="True" Classes="mono"
-                           Text="{Binding Log}"
-                           TextWrapping="Wrap" AcceptsReturn="True"
-                           MinHeight="150" Background="#F8FAFC" />
-                </DockPanel>
-              </Border>
-
-            </StackPanel>
-          </ScrollViewer>
-        </DockPanel>
+          </StackPanel>
+        </ScrollViewer>
       </Border>
 
-    </Panel>
+      <!-- WebView (fills remaining space) -->
+      <agw:WebView Grid.Column="1" x:Name="WebViewControl" />
+
+    </Grid>
   </DockPanel>
 </UserControl>

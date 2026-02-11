@@ -20,9 +20,11 @@ public partial class ConsumerWebViewE2EViewModel : ViewModelBase
 
     private int _autoRunStarted;
     private int _runAllInProgress;
+    private readonly Action<string>? _logSink;
 
-    public ConsumerWebViewE2EViewModel()
+    public ConsumerWebViewE2EViewModel(Action<string>? logSink = null)
     {
+        _logSink = logSink;
         Status = "Not started.";
         AddressText = TestHome.AbsoluteUri;
         ScriptInput = "document.title";
@@ -35,9 +37,6 @@ public partial class ConsumerWebViewE2EViewModel : ViewModelBase
 
     [ObservableProperty]
     private string _status = string.Empty;
-
-    [ObservableProperty]
-    private string _log = string.Empty;
 
     [ObservableProperty]
     private string _addressText = string.Empty;
@@ -310,11 +309,7 @@ public partial class ConsumerWebViewE2EViewModel : ViewModelBase
     //  Log management
     // ---------------------------------------------------------------------------
 
-    [RelayCommand]
-    private void ClearLog()
-    {
-        Log = string.Empty;
-    }
+    // Log is now shared via MainViewModel — ClearLog removed.
 
     // ---------------------------------------------------------------------------
     //  E2E test suite (github.com)
@@ -1316,7 +1311,7 @@ public partial class ConsumerWebViewE2EViewModel : ViewModelBase
     private void LogLine(string message)
     {
         var line = $"{DateTimeOffset.Now:HH:mm:ss.fff} {message}";
-        Log = $"{Log}{line}{Environment.NewLine}";
+        _logSink?.Invoke(line);
 
         if (AutoRun)
         {

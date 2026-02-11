@@ -326,6 +326,18 @@ internal class MockWebViewAdapter : IWebViewAdapter
 
     /// <summary>Creates a mock that supports PDF printing.</summary>
     public static MockWebViewAdapterWithPrint CreateWithPrint() => new();
+
+    /// <summary>Creates a mock that supports find-in-page.</summary>
+    public static MockWebViewAdapterWithFind CreateWithFind() => new();
+
+    /// <summary>Creates a mock that supports zoom control.</summary>
+    public static MockWebViewAdapterWithZoom CreateWithZoom() => new();
+
+    /// <summary>Creates a mock that supports preload scripts.</summary>
+    public static MockWebViewAdapterWithPreload CreateWithPreload() => new();
+
+    /// <summary>Creates a mock that supports context menu interception.</summary>
+    public static MockWebViewAdapterWithContextMenu CreateWithContextMenu() => new();
 }
 
 /// <summary>Mock adapter that also implements <see cref="IWebViewAdapterOptions"/> for environment options testing.</summary>
@@ -478,6 +490,75 @@ internal sealed class MockWebViewAdapterWithPrint : MockWebViewAdapter, IPrintAd
     }
 }
 
+/// <summary>Mock adapter that also implements <see cref="IZoomAdapter"/> for zoom control testing.</summary>
+internal sealed class MockWebViewAdapterWithZoom : MockWebViewAdapter, IZoomAdapter
+{
+    private double _zoomFactor = 1.0;
+
+    public double ZoomFactor
+    {
+        get => _zoomFactor;
+        set
+        {
+            _zoomFactor = value;
+            ZoomFactorChanged?.Invoke(this, value);
+        }
+    }
+
+    public event EventHandler<double>? ZoomFactorChanged;
+
+    /// <summary>Simulate an external zoom change (e.g. pinch-to-zoom).</summary>
+    public void SimulateZoomChange(double newZoom) => ZoomFactor = newZoom;
+}
+
+/// <summary>Mock adapter that also implements <see cref="IFindInPageAdapter"/> for find-in-page testing.</summary>
+internal sealed class MockWebViewAdapterWithFind : MockWebViewAdapter, IFindInPageAdapter
+{
+    /// <summary>The result to return from <see cref="FindAsync"/>.</summary>
+    public FindInPageResult FindResult { get; set; } = new() { ActiveMatchIndex = 0, TotalMatches = 3 };
+
+    /// <summary>The last search text received.</summary>
+    public string? LastSearchText { get; private set; }
+    /// <summary>The last options received.</summary>
+    public FindInPageOptions? LastOptions { get; private set; }
+    /// <summary>Whether StopFind was called.</summary>
+    public bool StopFindCalled { get; private set; }
+    /// <summary>The clearHighlights parameter from the last StopFind call.</summary>
+    public bool LastClearHighlights { get; private set; }
+
+    public Task<FindInPageResult> FindAsync(string text, FindInPageOptions? options)
+    {
+        LastSearchText = text;
+        LastOptions = options;
+        return Task.FromResult(FindResult);
+    }
+
+    public void StopFind(bool clearHighlights = true)
+    {
+        StopFindCalled = true;
+        LastClearHighlights = clearHighlights;
+    }
+}
+
+/// <summary>Mock adapter that also implements <see cref="IPreloadScriptAdapter"/> for preload script testing.</summary>
+internal sealed class MockWebViewAdapterWithPreload : MockWebViewAdapter, IPreloadScriptAdapter
+{
+    private int _nextId;
+    public Dictionary<string, string> Scripts { get; } = new();
+
+    public string AddPreloadScript(string javaScript)
+    {
+        var id = $"mock_preload_{++_nextId}";
+        Scripts[id] = javaScript;
+        return id;
+    }
+
+    public void RemovePreloadScript(string scriptId)
+    {
+        Scripts.Remove(scriptId);
+    }
+}
+
 /// <summary>Mock adapter that also implements <see cref="ICookieAdapter"/> for cookie management testing.</summary>
 internal sealed class MockWebViewAdapterWithCookies : MockWebViewAdapter, ICookieAdapter
 {
@@ -506,5 +587,17 @@ internal sealed class MockWebViewAdapterWithCookies : MockWebViewAdapter, ICooki
     {
         CookieStore.Clear();
         return Task.CompletedTask;
+    }
+}
+
+/// <summary>Mock adapter that also implements <see cref="IContextMenuAdapter"/> for context menu testing.</summary>
+internal sealed class MockWebViewAdapterWithContextMenu : MockWebViewAdapter, IContextMenuAdapter
+{
+    public event EventHandler<ContextMenuRequestedEventArgs>? ContextMenuRequested;
+
+    /// <summary>Simulates a context menu trigger for testing.</summary>
+    public void RaiseContextMenu(ContextMenuRequestedEventArgs args)
+    {
+        ContextMenuRequested?.Invoke(this, args);
     }
 }

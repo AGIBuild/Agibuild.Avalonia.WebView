@@ -1,7 +1,8 @@
+using System;
+using System.Globalization;
 using Avalonia.Controls;
-using Avalonia.Controls.Primitives;
-using Avalonia.Input;
-using Avalonia.Interactivity;
+using Avalonia.Data.Converters;
+using Avalonia.Media;
 using Agibuild.Avalonia.WebView.Integration.Tests.ViewModels;
 
 namespace Agibuild.Avalonia.WebView.Integration.Tests.Views;
@@ -12,13 +13,9 @@ public partial class FeatureE2EView : UserControl
     {
         InitializeComponent();
         DataContextChanged += OnDataContextChanged;
-
-        // Hide native WebView when tools drawer opens
-        var toolsToggle = this.FindControl<ToggleButton>("ToolsToggle");
-        toolsToggle?.IsCheckedChanged += (_, _) => SyncWebViewVisibility();
     }
 
-    private void OnDataContextChanged(object? sender, System.EventArgs e)
+    private void OnDataContextChanged(object? sender, EventArgs e)
     {
         if (DataContext is FeatureE2EViewModel vm)
         {
@@ -30,26 +27,55 @@ public partial class FeatureE2EView : UserControl
             }
         }
     }
+}
 
-    private void OnCloseToolsPanel(object? sender, RoutedEventArgs e)
+/// <summary>
+/// Converts a test result status string ("PASS", "FAIL", "SKIP", "...", "—")
+/// to a background or foreground brush.
+/// <para>ConverterParameter: "bg" for background (default), "fg" for foreground.</para>
+/// </summary>
+public sealed class TestResultBrushConverter : IValueConverter
+{
+    private static readonly SolidColorBrush PassBg = new(Color.Parse("#ECFDF5"));
+    private static readonly SolidColorBrush FailBg = new(Color.Parse("#FEF2F2"));
+    private static readonly SolidColorBrush SkipBg = new(Color.Parse("#FFFBEB"));
+    private static readonly SolidColorBrush RunBg = new(Color.Parse("#EFF6FF"));
+    private static readonly SolidColorBrush PendingBg = new(Color.Parse("#F1F5F9"));
+
+    private static readonly SolidColorBrush PassFg = new(Color.Parse("#059669"));
+    private static readonly SolidColorBrush FailFg = new(Color.Parse("#DC2626"));
+    private static readonly SolidColorBrush SkipFg = new(Color.Parse("#D97706"));
+    private static readonly SolidColorBrush RunFg = new(Color.Parse("#2563EB"));
+    private static readonly SolidColorBrush PendingFg = new(Color.Parse("#94A3B8"));
+
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        var toggle = this.FindControl<ToggleButton>("ToolsToggle");
-        if (toggle is not null)
-            toggle.IsChecked = false;
+        var status = value?.ToString();
+        var mode = parameter?.ToString();
+
+        if (mode == "fg")
+        {
+            return status switch
+            {
+                "PASS" => PassFg,
+                "FAIL" => FailFg,
+                "SKIP" => SkipFg,
+                "..." => RunFg,
+                _ => PendingFg
+            };
+        }
+
+        // Default: background
+        return status switch
+        {
+            "PASS" => PassBg,
+            "FAIL" => FailBg,
+            "SKIP" => SkipBg,
+            "..." => RunBg,
+            _ => PendingBg
+        };
     }
 
-    private void OnOverlayDismiss(object? sender, PointerPressedEventArgs e)
-    {
-        var toggle = this.FindControl<ToggleButton>("ToolsToggle");
-        if (toggle is not null)
-            toggle.IsChecked = false;
-    }
-
-    private void SyncWebViewVisibility()
-    {
-        var toggle = this.FindControl<ToggleButton>("ToolsToggle");
-        var host = this.FindControl<Border>("WebViewHost");
-        if (toggle is not null && host is not null)
-            host.IsVisible = toggle.IsChecked != true;
-    }
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => throw new NotSupportedException();
 }

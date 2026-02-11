@@ -10,7 +10,8 @@ namespace Agibuild.Avalonia.WebView.Adapters.MacOS;
 
 [SupportedOSPlatform("macos")]
 internal sealed class MacOSWebViewAdapter : IWebViewAdapter, INativeWebViewHandleProvider, ICookieAdapter, IWebViewAdapterOptions,
-    ICustomSchemeAdapter, IDownloadAdapter, IPermissionAdapter, ICommandAdapter, IScreenshotAdapter, IPrintAdapter
+    ICustomSchemeAdapter, IDownloadAdapter, IPermissionAdapter, ICommandAdapter, IScreenshotAdapter, IPrintAdapter,
+    IFindInPageAdapter, IZoomAdapter, IPreloadScriptAdapter, IContextMenuAdapter
 {
     private static bool DiagnosticsEnabled
         => string.Equals(Environment.GetEnvironmentVariable("AGIBUILD_WEBVIEW_DIAG"), "1", StringComparison.Ordinal);
@@ -1143,6 +1144,31 @@ internal sealed class MacOSWebViewAdapter : IWebViewAdapter, INativeWebViewHandl
 
         [DllImport(LibraryName, EntryPoint = "ag_wk_print_to_pdf", CallingConvention = CallingConvention.Cdecl)]
         internal static extern void PrintToPdf(IntPtr handle, PdfCb callback, IntPtr context);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        internal delegate void FindCb(IntPtr context, int activeMatchIndex, int totalMatches);
+
+        [DllImport(LibraryName, EntryPoint = "ag_wk_find_text", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void FindText(IntPtr handle,
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string text,
+            [MarshalAs(UnmanagedType.I1)] bool caseSensitive,
+            [MarshalAs(UnmanagedType.I1)] bool forward,
+            FindCb callback, IntPtr context);
+
+        [DllImport(LibraryName, EntryPoint = "ag_wk_stop_find", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void StopFind(IntPtr handle);
+
+        [DllImport(LibraryName, EntryPoint = "ag_wk_get_zoom", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern double GetZoom(IntPtr handle);
+
+        [DllImport(LibraryName, EntryPoint = "ag_wk_set_zoom", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void SetZoom(IntPtr handle, double zoomFactor);
+
+        [DllImport(LibraryName, EntryPoint = "ag_wk_add_user_script", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern IntPtr AddUserScript(IntPtr handle, [MarshalAs(UnmanagedType.LPUTF8Str)] string js);
+
+        [DllImport(LibraryName, EntryPoint = "ag_wk_remove_all_user_scripts", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void RemoveAllUserScripts(IntPtr handle);
     }
 
     // ==================== ICommandAdapter ====================
@@ -1221,5 +1247,89 @@ internal sealed class MacOSWebViewAdapter : IWebViewAdapter, INativeWebViewHandl
         Marshal.Copy(pdfData, buffer, 0, (int)pdfLen);
         tcs.TrySetResult(buffer);
     }
+
+    // ==================== IFindInPageAdapter ====================
+
+    public Task<FindInPageResult> FindAsync(string text, FindInPageOptions? options)
+    {
+        ThrowIfNotAttached();
+        var tcs = new TaskCompletionSource<FindInPageResult>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var handle = GCHandle.Alloc(tcs);
+
+        var caseSensitive = options?.CaseSensitive ?? false;
+        var forward = options?.Forward ?? true;
+
+        NativeMethods.FindText(_native, text, caseSensitive, forward, OnFindComplete, GCHandle.ToIntPtr(handle));
+        return tcs.Task;
+    }
+
+    private static void OnFindComplete(IntPtr context, int activeMatchIndex, int totalMatches)
+    {
+        var handle = GCHandle.FromIntPtr(context);
+        var tcs = (TaskCompletionSource<FindInPageResult>)handle.Target!;
+        handle.Free();
+
+        tcs.TrySetResult(new FindInPageResult
+        {
+            ActiveMatchIndex = activeMatchIndex,
+            TotalMatches = totalMatches
+        });
+    }
+
+    public void StopFind(bool clearHighlights = true)
+    {
+        if (_native == IntPtr.Zero || _detached) return;
+        NativeMethods.StopFind(_native);
+    }
+
+    // ==================== IZoomAdapter ====================
+
+    public event EventHandler<double>? ZoomFactorChanged;
+
+    public double ZoomFactor
+    {
+        get => (_native == IntPtr.Zero || _detached) ? 1.0 : NativeMethods.GetZoom(_native);
+        set
+        {
+            if (_native == IntPtr.Zero || _detached) return;
+            NativeMethods.SetZoom(_native, value);
+            ZoomFactorChanged?.Invoke(this, value);
+        }
+    }
+
+    // ==================== IPreloadScriptAdapter ====================
+
+    private readonly Dictionary<string, string> _preloadScripts = new();
+
+    public string AddPreloadScript(string javaScript)
+    {
+        ThrowIfNotAttached();
+        var ptr = NativeMethods.AddUserScript(_native, javaScript);
+        if (ptr == IntPtr.Zero)
+            throw new InvalidOperationException("Failed to add user script.");
+        var scriptId = Marshal.PtrToStringUTF8(ptr)!;
+        Marshal.FreeHGlobal(ptr);
+        _preloadScripts[scriptId] = javaScript;
+        return scriptId;
+    }
+
+    public void RemovePreloadScript(string scriptId)
+    {
+        if (_native == IntPtr.Zero || _detached) return;
+        if (_preloadScripts.Remove(scriptId))
+        {
+            // WKUserContentController doesn't support removing individual scripts.
+            // Remove all and re-add remaining.
+            NativeMethods.RemoveAllUserScripts(_native);
+            foreach (var remaining in _preloadScripts.Values)
+            {
+                NativeMethods.AddUserScript(_native, remaining);
+            }
+        }
+    }
+
+    // ==================== IContextMenuAdapter ====================
+
+    public event EventHandler<ContextMenuRequestedEventArgs>? ContextMenuRequested;
 }
 

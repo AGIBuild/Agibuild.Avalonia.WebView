@@ -1740,7 +1740,7 @@ public sealed class CoverageGapTests
     [Fact]
     public void Rpc_JsStub_contains_key_identifiers()
     {
-        Assert.Contains("__agRpc", WebViewRpcService.JsStub);
+        Assert.Contains("agWebView.rpc", WebViewRpcService.JsStub);
         Assert.Contains("invoke", WebViewRpcService.JsStub);
         Assert.Contains("_dispatch", WebViewRpcService.JsStub);
         Assert.Contains("_onResponse", WebViewRpcService.JsStub);
@@ -1872,7 +1872,7 @@ public sealed class CoverageGapTests
 
     private static string ExtractRpcId(string script)
     {
-        // script looks like: window.__agRpc && window.__agRpc._dispatch("...escaped json...")
+        // script looks like: window.agWebView && window.agWebView.rpc && window.agWebView.rpc._dispatch("...escaped json...")
         var start = script.IndexOf("_dispatch(") + "_dispatch(".Length;
         var end = script.LastIndexOf(')');
         var jsonString = script[start..end];
@@ -1889,5 +1889,334 @@ public sealed class CoverageGapTests
         return new WebViewRpcService(
             script => { scripts.Add(script); return Task.FromResult<string?>(null); },
             Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance);
+    }
+
+    // ==================== FindInPage Tests ====================
+
+    [Fact]
+    public async Task FindInPageAsync_throws_when_unsupported()
+    {
+        var adapter = MockWebViewAdapter.Create();
+        using var core = new WebViewCore(adapter, _dispatcher);
+        await Assert.ThrowsAsync<NotSupportedException>(() => core.FindInPageAsync("test"));
+    }
+
+    [Fact]
+    public async Task FindInPageAsync_throws_on_null_or_empty_text()
+    {
+        var adapter = MockWebViewAdapter.CreateWithFind();
+        using var core = new WebViewCore(adapter, _dispatcher);
+        await Assert.ThrowsAsync<ArgumentException>(() => core.FindInPageAsync(""));
+        await Assert.ThrowsAsync<ArgumentException>(() => core.FindInPageAsync(null!));
+    }
+
+    [Fact]
+    public async Task FindInPageAsync_delegates_to_adapter()
+    {
+        var adapter = MockWebViewAdapter.CreateWithFind();
+        using var core = new WebViewCore(adapter, _dispatcher);
+        var opts = new FindInPageOptions { CaseSensitive = true, Forward = false };
+        var result = await core.FindInPageAsync("hello", opts);
+
+        Assert.Equal(0, result.ActiveMatchIndex);
+        Assert.Equal(3, result.TotalMatches);
+
+        var findAdapter = (MockWebViewAdapterWithFind)adapter;
+        Assert.Equal("hello", findAdapter.LastSearchText);
+        Assert.True(findAdapter.LastOptions?.CaseSensitive);
+        Assert.False(findAdapter.LastOptions?.Forward);
+    }
+
+    [Fact]
+    public void StopFindInPage_throws_when_unsupported()
+    {
+        var adapter = MockWebViewAdapter.Create();
+        using var core = new WebViewCore(adapter, _dispatcher);
+        Assert.Throws<NotSupportedException>(() => core.StopFindInPage());
+    }
+
+    [Fact]
+    public void StopFindInPage_delegates_to_adapter()
+    {
+        var adapter = MockWebViewAdapter.CreateWithFind();
+        using var core = new WebViewCore(adapter, _dispatcher);
+        core.StopFindInPage(false);
+
+        var findAdapter = (MockWebViewAdapterWithFind)adapter;
+        Assert.True(findAdapter.StopFindCalled);
+        Assert.False(findAdapter.LastClearHighlights);
+    }
+
+    [Fact]
+    public async Task WebDialog_FindInPageAsync_throws_when_unsupported()
+    {
+        var host = new MockDialogHost();
+        var adapter = MockWebViewAdapter.Create();
+        using var dialog = new WebDialog(host, adapter, _dispatcher);
+        await Assert.ThrowsAsync<NotSupportedException>(() => dialog.FindInPageAsync("test"));
+    }
+
+    [Fact]
+    public async Task WebDialog_FindInPageAsync_delegates_to_core()
+    {
+        var host = new MockDialogHost();
+        var adapter = MockWebViewAdapter.CreateWithFind();
+        using var dialog = new WebDialog(host, adapter, _dispatcher);
+        var result = await dialog.FindInPageAsync("hello");
+        Assert.Equal(3, result.TotalMatches);
+    }
+
+    [Fact]
+    public void WebDialog_StopFindInPage_throws_when_unsupported()
+    {
+        var host = new MockDialogHost();
+        var adapter = MockWebViewAdapter.Create();
+        using var dialog = new WebDialog(host, adapter, _dispatcher);
+        Assert.Throws<NotSupportedException>(() => dialog.StopFindInPage());
+    }
+
+    [Fact]
+    public void FindInPageOptions_defaults()
+    {
+        var opts = new FindInPageOptions();
+        Assert.False(opts.CaseSensitive);
+        Assert.True(opts.Forward);
+    }
+
+    [Fact]
+    public void FindInPageResult_defaults()
+    {
+        var result = new FindInPageResult();
+        Assert.Equal(0, result.ActiveMatchIndex);
+        Assert.Equal(0, result.TotalMatches);
+    }
+
+    // ==================== Zoom Tests ====================
+
+    [Fact]
+    public void ZoomFactor_default_is_1_without_adapter()
+    {
+        var adapter = MockWebViewAdapter.Create();
+        using var core = new WebViewCore(adapter, _dispatcher);
+        Assert.Equal(1.0, core.ZoomFactor);
+    }
+
+    [Fact]
+    public void ZoomFactor_set_is_noop_without_adapter()
+    {
+        var adapter = MockWebViewAdapter.Create();
+        using var core = new WebViewCore(adapter, _dispatcher);
+        core.ZoomFactor = 2.0; // should not throw
+        Assert.Equal(1.0, core.ZoomFactor);
+    }
+
+    [Fact]
+    public void ZoomFactor_get_set_with_adapter()
+    {
+        var adapter = MockWebViewAdapter.CreateWithZoom();
+        using var core = new WebViewCore(adapter, _dispatcher);
+        Assert.Equal(1.0, core.ZoomFactor);
+
+        core.ZoomFactor = 1.5;
+        Assert.Equal(1.5, core.ZoomFactor);
+    }
+
+    [Fact]
+    public void ZoomFactor_clamps_to_min_max()
+    {
+        var adapter = MockWebViewAdapter.CreateWithZoom();
+        using var core = new WebViewCore(adapter, _dispatcher);
+
+        core.ZoomFactor = 0.1; // below 0.25 min
+        Assert.Equal(0.25, core.ZoomFactor, 2);
+
+        core.ZoomFactor = 10.0; // above 5.0 max
+        Assert.Equal(5.0, core.ZoomFactor, 2);
+    }
+
+    [Fact]
+    public void ZoomFactorChanged_fires_on_set()
+    {
+        var adapter = MockWebViewAdapter.CreateWithZoom();
+        using var core = new WebViewCore(adapter, _dispatcher);
+
+        double? received = null;
+        core.ZoomFactorChanged += (_, z) => received = z;
+
+        core.ZoomFactor = 2.0;
+        Assert.Equal(2.0, received);
+    }
+
+    [Fact]
+    public void WebDialog_ZoomFactor_delegates_to_core()
+    {
+        var host = new MockDialogHost();
+        var adapter = MockWebViewAdapter.CreateWithZoom();
+        using var dialog = new WebDialog(host, adapter, _dispatcher);
+
+        Assert.Equal(1.0, dialog.ZoomFactor);
+        dialog.ZoomFactor = 1.5;
+        Assert.Equal(1.5, dialog.ZoomFactor);
+    }
+
+    // ==================== PreloadScript Tests ====================
+
+    [Fact]
+    public void AddPreloadScript_throws_when_unsupported()
+    {
+        var adapter = MockWebViewAdapter.Create();
+        using var core = new WebViewCore(adapter, _dispatcher);
+        Assert.Throws<NotSupportedException>(() => core.AddPreloadScript("console.log('hi')"));
+    }
+
+    [Fact]
+    public void AddPreloadScript_returns_script_id()
+    {
+        var adapter = MockWebViewAdapter.CreateWithPreload();
+        using var core = new WebViewCore(adapter, _dispatcher);
+        var id = core.AddPreloadScript("console.log('hi')");
+        Assert.NotNull(id);
+        Assert.NotEmpty(id);
+    }
+
+    [Fact]
+    public void RemovePreloadScript_throws_when_unsupported()
+    {
+        var adapter = MockWebViewAdapter.Create();
+        using var core = new WebViewCore(adapter, _dispatcher);
+        Assert.Throws<NotSupportedException>(() => core.RemovePreloadScript("some-id"));
+    }
+
+    [Fact]
+    public void RemovePreloadScript_removes_script()
+    {
+        var adapter = MockWebViewAdapter.CreateWithPreload();
+        using var core = new WebViewCore(adapter, _dispatcher);
+        var id = core.AddPreloadScript("console.log('hi')");
+        core.RemovePreloadScript(id);
+
+        var preloadAdapter = (MockWebViewAdapterWithPreload)adapter;
+        Assert.DoesNotContain(id, preloadAdapter.Scripts.Keys);
+    }
+
+    [Fact]
+    public void WebDialog_AddPreloadScript_delegates_to_core()
+    {
+        var host = new MockDialogHost();
+        var adapter = MockWebViewAdapter.CreateWithPreload();
+        using var dialog = new WebDialog(host, adapter, _dispatcher);
+        var id = dialog.AddPreloadScript("console.log('test')");
+        Assert.NotNull(id);
+    }
+
+    [Fact]
+    public void WebDialog_AddPreloadScript_throws_when_unsupported()
+    {
+        var host = new MockDialogHost();
+        var adapter = MockWebViewAdapter.Create();
+        using var dialog = new WebDialog(host, adapter, _dispatcher);
+        Assert.Throws<NotSupportedException>(() => dialog.AddPreloadScript("x"));
+    }
+
+    [Fact]
+    public void Global_preloadscripts_applied_at_construction()
+    {
+        var adapter = MockWebViewAdapter.CreateWithPreload();
+        var originalOptions = WebViewEnvironment.Options;
+        try
+        {
+            WebViewEnvironment.Options = new WebViewEnvironmentOptions
+            {
+                PreloadScripts = new[] { "console.log('global1')", "console.log('global2')" }
+            };
+            using var core = new WebViewCore(adapter, _dispatcher);
+            var preloadAdapter = (MockWebViewAdapterWithPreload)adapter;
+            Assert.Equal(2, preloadAdapter.Scripts.Count);
+        }
+        finally
+        {
+            WebViewEnvironment.Options = originalOptions;
+        }
+    }
+
+    // ==================== ContextMenu Tests ====================
+
+    [Fact]
+    public void ContextMenuRequested_fires_when_adapter_raises()
+    {
+        var adapter = MockWebViewAdapter.CreateWithContextMenu();
+        using var core = new WebViewCore(adapter, _dispatcher);
+
+        ContextMenuRequestedEventArgs? received = null;
+        core.ContextMenuRequested += (_, e) => received = e;
+
+        var args = new ContextMenuRequestedEventArgs
+        {
+            X = 100, Y = 200,
+            LinkUri = new Uri("https://example.com"),
+            SelectionText = "hello",
+            MediaType = ContextMenuMediaType.None,
+            IsEditable = true
+        };
+        ((MockWebViewAdapterWithContextMenu)adapter).RaiseContextMenu(args);
+
+        Assert.NotNull(received);
+        Assert.Equal(100, received!.X);
+        Assert.Equal(200, received.Y);
+        Assert.Equal("hello", received.SelectionText);
+        Assert.True(received.IsEditable);
+    }
+
+    [Fact]
+    public void ContextMenuRequested_not_fired_without_adapter()
+    {
+        var adapter = MockWebViewAdapter.Create();
+        using var core = new WebViewCore(adapter, _dispatcher);
+
+        ContextMenuRequestedEventArgs? received = null;
+        core.ContextMenuRequested += (_, e) => received = e;
+
+        // No way to trigger it — should stay null
+        Assert.Null(received);
+    }
+
+    [Fact]
+    public void ContextMenuRequested_Handled_flag_propagates()
+    {
+        var adapter = MockWebViewAdapter.CreateWithContextMenu();
+        using var core = new WebViewCore(adapter, _dispatcher);
+
+        core.ContextMenuRequested += (_, e) => e.Handled = true;
+
+        var args = new ContextMenuRequestedEventArgs { X = 10, Y = 20 };
+        ((MockWebViewAdapterWithContextMenu)adapter).RaiseContextMenu(args);
+
+        Assert.True(args.Handled);
+    }
+
+    [Fact]
+    public void ContextMenuMediaType_enum_values()
+    {
+        Assert.Equal(0, (int)ContextMenuMediaType.None);
+        Assert.Equal(1, (int)ContextMenuMediaType.Image);
+        Assert.Equal(2, (int)ContextMenuMediaType.Video);
+        Assert.Equal(3, (int)ContextMenuMediaType.Audio);
+    }
+
+    [Fact]
+    public void WebDialog_ContextMenuRequested_fires()
+    {
+        var host = new MockDialogHost();
+        var adapter = MockWebViewAdapter.CreateWithContextMenu();
+        using var dialog = new WebDialog(host, adapter, _dispatcher);
+
+        ContextMenuRequestedEventArgs? received = null;
+        dialog.ContextMenuRequested += (_, e) => received = e;
+
+        var args = new ContextMenuRequestedEventArgs { X = 50, Y = 60 };
+        ((MockWebViewAdapterWithContextMenu)adapter).RaiseContextMenu(args);
+
+        Assert.NotNull(received);
+        Assert.Equal(50, received!.X);
     }
 }

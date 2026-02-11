@@ -22,7 +22,7 @@ namespace Agibuild.Avalonia.WebView.Integration.Tests.Automation;
 ///     5. The pending Task resolves with the result
 ///
 ///   JS → C# call flow:
-///     1. JS calls window.__agRpc.invoke("method", params)
+///     1. JS calls window.agWebView.rpc.invoke("method", params)
 ///     2. JS sends a JSON-RPC request via postMessage
 ///     3. WebViewCore receives it, dispatches to WebViewRpcService
 ///     4. WebViewRpcService calls the registered C# handler
@@ -215,7 +215,7 @@ public sealed class RpcIntegrationTests
 
     /// <summary>
     /// Extracts the JSON-RPC "id" from a script like:
-    ///   window.__agRpc && window.__agRpc._dispatch("{\"jsonrpc\":\"2.0\",\"id\":\"abc\",\"method\":\"getTitle\"}")
+    ///   window.agWebView && window.agWebView.rpc && window.agWebView.rpc._dispatch("{\"jsonrpc\":\"2.0\",\"id\":\"abc\",\"method\":\"getTitle\"}")
     /// </summary>
     private static string ExtractRpcId(string script)
     {

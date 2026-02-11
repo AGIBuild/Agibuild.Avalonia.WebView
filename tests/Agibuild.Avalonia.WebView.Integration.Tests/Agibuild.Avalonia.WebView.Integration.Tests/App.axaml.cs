@@ -13,6 +13,12 @@ namespace Agibuild.Avalonia.WebView.Integration.Tests
 {
     public partial class App : Application
     {
+        // Tab indices (must match MainView.axaml nav order):
+        //   0 = Browser (Consumer E2E)
+        //   1 = Advanced Features
+        //   2 = Platform Smoke (WK or WV2)
+        //   3 = Feature E2E
+
         public override void Initialize()
         {
             AvaloniaXamlLoader.Load(this);
@@ -29,9 +35,23 @@ namespace Agibuild.Avalonia.WebView.Integration.Tests
                 var args = desktop.Args ?? Array.Empty<string>();
                 var mainVm = new MainViewModel();
 
-                if (args.Contains("--wk-smoke"))
+                if (args.Contains("--consumer-e2e"))
+                {
+                    mainVm.SelectedTabIndex = 0;
+                    mainVm.ConsumerE2E.AutoRun = true;
+                    mainVm.ConsumerE2E.AutoRunCompleted += exitCode =>
+                        Dispatcher.UIThread.Post(() => desktop.Shutdown(exitCode));
+                }
+                else if (args.Contains("--advanced-e2e"))
                 {
                     mainVm.SelectedTabIndex = 1;
+                    mainVm.AdvancedE2E.AutoRun = true;
+                    mainVm.AdvancedE2E.AutoRunCompleted += exitCode =>
+                        Dispatcher.UIThread.Post(() => desktop.Shutdown(exitCode));
+                }
+                else if (args.Contains("--wk-smoke"))
+                {
+                    mainVm.SelectedTabIndex = 2;
                     mainVm.WkWebViewSmoke.AutoRun = true;
                     mainVm.WkWebViewSmoke.AutoRunCompleted += exitCode =>
                         Dispatcher.UIThread.Post(() => desktop.Shutdown(exitCode));
@@ -43,23 +63,9 @@ namespace Agibuild.Avalonia.WebView.Integration.Tests
                     mainVm.WebView2Smoke.AutoRunCompleted += exitCode =>
                         Dispatcher.UIThread.Post(() => desktop.Shutdown(exitCode));
                 }
-                else if (args.Contains("--consumer-e2e"))
-                {
-                    mainVm.SelectedTabIndex = 3;
-                    mainVm.ConsumerE2E.AutoRun = true;
-                    mainVm.ConsumerE2E.AutoRunCompleted += exitCode =>
-                        Dispatcher.UIThread.Post(() => desktop.Shutdown(exitCode));
-                }
-                else if (args.Contains("--advanced-e2e"))
-                {
-                    mainVm.SelectedTabIndex = 4;
-                    mainVm.AdvancedE2E.AutoRun = true;
-                    mainVm.AdvancedE2E.AutoRunCompleted += exitCode =>
-                        Dispatcher.UIThread.Post(() => desktop.Shutdown(exitCode));
-                }
                 else if (args.Contains("--feature-e2e"))
                 {
-                    mainVm.SelectedTabIndex = 6;
+                    mainVm.SelectedTabIndex = 3;
                     mainVm.FeatureE2E.AutoRun = true;
                     mainVm.FeatureE2E.AutoRunCompleted += exitCode =>
                         Dispatcher.UIThread.Post(() => desktop.Shutdown(exitCode));

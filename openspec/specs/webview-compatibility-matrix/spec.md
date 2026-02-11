@@ -144,3 +144,45 @@ The compatibility matrix SHALL update the error categorization capability entry 
 - **WHEN** the matrix is reviewed for error categorization
 - **THEN** it shows macOS (`NSURLError`), Windows (`CoreWebView2WebErrorStatus`), and Android (`WebViewClient.ERROR_*`) mappings
 
+### Requirement: Command Manager capability in matrix
+The compatibility matrix SHALL list command manager as an Extended capability with:
+- All platforms (Windows, macOS, iOS, Android, GTK): supported via `ICommandAdapter` facet
+- Commands: Copy, Cut, Paste, SelectAll, Undo, Redo
+- CT: contract tests via mock adapter verifying facet detection and command delegation
+
+#### Scenario: Command Manager is listed in matrix
+- **WHEN** the matrix is reviewed for command manager
+- **THEN** it shows all platforms as supported with CT acceptance criteria
+
+### Requirement: Screenshot capture capability in matrix
+The compatibility matrix SHALL list screenshot capture as an Extended capability with:
+- All platforms (Windows, macOS, iOS, Android, GTK): supported via `IScreenshotAdapter` facet
+- Returns PNG bytes; throws `NotSupportedException` when adapter lacks support
+- CT: contract tests via mock adapter verifying PNG header and unsupported behavior
+
+#### Scenario: Screenshot capture is listed in matrix
+- **WHEN** the matrix is reviewed for screenshot capture
+- **THEN** it shows all platforms as supported with CT acceptance criteria
+
+### Requirement: Print to PDF capability in matrix
+The compatibility matrix SHALL list print-to-pdf as an Extended capability with:
+- Windows (WebView2): supported via `CoreWebView2.PrintToPdfAsync`
+- macOS/iOS (WKWebView): supported via native PDF rendering
+- Android/GTK: not supported (throws `NotSupportedException`)
+- CT: contract tests via mock adapter verifying PDF header, options pass-through, and unsupported behavior
+
+#### Scenario: Print to PDF is listed in matrix
+- **WHEN** the matrix is reviewed for print-to-pdf
+- **THEN** it shows Windows/macOS/iOS as supported and Android/GTK as not supported
+
+### Requirement: JS-C# RPC capability in matrix
+The compatibility matrix SHALL list JS ↔ C# RPC as an Extended capability with:
+- All platforms: supported when WebMessage bridge is enabled
+- Protocol: JSON-RPC 2.0 over the WebMessage bridge
+- Requires explicit bridge enable (`EnableWebMessageBridge`)
+- CT: contract tests via mock adapter verifying handler registration, invocation, error handling
+
+#### Scenario: RPC is listed in matrix
+- **WHEN** the matrix is reviewed for JS ↔ C# RPC
+- **THEN** it shows all platforms as supported with CT acceptance criteria and bridge dependency noted
+

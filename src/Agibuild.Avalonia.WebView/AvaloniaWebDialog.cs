@@ -88,6 +88,10 @@ public sealed class AvaloniaWebDialog : IWebDialog
         if (!_disposed)
         {
             Closing?.Invoke(this, EventArgs.Empty);
+            // Mark disposed so subsequent API calls fail fast with ObjectDisposedException
+            // instead of crashing inside the (now-destroyed) native WebView.
+            _disposed = true;
+            _readyTcs.TrySetResult(); // Unblock any pending EnsureReadyAsync waiters
         }
     }
 
@@ -198,6 +202,36 @@ public sealed class AvaloniaWebDialog : IWebDialog
     public IWebViewRpcService? Rpc => _webView.Rpc;
     public Task<byte[]> CaptureScreenshotAsync() => _webView.CaptureScreenshotAsync();
     public Task<byte[]> PrintToPdfAsync(PdfPrintOptions? options = null) => _webView.PrintToPdfAsync(options);
+
+    /// <inheritdoc cref="WebViewCore.ZoomFactor"/>
+    public double ZoomFactor
+    {
+        get => _webView.ZoomFactor;
+        set => _webView.ZoomFactor = value;
+    }
+    /// <inheritdoc cref="WebViewCore.ZoomFactorChanged"/>
+    public event EventHandler<double>? ZoomFactorChanged
+    {
+        add => _webView.ZoomFactorChanged += value;
+        remove => _webView.ZoomFactorChanged -= value;
+    }
+
+    /// <inheritdoc cref="WebViewCore.FindInPageAsync"/>
+    public Task<FindInPageResult> FindInPageAsync(string text, FindInPageOptions? options = null) => _webView.FindInPageAsync(text, options);
+    /// <inheritdoc cref="WebViewCore.StopFindInPage"/>
+    public void StopFindInPage(bool clearHighlights = true) => _webView.StopFindInPage(clearHighlights);
+
+    /// <inheritdoc cref="WebViewCore.AddPreloadScript"/>
+    public string AddPreloadScript(string javaScript) => _webView.AddPreloadScript(javaScript);
+    /// <inheritdoc cref="WebViewCore.RemovePreloadScript"/>
+    public void RemovePreloadScript(string scriptId) => _webView.RemovePreloadScript(scriptId);
+
+    /// <inheritdoc cref="WebViewCore.ContextMenuRequested"/>
+    public event EventHandler<ContextMenuRequestedEventArgs>? ContextMenuRequested
+    {
+        add => _webView.ContextMenuRequested += value;
+        remove => _webView.ContextMenuRequested -= value;
+    }
 
     public event EventHandler<NavigationStartingEventArgs>? NavigationStarted
     {

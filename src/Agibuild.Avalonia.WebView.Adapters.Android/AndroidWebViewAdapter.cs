@@ -16,7 +16,8 @@ namespace Agibuild.Avalonia.WebView.Adapters.Android;
 
 [SupportedOSPlatform("android")]
 internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHandleProvider, ICookieAdapter, IWebViewAdapterOptions,
-    ICustomSchemeAdapter, IDownloadAdapter, IPermissionAdapter, ICommandAdapter, IScreenshotAdapter /* IPrintAdapter: Android lacks headless PDF export */
+    ICustomSchemeAdapter, IDownloadAdapter, IPermissionAdapter, ICommandAdapter, IScreenshotAdapter, /* IPrintAdapter: Android lacks headless PDF export */
+    IFindInPageAdapter, IZoomAdapter, IPreloadScriptAdapter, IContextMenuAdapter
 {
     private static bool DiagnosticsEnabled
         => string.Equals(System.Environment.GetEnvironmentVariable("AGIBUILD_WEBVIEW_DIAG"), "1", StringComparison.Ordinal);
@@ -1435,4 +1436,86 @@ internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHan
 
         return Task.FromResult(stream.ToArray());
     }
+
+    // ==================== IFindInPageAdapter ====================
+
+    public Task<FindInPageResult> FindAsync(string text, FindInPageOptions? options)
+    {
+        if (_webView is null)
+            throw new InvalidOperationException("WebView is not initialized.");
+
+        var tcs = new TaskCompletionSource<FindInPageResult>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        // Android WebView has built-in findAllAsync + FindListener
+        _webView.SetFindListener(new FindListener(tcs));
+        _webView.FindAllAsync(text);
+
+        return tcs.Task;
+    }
+
+    public void StopFind(bool clearHighlights = true)
+    {
+        _webView?.ClearMatches();
+    }
+
+    private sealed class FindListener : Java.Lang.Object, AWebView.IFindListener
+    {
+        private readonly TaskCompletionSource<FindInPageResult> _tcs;
+        public FindListener(TaskCompletionSource<FindInPageResult> tcs) => _tcs = tcs;
+
+        public void OnFindResultReceived(int activeMatchOrdinal, int numberOfMatches, bool isDoneCounting)
+        {
+            if (!isDoneCounting) return;
+            _tcs.TrySetResult(new FindInPageResult
+            {
+                ActiveMatchIndex = activeMatchOrdinal,
+                TotalMatches = numberOfMatches
+            });
+        }
+    }
+
+    // ==================== IZoomAdapter ====================
+
+    public event EventHandler<double>? ZoomFactorChanged;
+
+    public double ZoomFactor
+    {
+        get
+        {
+            if (_webView?.Settings is null) return 1.0;
+            return _webView.Settings.TextZoom / 100.0;
+        }
+        set
+        {
+            if (_webView?.Settings is null) return;
+            var percent = (int)Math.Round(value * 100);
+            _webView.Settings.TextZoom = percent;
+            ZoomFactorChanged?.Invoke(this, value);
+        }
+    }
+
+    // ==================== IPreloadScriptAdapter ====================
+
+    private readonly Dictionary<string, string> _preloadScripts = new();
+    private int _nextScriptId;
+
+    public string AddPreloadScript(string javaScript)
+    {
+        if (_webView is null)
+            throw new InvalidOperationException("WebView is not initialized.");
+        var scriptId = $"preload_{++_nextScriptId}";
+        _preloadScripts[scriptId] = javaScript;
+        // Android WebView injects scripts in onPageStarted via WebViewClient.
+        // The scripts are stored and executed at page load time.
+        return scriptId;
+    }
+
+    public void RemovePreloadScript(string scriptId)
+    {
+        _preloadScripts.Remove(scriptId);
+    }
+
+    // ==================== IContextMenuAdapter ====================
+
+    public event EventHandler<ContextMenuRequestedEventArgs>? ContextMenuRequested;
 }

@@ -3,7 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:Agibuild.Avalonia.WebView.Integration.Tests.ViewModels"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             mc:Ignorable="d" d:DesignWidth="1024" d:DesignHeight="640"
              x:Class="Agibuild.Avalonia.WebView.Integration.Tests.Views.MainView"
              x:DataType="vm:MainViewModel">
   <Design.DataContext>
@@ -13,7 +13,7 @@
   <DockPanel Background="{StaticResource SurfaceBgBrush}">
 
     <!-- ════════════ Top Header Bar ════════════ -->
-    <Border DockPanel.Dock="Top" Height="48">
+    <Border DockPanel.Dock="Top" Height="42">
       <Border.Background>
         <LinearGradientBrush StartPoint="0%,50%" EndPoint="100%,50%">
           <GradientStop Color="#1E40AF" Offset="0" />
@@ -21,109 +21,85 @@
           <GradientStop Color="#0EA5E9" Offset="1" />
         </LinearGradientBrush>
       </Border.Background>
-      <Grid ColumnDefinitions="Auto,Auto,*,Auto" Margin="8,0">
-        <ToggleButton x:Name="NavToggle" Grid.Column="0"
-                      Content="&#x2630;" FontSize="20"
-                      Foreground="White" Padding="8,4"
-                      Background="Transparent" BorderThickness="0"
-                      VerticalAlignment="Center" />
-        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"
-                    VerticalAlignment="Center" Margin="8,0,0,0">
-          <TextBlock Text="&#x1F310;" FontSize="20" VerticalAlignment="Center" />
-          <TextBlock Text="Agibuild WebView" FontSize="16" FontWeight="Bold"
+      <Grid ColumnDefinitions="Auto,*,Auto,Auto" Margin="10,0">
+        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8"
+                    VerticalAlignment="Center">
+          <TextBlock Text="&#x1F310;" FontSize="18" VerticalAlignment="Center" />
+          <TextBlock Text="Agibuild WebView" FontSize="15" FontWeight="Bold"
                      Foreground="White" VerticalAlignment="Center" />
         </StackPanel>
-        <Border Grid.Column="3" Background="#30FFFFFF" CornerRadius="10"
-                Padding="8,3" VerticalAlignment="Center">
-          <TextBlock Text="E2E Demo" FontSize="10" FontWeight="SemiBold"
+        <Border Grid.Column="2" Background="#30FFFFFF" CornerRadius="10"
+                Padding="8,3" VerticalAlignment="Center" Margin="0,0,8,0">
+          <TextBlock Text="E2E Test" FontSize="10" FontWeight="SemiBold"
                      Foreground="White" />
         </Border>
+        <!-- Log panel toggle -->
+        <ToggleButton Grid.Column="3" IsChecked="{Binding IsLogPanelOpen}"
+                      Content="&#x1F4CB;" FontSize="14"
+                      Foreground="White" Padding="8,4"
+                      Background="Transparent" BorderThickness="0"
+                      VerticalAlignment="Center"
+                      ToolTip.Tip="Toggle Console" />
       </Grid>
     </Border>
 
-    <!-- ════════════ Content + Overlay Drawer ════════════ -->
-    <Panel>
+    <!-- ════════════ Main: Nav Rail + Page + Log Panel ════════════ -->
+    <Grid ColumnDefinitions="Auto,*,Auto">
 
-      <!-- Lazy page host: only one view at a time -->
-      <ContentControl x:Name="PageHost" />
-
-      <!-- Overlay backdrop -->
-      <Border IsVisible="{Binding #NavToggle.IsChecked}"
-              Background="#40000000" ZIndex="10"
-              PointerPressed="OnOverlayDismiss" />
-
-      <!-- Navigation drawer -->
-      <Border IsVisible="{Binding #NavToggle.IsChecked}"
-              HorizontalAlignment="Left" Width="260"
-              Background="White" ZIndex="11">
+      <!-- ── Col 0: Nav Rail ── -->
+      <Border Grid.Column="0" Background="White" Width="140"
+              BorderThickness="0,0,1,0" BorderBrush="{StaticResource BorderDefaultBrush}">
         <DockPanel>
-          <Border DockPanel.Dock="Top" Padding="16,16,16,12">
-            <StackPanel Spacing="4">
-              <TextBlock Text="Navigation" Classes="subheading" />
-              <TextBlock Text="Select a test module" Classes="caption" />
-            </StackPanel>
-          </Border>
-          <Border DockPanel.Dock="Top" Height="1" Background="{StaticResource BorderDefaultBrush}" />
-
+          <TextBlock DockPanel.Dock="Top" Text="Modules" Classes="caption"
+                     Margin="12,10,12,4" />
           <ListBox x:Name="NavList"
                    SelectedIndex="{Binding SelectedTabIndex}"
                    SelectionChanged="OnNavSelectionChanged"
-                   Background="Transparent"
-                   Margin="8,8">
+                   Background="Transparent" Margin="4,2">
             <ListBox.Styles>
               <Style Selector="ListBoxItem">
-                <Setter Property="CornerRadius" Value="8" />
-                <Setter Property="Padding" Value="12,10" />
+                <Setter Property="CornerRadius" Value="6" />
+                <Setter Property="Padding" Value="10,8" />
                 <Setter Property="Margin" Value="0,1" />
+                <Setter Property="FontSize" Value="12" />
               </Style>
             </ListBox.Styles>
-
-            <ListBoxItem>
-              <StackPanel Spacing="2">
-                <TextBlock Text="Mock Adapter" FontWeight="SemiBold" FontSize="13" />
-                <TextBlock Text="Unit test with mock adapter" Classes="caption" />
-              </StackPanel>
-            </ListBoxItem>
-            <ListBoxItem>
-              <StackPanel Spacing="2">
-                <TextBlock Text="macOS WKWebView" FontWeight="SemiBold" FontSize="13" />
-                <TextBlock Text="Native WKWebView smoke test" Classes="caption" />
-              </StackPanel>
-            </ListBoxItem>
-            <ListBoxItem>
-              <StackPanel Spacing="2">
-                <TextBlock Text="Windows WebView2" FontWeight="SemiBold" FontSize="13" />
-                <TextBlock Text="Edge WebView2 smoke test" Classes="caption" />
-              </StackPanel>
-            </ListBoxItem>
-            <ListBoxItem>
-              <StackPanel Spacing="2">
-                <TextBlock Text="Consumer E2E" FontWeight="SemiBold" FontSize="13" />
-                <TextBlock Text="Full browser navigation" Classes="caption" />
-              </StackPanel>
-            </ListBoxItem>
-            <ListBoxItem>
-              <StackPanel Spacing="2">
-                <TextBlock Text="Advanced Features" FontWeight="SemiBold" FontSize="13" />
-                <TextBlock Text="Dialog, Auth, Environment" Classes="caption" />
-              </StackPanel>
-            </ListBoxItem>
-            <ListBoxItem>
-              <StackPanel Spacing="2">
-                <TextBlock Text="Nav Intercept" FontWeight="SemiBold" FontSize="13" />
-                <TextBlock Text="Block, allow, redirect links" Classes="caption" />
-              </StackPanel>
-            </ListBoxItem>
-            <ListBoxItem>
-              <StackPanel Spacing="2">
-                <TextBlock Text="Feature E2E" FontWeight="SemiBold" FontSize="13" />
-                <TextBlock Text="Commands, Screenshot, PDF, RPC" Classes="caption" />
-              </StackPanel>
-            </ListBoxItem>
+            <ListBoxItem Content="Browser" />
+            <ListBoxItem Content="Advanced" />
+            <ListBoxItem Content="Smoke" />
+            <ListBoxItem Content="Feature E2E" />
           </ListBox>
         </DockPanel>
       </Border>
 
-    </Panel>
+      <!-- ── Col 1: Page Host ── -->
+      <ContentControl Grid.Column="1" x:Name="PageHost" />
+
+      <!-- ── Col 2: Shared Log Panel (collapsible) ── -->
+      <Border Grid.Column="2" Width="320"
+              IsVisible="{Binding IsLogPanelOpen}"
+              Background="White"
+              BorderThickness="1,0,0,0" BorderBrush="{StaticResource BorderDefaultBrush}">
+        <DockPanel>
+          <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto,Auto" Margin="10,8,10,4">
+            <TextBlock Text="Console" FontWeight="SemiBold" FontSize="12"
+                       Foreground="{StaticResource TextSecondaryBrush}"
+                       VerticalAlignment="Center" />
+            <Button Grid.Column="1" Content="Clear" FontSize="10" Padding="8,3"
+                    CornerRadius="4" Command="{Binding ClearLogCommand}" />
+            <Button Grid.Column="2" Content="&#x2715;" FontSize="10" Padding="6,3"
+                    CornerRadius="4" Margin="4,0,0,0"
+                    Background="Transparent" BorderThickness="0"
+                    Command="{Binding ToggleLogPanelCommand}" />
+          </Grid>
+          <TextBox IsReadOnly="True" AcceptsReturn="True" TextWrapping="NoWrap"
+                   FontFamily="Menlo,Consolas,Courier New,monospace" FontSize="11"
+                   Text="{Binding SharedLog}"
+                   Margin="10,4,10,10" Background="#F8FAFC" CornerRadius="6"
+                   CaretIndex="2147483647" />
+        </DockPanel>
+      </Border>
+
+    </Grid>
   </DockPanel>
 </UserControl>

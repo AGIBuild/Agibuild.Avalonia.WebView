@@ -84,6 +84,36 @@ public sealed class WebDialog : IWebDialog
     public Task<byte[]> CaptureScreenshotAsync() => _core.CaptureScreenshotAsync();
     public Task<byte[]> PrintToPdfAsync(PdfPrintOptions? options = null) => _core.PrintToPdfAsync(options);
 
+    /// <inheritdoc cref="WebViewCore.ZoomFactor"/>
+    public double ZoomFactor
+    {
+        get => _core.ZoomFactor;
+        set => _core.ZoomFactor = value;
+    }
+    /// <inheritdoc cref="WebViewCore.ZoomFactorChanged"/>
+    public event EventHandler<double>? ZoomFactorChanged
+    {
+        add => _core.ZoomFactorChanged += value;
+        remove => _core.ZoomFactorChanged -= value;
+    }
+
+    /// <inheritdoc cref="WebViewCore.FindInPageAsync"/>
+    public Task<FindInPageResult> FindInPageAsync(string text, FindInPageOptions? options = null) => _core.FindInPageAsync(text, options);
+    /// <inheritdoc cref="WebViewCore.StopFindInPage"/>
+    public void StopFindInPage(bool clearHighlights = true) => _core.StopFindInPage(clearHighlights);
+
+    /// <inheritdoc cref="WebViewCore.AddPreloadScript"/>
+    public string AddPreloadScript(string javaScript) => _core.AddPreloadScript(javaScript);
+    /// <inheritdoc cref="WebViewCore.RemovePreloadScript"/>
+    public void RemovePreloadScript(string scriptId) => _core.RemovePreloadScript(scriptId);
+
+    /// <inheritdoc cref="WebViewCore.ContextMenuRequested"/>
+    public event EventHandler<ContextMenuRequestedEventArgs>? ContextMenuRequested
+    {
+        add => _core.ContextMenuRequested += value;
+        remove => _core.ContextMenuRequested -= value;
+    }
+
     public event EventHandler<NavigationStartingEventArgs>? NavigationStarted
     {
         add => _core.NavigationStarted += value;

@@ -71,6 +71,10 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
     private readonly ICommandManager? _commandManager;
     private readonly IScreenshotAdapter? _screenshotAdapter;
     private readonly IPrintAdapter? _printAdapter;
+    private readonly IFindInPageAdapter? _findInPageAdapter;
+    private readonly IZoomAdapter? _zoomAdapter;
+    private readonly IPreloadScriptAdapter? _preloadScriptAdapter;
+    private readonly IContextMenuAdapter? _contextMenuAdapter;
 
     private bool _webMessageBridgeEnabled;
     private IWebMessagePolicy? _webMessagePolicy;
@@ -150,6 +154,40 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         _printAdapter = _adapter as IPrintAdapter;
         _logger.LogDebug("Print support: {Supported}", _printAdapter is not null);
 
+        // Detect find-in-page support.
+        _findInPageAdapter = _adapter as IFindInPageAdapter;
+        _logger.LogDebug("Find-in-page support: {Supported}", _findInPageAdapter is not null);
+
+        // Detect zoom support.
+        _zoomAdapter = _adapter as IZoomAdapter;
+        if (_zoomAdapter is not null)
+        {
+            _zoomAdapter.ZoomFactorChanged += OnAdapterZoomFactorChanged;
+        }
+        _logger.LogDebug("Zoom support: {Supported}", _zoomAdapter is not null);
+
+        // Detect preload script support and apply global scripts.
+        _preloadScriptAdapter = _adapter as IPreloadScriptAdapter;
+        if (_preloadScriptAdapter is not null)
+        {
+            var globalScripts = WebViewEnvironment.Options.PreloadScripts;
+            foreach (var script in globalScripts)
+            {
+                _preloadScriptAdapter.AddPreloadScript(script);
+            }
+            if (globalScripts.Count > 0)
+                _logger.LogDebug("Global preload scripts applied: {Count}", globalScripts.Count);
+        }
+        _logger.LogDebug("Preload script support: {Supported}", _preloadScriptAdapter is not null);
+
+        // Subscribe to context menu events if adapter supports it.
+        _contextMenuAdapter = _adapter as IContextMenuAdapter;
+        if (_contextMenuAdapter is not null)
+        {
+            _contextMenuAdapter.ContextMenuRequested += OnAdapterContextMenuRequested;
+        }
+        _logger.LogDebug("Context menu support: {Supported}", _contextMenuAdapter is not null);
+
         _adapter.NavigationCompleted += OnAdapterNavigationCompleted;
         _adapter.NewWindowRequested += OnAdapterNewWindowRequested;
         _adapter.WebMessageReceived += OnAdapterWebMessageReceived;
@@ -220,6 +258,11 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
             downloadAdapter.DownloadRequested -= OnAdapterDownloadRequested;
         if (_adapter is IPermissionAdapter permissionAdapter)
             permissionAdapter.PermissionRequested -= OnAdapterPermissionRequested;
+        if (_zoomAdapter is not null)
+            _zoomAdapter.ZoomFactorChanged -= OnAdapterZoomFactorChanged;
+
+        if (_contextMenuAdapter is not null)
+            _contextMenuAdapter.ContextMenuRequested -= OnAdapterContextMenuRequested;
 
         if (_activeNavigation is not null)
         {
@@ -501,6 +544,102 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         if (_printAdapter is null)
             throw new NotSupportedException("The current WebView adapter does not support PDF printing.");
         return _printAdapter.PrintToPdfAsync(options);
+    }
+
+    // ==================== Zoom ====================
+
+    private const double MinZoom = 0.25;
+    private const double MaxZoom = 5.0;
+
+    /// <summary>Raised when the zoom factor changes.</summary>
+    public event EventHandler<double>? ZoomFactorChanged;
+
+    /// <summary>
+    /// Gets or sets the zoom factor (1.0 = 100%). Clamped to [0.25, 5.0].
+    /// Returns 1.0 if the adapter does not support zoom.
+    /// </summary>
+    public double ZoomFactor
+    {
+        get => _zoomAdapter?.ZoomFactor ?? 1.0;
+        set
+        {
+            ThrowIfDisposed();
+            if (_zoomAdapter is null) return; // no-op without adapter
+            _zoomAdapter.ZoomFactor = Math.Clamp(value, MinZoom, MaxZoom);
+        }
+    }
+
+    private void OnAdapterZoomFactorChanged(object? sender, double newZoom)
+    {
+        if (_disposed) return;
+        _ = _dispatcher.InvokeAsync(() => ZoomFactorChanged?.Invoke(this, newZoom));
+    }
+
+    /// <summary>Raised when the user triggers a context menu (right-click, long-press).</summary>
+    public event EventHandler<ContextMenuRequestedEventArgs>? ContextMenuRequested;
+
+    private void OnAdapterContextMenuRequested(object? sender, ContextMenuRequestedEventArgs e)
+    {
+        if (_disposed) return;
+        _ = _dispatcher.InvokeAsync(() => ContextMenuRequested?.Invoke(this, e));
+    }
+
+    /// <summary>
+    /// Searches the current page for the given text.
+    /// </summary>
+    /// <param name="text">The search text. Must not be null or empty.</param>
+    /// <param name="options">Optional search options (case sensitivity, direction).</param>
+    /// <returns>A <see cref="FindInPageResult"/> with match count and active index.</returns>
+    /// <exception cref="NotSupportedException">The adapter does not implement <see cref="IFindInPageAdapter"/>.</exception>
+    /// <exception cref="ArgumentException"><paramref name="text"/> is null or empty.</exception>
+    public Task<FindInPageResult> FindInPageAsync(string text, FindInPageOptions? options = null)
+    {
+        ThrowIfDisposed();
+        if (string.IsNullOrEmpty(text))
+            throw new ArgumentException("Search text must not be null or empty.", nameof(text));
+        if (_findInPageAdapter is null)
+            throw new NotSupportedException("The current WebView adapter does not support find-in-page.");
+        return _findInPageAdapter.FindAsync(text, options);
+    }
+
+    /// <summary>
+    /// Clears find-in-page highlights and resets search state.
+    /// </summary>
+    /// <param name="clearHighlights">Whether to remove visual highlights. Default: true.</param>
+    /// <exception cref="NotSupportedException">The adapter does not implement <see cref="IFindInPageAdapter"/>.</exception>
+    public void StopFindInPage(bool clearHighlights = true)
+    {
+        ThrowIfDisposed();
+        if (_findInPageAdapter is null)
+            throw new NotSupportedException("The current WebView adapter does not support find-in-page.");
+        _findInPageAdapter.StopFind(clearHighlights);
+    }
+
+    /// <summary>
+    /// Registers a JavaScript snippet to run at document start on every page load.
+    /// </summary>
+    /// <param name="javaScript">The script to inject.</param>
+    /// <returns>An opaque script ID that can be passed to <see cref="RemovePreloadScript"/>.</returns>
+    /// <exception cref="NotSupportedException">The adapter does not implement <see cref="IPreloadScriptAdapter"/>.</exception>
+    public string AddPreloadScript(string javaScript)
+    {
+        ThrowIfDisposed();
+        if (_preloadScriptAdapter is null)
+            throw new NotSupportedException("The current WebView adapter does not support preload scripts.");
+        return _preloadScriptAdapter.AddPreloadScript(javaScript);
+    }
+
+    /// <summary>
+    /// Removes a previously registered preload script by its ID.
+    /// </summary>
+    /// <param name="scriptId">The ID returned by <see cref="AddPreloadScript"/>.</param>
+    /// <exception cref="NotSupportedException">The adapter does not implement <see cref="IPreloadScriptAdapter"/>.</exception>
+    public void RemovePreloadScript(string scriptId)
+    {
+        ThrowIfDisposed();
+        if (_preloadScriptAdapter is null)
+            throw new NotSupportedException("The current WebView adapter does not support preload scripts.");
+        _preloadScriptAdapter.RemovePreloadScript(scriptId);
     }
 
     /// <summary>

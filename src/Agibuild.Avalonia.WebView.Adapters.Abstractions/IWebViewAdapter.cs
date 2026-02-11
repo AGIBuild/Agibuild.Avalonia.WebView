@@ -61,6 +61,52 @@ internal interface ICommandAdapter
 }
 
 /// <summary>
+/// Optional interface for adapters that support context menu interception.
+/// Runtime checks for this via <c>adapter as IContextMenuAdapter</c>.
+/// </summary>
+internal interface IContextMenuAdapter
+{
+    /// <summary>Raised when the user triggers a context menu (right-click, long-press).</summary>
+    event EventHandler<ContextMenuRequestedEventArgs>? ContextMenuRequested;
+}
+
+/// <summary>
+/// Optional interface for adapters that support preload scripts (user scripts injected at document start).
+/// Runtime checks for this via <c>adapter as IPreloadScriptAdapter</c>.
+/// </summary>
+internal interface IPreloadScriptAdapter
+{
+    /// <summary>Registers a JavaScript snippet to run at document start on every page load. Returns an opaque script ID.</summary>
+    string AddPreloadScript(string javaScript);
+    /// <summary>Removes a previously registered preload script by its ID.</summary>
+    void RemovePreloadScript(string scriptId);
+}
+
+/// <summary>
+/// Optional interface for adapters that support zoom level control.
+/// Runtime checks for this via <c>adapter as IZoomAdapter</c>.
+/// </summary>
+internal interface IZoomAdapter
+{
+    /// <summary>Gets or sets the zoom factor (1.0 = 100%).</summary>
+    double ZoomFactor { get; set; }
+    /// <summary>Raised when the zoom factor changes (programmatic or user-initiated).</summary>
+    event EventHandler<double>? ZoomFactorChanged;
+}
+
+/// <summary>
+/// Optional interface for adapters that support in-page text search.
+/// Runtime checks for this via <c>adapter as IFindInPageAdapter</c>.
+/// </summary>
+internal interface IFindInPageAdapter
+{
+    /// <summary>Searches the current page for the given text. Returns match info.</summary>
+    Task<FindInPageResult> FindAsync(string text, FindInPageOptions? options);
+    /// <summary>Clears find highlights and resets search state.</summary>
+    void StopFind(bool clearHighlights = true);
+}
+
+/// <summary>
 /// Optional interface for adapters that support screenshot capture.
 /// Runtime checks for this via <c>adapter as IScreenshotAdapter</c>.
 /// </summary>

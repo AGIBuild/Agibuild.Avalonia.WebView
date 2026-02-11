@@ -144,6 +144,52 @@ dialog.Show();
 await dialog.NavigateAsync(new Uri("https://example.com/login"));
 ```
 
+### Command Manager
+
+```csharp
+var commandManager = webView.TryGetCommandManager();
+if (commandManager is not null)
+{
+    commandManager.Copy();
+    commandManager.Paste();
+    commandManager.SelectAll();
+    commandManager.Cut();
+    commandManager.Undo();
+    commandManager.Redo();
+}
+```
+
+### Screenshot Capture
+
+```csharp
+byte[] pngBytes = await webView.CaptureScreenshotAsync();
+File.WriteAllBytes("screenshot.png", pngBytes);
+```
+
+### Print to PDF
+
+```csharp
+byte[] pdfBytes = await webView.PrintToPdfAsync(new PdfPrintOptions
+{
+    Landscape = true,
+    Scale = 0.8,
+    PrintBackground = true
+});
+File.WriteAllBytes("page.pdf", pdfBytes);
+```
+
+### JS ↔ C# RPC (Experimental)
+
+Bidirectional typed RPC over the WebMessage bridge using JSON-RPC 2.0:
+
+```csharp
+// C# handler called from JS
+webView.Rpc?.Handle("greet", (string name) => $"Hello, {name}!");
+
+// C# calling JS
+var result = await webView.Rpc!.InvokeAsync<string>("jsMethod", new { key = "value" });
+```
+
 ### Cookie Management (Experimental)
 
 ```csharp
@@ -168,7 +214,14 @@ WebViewEnvironment.Initialize(loggerFactory, new WebViewEnvironmentOptions
 
 ## Testing
 
-Spec-driven contract tests cover the runtime layer against mock adapters — no native browser needed. Line coverage **92%+**, branch coverage **84%+**.
+Spec-driven contract tests cover the runtime layer against mock adapters — no native browser needed.
+
+| Metric | Value |
+|--------|-------|
+| Unit tests | 391 |
+| Integration tests (headless) | 80 |
+| Line coverage | **96%+** |
+| Branch coverage | **84%+** |
 
 ## License
 

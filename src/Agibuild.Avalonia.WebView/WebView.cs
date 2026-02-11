@@ -31,6 +31,9 @@ public class WebView : NativeControlHost
     public static readonly DirectProperty<WebView, bool> IsLoadingProperty =
         AvaloniaProperty.RegisterDirect<WebView, bool>(nameof(IsLoading), o => o.IsLoading);
 
+    public static readonly StyledProperty<double> ZoomFactorProperty =
+        AvaloniaProperty.Register<WebView, double>(nameof(ZoomFactor), defaultValue: 1.0);
+
     // ---------------------------------------------------------------------------
     //  Internal state
     // ---------------------------------------------------------------------------
@@ -47,6 +50,7 @@ public class WebView : NativeControlHost
     static WebView()
     {
         SourceProperty.Changed.AddClassHandler<WebView>((wv, e) => wv.OnSourceChanged(e));
+        ZoomFactorProperty.Changed.AddClassHandler<WebView>((wv, e) => wv.OnZoomFactorChanged(e));
     }
 
     // ---------------------------------------------------------------------------
@@ -93,6 +97,19 @@ public class WebView : NativeControlHost
     /// Only valid after the control is attached to the visual tree.
     /// </summary>
     public Guid ChannelId => _core?.ChannelId ?? Guid.Empty;
+
+    /// <summary>
+    /// Gets or sets the zoom factor (1.0 = 100%). Clamped to [0.25, 5.0].
+    /// Bindable via <see cref="ZoomFactorProperty"/>.
+    /// </summary>
+    public double ZoomFactor
+    {
+        get => GetValue(ZoomFactorProperty);
+        set => SetValue(ZoomFactorProperty, value);
+    }
+
+    /// <summary>Raised when the zoom factor changes.</summary>
+    public event EventHandler<double>? ZoomFactorChanged;
 
     // --- Navigation ---
 
@@ -159,6 +176,56 @@ public class WebView : NativeControlHost
         if (_core is null)
             throw new InvalidOperationException("WebView is not initialized.");
         return _core.PrintToPdfAsync(options);
+    }
+
+    /// <summary>
+    /// Searches the current page for the given text.
+    /// </summary>
+    public Task<FindInPageResult> FindInPageAsync(string text, FindInPageOptions? options = null)
+    {
+        if (_core is null)
+            throw new InvalidOperationException("WebView is not initialized.");
+        return _core.FindInPageAsync(text, options);
+    }
+
+    /// <summary>
+    /// Clears find-in-page highlights and resets search state.
+    /// </summary>
+    public void StopFindInPage(bool clearHighlights = true)
+    {
+        if (_core is null)
+            throw new InvalidOperationException("WebView is not initialized.");
+        _core.StopFindInPage(clearHighlights);
+    }
+
+    /// <summary>
+    /// Registers a JavaScript snippet to run at document start on every page load.
+    /// </summary>
+    public string AddPreloadScript(string javaScript)
+    {
+        if (_core is null)
+            throw new InvalidOperationException("WebView is not initialized.");
+        return _core.AddPreloadScript(javaScript);
+    }
+
+    /// <summary>
+    /// Removes a previously registered preload script by its ID.
+    /// </summary>
+    public void RemovePreloadScript(string scriptId)
+    {
+        if (_core is null)
+            throw new InvalidOperationException("WebView is not initialized.");
+        _core.RemovePreloadScript(scriptId);
+    }
+
+    /// <summary>
+    /// Raised when the user triggers a context menu (right-click, long-press).
+    /// Set <c>Handled = true</c> in the event args to suppress the native context menu.
+    /// </summary>
+    public event EventHandler<ContextMenuRequestedEventArgs>? ContextMenuRequested
+    {
+        add { if (_core is not null) _core.ContextMenuRequested += value; }
+        remove { if (_core is not null) _core.ContextMenuRequested -= value; }
     }
 
     /// <summary>
@@ -326,6 +393,22 @@ public class WebView : NativeControlHost
         }
     }
 
+    private void OnZoomFactorChanged(AvaloniaPropertyChangedEventArgs e)
+    {
+        if (_core is null || !_coreAttached) return;
+        if (e.NewValue is double newZoom)
+        {
+            _core.ZoomFactor = newZoom;
+        }
+    }
+
+    private void OnCoreZoomFactorChanged(object? sender, double newZoom)
+    {
+        // Sync adapter-initiated zoom back to the Avalonia property
+        SetCurrentValue(ZoomFactorProperty, newZoom);
+        ZoomFactorChanged?.Invoke(this, newZoom);
+    }
+
     private void EnsureCore()
     {
         if (_core is null)
@@ -357,6 +440,12 @@ public class WebView : NativeControlHost
         _core.PermissionRequested += OnCorePermissionRequested;
         _core.AdapterCreated += OnCoreAdapterCreated;
         _core.AdapterDestroyed += OnCoreAdapterDestroyed;
+        _core.ZoomFactorChanged += OnCoreZoomFactorChanged;
+
+        // Apply initial zoom if set via XAML before core existed
+        var zoom = ZoomFactor;
+        if (Math.Abs(zoom - 1.0) > 0.001)
+            _core.ZoomFactor = zoom;
     }
 
     private void UnsubscribeCoreEvents()
@@ -373,6 +462,7 @@ public class WebView : NativeControlHost
         _core.PermissionRequested -= OnCorePermissionRequested;
         _core.AdapterCreated -= OnCoreAdapterCreated;
         _core.AdapterDestroyed -= OnCoreAdapterDestroyed;
+        _core.ZoomFactorChanged -= OnCoreZoomFactorChanged;
     }
 
     private void OnCoreNavigationStarted(object? sender, NavigationStartingEventArgs e)

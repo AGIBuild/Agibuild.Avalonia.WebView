@@ -63,8 +63,8 @@ internal sealed class WebViewRpcService : IWebViewRpcService
             };
 
             var json = JsonSerializer.Serialize(request, RpcJsonContext.Default.RpcRequest);
-            // Send via injected JS runtime: window.__agRpc._dispatch(json)
-            var script = $"window.__agRpc && window.__agRpc._dispatch({JsonSerializer.Serialize(json)})";
+            // Send via injected JS runtime: window.agWebView.rpc._dispatch(json)
+            var script = $"window.agWebView && window.agWebView.rpc && window.agWebView.rpc._dispatch({JsonSerializer.Serialize(json)})";
             await _invokeScript(script);
 
             // Wait for response (with timeout)
@@ -179,7 +179,7 @@ internal sealed class WebViewRpcService : IWebViewRpcService
             Result = result is null ? null : JsonSerializer.SerializeToElement(result)
         };
         var json = JsonSerializer.Serialize(response, RpcJsonContext.Default.RpcResponse);
-        var script = $"window.__agRpc && window.__agRpc._onResponse({JsonSerializer.Serialize(json)})";
+        var script = $"window.agWebView && window.agWebView.rpc && window.agWebView.rpc._onResponse({JsonSerializer.Serialize(json)})";
         await _invokeScript(script);
     }
 
@@ -191,7 +191,7 @@ internal sealed class WebViewRpcService : IWebViewRpcService
             Error = new RpcError { Code = code, Message = message }
         };
         var json = JsonSerializer.Serialize(response, RpcJsonContext.Default.RpcErrorResponse);
-        var script = $"window.__agRpc && window.__agRpc._onResponse({JsonSerializer.Serialize(json)})";
+        var script = $"window.agWebView && window.agWebView.rpc && window.agWebView.rpc._onResponse({JsonSerializer.Serialize(json)})";
         await _invokeScript(script);
     }
 
@@ -199,21 +199,24 @@ internal sealed class WebViewRpcService : IWebViewRpcService
 
     internal const string JsStub = """
         (function() {
-            if (window.__agRpc) return;
+            if (window.agWebView && window.agWebView.rpc) return;
+            if (!window.agWebView) window.agWebView = {};
             var pending = {};
             var handlers = {};
             var nextId = 0;
-            window.__agRpc = {
+            function post(msg) {
+                if (window.chrome && window.chrome.webview) {
+                    window.chrome.webview.postMessage(msg);
+                } else if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.agibuildWebView) {
+                    window.webkit.messageHandlers.agibuildWebView.postMessage(msg);
+                }
+            }
+            window.agWebView.rpc = {
                 invoke: function(method, params) {
                     return new Promise(function(resolve, reject) {
                         var id = '__js_' + (nextId++);
                         pending[id] = { resolve: resolve, reject: reject };
-                        var msg = JSON.stringify({ jsonrpc: '2.0', id: id, method: method, params: params });
-                        if (window.chrome && window.chrome.webview) {
-                            window.chrome.webview.postMessage(msg);
-                        } else if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.agWebView) {
-                            window.webkit.messageHandlers.agWebView.postMessage(msg);
-                        }
+                        post(JSON.stringify({ jsonrpc: '2.0', id: id, method: method, params: params }));
                     });
                 },
                 handle: function(method, handler) {
@@ -226,35 +229,15 @@ internal sealed class WebViewRpcService : IWebViewRpcService
                             var result = handlers[msg.method](msg.params);
                             if (result && typeof result.then === 'function') {
                                 result.then(function(r) {
-                                    var resp = JSON.stringify({ jsonrpc: '2.0', id: msg.id, result: r });
-                                    if (window.chrome && window.chrome.webview) {
-                                        window.chrome.webview.postMessage(resp);
-                                    } else if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.agWebView) {
-                                        window.webkit.messageHandlers.agWebView.postMessage(resp);
-                                    }
+                                    post(JSON.stringify({ jsonrpc: '2.0', id: msg.id, result: r }));
                                 }).catch(function(e) {
-                                    var resp = JSON.stringify({ jsonrpc: '2.0', id: msg.id, error: { code: -32603, message: e.message || 'Error' } });
-                                    if (window.chrome && window.chrome.webview) {
-                                        window.chrome.webview.postMessage(resp);
-                                    } else if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.agWebView) {
-                                        window.webkit.messageHandlers.agWebView.postMessage(resp);
-                                    }
+                                    post(JSON.stringify({ jsonrpc: '2.0', id: msg.id, error: { code: -32603, message: e.message || 'Error' } }));
                                 });
                             } else {
-                                var resp = JSON.stringify({ jsonrpc: '2.0', id: msg.id, result: result });
-                                if (window.chrome && window.chrome.webview) {
-                                    window.chrome.webview.postMessage(resp);
-                                } else if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.agWebView) {
-                                    window.webkit.messageHandlers.agWebView.postMessage(resp);
-                                }
+                                post(JSON.stringify({ jsonrpc: '2.0', id: msg.id, result: result }));
                             }
                         } catch(e) {
-                            var resp = JSON.stringify({ jsonrpc: '2.0', id: msg.id, error: { code: -32603, message: e.message || 'Error' } });
-                            if (window.chrome && window.chrome.webview) {
-                                window.chrome.webview.postMessage(resp);
-                            } else if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.agWebView) {
-                                window.webkit.messageHandlers.agWebView.postMessage(resp);
-                            }
+                            post(JSON.stringify({ jsonrpc: '2.0', id: msg.id, error: { code: -32603, message: e.message || 'Error' } }));
                         }
                     }
                 },

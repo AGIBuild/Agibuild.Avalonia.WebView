@@ -27,9 +27,11 @@ public partial class WebView2SmokeViewModel : ViewModelBase, IWebViewAdapterHost
 
     private int _autoRunStarted;
     private int _runAllInProgress;
+    private readonly Action<string>? _logSink;
 
-    public WebView2SmokeViewModel()
+    public WebView2SmokeViewModel(Action<string>? logSink = null)
     {
+        _logSink = logSink;
         ChannelId = Guid.NewGuid();
         Status = "Not started.";
     }
@@ -42,9 +44,6 @@ public partial class WebView2SmokeViewModel : ViewModelBase, IWebViewAdapterHost
 
     [ObservableProperty]
     private string _status = string.Empty;
-
-    [ObservableProperty]
-    private string _log = string.Empty;
 
     [RelayCommand]
     private Task InitializeAsync()
@@ -615,7 +614,7 @@ public partial class WebView2SmokeViewModel : ViewModelBase, IWebViewAdapterHost
     private void LogLine(string message)
     {
         var line = $"{DateTimeOffset.Now:HH:mm:ss.fff} {message}";
-        Log = $"{Log}{line}{Environment.NewLine}";
+        _logSink?.Invoke(line);
 
         if (AutoRun)
         {

@@ -11,6 +11,7 @@ public sealed class WebViewEnvironmentOptions : IWebViewEnvironmentOptions
     public string? CustomUserAgent { get; set; }
     public bool UseEphemeralSession { get; set; }
     public IReadOnlyList<CustomSchemeRegistration> CustomSchemes { get; set; } = [];
+    public IReadOnlyList<string> PreloadScripts { get; set; } = [];
 }
 
 /// <summary>

@@ -15,9 +15,11 @@ namespace Agibuild.Avalonia.WebView.Integration.Tests.ViewModels;
 public partial class AdvancedFeaturesE2EViewModel : ViewModelBase
 {
     private int _autoRunStarted;
+    private readonly Action<string>? _logSink;
 
-    public AdvancedFeaturesE2EViewModel()
+    public AdvancedFeaturesE2EViewModel(Action<string>? logSink = null)
     {
+        _logSink = logSink;
         Status = "Ready. Select a feature to test.";
     }
 
@@ -205,9 +207,6 @@ public partial class AdvancedFeaturesE2EViewModel : ViewModelBase
     private string _status = string.Empty;
 
     [ObservableProperty]
-    private string _log = string.Empty;
-
-    [ObservableProperty]
     private string _userAgentInput = "Agibuild-Test/1.0 (E2E)";
 
     [ObservableProperty]
@@ -385,6 +384,12 @@ public partial class AdvancedFeaturesE2EViewModel : ViewModelBase
             LogLine("[Dialog] User closed the dialog.");
             Status = "WebDialog test completed.";
         }
+        catch (ObjectDisposedException)
+        {
+            // User closed the dialog before navigation completed — expected behavior.
+            LogLine("[Dialog] Closed before operation completed.");
+            Status = "Dialog closed.";
+        }
         catch (Exception ex)
         {
             LogLine($"[Dialog] Error: {ex.Message}");
@@ -417,6 +422,11 @@ public partial class AdvancedFeaturesE2EViewModel : ViewModelBase
 
             LogLine("[Dialog] Ephemeral dialog closed.");
             Status = "Ephemeral dialog test completed.";
+        }
+        catch (ObjectDisposedException)
+        {
+            LogLine("[Dialog] Closed before operation completed.");
+            Status = "Dialog closed.";
         }
         catch (Exception ex)
         {
@@ -534,25 +544,12 @@ public partial class AdvancedFeaturesE2EViewModel : ViewModelBase
                           $"Custom UA: {opts.CustomUserAgent ?? "(none)"}";
     }
 
-    [RelayCommand]
-    private void ClearLog()
-    {
-        Log = string.Empty;
-    }
+    // Log is now shared via MainViewModel — ClearLog removed.
 
     private void LogLine(string message)
     {
-        var timestamp = DateTime.Now.ToString("HH:mm:ss.fff");
-        var line = $"[{timestamp}] {message}\n";
-
-        if (Dispatcher.UIThread.CheckAccess())
-        {
-            Log += line;
-        }
-        else
-        {
-            Dispatcher.UIThread.Post(() => Log += line);
-        }
+        var line = $"{DateTimeOffset.Now:HH:mm:ss.fff} {message}";
+        _logSink?.Invoke(line);
     }
 }
 

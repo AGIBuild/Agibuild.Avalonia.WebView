@@ -1185,3 +1185,129 @@ void ag_gtk_print_to_pdf(ag_gtk_handle handle, ag_gtk_pdf_cb callback, void* con
        Report as unsupported to let the runtime throw NotSupportedException. */
     callback(context, NULL, 0);
 }
+
+/* ========== Zoom ========== */
+
+double ag_gtk_get_zoom(ag_gtk_handle handle)
+{
+    if (!handle) return 1.0;
+    shim_state* s = (shim_state*)handle;
+    if (s->web_view == NULL || atomic_load(&s->detached)) return 1.0;
+    return webkit_web_view_get_zoom_level(s->web_view);
+}
+
+void ag_gtk_set_zoom(ag_gtk_handle handle, double zoom_factor)
+{
+    if (!handle) return;
+    shim_state* s = (shim_state*)handle;
+    if (s->web_view == NULL || atomic_load(&s->detached)) return;
+    webkit_web_view_set_zoom_level(s->web_view, zoom_factor);
+}
+
+/* ========== Find in Page ========== */
+
+typedef void (*ag_gtk_find_cb)(void* context, int32_t active_match_index, int32_t total_matches);
+
+typedef struct {
+    ag_gtk_find_cb callback;
+    void* context;
+    gulong counted_id;
+    gulong failed_id;
+} find_ctx;
+
+static void on_counted_matches(WebKitFindController* controller, guint match_count, gpointer user_data)
+{
+    find_ctx* ctx = (find_ctx*)user_data;
+    /* We report match_count; active index isn't directly available in WebKitGTK find API.
+       Report 0 as active index when matches found. */
+    int32_t active = match_count > 0 ? 0 : -1;
+    if (ctx->counted_id) g_signal_handler_disconnect(controller, ctx->counted_id);
+    if (ctx->failed_id) g_signal_handler_disconnect(controller, ctx->failed_id);
+    ctx->callback(ctx->context, active, (int32_t)match_count);
+    free(ctx);
+}
+
+static void on_failed_to_find(WebKitFindController* controller, gpointer user_data)
+{
+    find_ctx* ctx = (find_ctx*)user_data;
+    if (ctx->counted_id) g_signal_handler_disconnect(controller, ctx->counted_id);
+    if (ctx->failed_id) g_signal_handler_disconnect(controller, ctx->failed_id);
+    ctx->callback(ctx->context, -1, 0);
+    free(ctx);
+}
+
+void ag_gtk_find_text(ag_gtk_handle handle, const char* text, int case_sensitive, int forward, ag_gtk_find_cb callback, void* context)
+{
+    if (!handle)
+    {
+        callback(context, -1, 0);
+        return;
+    }
+    shim_state* s = (shim_state*)handle;
+    if (s->web_view == NULL || atomic_load(&s->detached))
+    {
+        callback(context, -1, 0);
+        return;
+    }
+
+    WebKitFindController* fc = webkit_web_view_get_find_controller(s->web_view);
+
+    find_ctx* ctx = (find_ctx*)calloc(1, sizeof(find_ctx));
+    ctx->callback = callback;
+    ctx->context = context;
+
+    ctx->counted_id = g_signal_connect(fc, "counted-matches", G_CALLBACK(on_counted_matches), ctx);
+    ctx->failed_id = g_signal_connect(fc, "failed-to-find-text", G_CALLBACK(on_failed_to_find), ctx);
+
+    guint32 options = WEBKIT_FIND_OPTIONS_WRAP_AROUND;
+    if (!case_sensitive) options |= WEBKIT_FIND_OPTIONS_CASE_INSENSITIVE;
+    if (!forward) options |= WEBKIT_FIND_OPTIONS_BACKWARDS;
+
+    webkit_find_controller_search(fc, text, options, G_MAXUINT);
+    webkit_find_controller_count_matches(fc, text, options, G_MAXUINT);
+}
+
+void ag_gtk_stop_find(ag_gtk_handle handle)
+{
+    if (!handle) return;
+    shim_state* s = (shim_state*)handle;
+    if (s->web_view == NULL || atomic_load(&s->detached)) return;
+
+    WebKitFindController* fc = webkit_web_view_get_find_controller(s->web_view);
+    webkit_find_controller_search_finish(fc);
+}
+
+/* ========== Preload Scripts ========== */
+
+static int64_t g_script_id_counter = 0;
+
+const char* ag_gtk_add_user_script(ag_gtk_handle handle, const char* js)
+{
+    if (!handle || !js) return NULL;
+    shim_state* s = (shim_state*)handle;
+    if (s->web_view == NULL || atomic_load(&s->detached)) return NULL;
+
+    WebKitUserContentManager* ucm = webkit_web_view_get_user_content_manager(s->web_view);
+    WebKitUserScript* script = webkit_user_script_new(
+        js,
+        WEBKIT_USER_CONTENT_INJECT_ALL_FRAMES,
+        WEBKIT_USER_SCRIPT_INJECT_AT_DOCUMENT_START,
+        NULL, NULL);
+    webkit_user_content_manager_add_script(ucm, script);
+    webkit_user_script_unref(script);
+
+    int64_t id = ++g_script_id_counter;
+    char buf[32];
+    snprintf(buf, sizeof(buf), "preload_%lld", (long long)id);
+    return strdup(buf);
+}
+
+void ag_gtk_remove_all_user_scripts(ag_gtk_handle handle)
+{
+    if (!handle) return;
+    shim_state* s = (shim_state*)handle;
+    if (s->web_view == NULL || atomic_load(&s->detached)) return;
+
+    WebKitUserContentManager* ucm = webkit_web_view_get_user_content_manager(s->web_view);
+    webkit_user_content_manager_remove_all_scripts(ucm);
+}

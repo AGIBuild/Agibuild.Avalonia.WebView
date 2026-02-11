@@ -58,7 +58,10 @@
 | `GoBack()/GoForward()` | Baseline | ✅ | ✅ | ✅ | N/A | ✅ | CT+IT | Sync API: UI-thread only; illegal call semantics fixed in contract |
 | `Refresh()/Stop()` | Baseline | ✅ | ✅ | ✅ | N/A | ✅ | CT+IT | Stop cancels current navigation (Completed=Canceled/Superseded) |
 | `TryGetCookieManager()` | Extended | ⚠️ | ⚠️ | ⚠️ | N/A | ⚠️ | CT+IT | Platform storage model differs; must list supported ops |
-| `TryGetCommandManager()` | Extended | ⚠️ | ⚠️ | ⚠️ | N/A | ⚠️ | CT | If mapped to native commands; otherwise optional |
+| `TryGetCommandManager()` | Extended | ✅ | ✅ | ✅ | N/A | ✅ | CT | Copy/Cut/Paste/SelectAll/Undo/Redo via native editing commands |
+| `CaptureScreenshotAsync()` | Extended | ✅ | ✅ | ✅ | N/A | ✅ | CT | Returns PNG bytes; all 5 platforms supported |
+| `PrintToPdfAsync()` | Extended | ✅ | ✅ | ❌ | N/A | ❌ | CT | Windows/macOS/iOS: PDF bytes; Android/GTK: `NotSupportedException` |
+| `Rpc` (JS ↔ C# RPC) | Extended | ✅ | ✅ | ✅ | N/A | ✅ | CT | JSON-RPC 2.0 over WebMessage bridge; requires bridge enabled |
 | `INativeWebViewHandleProvider` | Extended | ✅ | ✅ | ✅ | N/A | ✅ | IT | Handle type differs per platform; document stability & lifetime |
 
 #### 2.1.1 macOS WKWebView（Embedded）M0 验收标准（CT + IT 对齐）

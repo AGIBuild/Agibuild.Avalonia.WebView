@@ -1,7 +1,6 @@
 using System.ComponentModel;
+using System.Runtime.InteropServices;
 using Avalonia.Controls;
-using Avalonia.Controls.Primitives;
-using Avalonia.Input;
 using Agibuild.Avalonia.WebView.Integration.Tests.ViewModels;
 
 namespace Agibuild.Avalonia.WebView.Integration.Tests.Views
@@ -12,10 +11,6 @@ namespace Agibuild.Avalonia.WebView.Integration.Tests.Views
         {
             InitializeComponent();
             DataContextChanged += OnDataContextChanged;
-
-            // Hide native WebView when nav drawer opens (native controls render above Avalonia UI)
-            var navToggle = this.FindControl<ToggleButton>("NavToggle");
-            navToggle?.IsCheckedChanged += (_, _) => SyncPageHostVisibility();
         }
 
         private MainViewModel? _vm;
@@ -52,40 +47,32 @@ namespace Agibuild.Avalonia.WebView.Integration.Tests.Views
 
             host.Content = index switch
             {
-                0 => new WebViewTestView { DataContext = _vm.WebViewTest },
-                1 => new WkWebViewSmokeView { DataContext = _vm.WkWebViewSmoke },
-                2 => new WebView2SmokeView { DataContext = _vm.WebView2Smoke },
-                3 => new ConsumerWebViewE2EView { DataContext = _vm.ConsumerE2E },
-                4 => new AdvancedFeaturesE2EView { DataContext = _vm.AdvancedE2E },
-                5 => new NavigationInterceptView { DataContext = _vm.NavigationIntercept },
-                6 => new FeatureE2EView { DataContext = _vm.FeatureE2E },
+                0 => new ConsumerWebViewE2EView { DataContext = _vm.ConsumerE2E },
+                1 => new AdvancedFeaturesE2EView { DataContext = _vm.AdvancedE2E },
+                2 => CreatePlatformSmokeView(),
+                3 => new FeatureE2EView { DataContext = _vm.FeatureE2E },
                 _ => null
             };
         }
 
         /// <summary>
-        /// Hide PageHost when nav drawer is open so native controls don't obscure the drawer.
+        /// Auto-detect the current platform and show the appropriate smoke test view.
+        /// macOS → WKWebView smoke, Windows → WebView2 smoke.
         /// </summary>
-        private void SyncPageHostVisibility()
+        private UserControl? CreatePlatformSmokeView()
         {
-            var navToggle = this.FindControl<ToggleButton>("NavToggle");
-            var host = this.FindControl<ContentControl>("PageHost");
-            if (navToggle is not null && host is not null)
-                host.IsVisible = navToggle.IsChecked != true;
+            if (_vm is null) return null;
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                return new WkWebViewSmokeView { DataContext = _vm.WkWebViewSmoke };
+
+            // Windows and other platforms use WebView2 smoke
+            return new WebView2SmokeView { DataContext = _vm.WebView2Smoke };
         }
 
         private void OnNavSelectionChanged(object? sender, SelectionChangedEventArgs e)
         {
-            var toggle = this.FindControl<ToggleButton>("NavToggle");
-            if (toggle is not null)
-                toggle.IsChecked = false;
-        }
-
-        private void OnOverlayDismiss(object? sender, PointerPressedEventArgs e)
-        {
-            var toggle = this.FindControl<ToggleButton>("NavToggle");
-            if (toggle is not null)
-                toggle.IsChecked = false;
+            // Nav rail selection automatically triggers page load via SelectedTabIndex binding.
         }
     }
 }
