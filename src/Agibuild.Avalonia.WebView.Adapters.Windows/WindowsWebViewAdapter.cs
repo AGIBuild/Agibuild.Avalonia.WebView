@@ -10,7 +10,7 @@ namespace Agibuild.Avalonia.WebView.Adapters.Windows;
 [SupportedOSPlatform("windows")]
 internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHandleProvider, ICookieAdapter, IWebViewAdapterOptions,
     ICustomSchemeAdapter, IDownloadAdapter, IPermissionAdapter, ICommandAdapter, IScreenshotAdapter, IPrintAdapter,
-    IFindInPageAdapter, IZoomAdapter, IPreloadScriptAdapter, IContextMenuAdapter
+    IFindInPageAdapter, IZoomAdapter, IPreloadScriptAdapter, IContextMenuAdapter, IDevToolsAdapter
 {
     private static bool DiagnosticsEnabled
         => string.Equals(Environment.GetEnvironmentVariable("AGIBUILD_WEBVIEW_DIAG"), "1", StringComparison.Ordinal);
@@ -1245,4 +1245,21 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
     // ==================== IContextMenuAdapter ====================
 
     public event EventHandler<ContextMenuRequestedEventArgs>? ContextMenuRequested;
+
+    // ==================== IDevToolsAdapter ====================
+
+    public void OpenDevTools()
+    {
+        if (_webView is not null)
+            _webView.OpenDevToolsWindow();
+    }
+
+    public void CloseDevTools()
+    {
+        // WebView2 does not have a direct "close DevTools" API.
+        // Closing is only possible by the user or by reloading settings.
+        // This is a platform limitation — no-op.
+    }
+
+    public bool IsDevToolsOpen => false; // WebView2 does not expose this state
 }

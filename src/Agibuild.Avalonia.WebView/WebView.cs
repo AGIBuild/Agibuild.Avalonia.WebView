@@ -157,6 +157,54 @@ public class WebView : NativeControlHost
     public IWebViewRpcService? Rpc => _core?.Rpc;
 
     /// <summary>
+    /// Gets the type-safe bridge service for exposing C# services to JS (<see cref="JsExportAttribute"/>)
+    /// and importing JS services into C# (<see cref="JsImportAttribute"/>).
+    /// Accessing this property auto-enables the WebMessage bridge if not already enabled.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown when the control has not been attached yet.</exception>
+    public IBridgeService Bridge
+    {
+        get
+        {
+            EnsureCore();
+            return _core!.Bridge;
+        }
+    }
+
+    /// <summary>
+    /// Opens the browser developer tools (inspector) at runtime.
+    /// No-op if the platform adapter does not support runtime DevTools toggling.
+    /// </summary>
+    public void OpenDevTools()
+    {
+        EnsureCore();
+        _core!.OpenDevTools();
+    }
+
+    /// <summary>
+    /// Closes the browser developer tools.
+    /// No-op if the platform adapter does not support runtime DevTools toggling.
+    /// </summary>
+    public void CloseDevTools()
+    {
+        EnsureCore();
+        _core!.CloseDevTools();
+    }
+
+    /// <summary>
+    /// Returns whether developer tools are currently open.
+    /// Always returns false if the platform adapter does not support this check.
+    /// </summary>
+    public bool IsDevToolsOpen
+    {
+        get
+        {
+            EnsureCore();
+            return _core!.IsDevToolsOpen;
+        }
+    }
+
+    /// <summary>
     /// Captures a screenshot of the current viewport as a PNG byte array.
     /// Throws <see cref="NotSupportedException"/> if the adapter does not support screenshots.
     /// </summary>
@@ -265,6 +313,17 @@ public class WebView : NativeControlHost
     {
         EnsureCore();
         _core!.DisableWebMessageBridge();
+    }
+
+    /// <summary>
+    /// Enables SPA hosting. Registers the custom scheme, subscribes to WebResourceRequested,
+    /// and optionally auto-enables the bridge.
+    /// </summary>
+    public void EnableSpaHosting(SpaHostingOptions options)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        EnsureCore();
+        _core!.EnableSpaHosting(options);
     }
 
     public Task<string?> InvokeScriptAsync(string script)

@@ -9,7 +9,7 @@ namespace Agibuild.Avalonia.WebView.Adapters.Gtk;
 
 internal sealed class GtkWebViewAdapter : IWebViewAdapter, INativeWebViewHandleProvider, ICookieAdapter, IWebViewAdapterOptions,
     ICustomSchemeAdapter, IDownloadAdapter, IPermissionAdapter, ICommandAdapter, IScreenshotAdapter, /* IPrintAdapter: GTK WebKitGTK lacks a direct PDF export API */
-    IFindInPageAdapter, IZoomAdapter, IPreloadScriptAdapter, IContextMenuAdapter
+    IFindInPageAdapter, IZoomAdapter, IPreloadScriptAdapter, IContextMenuAdapter, IDevToolsAdapter
 {
     private static bool DiagnosticsEnabled
         => string.Equals(Environment.GetEnvironmentVariable("AGIBUILD_WEBVIEW_DIAG"), "1", StringComparison.Ordinal);
@@ -1275,4 +1275,11 @@ internal sealed class GtkWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
     // ==================== IContextMenuAdapter ====================
 
     public event EventHandler<ContextMenuRequestedEventArgs>? ContextMenuRequested;
+
+    // ==================== IDevToolsAdapter ====================
+    // WebKitGTK supports runtime inspector toggle via webkit_web_inspector_show/close.
+    // TODO: Wire native calls when GTK adapter is production-ready.
+    public void OpenDevTools() { }
+    public void CloseDevTools() { }
+    public bool IsDevToolsOpen => false;
 }

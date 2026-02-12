@@ -164,6 +164,11 @@ internal sealed class WebViewRpcService : IWebViewRpcService
             var result = await handler(paramsProp);
             await SendSuccessResponseAsync(id, result);
         }
+        catch (WebViewRpcException rpcEx)
+        {
+            _logger.LogDebug(rpcEx, "RPC: handler for '{Method}' threw RPC error {Code}", method, rpcEx.Code);
+            await SendErrorResponseAsync(id, rpcEx.Code, rpcEx.Message);
+        }
         catch (Exception ex)
         {
             _logger.LogDebug(ex, "RPC: handler for '{Method}' threw", method);

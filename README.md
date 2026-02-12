@@ -218,10 +218,29 @@ Spec-driven contract tests cover the runtime layer against mock adapters — no 
 
 | Metric | Value |
 |--------|-------|
-| Unit tests | 391 |
-| Integration tests (headless) | 80 |
-| Line coverage | **96%+** |
-| Branch coverage | **84%+** |
+| Unit tests | 626 |
+| Integration tests (headless) | 112 |
+| Line coverage | **95.4%** |
+| Branch coverage | **88.2%** |
+| Method coverage | **97.7%** |
+
+**Coverage by module:**
+
+| Assembly | Line coverage |
+|----------|:------------:|
+| Core (contracts, attributes, events) | 100% |
+| Adapters.Abstractions | 100% |
+| DependencyInjection | 100% |
+| Runtime (WebViewCore, Bridge, SPA hosting) | 94.7% |
+
+Run all automated tests with a single command:
+
+```bash
+nuke Test            # Unit + Integration (738 tests, ~1 min)
+nuke Coverage        # Unit tests with coverage report + threshold enforcement
+nuke NugetPackageTest  # NuGet package smoke test (pack → install → run)
+nuke TemplateE2E     # Template E2E (pack → install template → create project → test → cleanup)
+```
 
 ## License
 

@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Agibuild",
+  "classifications": ["Desktop", "Mobile", "Hybrid", "Avalonia", "WebView"],
+  "identity": "Agibuild.Avalonia.WebView.HybridTemplate",
+  "name": "Agibuild Hybrid App",
+  "shortName": "agibuild-hybrid",
+  "tags": {
+    "language": "C#",
+    "type": "solution"
+  },
+  "preferNameDirectory": true,
+  "sourceName": "HybridApp",
+  "symbols": {
+    "framework": {
+      "type": "parameter",
+      "datatype": "choice",
+      "description": "Frontend framework to scaffold",
+      "defaultValue": "vanilla",
+      "choices": [
+        { "choice": "vanilla", "description": "Plain HTML/JS (no build tools)" },
+        { "choice": "react", "description": "React with Vite" },
+        { "choice": "vue", "description": "Vue with Vite" }
+      ]
+    }
+  },
+  "sources": [
+    {
+      "modifiers": [
+        {
+          "condition": "(framework == 'react' || framework == 'vue')",
+          "exclude": ["HybridApp.Web.Vanilla/**"]
+        },
+        {
+          "condition": "(framework == 'vanilla')",
+          "exclude": ["HybridApp.Web.Vite/**"]
+        }
+      ]
+    }
+  ]
+}

@@ -81,6 +81,10 @@ public sealed class WebDialog : IWebDialog
     public ICookieManager? TryGetCookieManager() => _core.TryGetCookieManager();
     public ICommandManager? TryGetCommandManager() => _core.TryGetCommandManager();
     public IWebViewRpcService? Rpc => _core.Rpc;
+    public IBridgeService Bridge => _core.Bridge;
+    public void OpenDevTools() => _core.OpenDevTools();
+    public void CloseDevTools() => _core.CloseDevTools();
+    public bool IsDevToolsOpen => _core.IsDevToolsOpen;
     public Task<byte[]> CaptureScreenshotAsync() => _core.CaptureScreenshotAsync();
     public Task<byte[]> PrintToPdfAsync(PdfPrintOptions? options = null) => _core.PrintToPdfAsync(options);
 

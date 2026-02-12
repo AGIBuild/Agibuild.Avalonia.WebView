@@ -1,0 +1,207 @@
+using System.Text.Json;
+using Agibuild.Avalonia.WebView.Testing;
+using Xunit;
+
+namespace Agibuild.Avalonia.WebView.UnitTests;
+
+/// <summary>
+/// Comprehensive integration and edge-case tests for the Bridge system.
+/// Deliverable 1.7: exercises multi-service scenarios, lifecycle, and error boundaries.
+/// </summary>
+public sealed class BridgeIntegrationTests
+{
+    private readonly TestDispatcher _dispatcher = new();
+
+    private (WebViewCore Core, MockWebViewAdapter Adapter, List<string> Scripts) CreateCore()
+    {
+        var adapter = MockWebViewAdapter.Create();
+        var core = new WebViewCore(adapter, _dispatcher);
+        core.EnableWebMessageBridge(new WebMessageBridgeOptions
+        {
+            AllowedOrigins = new HashSet<string> { "*" }
+        });
+        var scripts = new List<string>();
+        adapter.ScriptCallback = script => { scripts.Add(script); return null; };
+        return (core, adapter, scripts);
+    }
+
+    // ==================== Multi-service coexistence ====================
+
+    [Fact]
+    public void Multiple_JsExport_services_can_be_exposed_simultaneously()
+    {
+        var (core, adapter, scripts) = CreateCore();
+
+        core.Bridge.Expose<IAppService>(new FakeAppService());
+        core.Bridge.Expose<ICustomNameService>(new FakeCustomNameService());
+
+        // Drain any queued dispatcher work from Expose.
+        _dispatcher.RunAll();
+        scripts.Clear();
+
+        // Call first service.
+        adapter.RaiseWebMessage(
+            """{"jsonrpc":"2.0","id":"m-1","method":"AppService.getCurrentUser","params":{}}""",
+            "*", core.ChannelId);
+        _dispatcher.RunAll();
+        Assert.True(scripts.Count > 0, $"Expected scripts after RPC call, got 0");
+        Assert.True(scripts.Any(s => s.Contains("Alice")), $"Expected 'Alice' in one of {scripts.Count} scripts");
+
+        // Call second service.
+        scripts.Clear();
+        adapter.RaiseWebMessage(
+            """{"jsonrpc":"2.0","id":"m-2","method":"api.ping","params":{}}""",
+            "*", core.ChannelId);
+        _dispatcher.RunAll();
+        Assert.True(scripts.Any(s => s.Contains("pong")), "Expected 'pong' in response");
+    }
+
+    [Fact]
+    public void Export_and_Import_proxies_can_coexist()
+    {
+        var (core, adapter, scripts) = CreateCore();
+
+        core.Bridge.Expose<IAppService>(new FakeAppService());
+        var proxy = core.Bridge.GetProxy<IUiController>();
+
+        // Export works.
+        scripts.Clear();
+        adapter.RaiseWebMessage(
+            """{"jsonrpc":"2.0","id":"ei-1","method":"AppService.getCurrentUser","params":{}}""",
+            "*", core.ChannelId);
+        _dispatcher.RunAll();
+        Assert.True(scripts.Any(s => s.Contains("Alice")), "Expected 'Alice' in response");
+
+        // Import proxy fires RPC call.
+        scripts.Clear();
+        _ = proxy.ShowNotification("hello");
+        Assert.True(scripts.Count > 0);
+        Assert.Contains("UiController.showNotification", scripts.Last());
+    }
+
+    // ==================== Lifecycle edge cases ====================
+
+    [Fact]
+    public void Bridge_survives_multiple_expose_remove_cycles()
+    {
+        var (core, adapter, scripts) = CreateCore();
+
+        for (int i = 0; i < 3; i++)
+        {
+            core.Bridge.Expose<IAppService>(new FakeAppService());
+
+            scripts.Clear();
+            adapter.RaiseWebMessage(
+                $"{{\"jsonrpc\":\"2.0\",\"id\":\"cycle-{i}\",\"method\":\"AppService.getCurrentUser\",\"params\":{{}}}}",
+                "*", core.ChannelId);
+            _dispatcher.RunAll();
+            Assert.True(scripts.Any(s => s.Contains("Alice")), $"Expected 'Alice' in response for cycle {i}");
+
+            core.Bridge.Remove<IAppService>();
+        }
+    }
+
+    [Fact]
+    public void Calling_method_on_removed_service_returns_method_not_found()
+    {
+        var (core, adapter, scripts) = CreateCore();
+
+        core.Bridge.Expose<IAppService>(new FakeAppService());
+        core.Bridge.Remove<IAppService>();
+
+        scripts.Clear();
+        adapter.RaiseWebMessage(
+            """{"jsonrpc":"2.0","id":"gone-1","method":"AppService.getCurrentUser","params":{}}""",
+            "*", core.ChannelId);
+        _dispatcher.RunAll();
+
+        Assert.True(scripts.Any(s => s.Contains("-32601")), "Expected '-32601' (method not found)");
+    }
+
+    [Fact]
+    public void Dispose_prevents_all_operations()
+    {
+        var (core, adapter, scripts) = CreateCore();
+        core.Bridge.Expose<IAppService>(new FakeAppService());
+        core.Dispose();
+
+        Assert.Throws<ObjectDisposedException>(() => core.Bridge.Expose<IAppService>(new FakeAppService()));
+        Assert.Throws<ObjectDisposedException>(() => core.Bridge.GetProxy<IUiController>());
+    }
+
+    // ==================== Error boundaries ====================
+
+    [JsExport]
+    public interface IFailingService
+    {
+        Task<string> WillFail();
+        Task WillThrowInvalidOp();
+    }
+
+    private class FailingImpl : IFailingService
+    {
+        public Task<string> WillFail() => throw new InvalidOperationException("Boom!");
+        public Task WillThrowInvalidOp() => throw new ArgumentException("Bad arg");
+    }
+
+    [Fact]
+    public void Handler_exception_returns_JSON_RPC_error_with_message()
+    {
+        var (core, adapter, scripts) = CreateCore();
+        core.Bridge.Expose<IFailingService>(new FailingImpl());
+
+        scripts.Clear();
+        adapter.RaiseWebMessage(
+            """{"jsonrpc":"2.0","id":"err-1","method":"FailingService.willFail","params":{}}""",
+            "*", core.ChannelId);
+        _dispatcher.RunAll();
+
+        Assert.True(scripts.Any(s => s.Contains("Boom!")), "Expected 'Boom!' error in response");
+    }
+
+    [Fact]
+    public void Different_exception_types_are_reported()
+    {
+        var (core, adapter, scripts) = CreateCore();
+        core.Bridge.Expose<IFailingService>(new FailingImpl());
+
+        scripts.Clear();
+        adapter.RaiseWebMessage(
+            """{"jsonrpc":"2.0","id":"err-2","method":"FailingService.willThrowInvalidOp","params":{}}""",
+            "*", core.ChannelId);
+        _dispatcher.RunAll();
+
+        Assert.True(scripts.Any(s => s.Contains("Bad arg")), "Expected 'Bad arg' error in response");
+    }
+
+    // ==================== Concurrent access ====================
+
+    [Fact]
+    public void Bridge_is_thread_safe_for_expose_operations()
+    {
+        var (core, adapter, scripts) = CreateCore();
+
+        // Parallel expose shouldn't throw (one might fail with duplicate, that's ok).
+        var tasks = Enumerable.Range(0, 10).Select(_ => Task.Run(() =>
+        {
+            try
+            {
+                core.Bridge.Expose<IAppService>(new FakeAppService());
+            }
+            catch (InvalidOperationException)
+            {
+                // Expected: "already exposed"
+            }
+        }));
+
+        Task.WaitAll(tasks.ToArray());
+
+        // At least one should have succeeded.
+        scripts.Clear();
+        adapter.RaiseWebMessage(
+            """{"jsonrpc":"2.0","id":"ts-1","method":"AppService.getCurrentUser","params":{}}""",
+            "*", core.ChannelId);
+        _dispatcher.RunAll();
+        Assert.True(scripts.Any(s => s.Contains("Alice")), "Expected 'Alice' in response after concurrent expose");
+    }
+}

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimal Hybrid App</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+        }
+        .card {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 480px;
+            width: 90%;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+        h1 { font-size: 1.8rem; margin-bottom: 0.5rem; }
+        p { opacity: 0.85; margin-bottom: 1.5rem; }
+        button {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: #fff;
+            padding: 0.7rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.2s;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        button:hover { background: rgba(255,255,255,0.35); }
+        #result {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            min-height: 60px;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Minimal Hybrid App</h1>
+        <p>Agibuild.Avalonia.WebView — Bridge demo with vanilla JS</p>
+
+        <div>
+            <button onclick="callGetUser()">Get Current User</button>
+            <button onclick="callSaveSettings()">Save Settings</button>
+            <button onclick="callSearchItems()">Search Items</button>
+        </div>
+
+        <div id="result">Waiting for bridge...</div>
+    </div>
+
+    <script>
+        const resultEl = document.getElementById('result');
+
+        function log(msg) {
+            resultEl.textContent = typeof msg === 'object' ? JSON.stringify(msg, null, 2) : msg;
+        }
+
+        // Wait for bridge to be ready
+        function waitForBridge() {
+            return new Promise((resolve) => {
+                const check = () => {
+                    if (window.agWebView && window.agWebView.rpc) {
+                        resolve();
+                        return;
+                    }
+                    setTimeout(check, 50);
+                };
+                check();
+            });
+        }
+
+        waitForBridge().then(() => {
+            log('Bridge ready! Click a button to call C#.');
+        });
+
+        async function callGetUser() {
+            try {
+                const user = await window.agWebView.rpc.invoke('AppService.getCurrentUser', {});
+                log(user);
+            } catch (e) {
+                log('Error: ' + e.message);
+            }
+        }
+
+        async function callSaveSettings() {
+            try {
+                await window.agWebView.rpc.invoke('AppService.saveSettings', {
+                    settings: { theme: 'dark', darkMode: true }
+                });
+                log('Settings saved!');
+            } catch (e) {
+                log('Error: ' + e.message);
+            }
+        }
+
+        async function callSearchItems() {
+            try {
+                const items = await window.agWebView.rpc.invoke('AppService.searchItems', {
+                    query: 'avalonia', limit: 5
+                });
+                log(items);
+            } catch (e) {
+                log('Error: ' + e.message);
+            }
+        }
+    </script>
+</body>
+</html>

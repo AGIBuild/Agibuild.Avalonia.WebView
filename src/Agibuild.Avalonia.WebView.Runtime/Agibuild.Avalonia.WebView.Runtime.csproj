@@ -4,6 +4,10 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+
+    <IsPackable>true</IsPackable>
+    <PackageId>Agibuild.Avalonia.WebView.Runtime</PackageId>
+    <Description>Runtime host (WebViewCore, RuntimeBridgeService, RPC dispatcher) for Agibuild.Avalonia.WebView.</Description>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,6 +28,7 @@
     <InternalsVisibleTo Include="Agibuild.Avalonia.WebView.Testing" />
     <InternalsVisibleTo Include="Agibuild.Avalonia.WebView.Integration.Tests" />
     <InternalsVisibleTo Include="Agibuild.Avalonia.WebView.Integration.Tests.Automation" />
+    <InternalsVisibleTo Include="Agibuild.Avalonia.WebView.Benchmarks" />
   </ItemGroup>
 
 </Project>

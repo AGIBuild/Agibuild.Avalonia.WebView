@@ -292,6 +292,12 @@ internal class MockWebViewAdapter : IWebViewAdapter
         WebResourceRequested?.Invoke(this, new WebResourceRequestedEventArgs());
     }
 
+    public void RaiseWebResourceRequested(WebResourceRequestedEventArgs args)
+    {
+        if (_detached) return;
+        WebResourceRequested?.Invoke(this, args);
+    }
+
     public void RaiseEnvironmentRequested()
     {
         if (_detached) return;

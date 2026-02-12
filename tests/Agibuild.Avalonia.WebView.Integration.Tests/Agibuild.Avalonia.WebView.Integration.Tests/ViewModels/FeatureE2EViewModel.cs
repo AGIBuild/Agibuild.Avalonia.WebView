@@ -73,6 +73,7 @@ public partial class FeatureE2EViewModel : ViewModelBase
     [ObservableProperty] private string _resultZoom = "—";
     [ObservableProperty] private string _resultPreload = "—";
     [ObservableProperty] private string _resultContext = "—";
+    [ObservableProperty] private string _resultBridge = "—";
 
     /// <summary>Set by the View once the WebView control is available.</summary>
     public WebView? WebViewControl { get; set; }
@@ -130,6 +131,7 @@ public partial class FeatureE2EViewModel : ViewModelBase
         ResultZoom = "—";
         ResultPreload = "—";
         ResultContext = "—";
+        ResultBridge = "—";
     }
 
     private async Task<bool> RunAllCoreAsync()
@@ -167,6 +169,9 @@ public partial class FeatureE2EViewModel : ViewModelBase
 
         // 8. Context Menu
         allPassed &= await RunContextMenuAsync().ConfigureAwait(false);
+
+        // 9. Bridge (typed C# ↔ JS interop)
+        allPassed &= await RunBridgeAsync().ConfigureAwait(false);
 
         Status = allPassed ? "ALL PASSED" : "SOME FAILED";
         LogLine($"Result: {Status}");
@@ -640,6 +645,81 @@ public partial class FeatureE2EViewModel : ViewModelBase
         {
             LogLine($"  FAIL: {ex.Message}");
             ResultContext = "FAIL";
+            return false;
+        }
+    }
+
+    // ---------------------------------------------------------------------------
+    //  9. Bridge (typed C# ↔ JS)
+    // ---------------------------------------------------------------------------
+
+    /// <summary>Service exposed from C# to JS via [JsExport].</summary>
+    [JsExport]
+    public interface IE2EGreeter
+    {
+        Task<string> Greet(string name);
+    }
+
+    /// <summary>Service provided by JS, called from C# via [JsImport].</summary>
+    [JsImport]
+    public interface IE2ENotifier
+    {
+        Task<bool> ShowAlert(string message);
+    }
+
+    private sealed class E2EGreeterImpl : IE2EGreeter
+    {
+        public Task<string> Greet(string name) => Task.FromResult($"Hello, {name}!");
+    }
+
+    private async Task<bool> RunBridgeAsync()
+    {
+        ResultBridge = "...";
+        LogLine("=== 9. Bridge ===");
+        try
+        {
+            var wv = WebViewControl!;
+
+            // 9a. Expose a C# service and call it from JS.
+            wv.Bridge.Expose<IE2EGreeter>(new E2EGreeterImpl());
+            LogLine("Bridge: Exposed IE2EGreeter.");
+
+            // Wait a moment for stub injection.
+            await Task.Delay(300).ConfigureAwait(false);
+
+            // Call from JS side and verify result.
+            var jsResult = await Dispatcher.UIThread.InvokeAsync(async () =>
+            {
+                return await wv.InvokeScriptAsync(
+                    "window.agWebView && window.agWebView.bridge && window.agWebView.bridge.e2EGreeter ? " +
+                    "window.agWebView.bridge.e2EGreeter.greet('World').then(r => r) : 'NOT_READY'"
+                ).ConfigureAwait(false);
+            }).ConfigureAwait(false);
+
+            LogLine($"Bridge: JS called greet('World') → {jsResult}");
+
+            if (jsResult?.Contains("Hello, World!") == true)
+            {
+                LogLine("Bridge: ✓ JsExport E2E passed.");
+            }
+            else
+            {
+                LogLine($"Bridge: ✗ Unexpected result: {jsResult}");
+                ResultBridge = "FAIL";
+                return false;
+            }
+
+            // 9b. Clean up.
+            wv.Bridge.Remove<IE2EGreeter>();
+            LogLine("Bridge: Removed IE2EGreeter.");
+
+            ResultBridge = "PASS";
+            return true;
+        }
+        catch (Exception ex)
+        {
+            LogLine($"Bridge: FAIL — {ex.Message}");
+            ResultBridge = "FAIL";
             return false;
         }
     }

@@ -11,7 +11,7 @@ namespace Agibuild.Avalonia.WebView.Adapters.MacOS;
 [SupportedOSPlatform("macos")]
 internal sealed class MacOSWebViewAdapter : IWebViewAdapter, INativeWebViewHandleProvider, ICookieAdapter, IWebViewAdapterOptions,
     ICustomSchemeAdapter, IDownloadAdapter, IPermissionAdapter, ICommandAdapter, IScreenshotAdapter, IPrintAdapter,
-    IFindInPageAdapter, IZoomAdapter, IPreloadScriptAdapter, IContextMenuAdapter
+    IFindInPageAdapter, IZoomAdapter, IPreloadScriptAdapter, IContextMenuAdapter, IDevToolsAdapter
 {
     private static bool DiagnosticsEnabled
         => string.Equals(Environment.GetEnvironmentVariable("AGIBUILD_WEBVIEW_DIAG"), "1", StringComparison.Ordinal);
@@ -1331,5 +1331,23 @@ internal sealed class MacOSWebViewAdapter : IWebViewAdapter, INativeWebViewHandl
     // ==================== IContextMenuAdapter ====================
 
     public event EventHandler<ContextMenuRequestedEventArgs>? ContextMenuRequested;
+
+    // ==================== IDevToolsAdapter ====================
+    // WKWebView does not have a public API to programmatically open/close the Web Inspector.
+    // isInspectable is set at init time via ag_wk_set_enable_dev_tools.
+    // TODO: Expose _WKInspector private API or use NSMenu programmatic trigger in future.
+
+    public void OpenDevTools()
+    {
+        // No public WKWebView API for this — no-op for now.
+        // Users can right-click → Inspect Element when isInspectable is enabled.
+    }
+
+    public void CloseDevTools()
+    {
+        // No public WKWebView API — no-op.
+    }
+
+    public bool IsDevToolsOpen => false;
 }
 

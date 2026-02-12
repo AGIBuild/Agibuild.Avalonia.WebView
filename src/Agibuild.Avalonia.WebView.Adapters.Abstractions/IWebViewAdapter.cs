@@ -23,6 +23,21 @@ internal interface IWebViewAdapterOptions
 }
 
 /// <summary>
+/// Optional interface for adapters that support runtime DevTools toggling.
+/// </summary>
+internal interface IDevToolsAdapter
+{
+    /// <summary>Opens the browser developer tools (inspector).</summary>
+    void OpenDevTools();
+
+    /// <summary>Closes the browser developer tools.</summary>
+    void CloseDevTools();
+
+    /// <summary>Returns whether developer tools are currently open.</summary>
+    bool IsDevToolsOpen { get; }
+}
+
+/// <summary>
 /// Optional interface for adapters that support custom URI scheme registration.
 /// Runtime checks for this via <c>adapter as ICustomSchemeAdapter</c>.
 /// <see cref="RegisterCustomSchemes"/> is called before <see cref="IWebViewAdapter.Attach"/>.

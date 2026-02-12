@@ -11,7 +11,7 @@ namespace Agibuild.Avalonia.WebView.Adapters.iOS;
 [SupportedOSPlatform("ios")]
 internal sealed class iOSWebViewAdapter : IWebViewAdapter, INativeWebViewHandleProvider, ICookieAdapter, IWebViewAdapterOptions,
     ICustomSchemeAdapter, IDownloadAdapter, IPermissionAdapter, ICommandAdapter, IScreenshotAdapter, IPrintAdapter,
-    IFindInPageAdapter, IZoomAdapter, IPreloadScriptAdapter, IContextMenuAdapter
+    IFindInPageAdapter, IZoomAdapter, IPreloadScriptAdapter, IContextMenuAdapter, IDevToolsAdapter
 {
     private static bool DiagnosticsEnabled
         => string.Equals(Environment.GetEnvironmentVariable("AGIBUILD_WEBVIEW_DIAG"), "1", StringComparison.Ordinal);
@@ -1290,4 +1290,10 @@ internal sealed class iOSWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
     // ==================== IContextMenuAdapter ====================
 
     public event EventHandler<ContextMenuRequestedEventArgs>? ContextMenuRequested;
+
+    // ==================== IDevToolsAdapter ====================
+
+    public void OpenDevTools() { }
+    public void CloseDevTools() { }
+    public bool IsDevToolsOpen => false;
 }

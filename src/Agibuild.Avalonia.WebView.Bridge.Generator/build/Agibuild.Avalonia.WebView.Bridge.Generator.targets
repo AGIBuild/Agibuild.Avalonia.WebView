@@ -1,0 +1,79 @@
+<!--
+  MSBuild targets for Agibuild.Avalonia.WebView.Bridge.Generator.
+  Automatically writes bridge.d.ts to $(BridgeTypeScriptOutputDir) after compilation
+  when the consumer assembly contains BridgeTypeScriptDeclarations.
+
+  To opt-out:  <GenerateBridgeTypeScript>false</GenerateBridgeTypeScript>
+  To customize: <BridgeTypeScriptOutputDir>wwwroot/types</BridgeTypeScriptOutputDir>
+-->
+<Project>
+  <PropertyGroup>
+    <GenerateBridgeTypeScript Condition="'$(GenerateBridgeTypeScript)' == ''">true</GenerateBridgeTypeScript>
+    <BridgeTypeScriptOutputDir Condition="'$(BridgeTypeScriptOutputDir)' == ''">$(MSBuildProjectDirectory)</BridgeTypeScriptOutputDir>
+  </PropertyGroup>
+
+  <Target Name="_WriteBridgeTypeScript"
+          AfterTargets="Build"
+          Condition="'$(GenerateBridgeTypeScript)' == 'true'">
+    <!--
+      This target uses a tiny inline C# task to:
+      1. Load the output assembly.
+      2. Look for BridgeTypeScriptDeclarations.All constant.
+      3. Write it to bridge.d.ts.
+    -->
+    <WriteBridgeTypeScriptTask
+      AssemblyPath="$(TargetPath)"
+      OutputDirectory="$(BridgeTypeScriptOutputDir)"
+      OutputFileName="bridge.d.ts" />
+  </Target>
+
+  <UsingTask TaskName="WriteBridgeTypeScriptTask"
+             TaskFactory="RoslynCodeTaskFactory"
+             AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+    <ParameterGroup>
+      <AssemblyPath ParameterType="System.String" Required="true" />
+      <OutputDirectory ParameterType="System.String" Required="true" />
+      <OutputFileName ParameterType="System.String" Required="true" />
+    </ParameterGroup>
+    <Task>
+      <Using Namespace="System" />
+      <Using Namespace="System.IO" />
+      <Using Namespace="System.Reflection" />
+      <Code Type="Fragment" Language="cs"><![CDATA[
+try
+{
+    var asm = Assembly.LoadFrom(AssemblyPath);
+    var type = Array.Find(asm.GetTypes(), t => t.Name == "BridgeTypeScriptDeclarations");
+    if (type == null)
+    {
+        Log.LogMessage(MessageImportance.Low, "Bridge: No BridgeTypeScriptDeclarations found, skipping .d.ts generation.");
+        return true;
+    }
+
+    var field = type.GetField("All", BindingFlags.Public | BindingFlags.Static);
+    if (field == null)
+    {
+        Log.LogMessage(MessageImportance.Low, "Bridge: BridgeTypeScriptDeclarations.All field not found.");
+        return true;
+    }
+
+    var content = field.GetValue(null) as string;
+    if (string.IsNullOrEmpty(content))
+    {
+        Log.LogMessage(MessageImportance.Low, "Bridge: BridgeTypeScriptDeclarations.All is empty.");
+        return true;
+    }
+
+    Directory.CreateDirectory(OutputDirectory);
+    var outputPath = Path.Combine(OutputDirectory, OutputFileName);
+    File.WriteAllText(outputPath, content);
+    Log.LogMessage(MessageImportance.High, "Bridge: Generated {0}", outputPath);
+}
+catch (Exception ex)
+{
+    Log.LogWarning("Bridge: Failed to generate .d.ts: {0}", ex.Message);
+}
+      ]]></Code>
+    </Task>
+  </UsingTask>
+</Project>

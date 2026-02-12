@@ -17,7 +17,7 @@ namespace Agibuild.Avalonia.WebView.Adapters.Android;
 [SupportedOSPlatform("android")]
 internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHandleProvider, ICookieAdapter, IWebViewAdapterOptions,
     ICustomSchemeAdapter, IDownloadAdapter, IPermissionAdapter, ICommandAdapter, IScreenshotAdapter, /* IPrintAdapter: Android lacks headless PDF export */
-    IFindInPageAdapter, IZoomAdapter, IPreloadScriptAdapter, IContextMenuAdapter
+    IFindInPageAdapter, IZoomAdapter, IPreloadScriptAdapter, IContextMenuAdapter, IDevToolsAdapter
 {
     private static bool DiagnosticsEnabled
         => string.Equals(System.Environment.GetEnvironmentVariable("AGIBUILD_WEBVIEW_DIAG"), "1", StringComparison.Ordinal);
@@ -1518,4 +1518,10 @@ internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHan
     // ==================== IContextMenuAdapter ====================
 
     public event EventHandler<ContextMenuRequestedEventArgs>? ContextMenuRequested;
+
+    // ==================== IDevToolsAdapter ====================
+
+    public void OpenDevTools() { }
+    public void CloseDevTools() { }
+    public bool IsDevToolsOpen => false;
 }

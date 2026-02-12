@@ -1,4 +1,7 @@
-# Agibuild.Avalonia.WebView 设计文档（TDD 优先）
+# Agibuild.Avalonia.WebView 设计文档
+
+> **项目愿景与目标**: 参见 [PROJECT.md](../openspec/PROJECT.md)
+> **交付路线图**: 参见 [ROADMAP.md](../openspec/ROADMAP.md)
 
 ---
 
@@ -6,19 +9,28 @@
 
 ### 🎯 目标
 
-构建一个完全模拟 Avalonia.Controls.WebView 功能的可替代控件库，具备一致的 API、跨平台行为，并支持：
-- 嵌入式浏览器控件（主 UI）
-- 弹窗/对话框模式 WebView
-- Web 认证流（OAuth 等）
-- 深度 JavaScript ↔ C# 双向交互
-- 环境配置与原生扩展
-- 易于单元测试（TDD 支持）
+构建一个跨平台混合应用框架（Hybrid App Framework），基于 Avalonia UI，使开发者能够以原生性能和体积，获得 Electron 级别的开发效率：
 
-### 🧠 设计原则（TDD 优先）
+**核心目标**（详见 [PROJECT.md §3.1](../openspec/PROJECT.md#31-core-goals-must-achieve)）：
+- **G1 — Type-Safe Bidirectional Bridge**: 源码生成器驱动的 C# ↔ JS 类型安全通信
+- **G2 — First-Class SPA Hosting**: 开箱即用的前端应用托管（`app://` 协议）
+- **G3 — Secure by Default**: 基于能力的安全模型，Web 内容只能调用显式暴露的方法
+- **G4 — Contract-Driven Testability**: 所有功能可通过 MockAdapter 测试，无需真实浏览器
+
+**已达成基础目标**（Phase 0）：
+- 5 平台原生 WebView 适配器（Windows/macOS/iOS/Android/Linux）
+- 完整导航控制（拦截、取消、重定向关联）
+- WebMessage 桥接 + 策略（Origin、Channel、Protocol 检查）
+- 丰富功能集：Cookies、Commands、Screenshot、PDF、RPC、Zoom、Find、Preload、ContextMenu、Download、Permission、WebResource
+- 391 单元测试 + 80 集成测试，96%+ 行覆盖率
+
+### 🧠 设计原则
 
 1. **契约优先**：先定义接口和契约，无平台依赖，写测试驱动契约行为。
 2. **跨平台隔离与适配器模式**：通过适配器抽象层隔离平台差异，使用 DI 容器注入平台实现。
 3. **可测试 & Mockable**：所有公开 API 均基于接口，事件与回调提供模拟触发机制。
+4. **安全即架构**：安全不是配置项，而是通过 Bridge 暴露面 + Policy 管道在架构层面保证。
+5. **渐进式采用**：从简单 WebView 控件到完整 Hybrid 框架，每一步都是可选的增量。
 
 ---
 
@@ -284,18 +296,22 @@ public void WebView_OnWebMessageReceived_ShouldPassMessage()
 
 ---
 
-## 10. 实现建议与路线
+## 10. 路线图
 
-1. 定义契约接口 + Mock Tests
-2. 实现 Adapter 框架 + Mock 运行
-3. 实现 Windows Adapter
-4. 实现 macOS/iOS Adapter
-5. 实现 Android Adapter
-6. 扩展 Dialog & AuthFlow
+完整路线图参见 [ROADMAP.md](../openspec/ROADMAP.md)。概要：
+
+| Phase | Focus | Status |
+|-------|-------|--------|
+| **Phase 0**: Foundation | 跨平台适配器 + 契约语义 + 丰富功能集 | ✅ Done |
+| **Phase 1**: Type-Safe Bridge | 源码生成器 + C# ↔ JS 类型安全桥接 + TS 类型生成 | 🔜 Next |
+| **Phase 2**: SPA Hosting | `app://` 协议 + 嵌入式资源 + HMR 代理 + 前端集成 | Planned |
+| **Phase 3**: Polish & GA | 项目模板 + 文档 + 性能基准 + 1.0 发布 | Planned |
 
 ---
 
 **总结**
 
-设计文档制定了一个契约驱动、可测试、跨平台隔离明显、与官方功能完全对应的 WebView 实现方案，覆盖嵌入式浏览器、弹窗 Web 浏览、OAuth / WebAuthFlow、环境配置、JS ↔ C# 交互及原生互操作。
+本项目已从一个"WebView 控件"演进为一个"跨平台 Hybrid App 框架"。Phase 0 建立了契约驱动、可测试、5 平台统一的基础设施；后续 Phase 1-3 将在此基础上构建类型安全桥接、SPA 托管和开发者工具链，最终实现"Electron 的开发效率 + Native 的性能和体积"这一核心价值主张。
+
+详细目标定义参见 [PROJECT.md](../openspec/PROJECT.md)。
 

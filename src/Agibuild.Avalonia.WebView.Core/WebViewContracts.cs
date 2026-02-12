@@ -56,6 +56,33 @@ public interface IWebView : IDisposable
     IWebViewRpcService? Rpc { get; }
 
     /// <summary>
+    /// Gets the type-safe bridge service for exposing C# services to JS (<see cref="JsExportAttribute"/>)
+    /// and importing JS services into C# (<see cref="JsImportAttribute"/>).
+    /// <para>
+    /// Accessing this property auto-enables the WebMessage bridge if it is not already enabled.
+    /// </para>
+    /// </summary>
+    IBridgeService Bridge { get; }
+
+    /// <summary>
+    /// Opens the browser developer tools (inspector) at runtime.
+    /// No-op if the platform adapter does not support runtime DevTools toggling.
+    /// </summary>
+    void OpenDevTools();
+
+    /// <summary>
+    /// Closes the browser developer tools.
+    /// No-op if the platform adapter does not support runtime DevTools toggling.
+    /// </summary>
+    void CloseDevTools();
+
+    /// <summary>
+    /// Returns whether developer tools are currently open.
+    /// Always returns false if the platform adapter does not support this check.
+    /// </summary>
+    bool IsDevToolsOpen { get; }
+
+    /// <summary>
     /// Captures a screenshot of the current viewport as a PNG byte array.
     /// Throws <see cref="NotSupportedException"/> if the adapter does not support screenshots.
     /// </summary>
@@ -85,6 +112,50 @@ public interface IWebView : IDisposable
 
     /// <summary>Raised before the native adapter is detached/destroyed. After this event, <see cref="INativeWebViewHandleProvider.TryGetWebViewHandle"/> returns <c>null</c>.</summary>
     event EventHandler? AdapterDestroyed;
+
+    // ==================== Zoom ====================
+
+    /// <summary>
+    /// Gets or sets the zoom factor. 1.0 = 100%. Returns 1.0 if zoom is not supported.
+    /// </summary>
+    double ZoomFactor { get; set; }
+
+    /// <summary>Raised when the zoom factor changes.</summary>
+    event EventHandler<double>? ZoomFactorChanged;
+
+    // ==================== Find in Page ====================
+
+    /// <summary>
+    /// Searches the current page for <paramref name="text"/>.
+    /// </summary>
+    /// <exception cref="NotSupportedException">The adapter does not implement find-in-page.</exception>
+    Task<FindInPageResult> FindInPageAsync(string text, FindInPageOptions? options = null);
+
+    /// <summary>
+    /// Stops an active find session and optionally clears highlights.
+    /// </summary>
+    /// <exception cref="NotSupportedException">The adapter does not implement find-in-page.</exception>
+    void StopFindInPage(bool clearHighlights = true);
+
+    // ==================== Preload Scripts ====================
+
+    /// <summary>
+    /// Adds a JavaScript snippet that runs before every page load.
+    /// </summary>
+    /// <returns>An opaque script ID for later removal.</returns>
+    /// <exception cref="NotSupportedException">The adapter does not implement preload scripts.</exception>
+    string AddPreloadScript(string javaScript);
+
+    /// <summary>
+    /// Removes a previously added preload script.
+    /// </summary>
+    /// <exception cref="NotSupportedException">The adapter does not implement preload scripts.</exception>
+    void RemovePreloadScript(string scriptId);
+
+    // ==================== Context Menu ====================
+
+    /// <summary>Raised when the user triggers a context menu (right-click, long-press).</summary>
+    event EventHandler<ContextMenuRequestedEventArgs>? ContextMenuRequested;
 }
 
 public interface IWebDialog : IWebView
@@ -263,7 +334,6 @@ public sealed class PdfPrintOptions
     public bool PrintBackground { get; set; } = true;
 }
 
-/// <summary>Options for in-page text search.</summary>
 /// <summary>Media type at the context menu hit-test location.</summary>
 public enum ContextMenuMediaType
 {
@@ -501,7 +571,6 @@ public sealed class WebMessageReceivedEventArgs : EventArgs
 /// Custom schemes must be registered via <see cref="IWebViewEnvironmentOptions.CustomSchemes"/>
 /// before the WebView is created.
 /// </summary>
-[Experimental("AGWV004")]
 public sealed class WebResourceRequestedEventArgs : EventArgs
 {
     public WebResourceRequestedEventArgs() { }

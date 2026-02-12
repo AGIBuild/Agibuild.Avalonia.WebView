@@ -3,6 +3,10 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+
+    <IsPackable>true</IsPackable>
+    <PackageId>Agibuild.Avalonia.WebView.Testing</PackageId>
+    <Description>Test utilities (MockBridgeService, MockWebViewAdapter, TestDispatcher) for Agibuild.Avalonia.WebView.</Description>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,5 +19,6 @@
     <InternalsVisibleTo Include="Agibuild.Avalonia.WebView.UnitTests" />
     <InternalsVisibleTo Include="Agibuild.Avalonia.WebView.Integration.Tests" />
     <InternalsVisibleTo Include="Agibuild.Avalonia.WebView.Integration.Tests.Automation" />
+    <InternalsVisibleTo Include="Agibuild.Avalonia.WebView.Benchmarks" />
   </ItemGroup>
 </Project>

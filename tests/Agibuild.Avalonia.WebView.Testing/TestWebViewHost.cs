@@ -35,8 +35,28 @@ public sealed class TestWebViewHost : IWebView
     public ICookieManager? TryGetCookieManager() => null;
     public ICommandManager? TryGetCommandManager() => null;
     public IWebViewRpcService? Rpc => null;
+    public IBridgeService Bridge => throw new NotSupportedException("TestWebViewHost does not support Bridge. Use WebViewCore with MockWebViewAdapter instead.");
+    public void OpenDevTools() { /* No-op for test stub. */ }
+    public void CloseDevTools() { /* No-op for test stub. */ }
+    public bool IsDevToolsOpen => false;
     public Task<byte[]> CaptureScreenshotAsync() => Task.FromException<byte[]>(new NotSupportedException());
     public Task<byte[]> PrintToPdfAsync(PdfPrintOptions? options = null) => Task.FromException<byte[]>(new NotSupportedException());
+
+    // Zoom
+    public double ZoomFactor { get; set; } = 1.0;
+    public event EventHandler<double>? ZoomFactorChanged { add { } remove { } }
+
+    // Find in Page
+    public Task<FindInPageResult> FindInPageAsync(string text, FindInPageOptions? options = null)
+        => Task.FromException<FindInPageResult>(new NotSupportedException());
+    public void StopFindInPage(bool clearHighlights = true) { }
+
+    // Preload Scripts
+    public string AddPreloadScript(string javaScript) => throw new NotSupportedException();
+    public void RemovePreloadScript(string scriptId) => throw new NotSupportedException();
+
+    // Context Menu
+    public event EventHandler<ContextMenuRequestedEventArgs>? ContextMenuRequested { add { } remove { } }
 
     public void Dispose() { /* No-op for test stub. */ }
 }

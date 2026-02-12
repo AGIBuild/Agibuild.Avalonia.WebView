@@ -4,6 +4,10 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Agibuild.Avalonia.WebView</RootNamespace>
+
+    <IsPackable>true</IsPackable>
+    <PackageId>Agibuild.Avalonia.WebView.Core</PackageId>
+    <Description>Core contract types (IWebView, IBridgeService, [JsExport], [JsImport]) for Agibuild.Avalonia.WebView.</Description>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="11.3.11" />

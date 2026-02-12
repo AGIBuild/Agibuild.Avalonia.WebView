@@ -80,6 +80,8 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
     private IWebMessagePolicy? _webMessagePolicy;
     private IWebMessageDropDiagnosticsSink? _webMessageDropDiagnosticsSink;
     private WebViewRpcService? _rpcService;
+    private RuntimeBridgeService? _bridgeService;
+    private SpaHostingService? _spaHostingService;
 
     internal WebViewCore(IWebViewAdapter adapter, IWebViewDispatcher dispatcher)
         : this(adapter, dispatcher, NullLogger<WebViewCore>.Instance)
@@ -271,6 +273,12 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
             _activeNavigation.TrySetFault(new ObjectDisposedException(nameof(WebViewCore)));
             _activeNavigation = null;
         }
+
+        _bridgeService?.Dispose();
+        _bridgeService = null;
+
+        _spaHostingService?.Dispose();
+        _spaHostingService = null;
 
         _logger.LogDebug("Dispose: completed");
     }
@@ -530,6 +538,54 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
 
     public IWebViewRpcService? Rpc => _rpcService;
 
+    // ==================== DevTools ====================
+
+    public void OpenDevTools()
+    {
+        ThrowIfDisposed();
+        if (_adapter is IDevToolsAdapter devTools)
+            devTools.OpenDevTools();
+        else
+            _logger.LogDebug("DevTools: adapter does not support runtime toggle");
+    }
+
+    public void CloseDevTools()
+    {
+        ThrowIfDisposed();
+        if (_adapter is IDevToolsAdapter devTools)
+            devTools.CloseDevTools();
+    }
+
+    public bool IsDevToolsOpen => _adapter is IDevToolsAdapter devTools && devTools.IsDevToolsOpen;
+
+    // ==================== Bridge ====================
+
+    public IBridgeService Bridge
+    {
+        get
+        {
+            ThrowIfDisposed();
+
+            if (_bridgeService is not null)
+                return _bridgeService;
+
+            // Auto-enable bridge with defaults if needed.
+            if (!_webMessageBridgeEnabled)
+            {
+                EnableWebMessageBridge(new WebMessageBridgeOptions());
+            }
+
+            _bridgeService = new RuntimeBridgeService(
+                _rpcService!,
+                script => InvokeScriptAsync(script),
+                _logger,
+                enableDevTools: WebViewEnvironment.Options.EnableDevTools);
+
+            _logger.LogDebug("Bridge: auto-created RuntimeBridgeService");
+            return _bridgeService;
+        }
+    }
+
     public Task<byte[]> CaptureScreenshotAsync()
     {
         ThrowIfDisposed();
@@ -715,6 +771,46 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         _rpcService = null;
 
         _logger.LogDebug("WebMessageBridge disabled");
+    }
+
+    // ==================== SPA Hosting ====================
+
+    /// <summary>
+    /// Enables SPA hosting. Registers the custom scheme, subscribes to WebResourceRequested,
+    /// and optionally auto-enables the bridge.
+    /// </summary>
+    public void EnableSpaHosting(SpaHostingOptions options)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        ThrowIfDisposed();
+
+        if (_spaHostingService is not null)
+            throw new InvalidOperationException("SPA hosting is already enabled.");
+
+        _spaHostingService = new SpaHostingService(options, _logger);
+
+        // Register custom scheme with the adapter.
+        if (_adapter is ICustomSchemeAdapter customSchemeAdapter)
+        {
+            customSchemeAdapter.RegisterCustomSchemes([_spaHostingService.GetSchemeRegistration()]);
+        }
+
+        // Subscribe to WebResourceRequested to intercept app:// requests.
+        WebResourceRequested += OnSpaWebResourceRequested;
+
+        // Auto-enable bridge if requested.
+        if (options.AutoInjectBridgeScript && !_webMessageBridgeEnabled)
+        {
+            EnableWebMessageBridge(new WebMessageBridgeOptions());
+        }
+
+        _logger.LogDebug("SPA hosting enabled: scheme={Scheme}, devServer={DevServer}",
+            options.Scheme, options.DevServerUrl ?? "(embedded)");
+    }
+
+    private void OnSpaWebResourceRequested(object? sender, WebResourceRequestedEventArgs e)
+    {
+        _spaHostingService?.TryHandle(e);
     }
 
     private Task InvokeAsyncOnUiThread(Func<Task> func)
