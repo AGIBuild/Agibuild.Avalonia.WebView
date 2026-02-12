@@ -1153,8 +1153,8 @@ class _Build : NukeBuild
         .DependsOn(Coverage, ValidatePackage);
 
     Target CiPublish => _ => _
-        .Description("Full CI/CD pipeline: compile → coverage → pack → validate → publish.")
-        .DependsOn(Coverage, ValidatePackage, Publish);
+        .Description("Full release pipeline: compile → coverage → integration tests → pack → validate → NuGet package test → publish.")
+        .DependsOn(Coverage, IntegrationTests, NugetPackageTest, Publish);
 
     // ──────────────────────────────── Helpers ────────────────────────────────────
 

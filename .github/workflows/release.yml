@@ -19,9 +19,9 @@ env:
   NUKE_TELEMETRY_OPTOUT: true
 
 jobs:
-  # ────────────────────────────── Build on macOS (primary, produces .nupkg) ────
+  # ────────────────────────────── Build, Test & Validate (macOS) ────────────────
   build:
-    name: Build & Pack (macOS)
+    name: Build, Test & Validate (macOS)
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -40,8 +40,8 @@ jobs:
       - name: Restore .NET tools
         run: dotnet tool restore
 
-      - name: Run full CI pipeline
-        run: ./build.sh --target Ci --configuration Release
+      - name: Run release pipeline (Coverage + Integration Tests + NuGet Package Test)
+        run: ./build.sh --target CiPublish --skip Publish --configuration Release
 
       - name: Upload NuGet package
         uses: actions/upload-artifact@v4
@@ -55,6 +55,14 @@ jobs:
         with:
           name: test-results-release
           path: artifacts/test-results/
+          if-no-files-found: ignore
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report-release
+          path: artifacts/coverage-report/
           if-no-files-found: ignore
 
   # ────────────────────────────── Publish to NuGet ─────────────────────────────
