@@ -1,246 +1,297 @@
-# Agibuild.Avalonia.WebView
+<p align="center">
+  <img src="https://img.shields.io/nuget/v/Agibuild.Avalonia.WebView?logo=nuget&label=NuGet&color=004880&style=flat-square" />
+  <img src="https://img.shields.io/nuget/dt/Agibuild.Avalonia.WebView?logo=nuget&label=Downloads&color=00a86b&style=flat-square" />
+  <a href="https://github.com/AGIBuild/Agibuild.Avalonia.WebView/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/AGIBuild/Agibuild.Avalonia.WebView/ci.yml?label=CI&logo=github&style=flat-square" /></a>
+  <img src="https://img.shields.io/badge/License-MIT-yellow?style=flat-square" />
+</p>
 
-[![CI](https://github.com/AGIBuild/Agibuild.Avalonia.WebView/actions/workflows/ci.yml/badge.svg)](https://github.com/AGIBuild/Agibuild.Avalonia.WebView/actions/workflows/ci.yml)
-[![Release](https://github.com/AGIBuild/Agibuild.Avalonia.WebView/actions/workflows/release.yml/badge.svg)](https://github.com/AGIBuild/Agibuild.Avalonia.WebView/actions/workflows/release.yml)
-[![NuGet](https://img.shields.io/nuget/v/Agibuild.Avalonia.WebView?logo=nuget&color=blue)](https://www.nuget.org/packages/Agibuild.Avalonia.WebView)
-[![NuGet Downloads](https://img.shields.io/nuget/dt/Agibuild.Avalonia.WebView?logo=nuget&color=green)](https://www.nuget.org/packages/Agibuild.Avalonia.WebView)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE.txt)
+<h1 align="center">Agibuild.Avalonia.WebView</h1>
 
-Cross-platform WebView control for [Avalonia UI](https://avaloniaui.net/) with native platform adapters.
+<p align="center">
+  <strong>One package. Five platforms. Native WebView in Avalonia — with a type-safe C# &harr; JS bridge.</strong>
+</p>
 
-| Platform | Engine | Status |
-|----------|--------|--------|
-| macOS | WKWebView | ![Preview](https://img.shields.io/badge/Preview-orange) |
-| Windows | WebView2 | ![Preview](https://img.shields.io/badge/Preview-orange) |
-| Linux | WebKitGTK | ![Untested](https://img.shields.io/badge/Untested-yellow) |
-| iOS | WKWebView | ![Preview](https://img.shields.io/badge/Preview-orange) |
-| Android | Android WebView | ![Preview](https://img.shields.io/badge/Preview-orange) |
+---
 
-## Installation
+## The Problem
 
-```bash
+Building hybrid desktop/mobile apps with Avalonia? You'll quickly hit these walls:
+
+- **No built-in WebView** &mdash; Avalonia doesn't ship one.
+- **Platform fragmentation** &mdash; WebView2 on Windows, WKWebView on macOS/iOS, WebKitGTK on Linux, Android WebView... each has a different API.
+- **JS interop is painful** &mdash; Passing strings through `InvokeScriptAsync` and parsing `WebMessageReceived` gets messy fast.
+- **SPA hosting is DIY** &mdash; Serving your React/Vue/Svelte app from embedded resources requires custom plumbing.
+
+## The Solution
+
+**One NuGet package.** Drop it in, call `.UseAgibuildWebView()`, and you get a native WebView on every platform &mdash; plus a type-safe bridge that lets C# and JavaScript call each other like they're in the same process.
+
+```
 dotnet add package Agibuild.Avalonia.WebView
 ```
 
-The correct native adapter is automatically selected at runtime — no per-platform packages needed.
+| Platform | Engine | Status |
+|----------|--------|--------|
+| macOS | WKWebView | Preview |
+| Windows | WebView2 | Preview |
+| Linux | WebKitGTK | Preview |
+| iOS | WKWebView | Preview |
+| Android | Android WebView | Preview |
 
-## Quick Start
+---
 
-### Minimal Setup
+## 30 Seconds to Your First WebView
 
-Add `.UseAgibuildWebView()` to your existing `AppBuilder` chain:
-
-```csharp
-AppBuilder.Configure<App>()
-    .UsePlatformDetect()
-    .UseAgibuildWebView() // <-- add this line
-    .StartWithClassicDesktopLifetime(args);
-```
-
-With logging:
+**1. Initialize** (one line in `Program.cs`):
 
 ```csharp
 AppBuilder.Configure<App>()
     .UsePlatformDetect()
-    .UseAgibuildWebView(loggerFactory)
+    .UseAgibuildWebView()   // <-- this is it
     .StartWithClassicDesktopLifetime(args);
 ```
 
-### XAML
+**2. Add the control** (XAML):
 
 ```xml
-<webview:WebView Source="https://example.com" />
+<Window xmlns:wv="using:Agibuild.Avalonia.WebView">
+    <wv:WebView x:Name="WebView" Source="https://example.com" />
+</Window>
 ```
 
-Where `webview` is:
+**That's it.** You have a native WebView running on macOS, Windows, Linux, iOS, and Android.
 
-```xml
-xmlns:webview="using:Agibuild.Avalonia.WebView"
-```
+---
 
-### With Dependency Injection
+## The Bridge: Type-Safe C# &harr; JS
+
+This is where it gets interesting. No more string-based messaging. Define a C# interface, and it just works on both sides.
+
+### Expose C# to JavaScript
 
 ```csharp
-var services = new ServiceCollection();
-services.AddWebView();
-services.AddWebViewDialogServices(); // Optional: dialogs + OAuth
+// 1. Define a contract
+[JsExport]
+public interface IGreeterService
+{
+    Task<string> Greet(string name);
+}
 
-var provider = services.BuildServiceProvider();
-provider.UseAgibuildWebView();
+// 2. Implement it
+public class GreeterService : IGreeterService
+{
+    public Task<string> Greet(string name)
+        => Task.FromResult($"Hello, {name}!");
+}
+
+// 3. Expose it (one line)
+webView.Bridge.Expose<IGreeterService>(new GreeterService());
 ```
 
-## Features
+Now JavaScript can call it directly:
 
-### Navigation
+```javascript
+const msg = await window.agWebView.rpc.invoke('GreeterService.greet', { name: 'World' });
+// => "Hello, World!"
+```
+
+### Call JavaScript from C#
 
 ```csharp
-await webView.NavigateAsync(new Uri("https://example.com"));
-await webView.NavigateToStringAsync("<h1>Hello</h1>");
+[JsImport]
+public interface INotificationService
+{
+    Task ShowNotification(string message);
+}
 
-webView.GoBack();
-webView.GoForward();
-webView.Refresh();
-webView.Stop();
+// Get a typed proxy — calls are forwarded to JS via RPC
+var notifications = webView.Bridge.GetProxy<INotificationService>();
+await notifications.ShowNotification("File saved!");
 ```
 
-### JavaScript Interop
+JavaScript registers the handler:
+
+```javascript
+window.agWebView.rpc.handle('NotificationService.showNotification', (params) => {
+    showToast(params.message);
+});
+```
+
+The bridge is powered by JSON-RPC 2.0 under the hood. A Roslyn source generator produces AOT-safe, reflection-free proxy code at compile time.
+
+---
+
+## SPA Hosting: Ship Your Frontend Inside the App
+
+Embed your React / Vue / Svelte / vanilla build output as resources. No external web server needed.
 
 ```csharp
-string? result = await webView.InvokeScriptAsync("document.title");
+webView.EnableSpaHosting(new SpaHostingOptions
+{
+    EmbeddedResourcePrefix = "wwwroot",
+    ResourceAssembly = typeof(MainWindow).Assembly,
+});
+
+await webView.NavigateAsync(new Uri("app://localhost/index.html"));
 ```
 
-### Events
+During development, proxy to your dev server with HMR:
 
 ```csharp
-webView.NavigationStarted += (s, e) =>
+webView.EnableSpaHosting(new SpaHostingOptions
 {
-    // e.RequestUri, e.Cancel
-};
-
-webView.NavigationCompleted += (s, e) =>
-{
-    // e.Status: Success, Failure, Canceled, Superseded
-};
-
-webView.NewWindowRequested += (s, e) =>
-{
-    e.Handled = true; // prevent popup, handle yourself
-};
-
-webView.WebMessageReceived += (s, e) =>
-{
-    // e.Body, e.Origin, e.ChannelId
-};
+    DevServerUrl = "http://localhost:5173",  // Vite, webpack, etc.
+});
 ```
 
-### OAuth Authentication
+The custom `app://` scheme handles MIME types, SPA fallback routing, immutable asset caching, and default security headers automatically.
+
+---
+
+## More Capabilities
+
+<details>
+<summary><strong>OAuth / Web Authentication</strong></summary>
 
 ```csharp
 var broker = serviceProvider.GetRequiredService<IWebAuthBroker>();
-
 var result = await broker.AuthenticateAsync(window, new AuthOptions
 {
     AuthorizeUri = new Uri("https://provider.com/oauth/authorize?..."),
-    CallbackUri = new Uri("myapp://callback"),
-    UseEphemeralSession = true,
-    Timeout = TimeSpan.FromMinutes(5)
+    CallbackUri  = new Uri("myapp://callback"),
+    Timeout      = TimeSpan.FromMinutes(5),
 });
 
 if (result.Status == WebAuthStatus.Success)
 {
-    // result.CallbackUri contains the OAuth callback with tokens
+    // result.CallbackUri contains the tokens
 }
 ```
+</details>
 
-### Web Dialog (Popup Window)
+<details>
+<summary><strong>Web Dialog (Popup Window)</strong></summary>
 
 ```csharp
-var factory = serviceProvider.GetRequiredService<IWebDialogFactory>();
 var dialog = factory.Create();
-
 dialog.Title = "Sign In";
 dialog.Resize(800, 600);
 dialog.Show();
 await dialog.NavigateAsync(new Uri("https://example.com/login"));
 ```
+</details>
 
-### Command Manager
-
-```csharp
-var commandManager = webView.TryGetCommandManager();
-if (commandManager is not null)
-{
-    commandManager.Copy();
-    commandManager.Paste();
-    commandManager.SelectAll();
-    commandManager.Cut();
-    commandManager.Undo();
-    commandManager.Redo();
-}
-```
-
-### Screenshot Capture
+<details>
+<summary><strong>Screenshot & PDF Export</strong></summary>
 
 ```csharp
-byte[] pngBytes = await webView.CaptureScreenshotAsync();
-File.WriteAllBytes("screenshot.png", pngBytes);
+byte[] png = await webView.CaptureScreenshotAsync();
+byte[] pdf = await webView.PrintToPdfAsync(new PdfPrintOptions { Landscape = true });
 ```
+</details>
 
-### Print to PDF
+<details>
+<summary><strong>Cookie Management</strong></summary>
 
 ```csharp
-byte[] pdfBytes = await webView.PrintToPdfAsync(new PdfPrintOptions
-{
-    Landscape = true,
-    Scale = 0.8,
-    PrintBackground = true
-});
-File.WriteAllBytes("page.pdf", pdfBytes);
+var cookies = webView.TryGetCookieManager();
+var all = await cookies!.GetCookiesAsync(new Uri("https://example.com"));
+await cookies.ClearAllCookiesAsync();
 ```
+</details>
 
-### JS ↔ C# RPC (Experimental)
-
-Bidirectional typed RPC over the WebMessage bridge using JSON-RPC 2.0:
+<details>
+<summary><strong>Clipboard / Command Manager</strong></summary>
 
 ```csharp
-// C# handler called from JS
-webView.Rpc?.Handle("greet", (string name) => $"Hello, {name}!");
-
-// C# calling JS
-var result = await webView.Rpc!.InvokeAsync<string>("jsMethod", new { key = "value" });
+var cmd = webView.TryGetCommandManager();
+cmd?.Copy(); cmd?.Paste(); cmd?.SelectAll(); cmd?.Undo(); cmd?.Redo();
 ```
+</details>
 
-### Cookie Management (Experimental)
-
-```csharp
-var cookieManager = webView.TryGetCookieManager();
-if (cookieManager is not null)
-{
-    var cookies = await cookieManager.GetCookiesAsync(new Uri("https://example.com"));
-    await cookieManager.ClearAllCookiesAsync();
-}
-```
-
-### Environment Options
+<details>
+<summary><strong>Environment Options</strong></summary>
 
 ```csharp
 WebViewEnvironment.Initialize(loggerFactory, new WebViewEnvironmentOptions
 {
-    EnableDevTools = true,
-    CustomUserAgent = "MyApp/1.0",
-    UseEphemeralSession = false
+    EnableDevTools    = true,
+    CustomUserAgent   = "MyApp/1.0",
+    UseEphemeralSession = false,
 });
 ```
+</details>
+
+<details>
+<summary><strong>Dependency Injection</strong></summary>
+
+```csharp
+var services = new ServiceCollection();
+services.AddWebView();
+services.AddWebViewDialogServices(); // dialogs + OAuth
+
+var provider = services.BuildServiceProvider();
+provider.UseAgibuildWebView();
+```
+</details>
+
+---
+
+## Architecture at a Glance
+
+```
+┌──────────────────────────────────────────────┐
+│              Your Avalonia App                │
+│                                              │
+│  ┌──────────┐  ┌────────┐  ┌─────────────┐  │
+│  │ WebView  │  │ Bridge │  │ SPA Hosting │  │
+│  │ Control  │  │C# ↔ JS │  │ app://      │  │
+│  └────┬─────┘  └───┬────┘  └──────┬──────┘  │
+│       │            │               │         │
+│  ┌────┴────────────┴───────────────┴──────┐  │
+│  │          WebViewCore (Runtime)         │  │
+│  │   Navigation · RPC · Events · Policy  │  │
+│  └────────────────┬──────────────────────┘  │
+│                   │ IWebViewAdapter          │
+│  ┌────────────────┴──────────────────────┐  │
+│  │     Platform Adapter (auto-selected)   │  │
+│  │  WKWebView│WebView2│WebKitGTK│Android │  │
+│  └────────────────────────────────────────┘  │
+└──────────────────────────────────────────────┘
+```
+
+---
+
+## Project Template
+
+Scaffold a hybrid app with the built-in template:
+
+```bash
+dotnet new install Agibuild.Avalonia.WebView.Templates
+dotnet new agibuild-hybrid -n MyApp
+cd MyApp && dotnet run --project MyApp.Desktop
+```
+
+---
 
 ## Testing
-
-Spec-driven contract tests cover the runtime layer against mock adapters — no native browser needed.
 
 | Metric | Value |
 |--------|-------|
 | Unit tests | 626 |
-| Integration tests (headless) | 112 |
+| Integration tests | 112 |
 | Line coverage | **95.4%** |
 | Branch coverage | **88.2%** |
 | Method coverage | **97.7%** |
 
-**Coverage by module:**
-
-| Assembly | Line coverage |
-|----------|:------------:|
-| Core (contracts, attributes, events) | 100% |
-| Adapters.Abstractions | 100% |
-| DependencyInjection | 100% |
-| Runtime (WebViewCore, Bridge, SPA hosting) | 94.7% |
-
-Run all automated tests with a single command:
-
 ```bash
-nuke Test            # Unit + Integration (738 tests, ~1 min)
-nuke Coverage        # Unit tests with coverage report + threshold enforcement
-nuke NugetPackageTest  # NuGet package smoke test (pack → install → run)
-nuke TemplateE2E     # Template E2E (pack → install template → create project → test → cleanup)
+nuke Test            # Unit + Integration (738 tests)
+nuke Coverage        # Coverage report + threshold enforcement
+nuke NugetPackageTest  # Pack → install → run smoke test
+nuke TemplateE2E     # Template end-to-end test
 ```
+
+---
 
 ## License
 
