@@ -74,6 +74,7 @@ public partial class FeatureE2EViewModel : ViewModelBase
     [ObservableProperty] private string _resultPreload = "—";
     [ObservableProperty] private string _resultContext = "—";
     [ObservableProperty] private string _resultBridge = "—";
+    [ObservableProperty] private string _resultDevTools = "—";
 
     /// <summary>Set by the View once the WebView control is available.</summary>
     public WebView? WebViewControl { get; set; }
@@ -132,6 +133,7 @@ public partial class FeatureE2EViewModel : ViewModelBase
         ResultPreload = "—";
         ResultContext = "—";
         ResultBridge = "—";
+        ResultDevTools = "—";
     }
 
     private async Task<bool> RunAllCoreAsync()
@@ -172,6 +174,9 @@ public partial class FeatureE2EViewModel : ViewModelBase
 
         // 9. Bridge (typed C# ↔ JS interop)
         allPassed &= await RunBridgeAsync().ConfigureAwait(false);
+
+        // 10. DevTools toggle
+        allPassed &= await RunDevToolsAsync().ConfigureAwait(false);
 
         Status = allPassed ? "ALL PASSED" : "SOME FAILED";
         LogLine($"Result: {Status}");
@@ -654,7 +659,7 @@ public partial class FeatureE2EViewModel : ViewModelBase
     // ---------------------------------------------------------------------------
 
     /// <summary>Service exposed from C# to JS via [JsExport].</summary>
-    [JsExport]
+    [JsExport(Name = "e2eGreeter")]
     public interface IE2EGreeter
     {
         Task<string> Greet(string name);
@@ -682,19 +687,63 @@ public partial class FeatureE2EViewModel : ViewModelBase
 
             // 9a. Expose a C# service and call it from JS.
             wv.Bridge.Expose<IE2EGreeter>(new E2EGreeterImpl());
-            LogLine("Bridge: Exposed IE2EGreeter.");
+            LogLine("Bridge: Exposed IE2EGreeter (service name: e2eGreeter).");
 
-            // Wait a moment for stub injection.
-            await Task.Delay(300).ConfigureAwait(false);
+            // Wait for the JS stub to be injected (fire-and-forget in RuntimeBridgeService).
+            await Task.Delay(800).ConfigureAwait(false);
 
-            // Call from JS side and verify result.
-            var jsResult = await Dispatcher.UIThread.InvokeAsync(async () =>
+            // Diagnostic: list all registered bridge services.
+            var bridgeKeys = await Dispatcher.UIThread.InvokeAsync(async () =>
+                await wv.InvokeScriptAsync(
+                    "window.agWebView && window.agWebView.bridge ? Object.keys(window.agWebView.bridge).join(',') : 'NO_BRIDGE'"
+                ).ConfigureAwait(false)
+            ).ConfigureAwait(false);
+            LogLine($"Bridge: registered services = [{bridgeKeys}]");
+
+            // Fire-and-forget the JS call — WKWebView evaluateJavaScript does NOT await
+            // Promises, so we store the result in a global variable and poll for it.
+            var invokeStatus = await Dispatcher.UIThread.InvokeAsync(async () =>
+                await wv.InvokeScriptAsync(
+                    """
+                    (function() {
+                        try {
+                            if (!window.agWebView || !window.agWebView.bridge || !window.agWebView.bridge.e2eGreeter)
+                                return 'NOT_READY';
+                            window.__e2eBridgeResult = null;
+                            window.agWebView.bridge.e2eGreeter.greet({name:'World'}).then(function(r) {
+                                window.__e2eBridgeResult = r;
+                            }).catch(function(e) {
+                                window.__e2eBridgeResult = 'ERR:' + e.message;
+                            });
+                            return 'invoked';
+                        } catch(e) {
+                            return 'ERR:' + e.message;
+                        }
+                    })()
+                    """
+                ).ConfigureAwait(false)
+            ).ConfigureAwait(false);
+            LogLine($"Bridge: invoke status = {invokeStatus}");
+
+            if (invokeStatus != "invoked")
             {
-                return await wv.InvokeScriptAsync(
-                    "window.agWebView && window.agWebView.bridge && window.agWebView.bridge.e2EGreeter ? " +
-                    "window.agWebView.bridge.e2EGreeter.greet('World').then(r => r) : 'NOT_READY'"
+                LogLine($"Bridge: ✗ Failed to invoke greet: {invokeStatus}");
+                ResultBridge = "FAIL";
+                return false;
+            }
+
+            // Poll for the result (up to 5s).
+            string? jsResult = null;
+            for (int i = 0; i < 25; i++)
+            {
+                await Task.Delay(200).ConfigureAwait(false);
+                jsResult = await Dispatcher.UIThread.InvokeAsync(async () =>
+                    await wv.InvokeScriptAsync("window.__e2eBridgeResult").ConfigureAwait(false)
                 ).ConfigureAwait(false);
-            }).ConfigureAwait(false);
+
+                if (jsResult is not null && jsResult != "null" && jsResult.Length > 0)
+                    break;
+            }
 
             LogLine($"Bridge: JS called greet('World') → {jsResult}");
 
@@ -721,6 +770,64 @@ public partial class FeatureE2EViewModel : ViewModelBase
             LogLine($"Bridge: FAIL — {ex.Message}");
             ResultBridge = "FAIL";
             return false;
+        }
+    }
+
+    // ---------------------------------------------------------------------------
+    //  Scenario 10: DevTools Toggle
+    // ---------------------------------------------------------------------------
+
+    private async Task<bool> RunDevToolsAsync()
+    {
+        ResultDevTools = "...";
+        try
+        {
+            LogLine("[10] DevTools Toggle");
+
+            var wv = WebViewControl!;
+
+            // Initial state: DevTools should not be open.
+            var initialState = await Dispatcher.UIThread.InvokeAsync(() => wv.IsDevToolsOpen);
+            LogLine($"  IsDevToolsOpen (initial): {initialState}");
+
+            // Open DevTools — no-op on platforms that don't support it, should not throw.
+            await Dispatcher.UIThread.InvokeAsync(() => wv.OpenDevTools());
+            LogLine("  OpenDevTools() → OK (no exception)");
+            await Task.Delay(200).ConfigureAwait(false);
+
+            // Close DevTools — no-op on platforms that don't support it, should not throw.
+            await Dispatcher.UIThread.InvokeAsync(() => wv.CloseDevTools());
+            LogLine("  CloseDevTools() → OK (no exception)");
+
+            LogLine("  PASS (DevTools toggle executed without error)");
+            ResultDevTools = "PASS";
+            return true;
+        }
+        catch (Exception ex)
+        {
+            LogLine($"  FAIL: {ex.Message}");
+            ResultDevTools = "FAIL";
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Manually opens DevTools for the current WebView. Can be bound to a toolbar
+    /// button or invoked via keyboard shortcut (F12 / Cmd+Shift+I).
+    /// </summary>
+    [RelayCommand]
+    private void OpenDevTools()
+    {
+        if (WebViewControl is null) return;
+
+        try
+        {
+            WebViewControl.OpenDevTools();
+            LogLine("DevTools: opened via manual command");
+        }
+        catch (Exception ex)
+        {
+            LogLine($"DevTools: failed — {ex.Message}");
         }
     }
 
