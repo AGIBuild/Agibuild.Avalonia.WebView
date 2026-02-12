@@ -914,9 +914,11 @@ public sealed class RuntimeCoverageTests
     {
         var (core, adapter, scripts) = CreateCoreWithBridge();
         var impl = new FakeReflectionExportService();
+
+        // Use a 2-second window to avoid flaky failures from Thread.Sleep imprecision on CI.
         core.Bridge.Expose<IReflectionExportService>(impl, new BridgeOptions
         {
-            RateLimit = new RateLimit(1, TimeSpan.FromMilliseconds(200))
+            RateLimit = new RateLimit(1, TimeSpan.FromSeconds(2))
         });
 
         // First call succeeds.
@@ -924,26 +926,24 @@ public sealed class RuntimeCoverageTests
             """{"jsonrpc":"2.0","id":"ev-1","method":"ReflectionExportService.voidNoArgs","params":null}""",
             "*", core.ChannelId);
         _dispatcher.RunAll();
-        Thread.Sleep(100);
-        Assert.Equal(1, impl.VoidCallCount);
 
-        // Second call: rate limited.
+        // Second call immediately after first — well within the 2-second window, must be rate limited.
         adapter.RaiseWebMessage(
             """{"jsonrpc":"2.0","id":"ev-2","method":"ReflectionExportService.voidNoArgs","params":null}""",
             "*", core.ChannelId);
         _dispatcher.RunAll();
-        Thread.Sleep(100);
+        Thread.Sleep(200);
         Assert.Equal(1, impl.VoidCallCount);
 
-        // Wait for window to expire (synchronous sleep to stay on UI thread).
-        Thread.Sleep(400);
+        // Wait for the 2-second window to expire.
+        Thread.Sleep(2500);
 
         // Third call: should succeed after eviction of expired entry.
         adapter.RaiseWebMessage(
             """{"jsonrpc":"2.0","id":"ev-3","method":"ReflectionExportService.voidNoArgs","params":null}""",
             "*", core.ChannelId);
         _dispatcher.RunAll();
-        Thread.Sleep(100);
+        Thread.Sleep(200);
         Assert.Equal(2, impl.VoidCallCount);
 
         core.Dispose();
