@@ -11,10 +11,22 @@
     <IsPackable>true</IsPackable>
     <PackageId>Agibuild.Avalonia.WebView.Bridge.Generator</PackageId>
     <Description>Roslyn source generator for type-safe C#/JS bridge proxies in Agibuild.Avalonia.WebView.</Description>
+
+    <!-- Analyzer packaging: output goes to analyzers/ not lib/ -->
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.12.0" PrivateAssets="all" />
+  </ItemGroup>
+
+  <!-- Ship the generator DLL under analyzers/dotnet/cs so NuGet treats it as a Roslyn analyzer -->
+  <ItemGroup>
+    <None Include="$(OutputPath)\$(AssemblyName).dll"
+          Pack="true"
+          PackagePath="analyzers/dotnet/cs"
+          Visible="false" />
   </ItemGroup>
 
 </Project>

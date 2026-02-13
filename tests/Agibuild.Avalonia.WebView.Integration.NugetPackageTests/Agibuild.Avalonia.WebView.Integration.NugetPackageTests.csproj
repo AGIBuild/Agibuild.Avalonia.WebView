@@ -18,6 +18,10 @@
     <!-- *-* = always resolve the latest version (including prerelease) from configured sources.
          The nuget.config in this directory points to ../../artifacts/packages/ as a local feed. -->
     <PackageReference Include="Agibuild.Avalonia.WebView" Version="*-*" />
+    <PackageReference Include="Agibuild.Avalonia.WebView.Core" Version="*-*" />
+    <PackageReference Include="Agibuild.Avalonia.WebView.Bridge.Generator" Version="*-*"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false" />
     <PackageReference Include="Avalonia.Diagnostics" Version="11.3.11">
       <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
       <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>

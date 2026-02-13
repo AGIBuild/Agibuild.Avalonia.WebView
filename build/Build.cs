@@ -286,13 +286,14 @@ class _Build : NukeBuild
         .DependsOn(UnitTests, IntegrationTests);
 
     Target Pack => _ => _
-        .Description("Creates the NuGet package (.nupkg).")
+        .Description("Creates all NuGet packages: main library and sub-packages (Core, Bridge.Generator, etc.).")
         .DependsOn(Build)
         .Produces(PackageOutputDirectory / "*.nupkg")
         .Executes(() =>
         {
             PackageOutputDirectory.CreateOrCleanDirectory();
 
+            // ── Main package (fat bundle: WebView + adapters) ──
             DotNetPack(s =>
             {
                 var settings = s
@@ -307,6 +308,32 @@ class _Build : NukeBuild
 
                 return settings;
             });
+
+            // ── Sub-packages (Core, Adapters.Abstractions, Runtime, Bridge.Generator, Testing) ──
+            var subPackageProjects = new[]
+            {
+                CoreProject,
+                AdaptersAbstractionsProject,
+                RuntimeProject,
+                BridgeGeneratorProject,
+                TestingProject,
+            };
+
+            foreach (var project in subPackageProjects)
+            {
+                DotNetPack(s =>
+                {
+                    var settings = s
+                        .SetProject(project)
+                        .SetConfiguration(Configuration)
+                        .SetOutputDirectory(PackageOutputDirectory);
+
+                    if (!string.IsNullOrEmpty(PackageVersion))
+                        settings = settings.SetProperty("MinVerVersionOverride", PackageVersion);
+
+                    return settings;
+                });
+            }
         });
 
     Target ValidatePackage => _ => _
@@ -319,7 +346,14 @@ class _Build : NukeBuild
                 .ToList();
 
             Assert.NotEmpty(nupkgFiles, "No .nupkg files found in output directory.");
-            var nupkgPath = nupkgFiles.First();
+
+            // Main package: Agibuild.Avalonia.WebView.<version>.nupkg (version starts with digit).
+            // Sub-packages: Agibuild.Avalonia.WebView.Core.<version>.nupkg etc. (next segment starts with letter).
+            var mainPackagePrefix = "Agibuild.Avalonia.WebView.";
+            var nupkgPath = nupkgFiles.FirstOrDefault(f =>
+                    f.Name.StartsWith(mainPackagePrefix, StringComparison.OrdinalIgnoreCase)
+                    && char.IsDigit(f.Name[mainPackagePrefix.Length]))
+                ?? throw new Exception("Main package Agibuild.Avalonia.WebView.*.nupkg not found in output directory.");
             Serilog.Log.Information("Validating package: {Package}", nupkgPath.Name);
 
             using var archive = ZipFile.OpenRead(nupkgPath);
@@ -343,7 +377,6 @@ class _Build : NukeBuild
 
                 // Non-assembly required files
                 ["buildTransitive/Agibuild.Avalonia.WebView.targets"] = "MSBuild targets",
-                ["LICENSE.txt"] = "License file",
                 ["README.md"] = "Package readme",
             };
 
@@ -465,7 +498,7 @@ class _Build : NukeBuild
 
     Target Publish => _ => _
         .Description("Pushes all NuGet packages (main library, sub-packages, and templates) to the configured source.")
-        .DependsOn(Pack, PackAll, PackTemplate)
+        .DependsOn(Pack, PackTemplate)
         .Requires(() => NuGetApiKey)
         .Executes(() =>
         {
@@ -802,14 +835,17 @@ class _Build : NukeBuild
         .DependsOn(ValidatePackage)
         .Executes(() =>
         {
-            // 1. Purge all cached versions so *-* resolves to the freshly packed build
-            var cacheBase = Path.Combine(
+            // 1. Purge all cached Agibuild package versions so *-* resolves to the freshly packed build
+            var nugetPackagesRoot = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-                ".nuget", "packages", "agibuild.avalonia.webview");
-            if (Directory.Exists(cacheBase))
+                ".nuget", "packages");
+            var agibuildPackageDirs = Directory.Exists(nugetPackagesRoot)
+                ? Directory.GetDirectories(nugetPackagesRoot, "agibuild.avalonia.webview*")
+                : [];
+            foreach (var dir in agibuildPackageDirs)
             {
-                Serilog.Log.Information("Clearing NuGet cache: {Path}", cacheBase);
-                Directory.Delete(cacheBase, recursive: true);
+                Serilog.Log.Information("Clearing NuGet cache: {Path}", dir);
+                Directory.Delete(dir, recursive: true);
             }
 
             // 2. Clean previous build outputs to avoid stale DLLs
@@ -859,38 +895,7 @@ class _Build : NukeBuild
             Serilog.Log.Information("NuGet package integration test PASSED.");
         });
 
-    // ──────────────────────── Template & Sub-package Targets ────────────────────────
-
-    Target PackAll => _ => _
-        .Description("Packs Core, Bridge.Generator, and Testing as separate NuGet packages.")
-        .DependsOn(Build)
-        .Executes(() =>
-        {
-            var projects = new[]
-            {
-                CoreProject,
-                AdaptersAbstractionsProject,
-                RuntimeProject,
-                BridgeGeneratorProject,
-                TestingProject,
-            };
-
-            foreach (var project in projects)
-            {
-                DotNetPack(s =>
-                {
-                    var settings = s
-                        .SetProject(project)
-                        .SetConfiguration(Configuration)
-                        .SetOutputDirectory(PackageOutputDirectory);
-
-                    if (!string.IsNullOrEmpty(PackageVersion))
-                        settings = settings.SetProperty("MinVerVersionOverride", PackageVersion);
-
-                    return settings;
-                });
-            }
-        });
+    // ──────────────────────── Template Targets ────────────────────────
 
     Target PackTemplate => _ => _
         .Description("Packs the dotnet new template into a NuGet package.")
@@ -931,7 +936,7 @@ class _Build : NukeBuild
 
     Target TemplateE2E => _ => _
         .Description("End-to-end test: pack → install template → create project → inject tests → build → test → cleanup.")
-        .DependsOn(Pack, PackAll)
+        .DependsOn(Pack)
         .Executes(() =>
         {
             var tempRoot = (AbsolutePath)Path.Combine(Path.GetTempPath(), $"agwv-template-e2e-{Guid.NewGuid():N}");
@@ -1154,7 +1159,7 @@ class _Build : NukeBuild
 
     Target CiPublish => _ => _
         .Description("Full release pipeline: compile → coverage → integration tests → pack → validate → NuGet package test → publish.")
-        .DependsOn(Coverage, IntegrationTests, NugetPackageTest, Publish);
+        .DependsOn(Coverage, IntegrationTests, NugetPackageTest, PackTemplate, Publish);
 
     // ──────────────────────────────── Helpers ────────────────────────────────────
 

@@ -32,7 +32,6 @@
         "IntegrationTests",
         "NugetPackageTest",
         "Pack",
-        "PackAll",
         "PackTemplate",
         "Publish",
         "PublishTemplate",

@@ -14,6 +14,9 @@
     <RepositoryUrl>https://github.com/AgibuilDev/Agibuild.Avalonia.WebView.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
 
+    <!-- SPDX license expression for all NuGet packages -->
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+
     <!-- MinVer: Git tag-driven versioning
          Tag format: v{major}.{minor}.{patch}[-preview]
          Examples: v0.2.0-preview, v0.2.1-preview, v1.0.0 -->
