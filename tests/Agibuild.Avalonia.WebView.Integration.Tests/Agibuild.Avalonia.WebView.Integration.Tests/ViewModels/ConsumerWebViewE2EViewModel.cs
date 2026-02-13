@@ -76,6 +76,11 @@ public partial class ConsumerWebViewE2EViewModel : ViewModelBase
         {
             _ = RunAllForAutoRunAsync();
         }
+        else
+        {
+            // Navigate to the initial URL shown in the address bar.
+            _ = GoToAddressAsync();
+        }
     }
 
     // ---------------------------------------------------------------------------

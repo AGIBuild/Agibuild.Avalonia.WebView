@@ -15,27 +15,44 @@ namespace Agibuild.Avalonia.WebView.Integration.Tests.ViewModels
             FeatureE2E = new FeatureE2EViewModel(AppendLog);
         }
 
+        /// <summary>
+        /// True on Android / iOS — drives adaptive layout (bottom tab bar vs nav rail).
+        /// </summary>
+        public bool IsMobile => OperatingSystem.IsAndroid() || OperatingSystem.IsIOS();
+
         [ObservableProperty]
         private int _selectedTabIndex;
 
-        // --- Shared log panel ---
+        // --- Shared log / console ---
 
         [ObservableProperty]
         private string _sharedLog = string.Empty;
 
-        [ObservableProperty]
-        private bool _isLogPanelOpen = true;
-
         public void AppendLog(string line)
         {
             SharedLog = $"{SharedLog}{line}{Environment.NewLine}";
+            AppLog.Write(line);
         }
 
         [RelayCommand]
         private void ClearLog() => SharedLog = string.Empty;
 
+        // --- Tab selection commands (for bottom tab bar buttons) ---
+
         [RelayCommand]
-        private void ToggleLogPanel() => IsLogPanelOpen = !IsLogPanelOpen;
+        private void SelectTab0() => SelectedTabIndex = 0;
+
+        [RelayCommand]
+        private void SelectTab1() => SelectedTabIndex = 1;
+
+        [RelayCommand]
+        private void SelectTab2() => SelectedTabIndex = 2;
+
+        [RelayCommand]
+        private void SelectTab3() => SelectedTabIndex = 3;
+
+        [RelayCommand]
+        private void SelectTab4() => SelectedTabIndex = 4;
 
         // --- Page ViewModels (nav order) ---
 

@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Avalonia.Interactivity;
 using Agibuild.Avalonia.WebView.Integration.Tests.ViewModels;
 
 namespace Agibuild.Avalonia.WebView.Integration.Tests.Views;
@@ -8,11 +9,13 @@ public partial class AdvancedFeaturesE2EView : UserControl
     public AdvancedFeaturesE2EView()
     {
         InitializeComponent();
-        DataContextChanged += OnDataContextChanged;
+        Loaded += OnViewLoaded;
     }
 
-    private void OnDataContextChanged(object? sender, System.EventArgs e)
+    private void OnViewLoaded(object? sender, RoutedEventArgs e)
     {
+        Loaded -= OnViewLoaded;
+
         if (DataContext is AdvancedFeaturesE2EViewModel vm)
         {
             var webView = this.FindControl<WebView>("WebViewControl");

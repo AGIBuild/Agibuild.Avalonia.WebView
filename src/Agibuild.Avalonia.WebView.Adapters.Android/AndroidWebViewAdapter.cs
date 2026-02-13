@@ -16,7 +16,7 @@ namespace Agibuild.Avalonia.WebView.Adapters.Android;
 
 [SupportedOSPlatform("android")]
 internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHandleProvider, ICookieAdapter, IWebViewAdapterOptions,
-    ICustomSchemeAdapter, IDownloadAdapter, IPermissionAdapter, ICommandAdapter, IScreenshotAdapter, /* IPrintAdapter: Android lacks headless PDF export */
+    ICustomSchemeAdapter, IDownloadAdapter, IPermissionAdapter, ICommandAdapter, IScreenshotAdapter, IPrintAdapter,
     IFindInPageAdapter, IZoomAdapter, IPreloadScriptAdapter, IContextMenuAdapter, IDevToolsAdapter
 {
     private static bool DiagnosticsEnabled
@@ -369,9 +369,18 @@ internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHan
         // Wait for the native WebView to be created (Attach posts asynchronously).
         await _webViewReady.Task.ConfigureAwait(false);
 
-        lock (_navLock) { BeginApiNavigation(navigationId, uri.AbsoluteUri); }
-
-        RunOnUiThread(() => _webView?.LoadUrl(uri.AbsoluteUri));
+        // Bundle BeginApiNavigation + LoadUrl into a single UI-thread action.
+        // After the await above we may be on a thread-pool thread. If we arm the
+        // navigation tracker first and then post LoadUrl separately, a stale
+        // onPageFinished callback (from a previous navigation) can fire on the
+        // Android UI thread between the two calls, prematurely completing the
+        // tracker with the wrong URL.
+        var absoluteUri = uri.AbsoluteUri;
+        RunOnUiThread(() =>
+        {
+            lock (_navLock) { BeginApiNavigation(navigationId, absoluteUri); }
+            _webView?.LoadUrl(absoluteUri);
+        });
     }
 
     public Task NavigateToStringAsync(Guid navigationId, string html)
@@ -388,11 +397,17 @@ internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHan
         // Always use LoadDataWithBaseURL — Android's LoadData has known encoding bugs
         // with '%', '#', non-ASCII characters, and emoji in HTML content.
         var baseUrlStr = baseUrl?.AbsoluteUri;
-        var navKey = baseUrlStr ?? "data:text/html";
+        // When baseUrl is null, Android reports "about:blank" in onPageStarted/onPageFinished.
+        var navKey = baseUrlStr ?? "about:blank";
 
-        lock (_navLock) { BeginApiNavigation(navigationId, navKey); }
-        RunOnUiThread(() => _webView?.LoadDataWithBaseURL(
-            baseUrlStr, html, "text/html", "UTF-8", null));
+        // Bundle BeginApiNavigation + LoadDataWithBaseURL into a single UI-thread
+        // action to prevent stale onPageFinished callbacks from prematurely completing
+        // the navigation tracker (see NavigateAsync for full explanation).
+        RunOnUiThread(() =>
+        {
+            lock (_navLock) { BeginApiNavigation(navigationId, navKey); }
+            _webView?.LoadDataWithBaseURL(baseUrlStr, html, "text/html", "UTF-8", null);
+        });
     }
 
     // ==================== Navigation — commands ====================
@@ -738,7 +753,16 @@ internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHan
             // URL change during active navigation indicates a redirect.
             if (_activeNavigationUrl is not null && !string.Equals(_activeNavigationUrl, url, StringComparison.Ordinal))
             {
-                // Redirect detected — update tracked URL but keep same correlation/navigation IDs.
+                // Redirect detected — re-register the navigation ID under the new URL
+                // so OnPageFinished can match it by exact URL lookup.
+                if (_apiNavIdByUrl.TryGetValue(_activeNavigationUrl, out var redirectedNavId))
+                {
+                    _apiNavIdByUrl.Remove(_activeNavigationUrl);
+                    _apiNavUrls.Remove(_activeNavigationUrl);
+                    _apiNavIdByUrl[url] = redirectedNavId;
+                    _apiNavUrls.Add(url);
+                }
+
                 _activeNavigationUrl = url;
 
                 if (DiagnosticsEnabled)
@@ -778,26 +802,13 @@ internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHan
             }
             else
             {
-                // Check pending API nav ID by looking through tracked URLs
-                var found = false;
-                navigationId = Guid.Empty;
-                foreach (var kvp in _apiNavIdByUrl)
+                // No URL match, no native navigation ID, no pending API navigation.
+                // This is a late/stale onPageFinished from a previous page load — ignore it.
+                if (DiagnosticsEnabled)
                 {
-                    navigationId = kvp.Value;
-                    _apiNavUrls.Remove(kvp.Key);
-                    found = true;
-                    break;
+                    Console.WriteLine($"[Agibuild.WebView] OnPageFinished (ignored stale): url={url}");
                 }
-                if (found)
-                {
-                    _apiNavIdByUrl.Remove(_apiNavIdByUrl.Keys.First());
-                }
-                else
-                {
-                    // Untracked navigation — ignore.
-                    _hasActiveNavigation = false;
-                    return;
-                }
+                return;
             }
 
             // Exactly-once guard.
@@ -904,16 +915,27 @@ internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHan
 
     private void BeginApiNavigation(Guid navigationId, string? url)
     {
-        _pendingApiNavigation = true;
-        _pendingApiNavigationId = navigationId;
         _hasActiveNavigation = true;
         _currentNativeNavigationId = Guid.Empty;
 
         if (url is not null)
         {
+            // URL is known upfront (NavigateAsync, NavigateToStringAsync).
+            // Register by exact URL so OnPageFinished can match precisely.
+            // Do NOT set _pendingApiNavigation — that flag is reserved for
+            // GoBack/GoForward/Refresh where the URL is unknown until
+            // ShouldOverrideUrlLoading fires.
+            _pendingApiNavigation = false;
             _apiNavUrls.Add(url);
             _apiNavIdByUrl[url] = navigationId;
             _activeNavigationUrl = url;
+        }
+        else
+        {
+            // URL unknown (GoBack/GoForward/Refresh).
+            // ShouldOverrideUrlLoading will resolve the actual URL.
+            _pendingApiNavigation = true;
+            _pendingApiNavigationId = navigationId;
         }
     }
 
@@ -922,17 +944,18 @@ internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHan
         if (view is null) return;
 
         var channelId = _host?.ChannelId ?? Guid.Empty;
+        // Pass the message body directly to the Java bridge without wrapping in a
+        // JSON envelope. The C# side (OnWebMessageReceived) already sets channelId
+        // and protocolVersion independently. Double-wrapping broke RPC/Bridge
+        // because the runtime layer received the envelope string instead of the
+        // actual message body.
         var bridgeScript = $$"""
             (function() {
                 window.__agibuildWebView = window.__agibuildWebView || {};
                 window.__agibuildWebView.channelId = '{{channelId}}';
                 window.__agibuildWebView.postMessage = function(body) {
                     if (window.__agibuildBridge) {
-                        window.__agibuildBridge.postMessage(JSON.stringify({
-                            channelId: '{{channelId}}',
-                            protocolVersion: 1,
-                            body: body
-                        }));
+                        window.__agibuildBridge.postMessage(body);
                     }
                 };
                 if (!window.chrome) window.chrome = {};
@@ -1416,7 +1439,7 @@ internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHan
             _ => null
         };
         if (jsCommand is not null)
-            _webView.EvaluateJavascript(jsCommand, null);
+            RunOnUiThread(() => _webView?.EvaluateJavascript(jsCommand, null));
     }
 
     // ==================== IScreenshotAdapter ====================
@@ -1437,6 +1460,87 @@ internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHan
         return Task.FromResult(stream.ToArray());
     }
 
+    // ==================== IPrintAdapter ====================
+
+    public Task<byte[]> PrintToPdfAsync(PdfPrintOptions? options)
+    {
+        if (_webView is null)
+            throw new InvalidOperationException("WebView is not initialized.");
+
+        var tcs = new TaskCompletionSource<byte[]>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        RunOnUiThread(() =>
+        {
+            try
+            {
+                var opts = options ?? new PdfPrintOptions();
+
+                // Convert inches to PostScript points (72 pt = 1 in).
+                var pageW = (int)(opts.PageWidth * 72);
+                var pageH = (int)(opts.PageHeight * 72);
+                if (opts.Landscape) (pageW, pageH) = (pageH, pageW);
+
+                var ml = (int)(opts.MarginLeft * 72);
+                var mt = (int)(opts.MarginTop * 72);
+                var mr = (int)(opts.MarginRight * 72);
+                var mb = (int)(opts.MarginBottom * 72);
+                var contentW = pageW - ml - mr;
+                var contentH = pageH - mt - mb;
+
+                if (_webView!.Width <= 0)
+                {
+                    tcs.TrySetException(new InvalidOperationException("WebView has zero width; cannot generate PDF."));
+                    return;
+                }
+
+                // Scale factor: fit WebView pixel width into PDF content width.
+                float scaleX = (float)contentW / _webView.Width;
+
+                // Full content height in PDF points.
+                // ContentHeight is in CSS px; multiply by display density to get physical px.
+                float density = _webView.Context?.Resources?.DisplayMetrics?.Density ?? 1f;
+                float webContentPx = _webView.ContentHeight * density;
+                int totalPdfH = Math.Max(contentH, (int)(webContentPx * scaleX));
+
+                var pdfDoc = new global::Android.Graphics.Pdf.PdfDocument();
+                int pageNum = 1;
+                int offset = 0;
+
+                while (offset < totalPdfH)
+                {
+                    var pi = new global::Android.Graphics.Pdf.PdfDocument.PageInfo.Builder(pageW, pageH, pageNum).Create()!;
+                    var page = pdfDoc.StartPage(pi);
+                    var canvas = page!.Canvas!;
+
+                    // Clip to content area (respect margins).
+                    canvas.ClipRect(ml, mt, pageW - mr, pageH - mb);
+
+                    // Translate for margins and vertical page offset, then scale.
+                    canvas.Translate(ml, mt - offset);
+                    canvas.Scale(scaleX, scaleX);
+
+                    _webView.Draw(canvas);
+
+                    pdfDoc.FinishPage(page);
+                    offset += contentH;
+                    pageNum++;
+                }
+
+                using var output = new MemoryStream();
+                pdfDoc.WriteTo(output);
+                pdfDoc.Close();
+
+                tcs.TrySetResult(output.ToArray());
+            }
+            catch (Exception ex)
+            {
+                tcs.TrySetException(ex);
+            }
+        });
+
+        return tcs.Task;
+    }
+
     // ==================== IFindInPageAdapter ====================
 
     public Task<FindInPageResult> FindAsync(string text, FindInPageOptions? options)
@@ -1446,16 +1550,20 @@ internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHan
 
         var tcs = new TaskCompletionSource<FindInPageResult>(TaskCreationOptions.RunContinuationsAsynchronously);
 
-        // Android WebView has built-in findAllAsync + FindListener
-        _webView.SetFindListener(new FindListener(tcs));
-        _webView.FindAllAsync(text);
+        // Android WebView has built-in findAllAsync + FindListener.
+        // All WebView methods must be called on the Android UI thread.
+        RunOnUiThread(() =>
+        {
+            _webView?.SetFindListener(new FindListener(tcs));
+            _webView?.FindAllAsync(text);
+        });
 
         return tcs.Task;
     }
 
     public void StopFind(bool clearHighlights = true)
     {
-        _webView?.ClearMatches();
+        RunOnUiThread(() => _webView?.ClearMatches());
     }
 
     private sealed class FindListener : Java.Lang.Object, AWebView.IFindListener

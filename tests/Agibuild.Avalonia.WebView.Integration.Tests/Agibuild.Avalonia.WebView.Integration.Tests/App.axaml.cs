@@ -22,6 +22,7 @@ namespace Agibuild.Avalonia.WebView.Integration.Tests
 
         public override void Initialize()
         {
+            AppLog.Initialize();
             AvaloniaXamlLoader.Load(this);
         }
 

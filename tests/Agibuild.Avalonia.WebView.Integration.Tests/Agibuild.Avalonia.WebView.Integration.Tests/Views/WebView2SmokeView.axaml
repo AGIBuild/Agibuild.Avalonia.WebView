@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:Agibuild.Avalonia.WebView.Integration.Tests.ViewModels"
              xmlns:controls="using:Agibuild.Avalonia.WebView.Integration.Tests.Controls"
+             xmlns:local="using:Agibuild.Avalonia.WebView.Integration.Tests"
              mc:Ignorable="d"
              x:Class="Agibuild.Avalonia.WebView.Integration.Tests.Views.WebView2SmokeView"
              x:DataType="vm:WebView2SmokeViewModel"
@@ -17,7 +18,7 @@
             Padding="6,4">
       <Grid ColumnDefinitions="Auto,*,Auto">
         <ToggleButton x:Name="ToolsToggle" Grid.Column="0"
-                      IsChecked="True"
+                      IsChecked="False"
                       Content="&#x2630;" ToolTip.Tip="Controls"
                       FontSize="14" Padding="8,5"
                       Background="Transparent" BorderThickness="0"
@@ -33,10 +34,11 @@
       </Grid>
     </Border>
 
-    <!-- ════════════ Tip bar ════════════ -->
+    <!-- ════════════ Tip bar (hidden on mobile) ════════════ -->
     <Border DockPanel.Dock="Bottom" Background="White"
             BorderThickness="0,1,0,0" BorderBrush="{StaticResource BorderDefaultBrush}"
-            Padding="8,3">
+            Padding="8,3"
+            IsVisible="{x:Static local:PlatformHelper.IsDesktop}">
       <TextBlock Text="Tip: build &amp; run as net10.0-windows to enable WebView2."
                  Classes="caption" />
     </Border>

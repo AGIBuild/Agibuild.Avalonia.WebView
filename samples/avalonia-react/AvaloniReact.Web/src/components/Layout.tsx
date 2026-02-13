@@ -108,10 +108,27 @@ export function Layout({ pages, children }: LayoutProps) {
   }, []);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-950">
-      {/* Sidebar */}
+    <div className="flex flex-col md:flex-row h-screen overflow-hidden bg-gray-50 dark:bg-gray-950">
+
+      {/* ══════ Mobile: Top Header ══════ */}
+      <header className="flex md:hidden items-center justify-between px-4 h-12 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shrink-0">
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 rounded-md bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-[10px] font-bold shrink-0">
+            A
+          </div>
+          <span className="text-sm font-semibold truncate">{appName}</span>
+        </div>
+        <button
+          onClick={toggleDark}
+          className="p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+        >
+          {dark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+        </button>
+      </header>
+
+      {/* ══════ Desktop: Sidebar (hidden on mobile) ══════ */}
       <aside
-        className={`flex flex-col border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 transition-all duration-200 ${
+        className={`hidden md:flex flex-col border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 transition-all duration-200 ${
           collapsed ? 'w-16' : 'w-56'
         }`}
       >
@@ -171,11 +188,34 @@ export function Layout({ pages, children }: LayoutProps) {
         </div>
       </aside>
 
-      {/* Main content */}
-      <main className="flex-1 overflow-auto">{children}</main>
+      {/* ══════ Main content ══════ */}
+      <main className="flex-1 overflow-auto pb-14 md:pb-0">{children}</main>
 
-      {/* Toast container */}
-      <div id="toast-container" className="fixed bottom-4 right-4 space-y-2 z-50" />
+      {/* ══════ Mobile: Bottom Tab Bar (hidden on desktop) ══════ */}
+      <nav className="flex md:hidden items-stretch border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 h-14 shrink-0">
+        {pages.map((page) => {
+          const Icon = ICONS[page.icon] ?? LayoutDashboard;
+          return (
+            <NavLink
+              key={page.id}
+              to={page.route}
+              className={({ isActive }) =>
+                `flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] transition-colors ${
+                  isActive
+                    ? 'text-blue-600 dark:text-blue-400'
+                    : 'text-gray-400 dark:text-gray-500'
+                }`
+              }
+            >
+              <Icon className="w-5 h-5" />
+              <span>{t(`page.${page.id}` as TranslationKey)}</span>
+            </NavLink>
+          );
+        })}
+      </nav>
+
+      {/* Toast container — offset above bottom tab on mobile */}
+      <div id="toast-container" className="fixed bottom-18 md:bottom-4 right-4 space-y-2 z-50" />
     </div>
   );
 }

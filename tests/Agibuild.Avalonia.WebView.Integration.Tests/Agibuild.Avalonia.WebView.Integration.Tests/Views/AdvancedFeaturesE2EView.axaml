@@ -17,7 +17,7 @@
             Padding="6,4">
       <Grid ColumnDefinitions="Auto,*,Auto">
         <ToggleButton x:Name="ToolsToggle" Grid.Column="0"
-                      IsChecked="True"
+                      IsChecked="False"
                       Content="&#x2630;" ToolTip.Tip="Controls"
                       FontSize="14" Padding="8,5"
                       Background="Transparent" BorderThickness="0"

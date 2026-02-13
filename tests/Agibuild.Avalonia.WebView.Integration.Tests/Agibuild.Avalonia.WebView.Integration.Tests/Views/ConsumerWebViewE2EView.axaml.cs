@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Agibuild.Avalonia.WebView.Integration.Tests.ViewModels;
 
 namespace Agibuild.Avalonia.WebView.Integration.Tests.Views;
@@ -9,11 +10,16 @@ public partial class ConsumerWebViewE2EView : UserControl
     public ConsumerWebViewE2EView()
     {
         InitializeComponent();
-        DataContextChanged += OnDataContextChanged;
+        // Use Loaded instead of DataContextChanged — by the time Loaded fires
+        // the WebView's NativeControlHost has been attached to the visual tree
+        // and the native adapter is ready for navigation.
+        Loaded += OnViewLoaded;
     }
 
-    private void OnDataContextChanged(object? sender, System.EventArgs e)
+    private void OnViewLoaded(object? sender, RoutedEventArgs e)
     {
+        Loaded -= OnViewLoaded;
+
         if (DataContext is ConsumerWebViewE2EViewModel vm)
         {
             var webView = this.FindControl<WebView>("WebViewControl");

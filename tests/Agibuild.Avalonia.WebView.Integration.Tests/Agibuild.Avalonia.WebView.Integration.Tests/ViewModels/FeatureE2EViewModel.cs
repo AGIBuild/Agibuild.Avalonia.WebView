@@ -315,7 +315,7 @@ public partial class FeatureE2EViewModel : ViewModelBase
         }
         catch (NotSupportedException)
         {
-            LogLine("  SKIP: adapter does not support IPrintAdapter (GTK/Android)");
+            LogLine("  SKIP: adapter does not support IPrintAdapter (GTK)");
             ResultPdf = "SKIP";
             return true;
         }

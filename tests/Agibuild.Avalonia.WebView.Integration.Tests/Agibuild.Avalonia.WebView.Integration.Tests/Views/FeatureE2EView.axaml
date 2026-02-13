@@ -5,6 +5,7 @@
              xmlns:vm="using:Agibuild.Avalonia.WebView.Integration.Tests.ViewModels"
              xmlns:agw="using:Agibuild.Avalonia.WebView"
              xmlns:views="using:Agibuild.Avalonia.WebView.Integration.Tests.Views"
+             xmlns:local="using:Agibuild.Avalonia.WebView.Integration.Tests"
              mc:Ignorable="d"
              x:Class="Agibuild.Avalonia.WebView.Integration.Tests.Views.FeatureE2EView"
              x:DataType="vm:FeatureE2EViewModel"
@@ -19,162 +20,245 @@
     <!-- ════════════ Top Toolbar ════════════ -->
     <Border DockPanel.Dock="Top" Background="White"
             BorderThickness="0,0,0,1" BorderBrush="{StaticResource BorderDefaultBrush}"
-            Padding="6,4">
-      <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto">
-        <ToggleButton x:Name="ToolsToggle" Grid.Column="0"
-                      IsChecked="True"
-                      Content="&#x2630;" ToolTip.Tip="Test Dashboard"
-                      FontSize="14" Padding="8,5"
-                      Background="Transparent" BorderThickness="0"
-                      CornerRadius="6" VerticalAlignment="Center" />
-        <TextBlock Grid.Column="1" Text="Feature E2E Test Runner"
-                   FontWeight="SemiBold" FontSize="13"
-                   Foreground="{StaticResource TextPrimaryBrush}"
-                   VerticalAlignment="Center" Margin="8,0" />
-        <Border Grid.Column="2" CornerRadius="6" Padding="8,3"
-                Background="#F0F9FF" VerticalAlignment="Center" Margin="0,0,8,0">
-          <TextBlock Text="{Binding Status}" FontSize="11" FontWeight="SemiBold"
-                     Foreground="#1E40AF" />
-        </Border>
-        <Button Grid.Column="3"
-                Content="&#x1F527; DevTools"
+            Padding="10,6">
+      <Grid ColumnDefinitions="*,Auto,Auto">
+        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+          <TextBlock Text="Feature E2E" FontWeight="SemiBold" FontSize="14"
+                     Foreground="{StaticResource TextPrimaryBrush}"
+                     VerticalAlignment="Center" />
+          <Border CornerRadius="6" Padding="8,3"
+                  Background="#F0F9FF" VerticalAlignment="Center">
+            <TextBlock Text="{Binding Status}" FontSize="11" FontWeight="SemiBold"
+                       Foreground="#1E40AF" />
+          </Border>
+        </StackPanel>
+        <Button Grid.Column="1"
+                Content="DevTools"
                 Command="{Binding OpenDevToolsCommand}"
-                ToolTip.Tip="Open DevTools (F12 / Cmd+Shift+I)"
-                Padding="10,5" FontSize="11" Margin="0,0,6,0"
+                Padding="10,5" FontSize="11" Margin="0,0,8,0"
                 Background="Transparent" BorderThickness="1"
                 BorderBrush="{StaticResource BorderDefaultBrush}"
-                CornerRadius="6" VerticalAlignment="Center" />
-        <Button Grid.Column="4" Classes="primary"
+                CornerRadius="6" VerticalAlignment="Center"
+                IsVisible="{x:Static local:PlatformHelper.IsDesktop}" />
+        <Button Grid.Column="2" Classes="primary"
                 Content="&#x25B6; Run All"
                 Command="{Binding RunAllCommand}"
-                Padding="12,5" FontSize="11" />
+                Padding="14,6" FontSize="12" />
       </Grid>
     </Border>
 
-    <!-- ════════════ Content: Left Panel + WebView ════════════ -->
-    <Grid ColumnDefinitions="Auto,*">
+    <!-- ════════════ WebView: hidden test fixture (kept in visual tree) ════════════ -->
+    <agw:WebView DockPanel.Dock="Bottom" x:Name="WebViewControl"
+                 Source="about:blank" Height="1" IsVisible="True" />
 
-      <!-- Left test dashboard panel (inline, collapsible) -->
-      <Border Grid.Column="0" Width="200"
-              IsVisible="{Binding #ToolsToggle.IsChecked}"
-              Background="White"
-              BorderThickness="0,0,1,0" BorderBrush="{StaticResource BorderDefaultBrush}">
-        <DockPanel>
-          <TextBlock DockPanel.Dock="Top" Text="Test Results" FontWeight="SemiBold" FontSize="12"
-                     Foreground="{StaticResource TextSecondaryBrush}"
-                     Margin="10,8,10,6" />
-          <ScrollViewer Margin="6,0,6,6">
-            <StackPanel Spacing="4">
+    <!-- ════════════ Main: Test Results Dashboard ════════════ -->
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                  Padding="12,12">
+      <StackPanel Spacing="6" MaxWidth="480"
+                  HorizontalAlignment="Center">
 
-              <!-- Test result cards (vertical list) -->
-              <Border CornerRadius="6" Padding="10,6"
-                      Background="{Binding ResultCommand, Converter={StaticResource ResultBrush}, ConverterParameter=bg}">
-                <Grid ColumnDefinitions="*,Auto">
-                  <TextBlock Text="Command" FontSize="12" FontWeight="SemiBold"
-                             Foreground="{StaticResource TextPrimaryBrush}" />
-                  <TextBlock Grid.Column="1" Text="{Binding ResultCommand}" FontSize="11" FontWeight="Bold"
-                             Foreground="{Binding ResultCommand, Converter={StaticResource ResultBrush}, ConverterParameter=fg}" />
-                </Grid>
-              </Border>
-
-              <Border CornerRadius="6" Padding="10,6"
-                      Background="{Binding ResultScreenshot, Converter={StaticResource ResultBrush}, ConverterParameter=bg}">
-                <Grid ColumnDefinitions="*,Auto">
-                  <TextBlock Text="Screenshot" FontSize="12" FontWeight="SemiBold"
-                             Foreground="{StaticResource TextPrimaryBrush}" />
-                  <TextBlock Grid.Column="1" Text="{Binding ResultScreenshot}" FontSize="11" FontWeight="Bold"
-                             Foreground="{Binding ResultScreenshot, Converter={StaticResource ResultBrush}, ConverterParameter=fg}" />
-                </Grid>
-              </Border>
-
-              <Border CornerRadius="6" Padding="10,6"
-                      Background="{Binding ResultPdf, Converter={StaticResource ResultBrush}, ConverterParameter=bg}">
-                <Grid ColumnDefinitions="*,Auto">
-                  <TextBlock Text="PDF" FontSize="12" FontWeight="SemiBold"
-                             Foreground="{StaticResource TextPrimaryBrush}" />
-                  <TextBlock Grid.Column="1" Text="{Binding ResultPdf}" FontSize="11" FontWeight="Bold"
-                             Foreground="{Binding ResultPdf, Converter={StaticResource ResultBrush}, ConverterParameter=fg}" />
-                </Grid>
-              </Border>
-
-              <Border CornerRadius="6" Padding="10,6"
-                      Background="{Binding ResultRpc, Converter={StaticResource ResultBrush}, ConverterParameter=bg}">
-                <Grid ColumnDefinitions="*,Auto">
-                  <TextBlock Text="RPC" FontSize="12" FontWeight="SemiBold"
-                             Foreground="{StaticResource TextPrimaryBrush}" />
-                  <TextBlock Grid.Column="1" Text="{Binding ResultRpc}" FontSize="11" FontWeight="Bold"
-                             Foreground="{Binding ResultRpc, Converter={StaticResource ResultBrush}, ConverterParameter=fg}" />
-                </Grid>
-              </Border>
-
-              <Border CornerRadius="6" Padding="10,6"
-                      Background="{Binding ResultFind, Converter={StaticResource ResultBrush}, ConverterParameter=bg}">
-                <Grid ColumnDefinitions="*,Auto">
-                  <TextBlock Text="Find" FontSize="12" FontWeight="SemiBold"
-                             Foreground="{StaticResource TextPrimaryBrush}" />
-                  <TextBlock Grid.Column="1" Text="{Binding ResultFind}" FontSize="11" FontWeight="Bold"
-                             Foreground="{Binding ResultFind, Converter={StaticResource ResultBrush}, ConverterParameter=fg}" />
-                </Grid>
-              </Border>
-
-              <Border CornerRadius="6" Padding="10,6"
-                      Background="{Binding ResultZoom, Converter={StaticResource ResultBrush}, ConverterParameter=bg}">
-                <Grid ColumnDefinitions="*,Auto">
-                  <TextBlock Text="Zoom" FontSize="12" FontWeight="SemiBold"
-                             Foreground="{StaticResource TextPrimaryBrush}" />
-                  <TextBlock Grid.Column="1" Text="{Binding ResultZoom}" FontSize="11" FontWeight="Bold"
-                             Foreground="{Binding ResultZoom, Converter={StaticResource ResultBrush}, ConverterParameter=fg}" />
-                </Grid>
-              </Border>
-
-              <Border CornerRadius="6" Padding="10,6"
-                      Background="{Binding ResultPreload, Converter={StaticResource ResultBrush}, ConverterParameter=bg}">
-                <Grid ColumnDefinitions="*,Auto">
-                  <TextBlock Text="Preload" FontSize="12" FontWeight="SemiBold"
-                             Foreground="{StaticResource TextPrimaryBrush}" />
-                  <TextBlock Grid.Column="1" Text="{Binding ResultPreload}" FontSize="11" FontWeight="Bold"
-                             Foreground="{Binding ResultPreload, Converter={StaticResource ResultBrush}, ConverterParameter=fg}" />
-                </Grid>
-              </Border>
-
-              <Border CornerRadius="6" Padding="10,6"
-                      Background="{Binding ResultContext, Converter={StaticResource ResultBrush}, ConverterParameter=bg}">
-                <Grid ColumnDefinitions="*,Auto">
-                  <TextBlock Text="Context" FontSize="12" FontWeight="SemiBold"
-                             Foreground="{StaticResource TextPrimaryBrush}" />
-                  <TextBlock Grid.Column="1" Text="{Binding ResultContext}" FontSize="11" FontWeight="Bold"
-                             Foreground="{Binding ResultContext, Converter={StaticResource ResultBrush}, ConverterParameter=fg}" />
-                </Grid>
-              </Border>
-
-              <Border CornerRadius="6" Padding="10,6"
-                      Background="{Binding ResultBridge, Converter={StaticResource ResultBrush}, ConverterParameter=bg}">
-                <Grid ColumnDefinitions="*,Auto">
-                  <TextBlock Text="Bridge" FontSize="12" FontWeight="SemiBold"
-                             Foreground="{StaticResource TextPrimaryBrush}" />
-                  <TextBlock Grid.Column="1" Text="{Binding ResultBridge}" FontSize="11" FontWeight="Bold"
-                             Foreground="{Binding ResultBridge, Converter={StaticResource ResultBrush}, ConverterParameter=fg}" />
-                </Grid>
-              </Border>
-
-              <Border CornerRadius="6" Padding="10,6"
-                      Background="{Binding ResultDevTools, Converter={StaticResource ResultBrush}, ConverterParameter=bg}">
-                <Grid ColumnDefinitions="*,Auto">
-                  <TextBlock Text="DevTools" FontSize="12" FontWeight="SemiBold"
-                             Foreground="{StaticResource TextPrimaryBrush}" />
-                  <TextBlock Grid.Column="1" Text="{Binding ResultDevTools}" FontSize="11" FontWeight="Bold"
-                             Foreground="{Binding ResultDevTools, Converter={StaticResource ResultBrush}, ConverterParameter=fg}" />
-                </Grid>
-              </Border>
-
+        <!-- Card: Command -->
+        <Border CornerRadius="8" Padding="14,10"
+                Background="{Binding ResultCommand, Converter={StaticResource ResultBrush}, ConverterParameter=bg}"
+                BorderThickness="1" BorderBrush="{StaticResource BorderDefaultBrush}">
+          <Grid ColumnDefinitions="Auto,*,Auto">
+            <TextBlock Text="&#x25B6;" FontSize="14" VerticalAlignment="Center"
+                       Foreground="{Binding ResultCommand, Converter={StaticResource ResultBrush}, ConverterParameter=fg}"
+                       Margin="0,0,10,0" />
+            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+              <TextBlock Text="Command Manager" FontSize="13" FontWeight="SemiBold"
+                         Foreground="{StaticResource TextPrimaryBrush}" />
+              <TextBlock Text="EvaluateJavascript, GoBack, Refresh" FontSize="10"
+                         Foreground="{StaticResource TextSecondaryBrush}" />
             </StackPanel>
-          </ScrollViewer>
-        </DockPanel>
-      </Border>
+            <TextBlock Grid.Column="2" Text="{Binding ResultCommand}" FontSize="13" FontWeight="Bold"
+                       Foreground="{Binding ResultCommand, Converter={StaticResource ResultBrush}, ConverterParameter=fg}"
+                       VerticalAlignment="Center" />
+          </Grid>
+        </Border>
 
-      <!-- WebView (fills remaining space) -->
-      <agw:WebView Grid.Column="1" x:Name="WebViewControl" Source="about:blank" />
+        <!-- Card: Screenshot -->
+        <Border CornerRadius="8" Padding="14,10"
+                Background="{Binding ResultScreenshot, Converter={StaticResource ResultBrush}, ConverterParameter=bg}"
+                BorderThickness="1" BorderBrush="{StaticResource BorderDefaultBrush}">
+          <Grid ColumnDefinitions="Auto,*,Auto">
+            <TextBlock Text="&#x25A3;" FontSize="14" VerticalAlignment="Center"
+                       Foreground="{Binding ResultScreenshot, Converter={StaticResource ResultBrush}, ConverterParameter=fg}"
+                       Margin="0,0,10,0" />
+            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+              <TextBlock Text="Screenshot" FontSize="13" FontWeight="SemiBold"
+                         Foreground="{StaticResource TextPrimaryBrush}" />
+              <TextBlock Text="CaptureScreenshotAsync PNG" FontSize="10"
+                         Foreground="{StaticResource TextSecondaryBrush}" />
+            </StackPanel>
+            <TextBlock Grid.Column="2" Text="{Binding ResultScreenshot}" FontSize="13" FontWeight="Bold"
+                       Foreground="{Binding ResultScreenshot, Converter={StaticResource ResultBrush}, ConverterParameter=fg}"
+                       VerticalAlignment="Center" />
+          </Grid>
+        </Border>
 
-    </Grid>
+        <!-- Card: PDF -->
+        <Border CornerRadius="8" Padding="14,10"
+                Background="{Binding ResultPdf, Converter={StaticResource ResultBrush}, ConverterParameter=bg}"
+                BorderThickness="1" BorderBrush="{StaticResource BorderDefaultBrush}">
+          <Grid ColumnDefinitions="Auto,*,Auto">
+            <TextBlock Text="&#x25A4;" FontSize="14" VerticalAlignment="Center"
+                       Foreground="{Binding ResultPdf, Converter={StaticResource ResultBrush}, ConverterParameter=fg}"
+                       Margin="0,0,10,0" />
+            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+              <TextBlock Text="PDF Export" FontSize="13" FontWeight="SemiBold"
+                         Foreground="{StaticResource TextPrimaryBrush}" />
+              <TextBlock Text="PrintToPdfAsync" FontSize="10"
+                         Foreground="{StaticResource TextSecondaryBrush}" />
+            </StackPanel>
+            <TextBlock Grid.Column="2" Text="{Binding ResultPdf}" FontSize="13" FontWeight="Bold"
+                       Foreground="{Binding ResultPdf, Converter={StaticResource ResultBrush}, ConverterParameter=fg}"
+                       VerticalAlignment="Center" />
+          </Grid>
+        </Border>
+
+        <!-- Card: RPC -->
+        <Border CornerRadius="8" Padding="14,10"
+                Background="{Binding ResultRpc, Converter={StaticResource ResultBrush}, ConverterParameter=bg}"
+                BorderThickness="1" BorderBrush="{StaticResource BorderDefaultBrush}">
+          <Grid ColumnDefinitions="Auto,*,Auto">
+            <TextBlock Text="&#x21C4;" FontSize="14" VerticalAlignment="Center"
+                       Foreground="{Binding ResultRpc, Converter={StaticResource ResultBrush}, ConverterParameter=fg}"
+                       Margin="0,0,10,0" />
+            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+              <TextBlock Text="JS ↔ C# RPC" FontSize="13" FontWeight="SemiBold"
+                         Foreground="{StaticResource TextPrimaryBrush}" />
+              <TextBlock Text="Bidirectional invoke" FontSize="10"
+                         Foreground="{StaticResource TextSecondaryBrush}" />
+            </StackPanel>
+            <TextBlock Grid.Column="2" Text="{Binding ResultRpc}" FontSize="13" FontWeight="Bold"
+                       Foreground="{Binding ResultRpc, Converter={StaticResource ResultBrush}, ConverterParameter=fg}"
+                       VerticalAlignment="Center" />
+          </Grid>
+        </Border>
+
+        <!-- Card: Find -->
+        <Border CornerRadius="8" Padding="14,10"
+                Background="{Binding ResultFind, Converter={StaticResource ResultBrush}, ConverterParameter=bg}"
+                BorderThickness="1" BorderBrush="{StaticResource BorderDefaultBrush}">
+          <Grid ColumnDefinitions="Auto,*,Auto">
+            <TextBlock Text="&#x2315;" FontSize="14" VerticalAlignment="Center"
+                       Foreground="{Binding ResultFind, Converter={StaticResource ResultBrush}, ConverterParameter=fg}"
+                       Margin="0,0,10,0" />
+            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+              <TextBlock Text="Find in Page" FontSize="13" FontWeight="SemiBold"
+                         Foreground="{StaticResource TextPrimaryBrush}" />
+              <TextBlock Text="FindInPageAsync / StopFind" FontSize="10"
+                         Foreground="{StaticResource TextSecondaryBrush}" />
+            </StackPanel>
+            <TextBlock Grid.Column="2" Text="{Binding ResultFind}" FontSize="13" FontWeight="Bold"
+                       Foreground="{Binding ResultFind, Converter={StaticResource ResultBrush}, ConverterParameter=fg}"
+                       VerticalAlignment="Center" />
+          </Grid>
+        </Border>
+
+        <!-- Card: Zoom -->
+        <Border CornerRadius="8" Padding="14,10"
+                Background="{Binding ResultZoom, Converter={StaticResource ResultBrush}, ConverterParameter=bg}"
+                BorderThickness="1" BorderBrush="{StaticResource BorderDefaultBrush}">
+          <Grid ColumnDefinitions="Auto,*,Auto">
+            <TextBlock Text="&#x2922;" FontSize="14" VerticalAlignment="Center"
+                       Foreground="{Binding ResultZoom, Converter={StaticResource ResultBrush}, ConverterParameter=fg}"
+                       Margin="0,0,10,0" />
+            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+              <TextBlock Text="Zoom" FontSize="13" FontWeight="SemiBold"
+                         Foreground="{StaticResource TextPrimaryBrush}" />
+              <TextBlock Text="ZoomFactor get/set" FontSize="10"
+                         Foreground="{StaticResource TextSecondaryBrush}" />
+            </StackPanel>
+            <TextBlock Grid.Column="2" Text="{Binding ResultZoom}" FontSize="13" FontWeight="Bold"
+                       Foreground="{Binding ResultZoom, Converter={StaticResource ResultBrush}, ConverterParameter=fg}"
+                       VerticalAlignment="Center" />
+          </Grid>
+        </Border>
+
+        <!-- Card: Preload -->
+        <Border CornerRadius="8" Padding="14,10"
+                Background="{Binding ResultPreload, Converter={StaticResource ResultBrush}, ConverterParameter=bg}"
+                BorderThickness="1" BorderBrush="{StaticResource BorderDefaultBrush}">
+          <Grid ColumnDefinitions="Auto,*,Auto">
+            <TextBlock Text="&#x21E9;" FontSize="14" VerticalAlignment="Center"
+                       Foreground="{Binding ResultPreload, Converter={StaticResource ResultBrush}, ConverterParameter=fg}"
+                       Margin="0,0,10,0" />
+            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+              <TextBlock Text="Preload Script" FontSize="13" FontWeight="SemiBold"
+                         Foreground="{StaticResource TextPrimaryBrush}" />
+              <TextBlock Text="AddPreloadScript / Remove" FontSize="10"
+                         Foreground="{StaticResource TextSecondaryBrush}" />
+            </StackPanel>
+            <TextBlock Grid.Column="2" Text="{Binding ResultPreload}" FontSize="13" FontWeight="Bold"
+                       Foreground="{Binding ResultPreload, Converter={StaticResource ResultBrush}, ConverterParameter=fg}"
+                       VerticalAlignment="Center" />
+          </Grid>
+        </Border>
+
+        <!-- Card: Context Menu -->
+        <Border CornerRadius="8" Padding="14,10"
+                Background="{Binding ResultContext, Converter={StaticResource ResultBrush}, ConverterParameter=bg}"
+                BorderThickness="1" BorderBrush="{StaticResource BorderDefaultBrush}">
+          <Grid ColumnDefinitions="Auto,*,Auto">
+            <TextBlock Text="&#x2261;" FontSize="14" VerticalAlignment="Center"
+                       Foreground="{Binding ResultContext, Converter={StaticResource ResultBrush}, ConverterParameter=fg}"
+                       Margin="0,0,10,0" />
+            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+              <TextBlock Text="Context Menu" FontSize="13" FontWeight="SemiBold"
+                         Foreground="{StaticResource TextPrimaryBrush}" />
+              <TextBlock Text="ContextMenuRequested event" FontSize="10"
+                         Foreground="{StaticResource TextSecondaryBrush}" />
+            </StackPanel>
+            <TextBlock Grid.Column="2" Text="{Binding ResultContext}" FontSize="13" FontWeight="Bold"
+                       Foreground="{Binding ResultContext, Converter={StaticResource ResultBrush}, ConverterParameter=fg}"
+                       VerticalAlignment="Center" />
+          </Grid>
+        </Border>
+
+        <!-- Card: Bridge -->
+        <Border CornerRadius="8" Padding="14,10"
+                Background="{Binding ResultBridge, Converter={StaticResource ResultBrush}, ConverterParameter=bg}"
+                BorderThickness="1" BorderBrush="{StaticResource BorderDefaultBrush}">
+          <Grid ColumnDefinitions="Auto,*,Auto">
+            <TextBlock Text="&#x2194;" FontSize="14" VerticalAlignment="Center"
+                       Foreground="{Binding ResultBridge, Converter={StaticResource ResultBrush}, ConverterParameter=fg}"
+                       Margin="0,0,10,0" />
+            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+              <TextBlock Text="Bridge" FontSize="13" FontWeight="SemiBold"
+                         Foreground="{StaticResource TextPrimaryBrush}" />
+              <TextBlock Text="JS → C# message channel" FontSize="10"
+                         Foreground="{StaticResource TextSecondaryBrush}" />
+            </StackPanel>
+            <TextBlock Grid.Column="2" Text="{Binding ResultBridge}" FontSize="13" FontWeight="Bold"
+                       Foreground="{Binding ResultBridge, Converter={StaticResource ResultBrush}, ConverterParameter=fg}"
+                       VerticalAlignment="Center" />
+          </Grid>
+        </Border>
+
+        <!-- Card: DevTools -->
+        <Border CornerRadius="8" Padding="14,10"
+                Background="{Binding ResultDevTools, Converter={StaticResource ResultBrush}, ConverterParameter=bg}"
+                BorderThickness="1" BorderBrush="{StaticResource BorderDefaultBrush}">
+          <Grid ColumnDefinitions="Auto,*,Auto">
+            <TextBlock Text="&#x2318;" FontSize="14" VerticalAlignment="Center"
+                       Foreground="{Binding ResultDevTools, Converter={StaticResource ResultBrush}, ConverterParameter=fg}"
+                       Margin="0,0,10,0" />
+            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+              <TextBlock Text="DevTools" FontSize="13" FontWeight="SemiBold"
+                         Foreground="{StaticResource TextPrimaryBrush}" />
+              <TextBlock Text="OpenDevTools / CloseDevTools" FontSize="10"
+                         Foreground="{StaticResource TextSecondaryBrush}" />
+            </StackPanel>
+            <TextBlock Grid.Column="2" Text="{Binding ResultDevTools}" FontSize="13" FontWeight="Bold"
+                       Foreground="{Binding ResultDevTools, Converter={StaticResource ResultBrush}, ConverterParameter=fg}"
+                       VerticalAlignment="Center" />
+          </Grid>
+        </Border>
+
+      </StackPanel>
+    </ScrollViewer>
+
   </DockPanel>
 </UserControl>

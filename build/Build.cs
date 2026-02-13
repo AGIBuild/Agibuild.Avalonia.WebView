@@ -132,6 +132,11 @@ class _Build : NukeBuild
     AbsolutePath TemplatePath =>
         RootDirectory / "templates" / "agibuild-hybrid";
 
+    // React sample (AvaloniReact)
+    AbsolutePath ReactSampleDirectory => RootDirectory / "samples" / "avalonia-react";
+    AbsolutePath ReactWebDirectory => ReactSampleDirectory / "AvaloniReact.Web";
+    AbsolutePath ReactDesktopProject => ReactSampleDirectory / "AvaloniReact.Desktop" / "AvaloniReact.Desktop.csproj";
+
     // ──────────────────────────────── Targets ────────────────────────────────────
 
     Target Clean => _ => _
@@ -580,34 +585,10 @@ class _Build : NukeBuild
                     }
                 };
                 emulatorProcess.Start();
-
-                // 4. Wait for device to boot
-                Serilog.Log.Information("Waiting for emulator to boot...");
-                var timeout = TimeSpan.FromMinutes(3);
-                var stopwatch = Stopwatch.StartNew();
-                var booted = false;
-
-                while (stopwatch.Elapsed < timeout)
-                {
-                    Thread.Sleep(3000);
-                    try
-                    {
-                        var bootResult = RunProcess(adbPath, "shell getprop sys.boot_completed");
-                        if (bootResult.Trim() == "1")
-                        {
-                            booted = true;
-                            break;
-                        }
-                    }
-                    catch
-                    {
-                        // Device not ready yet
-                    }
-                }
-
-                Assert.True(booted, $"Emulator did not boot within {timeout.TotalMinutes} minutes.");
-                Serilog.Log.Information("Emulator booted successfully ({Elapsed:F0}s).", stopwatch.Elapsed.TotalSeconds);
             }
+
+            // 4. Wait for device to fully boot (always, even if emulator was already running)
+            WaitForAndroidBoot(adbPath);
 
             // 5. Build and install the Android test app
             //    Use -t:Install so .NET SDK handles Fast Deployment correctly
@@ -615,10 +596,10 @@ class _Build : NukeBuild
             Serilog.Log.Information("Building and installing Android test app...");
             RunProcess("dotnet", $"build \"{E2EAndroidProject}\" --configuration {Configuration} -t:Install");
 
-            // 6. Launch the app
+            // 6. Launch the app (with retry to handle activity manager startup delay)
             const string packageName = "com.CompanyName.Agibuild.Avalonia.WebView.Integration.Tests";
             Serilog.Log.Information("Launching {Package}...", packageName);
-            RunProcess(adbPath, $"shell monkey -p {packageName} -c android.intent.category.LAUNCHER 1");
+            LaunchAndroidApp(adbPath, packageName);
 
             Serilog.Log.Information("Android test app deployed and launched successfully.");
         });
@@ -828,6 +809,94 @@ class _Build : NukeBuild
             }
 
             Serilog.Log.Information("iOS test app deployed and launched on simulator.");
+        });
+
+    // ──────────────────────────── React Sample ────────────────────────────────
+
+    Target StartReactDev => _ => _
+        .Description("Starts the React Vite dev server for the AvaloniReact sample (standalone, foreground).")
+        .Executes(() =>
+        {
+            EnsureReactDepsInstalled();
+
+            // Start Vite dev server in the foreground (Ctrl+C to stop)
+            Serilog.Log.Information("Starting Vite dev server on http://localhost:5173 ...");
+            var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "npm",
+                    Arguments = "run dev",
+                    WorkingDirectory = ReactWebDirectory,
+                    UseShellExecute = false,
+                    RedirectStandardOutput = false,
+                    RedirectStandardError = false,
+                }
+            };
+            process.Start();
+            process.WaitForExit();
+
+            if (process.ExitCode != 0)
+                Serilog.Log.Warning("Vite dev server exited with code {Code}.", process.ExitCode);
+        });
+
+    Target StartReactApp => _ => _
+        .Description("Launches the AvaloniReact desktop sample. In Debug: auto-starts Vite dev server if needed.")
+        .Executes(() =>
+        {
+            Assert.FileExists(ReactDesktopProject, $"AvaloniReact desktop project not found at {ReactDesktopProject}.");
+
+            Process? viteProcess = null;
+
+            // In Debug mode, ensure the Vite dev server is running
+            if (string.Equals(Configuration, "Debug", StringComparison.OrdinalIgnoreCase))
+            {
+                if (IsHttpReady("http://localhost:5173"))
+                {
+                    Serilog.Log.Information("Vite dev server already running on port 5173.");
+                }
+                else
+                {
+                    EnsureReactDepsInstalled();
+
+                    Serilog.Log.Information("Starting Vite dev server in background...");
+                    viteProcess = new Process
+                    {
+                        StartInfo = new ProcessStartInfo
+                        {
+                            FileName = "npm",
+                            Arguments = "run dev",
+                            WorkingDirectory = ReactWebDirectory,
+                            UseShellExecute = false,
+                            RedirectStandardOutput = false,
+                            RedirectStandardError = false,
+                        }
+                    };
+                    viteProcess.Start();
+
+                    // Wait for Vite to become ready (poll port 5173)
+                    WaitForPort(5173, timeoutSeconds: 60);
+                    Serilog.Log.Information("Vite dev server is ready on http://localhost:5173");
+                }
+            }
+
+            try
+            {
+                DotNetRun(s => s
+                    .SetProjectFile(ReactDesktopProject)
+                    .SetConfiguration(Configuration));
+            }
+            finally
+            {
+                // Clean up the background Vite process we started
+                if (viteProcess is { HasExited: false })
+                {
+                    Serilog.Log.Information("Stopping Vite dev server...");
+                    try { viteProcess.Kill(entireProcessTree: true); }
+                    catch { /* best effort */ }
+                    viteProcess.Dispose();
+                }
+            }
         });
 
     Target NugetPackageTest => _ => _
@@ -1163,7 +1232,76 @@ class _Build : NukeBuild
 
     // ──────────────────────────────── Helpers ────────────────────────────────────
 
-    static string RunProcess(string fileName, string arguments, int timeoutMs = 30_000)
+    static void WaitForAndroidBoot(string adbPath, int timeoutMinutes = 3)
+    {
+        Serilog.Log.Information("Waiting for emulator to boot...");
+        var timeout = TimeSpan.FromMinutes(timeoutMinutes);
+        var stopwatch = Stopwatch.StartNew();
+        var booted = false;
+
+        while (stopwatch.Elapsed < timeout)
+        {
+            Thread.Sleep(3000);
+            try
+            {
+                var bootResult = RunProcess(adbPath, "shell getprop sys.boot_completed");
+                if (bootResult.Trim() == "1")
+                {
+                    booted = true;
+                    break;
+                }
+            }
+            catch
+            {
+                // Device not ready yet
+            }
+        }
+
+        Assert.True(booted, $"Emulator did not boot within {timeoutMinutes} minutes.");
+        Serilog.Log.Information("Emulator booted successfully ({Elapsed:F0}s).", stopwatch.Elapsed.TotalSeconds);
+    }
+
+    /// <summary>
+    /// Launch an Android app via monkey, retrying until the activity manager is available.
+    /// After sys.boot_completed=1 there is a short window where system services are still initializing.
+    /// </summary>
+    static void LaunchAndroidApp(string adbPath, string packageName, int maxRetries = 5)
+    {
+        for (var attempt = 1; attempt <= maxRetries; attempt++)
+        {
+            try
+            {
+                var output = RunProcess(adbPath,
+                    $"shell monkey -p {packageName} -c android.intent.category.LAUNCHER 1");
+
+                // monkey writes "Events injected: 1" to stdout on success
+                if (output.Contains("Events injected", StringComparison.OrdinalIgnoreCase))
+                {
+                    return;
+                }
+
+                Serilog.Log.Warning("monkey attempt {Attempt}/{Max}: unexpected output: {Output}",
+                    attempt, maxRetries, output.Trim());
+            }
+            catch (Exception ex)
+            {
+                Serilog.Log.Warning("monkey attempt {Attempt}/{Max} failed: {Message}",
+                    attempt, maxRetries, ex.Message);
+            }
+
+            if (attempt < maxRetries)
+            {
+                Serilog.Log.Information("Waiting 3s before retry...");
+                Thread.Sleep(3000);
+            }
+        }
+
+        throw new InvalidOperationException(
+            $"Failed to launch {packageName} after {maxRetries} attempts. " +
+            "The activity manager may not be available — is the emulator fully booted?");
+    }
+
+    static string RunProcess(string fileName, string arguments, string? workingDirectory = null, int timeoutMs = 30_000)
     {
         var psi = new ProcessStartInfo
         {
@@ -1174,6 +1312,9 @@ class _Build : NukeBuild
             RedirectStandardError = true,
             CreateNoWindow = true,
         };
+
+        if (!string.IsNullOrEmpty(workingDirectory))
+            psi.WorkingDirectory = workingDirectory;
 
         using var process = Process.Start(psi)!;
         var output = process.StandardOutput.ReadToEnd();
@@ -1240,11 +1381,52 @@ class _Build : NukeBuild
         yield return IntegrationTestsProject;
     }
 
+    // ──────────────────────── React sample helpers ──────────────────────────
+
+    void EnsureReactDepsInstalled()
+    {
+        Assert.DirectoryExists(ReactWebDirectory, $"React web project not found at {ReactWebDirectory}.");
+        var nodeModules = ReactWebDirectory / "node_modules";
+        if (!Directory.Exists(nodeModules))
+        {
+            Serilog.Log.Information("node_modules not found, running npm install...");
+            RunProcess("npm", "install", workingDirectory: ReactWebDirectory, timeoutMs: 120_000);
+            Serilog.Log.Information("npm install completed.");
+        }
+    }
+
+    static bool IsHttpReady(string url)
+    {
+        try
+        {
+            using var http = new System.Net.Http.HttpClient { Timeout = TimeSpan.FromSeconds(2) };
+            var response = http.GetAsync(url).GetAwaiter().GetResult();
+            return response.IsSuccessStatusCode;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    static void WaitForPort(int port, int timeoutSeconds = 30)
+    {
+        var url = $"http://localhost:{port}";
+        var deadline = DateTime.UtcNow.AddSeconds(timeoutSeconds);
+        while (DateTime.UtcNow < deadline)
+        {
+            if (IsHttpReady(url)) return;
+            Thread.Sleep(500);
+        }
+
+        throw new TimeoutException($"{url} did not become available within {timeoutSeconds}s.");
+    }
+
     static bool HasDotNetWorkload(string platformKeyword)
     {
         try
         {
-            var output = RunProcess("dotnet", "workload list", 30_000);
+            var output = RunProcess("dotnet", "workload list", timeoutMs: 30_000);
             // Workload IDs can be 'android', 'maui-android', 'ios', 'maui-ios', etc.
             // Match any installed workload whose ID contains the platform keyword as a component.
             // Example: 'maui-android' matches keyword 'android'; 'ios' matches keyword 'ios'.

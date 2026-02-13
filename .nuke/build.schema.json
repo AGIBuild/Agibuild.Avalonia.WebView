@@ -39,6 +39,8 @@
         "Start",
         "StartAndroid",
         "StartIOS",
+        "StartReactApp",
+        "StartReactDev",
         "TemplateE2E",
         "Test",
         "UnitTests",

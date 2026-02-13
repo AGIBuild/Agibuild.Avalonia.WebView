@@ -2,6 +2,7 @@ using System;
 using System.Globalization;
 using Avalonia.Controls;
 using Avalonia.Data.Converters;
+using Avalonia.Interactivity;
 using Avalonia.Media;
 using Agibuild.Avalonia.WebView.Integration.Tests.ViewModels;
 
@@ -12,11 +13,13 @@ public partial class FeatureE2EView : UserControl
     public FeatureE2EView()
     {
         InitializeComponent();
-        DataContextChanged += OnDataContextChanged;
+        Loaded += OnViewLoaded;
     }
 
-    private void OnDataContextChanged(object? sender, EventArgs e)
+    private void OnViewLoaded(object? sender, RoutedEventArgs e)
     {
+        Loaded -= OnViewLoaded;
+
         if (DataContext is FeatureE2EViewModel vm)
         {
             var webView = this.FindControl<WebView>("WebViewControl");

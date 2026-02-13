@@ -12,8 +12,9 @@
 
   <DockPanel Background="{StaticResource SurfaceBgBrush}">
 
-    <!-- ════════════ Top Header Bar ════════════ -->
-    <Border DockPanel.Dock="Top" Height="42">
+    <!-- ════════════ Desktop: Top Header Bar with Hamburger ════════════ -->
+    <Border DockPanel.Dock="Top" Height="42"
+            IsVisible="{Binding !IsMobile}">
       <Border.Background>
         <LinearGradientBrush StartPoint="0%,50%" EndPoint="100%,50%">
           <GradientStop Color="#1E40AF" Offset="0" />
@@ -21,85 +22,111 @@
           <GradientStop Color="#0EA5E9" Offset="1" />
         </LinearGradientBrush>
       </Border.Background>
-      <Grid ColumnDefinitions="Auto,*,Auto,Auto" Margin="10,0">
-        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8"
-                    VerticalAlignment="Center">
-          <TextBlock Text="&#x1F310;" FontSize="18" VerticalAlignment="Center" />
+      <Grid ColumnDefinitions="Auto,Auto,*,Auto" Margin="6,0,10,0">
+        <!-- Hamburger toggle -->
+        <ToggleButton x:Name="NavToggle" Grid.Column="0"
+                      Content="&#x2630;" FontSize="16"
+                      Foreground="White" Background="Transparent"
+                      BorderThickness="0" Padding="8,4"
+                      VerticalAlignment="Center" CornerRadius="6" />
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"
+                    VerticalAlignment="Center" Margin="4,0,0,0">
           <TextBlock Text="Agibuild WebView" FontSize="15" FontWeight="Bold"
                      Foreground="White" VerticalAlignment="Center" />
         </StackPanel>
-        <Border Grid.Column="2" Background="#30FFFFFF" CornerRadius="10"
-                Padding="8,3" VerticalAlignment="Center" Margin="0,0,8,0">
+        <Border Grid.Column="3" Background="#30FFFFFF" CornerRadius="10"
+                Padding="8,3" VerticalAlignment="Center">
           <TextBlock Text="E2E Test" FontSize="10" FontWeight="SemiBold"
                      Foreground="White" />
         </Border>
-        <!-- Log panel toggle -->
-        <ToggleButton Grid.Column="3" IsChecked="{Binding IsLogPanelOpen}"
-                      Content="&#x1F4CB;" FontSize="14"
-                      Foreground="White" Padding="8,4"
-                      Background="Transparent" BorderThickness="0"
-                      VerticalAlignment="Center"
-                      ToolTip.Tip="Toggle Console" />
       </Grid>
     </Border>
 
-    <!-- ════════════ Main: Nav Rail + Page + Log Panel ════════════ -->
-    <Grid ColumnDefinitions="Auto,*,Auto">
+    <!-- ════════════ Mobile: Bottom Tab Bar ════════════ -->
+    <Border DockPanel.Dock="Bottom"
+            IsVisible="{Binding IsMobile}"
+            Height="56" Background="White"
+            BorderThickness="0,1,0,0" BorderBrush="{StaticResource BorderDefaultBrush}">
+      <UniformGrid Columns="5">
+        <Button Classes="tab-item"
+                Command="{Binding SelectTab0Command}"
+                Tag="{Binding SelectedTabIndex}">
+          <StackPanel Spacing="2" HorizontalAlignment="Center">
+            <TextBlock Text="&#x25CE;" FontSize="20" HorizontalAlignment="Center" />
+            <TextBlock Text="Browser" Classes="tab-label" HorizontalAlignment="Center" />
+          </StackPanel>
+        </Button>
+        <Button Classes="tab-item"
+                Command="{Binding SelectTab1Command}"
+                Tag="{Binding SelectedTabIndex}">
+          <StackPanel Spacing="2" HorizontalAlignment="Center">
+            <TextBlock Text="&#x25C6;" FontSize="20" HorizontalAlignment="Center" />
+            <TextBlock Text="Advanced" Classes="tab-label" HorizontalAlignment="Center" />
+          </StackPanel>
+        </Button>
+        <Button Classes="tab-item"
+                Command="{Binding SelectTab2Command}"
+                Tag="{Binding SelectedTabIndex}">
+          <StackPanel Spacing="2" HorizontalAlignment="Center">
+            <TextBlock Text="&#x25C9;" FontSize="20" HorizontalAlignment="Center" />
+            <TextBlock Text="Smoke" Classes="tab-label" HorizontalAlignment="Center" />
+          </StackPanel>
+        </Button>
+        <Button Classes="tab-item"
+                Command="{Binding SelectTab3Command}"
+                Tag="{Binding SelectedTabIndex}">
+          <StackPanel Spacing="2" HorizontalAlignment="Center">
+            <TextBlock Text="&#x2713;" FontSize="20" HorizontalAlignment="Center" />
+            <TextBlock Text="Feature" Classes="tab-label" HorizontalAlignment="Center" />
+          </StackPanel>
+        </Button>
+        <Button Classes="tab-item"
+                Command="{Binding SelectTab4Command}"
+                Tag="{Binding SelectedTabIndex}">
+          <StackPanel Spacing="2" HorizontalAlignment="Center">
+            <TextBlock Text="&#x2261;" FontSize="20" HorizontalAlignment="Center" />
+            <TextBlock Text="Console" Classes="tab-label" HorizontalAlignment="Center" />
+          </StackPanel>
+        </Button>
+      </UniformGrid>
+    </Border>
 
-      <!-- ── Col 0: Nav Rail ── -->
-      <Border Grid.Column="0" Background="White" Width="140"
-              BorderThickness="0,0,1,0" BorderBrush="{StaticResource BorderDefaultBrush}">
-        <DockPanel>
-          <TextBlock DockPanel.Dock="Top" Text="Modules" Classes="caption"
-                     Margin="12,10,12,4" />
-          <ListBox x:Name="NavList"
-                   SelectedIndex="{Binding SelectedTabIndex}"
-                   SelectionChanged="OnNavSelectionChanged"
-                   Background="Transparent" Margin="4,2">
-            <ListBox.Styles>
-              <Style Selector="ListBoxItem">
-                <Setter Property="CornerRadius" Value="6" />
-                <Setter Property="Padding" Value="10,8" />
-                <Setter Property="Margin" Value="0,1" />
-                <Setter Property="FontSize" Value="12" />
-              </Style>
-            </ListBox.Styles>
-            <ListBoxItem Content="Browser" />
-            <ListBoxItem Content="Advanced" />
-            <ListBoxItem Content="Smoke" />
-            <ListBoxItem Content="Feature E2E" />
-          </ListBox>
-        </DockPanel>
-      </Border>
+    <!-- ════════════ Desktop: Push Drawer (left-docked, toggled by hamburger) ════════════ -->
+    <Border DockPanel.Dock="Left" Width="170"
+            IsVisible="{Binding #NavToggle.IsChecked}"
+            Background="White"
+            BorderThickness="0,0,1,0" BorderBrush="{StaticResource BorderDefaultBrush}">
+      <DockPanel>
+        <TextBlock DockPanel.Dock="Top" Text="Modules" Classes="caption"
+                   Margin="12,10,12,4" />
+        <ListBox x:Name="NavList"
+                 SelectedIndex="{Binding SelectedTabIndex}"
+                 SelectionChanged="OnNavSelectionChanged"
+                 Background="Transparent" Margin="6,2">
+          <ListBox.Styles>
+            <Style Selector="ListBoxItem">
+              <Setter Property="CornerRadius" Value="8" />
+              <Setter Property="Padding" Value="12,8" />
+              <Setter Property="Margin" Value="0,1" />
+              <Setter Property="FontSize" Value="12" />
+            </Style>
+          </ListBox.Styles>
+          <ListBoxItem Content="Browser" />
+          <ListBoxItem Content="Advanced" />
+          <ListBoxItem Content="Smoke" />
+          <ListBoxItem Content="Feature E2E" />
+          <ListBoxItem Content="Console" />
+        </ListBox>
+      </DockPanel>
+    </Border>
 
-      <!-- ── Col 1: Page Host ── -->
-      <ContentControl Grid.Column="1" x:Name="PageHost" />
+    <!-- ════════════ Page Host: stacked pages with visibility toggle ════════════ -->
+    <!--
+      All page views are added as children of this Grid and kept alive.
+      Only the selected page is visible.  This prevents NativeControlHost
+      from detaching/disposing native WebView handles on tab switch.
+    -->
+    <Grid x:Name="PageHost" />
 
-      <!-- ── Col 2: Shared Log Panel (collapsible) ── -->
-      <Border Grid.Column="2" Width="320"
-              IsVisible="{Binding IsLogPanelOpen}"
-              Background="White"
-              BorderThickness="1,0,0,0" BorderBrush="{StaticResource BorderDefaultBrush}">
-        <DockPanel>
-          <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto,Auto" Margin="10,8,10,4">
-            <TextBlock Text="Console" FontWeight="SemiBold" FontSize="12"
-                       Foreground="{StaticResource TextSecondaryBrush}"
-                       VerticalAlignment="Center" />
-            <Button Grid.Column="1" Content="Clear" FontSize="10" Padding="8,3"
-                    CornerRadius="4" Command="{Binding ClearLogCommand}" />
-            <Button Grid.Column="2" Content="&#x2715;" FontSize="10" Padding="6,3"
-                    CornerRadius="4" Margin="4,0,0,0"
-                    Background="Transparent" BorderThickness="0"
-                    Command="{Binding ToggleLogPanelCommand}" />
-          </Grid>
-          <TextBox IsReadOnly="True" AcceptsReturn="True" TextWrapping="NoWrap"
-                   FontFamily="Menlo,Consolas,Courier New,monospace" FontSize="11"
-                   Text="{Binding SharedLog}"
-                   Margin="10,4,10,10" Background="#F8FAFC" CornerRadius="6"
-                   CaretIndex="2147483647" />
-        </DockPanel>
-      </Border>
-
-    </Grid>
   </DockPanel>
 </UserControl>

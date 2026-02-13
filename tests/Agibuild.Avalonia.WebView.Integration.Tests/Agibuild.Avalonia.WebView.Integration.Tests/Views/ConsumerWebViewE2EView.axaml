@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:Agibuild.Avalonia.WebView.Integration.Tests.ViewModels"
              xmlns:agw="using:Agibuild.Avalonia.WebView"
+             xmlns:local="using:Agibuild.Avalonia.WebView.Integration.Tests"
              mc:Ignorable="d"
              x:Class="Agibuild.Avalonia.WebView.Integration.Tests.Views.ConsumerWebViewE2EView"
              x:DataType="vm:ConsumerWebViewE2EViewModel"
@@ -18,7 +19,7 @@
       <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto,Auto">
         <!-- Toggle left panel -->
         <ToggleButton x:Name="ToolsToggle" Grid.Column="0"
-                      IsChecked="True"
+                      IsChecked="False"
                       Content="&#x2630;" ToolTip.Tip="Tools"
                       FontSize="14" Padding="8,5"
                       Background="Transparent" BorderThickness="0"
@@ -60,10 +61,11 @@
       </Grid>
     </Border>
 
-    <!-- ════════════ Status bar ════════════ -->
+    <!-- ════════════ Status bar (hidden on mobile to save vertical space) ════════════ -->
     <Border DockPanel.Dock="Bottom" Background="White"
             BorderThickness="0,1,0,0" BorderBrush="{StaticResource BorderDefaultBrush}"
-            Padding="8,3">
+            Padding="8,3"
+            IsVisible="{x:Static local:PlatformHelper.IsDesktop}">
       <TextBlock Text="{Binding Status}" Classes="caption" />
     </Border>
 

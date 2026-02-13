@@ -360,6 +360,13 @@ public partial class AdvancedFeaturesE2EViewModel : ViewModelBase
     {
         try
         {
+            if (OperatingSystem.IsAndroid() || OperatingSystem.IsIOS())
+            {
+                LogLine("[Dialog] WebDialog requires a desktop Window and is not available on mobile platforms.");
+                Status = "WebDialog is desktop-only.";
+                return;
+            }
+
             var url = DialogUrl?.Trim() ?? "https://github.com";
             LogLine($"[Dialog] Opening WebDialog to: {url}");
             Status = "Opening WebDialog...";
@@ -402,6 +409,13 @@ public partial class AdvancedFeaturesE2EViewModel : ViewModelBase
     {
         try
         {
+            if (OperatingSystem.IsAndroid() || OperatingSystem.IsIOS())
+            {
+                LogLine("[Dialog] Ephemeral WebDialog requires a desktop Window and is not available on mobile platforms.");
+                Status = "WebDialog is desktop-only.";
+                return;
+            }
+
             LogLine("[Dialog] Opening ephemeral WebDialog...");
             Status = "Opening ephemeral dialog...";
 
@@ -444,6 +458,13 @@ public partial class AdvancedFeaturesE2EViewModel : ViewModelBase
     {
         try
         {
+            if (OperatingSystem.IsAndroid() || OperatingSystem.IsIOS())
+            {
+                LogLine("[Auth] OAuth flow requires a desktop WebDialog and is not available on mobile platforms.");
+                Status = "AuthFlow is desktop-only.";
+                return;
+            }
+
             LogLine("[Auth] Starting OAuth flow simulation...");
             Status = "Running OAuth flow...";
 
@@ -500,6 +521,13 @@ public partial class AdvancedFeaturesE2EViewModel : ViewModelBase
     {
         try
         {
+            if (OperatingSystem.IsAndroid() || OperatingSystem.IsIOS())
+            {
+                LogLine("[Auth] OAuth cancel test requires a desktop WebDialog and is not available on mobile platforms.");
+                Status = "AuthFlow is desktop-only.";
+                return;
+            }
+
             LogLine("[Auth] Starting OAuth flow — close the dialog to test UserCancel...");
             Status = "Running OAuth flow (close dialog to cancel)...";
 
