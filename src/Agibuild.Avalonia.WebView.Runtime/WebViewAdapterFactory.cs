@@ -91,6 +91,8 @@ internal static class WebViewAdapterFactory
         }
     }
 
+    [UnconditionalSuppressMessage("Trimming", "IL2026",
+        Justification = "Dynamic assembly loading is the intended fallback for plugin discovery.")]
     private static void TryLoadFromAppBaseDirectory(string assemblyName)
     {
         try

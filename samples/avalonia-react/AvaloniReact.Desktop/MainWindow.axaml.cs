@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Agibuild.Avalonia.WebView;
 using Avalonia.Controls;
 using AvaloniReact.Bridge.Services;
@@ -12,29 +13,48 @@ public partial class MainWindow : Window
 
         Loaded += async (_, _) =>
         {
-            // ── SPA Hosting ─────────────────────────────────────────────
+            // ── 1. Navigate to SPA entry point ──────────────────────────
+            // Navigate FIRST so the page is loaded, then expose Bridge services
+            // (JS stubs must be injected into the loaded page, not about:blank).
+            try
+            {
 #if DEBUG
-            WebView.EnableSpaHosting(new SpaHostingOptions
-            {
-                DevServerUrl = "http://localhost:5173",
-            });
+                // In Debug: load directly from Vite dev server
+                // (run `npm run dev` in AvaloniReact.Web first).
+                await WebView.NavigateAsync(new Uri("http://localhost:5173"));
 #else
-            WebView.EnableSpaHosting(new SpaHostingOptions
-            {
-                EmbeddedResourcePrefix = "wwwroot",
-                ResourceAssembly = typeof(MainWindow).Assembly,
-            });
+                // In Release: use SPA hosting with embedded resources via app:// scheme.
+                WebView.EnableSpaHosting(new SpaHostingOptions
+                {
+                    EmbeddedResourcePrefix = "wwwroot",
+                    ResourceAssembly = typeof(MainWindow).Assembly,
+                });
+                await WebView.NavigateAsync(new Uri("app://localhost/index.html"));
 #endif
+            }
+            catch (WebViewNavigationException ex)
+            {
+                Debug.WriteLine($"Navigation failed: {ex.Message}");
+                await WebView.NavigateToStringAsync(
+                    "<html><body style='font-family:system-ui;padding:2em;color:#333'>" +
+                    "<h2>Navigation failed</h2>" +
+                    $"<p>{ex.Message}</p>" +
+#if DEBUG
+                    "<p>Make sure the Vite dev server is running:<br>" +
+                    "<code>cd AvaloniReact.Web && npm run dev</code></p>" +
+#endif
+                    "</body></html>");
+                return;
+            }
 
-            // ── Bridge Services ([JsExport] — C# exposed to JS) ────────
+            // ── 2. Expose Bridge Services ([JsExport] — C# → JS) ───────
+            // Must be called AFTER navigation completes so the RPC JS stubs
+            // are injected into the actual page (React app polls for window.agWebView.rpc).
             WebView.Bridge.Expose<IAppShellService>(new AppShellService());
             WebView.Bridge.Expose<ISystemInfoService>(new SystemInfoService());
             WebView.Bridge.Expose<IChatService>(new ChatService());
             WebView.Bridge.Expose<IFileService>(new FileService());
             WebView.Bridge.Expose<ISettingsService>(new SettingsService());
-
-            // ── Navigate to SPA entry point ─────────────────────────────
-            await WebView.NavigateAsync(new Uri("app://localhost/index.html"));
         };
     }
 }

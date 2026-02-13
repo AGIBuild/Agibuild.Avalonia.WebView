@@ -1,14 +1,20 @@
 import { useState, useEffect } from 'react';
 import { Save, Check } from 'lucide-react';
 import { settingsService, type AppSettings } from '../bridge/services';
+import { applySettings, dispatchSettingsChanged } from '../applySettings';
+import { useI18n } from '../i18n/I18nContext';
 
 export function Settings() {
+  const { t, setLocale } = useI18n();
   const [settings, setSettings] = useState<AppSettings | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    settingsService.getSettings().then(setSettings).catch(() => {});
+    settingsService.getSettings().then((s) => {
+      setSettings(s);
+      applySettings(s);
+    }).catch(() => {});
   }, []);
 
   const handleSave = async () => {
@@ -17,15 +23,9 @@ export function Settings() {
     try {
       const updated = await settingsService.updateSettings(settings);
       setSettings(updated);
+      applySettings(updated);
+      dispatchSettingsChanged(updated);
       setSaved(true);
-
-      // Apply theme
-      if (updated.theme === 'dark') {
-        document.documentElement.classList.add('dark');
-      } else if (updated.theme === 'light') {
-        document.documentElement.classList.remove('dark');
-      }
-
       setTimeout(() => setSaved(false), 2000);
     } finally {
       setSaving(false);
@@ -43,42 +43,46 @@ export function Settings() {
   return (
     <div className="p-6 max-w-2xl space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Settings</h1>
+        <h1 className="text-2xl font-bold">{t('settings.title')}</h1>
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-          Preferences persisted via <code className="text-xs bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">[JsExport] ISettingsService</code>
+          {t('settings.subtitle')} <code className="text-xs bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">[JsExport] ISettingsService</code>
         </p>
       </div>
 
       <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 divide-y divide-gray-100 dark:divide-gray-800">
         {/* Theme */}
-        <SettingRow label="Theme" description="Choose light, dark, or follow system preference.">
+        <SettingRow label={t('settings.theme')} description={t('settings.themeDesc')}>
           <select
             value={settings.theme}
             onChange={(e) => setSettings({ ...settings, theme: e.target.value })}
             className="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm"
           >
-            <option value="system">System</option>
-            <option value="light">Light</option>
-            <option value="dark">Dark</option>
+            <option value="system">{t('settings.themeSystem')}</option>
+            <option value="light">{t('settings.themeLight')}</option>
+            <option value="dark">{t('settings.themeDark')}</option>
           </select>
         </SettingRow>
 
         {/* Language */}
-        <SettingRow label="Language" description="Interface language preference.">
+        <SettingRow label={t('settings.language')} description={t('settings.languageDesc')}>
           <select
             value={settings.language}
-            onChange={(e) => setSettings({ ...settings, language: e.target.value })}
+            onChange={(e) => {
+              const lang = e.target.value;
+              setSettings({ ...settings, language: lang });
+              setLocale(lang);
+            }}
             className="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm"
           >
             <option value="en">English</option>
-            <option value="zh">Chinese</option>
-            <option value="ja">Japanese</option>
-            <option value="ko">Korean</option>
+            <option value="zh">中文</option>
+            <option value="ja">日本語</option>
+            <option value="ko">한국어</option>
           </select>
         </SettingRow>
 
         {/* Font Size */}
-        <SettingRow label="Font Size" description={`Current: ${settings.fontSize}px`}>
+        <SettingRow label={t('settings.fontSize')} description={t('settings.fontSizeDesc', { size: settings.fontSize })}>
           <input
             type="range"
             min={12}
@@ -90,7 +94,7 @@ export function Settings() {
         </SettingRow>
 
         {/* Sidebar Collapsed */}
-        <SettingRow label="Compact Sidebar" description="Start with sidebar collapsed.">
+        <SettingRow label={t('settings.sidebar')} description={t('settings.sidebarDesc')}>
           <button
             onClick={() => setSettings({ ...settings, sidebarCollapsed: !settings.sidebarCollapsed })}
             className={`relative w-10 h-6 rounded-full transition-colors ${
@@ -113,14 +117,14 @@ export function Settings() {
         className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-500 text-white text-sm font-medium hover:bg-blue-600 disabled:opacity-50 transition-colors"
       >
         {saved ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
-        {saved ? 'Saved!' : saving ? 'Saving...' : 'Save Settings'}
+        {saved ? t('settings.saved') : saving ? t('settings.saving') : t('settings.save')}
       </button>
 
       {/* How it works */}
       <div className="bg-blue-50 dark:bg-blue-500/5 border border-blue-200 dark:border-blue-800 rounded-xl p-5 text-sm">
-        <p className="font-medium text-blue-700 dark:text-blue-300">How this works</p>
+        <p className="font-medium text-blue-700 dark:text-blue-300">{t('settings.howTitle')}</p>
         <p className="mt-1 text-blue-600 dark:text-blue-400">
-          Settings are read/written via the C# <code className="bg-blue-100 dark:bg-blue-500/20 px-1 rounded">SettingsService</code>, which persists them as JSON in the user's app data directory. The <code className="bg-blue-100 dark:bg-blue-500/20 px-1 rounded">IThemeService [JsImport]</code> allows C# to push theme changes to React.
+          {t('settings.howBody')}
         </p>
       </div>
     </div>

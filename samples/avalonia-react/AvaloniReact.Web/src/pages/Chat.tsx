@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { Send, Trash2, Bot, User } from 'lucide-react';
 import { chatService, type ChatMessage } from '../bridge/services';
+import { useI18n } from '../i18n/I18nContext';
 
 export function Chat() {
+  const { t } = useI18n();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
@@ -64,16 +66,16 @@ export function Chat() {
       {/* Header */}
       <div className="flex items-center justify-between px-6 h-14 border-b border-gray-200 dark:border-gray-800 shrink-0">
         <div>
-          <h1 className="text-lg font-bold">Chat</h1>
+          <h1 className="text-lg font-bold">{t('chat.title')}</h1>
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            Bidirectional Bridge demo — <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded">[JsExport] IChatService</code>
+            {t('chat.subtitle')} — <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded">[JsExport] IChatService</code>
           </p>
         </div>
         <button
           onClick={handleClear}
           className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
         >
-          <Trash2 className="w-3.5 h-3.5" /> Clear
+          <Trash2 className="w-3.5 h-3.5" /> {t('chat.clear')}
         </button>
       </div>
 
@@ -82,8 +84,8 @@ export function Chat() {
         {messages.length === 0 && (
           <div className="text-center py-16 text-gray-400 dark:text-gray-500">
             <Bot className="w-10 h-10 mx-auto mb-3 opacity-50" />
-            <p className="text-sm">Send a message to start chatting with the C# service.</p>
-            <p className="text-xs mt-1">Try: "hello", "time", "memory", "bridge", or "help"</p>
+            <p className="text-sm">{t('chat.emptyTitle')}</p>
+            <p className="text-xs mt-1">{t('chat.emptyHint')}</p>
           </div>
         )}
         {messages.map((msg) => (
@@ -138,7 +140,7 @@ export function Chat() {
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Type a message..."
+            placeholder={t('chat.placeholder')}
             className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/40"
             disabled={sending}
           />

@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Cpu, MemoryStick, Monitor, Clock, Server, Layers, Globe, Hash } from 'lucide-react';
 import { systemInfoService, type SystemInfo, type RuntimeMetrics } from '../bridge/services';
+import { useI18n } from '../i18n/I18nContext';
 
 export function Dashboard() {
+  const { t } = useI18n();
   const [info, setInfo] = useState<SystemInfo | null>(null);
   const [metrics, setMetrics] = useState<RuntimeMetrics | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -36,9 +38,9 @@ export function Dashboard() {
   return (
     <div className="p-6 space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Dashboard</h1>
+        <h1 className="text-2xl font-bold">{t('dashboard.title')}</h1>
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-          System information from C# via <code className="text-xs bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">[JsExport] ISystemInfoService</code>
+          {t('dashboard.subtitle')} <code className="text-xs bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">[JsExport] ISystemInfoService</code>
         </p>
       </div>
 
@@ -46,25 +48,25 @@ export function Dashboard() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
           icon={<MemoryStick className="w-5 h-5" />}
-          label="Working Set"
+          label={t('dashboard.workingSet')}
           value={metrics ? `${metrics.workingSetMb} MB` : '—'}
           color="blue"
         />
         <MetricCard
           icon={<Layers className="w-5 h-5" />}
-          label="GC Memory"
+          label={t('dashboard.gcMemory')}
           value={metrics ? `${metrics.gcTotalMemoryMb} MB` : '—'}
           color="purple"
         />
         <MetricCard
           icon={<Cpu className="w-5 h-5" />}
-          label="Threads"
+          label={t('dashboard.threads')}
           value={metrics ? `${metrics.threadCount}` : '—'}
           color="green"
         />
         <MetricCard
           icon={<Clock className="w-5 h-5" />}
-          label="Uptime"
+          label={t('dashboard.uptime')}
           value={metrics ? formatUptime(metrics.uptimeSeconds) : '—'}
           color="amber"
         />
@@ -74,24 +76,24 @@ export function Dashboard() {
       {info && (
         <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
           <div className="px-5 py-3 border-b border-gray-200 dark:border-gray-800">
-            <h2 className="font-semibold">Platform Details</h2>
+            <h2 className="font-semibold">{t('dashboard.platformDetails')}</h2>
           </div>
           <div className="divide-y divide-gray-100 dark:divide-gray-800">
-            <InfoRow icon={<Monitor className="w-4 h-4" />} label="Operating System" value={`${info.osName} — ${info.osVersion}`} />
-            <InfoRow icon={<Server className="w-4 h-4" />} label=".NET Runtime" value={info.dotnetVersion} />
-            <InfoRow icon={<Layers className="w-4 h-4" />} label="Avalonia" value={info.avaloniaVersion} />
-            <InfoRow icon={<Globe className="w-4 h-4" />} label="WebView Engine" value={info.webViewEngine} />
-            <InfoRow icon={<Cpu className="w-4 h-4" />} label="Machine" value={`${info.machineName} (${info.processorCount} cores)`} />
-            <InfoRow icon={<Hash className="w-4 h-4" />} label="Total Memory" value={`${info.totalMemoryMb} MB`} />
+            <InfoRow icon={<Monitor className="w-4 h-4" />} label={t('dashboard.os')} value={`${info.osName} — ${info.osVersion}`} />
+            <InfoRow icon={<Server className="w-4 h-4" />} label={t('dashboard.dotnet')} value={info.dotnetVersion} />
+            <InfoRow icon={<Layers className="w-4 h-4" />} label={t('dashboard.avalonia')} value={info.avaloniaVersion} />
+            <InfoRow icon={<Globe className="w-4 h-4" />} label={t('dashboard.webviewEngine')} value={info.webViewEngine} />
+            <InfoRow icon={<Cpu className="w-4 h-4" />} label={t('dashboard.machine')} value={`${info.machineName} (${info.processorCount} cores)`} />
+            <InfoRow icon={<Hash className="w-4 h-4" />} label={t('dashboard.totalMemory')} value={`${info.totalMemoryMb} MB`} />
           </div>
         </div>
       )}
 
       {/* Bridge call explanation */}
       <div className="bg-blue-50 dark:bg-blue-500/5 border border-blue-200 dark:border-blue-800 rounded-xl p-5 text-sm">
-        <p className="font-medium text-blue-700 dark:text-blue-300">How this works</p>
+        <p className="font-medium text-blue-700 dark:text-blue-300">{t('dashboard.howTitle')}</p>
         <p className="mt-1 text-blue-600 dark:text-blue-400">
-          The metrics above are fetched from C# via <code className="bg-blue-100 dark:bg-blue-500/20 px-1 rounded">SystemInfoService.getRuntimeMetrics()</code> — a JSON-RPC call over the WebView bridge, refreshing every 2 seconds. Data like OS info and .NET version are impossible to obtain from JavaScript alone.
+          {t('dashboard.howBody')}
         </p>
       </div>
     </div>

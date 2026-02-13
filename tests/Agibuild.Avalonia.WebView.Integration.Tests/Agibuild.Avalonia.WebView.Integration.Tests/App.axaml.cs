@@ -7,6 +7,7 @@ using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace Agibuild.Avalonia.WebView.Integration.Tests
@@ -84,6 +85,8 @@ namespace Agibuild.Avalonia.WebView.Integration.Tests
             base.OnFrameworkInitializationCompleted();
         }
 
+        [UnconditionalSuppressMessage("Trimming", "IL2026",
+            Justification = "Avalonia DataValidators access is required to disable duplicate validation.")]
         private void DisableAvaloniaDataAnnotationValidation()
         {
             // Get an array of plugins to remove

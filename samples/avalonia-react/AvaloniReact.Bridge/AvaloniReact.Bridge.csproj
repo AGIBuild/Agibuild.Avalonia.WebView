@@ -8,12 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Agibuild.Avalonia.WebView.Core" Version="*-*" />
+    <PackageReference Include="Agibuild.Avalonia.WebView.Core" Version="0.1.8-preview" />
   </ItemGroup>
 
   <!-- Source generator for typed bridge (AOT-safe proxies; falls back to reflection when absent) -->
   <ItemGroup>
-    <PackageReference Include="Agibuild.Avalonia.WebView.Bridge.Generator" Version="*-*"
+    <PackageReference Include="Agibuild.Avalonia.WebView.Bridge.Generator" Version="0.1.8-preview"
                       OutputItemType="Analyzer"
                       ReferenceOutputAssembly="false" />
   </ItemGroup>

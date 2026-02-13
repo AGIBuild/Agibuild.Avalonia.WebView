@@ -1,4 +1,6 @@
-- name: API Reference
-  href: api/
+- name: Demo
+  href: demo/
 - name: Articles
   href: articles/
+- name: API Reference
+  href: api/

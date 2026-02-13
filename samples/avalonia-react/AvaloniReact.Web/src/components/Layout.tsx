@@ -1,11 +1,14 @@
 import { NavLink } from 'react-router';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   LayoutDashboard, MessageSquare, FolderOpen, Settings as SettingsIcon,
   Moon, Sun, PanelLeftClose, PanelLeft,
 } from 'lucide-react';
-import type { PageDefinition } from '../bridge/services';
-import { appShellService } from '../bridge/services';
+import type { PageDefinition, AppSettings } from '../bridge/services';
+import { appShellService, settingsService } from '../bridge/services';
+import { applySettings } from '../applySettings';
+import { useI18n } from '../i18n/I18nContext';
+import type { TranslationKey } from '../i18n/translations';
 
 /** Map icon names (from C#) to Lucide icon components. */
 const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -21,15 +24,35 @@ interface LayoutProps {
 }
 
 export function Layout({ pages, children }: LayoutProps) {
+  const { t } = useI18n();
   const [collapsed, setCollapsed] = useState(false);
   const [dark, setDark] = useState(false);
   const [appName, setAppName] = useState('Hybrid Demo');
 
+  // Load persisted settings on mount and apply them.
   useEffect(() => {
-    // Check system preference on mount
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    setDark(prefersDark);
-    if (prefersDark) document.documentElement.classList.add('dark');
+    settingsService.getSettings().then((s) => {
+      setCollapsed(s.sidebarCollapsed);
+      applySettings(s);
+      // Sync local dark state with applied theme.
+      setDark(document.documentElement.classList.contains('dark'));
+    }).catch(() => {
+      // Fallback: use system preference if settings unavailable.
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      setDark(prefersDark);
+      if (prefersDark) document.documentElement.classList.add('dark');
+    });
+  }, []);
+
+  // Listen for settings changes dispatched by the Settings page.
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const s = (e as CustomEvent<AppSettings>).detail;
+      setCollapsed(s.sidebarCollapsed);
+      setDark(document.documentElement.classList.contains('dark'));
+    };
+    window.addEventListener('app-settings-changed', handler);
+    return () => window.removeEventListener('app-settings-changed', handler);
   }, []);
 
   useEffect(() => {
@@ -61,11 +84,28 @@ export function Layout({ pages, children }: LayoutProps) {
     });
   }, []);
 
-  const toggleDark = () => {
-    const next = !dark;
-    setDark(next);
-    document.documentElement.classList.toggle('dark', next);
-  };
+  const toggleCollapsed = useCallback(() => {
+    setCollapsed((prev) => {
+      const next = !prev;
+      // Persist the change.
+      settingsService.getSettings().then((s) => {
+        settingsService.updateSettings({ ...s, sidebarCollapsed: next }).catch(() => {});
+      }).catch(() => {});
+      return next;
+    });
+  }, []);
+
+  const toggleDark = useCallback(() => {
+    setDark((prev) => {
+      const next = !prev;
+      document.documentElement.classList.toggle('dark', next);
+      // Persist the theme choice.
+      settingsService.getSettings().then((s) => {
+        settingsService.updateSettings({ ...s, theme: next ? 'dark' : 'light' }).catch(() => {});
+      }).catch(() => {});
+      return next;
+    });
+  }, []);
 
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-950">
@@ -102,7 +142,7 @@ export function Layout({ pages, children }: LayoutProps) {
                 }
               >
                 <Icon className="w-5 h-5 shrink-0" />
-                {!collapsed && <span className="truncate">{page.title}</span>}
+                {!collapsed && <span className="truncate">{t(`page.${page.id}` as TranslationKey)}</span>}
               </NavLink>
             );
           })}
@@ -115,10 +155,10 @@ export function Layout({ pages, children }: LayoutProps) {
             className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 w-full"
           >
             {dark ? <Sun className="w-5 h-5 shrink-0" /> : <Moon className="w-5 h-5 shrink-0" />}
-            {!collapsed && <span>{dark ? 'Light mode' : 'Dark mode'}</span>}
+            {!collapsed && <span>{dark ? t('layout.lightMode') : t('layout.darkMode')}</span>}
           </button>
           <button
-            onClick={() => setCollapsed((c) => !c)}
+            onClick={toggleCollapsed}
             className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 w-full"
           >
             {collapsed ? (
@@ -126,7 +166,7 @@ export function Layout({ pages, children }: LayoutProps) {
             ) : (
               <PanelLeftClose className="w-5 h-5 shrink-0" />
             )}
-            {!collapsed && <span>Collapse</span>}
+            {!collapsed && <span>{t('layout.collapse')}</span>}
           </button>
         </div>
       </aside>

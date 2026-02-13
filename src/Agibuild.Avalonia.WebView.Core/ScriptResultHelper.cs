@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 
 namespace Agibuild.Avalonia.WebView;
@@ -18,6 +19,8 @@ public static class ScriptResultHelper
     /// <c>null</c> when the result represents JavaScript null/undefined;
     /// otherwise the decoded raw string value.
     /// </returns>
+    [UnconditionalSuppressMessage("Trimming", "IL2026",
+        Justification = "Deserializing to System.String is always safe for trimming.")]
     public static string? NormalizeJsonResult(string? jsonResult)
     {
         if (jsonResult is null || string.Equals(jsonResult, "null", StringComparison.Ordinal))

@@ -4,9 +4,10 @@ Cross-platform hybrid app framework — Electron's developer productivity with n
 
 ## Quick Links
 
-- [API Reference](api/index.md)
+- [Demo: Avalonia + React Hybrid App](demo/index.md) — See the framework in action with screenshots
 - [Getting Started](articles/getting-started.md)
 - [Architecture](articles/architecture.md)
+- [API Reference](api/index.md)
 
 ## Features
 

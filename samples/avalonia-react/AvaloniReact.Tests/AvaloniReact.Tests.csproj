@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Agibuild.Avalonia.WebView.Core" Version="*-*" />
+    <PackageReference Include="Agibuild.Avalonia.WebView.Core" Version="0.1.8-preview" />
   </ItemGroup>
 
   <ItemGroup>

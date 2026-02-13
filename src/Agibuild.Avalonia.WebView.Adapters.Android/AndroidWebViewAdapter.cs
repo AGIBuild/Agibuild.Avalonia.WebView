@@ -1517,7 +1517,9 @@ internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHan
 
     // ==================== IContextMenuAdapter ====================
 
+#pragma warning disable CS0067 // Event is required by IContextMenuAdapter but not yet raised on Android
     public event EventHandler<ContextMenuRequestedEventArgs>? ContextMenuRequested;
+#pragma warning restore CS0067
 
     // ==================== IDevToolsAdapter ====================
 

@@ -9,6 +9,8 @@
     <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
     <AndroidPackageFormat>apk</AndroidPackageFormat>
     <AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
+    <!-- Suppress SkiaSharp 16KB page size warning (third-party, awaiting upstream fix) -->
+    <NoWarn>$(NoWarn);XA0141</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

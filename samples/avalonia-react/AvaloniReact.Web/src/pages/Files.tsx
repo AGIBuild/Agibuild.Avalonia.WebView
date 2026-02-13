@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Folder, File, ChevronRight, ArrowUp, Eye } from 'lucide-react';
 import { fileService, type FileEntry } from '../bridge/services';
+import { useI18n } from '../i18n/I18nContext';
 
 export function Files() {
+  const { t } = useI18n();
   const [entries, setEntries] = useState<FileEntry[]>([]);
   const [currentPath, setCurrentPath] = useState<string>('');
   const [preview, setPreview] = useState<{ name: string; content: string } | null>(null);
@@ -53,9 +55,9 @@ export function Files() {
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-800 shrink-0">
-        <h1 className="text-lg font-bold">Files</h1>
+        <h1 className="text-lg font-bold">{t('files.title')}</h1>
         <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-          Native file system access via <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded">[JsExport] IFileService</code>
+          {t('files.subtitle')} <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded">[JsExport] IFileService</code>
         </p>
       </div>
 
@@ -85,14 +87,14 @@ export function Files() {
               <div className="w-5 h-5 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
             </div>
           ) : entries.length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-16">Empty directory</p>
+            <p className="text-sm text-gray-400 text-center py-16">{t('files.empty')}</p>
           ) : (
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100 dark:border-gray-800 text-xs text-gray-500 dark:text-gray-400">
-                  <th className="text-left px-5 py-2 font-medium">Name</th>
-                  <th className="text-right px-5 py-2 font-medium w-24">Size</th>
-                  <th className="text-right px-5 py-2 font-medium w-40">Modified</th>
+                  <th className="text-left px-5 py-2 font-medium">{t('files.name')}</th>
+                  <th className="text-right px-5 py-2 font-medium w-24">{t('files.size')}</th>
+                  <th className="text-right px-5 py-2 font-medium w-40">{t('files.modified')}</th>
                   <th className="w-12" />
                 </tr>
               </thead>
@@ -138,7 +140,7 @@ export function Files() {
                 onClick={() => setPreview(null)}
                 className="text-xs text-gray-400 hover:text-gray-600"
               >
-                Close
+                {t('files.close')}
               </button>
             </div>
             <pre className="flex-1 overflow-auto p-4 text-xs font-mono text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-900/50 whitespace-pre-wrap">

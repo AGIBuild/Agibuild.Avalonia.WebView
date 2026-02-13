@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 
 namespace Agibuild.Avalonia.WebView;
@@ -33,9 +34,13 @@ public interface IBridgeServiceRegistration<in T> where T : class
 public sealed class BridgeRegistrationAttribute : Attribute
 {
     public Type InterfaceType { get; }
+
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
     public Type RegistrationType { get; }
 
-    public BridgeRegistrationAttribute(Type interfaceType, Type registrationType)
+    public BridgeRegistrationAttribute(
+        Type interfaceType,
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type registrationType)
     {
         InterfaceType = interfaceType;
         RegistrationType = registrationType;
@@ -50,9 +55,13 @@ public sealed class BridgeRegistrationAttribute : Attribute
 public sealed class BridgeProxyAttribute : Attribute
 {
     public Type InterfaceType { get; }
+
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
     public Type ProxyType { get; }
 
-    public BridgeProxyAttribute(Type interfaceType, Type proxyType)
+    public BridgeProxyAttribute(
+        Type interfaceType,
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type proxyType)
     {
         InterfaceType = interfaceType;
         ProxyType = proxyType;

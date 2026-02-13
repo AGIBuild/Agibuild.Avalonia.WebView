@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
@@ -103,6 +104,8 @@ internal sealed class RuntimeBridgeService : IBridgeService, IDisposable
         }
     }
 
+    [UnconditionalSuppressMessage("Trimming", "IL2070",
+        Justification = "Reflection-based fallback path; source-generated path is preferred for AOT/trim scenarios.")]
     private void ExposeViaReflection<T>(T implementation, Type interfaceType, RateLimit? rateLimit = null) where T : class
     {
         var serviceName = GetServiceName<JsExportAttribute>(interfaceType);
@@ -204,6 +207,8 @@ internal sealed class RuntimeBridgeService : IBridgeService, IDisposable
 
     // ==================== Private helpers ====================
 
+    [UnconditionalSuppressMessage("Trimming", "IL2075",
+        Justification = "Task<T>.Result property is guaranteed to exist by the runtime.")]
     private Func<JsonElement?, Task<object?>> CreateHandler(MethodInfo method, object target)
     {
         var parameters = method.GetParameters();
@@ -242,6 +247,10 @@ internal sealed class RuntimeBridgeService : IBridgeService, IDisposable
         };
     }
 
+    [UnconditionalSuppressMessage("Trimming", "IL2026",
+        Justification = "Reflection-based fallback; source-generated path is preferred for AOT/trim.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2072",
+        Justification = "Value types always have a parameterless constructor.")]
     private static object?[] DeserializeParameters(ParameterInfo[] parameters, JsonElement? args)
     {
         if (parameters.Length == 0)
@@ -316,6 +325,8 @@ internal sealed class RuntimeBridgeService : IBridgeService, IDisposable
         return new object?[parameters.Length];
     }
 
+    [UnconditionalSuppressMessage("Trimming", "IL2091",
+        Justification = "DispatchProxy fallback; source-generated proxy is preferred for AOT/trim.")]
     private T CreateImportProxy<T>() where T : class
     {
         var interfaceType = typeof(T);
@@ -329,7 +340,9 @@ internal sealed class RuntimeBridgeService : IBridgeService, IDisposable
         return proxy;
     }
 
-    private static string GenerateJsStub(string serviceName, Type interfaceType)
+    private static string GenerateJsStub(
+        string serviceName,
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] Type interfaceType)
     {
         var methods = interfaceType.GetMethods(BindingFlags.Public | BindingFlags.Instance);
         var methodLines = new List<string>();
@@ -352,7 +365,7 @@ internal sealed class RuntimeBridgeService : IBridgeService, IDisposable
             """;
     }
 
-    private static string GetServiceName<TAttr>(Type interfaceType) where TAttr : Attribute
+    private static string GetServiceName<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TAttr>(Type interfaceType) where TAttr : Attribute
     {
         var attr = interfaceType.GetCustomAttribute<TAttr>();
         var nameProperty = typeof(TAttr).GetProperty("Name");
@@ -398,6 +411,8 @@ internal sealed class RuntimeBridgeService : IBridgeService, IDisposable
 
     // ==================== Source-generated code discovery ====================
 
+    [UnconditionalSuppressMessage("Trimming", "IL2072",
+        Justification = "RegistrationType is a source-generated type known to have a parameterless constructor.")]
     private static IBridgeServiceRegistration<T>? FindGeneratedRegistration<T>() where T : class
     {
         var interfaceType = typeof(T);
@@ -437,6 +452,8 @@ internal sealed class RuntimeBridgeService : IBridgeService, IDisposable
         return null;
     }
 
+    [UnconditionalSuppressMessage("Trimming", "IL2072",
+        Justification = "ProxyType is a source-generated type known to have a constructor taking IWebViewRpcService.")]
     private T? FindAndCreateGeneratedProxy<T>() where T : class
     {
         var interfaceType = typeof(T);

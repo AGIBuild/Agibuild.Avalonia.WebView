@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
@@ -45,6 +46,8 @@ internal sealed class WebViewRpcService : IWebViewRpcService
 
     // ==================== C# → JS calls ====================
 
+    [UnconditionalSuppressMessage("Trimming", "IL2026",
+        Justification = "RPC args serialization uses runtime types; callers are responsible for ensuring types are preserved.")]
     public async Task<JsonElement> InvokeAsync(string method, object? args = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(method);
@@ -64,7 +67,7 @@ internal sealed class WebViewRpcService : IWebViewRpcService
 
             var json = JsonSerializer.Serialize(request, RpcJsonContext.Default.RpcRequest);
             // Send via injected JS runtime: window.agWebView.rpc._dispatch(json)
-            var script = $"window.agWebView && window.agWebView.rpc && window.agWebView.rpc._dispatch({JsonSerializer.Serialize(json)})";
+            var script = $"window.agWebView && window.agWebView.rpc && window.agWebView.rpc._dispatch({JsonSerializer.Serialize(json, RpcJsonContext.Default.String)})";
             await _invokeScript(script);
 
             // Wait for response (with timeout)
@@ -80,6 +83,8 @@ internal sealed class WebViewRpcService : IWebViewRpcService
         }
     }
 
+    [UnconditionalSuppressMessage("Trimming", "IL2026",
+        Justification = "Generic RPC deserialization; callers are responsible for ensuring T is preserved.")]
     public async Task<T?> InvokeAsync<T>(string method, object? args = null)
     {
         var result = await InvokeAsync(method, args);
@@ -176,6 +181,8 @@ internal sealed class WebViewRpcService : IWebViewRpcService
         }
     }
 
+    [UnconditionalSuppressMessage("Trimming", "IL2026",
+        Justification = "RPC result serialization uses runtime types; the handler is responsible for type safety.")]
     private async Task SendSuccessResponseAsync(string id, object? result)
     {
         var response = new RpcResponse
@@ -184,7 +191,7 @@ internal sealed class WebViewRpcService : IWebViewRpcService
             Result = result is null ? null : JsonSerializer.SerializeToElement(result)
         };
         var json = JsonSerializer.Serialize(response, RpcJsonContext.Default.RpcResponse);
-        var script = $"window.agWebView && window.agWebView.rpc && window.agWebView.rpc._onResponse({JsonSerializer.Serialize(json)})";
+        var script = $"window.agWebView && window.agWebView.rpc && window.agWebView.rpc._onResponse({JsonSerializer.Serialize(json, RpcJsonContext.Default.String)})";
         await _invokeScript(script);
     }
 
@@ -196,7 +203,7 @@ internal sealed class WebViewRpcService : IWebViewRpcService
             Error = new RpcError { Code = code, Message = message }
         };
         var json = JsonSerializer.Serialize(response, RpcJsonContext.Default.RpcErrorResponse);
-        var script = $"window.agWebView && window.agWebView.rpc && window.agWebView.rpc._onResponse({JsonSerializer.Serialize(json)})";
+        var script = $"window.agWebView && window.agWebView.rpc && window.agWebView.rpc._onResponse({JsonSerializer.Serialize(json, RpcJsonContext.Default.String)})";
         await _invokeScript(script);
     }
 
@@ -319,6 +326,7 @@ internal sealed class WebViewRpcService : IWebViewRpcService
 [JsonSerializable(typeof(WebViewRpcService.RpcResponse))]
 [JsonSerializable(typeof(WebViewRpcService.RpcErrorResponse))]
 [JsonSerializable(typeof(WebViewRpcService.RpcError))]
+[JsonSerializable(typeof(string))]
 internal partial class RpcJsonContext : JsonSerializerContext
 {
 }

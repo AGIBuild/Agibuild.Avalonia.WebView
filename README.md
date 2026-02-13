@@ -148,6 +148,32 @@ The custom `app://` scheme handles MIME types, SPA fallback routing, immutable a
 
 ---
 
+## See It in Action: Avalonia + React Demo
+
+A full-featured sample app ships in [`samples/avalonia-react/`](samples/avalonia-react/) — React 19 + TypeScript + Tailwind CSS running inside Avalonia's native window, powered by the type-safe bridge.
+
+### Dashboard — Live .NET Metrics via Bridge
+
+<p align="center"><img src="docs/demo/images/dashboard.jpg" width="720" /></p>
+
+Real-time process metrics (working set, GC memory, threads, uptime) and platform details (OS, .NET version, WebView engine) fetched from C# every 2 seconds via `ISystemInfoService` — data that JavaScript alone cannot access.
+
+### Chat — Bidirectional C# ↔ JS Communication
+
+<p align="center"><img src="docs/demo/images/chat.jpg" width="720" /></p>
+
+Send messages to a C# service and receive contextual responses. Demonstrates request/response RPC, chat history persistence, optimistic UI updates, and error handling — all through `IChatService`.
+
+### Settings — Persistent Configuration with Live UI Updates
+
+<p align="center"><img src="docs/demo/images/settings.jpg" width="720" /></p>
+
+Theme switching (light/dark/system), multi-language i18n (EN/ZH/JA/KO), font size scaling, and sidebar state — all persisted to native app data via `ISettingsService` and applied in real-time across components.
+
+> **[Full demo walkthrough with code examples →](docs/demo/index.md)**
+
+---
+
 ## More Capabilities
 
 <details>
