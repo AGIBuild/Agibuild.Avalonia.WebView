@@ -1,0 +1,31 @@
+---
+description: Core development workflow rules for feature changes, testing, and design philosophy
+alwaysApply: true
+---
+
+# Development Workflow
+
+## Change Tracking
+
+Before implementing any functional change (new feature, behavioral modification, or significant refactor), create a **proposal** and **spec** first. This ensures changes are reviewed, tracked, and well-documented before code is written.
+
+- Use the OpenSpec workflow (proposal → spec → implementation) for all non-trivial changes.
+- Hotfixes and typo-level corrections are exempt.
+
+## Test Coverage
+
+Every functional code change MUST include corresponding test updates:
+
+- Add or update unit/integration tests to cover the changed behavior.
+- Aim for maximum practical coverage — all branches, edge cases, and error paths.
+- All existing and new tests MUST pass before considering the change complete.
+- Run tests after implementation; do not defer testing to a later step.
+
+## Design Philosophy
+
+Favor **long-term value** over short-term speed:
+
+- Design for extensibility — anticipate future requirements and avoid painting into corners.
+- Follow established best practices, proven patterns, and industry-standard approaches.
+- Prefer modular, pluggable architectures over monolithic quick-fixes.
+- When trade-offs exist between "fast to ship" and "right to maintain", choose maintainability.
