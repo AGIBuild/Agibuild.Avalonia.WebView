@@ -22,7 +22,7 @@ public sealed class FindInPageIntegrationTests
     // ──────────────────── Test 1: Find returns match result ────────────────────
 
     [AvaloniaFact]
-    public async Task Find_returns_match_result()
+    public void Find_returns_match_result()
     {
         // Arrange: adapter that supports find-in-page
         var host = new MockDialogHost();
@@ -30,7 +30,7 @@ public sealed class FindInPageIntegrationTests
         using var dialog = new WebDialog(host, adapter, _dispatcher);
 
         // Act
-        var result = await dialog.FindInPageAsync("hello");
+        var result = DispatcherTestPump.Run(_dispatcher, () => dialog.FindInPageAsync("hello"));
 
         // Assert
         Assert.Equal(0, result.ActiveMatchIndex);
@@ -40,14 +40,14 @@ public sealed class FindInPageIntegrationTests
     // ──────────────────── Test 2: Find passes options to adapter ────────────────────
 
     [AvaloniaFact]
-    public async Task Find_passes_options_to_adapter()
+    public void Find_passes_options_to_adapter()
     {
         var host = new MockDialogHost();
         var adapter = MockWebViewAdapter.CreateWithFind();
         using var dialog = new WebDialog(host, adapter, _dispatcher);
 
         var opts = new FindInPageOptions { CaseSensitive = true, Forward = false };
-        await dialog.FindInPageAsync("test", opts);
+        DispatcherTestPump.Run(_dispatcher, () => dialog.FindInPageAsync("test", opts));
 
         var findAdapter = (MockWebViewAdapterWithFind)adapter;
         Assert.Equal("test", findAdapter.LastSearchText);
@@ -64,7 +64,7 @@ public sealed class FindInPageIntegrationTests
         var adapter = MockWebViewAdapter.CreateWithFind();
         using var dialog = new WebDialog(host, adapter, _dispatcher);
 
-        dialog.StopFindInPage(false);
+        DispatcherTestPump.Run(_dispatcher, () => dialog.StopFindInPageAsync(false));
 
         var findAdapter = (MockWebViewAdapterWithFind)adapter;
         Assert.True(findAdapter.StopFindCalled);
@@ -74,13 +74,13 @@ public sealed class FindInPageIntegrationTests
     // ──────────────────── Test 4: Find without adapter throws ────────────────────
 
     [AvaloniaFact]
-    public async Task Find_without_adapter_throws_NotSupportedException()
+    public void Find_without_adapter_throws_NotSupportedException()
     {
         var host = new MockDialogHost();
         var adapter = MockWebViewAdapter.Create(); // basic — no find support
         using var dialog = new WebDialog(host, adapter, _dispatcher);
 
-        await Assert.ThrowsAsync<NotSupportedException>(() => dialog.FindInPageAsync("x"));
+        Assert.Throws<NotSupportedException>(() => DispatcherTestPump.Run(_dispatcher, () => dialog.FindInPageAsync("x")));
     }
 
     // ──────────────────── Test 5: StopFind without adapter throws ────────────────────
@@ -92,20 +92,20 @@ public sealed class FindInPageIntegrationTests
         var adapter = MockWebViewAdapter.Create();
         using var dialog = new WebDialog(host, adapter, _dispatcher);
 
-        Assert.Throws<NotSupportedException>(() => dialog.StopFindInPage());
+        Assert.Throws<NotSupportedException>(() => DispatcherTestPump.Run(_dispatcher, () => dialog.StopFindInPageAsync()));
     }
 
     // ──────────────────── Test 6: Find after dispose throws ────────────────────
 
     [AvaloniaFact]
-    public async Task Find_after_dispose_throws_ObjectDisposedException()
+    public void Find_after_dispose_throws_ObjectDisposedException()
     {
         var host = new MockDialogHost();
         var adapter = MockWebViewAdapter.CreateWithFind();
         var dialog = new WebDialog(host, adapter, _dispatcher);
         dialog.Dispose();
 
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => dialog.FindInPageAsync("test"));
+        Assert.Throws<ObjectDisposedException>(() => DispatcherTestPump.Run(_dispatcher, () => dialog.FindInPageAsync("test")));
     }
 
     // ──────────────────── Test 7: StopFind after dispose throws ────────────────────
@@ -118,45 +118,45 @@ public sealed class FindInPageIntegrationTests
         var dialog = new WebDialog(host, adapter, _dispatcher);
         dialog.Dispose();
 
-        Assert.Throws<ObjectDisposedException>(() => dialog.StopFindInPage());
+        Assert.Throws<ObjectDisposedException>(() => DispatcherTestPump.Run(_dispatcher, () => dialog.StopFindInPageAsync()));
     }
 
     // ──────────────────── Test 8: Find with null text throws ArgumentException ────────────────────
 
     [AvaloniaFact]
-    public async Task Find_with_null_text_throws_ArgumentException()
+    public void Find_with_null_text_throws_ArgumentException()
     {
         var host = new MockDialogHost();
         var adapter = MockWebViewAdapter.CreateWithFind();
         using var dialog = new WebDialog(host, adapter, _dispatcher);
 
-        await Assert.ThrowsAsync<ArgumentException>(() => dialog.FindInPageAsync(null!));
+        Assert.Throws<ArgumentException>(() => DispatcherTestPump.Run(_dispatcher, () => dialog.FindInPageAsync(null!)));
     }
 
     // ──────────────────── Test 9: Find with empty text throws ArgumentException ────────────────────
 
     [AvaloniaFact]
-    public async Task Find_with_empty_text_throws_ArgumentException()
+    public void Find_with_empty_text_throws_ArgumentException()
     {
         var host = new MockDialogHost();
         var adapter = MockWebViewAdapter.CreateWithFind();
         using var dialog = new WebDialog(host, adapter, _dispatcher);
 
-        await Assert.ThrowsAsync<ArgumentException>(() => dialog.FindInPageAsync(""));
+        Assert.Throws<ArgumentException>(() => DispatcherTestPump.Run(_dispatcher, () => dialog.FindInPageAsync("")));
     }
 
     // ──────────────────── Test 10: Find → Stop → Find again works ────────────────────
 
     [AvaloniaFact]
-    public async Task Find_stop_find_again_works()
+    public void Find_stop_find_again_works()
     {
         var host = new MockDialogHost();
         var adapter = MockWebViewAdapter.CreateWithFind();
         using var dialog = new WebDialog(host, adapter, _dispatcher);
 
-        await dialog.FindInPageAsync("first");
-        dialog.StopFindInPage();
-        var result = await dialog.FindInPageAsync("second");
+        DispatcherTestPump.Run(_dispatcher, () => dialog.FindInPageAsync("first"));
+        DispatcherTestPump.Run(_dispatcher, () => dialog.StopFindInPageAsync());
+        var result = DispatcherTestPump.Run(_dispatcher, () => dialog.FindInPageAsync("second"));
 
         var findAdapter = (MockWebViewAdapterWithFind)adapter;
         Assert.Equal("second", findAdapter.LastSearchText);

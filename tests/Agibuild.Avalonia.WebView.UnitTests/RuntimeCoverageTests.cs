@@ -13,8 +13,8 @@ namespace Agibuild.Avalonia.WebView.UnitTests;
 // ==================== JsImport interfaces for BridgeImportProxy tests ====================
 
 /// <summary>
-/// Interface with sync return method to cover the sync path in BridgeImportProxy.
-/// NOT decorated with [JsImport] to avoid source generator issues with sync returns.
+/// Interface with sync return methods to verify BridgeImportProxy rejects non-Task returns.
+/// NOT decorated with [JsImport] to avoid source generator issues with sync signatures.
 /// Used directly via DispatchProxy.Create.
 /// </summary>
 public interface ISyncImport
@@ -30,6 +30,12 @@ public interface IAsyncImport
 {
     Task SendAsync(string data, int retries);
     Task<string> FetchAsync(string key);
+}
+
+[JsImport]
+public interface IAsyncNoArgsImport
+{
+    Task PingAsync();
 }
 
 /// <summary>Interface with multiple parameters to exercise parameter mapping.</summary>
@@ -108,40 +114,35 @@ public sealed class RuntimeCoverageTests
     }
 
     [Fact]
-    public void BridgeImportProxy_sync_void_method_blocks_on_InvokeAsync()
+    public void BridgeImportProxy_sync_void_method_throws_not_supported()
     {
         var rpc = new RecordingRpcService();
         var proxy = CreateProxy<ISyncImport>(rpc, "SyncImport");
 
-        // Sync void method — should block on InvokeAsync and return null.
-        proxy.FireAndForget("msg");
-
-        Assert.Single(rpc.Invocations);
-        Assert.Equal("SyncImport.fireAndForget", rpc.Invocations[0].Method);
+        var ex = Assert.Throws<NotSupportedException>(() => proxy.FireAndForget("msg"));
+        Assert.Contains("must return Task or Task<T>", ex.Message);
+        Assert.Empty(rpc.Invocations);
     }
 
     [Fact]
-    public void BridgeImportProxy_sync_reference_return_blocks_and_returns_null()
+    public void BridgeImportProxy_sync_reference_return_throws_not_supported()
     {
         var rpc = new RecordingRpcService();
         var proxy = CreateProxy<ISyncImport>(rpc, "SyncImport");
 
-        // Sync string return — should block on InvokeAsync and return null.
-        var result = proxy.GetLabel();
-
-        Assert.Null(result);
-        Assert.Single(rpc.Invocations);
-        Assert.Equal("SyncImport.getLabel", rpc.Invocations[0].Method);
+        var ex = Assert.Throws<NotSupportedException>(() => proxy.GetLabel());
+        Assert.Contains("must return Task or Task<T>", ex.Message);
+        Assert.Empty(rpc.Invocations);
     }
 
     [Fact]
-    public void BridgeImportProxy_no_args_sends_null_params()
+    public async Task BridgeImportProxy_no_args_sends_null_params()
     {
         var rpc = new RecordingRpcService();
-        var proxy = CreateProxy<ISyncImport>(rpc, "SyncImport");
+        var proxy = CreateProxy<IAsyncNoArgsImport>(rpc, "AsyncNoArgsImport");
 
-        // Ping() has no parameters — namedParams should be null.
-        proxy.Ping();
+        // No-arg async import method should pass null params.
+        await proxy.PingAsync();
 
         Assert.Null(rpc.Invocations[0].Args);
     }
@@ -528,10 +529,10 @@ public sealed class RuntimeCoverageTests
         var request = """{"jsonrpc":"2.0","id":"arr-1","method":"MultiParamExport.greet","params":["Bob",25,true]}""";
         adapter.RaiseWebMessage(request, "*", core.ChannelId);
         _dispatcher.RunAll();
-        Thread.Sleep(200);
+        DispatcherTestPump.WaitUntil(_dispatcher, () => scripts.Any(s => s.Contains("arr-1")));
 
         // The handler should have executed successfully.
-        Assert.True(scripts.Any(s => s.Contains("arr-1")));
+        Assert.Contains(scripts, s => s.Contains("arr-1"));
     }
 
     [Fact]
@@ -545,9 +546,9 @@ public sealed class RuntimeCoverageTests
         var request = """{"jsonrpc":"2.0","id":"sp-1","method":"MultiParamExport.syncMethod","params":"hello"}""";
         adapter.RaiseWebMessage(request, "*", core.ChannelId);
         _dispatcher.RunAll();
-        Thread.Sleep(200);
+        DispatcherTestPump.WaitUntil(_dispatcher, () => scripts.Any(s => s.Contains("sp-1")));
 
-        Assert.True(scripts.Any(s => s.Contains("sp-1")));
+        Assert.Contains(scripts, s => s.Contains("sp-1"));
     }
 
     [Fact]
@@ -561,9 +562,9 @@ public sealed class RuntimeCoverageTests
         var request = """{"jsonrpc":"2.0","id":"np-1","method":"MultiParamExport.voidMethod","params":null}""";
         adapter.RaiseWebMessage(request, "*", core.ChannelId);
         _dispatcher.RunAll();
-        Thread.Sleep(200);
+        DispatcherTestPump.WaitUntil(_dispatcher, () => scripts.Any(s => s.Contains("np-1")));
 
-        Assert.True(scripts.Any(s => s.Contains("np-1")));
+        Assert.Contains(scripts, s => s.Contains("np-1"));
     }
 
     [Fact]
@@ -577,9 +578,9 @@ public sealed class RuntimeCoverageTests
         var request = """{"jsonrpc":"2.0","id":"ex-1","method":"MultiParamExport.greet","params":{"Name":"Charlie","Age":30}}""";
         adapter.RaiseWebMessage(request, "*", core.ChannelId);
         _dispatcher.RunAll();
-        Thread.Sleep(200);
+        DispatcherTestPump.WaitUntil(_dispatcher, () => scripts.Any(s => s.Contains("ex-1")));
 
-        Assert.True(scripts.Any(s => s.Contains("ex-1")));
+        Assert.Contains(scripts, s => s.Contains("ex-1"));
     }
 
     [Fact]
@@ -593,9 +594,9 @@ public sealed class RuntimeCoverageTests
         var request = """{"jsonrpc":"2.0","id":"opt-1","method":"MultiParamExport.greet","params":{"name":"Dana","age":28}}""";
         adapter.RaiseWebMessage(request, "*", core.ChannelId);
         _dispatcher.RunAll();
-        Thread.Sleep(200);
+        DispatcherTestPump.WaitUntil(_dispatcher, () => scripts.Any(s => s.Contains("opt-1")));
 
-        Assert.True(scripts.Any(s => s.Contains("opt-1")));
+        Assert.Contains(scripts, s => s.Contains("opt-1"));
     }
 
     [Fact]
@@ -609,9 +610,9 @@ public sealed class RuntimeCoverageTests
         var request = """{"jsonrpc":"2.0","id":"short-1","method":"MultiParamExport.greet","params":["Eve"]}""";
         adapter.RaiseWebMessage(request, "*", core.ChannelId);
         _dispatcher.RunAll();
-        Thread.Sleep(200);
+        DispatcherTestPump.WaitUntil(_dispatcher, () => scripts.Any(s => s.Contains("short-1")));
 
-        Assert.True(scripts.Any(s => s.Contains("short-1")));
+        Assert.Contains(scripts, s => s.Contains("short-1"));
     }
 
     // ========================= RuntimeBridgeService — sync method handler =========================
@@ -627,10 +628,10 @@ public sealed class RuntimeCoverageTests
         var request = """{"jsonrpc":"2.0","id":"sync-m1","method":"MultiParamExport.syncMethod","params":{"input":"hello"}}""";
         adapter.RaiseWebMessage(request, "*", core.ChannelId);
         _dispatcher.RunAll();
-        Thread.Sleep(200);
+        DispatcherTestPump.WaitUntil(_dispatcher, () => scripts.Any(s => s.Contains("sync-m1")));
 
         // Should contain the result "HELLO".
-        Assert.True(scripts.Any(s => s.Contains("sync-m1") && s.Contains("HELLO")));
+        Assert.Contains(scripts, s => s.Contains("sync-m1") && s.Contains("HELLO"));
     }
 
     // ========================= RuntimeBridgeService — ValidateJsExportAttribute non-interface =========================
@@ -695,40 +696,34 @@ public sealed class RuntimeCoverageTests
     // ========================= WebDialog — OpenDevTools / CloseDevTools / IsDevToolsOpen =========================
 
     [Fact]
-    public void WebDialog_OpenDevTools_delegates_to_core()
+    public async Task WebDialog_OpenDevTools_delegates_to_core()
     {
         var host = new MockDialogHost();
         var adapter = MockWebViewAdapter.Create();
         using var dialog = new WebDialog(host, adapter, _dispatcher);
 
         // OpenDevTools on base adapter is a no-op but covers the delegation path.
-        dialog.OpenDevTools();
-        Assert.False(dialog.IsDevToolsOpen);
+        await dialog.OpenDevToolsAsync();
+        Assert.False(await dialog.IsDevToolsOpenAsync());
 
-        dialog.CloseDevTools();
-        Assert.False(dialog.IsDevToolsOpen);
+        await dialog.CloseDevToolsAsync();
+        Assert.False(await dialog.IsDevToolsOpenAsync());
     }
 
     // ========================= WebDialog — ZoomFactorChanged event delegation =========================
 
     [Fact]
-    public void WebDialog_ZoomFactorChanged_event_subscribe_unsubscribe()
+    public async Task WebDialog_SetZoomFactorAsync_delegates_to_core()
     {
         var host = new MockDialogHost();
         var adapter = MockWebViewAdapter.CreateWithZoom();
         using var dialog = new WebDialog(host, adapter, _dispatcher);
 
-        double? received = null;
-        EventHandler<double> handler = (_, z) => received = z;
+        await dialog.SetZoomFactorAsync(2.0);
+        Assert.Equal(2.0, await dialog.GetZoomFactorAsync());
 
-        dialog.ZoomFactorChanged += handler;
-        dialog.ZoomFactor = 2.0;
-        Assert.Equal(2.0, received);
-
-        received = null;
-        dialog.ZoomFactorChanged -= handler;
-        dialog.ZoomFactor = 3.0;
-        Assert.Null(received);
+        await dialog.SetZoomFactorAsync(3.0);
+        Assert.Equal(3.0, await dialog.GetZoomFactorAsync());
     }
 
     // ========================= WebDialog — ContextMenuRequested event unsubscribe =========================
@@ -848,7 +843,7 @@ public sealed class RuntimeCoverageTests
         var request = """{"jsonrpc":"2.0","id":"throw-1","method":"ReflectionThrowingExport.willThrow","params":null}""";
         adapter.RaiseWebMessage(request, "*", core.ChannelId);
         _dispatcher.RunAll();
-        Thread.Sleep(200);
+        DispatcherTestPump.WaitUntil(_dispatcher, () => scripts.Any(s => s.Contains("throw-1")));
 
         // Error response should contain the unwrapped inner exception message, not TargetInvocationException.
         Assert.Contains(scripts, s => s.Contains("throw-1") && s.Contains("Deliberate test exception"));
@@ -868,7 +863,7 @@ public sealed class RuntimeCoverageTests
         var request = """{"jsonrpc":"2.0","id":"vt-1","method":"ReflectionValueTypeExport.add","params":{"a":5}}""";
         adapter.RaiseWebMessage(request, "*", core.ChannelId);
         _dispatcher.RunAll();
-        Thread.Sleep(200);
+        DispatcherTestPump.WaitUntil(_dispatcher, () => scripts.Any(s => s.Contains("vt-1")));
 
         Assert.Equal((5, 0), impl.LastArgs);
         Assert.Contains(scripts, s => s.Contains("vt-1") && s.Contains("5"));
@@ -893,7 +888,7 @@ public sealed class RuntimeCoverageTests
         var request1 = """{"jsonrpc":"2.0","id":"sgrl-1","method":"MultiParamExport.voidMethod","params":null}""";
         adapter.RaiseWebMessage(request1, "*", core.ChannelId);
         _dispatcher.RunAll();
-        Thread.Sleep(200);
+        DispatcherTestPump.WaitUntil(_dispatcher, () => scripts.Any(s => s.Contains("sgrl-1")));
 
         Assert.Contains(scripts, s => s.Contains("sgrl-1"));
 
@@ -901,7 +896,7 @@ public sealed class RuntimeCoverageTests
         var request2 = """{"jsonrpc":"2.0","id":"sgrl-2","method":"MultiParamExport.voidMethod","params":null}""";
         adapter.RaiseWebMessage(request2, "*", core.ChannelId);
         _dispatcher.RunAll();
-        Thread.Sleep(200);
+        DispatcherTestPump.WaitUntil(_dispatcher, () => scripts.Any(s => s.Contains("sgrl-2")));
 
         Assert.Contains(scripts, s => s.Contains("-32029"));
         core.Dispose();
@@ -932,18 +927,19 @@ public sealed class RuntimeCoverageTests
             """{"jsonrpc":"2.0","id":"ev-2","method":"ReflectionExportService.voidNoArgs","params":null}""",
             "*", core.ChannelId);
         _dispatcher.RunAll();
-        Thread.Sleep(200);
+        DispatcherTestPump.WaitUntil(_dispatcher, () => scripts.Any(s => s.Contains("ev-2")));
         Assert.Equal(1, impl.VoidCallCount);
 
         // Wait for the 2-second window to expire.
-        Thread.Sleep(2500);
+        var evictionDeadline = DateTime.UtcNow.AddSeconds(2.5);
+        DispatcherTestPump.WaitUntil(_dispatcher, () => DateTime.UtcNow >= evictionDeadline, TimeSpan.FromSeconds(3));
 
         // Third call: should succeed after eviction of expired entry.
         adapter.RaiseWebMessage(
             """{"jsonrpc":"2.0","id":"ev-3","method":"ReflectionExportService.voidNoArgs","params":null}""",
             "*", core.ChannelId);
         _dispatcher.RunAll();
-        Thread.Sleep(200);
+        DispatcherTestPump.WaitUntil(_dispatcher, () => scripts.Any(s => s.Contains("ev-3")));
         Assert.Equal(2, impl.VoidCallCount);
 
         core.Dispose();
@@ -1242,7 +1238,7 @@ public sealed class RuntimeCoverageTests
         var request = """{"jsonrpc":"2.0","id":"ref-1","method":"ReflectionExportService.greet","params":{"name":"Alice"}}""";
         adapter.RaiseWebMessage(request, "*", core.ChannelId);
         _dispatcher.RunAll();
-        Thread.Sleep(200);
+        DispatcherTestPump.WaitUntil(_dispatcher, () => scripts.Any(s => s.Contains("ref-1")));
 
         Assert.Equal("Alice", impl.LastGreetName);
         Assert.Contains(scripts, s => s.Contains("ref-1") && s.Contains("Hello, Alice!"));
@@ -1259,7 +1255,7 @@ public sealed class RuntimeCoverageTests
         var request = """{"jsonrpc":"2.0","id":"ref-arr-1","method":"ReflectionExportService.greet","params":["Bob"]}""";
         adapter.RaiseWebMessage(request, "*", core.ChannelId);
         _dispatcher.RunAll();
-        Thread.Sleep(200);
+        DispatcherTestPump.WaitUntil(_dispatcher, () => scripts.Any(s => s.Contains("ref-arr-1")));
 
         Assert.Equal("Bob", impl.LastGreetName);
         Assert.Contains(scripts, s => s.Contains("ref-arr-1"));
@@ -1276,7 +1272,7 @@ public sealed class RuntimeCoverageTests
         var request = """{"jsonrpc":"2.0","id":"ref-void-1","method":"ReflectionExportService.voidNoArgs","params":null}""";
         adapter.RaiseWebMessage(request, "*", core.ChannelId);
         _dispatcher.RunAll();
-        Thread.Sleep(200);
+        DispatcherTestPump.WaitUntil(_dispatcher, () => scripts.Any(s => s.Contains("ref-void-1")));
 
         Assert.Equal(1, impl.VoidCallCount);
         Assert.Contains(scripts, s => s.Contains("ref-void-1"));
@@ -1293,7 +1289,7 @@ public sealed class RuntimeCoverageTests
         var request = """{"jsonrpc":"2.0","id":"ref-sd-1","method":"ReflectionExportService.saveData","params":{"key":"myKey","value":"myValue"}}""";
         adapter.RaiseWebMessage(request, "*", core.ChannelId);
         _dispatcher.RunAll();
-        Thread.Sleep(200);
+        DispatcherTestPump.WaitUntil(_dispatcher, () => scripts.Any(s => s.Contains("ref-sd-1")));
 
         Assert.Equal(("myKey", "myValue"), impl.LastSavedData);
     }
@@ -1309,7 +1305,7 @@ public sealed class RuntimeCoverageTests
         var request = """{"jsonrpc":"2.0","id":"ref-def-1","method":"ReflectionExportService.saveData","params":{"key":"onlyKey"}}""";
         adapter.RaiseWebMessage(request, "*", core.ChannelId);
         _dispatcher.RunAll();
-        Thread.Sleep(200);
+        DispatcherTestPump.WaitUntil(_dispatcher, () => scripts.Any(s => s.Contains("ref-def-1")));
 
         Assert.Equal("onlyKey", impl.LastSavedData?.Key);
         // value should be null (default for missing string param).
@@ -1327,7 +1323,7 @@ public sealed class RuntimeCoverageTests
         var request = """{"jsonrpc":"2.0","id":"ref-sp-1","method":"ReflectionExportService.greet","params":"Dave"}""";
         adapter.RaiseWebMessage(request, "*", core.ChannelId);
         _dispatcher.RunAll();
-        Thread.Sleep(200);
+        DispatcherTestPump.WaitUntil(_dispatcher, () => scripts.Any(s => s.Contains("ref-sp-1")));
 
         Assert.Equal("Dave", impl.LastGreetName);
     }
@@ -1422,7 +1418,7 @@ public sealed class RuntimeCoverageTests
             adapter.RaiseWebMessage(request, "*", core.ChannelId);
         }
         _dispatcher.RunAll();
-        Thread.Sleep(200);
+        DispatcherTestPump.WaitUntil(_dispatcher, () => scripts.Count(s => s.Contains("rl-0") || s.Contains("rl-1")) >= 2);
 
         Assert.Equal(2, impl.VoidCallCount);
 
@@ -1430,7 +1426,7 @@ public sealed class RuntimeCoverageTests
         var request3 = """{"jsonrpc":"2.0","id":"rl-2","method":"ReflectionExportService.voidNoArgs","params":null}""";
         adapter.RaiseWebMessage(request3, "*", core.ChannelId);
         _dispatcher.RunAll();
-        Thread.Sleep(200);
+        DispatcherTestPump.WaitUntil(_dispatcher, () => scripts.Any(s => s.Contains("rl-2")));
 
         // VoidCallCount should still be 2 (third call was rejected).
         Assert.Equal(2, impl.VoidCallCount);
@@ -1443,17 +1439,17 @@ public sealed class RuntimeCoverageTests
     // ========================= WebViewCore — DevTools with IDevToolsAdapter mock =========================
 
     [Fact]
-    public void WebViewCore_OpenDevTools_delegates_to_IDevToolsAdapter()
+    public async Task WebViewCore_OpenDevTools_delegates_to_IDevToolsAdapter()
     {
         var adapter = new MockDevToolsAdapter();
         using var core = new WebViewCore(adapter, _dispatcher);
 
-        core.OpenDevTools();
+        await core.OpenDevToolsAsync();
         Assert.True(adapter.DevToolsOpened);
-        Assert.True(core.IsDevToolsOpen);
+        Assert.True(await core.IsDevToolsOpenAsync());
 
-        core.CloseDevTools();
-        Assert.False(core.IsDevToolsOpen);
+        await core.CloseDevToolsAsync();
+        Assert.False(await core.IsDevToolsOpenAsync());
         Assert.True(adapter.DevToolsClosed);
     }
 

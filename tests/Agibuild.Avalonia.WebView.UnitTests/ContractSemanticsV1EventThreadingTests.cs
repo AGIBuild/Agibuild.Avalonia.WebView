@@ -33,7 +33,7 @@ public sealed class ContractSemanticsV1EventThreadingTests
             messageRaised.Set();
         };
 
-        var navTask = RunOffThread(() => webView.NavigateAsync(new Uri("https://example.test")));
+        var navTask = ThreadingTestHelper.RunOffThread(() => webView.NavigateAsync(new Uri("https://example.test")));
         dispatcher.RunAll();
         adapter.RaiseNavigationCompleted(NavigationCompletedStatus.Success);
         navTask.GetAwaiter().GetResult();
@@ -59,37 +59,5 @@ public sealed class ContractSemanticsV1EventThreadingTests
         Assert.Equal(dispatcher.UiThreadId, messageThreadId);
     }
 
-    private static Task RunOffThread(Func<Task> func)
-    {
-        using var ready = new ManualResetEventSlim(false);
-        var tcs = new TaskCompletionSource<Task>(TaskCreationOptions.RunContinuationsAsynchronously);
-
-        var thread = new Thread(() =>
-        {
-            try
-            {
-                tcs.SetResult(func());
-            }
-            catch (Exception ex)
-            {
-                tcs.SetException(ex);
-            }
-            finally
-            {
-                ready.Set();
-            }
-        })
-        {
-            IsBackground = true
-        };
-
-        thread.Start();
-        if (!ready.Wait(TimeSpan.FromSeconds(5)))
-        {
-            throw new TimeoutException("Off-thread invocation did not start within timeout.");
-        }
-
-        return tcs.Task.Unwrap();
-    }
 }
 

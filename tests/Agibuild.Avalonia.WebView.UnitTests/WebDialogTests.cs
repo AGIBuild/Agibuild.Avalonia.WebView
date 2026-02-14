@@ -129,13 +129,14 @@ public sealed class WebDialogTests
     }
 
     [Fact]
-    public async Task NavigateAsync_delegates_to_core_and_adapter()
+    public void NavigateAsync_delegates_to_core_and_adapter()
     {
         var (dialog, _, adapter) = CreateDialog();
         var uri = new Uri("https://example.com");
 
         // Start navigation (it won't complete without raising NavigationCompleted).
-        var navTask = dialog.NavigateAsync(uri);
+        var navTask = Task.Run(() => dialog.NavigateAsync(uri));
+        DispatcherTestPump.WaitUntil(_dispatcher, () => adapter.LastNavigationId.HasValue);
 
         // Adapter should have received the navigation request.
         Assert.NotNull(adapter.LastNavigationId);
@@ -143,16 +144,17 @@ public sealed class WebDialogTests
 
         // Complete the navigation so the task resolves.
         adapter.RaiseNavigationCompleted();
-        await navTask;
+        DispatcherTestPump.WaitUntil(_dispatcher, () => navTask.IsCompleted);
+        navTask.GetAwaiter().GetResult();
     }
 
     [Fact]
-    public async Task InvokeScriptAsync_delegates_to_core()
+    public void InvokeScriptAsync_delegates_to_core()
     {
         var (dialog, _, adapter) = CreateDialog();
         adapter.ScriptResult = "42";
 
-        var result = await dialog.InvokeScriptAsync("return 42");
+        var result = DispatcherTestPump.Run(_dispatcher, () => dialog.InvokeScriptAsync("return 42"));
         Assert.Equal("42", result);
     }
 
@@ -190,7 +192,7 @@ public sealed class WebDialogTests
         adapter.CanGoBack = true;
         adapter.GoBackAccepted = true;
 
-        var result = dialog.GoBack();
+        var result = DispatcherTestPump.Run(_dispatcher, () => dialog.GoBackAsync());
         Assert.True(result);
         Assert.Equal(1, adapter.GoBackCallCount);
     }
@@ -202,7 +204,7 @@ public sealed class WebDialogTests
         adapter.CanGoForward = true;
         adapter.GoForwardAccepted = true;
 
-        var result = dialog.GoForward();
+        var result = DispatcherTestPump.Run(_dispatcher, () => dialog.GoForwardAsync());
         Assert.True(result);
         Assert.Equal(1, adapter.GoForwardCallCount);
     }
@@ -213,25 +215,26 @@ public sealed class WebDialogTests
         var (dialog, _, adapter) = CreateDialog();
         adapter.RefreshAccepted = true;
 
-        var result = dialog.Refresh();
+        var result = DispatcherTestPump.Run(_dispatcher, () => dialog.RefreshAsync());
         Assert.True(result);
         Assert.Equal(1, adapter.RefreshCallCount);
     }
 
     [Fact]
-    public async Task Stop_delegates_to_core()
+    public void Stop_delegates_to_core()
     {
         var (dialog, _, adapter) = CreateDialog();
         adapter.StopAccepted = true;
+        adapter.AutoCompleteNavigation = false;
 
         // Need an active navigation for Stop to work
-        var navTask = dialog.NavigateAsync(new Uri("https://example.com"));
-        var result = dialog.Stop();
+        var navTask = Task.Run(() => dialog.NavigateAsync(new Uri("https://example.com")));
+        DispatcherTestPump.WaitUntil(_dispatcher, () => adapter.LastNavigationId.HasValue);
+        var result = DispatcherTestPump.Run(_dispatcher, () => dialog.StopAsync());
         Assert.True(result);
         Assert.Equal(1, adapter.StopCallCount);
-
-        // navTask should complete (canceled)
-        await navTask;
+        adapter.RaiseNavigationCompleted(NavigationCompletedStatus.Canceled);
+        dialog.Dispose();
     }
 
     [Fact]
@@ -246,47 +249,47 @@ public sealed class WebDialogTests
     }
 
     [Fact]
-    public async Task NavigateToStringAsync_delegates_to_core()
+    public void NavigateToStringAsync_delegates_to_core()
     {
         var (dialog, _, adapter) = CreateDialog();
         adapter.AutoCompleteNavigation = true;
 
-        await dialog.NavigateToStringAsync("<h1>Hello</h1>");
+        DispatcherTestPump.Run(_dispatcher, () => dialog.NavigateToStringAsync("<h1>Hello</h1>"));
         Assert.NotNull(adapter.LastNavigationId);
     }
 
     [Fact]
-    public async Task NavigateToStringAsync_with_baseUrl_delegates_to_core()
+    public void NavigateToStringAsync_with_baseUrl_delegates_to_core()
     {
         var (dialog, _, adapter) = CreateDialog();
         adapter.AutoCompleteNavigation = true;
         var baseUrl = new Uri("https://base.test/");
 
-        await dialog.NavigateToStringAsync("<h1>Hello</h1>", baseUrl);
+        DispatcherTestPump.Run(_dispatcher, () => dialog.NavigateToStringAsync("<h1>Hello</h1>", baseUrl));
         Assert.Equal(baseUrl, adapter.LastBaseUrl);
     }
 
     [Fact]
-    public async Task NavigationStarted_event_delegation()
+    public void NavigationStarted_event_delegation()
     {
         var (dialog, _, adapter) = CreateDialog();
         var raised = false;
         dialog.NavigationStarted += (_, _) => raised = true;
 
         adapter.AutoCompleteNavigation = true;
-        await dialog.NavigateAsync(new Uri("https://example.com"));
+        DispatcherTestPump.Run(_dispatcher, () => dialog.NavigateAsync(new Uri("https://example.com")));
         Assert.True(raised);
     }
 
     [Fact]
-    public async Task NavigationCompleted_event_delegation()
+    public void NavigationCompleted_event_delegation()
     {
         var (dialog, _, adapter) = CreateDialog();
         var raised = false;
         dialog.NavigationCompleted += (_, _) => raised = true;
 
         adapter.AutoCompleteNavigation = true;
-        await dialog.NavigateAsync(new Uri("https://example.com"));
+        DispatcherTestPump.Run(_dispatcher, () => dialog.NavigateAsync(new Uri("https://example.com")));
         Assert.True(raised);
     }
 

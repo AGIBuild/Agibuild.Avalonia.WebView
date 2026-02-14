@@ -169,31 +169,31 @@ public sealed class WebDialogIntegrationTests
     // --- Navigation Commands ---
 
     [AvaloniaFact]
-    public void GoBack_and_GoForward_delegate()
+    public async Task GoBack_and_GoForward_delegate()
     {
         var (dialog, _, adapter) = CreateDialog();
 
         // No history → should return false.
-        Assert.False(dialog.GoBack());
-        Assert.False(dialog.GoForward());
+        Assert.False(await dialog.GoBackAsync());
+        Assert.False(await dialog.GoForwardAsync());
 
         // With history.
         adapter.CanGoBack = true;
         adapter.GoBackAccepted = true;
-        Assert.True(dialog.GoBack());
+        Assert.True(await dialog.GoBackAsync());
 
         adapter.CanGoForward = true;
         adapter.GoForwardAccepted = true;
-        Assert.True(dialog.GoForward());
+        Assert.True(await dialog.GoForwardAsync());
     }
 
     [AvaloniaFact]
-    public void Refresh_delegates()
+    public async Task Refresh_delegates()
     {
         var (dialog, _, adapter) = CreateDialog();
         adapter.RefreshAccepted = true;
 
-        Assert.True(dialog.Refresh());
+        Assert.True(await dialog.RefreshAsync());
         Assert.Equal(1, adapter.RefreshCallCount);
     }
 
@@ -207,7 +207,7 @@ public sealed class WebDialogIntegrationTests
         var navTask = dialog.NavigateAsync(new Uri("https://slow.example.com"));
 
         // Stop it.
-        Assert.True(dialog.Stop());
+        Assert.True(await dialog.StopAsync());
 
         // Task should complete (canceled).
         await navTask;

@@ -597,10 +597,8 @@ public class BridgeImportProxy : DispatchProxy
             return invokeMethod.Invoke(_rpc, [methodName, namedParams]);
         }
 
-        // Synchronous return — wrap in InvokeAsync.
-        var task = _rpc.InvokeAsync(methodName, namedParams);
-        // For non-async methods, block (not ideal but the interface contract should use Task).
-        task.GetAwaiter().GetResult();
-        return null;
+        throw new NotSupportedException(
+            $"[JsImport] method '{targetMethod.DeclaringType?.Name}.{targetMethod.Name}' must return Task or Task<T>. " +
+            "Synchronous return types are not supported.");
     }
 }

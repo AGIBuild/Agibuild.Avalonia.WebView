@@ -21,7 +21,7 @@ public sealed class ContractSemanticsV1CommandNavigationTests
 
         webView.NavigationStarted += (_, e) => e.Cancel = true;
 
-        var accepted = webView.GoBack();
+        var accepted = DispatcherTestPump.Run(dispatcher, () => webView.GoBackAsync());
 
         Assert.False(accepted);
         Assert.Equal(0, adapter.GoBackCallCount);
@@ -46,7 +46,7 @@ public sealed class ContractSemanticsV1CommandNavigationTests
         webView.NavigationStarted += (_, e) => startedId = e.NavigationId;
         webView.NavigationCompleted += (_, e) => completedId = e.NavigationId;
 
-        var accepted = webView.GoBack();
+        var accepted = DispatcherTestPump.Run(dispatcher, () => webView.GoBackAsync());
 
         Assert.True(accepted);
         Assert.Equal(1, adapter.GoBackCallCount);

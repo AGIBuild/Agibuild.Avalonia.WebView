@@ -14,7 +14,7 @@ public sealed class WebAuthBrokerTests
     private readonly TestDispatcher _dispatcher = new();
 
     [Fact]
-    public async Task Success_flow_returns_callback_uri()
+    public void Success_flow_returns_callback_uri()
     {
         var factory = new AuthTestDialogFactory(_dispatcher);
         var broker = new WebAuthBroker(factory);
@@ -38,7 +38,7 @@ public sealed class WebAuthBrokerTests
             };
         };
 
-        var result = await broker.AuthenticateAsync(owner, options);
+        var result = DispatcherTestPump.Run(_dispatcher, () => broker.AuthenticateAsync(owner, options), TimeSpan.FromSeconds(10));
 
         Assert.Equal(WebAuthStatus.Success, result.Status);
         Assert.NotNull(result.CallbackUri);
@@ -46,7 +46,7 @@ public sealed class WebAuthBrokerTests
     }
 
     [Fact]
-    public async Task User_cancel_returns_UserCancel()
+    public void User_cancel_returns_UserCancel()
     {
         var factory = new AuthTestDialogFactory(_dispatcher);
         var broker = new WebAuthBroker(factory);
@@ -67,13 +67,13 @@ public sealed class WebAuthBrokerTests
             };
         };
 
-        var result = await broker.AuthenticateAsync(owner, options);
+        var result = DispatcherTestPump.Run(_dispatcher, () => broker.AuthenticateAsync(owner, options), TimeSpan.FromSeconds(10));
 
         Assert.Equal(WebAuthStatus.UserCancel, result.Status);
     }
 
     [Fact]
-    public async Task Timeout_returns_Timeout()
+    public void Timeout_returns_Timeout()
     {
         var factory = new AuthTestDialogFactory(_dispatcher);
         var broker = new WebAuthBroker(factory);
@@ -91,7 +91,7 @@ public sealed class WebAuthBrokerTests
             adapter.AutoCompleteNavigation = true;
         };
 
-        var result = await broker.AuthenticateAsync(owner, options);
+        var result = DispatcherTestPump.Run(_dispatcher, () => broker.AuthenticateAsync(owner, options), TimeSpan.FromSeconds(10));
 
         Assert.Equal(WebAuthStatus.Timeout, result.Status);
         Assert.NotNull(result.Error);

@@ -27,33 +27,34 @@ public sealed class TestWebViewHost : IWebView
     public Task NavigateToStringAsync(string html, Uri? baseUrl) => Task.CompletedTask;
     public Task<string?> InvokeScriptAsync(string script) => Task.FromResult<string?>(null);
 
-    public bool GoBack() => false;
-    public bool GoForward() => false;
-    public bool Refresh() => false;
-    public bool Stop() => false;
+    public Task<bool> GoBackAsync() => Task.FromResult(false);
+    public Task<bool> GoForwardAsync() => Task.FromResult(false);
+    public Task<bool> RefreshAsync() => Task.FromResult(false);
+    public Task<bool> StopAsync() => Task.FromResult(false);
 
     public ICookieManager? TryGetCookieManager() => null;
     public ICommandManager? TryGetCommandManager() => null;
+    public Task<global::Avalonia.Platform.IPlatformHandle?> TryGetWebViewHandleAsync() => Task.FromResult<global::Avalonia.Platform.IPlatformHandle?>(null);
     public IWebViewRpcService? Rpc => null;
     public IBridgeService Bridge => throw new NotSupportedException("TestWebViewHost does not support Bridge. Use WebViewCore with MockWebViewAdapter instead.");
-    public void OpenDevTools() { /* No-op for test stub. */ }
-    public void CloseDevTools() { /* No-op for test stub. */ }
-    public bool IsDevToolsOpen => false;
+    public Task OpenDevToolsAsync() => Task.CompletedTask;
+    public Task CloseDevToolsAsync() => Task.CompletedTask;
+    public Task<bool> IsDevToolsOpenAsync() => Task.FromResult(false);
     public Task<byte[]> CaptureScreenshotAsync() => Task.FromException<byte[]>(new NotSupportedException());
     public Task<byte[]> PrintToPdfAsync(PdfPrintOptions? options = null) => Task.FromException<byte[]>(new NotSupportedException());
 
     // Zoom
-    public double ZoomFactor { get; set; } = 1.0;
-    public event EventHandler<double>? ZoomFactorChanged { add { } remove { } }
+    public Task<double> GetZoomFactorAsync() => Task.FromResult(1.0);
+    public Task SetZoomFactorAsync(double zoomFactor) => Task.CompletedTask;
 
     // Find in Page
     public Task<FindInPageResult> FindInPageAsync(string text, FindInPageOptions? options = null)
         => Task.FromException<FindInPageResult>(new NotSupportedException());
-    public void StopFindInPage(bool clearHighlights = true) { }
+    public Task StopFindInPageAsync(bool clearHighlights = true) => Task.CompletedTask;
 
     // Preload Scripts
-    public string AddPreloadScript(string javaScript) => throw new NotSupportedException();
-    public void RemovePreloadScript(string scriptId) => throw new NotSupportedException();
+    public Task<string> AddPreloadScriptAsync(string javaScript) => Task.FromException<string>(new NotSupportedException());
+    public Task RemovePreloadScriptAsync(string scriptId) => Task.FromException(new NotSupportedException());
 
     // Context Menu
     public event EventHandler<ContextMenuRequestedEventArgs>? ContextMenuRequested { add { } remove { } }

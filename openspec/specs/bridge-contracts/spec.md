@@ -1,3 +1,6 @@
+## Purpose
+Define the JS bridge contract for export/import attributes, service registration, and proxy behavior across runtime implementations.
+
 ## Requirements
 
 ### Requirement: JsExport attribute exists in Core assembly

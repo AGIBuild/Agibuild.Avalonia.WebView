@@ -965,7 +965,7 @@ public sealed class CoverageGapTests
         adapter.CanGoBack = true;
 
         // GoBack while first navigation is active — should supersede it
-        core.GoBack();
+        await core.GoBackAsync();
 
         // First navigation should complete with Superseded
         Assert.NotNull(supersededArgs);
@@ -1377,12 +1377,12 @@ public sealed class CoverageGapTests
     public void ICommandManager_has_all_six_methods()
     {
         var methods = typeof(ICommandManager).GetMethods();
-        Assert.Contains(methods, m => m.Name == "Copy");
-        Assert.Contains(methods, m => m.Name == "Cut");
-        Assert.Contains(methods, m => m.Name == "Paste");
-        Assert.Contains(methods, m => m.Name == "SelectAll");
-        Assert.Contains(methods, m => m.Name == "Undo");
-        Assert.Contains(methods, m => m.Name == "Redo");
+        Assert.Contains(methods, m => m.Name == "CopyAsync");
+        Assert.Contains(methods, m => m.Name == "CutAsync");
+        Assert.Contains(methods, m => m.Name == "PasteAsync");
+        Assert.Contains(methods, m => m.Name == "SelectAllAsync");
+        Assert.Contains(methods, m => m.Name == "UndoAsync");
+        Assert.Contains(methods, m => m.Name == "RedoAsync");
     }
 
     [Fact]
@@ -1429,7 +1429,7 @@ public sealed class CoverageGapTests
     [InlineData(WebViewCommand.SelectAll)]
     [InlineData(WebViewCommand.Undo)]
     [InlineData(WebViewCommand.Redo)]
-    public void CommandManager_delegates_to_adapter(WebViewCommand command)
+    public async Task CommandManager_delegates_to_adapter(WebViewCommand command)
     {
         var adapter = MockWebViewAdapter.CreateWithCommands();
         using var core = new WebViewCore(adapter, _dispatcher);
@@ -1437,12 +1437,12 @@ public sealed class CoverageGapTests
 
         switch (command)
         {
-            case WebViewCommand.Copy: mgr.Copy(); break;
-            case WebViewCommand.Cut: mgr.Cut(); break;
-            case WebViewCommand.Paste: mgr.Paste(); break;
-            case WebViewCommand.SelectAll: mgr.SelectAll(); break;
-            case WebViewCommand.Undo: mgr.Undo(); break;
-            case WebViewCommand.Redo: mgr.Redo(); break;
+            case WebViewCommand.Copy: await mgr.CopyAsync(); break;
+            case WebViewCommand.Cut: await mgr.CutAsync(); break;
+            case WebViewCommand.Paste: await mgr.PasteAsync(); break;
+            case WebViewCommand.SelectAll: await mgr.SelectAllAsync(); break;
+            case WebViewCommand.Undo: await mgr.UndoAsync(); break;
+            case WebViewCommand.Redo: await mgr.RedoAsync(); break;
         }
 
         Assert.Single(adapter.ExecutedCommands);
@@ -1580,7 +1580,7 @@ public sealed class CoverageGapTests
 
         var request = """{"jsonrpc":"2.0","id":"sync-1","method":"math.add","params":{"a":3,"b":4}}""";
         rpc.TryProcessMessage(request);
-        Thread.Sleep(100);
+        WaitUntil(() => scripts.Any(s => s.Contains("sync-1")));
         Assert.Contains(scripts, s => s.Contains("_onResponse") && s.Contains("sync-1"));
     }
 
@@ -1596,7 +1596,7 @@ public sealed class CoverageGapTests
 
         var request = """{"jsonrpc":"2.0","id":"async-1","method":"async.echo","params":{"msg":"hello"}}""";
         rpc.TryProcessMessage(request);
-        Thread.Sleep(200);
+        WaitUntil(() => scripts.Any(s => s.Contains("async-1")));
         Assert.Contains(scripts, s => s.Contains("_onResponse") && s.Contains("async-1"));
     }
 
@@ -1606,7 +1606,7 @@ public sealed class CoverageGapTests
         var rpc = CreateTestRpcService(out var scripts);
         var request = """{"jsonrpc":"2.0","id":"unk-1","method":"nonexistent","params":null}""";
         rpc.TryProcessMessage(request);
-        Thread.Sleep(100);
+        WaitUntil(() => scripts.Any(s => s.Contains("-32601")));
         Assert.Contains(scripts, s => s.Contains("-32601"));
     }
 
@@ -1618,7 +1618,7 @@ public sealed class CoverageGapTests
 
         var request = """{"jsonrpc":"2.0","id":"err-1","method":"bad.handler","params":null}""";
         rpc.TryProcessMessage(request);
-        Thread.Sleep(100);
+        WaitUntil(() => scripts.Any(s => s.Contains("Boom")));
         Assert.Contains(scripts, s => s.Contains("Boom"));
     }
 
@@ -1629,7 +1629,7 @@ public sealed class CoverageGapTests
         var task = rpc.InvokeAsync("js.getTheme");
         Assert.False(task.IsCompleted);
 
-        Thread.Sleep(50);
+        WaitUntil(() => scripts.Count > 0);
         Assert.NotEmpty(scripts);
         var callId = ExtractRpcId(scripts[0]);
 
@@ -1647,7 +1647,7 @@ public sealed class CoverageGapTests
         var rpc = CreateTestRpcService(out var scripts);
         var task = rpc.InvokeAsync<int>("js.getCount");
 
-        Thread.Sleep(50);
+        WaitUntil(() => scripts.Count > 0);
         var callId = ExtractRpcId(scripts[0]);
 
         rpc.TryProcessMessage("{\"jsonrpc\":\"2.0\",\"id\":\"" + callId + "\",\"result\":42}");
@@ -1660,7 +1660,7 @@ public sealed class CoverageGapTests
         var rpc = CreateTestRpcService(out var scripts);
         var task = rpc.InvokeAsync("js.fail");
 
-        Thread.Sleep(50);
+        WaitUntil(() => scripts.Count > 0);
         var callId = ExtractRpcId(scripts[0]);
 
         rpc.TryProcessMessage("{\"jsonrpc\":\"2.0\",\"id\":\"" + callId + "\",\"error\":{\"code\":-32603,\"message\":\"JS error\"}}");
@@ -1675,7 +1675,7 @@ public sealed class CoverageGapTests
         var rpc = CreateTestRpcService(out var scripts);
         var task = rpc.InvokeAsync("js.void");
 
-        Thread.Sleep(50);
+        WaitUntil(() => scripts.Count > 0);
         var callId = ExtractRpcId(scripts[0]);
 
         var json = "{\"jsonrpc\":\"2.0\",\"id\":\"" + callId + "\"}";
@@ -1689,7 +1689,7 @@ public sealed class CoverageGapTests
         var rpc = CreateTestRpcService(out var scripts);
         var task = rpc.InvokeAsync("js.x");
 
-        Thread.Sleep(50);
+        WaitUntil(() => scripts.Count > 0);
         var callId = ExtractRpcId(scripts[0]);
 
         var json = "{\"jsonrpc\":\"2.0\",\"id\":\"" + callId + "\",\"error\":{\"message\":\"oops\"}}";
@@ -1725,7 +1725,7 @@ public sealed class CoverageGapTests
         });
 
         rpc.TryProcessMessage("""{"jsonrpc":"2.0","id":"np-1","method":"noparams"}""");
-        Thread.Sleep(100);
+        WaitUntil(() => scripts.Any(s => s.Contains("np-1")));
         Assert.Contains(scripts, s => s.Contains("np-1"));
     }
 
@@ -1769,7 +1769,7 @@ public sealed class CoverageGapTests
         var rpc = CreateTestRpcService(out var scripts);
         var task = rpc.InvokeAsync("js.greet", new { name = "Alice" });
 
-        Thread.Sleep(50);
+        WaitUntil(() => scripts.Count > 0);
         Assert.NotEmpty(scripts);
         var callId = ExtractRpcId(scripts[0]);
         // The script should contain the params
@@ -1807,7 +1807,7 @@ public sealed class CoverageGapTests
         var rpc = CreateTestRpcService(out var scripts);
         var task = rpc.InvokeAsync("js.fail");
 
-        Thread.Sleep(50);
+        WaitUntil(() => scripts.Count > 0);
         var callId = ExtractRpcId(scripts[0]);
 
         // Error without "code" property — default -32603 should be used
@@ -1824,7 +1824,7 @@ public sealed class CoverageGapTests
         var rpc = CreateTestRpcService(out var scripts);
         var task = rpc.InvokeAsync("js.fail2");
 
-        Thread.Sleep(50);
+        WaitUntil(() => scripts.Count > 0);
         var callId = ExtractRpcId(scripts[0]);
 
         // Error with code but no "message" — default "RPC error" should be used
@@ -1842,7 +1842,7 @@ public sealed class CoverageGapTests
         rpc.Handle("void.method", _ => Task.FromResult<object?>(null));
 
         rpc.TryProcessMessage("{\"jsonrpc\":\"2.0\",\"id\":\"v1\",\"method\":\"void.method\",\"params\":null}");
-        Thread.Sleep(100);
+        WaitUntil(() => scripts.Any(s => s.Contains("v1")));
         // The response should contain "v1" and null result
         Assert.Contains(scripts, s => s.Contains("v1"));
     }
@@ -1860,7 +1860,7 @@ public sealed class CoverageGapTests
         var rpc = CreateTestRpcService(out var scripts);
         var task = rpc.InvokeAsync<string>("js.nullResult");
 
-        Thread.Sleep(50);
+        WaitUntil(() => scripts.Count > 0);
         var callId = ExtractRpcId(scripts[0]);
 
         // Response with null result
@@ -1868,6 +1868,13 @@ public sealed class CoverageGapTests
 
         var result = await task;
         Assert.Null(result);
+    }
+
+    private static void WaitUntil(Func<bool> condition, int timeoutMilliseconds = 3000)
+    {
+        Assert.True(
+            SpinWait.SpinUntil(condition, TimeSpan.FromMilliseconds(timeoutMilliseconds)),
+            "Timed out while waiting for asynchronous RPC processing.");
     }
 
     private static string ExtractRpcId(string script)
@@ -1907,7 +1914,7 @@ public sealed class CoverageGapTests
         var rpc = CreateTestRpcService(out var scripts);
         var task = rpc.InvokeAsync("js.setProfile", new PlainProfile("Alice", true, 5));
 
-        Thread.Sleep(50);
+        WaitUntil(() => scripts.Count > 0);
         Assert.NotEmpty(scripts);
 
         // Extract the dispatched JSON and verify camelCase property names
@@ -1932,7 +1939,7 @@ public sealed class CoverageGapTests
         rpc.Handle("getProfile", _ => Task.FromResult<object?>(new PlainProfile("Bob", false, 10)));
 
         rpc.TryProcessMessage("{\"jsonrpc\":\"2.0\",\"id\":\"cc-1\",\"method\":\"getProfile\",\"params\":null}");
-        Thread.Sleep(100);
+        WaitUntil(() => scripts.Any(s => s.Contains("cc-1")));
 
         var responseScript = scripts.First(s => s.Contains("_onResponse") && s.Contains("cc-1"));
         Assert.Contains("userName", responseScript);
@@ -1949,7 +1956,7 @@ public sealed class CoverageGapTests
         var rpc = CreateTestRpcService(out var scripts);
         var task = rpc.InvokeAsync<PlainProfile>("js.getProfile");
 
-        Thread.Sleep(50);
+        WaitUntil(() => scripts.Count > 0);
         var callId = ExtractRpcId(scripts[0]);
 
         // JS returns camelCase JSON
@@ -1968,7 +1975,7 @@ public sealed class CoverageGapTests
         var rpc = CreateTestRpcService(out var scripts);
         var task = rpc.InvokeAsync("js.setCustomProfile", new CustomNameProfile("Charlie", true));
 
-        Thread.Sleep(50);
+        WaitUntil(() => scripts.Count > 0);
         Assert.NotEmpty(scripts);
 
         // user_name from [JsonPropertyName] should appear, not userName
@@ -2019,19 +2026,19 @@ public sealed class CoverageGapTests
     }
 
     [Fact]
-    public void StopFindInPage_throws_when_unsupported()
+    public async Task StopFindInPage_throws_when_unsupported()
     {
         var adapter = MockWebViewAdapter.Create();
         using var core = new WebViewCore(adapter, _dispatcher);
-        Assert.Throws<NotSupportedException>(() => core.StopFindInPage());
+        await Assert.ThrowsAsync<NotSupportedException>(() => core.StopFindInPageAsync());
     }
 
     [Fact]
-    public void StopFindInPage_delegates_to_adapter()
+    public async Task StopFindInPage_delegates_to_adapter()
     {
         var adapter = MockWebViewAdapter.CreateWithFind();
         using var core = new WebViewCore(adapter, _dispatcher);
-        core.StopFindInPage(false);
+        await core.StopFindInPageAsync(false);
 
         var findAdapter = (MockWebViewAdapterWithFind)adapter;
         Assert.True(findAdapter.StopFindCalled);
@@ -2058,12 +2065,12 @@ public sealed class CoverageGapTests
     }
 
     [Fact]
-    public void WebDialog_StopFindInPage_throws_when_unsupported()
+    public async Task WebDialog_StopFindInPage_throws_when_unsupported()
     {
         var host = new MockDialogHost();
         var adapter = MockWebViewAdapter.Create();
         using var dialog = new WebDialog(host, adapter, _dispatcher);
-        Assert.Throws<NotSupportedException>(() => dialog.StopFindInPage());
+        await Assert.ThrowsAsync<NotSupportedException>(() => dialog.StopFindInPageAsync());
     }
 
     [Fact]
@@ -2089,7 +2096,7 @@ public sealed class CoverageGapTests
     {
         var adapter = MockWebViewAdapter.Create();
         using var core = new WebViewCore(adapter, _dispatcher);
-        Assert.Equal(1.0, core.ZoomFactor);
+        Assert.Equal(1.0, core.GetZoomFactorAsync().GetAwaiter().GetResult());
     }
 
     [Fact]
@@ -2097,8 +2104,8 @@ public sealed class CoverageGapTests
     {
         var adapter = MockWebViewAdapter.Create();
         using var core = new WebViewCore(adapter, _dispatcher);
-        core.ZoomFactor = 2.0; // should not throw
-        Assert.Equal(1.0, core.ZoomFactor);
+        core.SetZoomFactorAsync(2.0).GetAwaiter().GetResult(); // should not throw
+        Assert.Equal(1.0, core.GetZoomFactorAsync().GetAwaiter().GetResult());
     }
 
     [Fact]
@@ -2106,10 +2113,10 @@ public sealed class CoverageGapTests
     {
         var adapter = MockWebViewAdapter.CreateWithZoom();
         using var core = new WebViewCore(adapter, _dispatcher);
-        Assert.Equal(1.0, core.ZoomFactor);
+        Assert.Equal(1.0, core.GetZoomFactorAsync().GetAwaiter().GetResult());
 
-        core.ZoomFactor = 1.5;
-        Assert.Equal(1.5, core.ZoomFactor);
+        core.SetZoomFactorAsync(1.5).GetAwaiter().GetResult();
+        Assert.Equal(1.5, core.GetZoomFactorAsync().GetAwaiter().GetResult());
     }
 
     [Fact]
@@ -2118,11 +2125,11 @@ public sealed class CoverageGapTests
         var adapter = MockWebViewAdapter.CreateWithZoom();
         using var core = new WebViewCore(adapter, _dispatcher);
 
-        core.ZoomFactor = 0.1; // below 0.25 min
-        Assert.Equal(0.25, core.ZoomFactor, 2);
+        core.SetZoomFactorAsync(0.1).GetAwaiter().GetResult(); // below 0.25 min
+        Assert.Equal(0.25, core.GetZoomFactorAsync().GetAwaiter().GetResult(), 2);
 
-        core.ZoomFactor = 10.0; // above 5.0 max
-        Assert.Equal(5.0, core.ZoomFactor, 2);
+        core.SetZoomFactorAsync(10.0).GetAwaiter().GetResult(); // above 5.0 max
+        Assert.Equal(5.0, core.GetZoomFactorAsync().GetAwaiter().GetResult(), 2);
     }
 
     [Fact]
@@ -2134,7 +2141,7 @@ public sealed class CoverageGapTests
         double? received = null;
         core.ZoomFactorChanged += (_, z) => received = z;
 
-        core.ZoomFactor = 2.0;
+        core.SetZoomFactorAsync(2.0).GetAwaiter().GetResult();
         Assert.Equal(2.0, received);
     }
 
@@ -2145,68 +2152,85 @@ public sealed class CoverageGapTests
         var adapter = MockWebViewAdapter.CreateWithZoom();
         using var dialog = new WebDialog(host, adapter, _dispatcher);
 
-        Assert.Equal(1.0, dialog.ZoomFactor);
-        dialog.ZoomFactor = 1.5;
-        Assert.Equal(1.5, dialog.ZoomFactor);
+        Assert.Equal(1.0, dialog.GetZoomFactorAsync().GetAwaiter().GetResult());
+        dialog.SetZoomFactorAsync(1.5).GetAwaiter().GetResult();
+        Assert.Equal(1.5, dialog.GetZoomFactorAsync().GetAwaiter().GetResult());
     }
 
     // ==================== PreloadScript Tests ====================
 
     [Fact]
-    public void AddPreloadScript_throws_when_unsupported()
+    public async Task AddPreloadScript_throws_when_unsupported()
     {
         var adapter = MockWebViewAdapter.Create();
         using var core = new WebViewCore(adapter, _dispatcher);
-        Assert.Throws<NotSupportedException>(() => core.AddPreloadScript("console.log('hi')"));
+        await Assert.ThrowsAsync<NotSupportedException>(() => core.AddPreloadScriptAsync("console.log('hi')"));
     }
 
     [Fact]
-    public void AddPreloadScript_returns_script_id()
+    public async Task AddPreloadScript_returns_script_id()
     {
         var adapter = MockWebViewAdapter.CreateWithPreload();
         using var core = new WebViewCore(adapter, _dispatcher);
-        var id = core.AddPreloadScript("console.log('hi')");
+        var id = await core.AddPreloadScriptAsync("console.log('hi')");
         Assert.NotNull(id);
         Assert.NotEmpty(id);
     }
 
     [Fact]
-    public void RemovePreloadScript_throws_when_unsupported()
-    {
-        var adapter = MockWebViewAdapter.Create();
-        using var core = new WebViewCore(adapter, _dispatcher);
-        Assert.Throws<NotSupportedException>(() => core.RemovePreloadScript("some-id"));
-    }
-
-    [Fact]
-    public void RemovePreloadScript_removes_script()
+    public async Task AddPreloadScript_prefers_async_adapter_when_available()
     {
         var adapter = MockWebViewAdapter.CreateWithPreload();
         using var core = new WebViewCore(adapter, _dispatcher);
-        var id = core.AddPreloadScript("console.log('hi')");
-        core.RemovePreloadScript(id);
+        var preloadAdapter = (MockWebViewAdapterWithPreload)adapter;
+
+        const string script = "console.log('prefer-async')";
+        var id = await core.AddPreloadScriptAsync(script);
+        await core.RemovePreloadScriptAsync(id);
+
+        Assert.Contains(script, preloadAdapter.AsyncAddedScripts);
+        Assert.DoesNotContain(script, preloadAdapter.SyncAddedScripts);
+        Assert.Contains(id, preloadAdapter.AsyncRemovedScriptIds);
+        Assert.DoesNotContain(id, preloadAdapter.SyncRemovedScriptIds);
+    }
+
+    [Fact]
+    public async Task RemovePreloadScript_throws_when_unsupported()
+    {
+        var adapter = MockWebViewAdapter.Create();
+        using var core = new WebViewCore(adapter, _dispatcher);
+        await Assert.ThrowsAsync<NotSupportedException>(() => core.RemovePreloadScriptAsync("some-id"));
+    }
+
+    [Fact]
+    public async Task RemovePreloadScript_removes_script()
+    {
+        var adapter = MockWebViewAdapter.CreateWithPreload();
+        using var core = new WebViewCore(adapter, _dispatcher);
+        var id = await core.AddPreloadScriptAsync("console.log('hi')");
+        await core.RemovePreloadScriptAsync(id);
 
         var preloadAdapter = (MockWebViewAdapterWithPreload)adapter;
         Assert.DoesNotContain(id, preloadAdapter.Scripts.Keys);
     }
 
     [Fact]
-    public void WebDialog_AddPreloadScript_delegates_to_core()
+    public async Task WebDialog_AddPreloadScript_delegates_to_core()
     {
         var host = new MockDialogHost();
         var adapter = MockWebViewAdapter.CreateWithPreload();
         using var dialog = new WebDialog(host, adapter, _dispatcher);
-        var id = dialog.AddPreloadScript("console.log('test')");
+        var id = await dialog.AddPreloadScriptAsync("console.log('test')");
         Assert.NotNull(id);
     }
 
     [Fact]
-    public void WebDialog_AddPreloadScript_throws_when_unsupported()
+    public async Task WebDialog_AddPreloadScript_throws_when_unsupported()
     {
         var host = new MockDialogHost();
         var adapter = MockWebViewAdapter.Create();
         using var dialog = new WebDialog(host, adapter, _dispatcher);
-        Assert.Throws<NotSupportedException>(() => dialog.AddPreloadScript("x"));
+        await Assert.ThrowsAsync<NotSupportedException>(() => dialog.AddPreloadScriptAsync("x"));
     }
 
     [Fact]

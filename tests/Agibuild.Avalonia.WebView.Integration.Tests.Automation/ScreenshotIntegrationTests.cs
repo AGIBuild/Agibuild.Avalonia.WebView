@@ -21,7 +21,7 @@ public sealed class ScreenshotIntegrationTests
     // ──────────────────── Test 1: Returns PNG bytes ────────────────────
 
     [AvaloniaFact]
-    public async Task Screenshot_returns_png_bytes()
+    public void Screenshot_returns_png_bytes()
     {
         // Arrange: adapter that supports screenshots
         var host = new MockDialogHost();
@@ -29,7 +29,7 @@ public sealed class ScreenshotIntegrationTests
         using var dialog = new WebDialog(host, adapter, _dispatcher);
 
         // Act: capture screenshot
-        var bytes = await dialog.CaptureScreenshotAsync();
+        var bytes = DispatcherTestPump.Run(_dispatcher, () => dialog.CaptureScreenshotAsync());
 
         // Assert: got non-empty bytes with PNG magic header (0x89 P N G)
         Assert.NotNull(bytes);
@@ -43,7 +43,7 @@ public sealed class ScreenshotIntegrationTests
     // ──────────────────── Test 2: Throws when unsupported ────────────────────
 
     [AvaloniaFact]
-    public async Task Screenshot_throws_NotSupportedException_when_adapter_lacks_support()
+    public void Screenshot_throws_NotSupportedException_when_adapter_lacks_support()
     {
         // Arrange: basic adapter does NOT implement IScreenshotAdapter
         var host = new MockDialogHost();
@@ -51,7 +51,7 @@ public sealed class ScreenshotIntegrationTests
         using var dialog = new WebDialog(host, adapter, _dispatcher);
 
         // Act & Assert
-        await Assert.ThrowsAsync<NotSupportedException>(
-            () => dialog.CaptureScreenshotAsync());
+        Assert.Throws<NotSupportedException>(
+            () => DispatcherTestPump.Run(_dispatcher, () => dialog.CaptureScreenshotAsync()));
     }
 }

@@ -1,3 +1,6 @@
+## Purpose
+Define the platform-agnostic Core contract surface, required types, and compatibility expectations for WebView consumers and adapters.
+
 ## Requirements
 
 ### Requirement: Core contracts assembly

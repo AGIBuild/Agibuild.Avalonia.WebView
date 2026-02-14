@@ -77,8 +77,9 @@ public sealed class ConcurrencyNavigationTests
         var task = core.NavigateAsync(new Uri("https://example.test/stop"));
         dispatcher.RunAll();
 
-        core.Stop();
+        var stopAccepted = DispatcherTestPump.Run(dispatcher, () => core.StopAsync());
 
+        Assert.True(stopAccepted);
         Assert.NotNull(completed);
         Assert.Equal(NavigationCompletedStatus.Canceled, completed!.Status);
         Assert.False(core.IsLoading);
@@ -94,7 +95,7 @@ public sealed class ConcurrencyNavigationTests
         var adapter = new MockWebViewAdapter { StopAccepted = true };
         var core = new WebViewCore(adapter, dispatcher);
 
-        Assert.False(core.Stop());
+        Assert.False(DispatcherTestPump.Run(dispatcher, () => core.StopAsync()));
         Assert.False(core.IsLoading);
     }
 }

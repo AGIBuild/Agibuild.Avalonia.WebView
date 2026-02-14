@@ -10,7 +10,7 @@ namespace Agibuild.Avalonia.WebView.Adapters.Windows;
 [SupportedOSPlatform("windows")]
 internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHandleProvider, ICookieAdapter, IWebViewAdapterOptions,
     ICustomSchemeAdapter, IDownloadAdapter, IPermissionAdapter, ICommandAdapter, IScreenshotAdapter, IPrintAdapter,
-    IFindInPageAdapter, IZoomAdapter, IPreloadScriptAdapter, IContextMenuAdapter, IDevToolsAdapter
+    IFindInPageAdapter, IZoomAdapter, IPreloadScriptAdapter, IAsyncPreloadScriptAdapter, IContextMenuAdapter, IDevToolsAdapter
 {
     private static bool DiagnosticsEnabled
         => string.Equals(Environment.GetEnvironmentVariable("AGIBUILD_WEBVIEW_DIAG"), "1", StringComparison.Ordinal);
@@ -1227,19 +1227,32 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
 
     public string AddPreloadScript(string javaScript)
     {
-        ThrowIfNotAttached();
-        if (_webView is null)
-            throw new InvalidOperationException("WebView is not initialized.");
-        // WebView2's AddScriptToExecuteOnDocumentCreatedAsync returns a script ID
-        var task = _webView.AddScriptToExecuteOnDocumentCreatedAsync(javaScript);
-        task.Wait(); // block — called from UI thread during init, safe for WebView2
-        return task.Result;
+        // Legacy sync path kept for compatibility with obsolete sync API.
+        // Runtime async path should use AddPreloadScriptAsync to avoid blocking UI.
+        return AddPreloadScriptAsync(javaScript).GetAwaiter().GetResult();
+    }
+
+    public Task<string> AddPreloadScriptAsync(string javaScript)
+    {
+        return RunOnUiThreadAsync(async () =>
+        {
+            ThrowIfNotAttached();
+            if (_webView is null)
+                throw new InvalidOperationException("WebView is not initialized.");
+            return await _webView.AddScriptToExecuteOnDocumentCreatedAsync(javaScript).ConfigureAwait(false);
+        });
     }
 
     public void RemovePreloadScript(string scriptId)
     {
         if (_webView is null || _detached) return;
         _webView.RemoveScriptToExecuteOnDocumentCreated(scriptId);
+    }
+
+    public Task RemovePreloadScriptAsync(string scriptId)
+    {
+        RunOnUiThread(() => RemovePreloadScript(scriptId));
+        return Task.CompletedTask;
     }
 
     // ==================== IContextMenuAdapter ====================

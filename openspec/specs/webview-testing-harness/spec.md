@@ -1,3 +1,6 @@
+## Purpose
+Define deterministic, platform-agnostic testing harness requirements for validating WebView contract behavior and threading semantics.
+
 ## Requirements
 
 ### Requirement: Test project scaffold

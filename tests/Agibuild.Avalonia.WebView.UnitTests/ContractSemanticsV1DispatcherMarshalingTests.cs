@@ -84,16 +84,44 @@ public sealed class ContractSemanticsV1DispatcherMarshalingTests
         };
         thread.Start();
 
-        // Give the thread time to queue the work item.
-        Thread.Sleep(50);
-
         // Drain the dispatcher queue on the "UI thread" so the blocking call completes.
-        dispatcher.RunAll();
+        DispatcherTestPump.WaitUntil(dispatcher, () => dispatcher.QueuedCount > 0);
         thread.Join();
 
         Assert.Null(thrown);
         Assert.NotNull(result);
         Assert.Equal("TestHandle", result!.HandleDescriptor);
+        Assert.Equal(1, adapter.TryGetHandleCallCount);
+    }
+
+    [Fact]
+    public async Task TryGetWebViewHandleAsync_off_thread_dispatches_to_ui_thread()
+    {
+        var dispatcher = new TestDispatcher();
+        var adapter = MockWebViewAdapter.CreateWithHandle();
+        adapter.HandleToReturn = new TestPlatformHandle(new IntPtr(0x55), "AsyncHandle");
+        using var core = new WebViewCore(adapter, dispatcher);
+
+        Task<IPlatformHandle?>? handleTask = null;
+
+        var thread = new Thread(() =>
+        {
+            handleTask = core.TryGetWebViewHandleAsync();
+        })
+        {
+            IsBackground = true
+        };
+        thread.Start();
+        thread.Join();
+
+        Assert.NotNull(handleTask);
+        Assert.False(handleTask!.IsCompleted);
+
+        DispatcherTestPump.WaitUntil(dispatcher, () => handleTask.IsCompleted);
+
+        var result = await handleTask;
+        Assert.NotNull(result);
+        Assert.Equal("AsyncHandle", result!.HandleDescriptor);
         Assert.Equal(1, adapter.TryGetHandleCallCount);
     }
 
@@ -151,8 +179,8 @@ public sealed class ContractSemanticsV1DispatcherMarshalingTests
 
         Assert.False(bgTask.IsCompleted);
 
-        // Drain.
-        dispatcher.RunAll();
+        // Drain until background task completes.
+        DispatcherTestPump.WaitUntil(dispatcher, () => bgTask.IsCompleted);
 
         var cookies = await bgTask;
         Assert.Single(cookies);
@@ -180,7 +208,7 @@ public sealed class ContractSemanticsV1DispatcherMarshalingTests
 
         Assert.False(bgTask.IsCompleted);
 
-        dispatcher.RunAll();
+        DispatcherTestPump.WaitUntil(dispatcher, () => bgTask.IsCompleted);
         await bgTask;
 
         // Verify cookie was stored.
@@ -214,7 +242,7 @@ public sealed class ContractSemanticsV1DispatcherMarshalingTests
 
         Assert.False(bgTask.IsCompleted);
 
-        dispatcher.RunAll();
+        DispatcherTestPump.WaitUntil(dispatcher, () => bgTask.IsCompleted);
         await bgTask;
 
         // Verify deleted.
@@ -248,7 +276,7 @@ public sealed class ContractSemanticsV1DispatcherMarshalingTests
 
         Assert.False(bgTask.IsCompleted);
 
-        dispatcher.RunAll();
+        DispatcherTestPump.WaitUntil(dispatcher, () => bgTask.IsCompleted);
         await bgTask;
 
         // Verify cleared.

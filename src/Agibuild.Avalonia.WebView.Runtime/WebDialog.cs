@@ -73,43 +73,34 @@ public sealed class WebDialog : IWebDialog
     public Task NavigateToStringAsync(string html, Uri? baseUrl) => _core.NavigateToStringAsync(html, baseUrl);
     public Task<string?> InvokeScriptAsync(string script) => _core.InvokeScriptAsync(script);
 
-    public bool GoBack() => _core.GoBack();
-    public bool GoForward() => _core.GoForward();
-    public bool Refresh() => _core.Refresh();
-    public bool Stop() => _core.Stop();
+    public Task<bool> GoBackAsync() => _core.GoBackAsync();
+    public Task<bool> GoForwardAsync() => _core.GoForwardAsync();
+    public Task<bool> RefreshAsync() => _core.RefreshAsync();
+    public Task<bool> StopAsync() => _core.StopAsync();
 
     public ICookieManager? TryGetCookieManager() => _core.TryGetCookieManager();
     public ICommandManager? TryGetCommandManager() => _core.TryGetCommandManager();
+    public Task<global::Avalonia.Platform.IPlatformHandle?> TryGetWebViewHandleAsync() => _core.TryGetWebViewHandleAsync();
     public IWebViewRpcService? Rpc => _core.Rpc;
     public IBridgeService Bridge => _core.Bridge;
-    public void OpenDevTools() => _core.OpenDevTools();
-    public void CloseDevTools() => _core.CloseDevTools();
-    public bool IsDevToolsOpen => _core.IsDevToolsOpen;
+    public Task OpenDevToolsAsync() => _core.OpenDevToolsAsync();
+    public Task CloseDevToolsAsync() => _core.CloseDevToolsAsync();
+    public Task<bool> IsDevToolsOpenAsync() => _core.IsDevToolsOpenAsync();
     public Task<byte[]> CaptureScreenshotAsync() => _core.CaptureScreenshotAsync();
     public Task<byte[]> PrintToPdfAsync(PdfPrintOptions? options = null) => _core.PrintToPdfAsync(options);
 
-    /// <inheritdoc cref="WebViewCore.ZoomFactor"/>
-    public double ZoomFactor
-    {
-        get => _core.ZoomFactor;
-        set => _core.ZoomFactor = value;
-    }
-    /// <inheritdoc cref="WebViewCore.ZoomFactorChanged"/>
-    public event EventHandler<double>? ZoomFactorChanged
-    {
-        add => _core.ZoomFactorChanged += value;
-        remove => _core.ZoomFactorChanged -= value;
-    }
+    public Task<double> GetZoomFactorAsync() => _core.GetZoomFactorAsync();
+    public Task SetZoomFactorAsync(double zoomFactor) => _core.SetZoomFactorAsync(zoomFactor);
 
     /// <inheritdoc cref="WebViewCore.FindInPageAsync"/>
     public Task<FindInPageResult> FindInPageAsync(string text, FindInPageOptions? options = null) => _core.FindInPageAsync(text, options);
-    /// <inheritdoc cref="WebViewCore.StopFindInPage"/>
-    public void StopFindInPage(bool clearHighlights = true) => _core.StopFindInPage(clearHighlights);
+    /// <inheritdoc cref="WebViewCore.StopFindInPageAsync"/>
+    public Task StopFindInPageAsync(bool clearHighlights = true) => _core.StopFindInPageAsync(clearHighlights);
 
-    /// <inheritdoc cref="WebViewCore.AddPreloadScript"/>
-    public string AddPreloadScript(string javaScript) => _core.AddPreloadScript(javaScript);
-    /// <inheritdoc cref="WebViewCore.RemovePreloadScript"/>
-    public void RemovePreloadScript(string scriptId) => _core.RemovePreloadScript(scriptId);
+    /// <inheritdoc cref="WebViewCore.AddPreloadScriptAsync"/>
+    public Task<string> AddPreloadScriptAsync(string javaScript) => _core.AddPreloadScriptAsync(javaScript);
+    /// <inheritdoc cref="WebViewCore.RemovePreloadScriptAsync"/>
+    public Task RemovePreloadScriptAsync(string scriptId) => _core.RemovePreloadScriptAsync(scriptId);
 
     /// <inheritdoc cref="WebViewCore.ContextMenuRequested"/>
     public event EventHandler<ContextMenuRequestedEventArgs>? ContextMenuRequested

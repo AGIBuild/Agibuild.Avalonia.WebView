@@ -98,6 +98,18 @@ internal interface IPreloadScriptAdapter
 }
 
 /// <summary>
+/// Optional async preload script interface for adapters that can register scripts without blocking the UI thread.
+/// Runtime prefers this over <see cref="IPreloadScriptAdapter"/> when available.
+/// </summary>
+internal interface IAsyncPreloadScriptAdapter
+{
+    /// <summary>Registers a JavaScript snippet to run at document start on every page load. Returns an opaque script ID.</summary>
+    Task<string> AddPreloadScriptAsync(string javaScript);
+    /// <summary>Removes a previously registered preload script by its ID.</summary>
+    Task RemovePreloadScriptAsync(string scriptId);
+}
+
+/// <summary>
 /// Optional interface for adapters that support zoom level control.
 /// Runtime checks for this via <c>adapter as IZoomAdapter</c>.
 /// </summary>

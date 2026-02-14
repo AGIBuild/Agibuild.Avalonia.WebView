@@ -209,11 +209,11 @@ public partial class FeatureE2EViewModel : ViewModelBase
             await Task.Delay(200).ConfigureAwait(false);
 
             // SelectAll
-            mgr.SelectAll();
+            await mgr.SelectAllAsync().ConfigureAwait(false);
             await Task.Delay(200).ConfigureAwait(false);
 
             // Copy
-            mgr.Copy();
+            await mgr.CopyAsync().ConfigureAwait(false);
             await Task.Delay(200).ConfigureAwait(false);
 
             LogLine("  PASS (commands executed without error)");
@@ -509,7 +509,7 @@ public partial class FeatureE2EViewModel : ViewModelBase
             }
 
             // Stop find
-            WebViewControl.StopFindInPage();
+            await WebViewControl!.StopFindInPageAsync().ConfigureAwait(false);
             LogLine("  StopFindInPage → OK");
 
             LogLine("  PASS");
@@ -541,21 +541,15 @@ public partial class FeatureE2EViewModel : ViewModelBase
         {
             LogLine("[6] Zoom Control");
 
-            // ZoomFactor is a StyledProperty — must be accessed on the UI thread.
-            // WKWebView's setPageZoomFactor triggers a full page re-layout which
-            // can block the main thread for 1-2 seconds. We split each zoom
-            // operation into a separate dispatch so the UI thread can breathe
-            // between calls and macOS won't flag us as "hung".
-
-            var original = await Dispatcher.UIThread.InvokeAsync(() => WebViewControl!.ZoomFactor);
+            var original = await WebViewControl!.GetZoomFactorAsync().ConfigureAwait(false);
             LogLine($"  Current zoom: {original}");
 
             // Set zoom to 1.5 — yields back to UI pump after completion
-            await Dispatcher.UIThread.InvokeAsync(() => WebViewControl!.ZoomFactor = 1.5);
+            await WebViewControl.SetZoomFactorAsync(1.5).ConfigureAwait(false);
             // Let the UI thread process pending events (repaint, input, etc.)
             await Task.Delay(50).ConfigureAwait(false);
 
-            var actual = await Dispatcher.UIThread.InvokeAsync(() => WebViewControl!.ZoomFactor);
+            var actual = await WebViewControl.GetZoomFactorAsync().ConfigureAwait(false);
             LogLine($"  Set 1.5 → got {actual}");
 
             if (Math.Abs(actual - 1.5) > 0.01)
@@ -564,7 +558,7 @@ public partial class FeatureE2EViewModel : ViewModelBase
             }
 
             // Reset to 1.0
-            await Dispatcher.UIThread.InvokeAsync(() => WebViewControl!.ZoomFactor = 1.0);
+            await WebViewControl.SetZoomFactorAsync(1.0).ConfigureAwait(false);
             await Task.Delay(50).ConfigureAwait(false);
             LogLine("  Reset to 1.0 → OK");
 
@@ -591,7 +585,7 @@ public partial class FeatureE2EViewModel : ViewModelBase
         {
             LogLine("[7] Preload Script");
 
-            var scriptId = WebViewControl!.AddPreloadScript("window.__e2ePreload = true;");
+            var scriptId = await WebViewControl!.AddPreloadScriptAsync("window.__e2ePreload = true;").ConfigureAwait(false);
             LogLine($"  AddPreloadScript → id={scriptId}");
 
             if (string.IsNullOrEmpty(scriptId))
@@ -601,7 +595,7 @@ public partial class FeatureE2EViewModel : ViewModelBase
                 return false;
             }
 
-            WebViewControl.RemovePreloadScript(scriptId);
+            await WebViewControl.RemovePreloadScriptAsync(scriptId).ConfigureAwait(false);
             LogLine("  RemovePreloadScript → OK");
 
             LogLine("  PASS");
@@ -787,16 +781,16 @@ public partial class FeatureE2EViewModel : ViewModelBase
             var wv = WebViewControl!;
 
             // Initial state: DevTools should not be open.
-            var initialState = await Dispatcher.UIThread.InvokeAsync(() => wv.IsDevToolsOpen);
+            var initialState = await wv.IsDevToolsOpenAsync().ConfigureAwait(false);
             LogLine($"  IsDevToolsOpen (initial): {initialState}");
 
             // Open DevTools — no-op on platforms that don't support it, should not throw.
-            await Dispatcher.UIThread.InvokeAsync(() => wv.OpenDevTools());
+            await wv.OpenDevToolsAsync().ConfigureAwait(false);
             LogLine("  OpenDevTools() → OK (no exception)");
             await Task.Delay(200).ConfigureAwait(false);
 
             // Close DevTools — no-op on platforms that don't support it, should not throw.
-            await Dispatcher.UIThread.InvokeAsync(() => wv.CloseDevTools());
+            await wv.CloseDevToolsAsync().ConfigureAwait(false);
             LogLine("  CloseDevTools() → OK (no exception)");
 
             LogLine("  PASS (DevTools toggle executed without error)");
@@ -816,13 +810,13 @@ public partial class FeatureE2EViewModel : ViewModelBase
     /// button or invoked via keyboard shortcut (F12 / Cmd+Shift+I).
     /// </summary>
     [RelayCommand]
-    private void OpenDevTools()
+    private async Task OpenDevTools()
     {
         if (WebViewControl is null) return;
 
         try
         {
-            WebViewControl.OpenDevTools();
+            await WebViewControl.OpenDevToolsAsync().ConfigureAwait(false);
             LogLine("DevTools: opened via manual command");
         }
         catch (Exception ex)

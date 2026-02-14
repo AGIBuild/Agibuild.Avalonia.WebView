@@ -36,7 +36,7 @@ public sealed class ContractSemanticsV1CommandNavigationCoverageTests
         var adapter = new MockWebViewAdapter { CanGoForward = false };
         var core = new WebViewCore(adapter, dispatcher);
 
-        Assert.False(core.GoForward());
+        Assert.False(DispatcherTestPump.Run(dispatcher, () => core.GoForwardAsync()));
     }
 
     [Fact]
@@ -46,7 +46,7 @@ public sealed class ContractSemanticsV1CommandNavigationCoverageTests
         var adapter = new MockWebViewAdapter { CanGoForward = true, GoForwardAccepted = true };
         var core = new WebViewCore(adapter, dispatcher);
 
-        Assert.True(core.GoForward());
+        Assert.True(DispatcherTestPump.Run(dispatcher, () => core.GoForwardAsync()));
     }
 
     [Fact]
@@ -56,7 +56,7 @@ public sealed class ContractSemanticsV1CommandNavigationCoverageTests
         var adapter = new MockWebViewAdapter { CanGoForward = true, GoForwardAccepted = false };
         var core = new WebViewCore(adapter, dispatcher);
 
-        Assert.False(core.GoForward());
+        Assert.False(DispatcherTestPump.Run(dispatcher, () => core.GoForwardAsync()));
     }
 
     [Fact]
@@ -68,7 +68,7 @@ public sealed class ContractSemanticsV1CommandNavigationCoverageTests
 
         core.NavigationStarted += (_, e) => e.Cancel = true;
 
-        Assert.False(core.GoForward());
+        Assert.False(DispatcherTestPump.Run(dispatcher, () => core.GoForwardAsync()));
     }
 
     [Fact]
@@ -78,7 +78,7 @@ public sealed class ContractSemanticsV1CommandNavigationCoverageTests
         var adapter = new MockWebViewAdapter { RefreshAccepted = true };
         var core = new WebViewCore(adapter, dispatcher);
 
-        Assert.True(core.Refresh());
+        Assert.True(DispatcherTestPump.Run(dispatcher, () => core.RefreshAsync()));
     }
 
     [Fact]
@@ -88,7 +88,7 @@ public sealed class ContractSemanticsV1CommandNavigationCoverageTests
         var adapter = new MockWebViewAdapter { RefreshAccepted = false };
         var core = new WebViewCore(adapter, dispatcher);
 
-        Assert.False(core.Refresh());
+        Assert.False(DispatcherTestPump.Run(dispatcher, () => core.RefreshAsync()));
     }
 
     [Fact]
@@ -100,7 +100,7 @@ public sealed class ContractSemanticsV1CommandNavigationCoverageTests
 
         core.NavigationStarted += (_, e) => e.Cancel = true;
 
-        Assert.False(core.Refresh());
+        Assert.False(DispatcherTestPump.Run(dispatcher, () => core.RefreshAsync()));
     }
 
     [Fact]
@@ -127,7 +127,7 @@ public sealed class ContractSemanticsV1CommandNavigationCoverageTests
     }
 
     [Fact]
-    public void GoBack_after_dispose_throws_ObjectDisposedException()
+    public async Task GoBack_after_dispose_throws_ObjectDisposedException()
     {
         var dispatcher = new TestDispatcher();
         var adapter = new MockWebViewAdapter();
@@ -135,11 +135,11 @@ public sealed class ContractSemanticsV1CommandNavigationCoverageTests
 
         core.Dispose();
 
-        Assert.Throws<ObjectDisposedException>(() => core.GoBack());
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => core.GoBackAsync());
     }
 
     [Fact]
-    public void GoForward_after_dispose_throws_ObjectDisposedException()
+    public async Task GoForward_after_dispose_throws_ObjectDisposedException()
     {
         var dispatcher = new TestDispatcher();
         var adapter = new MockWebViewAdapter();
@@ -147,11 +147,11 @@ public sealed class ContractSemanticsV1CommandNavigationCoverageTests
 
         core.Dispose();
 
-        Assert.Throws<ObjectDisposedException>(() => core.GoForward());
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => core.GoForwardAsync());
     }
 
     [Fact]
-    public void Refresh_after_dispose_throws_ObjectDisposedException()
+    public async Task Refresh_after_dispose_throws_ObjectDisposedException()
     {
         var dispatcher = new TestDispatcher();
         var adapter = new MockWebViewAdapter();
@@ -159,11 +159,11 @@ public sealed class ContractSemanticsV1CommandNavigationCoverageTests
 
         core.Dispose();
 
-        Assert.Throws<ObjectDisposedException>(() => core.Refresh());
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => core.RefreshAsync());
     }
 
     [Fact]
-    public void Stop_after_dispose_throws_ObjectDisposedException()
+    public async Task Stop_after_dispose_throws_ObjectDisposedException()
     {
         var dispatcher = new TestDispatcher();
         var adapter = new MockWebViewAdapter();
@@ -171,7 +171,7 @@ public sealed class ContractSemanticsV1CommandNavigationCoverageTests
 
         core.Dispose();
 
-        Assert.Throws<ObjectDisposedException>(() => core.Stop());
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => core.StopAsync());
     }
 
     [Fact]
@@ -224,7 +224,7 @@ public sealed class ContractSemanticsV1CommandNavigationCoverageTests
         var adapter = new MockWebViewAdapter();
         var core = new WebViewCore(adapter, dispatcher);
 
-        Assert.False(core.Stop());
+        Assert.False(DispatcherTestPump.Run(dispatcher, () => core.StopAsync()));
     }
 
     [Fact]
@@ -376,7 +376,7 @@ public sealed class ContractSemanticsV1CommandNavigationCoverageTests
         var adapter = new MockWebViewAdapter { CanGoBack = true, GoBackAccepted = false };
         var core = new WebViewCore(adapter, dispatcher);
 
-        Assert.False(core.GoBack());
+        Assert.False(DispatcherTestPump.Run(dispatcher, () => core.GoBackAsync()));
     }
 
     [Fact]
@@ -388,7 +388,7 @@ public sealed class ContractSemanticsV1CommandNavigationCoverageTests
 
         core.NavigationStarted += (_, e) => e.Cancel = true;
 
-        Assert.False(core.GoBack());
+        Assert.False(DispatcherTestPump.Run(dispatcher, () => core.GoBackAsync()));
     }
 
     [Fact]

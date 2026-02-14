@@ -6,7 +6,7 @@ namespace Agibuild.Avalonia.WebView.UnitTests;
 public sealed class ContractSemanticsV1NewWindowFallbackTests
 {
     [Fact]
-    public async Task Unhandled_NewWindowRequested_with_non_null_URI_triggers_NavigateAsync_fallback()
+    public void Unhandled_NewWindowRequested_with_non_null_URI_triggers_NavigateAsync_fallback()
     {
         var dispatcher = new TestDispatcher();
         var adapter = new MockWebViewAdapter();
@@ -18,7 +18,7 @@ public sealed class ContractSemanticsV1NewWindowFallbackTests
         // Raise new window request without handling it
         var targetUri = new Uri("https://example.test/popup");
         adapter.RaiseNewWindowRequested(targetUri);
-        dispatcher.RunAll();
+        DispatcherTestPump.WaitUntil(dispatcher, () => startedArgs is not null);
 
         // The fallback should have triggered NavigateAsync which raises NavigationStarted
         Assert.NotNull(startedArgs);

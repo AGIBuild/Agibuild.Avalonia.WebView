@@ -146,37 +146,37 @@ public partial class ConsumerWebViewE2EViewModel : ViewModelBase
     // ---------------------------------------------------------------------------
 
     [RelayCommand]
-    private void GoBack()
+    private async Task GoBack()
     {
         if (WebViewControl is null) return;
-        var result = WebViewControl.GoBack();
+        var result = await WebViewControl.GoBackAsync().ConfigureAwait(false);
         LogLine($"GoBack → {result}");
         UpdateNavigationState();
     }
 
     [RelayCommand]
-    private void GoForward()
+    private async Task GoForward()
     {
         if (WebViewControl is null) return;
-        var result = WebViewControl.GoForward();
+        var result = await WebViewControl.GoForwardAsync().ConfigureAwait(false);
         LogLine($"GoForward → {result}");
         UpdateNavigationState();
     }
 
     [RelayCommand]
-    private void DoRefresh()
+    private async Task DoRefresh()
     {
         if (WebViewControl is null) return;
-        var result = WebViewControl.Refresh();
+        var result = await WebViewControl.RefreshAsync().ConfigureAwait(false);
         LogLine($"Refresh → {result}");
         UpdateNavigationState();
     }
 
     [RelayCommand]
-    private void DoStop()
+    private async Task DoStop()
     {
         if (WebViewControl is null) return;
-        var result = WebViewControl.Stop();
+        var result = await WebViewControl.StopAsync().ConfigureAwait(false);
         LogLine($"Stop → {result}");
         UpdateNavigationState();
     }
@@ -648,7 +648,7 @@ public partial class ConsumerWebViewE2EViewModel : ViewModelBase
             bool backResult;
             try
             {
-                backResult = await Dispatcher.UIThread.InvokeAsync(() => WebViewControl.GoBack());
+                backResult = await WebViewControl.GoBackAsync().ConfigureAwait(false);
                 if (!backResult)
                 {
                     LogLine("  FAIL: GoBack returned false");
@@ -671,7 +671,7 @@ public partial class ConsumerWebViewE2EViewModel : ViewModelBase
             bool fwdResult;
             try
             {
-                fwdResult = await Dispatcher.UIThread.InvokeAsync(() => WebViewControl.GoForward());
+                fwdResult = await WebViewControl.GoForwardAsync().ConfigureAwait(false);
                 if (!fwdResult)
                 {
                     LogLine("  FAIL: GoForward returned false");
@@ -713,7 +713,7 @@ public partial class ConsumerWebViewE2EViewModel : ViewModelBase
             WebViewControl!.NavigationCompleted += Handler;
             try
             {
-                var result = await Dispatcher.UIThread.InvokeAsync(() => WebViewControl.Refresh());
+                var result = await WebViewControl.RefreshAsync().ConfigureAwait(false);
                 if (!result)
                 {
                     LogLine("  FAIL: Refresh returned false");
@@ -754,7 +754,7 @@ public partial class ConsumerWebViewE2EViewModel : ViewModelBase
             var uri = new Uri("https://github.com/search?q=webview+stop+test");
             _ = WebViewControl!.NavigateAsync(uri);
 
-            var result = await Dispatcher.UIThread.InvokeAsync(() => WebViewControl.Stop());
+            var result = await WebViewControl.StopAsync().ConfigureAwait(false);
             LogLine($"  Stop returned: {result}");
 
             // Give a short delay for state to settle.

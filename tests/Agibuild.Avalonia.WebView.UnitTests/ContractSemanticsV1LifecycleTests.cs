@@ -6,7 +6,7 @@ namespace Agibuild.Avalonia.WebView.UnitTests;
 public sealed class ContractSemanticsV1LifecycleTests
 {
     [Fact]
-    public void Disposed_sync_apis_throw_ObjectDisposedException()
+    public async Task Disposed_command_apis_throw_ObjectDisposedException()
     {
         var dispatcher = new TestDispatcher();
         var adapter = new MockWebViewAdapter();
@@ -14,10 +14,10 @@ public sealed class ContractSemanticsV1LifecycleTests
 
         webView.Dispose();
 
-        Assert.Throws<ObjectDisposedException>(() => webView.Stop());
-        Assert.Throws<ObjectDisposedException>(() => webView.GoBack());
-        Assert.Throws<ObjectDisposedException>(() => webView.GoForward());
-        Assert.Throws<ObjectDisposedException>(() => webView.Refresh());
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => webView.StopAsync());
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => webView.GoBackAsync());
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => webView.GoForwardAsync());
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => webView.RefreshAsync());
     }
 
     [Fact]
@@ -51,6 +51,34 @@ public sealed class ContractSemanticsV1LifecycleTests
         adapter.RaiseWebMessage("{\"x\":1}", "https://example.test", Guid.NewGuid(), protocolVersion: 1);
 
         Assert.False(raised);
+    }
+
+    [Fact]
+    public async Task Detaching_state_rejects_adapter_operations_fast()
+    {
+        var dispatcher = new TestDispatcher();
+        var adapter = new MockWebViewAdapter();
+        var webView = new WebViewCore(adapter, dispatcher);
+        webView.Attach(new TestPlatformHandle(IntPtr.Zero, "test-parent"));
+        webView.Detach();
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => webView.InvokeScriptAsync("1+1"));
+        Assert.Contains("not allowed in state", ex.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.True(WebViewOperationFailure.TryGetCategory(ex, out var category));
+        Assert.Equal(WebViewOperationFailureCategory.NotReady, category);
+        Assert.Equal(0, dispatcher.QueuedCount);
+    }
+
+    [Fact]
+    public async Task Disposed_state_fails_before_enqueue()
+    {
+        var dispatcher = new TestDispatcher();
+        var adapter = new MockWebViewAdapter();
+        var webView = new WebViewCore(adapter, dispatcher);
+        webView.Dispose();
+
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => webView.GoBackAsync());
+        Assert.Equal(0, dispatcher.QueuedCount);
     }
 }
 

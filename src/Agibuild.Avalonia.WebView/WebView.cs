@@ -13,7 +13,7 @@ namespace Agibuild.Avalonia.WebView;
 /// <code>&lt;agw:WebView Source="https://example.com" /&gt;</code>
 /// </para>
 /// </summary>
-public class WebView : NativeControlHost
+public class WebView : NativeControlHost, IWebView
 {
     // ---------------------------------------------------------------------------
     //  Avalonia StyledProperties
@@ -42,6 +42,7 @@ public class WebView : NativeControlHost
     private bool _coreAttached;
     private bool _adapterUnavailable;
     private ILoggerFactory? _loggerFactory;
+    private EventHandler<ContextMenuRequestedEventArgs>? _contextMenuRequestedHandlers;
 
     // ---------------------------------------------------------------------------
     //  Constructor
@@ -67,6 +68,13 @@ public class WebView : NativeControlHost
         get => _loggerFactory;
         set => _loggerFactory = value;
     }
+
+    /// <summary>
+    /// Optional per-instance environment options. When set, these options are used for this control
+    /// instead of the global <see cref="WebViewEnvironment.Options"/>.
+    /// Set this before the control is attached to the visual tree.
+    /// </summary>
+    public IWebViewEnvironmentOptions? EnvironmentOptions { get; set; }
 
     /// <summary>
     /// Gets or sets the current navigation URI. Setting this triggers a navigation.
@@ -106,6 +114,20 @@ public class WebView : NativeControlHost
     {
         get => GetValue(ZoomFactorProperty);
         set => SetValue(ZoomFactorProperty, value);
+    }
+
+    public Task<double> GetZoomFactorAsync()
+    {
+        if (_core is null)
+            throw new InvalidOperationException("WebView is not initialized.");
+        return _core.GetZoomFactorAsync();
+    }
+
+    public Task SetZoomFactorAsync(double zoomFactor)
+    {
+        if (_core is null)
+            throw new InvalidOperationException("WebView is not initialized.");
+        return _core.SetZoomFactorAsync(zoomFactor);
     }
 
     /// <summary>Raised when the zoom factor changes.</summary>
@@ -175,33 +197,30 @@ public class WebView : NativeControlHost
     /// Opens the browser developer tools (inspector) at runtime.
     /// No-op if the platform adapter does not support runtime DevTools toggling.
     /// </summary>
-    public void OpenDevTools()
+    public Task OpenDevToolsAsync()
     {
         EnsureCore();
-        _core!.OpenDevTools();
+        return _core!.OpenDevToolsAsync();
     }
 
     /// <summary>
     /// Closes the browser developer tools.
     /// No-op if the platform adapter does not support runtime DevTools toggling.
     /// </summary>
-    public void CloseDevTools()
+    public Task CloseDevToolsAsync()
     {
         EnsureCore();
-        _core!.CloseDevTools();
+        return _core!.CloseDevToolsAsync();
     }
 
     /// <summary>
     /// Returns whether developer tools are currently open.
     /// Always returns false if the platform adapter does not support this check.
     /// </summary>
-    public bool IsDevToolsOpen
+    public Task<bool> IsDevToolsOpenAsync()
     {
-        get
-        {
-            EnsureCore();
-            return _core!.IsDevToolsOpen;
-        }
+        EnsureCore();
+        return _core!.IsDevToolsOpenAsync();
     }
 
     /// <summary>
@@ -239,31 +258,31 @@ public class WebView : NativeControlHost
     /// <summary>
     /// Clears find-in-page highlights and resets search state.
     /// </summary>
-    public void StopFindInPage(bool clearHighlights = true)
+    public Task StopFindInPageAsync(bool clearHighlights = true)
     {
         if (_core is null)
             throw new InvalidOperationException("WebView is not initialized.");
-        _core.StopFindInPage(clearHighlights);
+        return _core.StopFindInPageAsync(clearHighlights);
     }
 
     /// <summary>
     /// Registers a JavaScript snippet to run at document start on every page load.
     /// </summary>
-    public string AddPreloadScript(string javaScript)
+    public Task<string> AddPreloadScriptAsync(string javaScript)
     {
         if (_core is null)
             throw new InvalidOperationException("WebView is not initialized.");
-        return _core.AddPreloadScript(javaScript);
+        return _core.AddPreloadScriptAsync(javaScript);
     }
 
     /// <summary>
     /// Removes a previously registered preload script by its ID.
     /// </summary>
-    public void RemovePreloadScript(string scriptId)
+    public Task RemovePreloadScriptAsync(string scriptId)
     {
         if (_core is null)
             throw new InvalidOperationException("WebView is not initialized.");
-        _core.RemovePreloadScript(scriptId);
+        return _core.RemovePreloadScriptAsync(scriptId);
     }
 
     /// <summary>
@@ -272,8 +291,22 @@ public class WebView : NativeControlHost
     /// </summary>
     public event EventHandler<ContextMenuRequestedEventArgs>? ContextMenuRequested
     {
-        add { if (_core is not null) _core.ContextMenuRequested += value; }
-        remove { if (_core is not null) _core.ContextMenuRequested -= value; }
+        add
+        {
+            _contextMenuRequestedHandlers += value;
+            if (_core is not null)
+            {
+                _core.ContextMenuRequested += value;
+            }
+        }
+        remove
+        {
+            _contextMenuRequestedHandlers -= value;
+            if (_core is not null)
+            {
+                _core.ContextMenuRequested -= value;
+            }
+        }
     }
 
     /// <summary>
@@ -282,6 +315,19 @@ public class WebView : NativeControlHost
     public IPlatformHandle? TryGetWebViewHandle()
     {
         return _core?.TryGetWebViewHandle();
+    }
+
+    /// <summary>
+    /// Returns the underlying platform WebView handle asynchronously, or <c>null</c> if not available.
+    /// </summary>
+    public Task<IPlatformHandle?> TryGetWebViewHandleAsync()
+    {
+        if (_core is null)
+        {
+            return Task.FromResult<IPlatformHandle?>(null);
+        }
+
+        return _core.TryGetWebViewHandleAsync();
     }
 
     /// <summary>
@@ -333,28 +379,28 @@ public class WebView : NativeControlHost
         return _core!.InvokeScriptAsync(script);
     }
 
-    public bool GoBack()
+    public Task<bool> GoBackAsync()
     {
-        if (_core is null) return false;
-        return _core.GoBack();
+        if (_core is null) return Task.FromResult(false);
+        return _core.GoBackAsync();
     }
 
-    public bool GoForward()
+    public Task<bool> GoForwardAsync()
     {
-        if (_core is null) return false;
-        return _core.GoForward();
+        if (_core is null) return Task.FromResult(false);
+        return _core.GoForwardAsync();
     }
 
-    public bool Refresh()
+    public Task<bool> RefreshAsync()
     {
-        if (_core is null) return false;
-        return _core.Refresh();
+        if (_core is null) return Task.FromResult(false);
+        return _core.RefreshAsync();
     }
 
-    public bool Stop()
+    public Task<bool> StopAsync()
     {
-        if (_core is null) return false;
-        return _core.Stop();
+        if (_core is null) return Task.FromResult(false);
+        return _core.StopAsync();
     }
 
     // --- Events (bubbled from WebViewCore) ---
@@ -385,7 +431,7 @@ public class WebView : NativeControlHost
             var logger = effectiveLoggerFactory?.CreateLogger<WebViewCore>()
                          ?? (ILogger<WebViewCore>)NullLogger<WebViewCore>.Instance;
 
-            _core = WebViewCore.CreateForControl(dispatcher, logger);
+            _core = WebViewCore.CreateForControl(dispatcher, logger, EnvironmentOptions);
 
             // Subscribe before Attach so we receive AdapterCreated raised during Attach().
             SubscribeCoreEvents();
@@ -457,7 +503,7 @@ public class WebView : NativeControlHost
         if (_core is null || !_coreAttached) return;
         if (e.NewValue is double newZoom)
         {
-            _core.ZoomFactor = newZoom;
+            _ = _core.SetZoomFactorAsync(newZoom);
         }
     }
 
@@ -500,11 +546,15 @@ public class WebView : NativeControlHost
         _core.AdapterCreated += OnCoreAdapterCreated;
         _core.AdapterDestroyed += OnCoreAdapterDestroyed;
         _core.ZoomFactorChanged += OnCoreZoomFactorChanged;
+        if (_contextMenuRequestedHandlers is not null)
+        {
+            _core.ContextMenuRequested += _contextMenuRequestedHandlers;
+        }
 
         // Apply initial zoom if set via XAML before core existed
         var zoom = ZoomFactor;
         if (Math.Abs(zoom - 1.0) > 0.001)
-            _core.ZoomFactor = zoom;
+            _ = _core.SetZoomFactorAsync(zoom);
     }
 
     private void UnsubscribeCoreEvents()
@@ -522,6 +572,10 @@ public class WebView : NativeControlHost
         _core.AdapterCreated -= OnCoreAdapterCreated;
         _core.AdapterDestroyed -= OnCoreAdapterDestroyed;
         _core.ZoomFactorChanged -= OnCoreZoomFactorChanged;
+        if (_contextMenuRequestedHandlers is not null)
+        {
+            _core.ContextMenuRequested -= _contextMenuRequestedHandlers;
+        }
     }
 
     private void OnCoreNavigationStarted(object? sender, NavigationStartingEventArgs e)
@@ -569,4 +623,18 @@ public class WebView : NativeControlHost
 
     private void OnCoreAdapterDestroyed(object? sender, EventArgs e)
         => AdapterDestroyed?.Invoke(this, EventArgs.Empty);
+
+    public void Dispose()
+    {
+        UnsubscribeCoreEvents();
+
+        if (_coreAttached)
+        {
+            _core?.Detach();
+            _coreAttached = false;
+        }
+
+        _core?.Dispose();
+        _core = null;
+    }
 }

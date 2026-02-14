@@ -6,18 +6,18 @@ namespace Agibuild.Avalonia.WebView.UnitTests;
 public class DevToolsTests
 {
     [Fact]
-    public void IWebView_declares_OpenDevTools_CloseDevTools_IsDevToolsOpen()
+    public void IWebView_declares_async_DevTools_members()
     {
         // Compile-time verification: IWebView has the methods
-        var methods = typeof(IWebView).GetMethod("OpenDevTools");
+        var methods = typeof(IWebView).GetMethod("OpenDevToolsAsync");
         Assert.NotNull(methods);
 
-        methods = typeof(IWebView).GetMethod("CloseDevTools");
+        methods = typeof(IWebView).GetMethod("CloseDevToolsAsync");
         Assert.NotNull(methods);
 
-        var prop = typeof(IWebView).GetProperty("IsDevToolsOpen");
-        Assert.NotNull(prop);
-        Assert.Equal(typeof(bool), prop.PropertyType);
+        methods = typeof(IWebView).GetMethod("IsDevToolsOpenAsync");
+        Assert.NotNull(methods);
+        Assert.Equal(typeof(Task<bool>), methods!.ReturnType);
     }
 
     [Fact]
@@ -29,17 +29,17 @@ public class DevToolsTests
 
         // IDevToolsAdapter is defined in Adapters.Abstractions, may not be visible here.
         // Instead verify via IWebView which delegates to it.
-        Assert.NotNull(typeof(IWebView).GetMethod("OpenDevTools"));
-        Assert.NotNull(typeof(IWebView).GetMethod("CloseDevTools"));
-        Assert.NotNull(typeof(IWebView).GetProperty("IsDevToolsOpen"));
+        Assert.NotNull(typeof(IWebView).GetMethod("OpenDevToolsAsync"));
+        Assert.NotNull(typeof(IWebView).GetMethod("CloseDevToolsAsync"));
+        Assert.NotNull(typeof(IWebView).GetMethod("IsDevToolsOpenAsync"));
     }
 
     [Fact]
-    public void TestWebViewHost_DevTools_are_noop()
+    public async Task TestWebViewHost_DevTools_are_noop()
     {
         using var host = new Agibuild.Avalonia.WebView.Testing.TestWebViewHost();
-        host.OpenDevTools();
-        host.CloseDevTools();
-        Assert.False(host.IsDevToolsOpen);
+        await host.OpenDevToolsAsync();
+        await host.CloseDevToolsAsync();
+        Assert.False(await host.IsDevToolsOpenAsync());
     }
 }

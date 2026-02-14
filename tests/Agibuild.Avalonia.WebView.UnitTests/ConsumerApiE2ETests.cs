@@ -57,13 +57,13 @@ public sealed class ConsumerApiE2ETests
     }
 
     [Fact]
-    public async Task InvokeScript_returns_result()
+    public void InvokeScript_returns_result()
     {
         var dispatcher = new TestDispatcher();
         var adapter = new MockWebViewAdapter { ScriptResult = "42" };
         var core = new WebViewCore(adapter, dispatcher);
 
-        var result = await core.InvokeScriptAsync("1+1");
+        var result = DispatcherTestPump.Run(dispatcher, () => core.InvokeScriptAsync("1+1"));
 
         Assert.Equal("42", result);
     }
@@ -77,6 +77,7 @@ public sealed class ConsumerApiE2ETests
 
         var uri = new Uri("https://example.test/source");
         core.Source = uri;
+        DispatcherTestPump.WaitUntil(dispatcher, () => adapter.LastNavigationUri == uri);
 
         Assert.Equal(uri, core.Source);
         Assert.Equal(uri, adapter.LastNavigationUri);
@@ -108,7 +109,7 @@ public sealed class ConsumerApiE2ETests
         var adapter = new MockWebViewAdapter { CanGoBack = false };
         var core = new WebViewCore(adapter, dispatcher);
 
-        Assert.False(core.GoBack());
+        Assert.False(DispatcherTestPump.Run(dispatcher, () => core.GoBackAsync()));
     }
 
     [Fact]
@@ -118,7 +119,7 @@ public sealed class ConsumerApiE2ETests
         var adapter = new MockWebViewAdapter { CanGoBack = true, GoBackAccepted = true };
         var core = new WebViewCore(adapter, dispatcher);
 
-        Assert.True(core.GoBack());
+        Assert.True(DispatcherTestPump.Run(dispatcher, () => core.GoBackAsync()));
     }
 
     [Fact]

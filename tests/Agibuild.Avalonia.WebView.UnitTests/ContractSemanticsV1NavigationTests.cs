@@ -35,7 +35,7 @@ public sealed class ContractSemanticsV1NavigationTests
         var startedThreadId = -1;
         webView.NavigationStarted += (_, _) => startedThreadId = Environment.CurrentManagedThreadId;
 
-        var navTask = RunOffThread(() => webView.NavigateAsync(new Uri("https://example.test")));
+        var navTask = ThreadingTestHelper.RunOffThread(() => webView.NavigateAsync(new Uri("https://example.test")));
 
         dispatcher.RunAll();
 
@@ -58,7 +58,7 @@ public sealed class ContractSemanticsV1NavigationTests
         webView.NavigationStarted += (_, args) => args.Cancel = true;
         webView.NavigationCompleted += (_, args) => completed = args;
 
-        var navTask = RunOffThread(() => webView.NavigateAsync(new Uri("https://example.test")));
+        var navTask = ThreadingTestHelper.RunOffThread(() => webView.NavigateAsync(new Uri("https://example.test")));
 
         dispatcher.RunAll();
 
@@ -81,13 +81,14 @@ public sealed class ContractSemanticsV1NavigationTests
         var completedStatuses = new List<NavigationCompletedStatus>();
         webView.NavigationCompleted += (_, args) => completedStatuses.Add(args.Status);
 
-        var nav1 = RunOffThread(() => webView.NavigateAsync(new Uri("https://example.test/1")));
+        var nav1 = ThreadingTestHelper.RunOffThread(() => webView.NavigateAsync(new Uri("https://example.test/1")));
         dispatcher.RunAll();
 
-        var nav2 = RunOffThread(() => webView.NavigateAsync(new Uri("https://example.test/2")));
+        var nav2 = ThreadingTestHelper.RunOffThread(() => webView.NavigateAsync(new Uri("https://example.test/2")));
         dispatcher.RunAll();
 
         // nav1 should have completed successfully as superseded when nav2 started.
+        ThreadingTestHelper.PumpUntil(dispatcher, () => completedStatuses.Contains(NavigationCompletedStatus.Superseded));
         Assert.Contains(NavigationCompletedStatus.Superseded, completedStatuses);
 
         // Complete nav2 on the UI thread (where dispatcher.RunAll works).
@@ -108,7 +109,7 @@ public sealed class ContractSemanticsV1NavigationTests
         var count = 0;
         webView.NavigationCompleted += (_, _) => count++;
 
-        var navTask = RunOffThread(() => webView.NavigateAsync(new Uri("https://example.test")));
+        var navTask = ThreadingTestHelper.RunOffThread(() => webView.NavigateAsync(new Uri("https://example.test")));
         dispatcher.RunAll();
 
         adapter.RaiseNavigationCompleted(NavigationCompletedStatus.Success);
@@ -125,7 +126,7 @@ public sealed class ContractSemanticsV1NavigationTests
         var adapter = new MockWebViewAdapter();
         var webView = new WebViewCore(adapter, dispatcher);
 
-        var navTask = RunOffThread(() => webView.NavigateAsync(new Uri("https://example.test")));
+        var navTask = ThreadingTestHelper.RunOffThread(() => webView.NavigateAsync(new Uri("https://example.test")));
         dispatcher.RunAll();
 
         adapter.RaiseNavigationCompleted(NavigationCompletedStatus.Failure, new Exception("boom"));
@@ -134,36 +135,5 @@ public sealed class ContractSemanticsV1NavigationTests
         Assert.Equal(new Uri("https://example.test"), ex.RequestUri);
     }
 
-    private static Task RunOffThread(Func<Task> func)
-    {
-        using var ready = new ManualResetEventSlim(false);
-        var tcs = new TaskCompletionSource<Task>(TaskCreationOptions.RunContinuationsAsynchronously);
-
-        var thread = new Thread(() =>
-        {
-            try
-            {
-                tcs.SetResult(func());
-            }
-            catch (Exception ex)
-            {
-                tcs.SetException(ex);
-            }
-            finally
-            {
-                ready.Set();
-            }
-        })
-        {
-            IsBackground = true
-        };
-
-        thread.Start();
-        if (!ready.Wait(TimeSpan.FromSeconds(5)))
-        {
-            throw new TimeoutException("Off-thread invocation did not start within timeout.");
-        }
-        return tcs.Task.Unwrap();
-    }
 }
 

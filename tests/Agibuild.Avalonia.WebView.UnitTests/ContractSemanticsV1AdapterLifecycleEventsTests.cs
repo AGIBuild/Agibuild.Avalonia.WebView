@@ -162,6 +162,25 @@ public sealed class ContractSemanticsV1AdapterLifecycleEventsTests
         Assert.Null(core.TryGetWebViewHandle());
     }
 
+    [Fact]
+    public async Task TryGetWebViewHandleAsync_returns_null_after_adapter_destroyed()
+    {
+        var dispatcher = new TestDispatcher();
+        var adapter = MockWebViewAdapter.CreateWithHandle();
+        adapter.HandleToReturn = new TestPlatformHandle(0x1234, "WebView2");
+
+        var core = new WebViewCore(adapter, dispatcher);
+        core.Attach(new TestPlatformHandle(IntPtr.Zero, "test-parent"));
+
+        var beforeDetach = await core.TryGetWebViewHandleAsync();
+        Assert.NotNull(beforeDetach);
+
+        core.Detach();
+
+        var afterDetach = await core.TryGetWebViewHandleAsync();
+        Assert.Null(afterDetach);
+    }
+
     // -----------------------------------------------------------------------
     //  10.5 No events fire after AdapterDestroyed
     // -----------------------------------------------------------------------

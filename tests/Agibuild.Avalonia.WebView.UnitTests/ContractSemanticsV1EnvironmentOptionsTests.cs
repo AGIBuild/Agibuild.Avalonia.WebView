@@ -1,5 +1,6 @@
 using Agibuild.Avalonia.WebView;
 using Agibuild.Avalonia.WebView.Testing;
+using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
 namespace Agibuild.Avalonia.WebView.UnitTests;
@@ -124,6 +125,47 @@ public sealed class ContractSemanticsV1EnvironmentOptionsTests
             Assert.True(WebViewEnvironment.Options.EnableDevTools);
             Assert.Equal("MyApp/3.0", WebViewEnvironment.Options.CustomUserAgent);
             Assert.False(WebViewEnvironment.Options.UseEphemeralSession);
+        }
+        finally
+        {
+            WebViewEnvironment.Options = savedOptions;
+        }
+    }
+
+    [Fact]
+    public void Explicit_environment_options_are_instance_scoped_and_do_not_mutate_global_state()
+    {
+        var savedOptions = WebViewEnvironment.Options;
+        try
+        {
+            var global = new WebViewEnvironmentOptions
+            {
+                EnableDevTools = false,
+                CustomUserAgent = "Global/1.0",
+                UseEphemeralSession = false
+            };
+            WebViewEnvironment.Options = global;
+
+            var instanceOptions = new WebViewEnvironmentOptions
+            {
+                EnableDevTools = true,
+                CustomUserAgent = "Instance/2.0",
+                UseEphemeralSession = true
+            };
+
+            var adapter = MockWebViewAdapter.CreateWithOptions();
+            using var core = new WebViewCore(
+                adapter,
+                _dispatcher,
+                NullLogger<WebViewCore>.Instance,
+                instanceOptions);
+
+            Assert.Equal(1, adapter.ApplyOptionsCallCount);
+            Assert.NotNull(adapter.AppliedOptions);
+            Assert.True(adapter.AppliedOptions!.EnableDevTools);
+            Assert.Equal("Instance/2.0", adapter.AppliedOptions.CustomUserAgent);
+            Assert.True(adapter.AppliedOptions.UseEphemeralSession);
+            Assert.Same(global, WebViewEnvironment.Options);
         }
         finally
         {

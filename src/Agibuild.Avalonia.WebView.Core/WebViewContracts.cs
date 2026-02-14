@@ -27,6 +27,46 @@ public enum WebMessageDropReason
     ChannelMismatch
 }
 
+public enum WebViewOperationFailureCategory
+{
+    Disposed,
+    NotReady,
+    DispatchFailed,
+    AdapterFailed
+}
+
+public static class WebViewOperationFailure
+{
+    private const string CategoryDataKey = "Agibuild.WebView.OperationFailureCategory";
+
+    public static void SetCategory(Exception exception, WebViewOperationFailureCategory category)
+    {
+        ArgumentNullException.ThrowIfNull(exception);
+        exception.Data[CategoryDataKey] = category;
+    }
+
+    public static bool TryGetCategory(Exception exception, out WebViewOperationFailureCategory category)
+    {
+        ArgumentNullException.ThrowIfNull(exception);
+
+        if (exception.Data[CategoryDataKey] is WebViewOperationFailureCategory typed)
+        {
+            category = typed;
+            return true;
+        }
+
+        if (exception.Data[CategoryDataKey] is string text &&
+            Enum.TryParse(text, ignoreCase: true, out WebViewOperationFailureCategory parsed))
+        {
+            category = parsed;
+            return true;
+        }
+
+        category = default;
+        return false;
+    }
+}
+
 public interface IWebView : IDisposable
 {
     Uri Source { get; set; }
@@ -41,13 +81,14 @@ public interface IWebView : IDisposable
     Task NavigateToStringAsync(string html, Uri? baseUrl);
     Task<string?> InvokeScriptAsync(string script);
 
-    bool GoBack();
-    bool GoForward();
-    bool Refresh();
-    bool Stop();
+    Task<bool> GoBackAsync();
+    Task<bool> GoForwardAsync();
+    Task<bool> RefreshAsync();
+    Task<bool> StopAsync();
 
     ICookieManager? TryGetCookieManager();
     ICommandManager? TryGetCommandManager();
+    Task<IPlatformHandle?> TryGetWebViewHandleAsync();
 
     /// <summary>
     /// Gets the RPC service for bidirectional JS ↔ C# method calls.
@@ -68,19 +109,19 @@ public interface IWebView : IDisposable
     /// Opens the browser developer tools (inspector) at runtime.
     /// No-op if the platform adapter does not support runtime DevTools toggling.
     /// </summary>
-    void OpenDevTools();
+    Task OpenDevToolsAsync();
 
     /// <summary>
     /// Closes the browser developer tools.
     /// No-op if the platform adapter does not support runtime DevTools toggling.
     /// </summary>
-    void CloseDevTools();
+    Task CloseDevToolsAsync();
 
     /// <summary>
     /// Returns whether developer tools are currently open.
     /// Always returns false if the platform adapter does not support this check.
     /// </summary>
-    bool IsDevToolsOpen { get; }
+    Task<bool> IsDevToolsOpenAsync();
 
     /// <summary>
     /// Captures a screenshot of the current viewport as a PNG byte array.
@@ -118,10 +159,8 @@ public interface IWebView : IDisposable
     /// <summary>
     /// Gets or sets the zoom factor. 1.0 = 100%. Returns 1.0 if zoom is not supported.
     /// </summary>
-    double ZoomFactor { get; set; }
-
-    /// <summary>Raised when the zoom factor changes.</summary>
-    event EventHandler<double>? ZoomFactorChanged;
+    Task<double> GetZoomFactorAsync();
+    Task SetZoomFactorAsync(double zoomFactor);
 
     // ==================== Find in Page ====================
 
@@ -135,7 +174,7 @@ public interface IWebView : IDisposable
     /// Stops an active find session and optionally clears highlights.
     /// </summary>
     /// <exception cref="NotSupportedException">The adapter does not implement find-in-page.</exception>
-    void StopFindInPage(bool clearHighlights = true);
+    Task StopFindInPageAsync(bool clearHighlights = true);
 
     // ==================== Preload Scripts ====================
 
@@ -144,13 +183,13 @@ public interface IWebView : IDisposable
     /// </summary>
     /// <returns>An opaque script ID for later removal.</returns>
     /// <exception cref="NotSupportedException">The adapter does not implement preload scripts.</exception>
-    string AddPreloadScript(string javaScript);
+    Task<string> AddPreloadScriptAsync(string javaScript);
 
     /// <summary>
     /// Removes a previously added preload script.
     /// </summary>
     /// <exception cref="NotSupportedException">The adapter does not implement preload scripts.</exception>
-    void RemovePreloadScript(string scriptId);
+    Task RemovePreloadScriptAsync(string scriptId);
 
     // ==================== Context Menu ====================
 
@@ -406,17 +445,17 @@ public enum WebViewCommand
 public interface ICommandManager
 {
     /// <summary>Copies the current selection to the clipboard.</summary>
-    void Copy();
+    Task CopyAsync();
     /// <summary>Cuts the current selection to the clipboard.</summary>
-    void Cut();
+    Task CutAsync();
     /// <summary>Pastes clipboard content at the current position.</summary>
-    void Paste();
+    Task PasteAsync();
     /// <summary>Selects all content in the WebView.</summary>
-    void SelectAll();
+    Task SelectAllAsync();
     /// <summary>Undoes the last editing action.</summary>
-    void Undo();
+    Task UndoAsync();
     /// <summary>Redoes the last undone editing action.</summary>
-    void Redo();
+    Task RedoAsync();
 }
 
 /// <summary>Abstraction for a top-level window that can serve as an owner for dialogs.</summary>

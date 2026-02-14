@@ -99,8 +99,7 @@ public sealed class RpcIntegrationTests
             "*", core.ChannelId);
         _dispatcher.RunAll();
 
-        // Wait briefly for async handler to complete
-        Thread.Sleep(200);
+        DispatcherTestPump.WaitUntil(_dispatcher, () => capturedScripts.Any(s => s.Contains("test-1")));
 
         // Assert: response script was sent back containing the result (10)
         Assert.Contains(capturedScripts, s => s.Contains("test-1") && s.Contains("10"));
@@ -152,7 +151,7 @@ public sealed class RpcIntegrationTests
             """{"jsonrpc":"2.0","id":"err-1","method":"nonExistent","params":null}""",
             "*", core.ChannelId);
         _dispatcher.RunAll();
-        Thread.Sleep(200);
+        DispatcherTestPump.WaitUntil(_dispatcher, () => capturedScripts.Any(s => s.Contains("err-1")));
 
         // Assert: error response with code -32601 (Method not found)
         Assert.Contains(capturedScripts, s => s.Contains("err-1") && s.Contains("-32601"));
@@ -176,7 +175,7 @@ public sealed class RpcIntegrationTests
             """{"jsonrpc":"2.0","id":"err-2","method":"crash","params":null}""",
             "*", core.ChannelId);
         _dispatcher.RunAll();
-        Thread.Sleep(200);
+        DispatcherTestPump.WaitUntil(_dispatcher, () => capturedScripts.Any(s => s.Contains("err-2")));
 
         // Assert: error response with code -32603 (Internal error) and our message
         Assert.Contains(capturedScripts, s =>
@@ -204,7 +203,7 @@ public sealed class RpcIntegrationTests
             """{"jsonrpc":"2.0","id":"rm-1","method":"temp","params":null}""",
             "*", core.ChannelId);
         _dispatcher.RunAll();
-        Thread.Sleep(200);
+        DispatcherTestPump.WaitUntil(_dispatcher, () => capturedScripts.Any(s => s.Contains("rm-1")));
 
         // Assert: method not found error
         Assert.Contains(capturedScripts, s => s.Contains("rm-1") && s.Contains("-32601"));

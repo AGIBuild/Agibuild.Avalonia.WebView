@@ -180,6 +180,7 @@ public sealed class BridgeIntegrationTests
     public void Bridge_is_thread_safe_for_expose_operations()
     {
         var (core, adapter, scripts) = CreateCore();
+        adapter.ScriptCallback = _ => null;
 
         // Parallel expose shouldn't throw (one might fail with duplicate, that's ok).
         var tasks = Enumerable.Range(0, 10).Select(_ => Task.Run(() =>
@@ -197,11 +198,12 @@ public sealed class BridgeIntegrationTests
         Task.WaitAll(tasks.ToArray());
 
         // At least one should have succeeded.
+        adapter.ScriptCallback = script => { scripts.Add(script); return null; };
         scripts.Clear();
         adapter.RaiseWebMessage(
             """{"jsonrpc":"2.0","id":"ts-1","method":"AppService.getCurrentUser","params":{}}""",
             "*", core.ChannelId);
-        _dispatcher.RunAll();
+        DispatcherTestPump.WaitUntil(_dispatcher, () => scripts.Any(s => s.Contains("Alice")), TimeSpan.FromSeconds(2));
         Assert.True(scripts.Any(s => s.Contains("Alice")), "Expected 'Alice' in response after concurrent expose");
     }
 }

@@ -1,3 +1,6 @@
+## Purpose
+Define deterministic, testable v1 behavioral semantics for WebView contracts, including threading, lifecycle, and event guarantees.
+
 ## Requirements
 
 ### Requirement: Baseline semantics are versioned and testable

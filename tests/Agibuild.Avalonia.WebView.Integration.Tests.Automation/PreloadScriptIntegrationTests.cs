@@ -28,7 +28,7 @@ public sealed class PreloadScriptIntegrationTests
         var adapter = MockWebViewAdapter.CreateWithPreload();
         using var dialog = new WebDialog(host, adapter, _dispatcher);
 
-        var id = dialog.AddPreloadScript("console.log('hello')");
+        var id = DispatcherTestPump.Run(_dispatcher, () => dialog.AddPreloadScriptAsync("console.log('hello')"));
 
         Assert.NotNull(id);
         Assert.NotEmpty(id);
@@ -43,8 +43,8 @@ public sealed class PreloadScriptIntegrationTests
         var adapter = MockWebViewAdapter.CreateWithPreload();
         using var dialog = new WebDialog(host, adapter, _dispatcher);
 
-        var id = dialog.AddPreloadScript("console.log('hello')");
-        dialog.RemovePreloadScript(id);
+        var id = DispatcherTestPump.Run(_dispatcher, () => dialog.AddPreloadScriptAsync("console.log('hello')"));
+        DispatcherTestPump.Run(_dispatcher, () => dialog.RemovePreloadScriptAsync(id));
 
         var preloadAdapter = (MockWebViewAdapterWithPreload)adapter;
         Assert.Empty(preloadAdapter.Scripts);
@@ -59,12 +59,12 @@ public sealed class PreloadScriptIntegrationTests
         var adapter = MockWebViewAdapter.CreateWithPreload();
         using var dialog = new WebDialog(host, adapter, _dispatcher);
 
-        var id1 = dialog.AddPreloadScript("console.log('a')");
-        var id2 = dialog.AddPreloadScript("console.log('b')");
+        var id1 = DispatcherTestPump.Run(_dispatcher, () => dialog.AddPreloadScriptAsync("console.log('a')"));
+        var id2 = DispatcherTestPump.Run(_dispatcher, () => dialog.AddPreloadScriptAsync("console.log('b')"));
 
         Assert.NotEqual(id1, id2);
 
-        dialog.RemovePreloadScript(id1);
+        DispatcherTestPump.Run(_dispatcher, () => dialog.RemovePreloadScriptAsync(id1));
 
         var preloadAdapter = (MockWebViewAdapterWithPreload)adapter;
         Assert.Single(preloadAdapter.Scripts);
@@ -80,7 +80,7 @@ public sealed class PreloadScriptIntegrationTests
         var adapter = MockWebViewAdapter.Create();
         using var dialog = new WebDialog(host, adapter, _dispatcher);
 
-        Assert.Throws<NotSupportedException>(() => dialog.AddPreloadScript("x"));
+        Assert.Throws<NotSupportedException>(() => DispatcherTestPump.Run(_dispatcher, () => dialog.AddPreloadScriptAsync("x")));
     }
 
     // ──────────────────── Test 5: Remove without adapter throws ────────────────────
@@ -92,7 +92,7 @@ public sealed class PreloadScriptIntegrationTests
         var adapter = MockWebViewAdapter.Create();
         using var dialog = new WebDialog(host, adapter, _dispatcher);
 
-        Assert.Throws<NotSupportedException>(() => dialog.RemovePreloadScript("some-id"));
+        Assert.Throws<NotSupportedException>(() => DispatcherTestPump.Run(_dispatcher, () => dialog.RemovePreloadScriptAsync("some-id")));
     }
 
     // ──────────────────── Test 6: Add after dispose throws ────────────────────
@@ -105,7 +105,7 @@ public sealed class PreloadScriptIntegrationTests
         var dialog = new WebDialog(host, adapter, _dispatcher);
         dialog.Dispose();
 
-        Assert.Throws<ObjectDisposedException>(() => dialog.AddPreloadScript("x"));
+        Assert.Throws<ObjectDisposedException>(() => DispatcherTestPump.Run(_dispatcher, () => dialog.AddPreloadScriptAsync("x")));
     }
 
     // ──────────────────── Test 7: Remove after dispose throws ────────────────────
@@ -116,10 +116,10 @@ public sealed class PreloadScriptIntegrationTests
         var host = new MockDialogHost();
         var adapter = MockWebViewAdapter.CreateWithPreload();
         var dialog = new WebDialog(host, adapter, _dispatcher);
-        var id = dialog.AddPreloadScript("x");
+        var id = DispatcherTestPump.Run(_dispatcher, () => dialog.AddPreloadScriptAsync("x"));
         dialog.Dispose();
 
-        Assert.Throws<ObjectDisposedException>(() => dialog.RemovePreloadScript(id));
+        Assert.Throws<ObjectDisposedException>(() => DispatcherTestPump.Run(_dispatcher, () => dialog.RemovePreloadScriptAsync(id)));
     }
 
     // ──────────────────── Test 8: Remove unknown ID is no-op ────────────────────
@@ -131,8 +131,8 @@ public sealed class PreloadScriptIntegrationTests
         var adapter = MockWebViewAdapter.CreateWithPreload();
         using var dialog = new WebDialog(host, adapter, _dispatcher);
 
-        var id = dialog.AddPreloadScript("console.log('keep')");
-        dialog.RemovePreloadScript("nonexistent-id"); // should not throw
+        DispatcherTestPump.Run(_dispatcher, () => dialog.AddPreloadScriptAsync("console.log('keep')"));
+        DispatcherTestPump.Run(_dispatcher, () => dialog.RemovePreloadScriptAsync("nonexistent-id")); // should not throw
 
         var preloadAdapter = (MockWebViewAdapterWithPreload)adapter;
         Assert.Single(preloadAdapter.Scripts); // original still there
@@ -147,9 +147,9 @@ public sealed class PreloadScriptIntegrationTests
         var adapter = MockWebViewAdapter.CreateWithPreload();
         using var dialog = new WebDialog(host, adapter, _dispatcher);
 
-        var id1 = dialog.AddPreloadScript("console.log('a')");
-        dialog.RemovePreloadScript(id1);
-        var id2 = dialog.AddPreloadScript("console.log('b')");
+        var id1 = DispatcherTestPump.Run(_dispatcher, () => dialog.AddPreloadScriptAsync("console.log('a')"));
+        DispatcherTestPump.Run(_dispatcher, () => dialog.RemovePreloadScriptAsync(id1));
+        var id2 = DispatcherTestPump.Run(_dispatcher, () => dialog.AddPreloadScriptAsync("console.log('b')"));
 
         Assert.NotEqual(id1, id2);
         var preloadAdapter = (MockWebViewAdapterWithPreload)adapter;

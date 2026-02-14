@@ -22,7 +22,7 @@ public sealed class PrintToPdfIntegrationTests
     // ──────────────────── Test 1: Returns PDF bytes ────────────────────
 
     [AvaloniaFact]
-    public async Task PrintToPdf_returns_pdf_bytes()
+    public void PrintToPdf_returns_pdf_bytes()
     {
         // Arrange
         var host = new MockDialogHost();
@@ -30,7 +30,7 @@ public sealed class PrintToPdfIntegrationTests
         using var dialog = new WebDialog(host, adapter, _dispatcher);
 
         // Act
-        var bytes = await dialog.PrintToPdfAsync();
+        var bytes = DispatcherTestPump.Run(_dispatcher, () => dialog.PrintToPdfAsync());
 
         // Assert: got non-empty bytes with PDF magic header (%PDF)
         Assert.NotNull(bytes);
@@ -44,7 +44,7 @@ public sealed class PrintToPdfIntegrationTests
     // ──────────────────── Test 2: Options pass through ────────────────────
 
     [AvaloniaFact]
-    public async Task PrintToPdf_with_options_passes_through_to_adapter()
+    public void PrintToPdf_with_options_passes_through_to_adapter()
     {
         // Arrange
         var host = new MockDialogHost();
@@ -60,7 +60,7 @@ public sealed class PrintToPdfIntegrationTests
         };
 
         // Act
-        await dialog.PrintToPdfAsync(options);
+        DispatcherTestPump.Run(_dispatcher, () => dialog.PrintToPdfAsync(options));
 
         // Assert: adapter received the exact options we passed
         Assert.NotNull(adapter.LastPrintOptions);
@@ -73,7 +73,7 @@ public sealed class PrintToPdfIntegrationTests
     // ──────────────────── Test 3: Throws when unsupported ────────────────────
 
     [AvaloniaFact]
-    public async Task PrintToPdf_throws_NotSupportedException_when_adapter_lacks_support()
+    public void PrintToPdf_throws_NotSupportedException_when_adapter_lacks_support()
     {
         // Arrange: basic adapter does NOT implement IPrintAdapter
         var host = new MockDialogHost();
@@ -81,8 +81,8 @@ public sealed class PrintToPdfIntegrationTests
         using var dialog = new WebDialog(host, adapter, _dispatcher);
 
         // Act & Assert
-        await Assert.ThrowsAsync<NotSupportedException>(
-            () => dialog.PrintToPdfAsync());
+        Assert.Throws<NotSupportedException>(
+            () => DispatcherTestPump.Run(_dispatcher, () => dialog.PrintToPdfAsync()));
     }
 
     // ──────────────────── Test 4: Default options ────────────────────

@@ -17,7 +17,7 @@ public sealed class ContractSemanticsV1NativeNavigationTests
 
         webView.NavigationStarted += (_, e) => e.Cancel = true;
 
-        var decisionTask = RunOffThread(async () =>
+        var decisionTask = ThreadingTestHelper.RunOffThread(async () =>
         {
             var decision = await adapter.SimulateNativeNavigationStartingAsync(new Uri("https://example.test/native"));
             return decision;
@@ -47,7 +47,7 @@ public sealed class ContractSemanticsV1NativeNavigationTests
         };
 
         var target = new Uri("https://example.test/native-ok");
-        var decisionTask = RunOffThread(async () =>
+        var decisionTask = ThreadingTestHelper.RunOffThread(async () =>
         {
             var decision = await adapter.SimulateNativeNavigationStartingAsync(target);
             return decision;
@@ -79,12 +79,12 @@ public sealed class ContractSemanticsV1NativeNavigationTests
 
         var correlationId = Guid.NewGuid();
 
-        var step1 = RunOffThread(async () =>
+        var step1 = ThreadingTestHelper.RunOffThread(async () =>
             await adapter.SimulateNativeNavigationStartingAsync(new Uri("https://example.test/start"), correlationId: correlationId));
         dispatcher.RunAll();
         var d1 = step1.GetAwaiter().GetResult();
 
-        var step2 = RunOffThread(async () =>
+        var step2 = ThreadingTestHelper.RunOffThread(async () =>
             await adapter.SimulateNativeNavigationStartingAsync(new Uri("https://example.test/redirected"), correlationId: correlationId));
         dispatcher.RunAll();
         var d2 = step2.GetAwaiter().GetResult();
@@ -100,37 +100,5 @@ public sealed class ContractSemanticsV1NativeNavigationTests
         Assert.Contains(started, s => s.RequestUri == new Uri("https://example.test/redirected"));
     }
 
-    private static Task<T> RunOffThread<T>(Func<Task<T>> func)
-    {
-        using var ready = new ManualResetEventSlim(false);
-        var tcs = new TaskCompletionSource<Task<T>>(TaskCreationOptions.RunContinuationsAsynchronously);
-
-        var thread = new Thread(() =>
-        {
-            try
-            {
-                tcs.SetResult(func());
-            }
-            catch (Exception ex)
-            {
-                tcs.SetException(ex);
-            }
-            finally
-            {
-                ready.Set();
-            }
-        })
-        {
-            IsBackground = true
-        };
-
-        thread.Start();
-        if (!ready.Wait(TimeSpan.FromSeconds(5)))
-        {
-            throw new TimeoutException("Off-thread invocation did not start within timeout.");
-        }
-
-        return tcs.Task.Unwrap();
-    }
 }
 

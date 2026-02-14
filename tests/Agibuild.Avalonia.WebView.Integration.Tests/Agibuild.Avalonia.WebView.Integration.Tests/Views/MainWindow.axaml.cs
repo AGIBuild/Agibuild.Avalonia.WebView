@@ -19,7 +19,7 @@ namespace Agibuild.Avalonia.WebView.Integration.Tests.Views
         /// Global keyboard shortcut: F12 or Cmd+Shift+I (macOS) / Ctrl+Shift+I (Windows/Linux)
         /// opens DevTools on the currently active WebView.
         /// </summary>
-        private void OnGlobalKeyDown(object? sender, KeyEventArgs e)
+        private async void OnGlobalKeyDown(object? sender, KeyEventArgs e)
         {
             var isDevToolsShortcut = e.Key == Key.F12
                 || (e.Key == Key.I
@@ -34,7 +34,7 @@ namespace Agibuild.Avalonia.WebView.Integration.Tests.Views
             var webView = this.GetVisualDescendants().OfType<WebView>().FirstOrDefault();
             if (webView is not null)
             {
-                webView.OpenDevTools();
+                await webView.OpenDevToolsAsync();
                 e.Handled = true;
             }
         }

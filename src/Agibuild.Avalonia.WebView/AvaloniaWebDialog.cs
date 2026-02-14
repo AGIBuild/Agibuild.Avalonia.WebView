@@ -29,22 +29,19 @@ public sealed class AvaloniaWebDialog : IWebDialog
 
     public AvaloniaWebDialog(IWebViewEnvironmentOptions? options = null)
     {
-        // Apply environment options BEFORE creating the WebView so that
-        // WebViewCore picks them up during construction/attachment.
-        if (options is not null)
+        _webView = new WebView
         {
-            var original = WebViewEnvironment.Options;
-            WebViewEnvironment.Options = new WebViewEnvironmentOptions
-            {
-                EnableDevTools = options.EnableDevTools,
-                UseEphemeralSession = options.UseEphemeralSession,
-                CustomUserAgent = options.CustomUserAgent
-            };
-            // Note: This sets the global options temporarily.
-            // A future improvement could scope options per-instance.
-        }
-
-        _webView = new WebView();
+            EnvironmentOptions = options is null
+                ? null
+                : new WebViewEnvironmentOptions
+                {
+                    EnableDevTools = options.EnableDevTools,
+                    UseEphemeralSession = options.UseEphemeralSession,
+                    CustomUserAgent = options.CustomUserAgent,
+                    CustomSchemes = [.. options.CustomSchemes],
+                    PreloadScripts = [.. options.PreloadScripts]
+                }
+        };
 
         // Listen for the first NavigationCompleted to signal readiness.
         // This fires when the WebView's NativeControlHost has been created
@@ -192,43 +189,34 @@ public sealed class AvaloniaWebDialog : IWebDialog
         return await _webView.InvokeScriptAsync(script);
     }
 
-    public bool GoBack() => _webView.GoBack();
-    public bool GoForward() => _webView.GoForward();
-    public bool Refresh() => _webView.Refresh();
-    public bool Stop() => _webView.Stop();
+    public Task<bool> GoBackAsync() => _webView.GoBackAsync();
+    public Task<bool> GoForwardAsync() => _webView.GoForwardAsync();
+    public Task<bool> RefreshAsync() => _webView.RefreshAsync();
+    public Task<bool> StopAsync() => _webView.StopAsync();
 
     public ICookieManager? TryGetCookieManager() => _webView.TryGetCookieManager();
     public ICommandManager? TryGetCommandManager() => _webView.TryGetCommandManager();
+    public Task<IPlatformHandle?> TryGetWebViewHandleAsync() => _webView.TryGetWebViewHandleAsync();
     public IWebViewRpcService? Rpc => _webView.Rpc;
     public IBridgeService Bridge => _webView.Bridge;
-    public void OpenDevTools() => _webView.OpenDevTools();
-    public void CloseDevTools() => _webView.CloseDevTools();
-    public bool IsDevToolsOpen => _webView.IsDevToolsOpen;
+    public Task OpenDevToolsAsync() => _webView.OpenDevToolsAsync();
+    public Task CloseDevToolsAsync() => _webView.CloseDevToolsAsync();
+    public Task<bool> IsDevToolsOpenAsync() => _webView.IsDevToolsOpenAsync();
     public Task<byte[]> CaptureScreenshotAsync() => _webView.CaptureScreenshotAsync();
     public Task<byte[]> PrintToPdfAsync(PdfPrintOptions? options = null) => _webView.PrintToPdfAsync(options);
 
-    /// <inheritdoc cref="WebViewCore.ZoomFactor"/>
-    public double ZoomFactor
-    {
-        get => _webView.ZoomFactor;
-        set => _webView.ZoomFactor = value;
-    }
-    /// <inheritdoc cref="WebViewCore.ZoomFactorChanged"/>
-    public event EventHandler<double>? ZoomFactorChanged
-    {
-        add => _webView.ZoomFactorChanged += value;
-        remove => _webView.ZoomFactorChanged -= value;
-    }
+    public Task<double> GetZoomFactorAsync() => _webView.GetZoomFactorAsync();
+    public Task SetZoomFactorAsync(double zoomFactor) => _webView.SetZoomFactorAsync(zoomFactor);
 
     /// <inheritdoc cref="WebViewCore.FindInPageAsync"/>
     public Task<FindInPageResult> FindInPageAsync(string text, FindInPageOptions? options = null) => _webView.FindInPageAsync(text, options);
-    /// <inheritdoc cref="WebViewCore.StopFindInPage"/>
-    public void StopFindInPage(bool clearHighlights = true) => _webView.StopFindInPage(clearHighlights);
+    /// <inheritdoc cref="WebViewCore.StopFindInPageAsync"/>
+    public Task StopFindInPageAsync(bool clearHighlights = true) => _webView.StopFindInPageAsync(clearHighlights);
 
-    /// <inheritdoc cref="WebViewCore.AddPreloadScript"/>
-    public string AddPreloadScript(string javaScript) => _webView.AddPreloadScript(javaScript);
-    /// <inheritdoc cref="WebViewCore.RemovePreloadScript"/>
-    public void RemovePreloadScript(string scriptId) => _webView.RemovePreloadScript(scriptId);
+    /// <inheritdoc cref="WebViewCore.AddPreloadScriptAsync"/>
+    public Task<string> AddPreloadScriptAsync(string javaScript) => _webView.AddPreloadScriptAsync(javaScript);
+    /// <inheritdoc cref="WebViewCore.RemovePreloadScriptAsync"/>
+    public Task RemovePreloadScriptAsync(string scriptId) => _webView.RemovePreloadScriptAsync(scriptId);
 
     /// <inheritdoc cref="WebViewCore.ContextMenuRequested"/>
     public event EventHandler<ContextMenuRequestedEventArgs>? ContextMenuRequested

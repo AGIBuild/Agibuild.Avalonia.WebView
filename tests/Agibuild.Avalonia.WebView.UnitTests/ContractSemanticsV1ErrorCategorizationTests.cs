@@ -16,7 +16,11 @@ public sealed class ContractSemanticsV1ErrorCategorizationTests
         webView.NavigationCompleted += (_, e) => completed = e;
 
         var navTask = webView.NavigateAsync(new Uri("https://example.test"));
-        dispatcher.RunAll();
+        Assert.True(SpinWait.SpinUntil(() =>
+        {
+            dispatcher.RunAll();
+            return adapter.LastNavigationId.HasValue;
+        }, TimeSpan.FromSeconds(2)));
 
         var navId = adapter.LastNavigationId!.Value;
         var navUri = adapter.LastNavigationUri!;
@@ -44,7 +48,11 @@ public sealed class ContractSemanticsV1ErrorCategorizationTests
         webView.NavigationCompleted += (_, e) => completed = e;
 
         var navTask = webView.NavigateAsync(new Uri("https://example.test"));
-        dispatcher.RunAll();
+        Assert.True(SpinWait.SpinUntil(() =>
+        {
+            dispatcher.RunAll();
+            return adapter.LastNavigationId.HasValue;
+        }, TimeSpan.FromSeconds(2)));
 
         var navId = adapter.LastNavigationId!.Value;
         var navUri = adapter.LastNavigationUri!;
@@ -71,7 +79,11 @@ public sealed class ContractSemanticsV1ErrorCategorizationTests
         webView.NavigationCompleted += (_, e) => completed = e;
 
         var navTask = webView.NavigateAsync(new Uri("https://example.test"));
-        dispatcher.RunAll();
+        Assert.True(SpinWait.SpinUntil(() =>
+        {
+            dispatcher.RunAll();
+            return adapter.LastNavigationId.HasValue;
+        }, TimeSpan.FromSeconds(2)));
 
         var navId = adapter.LastNavigationId!.Value;
         var navUri = adapter.LastNavigationUri!;
@@ -86,4 +98,5 @@ public sealed class ContractSemanticsV1ErrorCategorizationTests
         var ex = await Assert.ThrowsAsync<WebViewTimeoutException>(() => navTask);
         Assert.Equal(navId, ex.NavigationId);
     }
+
 }

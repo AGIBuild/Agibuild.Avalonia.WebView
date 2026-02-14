@@ -63,14 +63,14 @@ public sealed class CommandManagerIntegrationTests
     // ──────────────────── Test 2: Single command delegation ────────────────────
 
     [AvaloniaFact]
-    public void Copy_delegates_to_adapter()
+    public async Task Copy_delegates_to_adapter()
     {
         // Arrange
         var (dialog, adapter) = CreateDialogWithCommands();
         var mgr = dialog.TryGetCommandManager()!;
 
         // Act: user presses Ctrl+C
-        mgr.Copy();
+        await mgr.CopyAsync();
 
         // Assert: adapter received the Copy command
         Assert.Single(adapter.ExecutedCommands);
@@ -81,14 +81,14 @@ public sealed class CommandManagerIntegrationTests
     // ──────────────────── Test 3: Command ordering ────────────────────
 
     [AvaloniaFact]
-    public void SelectAll_then_Cut_executes_in_order()
+    public async Task SelectAll_then_Cut_executes_in_order()
     {
         var (dialog, adapter) = CreateDialogWithCommands();
         var mgr = dialog.TryGetCommandManager()!;
 
         // Act: user selects all, then cuts
-        mgr.SelectAll();
-        mgr.Cut();
+        await mgr.SelectAllAsync();
+        await mgr.CutAsync();
 
         // Assert: commands arrive in order
         Assert.Equal(2, adapter.ExecutedCommands.Count);
@@ -100,18 +100,18 @@ public sealed class CommandManagerIntegrationTests
     // ──────────────────── Test 4: All six commands ────────────────────
 
     [AvaloniaFact]
-    public void All_six_commands_work()
+    public async Task All_six_commands_work()
     {
         var (dialog, adapter) = CreateDialogWithCommands();
         var mgr = dialog.TryGetCommandManager()!;
 
         // Act: fire all six editing commands
-        mgr.Copy();
-        mgr.Cut();
-        mgr.Paste();
-        mgr.SelectAll();
-        mgr.Undo();
-        mgr.Redo();
+        await mgr.CopyAsync();
+        await mgr.CutAsync();
+        await mgr.PasteAsync();
+        await mgr.SelectAllAsync();
+        await mgr.UndoAsync();
+        await mgr.RedoAsync();
 
         // Assert: all six recorded in the correct order
         var expected = new[]

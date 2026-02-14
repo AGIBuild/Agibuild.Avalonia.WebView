@@ -25,43 +25,12 @@ public sealed class ContractSemanticsV1ScriptTests
         };
         var webView = new WebViewCore(adapter, dispatcher);
 
-        var scriptTask = RunOffThread(() => webView.InvokeScriptAsync("return 1;"));
+        var scriptTask = ThreadingTestHelper.RunOffThread(() => webView.InvokeScriptAsync("return 1;"));
 
         dispatcher.RunAll();
 
         await Assert.ThrowsAsync<WebViewScriptException>(() => scriptTask);
     }
 
-    private static Task<string?> RunOffThread(Func<Task<string?>> func)
-    {
-        using var ready = new ManualResetEventSlim(false);
-        var tcs = new TaskCompletionSource<Task<string?>>(TaskCreationOptions.RunContinuationsAsynchronously);
-
-        var thread = new Thread(() =>
-        {
-            try
-            {
-                tcs.SetResult(func());
-            }
-            catch (Exception ex)
-            {
-                tcs.SetException(ex);
-            }
-            finally
-            {
-                ready.Set();
-            }
-        })
-        {
-            IsBackground = true
-        };
-
-        thread.Start();
-        if (!ready.Wait(TimeSpan.FromSeconds(5)))
-        {
-            throw new TimeoutException("Off-thread invocation did not start within timeout.");
-        }
-        return tcs.Task.Unwrap();
-    }
 }
 

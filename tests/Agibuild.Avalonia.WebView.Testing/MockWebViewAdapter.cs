@@ -546,14 +546,19 @@ internal sealed class MockWebViewAdapterWithFind : MockWebViewAdapter, IFindInPa
     }
 }
 
-/// <summary>Mock adapter that also implements <see cref="IPreloadScriptAdapter"/> for preload script testing.</summary>
-internal sealed class MockWebViewAdapterWithPreload : MockWebViewAdapter, IPreloadScriptAdapter
+/// <summary>Mock adapter that also implements preload script adapters for preload script testing.</summary>
+internal sealed class MockWebViewAdapterWithPreload : MockWebViewAdapter, IPreloadScriptAdapter, IAsyncPreloadScriptAdapter
 {
     private int _nextId;
     public Dictionary<string, string> Scripts { get; } = new();
+    public List<string> SyncAddedScripts { get; } = new();
+    public List<string> AsyncAddedScripts { get; } = new();
+    public List<string> SyncRemovedScriptIds { get; } = new();
+    public List<string> AsyncRemovedScriptIds { get; } = new();
 
     public string AddPreloadScript(string javaScript)
     {
+        SyncAddedScripts.Add(javaScript);
         var id = $"mock_preload_{++_nextId}";
         Scripts[id] = javaScript;
         return id;
@@ -561,7 +566,23 @@ internal sealed class MockWebViewAdapterWithPreload : MockWebViewAdapter, IPrelo
 
     public void RemovePreloadScript(string scriptId)
     {
+        SyncRemovedScriptIds.Add(scriptId);
         Scripts.Remove(scriptId);
+    }
+
+    public Task<string> AddPreloadScriptAsync(string javaScript)
+    {
+        AsyncAddedScripts.Add(javaScript);
+        var id = $"mock_preload_{++_nextId}";
+        Scripts[id] = javaScript;
+        return Task.FromResult(id);
+    }
+
+    public Task RemovePreloadScriptAsync(string scriptId)
+    {
+        AsyncRemovedScriptIds.Add(scriptId);
+        Scripts.Remove(scriptId);
+        return Task.CompletedTask;
     }
 }
 

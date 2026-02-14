@@ -11,6 +11,10 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
     private readonly IWebViewAdapter _adapter;
     private readonly IWebViewDispatcher _dispatcher;
     private readonly ILogger<WebViewCore> _logger;
+    private readonly IWebViewEnvironmentOptions _environmentOptions;
+    private readonly object _operationQueueLock = new();
+    private Task _operationQueueTail = Task.CompletedTask;
+    private long _operationSequence;
 
     /// <summary>
     /// Creates a new <see cref="IWebView"/> using the default platform adapter for the current OS.
@@ -29,17 +33,26 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
     }
 
     [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-    internal static WebViewCore CreateForControl(IWebViewDispatcher dispatcher, ILogger<WebViewCore>? logger = null)
+    internal static WebViewCore CreateForControl(
+        IWebViewDispatcher dispatcher,
+        ILogger<WebViewCore>? logger = null,
+        IWebViewEnvironmentOptions? environmentOptions = null)
     {
         ArgumentNullException.ThrowIfNull(dispatcher);
-        return new WebViewCore(WebViewAdapterFactory.CreateDefaultAdapter(), dispatcher, logger ?? NullLogger<WebViewCore>.Instance);
+        return new WebViewCore(
+            WebViewAdapterFactory.CreateDefaultAdapter(),
+            dispatcher,
+            logger ?? NullLogger<WebViewCore>.Instance,
+            environmentOptions);
     }
 
     [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     internal void Attach(global::Avalonia.Platform.IPlatformHandle parentHandle)
     {
+        _lifecycleState = WebViewLifecycleState.Attaching;
         _logger.LogDebug("Attach: parentHandle.HandleDescriptor={Descriptor}", parentHandle.HandleDescriptor);
         _adapter.Attach(parentHandle);
+        _lifecycleState = WebViewLifecycleState.Ready;
         _logger.LogDebug("Attach: completed");
 
         // Raise AdapterCreated after successful attach, before any pending navigation.
@@ -51,6 +64,7 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
     [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     internal void Detach()
     {
+        _lifecycleState = WebViewLifecycleState.Detaching;
         _logger.LogDebug("Detach: begin");
         RaiseAdapterDestroyedOnce();
         _adapter.Detach();
@@ -66,6 +80,7 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
     // Only accessed on the UI thread (all paths go through _dispatcher).
     private NavigationOperation? _activeNavigation;
     private Uri _source;
+    private volatile WebViewLifecycleState _lifecycleState = WebViewLifecycleState.Created;
 
     private readonly ICookieManager? _cookieManager;
     private readonly ICommandManager? _commandManager;
@@ -74,6 +89,7 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
     private readonly IFindInPageAdapter? _findInPageAdapter;
     private readonly IZoomAdapter? _zoomAdapter;
     private readonly IPreloadScriptAdapter? _preloadScriptAdapter;
+    private readonly IAsyncPreloadScriptAdapter? _asyncPreloadScriptAdapter;
     private readonly IContextMenuAdapter? _contextMenuAdapter;
 
     private bool _webMessageBridgeEnabled;
@@ -88,11 +104,16 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
     {
     }
 
-    internal WebViewCore(IWebViewAdapter adapter, IWebViewDispatcher dispatcher, ILogger<WebViewCore> logger)
+    internal WebViewCore(
+        IWebViewAdapter adapter,
+        IWebViewDispatcher dispatcher,
+        ILogger<WebViewCore> logger,
+        IWebViewEnvironmentOptions? environmentOptions = null)
     {
         _adapter = adapter ?? throw new ArgumentNullException(nameof(adapter));
         _dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
         _logger = logger ?? NullLogger<WebViewCore>.Instance;
+        _environmentOptions = environmentOptions ?? WebViewEnvironment.Options;
 
         _source = AboutBlank;
         ChannelId = Guid.NewGuid();
@@ -106,21 +127,21 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         // Apply global environment options if adapter supports them.
         if (_adapter is IWebViewAdapterOptions adapterOptions)
         {
-            var envOptions = WebViewEnvironment.Options;
+            var envOptions = _environmentOptions;
             adapterOptions.ApplyEnvironmentOptions(envOptions);
             _logger.LogDebug("Environment options applied: DevTools={DevTools}, Ephemeral={Ephemeral}, UA={UA}",
                 envOptions.EnableDevTools, envOptions.UseEphemeralSession, envOptions.CustomUserAgent ?? "(default)");
         }
 
         _cookieManager = adapter is ICookieAdapter cookieAdapter
-            ? new RuntimeCookieManager(cookieAdapter, this, _dispatcher, _logger)
+            ? new RuntimeCookieManager(cookieAdapter, this, _logger)
             : null;
         _logger.LogDebug("Cookie support: {Supported}", _cookieManager is not null);
 
         // Register custom schemes if adapter supports it.
         if (_adapter is ICustomSchemeAdapter customSchemeAdapter)
         {
-            var schemes = WebViewEnvironment.Options.CustomSchemes;
+            var schemes = _environmentOptions.CustomSchemes;
             if (schemes.Count > 0)
             {
                 customSchemeAdapter.RegisterCustomSchemes(schemes);
@@ -144,7 +165,7 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
 
         // Detect command support.
         _commandManager = _adapter is ICommandAdapter commandAdapter
-            ? new RuntimeCommandManager(commandAdapter)
+            ? new RuntimeCommandManager(commandAdapter, this)
             : null;
         _logger.LogDebug("Command support: {Supported}", _commandManager is not null);
 
@@ -170,9 +191,10 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
 
         // Detect preload script support and apply global scripts.
         _preloadScriptAdapter = _adapter as IPreloadScriptAdapter;
+        _asyncPreloadScriptAdapter = _adapter as IAsyncPreloadScriptAdapter;
         if (_preloadScriptAdapter is not null)
         {
-            var globalScripts = WebViewEnvironment.Options.PreloadScripts;
+            var globalScripts = _environmentOptions.PreloadScripts;
             foreach (var script in globalScripts)
             {
                 _preloadScriptAdapter.AddPreloadScript(script);
@@ -210,10 +232,11 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
             SetSourceInternal(value);
 
             // Source is a sync API surface; we still start navigation to keep semantics consistent.
-            _ = StartNavigationCoreAsync(
+            var navigationTask = StartNavigationCoreAsync(
                 requestUri: value,
                 adapterInvoke: navigationId => _adapter.NavigateAsync(navigationId, value),
-                updateSource: false).ContinueWith(static _ => { }, TaskContinuationOptions.OnlyOnFaulted);
+                updateSource: false);
+            ObserveBackgroundTask(navigationTask, nameof(Source));
         }
     }
 
@@ -249,6 +272,7 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         RaiseAdapterDestroyedOnce();
 
         _disposed = true;
+        _lifecycleState = WebViewLifecycleState.Disposed;
 
         _adapter.NavigationCompleted -= OnAdapterNavigationCompleted;
         _adapter.NewWindowRequested -= OnAdapterNewWindowRequested;
@@ -288,9 +312,9 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         ArgumentNullException.ThrowIfNull(uri);
         _logger.LogDebug("NavigateAsync: {Uri}", uri);
 
-        return InvokeAsyncOnUiThread(() => StartNavigationCoreAsync(
+        return EnqueueOperationAsync(nameof(NavigateAsync), () => StartNavigationRequestCoreAsync(
             requestUri: uri,
-            adapterInvoke: navigationId => _adapter.NavigateAsync(navigationId, uri)));
+            adapterInvoke: navigationId => _adapter.NavigateAsync(navigationId, uri))).Unwrap();
     }
 
     public Task NavigateToStringAsync(string html)
@@ -302,9 +326,9 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         var requestUri = baseUrl ?? AboutBlank;
         _logger.LogDebug("NavigateToStringAsync: html length={Length}, baseUrl={BaseUrl}", html.Length, baseUrl);
 
-        return InvokeAsyncOnUiThread(() => StartNavigationCoreAsync(
+        return EnqueueOperationAsync(nameof(NavigateToStringAsync), () => StartNavigationRequestCoreAsync(
             requestUri: requestUri,
-            adapterInvoke: navigationId => _adapter.NavigateToStringAsync(navigationId, html, baseUrl)));
+            adapterInvoke: navigationId => _adapter.NavigateToStringAsync(navigationId, html, baseUrl))).Unwrap();
     }
 
     public Task<string?> InvokeScriptAsync(string script)
@@ -317,9 +341,7 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
             return Task.FromException<string?>(new ObjectDisposedException(nameof(WebViewCore)));
         }
 
-        return _dispatcher.CheckAccess()
-            ? InvokeScriptOnUiThreadAsync(script)
-            : _dispatcher.InvokeAsync(() => InvokeScriptOnUiThreadAsync(script));
+        return EnqueueOperationAsync(nameof(InvokeScriptAsync), () => InvokeScriptOnUiThreadAsync(script));
 
         async Task<string?> InvokeScriptOnUiThreadAsync(string s)
         {
@@ -339,10 +361,13 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         }
     }
 
-    public bool GoBack()
+    public Task<bool> GoBackAsync()
+        => EnqueueOperationAsync(nameof(GoBackAsync), () => Task.FromResult(GoBackCore()));
+
+    private bool GoBackCore()
     {
         ThrowIfDisposed();
-        ThrowIfNotOnUiThread(nameof(GoBack));
+        ThrowIfNotOnUiThread(nameof(GoBackAsync));
 
         if (!_adapter.CanGoBack)
         {
@@ -369,10 +394,13 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         return true;
     }
 
-    public bool GoForward()
+    public Task<bool> GoForwardAsync()
+        => EnqueueOperationAsync(nameof(GoForwardAsync), () => Task.FromResult(GoForwardCore()));
+
+    private bool GoForwardCore()
     {
         ThrowIfDisposed();
-        ThrowIfNotOnUiThread(nameof(GoForward));
+        ThrowIfNotOnUiThread(nameof(GoForwardAsync));
 
         if (!_adapter.CanGoForward)
         {
@@ -399,10 +427,13 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         return true;
     }
 
-    public bool Refresh()
+    public Task<bool> RefreshAsync()
+        => EnqueueOperationAsync(nameof(RefreshAsync), () => Task.FromResult(RefreshCore()));
+
+    private bool RefreshCore()
     {
         ThrowIfDisposed();
-        ThrowIfNotOnUiThread(nameof(Refresh));
+        ThrowIfNotOnUiThread(nameof(RefreshAsync));
 
         var navigationId = StartCommandNavigation(requestUri: Source);
         if (navigationId == Guid.Empty)
@@ -423,10 +454,13 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         return true;
     }
 
-    public bool Stop()
+    public Task<bool> StopAsync()
+        => EnqueueOperationAsync(nameof(StopAsync), () => Task.FromResult(StopCore()));
+
+    private bool StopCore()
     {
         ThrowIfDisposed();
-        ThrowIfNotOnUiThread(nameof(Stop));
+        ThrowIfNotOnUiThread(nameof(StopAsync));
 
         if (_activeNavigation is null)
         {
@@ -540,23 +574,40 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
 
     // ==================== DevTools ====================
 
-    public void OpenDevTools()
+    public Task OpenDevToolsAsync()
     {
-        ThrowIfDisposed();
-        if (_adapter is IDevToolsAdapter devTools)
-            devTools.OpenDevTools();
-        else
-            _logger.LogDebug("DevTools: adapter does not support runtime toggle");
+        return EnqueueOperationAsync(nameof(OpenDevToolsAsync), () =>
+        {
+            ThrowIfDisposed();
+            if (_adapter is IDevToolsAdapter devTools)
+                devTools.OpenDevTools();
+            else
+                _logger.LogDebug("DevTools: adapter does not support runtime toggle");
+
+            return Task.CompletedTask;
+        });
     }
 
-    public void CloseDevTools()
+    public Task CloseDevToolsAsync()
     {
-        ThrowIfDisposed();
-        if (_adapter is IDevToolsAdapter devTools)
-            devTools.CloseDevTools();
+        return EnqueueOperationAsync(nameof(CloseDevToolsAsync), () =>
+        {
+            ThrowIfDisposed();
+            if (_adapter is IDevToolsAdapter devTools)
+                devTools.CloseDevTools();
+
+            return Task.CompletedTask;
+        });
     }
 
-    public bool IsDevToolsOpen => _adapter is IDevToolsAdapter devTools && devTools.IsDevToolsOpen;
+    public Task<bool> IsDevToolsOpenAsync()
+    {
+        return EnqueueOperationAsync(nameof(IsDevToolsOpenAsync), () =>
+        {
+            ThrowIfDisposed();
+            return Task.FromResult(_adapter is IDevToolsAdapter devTools && devTools.IsDevToolsOpen);
+        });
+    }
 
     // ==================== Bridge ====================
 
@@ -579,7 +630,7 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
                 _rpcService!,
                 script => InvokeScriptAsync(script),
                 _logger,
-                enableDevTools: WebViewEnvironment.Options.EnableDevTools);
+                enableDevTools: _environmentOptions.EnableDevTools);
 
             _logger.LogDebug("Bridge: auto-created RuntimeBridgeService");
             return _bridgeService;
@@ -588,18 +639,24 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
 
     public Task<byte[]> CaptureScreenshotAsync()
     {
-        ThrowIfDisposed();
-        if (_screenshotAdapter is null)
-            throw new NotSupportedException("The current WebView adapter does not support screenshot capture.");
-        return _screenshotAdapter.CaptureScreenshotAsync();
+        return EnqueueOperationAsync(nameof(CaptureScreenshotAsync), () =>
+        {
+            ThrowIfDisposed();
+            if (_screenshotAdapter is null)
+                throw new NotSupportedException("The current WebView adapter does not support screenshot capture.");
+            return _screenshotAdapter.CaptureScreenshotAsync();
+        });
     }
 
     public Task<byte[]> PrintToPdfAsync(PdfPrintOptions? options = null)
     {
-        ThrowIfDisposed();
-        if (_printAdapter is null)
-            throw new NotSupportedException("The current WebView adapter does not support PDF printing.");
-        return _printAdapter.PrintToPdfAsync(options);
+        return EnqueueOperationAsync(nameof(PrintToPdfAsync), () =>
+        {
+            ThrowIfDisposed();
+            if (_printAdapter is null)
+                throw new NotSupportedException("The current WebView adapter does not support PDF printing.");
+            return _printAdapter.PrintToPdfAsync(options);
+        });
     }
 
     // ==================== Zoom ====================
@@ -614,15 +671,24 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
     /// Gets or sets the zoom factor (1.0 = 100%). Clamped to [0.25, 5.0].
     /// Returns 1.0 if the adapter does not support zoom.
     /// </summary>
-    public double ZoomFactor
+    public Task<double> GetZoomFactorAsync()
     {
-        get => _zoomAdapter?.ZoomFactor ?? 1.0;
-        set
+        return EnqueueOperationAsync(nameof(GetZoomFactorAsync), () =>
         {
             ThrowIfDisposed();
-            if (_zoomAdapter is null) return; // no-op without adapter
-            _zoomAdapter.ZoomFactor = Math.Clamp(value, MinZoom, MaxZoom);
-        }
+            return Task.FromResult(_zoomAdapter?.ZoomFactor ?? 1.0);
+        });
+    }
+
+    public Task SetZoomFactorAsync(double zoomFactor)
+    {
+        return EnqueueOperationAsync(nameof(SetZoomFactorAsync), () =>
+        {
+            ThrowIfDisposed();
+            if (_zoomAdapter is null) return Task.CompletedTask; // no-op without adapter
+            _zoomAdapter.ZoomFactor = Math.Clamp(zoomFactor, MinZoom, MaxZoom);
+            return Task.CompletedTask;
+        });
     }
 
     private void OnAdapterZoomFactorChanged(object? sender, double newZoom)
@@ -650,12 +716,15 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
     /// <exception cref="ArgumentException"><paramref name="text"/> is null or empty.</exception>
     public Task<FindInPageResult> FindInPageAsync(string text, FindInPageOptions? options = null)
     {
-        ThrowIfDisposed();
-        if (string.IsNullOrEmpty(text))
-            throw new ArgumentException("Search text must not be null or empty.", nameof(text));
-        if (_findInPageAdapter is null)
-            throw new NotSupportedException("The current WebView adapter does not support find-in-page.");
-        return _findInPageAdapter.FindAsync(text, options);
+        return EnqueueOperationAsync(nameof(FindInPageAsync), () =>
+        {
+            ThrowIfDisposed();
+            if (string.IsNullOrEmpty(text))
+                throw new ArgumentException("Search text must not be null or empty.", nameof(text));
+            if (_findInPageAdapter is null)
+                throw new NotSupportedException("The current WebView adapter does not support find-in-page.");
+            return _findInPageAdapter.FindAsync(text, options);
+        });
     }
 
     /// <summary>
@@ -663,61 +732,93 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
     /// </summary>
     /// <param name="clearHighlights">Whether to remove visual highlights. Default: true.</param>
     /// <exception cref="NotSupportedException">The adapter does not implement <see cref="IFindInPageAdapter"/>.</exception>
-    public void StopFindInPage(bool clearHighlights = true)
+    public Task StopFindInPageAsync(bool clearHighlights = true)
     {
-        ThrowIfDisposed();
-        if (_findInPageAdapter is null)
-            throw new NotSupportedException("The current WebView adapter does not support find-in-page.");
-        _findInPageAdapter.StopFind(clearHighlights);
+        return EnqueueOperationAsync(nameof(StopFindInPageAsync), () =>
+        {
+            ThrowIfDisposed();
+            if (_findInPageAdapter is null)
+                throw new NotSupportedException("The current WebView adapter does not support find-in-page.");
+            _findInPageAdapter.StopFind(clearHighlights);
+            return Task.CompletedTask;
+        });
     }
 
     /// <summary>
     /// Registers a JavaScript snippet to run at document start on every page load.
     /// </summary>
     /// <param name="javaScript">The script to inject.</param>
-    /// <returns>An opaque script ID that can be passed to <see cref="RemovePreloadScript"/>.</returns>
+    /// <returns>An opaque script ID that can be passed to <see cref="RemovePreloadScriptAsync"/>.</returns>
     /// <exception cref="NotSupportedException">The adapter does not implement <see cref="IPreloadScriptAdapter"/>.</exception>
-    public string AddPreloadScript(string javaScript)
+    public Task<string> AddPreloadScriptAsync(string javaScript)
     {
-        ThrowIfDisposed();
-        if (_preloadScriptAdapter is null)
-            throw new NotSupportedException("The current WebView adapter does not support preload scripts.");
-        return _preloadScriptAdapter.AddPreloadScript(javaScript);
+        return EnqueueOperationAsync(nameof(AddPreloadScriptAsync), () =>
+        {
+            ThrowIfDisposed();
+            if (_asyncPreloadScriptAdapter is not null)
+            {
+                return _asyncPreloadScriptAdapter.AddPreloadScriptAsync(javaScript);
+            }
+
+            if (_preloadScriptAdapter is null)
+                throw new NotSupportedException("The current WebView adapter does not support preload scripts.");
+            return Task.FromResult(_preloadScriptAdapter.AddPreloadScript(javaScript));
+        });
     }
 
     /// <summary>
     /// Removes a previously registered preload script by its ID.
     /// </summary>
-    /// <param name="scriptId">The ID returned by <see cref="AddPreloadScript"/>.</param>
+    /// <param name="scriptId">The ID returned by <see cref="AddPreloadScriptAsync"/>.</param>
     /// <exception cref="NotSupportedException">The adapter does not implement <see cref="IPreloadScriptAdapter"/>.</exception>
-    public void RemovePreloadScript(string scriptId)
+    public Task RemovePreloadScriptAsync(string scriptId)
     {
-        ThrowIfDisposed();
-        if (_preloadScriptAdapter is null)
-            throw new NotSupportedException("The current WebView adapter does not support preload scripts.");
-        _preloadScriptAdapter.RemovePreloadScript(scriptId);
+        return EnqueueOperationAsync(nameof(RemovePreloadScriptAsync), () =>
+        {
+            ThrowIfDisposed();
+            if (_asyncPreloadScriptAdapter is not null)
+            {
+                return _asyncPreloadScriptAdapter.RemovePreloadScriptAsync(scriptId);
+            }
+
+            if (_preloadScriptAdapter is null)
+                throw new NotSupportedException("The current WebView adapter does not support preload scripts.");
+            _preloadScriptAdapter.RemovePreloadScript(scriptId);
+            return Task.CompletedTask;
+        });
     }
 
     /// <summary>
-    /// Delegates to the adapter's <see cref="INativeWebViewHandleProvider.TryGetWebViewHandle()"/>
-    /// if the adapter supports it; otherwise returns <c>null</c>.
-    /// Returns <c>null</c> after <see cref="AdapterDestroyed"/> has been raised.
+    /// Asynchronously retrieves the native platform WebView handle.
+    /// This is the primary any-thread API surface and always marshals adapter access to the UI thread.
     /// </summary>
-    public global::Avalonia.Platform.IPlatformHandle? TryGetWebViewHandle()
+    public Task<global::Avalonia.Platform.IPlatformHandle?> TryGetWebViewHandleAsync()
     {
         if (_adapterDestroyed)
         {
-            return null;
+            return Task.FromResult<global::Avalonia.Platform.IPlatformHandle?>(null);
         }
 
         if (_adapter is not INativeWebViewHandleProvider provider)
         {
-            return null;
+            return Task.FromResult<global::Avalonia.Platform.IPlatformHandle?>(null);
         }
 
-        return _dispatcher.CheckAccess()
-            ? provider.TryGetWebViewHandle()
-            : _dispatcher.InvokeAsync(() => provider.TryGetWebViewHandle()).GetAwaiter().GetResult();
+        if (_dispatcher.CheckAccess())
+        {
+            return Task.FromResult(provider.TryGetWebViewHandle());
+        }
+
+        return _dispatcher.InvokeAsync(() => provider.TryGetWebViewHandle());
+    }
+
+    /// <summary>
+    /// Compatibility wrapper around <see cref="TryGetWebViewHandleAsync"/> for synchronous call sites.
+    /// Prefer using <see cref="TryGetWebViewHandleAsync"/> to avoid blocking.
+    /// </summary>
+    public global::Avalonia.Platform.IPlatformHandle? TryGetWebViewHandle()
+    {
+        return TryGetWebViewHandleAsync().GetAwaiter().GetResult();
     }
 
     /// <summary>
@@ -735,7 +836,8 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
             }
             else
             {
-                _ = _dispatcher.InvokeAsync(() => adapterOptions.SetCustomUserAgent(userAgent));
+                var dispatchTask = _dispatcher.InvokeAsync(() => adapterOptions.SetCustomUserAgent(userAgent));
+                ObserveBackgroundTask(dispatchTask, nameof(SetCustomUserAgent));
             }
 
             _logger.LogDebug("CustomUserAgent set to: {UA}", userAgent ?? "(default)");
@@ -754,7 +856,7 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         _rpcService ??= new WebViewRpcService(script => InvokeScriptAsync(script), _logger);
 
         // Inject RPC JS stub.
-        _ = InvokeScriptAsync(WebViewRpcService.JsStub);
+        ObserveBackgroundTask(InvokeScriptAsync(WebViewRpcService.JsStub), $"{nameof(EnableWebMessageBridge)}.{nameof(WebViewRpcService.JsStub)}");
 
         _logger.LogDebug("WebMessageBridge enabled: originCount={Count}, protocol={Protocol}",
             options.AllowedOrigins?.Count ?? 0, options.ProtocolVersion);
@@ -813,22 +915,185 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         _spaHostingService?.TryHandle(e);
     }
 
+    private Task EnqueueOperationAsync(string operationType, Func<Task> func)
+        => EnqueueOperationAsync<object?>(operationType, async () =>
+        {
+            await func().ConfigureAwait(false);
+            return null;
+        });
+
+    private Task<T> EnqueueOperationAsync<T>(string operationType, Func<Task<T>> func)
+    {
+        if (_disposed)
+        {
+            return Task.FromException<T>(ClassifyFailure(
+                new ObjectDisposedException(nameof(WebViewCore)),
+                operationType,
+                defaultCategory: WebViewOperationFailureCategory.Disposed));
+        }
+
+        if (!IsOperationAcceptedInCurrentState())
+        {
+            return Task.FromException<T>(ClassifyFailure(
+                new InvalidOperationException($"Operation '{operationType}' is not allowed in state '{_lifecycleState}'."),
+                operationType,
+                defaultCategory: WebViewOperationFailureCategory.NotReady));
+        }
+
+        var operationId = Interlocked.Increment(ref _operationSequence);
+        var enqueueTs = DateTimeOffset.UtcNow;
+        var tcs = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        lock (_operationQueueLock)
+        {
+            _operationQueueTail = _operationQueueTail.ContinueWith(
+                _ => RunQueuedOperationAsync(operationId, operationType, enqueueTs, func, tcs),
+                CancellationToken.None,
+                TaskContinuationOptions.ExecuteSynchronously,
+                TaskScheduler.Default).Unwrap();
+        }
+
+        return tcs.Task;
+    }
+
+    private bool IsOperationAcceptedInCurrentState()
+        => _lifecycleState is WebViewLifecycleState.Created
+            or WebViewLifecycleState.Attaching
+            or WebViewLifecycleState.Ready;
+
+    private async Task RunQueuedOperationAsync<T>(
+        long operationId,
+        string operationType,
+        DateTimeOffset enqueueTs,
+        Func<Task<T>> func,
+        TaskCompletionSource<T> tcs)
+    {
+        var startTs = DateTimeOffset.UtcNow;
+        var startThread = Environment.CurrentManagedThreadId;
+        try
+        {
+            var result = await InvokeAsyncOnUiThread(func).ConfigureAwait(false);
+            var endTs = DateTimeOffset.UtcNow;
+            _logger.LogDebug(
+                "Operation success: id={OperationId}, type={OperationType}, enqueueTs={EnqueueTs}, startTs={StartTs}, endTs={EndTs}, threadId={ThreadId}, lifecycleState={LifecycleState}",
+                operationId, operationType, enqueueTs, startTs, endTs, startThread, _lifecycleState);
+            tcs.TrySetResult(result);
+        }
+        catch (Exception ex)
+        {
+            var classified = ClassifyFailure(ex, operationType, WebViewOperationFailureCategory.AdapterFailed);
+            var endTs = DateTimeOffset.UtcNow;
+            _logger.LogDebug(
+                classified,
+                "Operation failed: id={OperationId}, type={OperationType}, enqueueTs={EnqueueTs}, startTs={StartTs}, endTs={EndTs}, threadId={ThreadId}, lifecycleState={LifecycleState}",
+                operationId, operationType, enqueueTs, startTs, endTs, startThread, _lifecycleState);
+            tcs.TrySetException(classified);
+        }
+    }
+
     private Task InvokeAsyncOnUiThread(Func<Task> func)
     {
         if (_disposed)
         {
-            return Task.FromException(new ObjectDisposedException(nameof(WebViewCore)));
+            return Task.FromException(ClassifyFailure(
+                new ObjectDisposedException(nameof(WebViewCore)),
+                operationType: "Dispatch",
+                defaultCategory: WebViewOperationFailureCategory.Disposed));
         }
 
-        return _dispatcher.CheckAccess()
-            ? func()
-            : _dispatcher.InvokeAsync(func);
+        if (_dispatcher.CheckAccess())
+        {
+            return func();
+        }
+
+        return InvokeWithDispatchFailureMappingAsync(func);
+    }
+
+    private Task<T> InvokeAsyncOnUiThread<T>(Func<Task<T>> func)
+    {
+        if (_disposed)
+        {
+            return Task.FromException<T>(ClassifyFailure(
+                new ObjectDisposedException(nameof(WebViewCore)),
+                operationType: "Dispatch",
+                defaultCategory: WebViewOperationFailureCategory.Disposed));
+        }
+
+        if (_dispatcher.CheckAccess())
+        {
+            return func();
+        }
+
+        return InvokeWithDispatchFailureMappingAsync(func);
+    }
+
+    private async Task InvokeWithDispatchFailureMappingAsync(Func<Task> func)
+    {
+        Task dispatchedTask;
+        try
+        {
+            dispatchedTask = _dispatcher.InvokeAsync(func);
+        }
+        catch (Exception ex)
+        {
+            throw ClassifyFailure(ex, operationType: "Dispatch", defaultCategory: WebViewOperationFailureCategory.DispatchFailed);
+        }
+
+        await dispatchedTask.ConfigureAwait(false);
+    }
+
+    private async Task<T> InvokeWithDispatchFailureMappingAsync<T>(Func<Task<T>> func)
+    {
+        Task<T> dispatchedTask;
+        try
+        {
+            dispatchedTask = _dispatcher.InvokeAsync(func);
+        }
+        catch (Exception ex)
+        {
+            throw ClassifyFailure(ex, operationType: "Dispatch", defaultCategory: WebViewOperationFailureCategory.DispatchFailed);
+        }
+
+        return await dispatchedTask.ConfigureAwait(false);
+    }
+
+    private Exception ClassifyFailure(
+        Exception exception,
+        string operationType,
+        WebViewOperationFailureCategory defaultCategory)
+    {
+        if (WebViewOperationFailure.TryGetCategory(exception, out _))
+        {
+            return exception;
+        }
+
+        var category = exception switch
+        {
+            ObjectDisposedException => WebViewOperationFailureCategory.Disposed,
+            InvalidOperationException invalidOp when
+                invalidOp.Message.Contains("not allowed in state", StringComparison.OrdinalIgnoreCase)
+                => WebViewOperationFailureCategory.NotReady,
+            _ => defaultCategory
+        };
+
+        WebViewOperationFailure.SetCategory(exception, category);
+        exception.Data["operationType"] = operationType;
+        return exception;
     }
 
     private Task StartNavigationCoreAsync(Uri requestUri, Func<Guid, Task> adapterInvoke)
         => StartNavigationCoreAsync(requestUri, adapterInvoke, updateSource: true);
 
     private async Task StartNavigationCoreAsync(Uri requestUri, Func<Guid, Task> adapterInvoke, bool updateSource)
+    {
+        var completionTask = await StartNavigationRequestCoreAsync(requestUri, adapterInvoke, updateSource).ConfigureAwait(false);
+        await completionTask.ConfigureAwait(false);
+    }
+
+    private Task<Task> StartNavigationRequestCoreAsync(Uri requestUri, Func<Guid, Task> adapterInvoke)
+        => StartNavigationRequestCoreAsync(requestUri, adapterInvoke, updateSource: true);
+
+    private async Task<Task> StartNavigationRequestCoreAsync(Uri requestUri, Func<Guid, Task> adapterInvoke, bool updateSource)
     {
         ThrowIfDisposed();
         ThrowIfNotOnUiThread("async navigation");
@@ -856,8 +1121,7 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         {
             _logger.LogDebug("StartNavigation: canceled by handler, id={NavigationId}", navigationId);
             CompleteActiveNavigation(NavigationCompletedStatus.Canceled, error: null);
-            await operation.Task.ConfigureAwait(false);
-            return;
+            return operation.Task;
         }
 
         try
@@ -868,11 +1132,10 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         {
             _logger.LogDebug(ex, "StartNavigation: adapter invocation failed, id={NavigationId}", navigationId);
             CompleteActiveNavigation(NavigationCompletedStatus.Failure, ex);
-            await operation.Task.ConfigureAwait(false);
-            return;
+            return operation.Task;
         }
 
-        await operation.Task.ConfigureAwait(false);
+        return operation.Task;
     }
 
     private Guid StartCommandNavigation(Uri requestUri)
@@ -1188,6 +1451,24 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         }
     }
 
+    private void ObserveBackgroundTask(Task task, string operationType)
+    {
+        task.ContinueWith(
+            t =>
+            {
+                if (t.Exception is null)
+                {
+                    return;
+                }
+
+                var error = t.Exception.InnerException ?? t.Exception;
+                _logger.LogDebug(error, "Background operation faulted: {OperationType}", operationType);
+            },
+            CancellationToken.None,
+            TaskContinuationOptions.OnlyOnFaulted,
+            TaskScheduler.Default);
+    }
+
     private void ThrowIfDisposed()
     {
         if (_disposed)
@@ -1208,14 +1489,12 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
     {
         private readonly ICookieAdapter _cookieAdapter;
         private readonly WebViewCore _owner;
-        private readonly IWebViewDispatcher _dispatcher;
         private readonly ILogger _logger;
 
-        public RuntimeCookieManager(ICookieAdapter cookieAdapter, WebViewCore owner, IWebViewDispatcher dispatcher, ILogger logger)
+        public RuntimeCookieManager(ICookieAdapter cookieAdapter, WebViewCore owner, ILogger logger)
         {
             _cookieAdapter = cookieAdapter;
             _owner = owner;
-            _dispatcher = dispatcher;
             _logger = logger;
         }
 
@@ -1224,9 +1503,7 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
             ArgumentNullException.ThrowIfNull(uri);
             ThrowIfOwnerDisposed();
             _logger.LogDebug("CookieManager.GetCookiesAsync: {Uri}", uri);
-            return _dispatcher.CheckAccess()
-                ? _cookieAdapter.GetCookiesAsync(uri)
-                : _dispatcher.InvokeAsync(() => _cookieAdapter.GetCookiesAsync(uri));
+            return _owner.EnqueueOperationAsync("Cookie.GetCookiesAsync", () => _cookieAdapter.GetCookiesAsync(uri));
         }
 
         public Task SetCookieAsync(WebViewCookie cookie)
@@ -1234,9 +1511,7 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
             ArgumentNullException.ThrowIfNull(cookie);
             ThrowIfOwnerDisposed();
             _logger.LogDebug("CookieManager.SetCookieAsync: {Name}@{Domain}", cookie.Name, cookie.Domain);
-            return _dispatcher.CheckAccess()
-                ? _cookieAdapter.SetCookieAsync(cookie)
-                : _dispatcher.InvokeAsync(() => _cookieAdapter.SetCookieAsync(cookie));
+            return _owner.EnqueueOperationAsync("Cookie.SetCookieAsync", () => _cookieAdapter.SetCookieAsync(cookie));
         }
 
         public Task DeleteCookieAsync(WebViewCookie cookie)
@@ -1244,18 +1519,14 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
             ArgumentNullException.ThrowIfNull(cookie);
             ThrowIfOwnerDisposed();
             _logger.LogDebug("CookieManager.DeleteCookieAsync: {Name}@{Domain}", cookie.Name, cookie.Domain);
-            return _dispatcher.CheckAccess()
-                ? _cookieAdapter.DeleteCookieAsync(cookie)
-                : _dispatcher.InvokeAsync(() => _cookieAdapter.DeleteCookieAsync(cookie));
+            return _owner.EnqueueOperationAsync("Cookie.DeleteCookieAsync", () => _cookieAdapter.DeleteCookieAsync(cookie));
         }
 
         public Task ClearAllCookiesAsync()
         {
             ThrowIfOwnerDisposed();
             _logger.LogDebug("CookieManager.ClearAllCookiesAsync");
-            return _dispatcher.CheckAccess()
-                ? _cookieAdapter.ClearAllCookiesAsync()
-                : _dispatcher.InvokeAsync(() => _cookieAdapter.ClearAllCookiesAsync());
+            return _owner.EnqueueOperationAsync("Cookie.ClearAllCookiesAsync", () => _cookieAdapter.ClearAllCookiesAsync());
         }
 
         private void ThrowIfOwnerDisposed()
@@ -1273,18 +1544,43 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
     private sealed class RuntimeCommandManager : ICommandManager
     {
         private readonly ICommandAdapter _commandAdapter;
+        private readonly WebViewCore _owner;
 
-        public RuntimeCommandManager(ICommandAdapter commandAdapter)
+        public RuntimeCommandManager(ICommandAdapter commandAdapter, WebViewCore owner)
         {
             _commandAdapter = commandAdapter;
+            _owner = owner;
         }
 
-        public void Copy() => _commandAdapter.ExecuteCommand(WebViewCommand.Copy);
-        public void Cut() => _commandAdapter.ExecuteCommand(WebViewCommand.Cut);
-        public void Paste() => _commandAdapter.ExecuteCommand(WebViewCommand.Paste);
-        public void SelectAll() => _commandAdapter.ExecuteCommand(WebViewCommand.SelectAll);
-        public void Undo() => _commandAdapter.ExecuteCommand(WebViewCommand.Undo);
-        public void Redo() => _commandAdapter.ExecuteCommand(WebViewCommand.Redo);
+        public Task CopyAsync() => ExecuteAsync(WebViewCommand.Copy);
+
+        public Task CutAsync() => ExecuteAsync(WebViewCommand.Cut);
+
+        public Task PasteAsync() => ExecuteAsync(WebViewCommand.Paste);
+
+        public Task SelectAllAsync() => ExecuteAsync(WebViewCommand.SelectAll);
+
+        public Task UndoAsync() => ExecuteAsync(WebViewCommand.Undo);
+
+        public Task RedoAsync() => ExecuteAsync(WebViewCommand.Redo);
+
+        private Task ExecuteAsync(WebViewCommand command)
+        {
+            return _owner.EnqueueOperationAsync($"Command.{command}", () =>
+            {
+                _commandAdapter.ExecuteCommand(command);
+                return Task.CompletedTask;
+            });
+        }
+    }
+
+    private enum WebViewLifecycleState
+    {
+        Created,
+        Attaching,
+        Ready,
+        Detaching,
+        Disposed
     }
 
     private sealed class NavigationOperation
