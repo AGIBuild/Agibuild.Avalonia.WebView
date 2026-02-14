@@ -2,7 +2,7 @@ import { NavLink } from 'react-router';
 import { useState, useEffect, useCallback } from 'react';
 import {
   LayoutDashboard, MessageSquare, FolderOpen, Settings as SettingsIcon,
-  Moon, Sun, PanelLeftClose, PanelLeft,
+  Moon, Sun, Menu, PanelLeftClose,
 } from 'lucide-react';
 import type { PageDefinition, AppSettings } from '../bridge/services';
 import { appShellService, settingsService } from '../bridge/services';
@@ -107,6 +107,10 @@ export function Layout({ pages, children }: LayoutProps) {
     });
   }, []);
 
+  // Separate settings from main navigation pages.
+  const mainPages = pages.filter((p) => p.id !== 'settings');
+  const settingsPage = pages.find((p) => p.id === 'settings');
+
   return (
     <div className="flex flex-col md:flex-row h-screen overflow-hidden bg-gray-50 dark:bg-gray-950">
 
@@ -132,19 +136,32 @@ export function Layout({ pages, children }: LayoutProps) {
           collapsed ? 'w-16' : 'w-56'
         }`}
       >
-        {/* Logo area */}
-        <div className="flex items-center gap-2 px-4 h-14 border-b border-gray-200 dark:border-gray-800">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
-            A
-          </div>
+        {/* Header: Hamburger toggle + Logo */}
+        <div className="flex items-center gap-2 px-3 h-14 border-b border-gray-200 dark:border-gray-800">
+          <button
+            onClick={toggleCollapsed}
+            className="p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 shrink-0"
+            title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            {collapsed ? (
+              <Menu className="w-5 h-5" />
+            ) : (
+              <PanelLeftClose className="w-5 h-5" />
+            )}
+          </button>
           {!collapsed && (
-            <span className="text-sm font-semibold truncate">{appName}</span>
+            <>
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                A
+              </div>
+              <span className="text-sm font-semibold truncate">{appName}</span>
+            </>
           )}
         </div>
 
-        {/* Navigation */}
+        {/* Main navigation (without Settings) */}
         <nav className="flex-1 py-2 space-y-0.5 px-2">
-          {pages.map((page) => {
+          {mainPages.map((page) => {
             const Icon = ICONS[page.icon] ?? LayoutDashboard;
             return (
               <NavLink
@@ -165,7 +182,7 @@ export function Layout({ pages, children }: LayoutProps) {
           })}
         </nav>
 
-        {/* Bottom actions */}
+        {/* Bottom: Dark mode + Settings */}
         <div className="border-t border-gray-200 dark:border-gray-800 p-2 space-y-0.5">
           <button
             onClick={toggleDark}
@@ -174,17 +191,21 @@ export function Layout({ pages, children }: LayoutProps) {
             {dark ? <Sun className="w-5 h-5 shrink-0" /> : <Moon className="w-5 h-5 shrink-0" />}
             {!collapsed && <span>{dark ? t('layout.lightMode') : t('layout.darkMode')}</span>}
           </button>
-          <button
-            onClick={toggleCollapsed}
-            className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 w-full"
-          >
-            {collapsed ? (
-              <PanelLeft className="w-5 h-5 shrink-0" />
-            ) : (
-              <PanelLeftClose className="w-5 h-5 shrink-0" />
-            )}
-            {!collapsed && <span>{t('layout.collapse')}</span>}
-          </button>
+          {settingsPage && (
+            <NavLink
+              to={settingsPage.route}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors w-full ${
+                  isActive
+                    ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 font-medium'
+                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                }`
+              }
+            >
+              <SettingsIcon className="w-5 h-5 shrink-0" />
+              {!collapsed && <span className="truncate">{t('page.settings' as TranslationKey)}</span>}
+            </NavLink>
+          )}
         </div>
       </aside>
 
