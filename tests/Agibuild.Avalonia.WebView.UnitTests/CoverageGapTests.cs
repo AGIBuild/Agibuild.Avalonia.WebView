@@ -1891,6 +1891,97 @@ public sealed class CoverageGapTests
             Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance);
     }
 
+    // ========================= CamelCase JSON serialization =========================
+
+    // Plain record without [JsonPropertyName] — should serialize as camelCase via BridgeJsonOptions.
+    private record PlainProfile(string UserName, bool IsAdmin, int LoginCount);
+
+    // Record with explicit [JsonPropertyName] — attribute should take priority over naming policy.
+    private record CustomNameProfile(
+        [property: System.Text.Json.Serialization.JsonPropertyName("user_name")] string UserName,
+        bool IsAdmin);
+
+    [Fact]
+    public async Task Rpc_InvokeAsync_params_serialize_as_camelCase()
+    {
+        var rpc = CreateTestRpcService(out var scripts);
+        var task = rpc.InvokeAsync("js.setProfile", new PlainProfile("Alice", true, 5));
+
+        Thread.Sleep(50);
+        Assert.NotEmpty(scripts);
+
+        // Extract the dispatched JSON and verify camelCase property names
+        var dispatchScript = scripts[0];
+        Assert.Contains("userName", dispatchScript);
+        Assert.Contains("isAdmin", dispatchScript);
+        Assert.Contains("loginCount", dispatchScript);
+        // Ensure PascalCase names are NOT present in the payload
+        Assert.DoesNotContain("UserName", dispatchScript);
+        Assert.DoesNotContain("IsAdmin", dispatchScript);
+        Assert.DoesNotContain("LoginCount", dispatchScript);
+
+        var callId = ExtractRpcId(scripts[0]);
+        rpc.TryProcessMessage("{\"jsonrpc\":\"2.0\",\"id\":\"" + callId + "\",\"result\":null}");
+        await task;
+    }
+
+    [Fact]
+    public void Rpc_handler_result_serializes_as_camelCase()
+    {
+        var rpc = CreateTestRpcService(out var scripts);
+        rpc.Handle("getProfile", _ => Task.FromResult<object?>(new PlainProfile("Bob", false, 10)));
+
+        rpc.TryProcessMessage("{\"jsonrpc\":\"2.0\",\"id\":\"cc-1\",\"method\":\"getProfile\",\"params\":null}");
+        Thread.Sleep(100);
+
+        var responseScript = scripts.First(s => s.Contains("_onResponse") && s.Contains("cc-1"));
+        Assert.Contains("userName", responseScript);
+        Assert.Contains("isAdmin", responseScript);
+        Assert.Contains("loginCount", responseScript);
+        Assert.DoesNotContain("UserName", responseScript);
+        Assert.DoesNotContain("IsAdmin", responseScript);
+        Assert.DoesNotContain("LoginCount", responseScript);
+    }
+
+    [Fact]
+    public async Task Rpc_InvokeAsync_T_deserializes_camelCase_into_record()
+    {
+        var rpc = CreateTestRpcService(out var scripts);
+        var task = rpc.InvokeAsync<PlainProfile>("js.getProfile");
+
+        Thread.Sleep(50);
+        var callId = ExtractRpcId(scripts[0]);
+
+        // JS returns camelCase JSON
+        rpc.TryProcessMessage("{\"jsonrpc\":\"2.0\",\"id\":\"" + callId + "\",\"result\":{\"userName\":\"Alice\",\"isAdmin\":true,\"loginCount\":5}}");
+
+        var profile = await task;
+        Assert.NotNull(profile);
+        Assert.Equal("Alice", profile!.UserName);
+        Assert.True(profile.IsAdmin);
+        Assert.Equal(5, profile.LoginCount);
+    }
+
+    [Fact]
+    public async Task Rpc_JsonPropertyName_takes_priority_over_naming_policy()
+    {
+        var rpc = CreateTestRpcService(out var scripts);
+        var task = rpc.InvokeAsync("js.setCustomProfile", new CustomNameProfile("Charlie", true));
+
+        Thread.Sleep(50);
+        Assert.NotEmpty(scripts);
+
+        // user_name from [JsonPropertyName] should appear, not userName
+        var dispatchScript = scripts[0];
+        Assert.Contains("user_name", dispatchScript);
+        // isAdmin should still be camelCase (no [JsonPropertyName] on it)
+        Assert.Contains("isAdmin", dispatchScript);
+
+        var callId = ExtractRpcId(scripts[0]);
+        rpc.TryProcessMessage("{\"jsonrpc\":\"2.0\",\"id\":\"" + callId + "\",\"result\":null}");
+        await task;
+    }
+
     // ==================== FindInPage Tests ====================
 
     [Fact]

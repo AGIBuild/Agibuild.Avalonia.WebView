@@ -11,6 +11,16 @@ namespace Agibuild.Avalonia.WebView;
 /// </summary>
 internal sealed class WebViewRpcService : IWebViewRpcService
 {
+    /// <summary>
+    /// Shared JSON options for bridge payload serialization: camelCase naming + case-insensitive deserialization.
+    /// RPC envelope types (RpcRequest, RpcResponse, etc.) use source-generated RpcJsonContext and are unaffected.
+    /// </summary>
+    private static readonly JsonSerializerOptions BridgeJsonOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        PropertyNameCaseInsensitive = true,
+    };
+
     private readonly ConcurrentDictionary<string, Func<JsonElement?, Task<object?>>> _handlers = new();
     private readonly ConcurrentDictionary<string, TaskCompletionSource<JsonElement>> _pendingCalls = new();
     private readonly Func<string, Task<string?>> _invokeScript;
@@ -62,7 +72,7 @@ internal sealed class WebViewRpcService : IWebViewRpcService
             {
                 Id = id,
                 Method = method,
-                Params = args is null ? null : JsonSerializer.SerializeToElement(args)
+                Params = args is null ? null : JsonSerializer.SerializeToElement(args, BridgeJsonOptions)
             };
 
             var json = JsonSerializer.Serialize(request, RpcJsonContext.Default.RpcRequest);
@@ -90,7 +100,7 @@ internal sealed class WebViewRpcService : IWebViewRpcService
         var result = await InvokeAsync(method, args);
         if (result.ValueKind == JsonValueKind.Null || result.ValueKind == JsonValueKind.Undefined)
             return default;
-        return result.Deserialize<T>();
+        return result.Deserialize<T>(BridgeJsonOptions);
     }
 
     // ==================== JS → C# dispatch ====================
@@ -188,7 +198,7 @@ internal sealed class WebViewRpcService : IWebViewRpcService
         var response = new RpcResponse
         {
             Id = id,
-            Result = result is null ? null : JsonSerializer.SerializeToElement(result)
+            Result = result is null ? null : JsonSerializer.SerializeToElement(result, BridgeJsonOptions)
         };
         var json = JsonSerializer.Serialize(response, RpcJsonContext.Default.RpcResponse);
         var script = $"window.agWebView && window.agWebView.rpc && window.agWebView.rpc._onResponse({JsonSerializer.Serialize(json, RpcJsonContext.Default.String)})";
