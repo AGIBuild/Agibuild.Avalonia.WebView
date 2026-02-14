@@ -905,9 +905,15 @@ class _Build : NukeBuild
         .Executes(() =>
         {
             // 1. Purge all cached Agibuild package versions so *-* resolves to the freshly packed build
-            var nugetPackagesRoot = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-                ".nuget", "packages");
+            var nugetPackagesRoot = Environment.GetEnvironmentVariable("NUGET_PACKAGES");
+            if (string.IsNullOrWhiteSpace(nugetPackagesRoot))
+            {
+                nugetPackagesRoot = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                    ".nuget", "packages");
+            }
+
+            Serilog.Log.Information("NuGet global packages root: {Path}", nugetPackagesRoot);
             var agibuildPackageDirs = Directory.Exists(nugetPackagesRoot)
                 ? Directory.GetDirectories(nugetPackagesRoot, "agibuild.avalonia.webview*")
                 : [];

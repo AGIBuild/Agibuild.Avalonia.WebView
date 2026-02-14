@@ -24,6 +24,9 @@
     <PackageReference Include="Avalonia" Version="11.3.11" />
     <!-- Transitive dependency from Runtime and DI projects (which use PrivateAssets=all). -->
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.2" />
+    <!-- Windows adapter in lib/net10.0 depends on this assembly at runtime. Keep it as a package dependency
+         so consumer apps restore Microsoft.Web.WebView2.Core and avoid FileNotFoundException. -->
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3719.77" />
   </ItemGroup>
 
   <ItemGroup>
