@@ -1,8 +1,6 @@
 ## Purpose
 Define deterministic, testable v1 behavioral semantics for WebView contracts, including threading, lifecycle, and event guarantees.
-
 ## Requirements
-
 ### Requirement: Baseline semantics are versioned and testable
 The system SHALL define a Baseline behavioral contract named "WebView Contract Semantics v1".
 The v1 semantics SHALL be testable via deterministic Contract Tests (CT) without platform dependencies.
@@ -246,7 +244,7 @@ The runtime SHALL preserve the categorized exception from the adapter's `Navigat
 - **THEN** `NavigationCompleted.Error` is an instance of `WebViewNavigationException`
 
 ### Requirement: NavigateToStringAsync baseUrl semantics
-When `NavigateToStringAsync(html, baseUrl)` is called with a non-null `baseUrl`:
+When `NavigateToStringAsync(html, baseUrl)` is called with a non-null `baseUrl`, the runtime SHALL treat `baseUrl` as the canonical request source for that navigation.
 - `Source` SHALL be set to `baseUrl` (not `about:blank`)
 - `NavigationStarted` SHALL be raised with `RequestUri == baseUrl`
 When `baseUrl` is `null`, behavior SHALL be identical to the existing semantics (`Source == about:blank`).
