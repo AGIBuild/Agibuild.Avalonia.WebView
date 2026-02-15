@@ -6,6 +6,7 @@ namespace Agibuild.Avalonia.WebView.UnitTests;
 /// <summary>
 /// Tests for concurrent / superseding navigation scenarios.
 /// </summary>
+[Collection("NavigationSemantics")]
 public sealed class ConcurrencyNavigationTests
 {
     [Fact]

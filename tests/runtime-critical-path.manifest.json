@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "scenarios": [
+    {
+      "id": "off-thread-handle-marshaling",
+      "lane": "RuntimeAutomation",
+      "file": "tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/AsyncBoundaryAndEnvironmentIntegrationTests.cs",
+      "testMethod": "TryGetWebViewHandleAsync_off_thread_marshals_to_ui_thread"
+    },
+    {
+      "id": "off-thread-navigation-marshaling",
+      "lane": "RuntimeAutomation",
+      "file": "tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/AsyncBoundaryAndEnvironmentIntegrationTests.cs",
+      "testMethod": "NavigateAsync_off_thread_marshals_to_ui_thread"
+    },
+    {
+      "id": "lifecycle-contextmenu-reattach-wiring",
+      "lane": "RuntimeAutomation",
+      "file": "tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/WebViewControlEventWiringIntegrationTests.cs",
+      "testMethod": "ContextMenuRequested_rebinds_to_new_core_after_reattach"
+    },
+    {
+      "id": "instance-options-isolation",
+      "lane": "RuntimeAutomation",
+      "file": "tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/AsyncBoundaryAndEnvironmentIntegrationTests.cs",
+      "testMethod": "Instance_environment_options_are_isolated_between_cores"
+    },
+    {
+      "id": "package-consumption-smoke",
+      "lane": "RuntimeAutomation.PackageSmoke",
+      "file": "build/Build.cs",
+      "testMethod": "NugetPackageTest"
+    }
+  ]
+}

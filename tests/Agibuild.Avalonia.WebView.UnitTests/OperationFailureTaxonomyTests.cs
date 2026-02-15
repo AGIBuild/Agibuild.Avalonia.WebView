@@ -6,6 +6,30 @@ namespace Agibuild.Avalonia.WebView.UnitTests;
 public sealed class OperationFailureTaxonomyTests
 {
     [Fact]
+    public void TryGetCategory_parses_case_insensitive_string_payload()
+    {
+        var ex = new InvalidOperationException("payload");
+        ex.Data[GetCategoryDataKey()] = "dispatchfailed";
+
+        var ok = WebViewOperationFailure.TryGetCategory(ex, out var category);
+
+        Assert.True(ok);
+        Assert.Equal(WebViewOperationFailureCategory.DispatchFailed, category);
+    }
+
+    [Fact]
+    public void TryGetCategory_rejects_invalid_string_payload()
+    {
+        var ex = new InvalidOperationException("payload");
+        ex.Data[GetCategoryDataKey()] = "not-a-category";
+
+        var ok = WebViewOperationFailure.TryGetCategory(ex, out var category);
+
+        Assert.False(ok);
+        Assert.Equal(default, category);
+    }
+
+    [Fact]
     public async Task Async_api_after_dispose_has_Disposed_category()
     {
         var dispatcher = new TestDispatcher();
@@ -74,5 +98,14 @@ public sealed class OperationFailureTaxonomyTests
         public Task<T> InvokeAsync<T>(Func<T> func) => throw new InvalidOperationException("dispatch failure");
         public Task InvokeAsync(Func<Task> func) => throw new InvalidOperationException("dispatch failure");
         public Task<T> InvokeAsync<T>(Func<Task<T>> func) => throw new InvalidOperationException("dispatch failure");
+    }
+
+    private static string GetCategoryDataKey()
+    {
+        var keyField = typeof(WebViewOperationFailure).GetField(
+            "CategoryDataKey",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+        Assert.NotNull(keyField);
+        return Assert.IsType<string>(keyField!.GetValue(null));
     }
 }

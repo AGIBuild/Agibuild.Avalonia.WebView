@@ -7,6 +7,7 @@ namespace Agibuild.Avalonia.WebView.UnitTests;
 /// Coverage-focused tests for GoForward, Refresh, Stop, CanGoBack/CanGoForward,
 /// and the RuntimeCookieManager dispose guard.
 /// </summary>
+[Collection("NavigationSemantics")]
 public sealed class ContractSemanticsV1CommandNavigationCoverageTests
 {
     [Fact]

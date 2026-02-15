@@ -159,6 +159,16 @@ public sealed class WebDialogTests
     }
 
     [Fact]
+    public async Task TryGetWebViewHandleAsync_delegates_to_core()
+    {
+        var (dialog, _, _) = CreateDialog();
+
+        var handle = await dialog.TryGetWebViewHandleAsync();
+
+        Assert.Null(handle);
+    }
+
+    [Fact]
     public void Source_get_set_delegates_to_core()
     {
         var (dialog, _, _) = CreateDialog();
@@ -267,6 +277,20 @@ public sealed class WebDialogTests
 
         DispatcherTestPump.Run(_dispatcher, () => dialog.NavigateToStringAsync("<h1>Hello</h1>", baseUrl));
         Assert.Equal(baseUrl, adapter.LastBaseUrl);
+    }
+
+    [Fact]
+    public async Task RemovePreloadScriptAsync_delegates_to_core()
+    {
+        var host = new MockDialogHost();
+        var adapter = MockWebViewAdapter.CreateWithPreload();
+        using var dialog = new WebDialog(host, adapter, _dispatcher);
+
+        var id = await dialog.AddPreloadScriptAsync("console.log('remove-me')");
+        await dialog.RemovePreloadScriptAsync(id);
+
+        var preloadAdapter = Assert.IsType<MockWebViewAdapterWithPreload>(adapter);
+        Assert.DoesNotContain(id, preloadAdapter.Scripts.Keys);
     }
 
     [Fact]

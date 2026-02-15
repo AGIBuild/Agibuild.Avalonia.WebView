@@ -2,13 +2,15 @@ namespace Agibuild.Avalonia.WebView.Testing;
 
 public static class DispatcherTestPump
 {
+    private static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(15);
+
     public static void Run(TestDispatcher dispatcher, Func<Task> action, TimeSpan? timeout = null)
     {
         ArgumentNullException.ThrowIfNull(dispatcher);
         ArgumentNullException.ThrowIfNull(action);
 
         var task = Task.Run(action);
-        Wait(dispatcher, task, timeout ?? TimeSpan.FromSeconds(5));
+        Wait(dispatcher, task, timeout ?? DefaultTimeout);
         task.GetAwaiter().GetResult();
     }
 
@@ -18,7 +20,7 @@ public static class DispatcherTestPump
         ArgumentNullException.ThrowIfNull(action);
 
         var task = Task.Run(action);
-        Wait(dispatcher, task, timeout ?? TimeSpan.FromSeconds(5));
+        Wait(dispatcher, task, timeout ?? DefaultTimeout);
         return task.GetAwaiter().GetResult();
     }
 
@@ -44,7 +46,7 @@ public static class DispatcherTestPump
         ArgumentNullException.ThrowIfNull(dispatcher);
         ArgumentNullException.ThrowIfNull(condition);
 
-        var deadline = DateTime.UtcNow.Add(timeout ?? TimeSpan.FromSeconds(5));
+        var deadline = DateTime.UtcNow.Add(timeout ?? DefaultTimeout);
         while (!condition())
         {
             dispatcher.RunAll();

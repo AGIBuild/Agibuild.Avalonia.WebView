@@ -24,10 +24,12 @@
     "ExecutableTarget": {
       "type": "string",
       "enum": [
+        "AutomationLaneReport",
         "Build",
         "Ci",
         "CiPublish",
         "Clean",
+        "ContractAutomation",
         "Coverage",
         "IntegrationTests",
         "NugetPackageTest",
@@ -36,6 +38,7 @@
         "Publish",
         "PublishTemplate",
         "Restore",
+        "RuntimeAutomation",
         "Start",
         "StartAndroid",
         "StartIOS",

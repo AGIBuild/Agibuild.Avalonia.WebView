@@ -1,4 +1,3 @@
-using System.Reflection;
 using Agibuild.Avalonia.WebView;
 using Agibuild.Avalonia.WebView.Testing;
 using Avalonia.Headless.XUnit;
@@ -19,8 +18,8 @@ public sealed class WebViewControlEventWiringIntegrationTests
         var fired = false;
         webView.ContextMenuRequested += (_, _) => fired = true;
 
-        SetPrivateField(webView, "_core", core);
-        InvokePrivate(webView, "SubscribeCoreEvents");
+        webView.TestOnlyAttachCore(core);
+        webView.TestOnlySubscribeCoreEvents();
 
         ((MockWebViewAdapterWithContextMenu)adapter).RaiseContextMenu(new ContextMenuRequestedEventArgs { X = 1, Y = 2 });
 
@@ -40,8 +39,8 @@ public sealed class WebViewControlEventWiringIntegrationTests
         webView.ContextMenuRequested += handler;
         webView.ContextMenuRequested -= handler;
 
-        SetPrivateField(webView, "_core", core);
-        InvokePrivate(webView, "SubscribeCoreEvents");
+        webView.TestOnlyAttachCore(core);
+        webView.TestOnlySubscribeCoreEvents();
 
         ((MockWebViewAdapterWithContextMenu)adapter).RaiseContextMenu(new ContextMenuRequestedEventArgs { X = 1, Y = 2 });
 
@@ -60,8 +59,8 @@ public sealed class WebViewControlEventWiringIntegrationTests
         EventHandler<ContextMenuRequestedEventArgs> handler = (_, _) => fired = true;
         webView.ContextMenuRequested += handler;
 
-        SetPrivateField(webView, "_core", core);
-        InvokePrivate(webView, "SubscribeCoreEvents");
+        webView.TestOnlyAttachCore(core);
+        webView.TestOnlySubscribeCoreEvents();
 
         webView.ContextMenuRequested -= handler;
         ((MockWebViewAdapterWithContextMenu)adapter).RaiseContextMenu(new ContextMenuRequestedEventArgs { X = 11, Y = 22 });
@@ -80,36 +79,22 @@ public sealed class WebViewControlEventWiringIntegrationTests
         var adapter1 = MockWebViewAdapter.CreateWithContextMenu();
         using var core1 = new WebViewCore(adapter1, dispatcher1);
 
-        SetPrivateField(webView, "_core", core1);
-        InvokePrivate(webView, "SubscribeCoreEvents");
+        webView.TestOnlyAttachCore(core1);
+        webView.TestOnlySubscribeCoreEvents();
         ((MockWebViewAdapterWithContextMenu)adapter1).RaiseContextMenu(new ContextMenuRequestedEventArgs { X = 1, Y = 1 });
 
-        InvokePrivate(webView, "UnsubscribeCoreEvents");
+        webView.TestOnlyUnsubscribeCoreEvents();
 
         var dispatcher2 = new TestDispatcher();
         var adapter2 = MockWebViewAdapter.CreateWithContextMenu();
         using var core2 = new WebViewCore(adapter2, dispatcher2);
 
-        SetPrivateField(webView, "_core", core2);
-        InvokePrivate(webView, "SubscribeCoreEvents");
+        webView.TestOnlyAttachCore(core2);
+        webView.TestOnlySubscribeCoreEvents();
 
         ((MockWebViewAdapterWithContextMenu)adapter1).RaiseContextMenu(new ContextMenuRequestedEventArgs { X = 2, Y = 2 });
         ((MockWebViewAdapterWithContextMenu)adapter2).RaiseContextMenu(new ContextMenuRequestedEventArgs { X = 3, Y = 3 });
 
         Assert.Equal(2, firedCount);
-    }
-
-    private static void SetPrivateField(object target, string fieldName, object value)
-    {
-        var field = target.GetType().GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic);
-        Assert.NotNull(field);
-        field!.SetValue(target, value);
-    }
-
-    private static void InvokePrivate(object target, string methodName)
-    {
-        var method = target.GetType().GetMethod(methodName, BindingFlags.Instance | BindingFlags.NonPublic);
-        Assert.NotNull(method);
-        method!.Invoke(target, null);
     }
 }

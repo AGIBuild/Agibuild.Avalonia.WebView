@@ -61,6 +61,7 @@ public sealed class SpaHostingTests
     [InlineData("styles.css", false)]
     [InlineData("app.js", false)]
     [InlineData("image.ab12.png", false)]         // Too short for hash
+    [InlineData("chunk-NOTHEX.css", false)]       // Dash segment exists but is not hex
     public void IsHashedFilename_detects_hashed_filenames(string path, bool expected)
     {
         Assert.Equal(expected, SpaHostingService.IsHashedFilename(path));

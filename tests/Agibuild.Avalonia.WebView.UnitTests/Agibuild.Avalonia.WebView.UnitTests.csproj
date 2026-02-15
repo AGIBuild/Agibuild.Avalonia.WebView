@@ -4,6 +4,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <IsTestProject>true</IsTestProject>
+    <AutomationLane>ContractAutomation</AutomationLane>
     <!-- xUnit1031: Intentional blocking in threading/dispatcher tests — GetAwaiter().GetResult() is needed
          to test cross-thread marshaling behavior with RunOffThread pattern. -->
     <NoWarn>$(NoWarn);xUnit1031</NoWarn>

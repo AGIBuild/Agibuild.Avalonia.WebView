@@ -531,6 +531,18 @@ public class WebView : NativeControlHost, IWebView
         }
     }
 
+    // Internal test seam for lifecycle wiring assertions without private reflection.
+    internal void TestOnlyAttachCore(WebViewCore core)
+    {
+        ArgumentNullException.ThrowIfNull(core);
+        _core = core;
+        _adapterUnavailable = false;
+    }
+
+    internal void TestOnlySubscribeCoreEvents() => SubscribeCoreEvents();
+
+    internal void TestOnlyUnsubscribeCoreEvents() => UnsubscribeCoreEvents();
+
     private void SubscribeCoreEvents()
     {
         if (_core is null) return;

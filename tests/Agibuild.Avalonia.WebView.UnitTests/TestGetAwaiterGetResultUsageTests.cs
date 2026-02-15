@@ -24,6 +24,7 @@ public sealed class TestGetAwaiterGetResultUsageTests
             "tests/Agibuild.Avalonia.WebView.UnitTests/ContractSemanticsV1SourceAndStopTests.cs",
             "tests/Agibuild.Avalonia.WebView.UnitTests/ContractSemanticsV1ThreadingTests.cs",
             "tests/Agibuild.Avalonia.WebView.UnitTests/CoverageGapTests.cs",
+            "tests/Agibuild.Avalonia.WebView.UnitTests/BuildOrchestrationBlockingWaitGovernanceTests.cs",
             "tests/Agibuild.Avalonia.WebView.UnitTests/WebDialogTests.cs",
             "tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/WebAuthBrokerIntegrationTests.cs",
         };

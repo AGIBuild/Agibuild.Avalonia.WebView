@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Xml.Linq;
 using Nuke.Common;
@@ -22,6 +23,21 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
     AutoGenerate = false)]
 class _Build : NukeBuild
 {
+    private const string ContractAutomationLane = "ContractAutomation";
+    private const string RuntimeAutomationLane = "RuntimeAutomation";
+
+    private sealed record AutomationLaneResult(
+        string Lane,
+        string Status,
+        string Project,
+        string? Reason = null);
+
+    private sealed record NugetSmokeRetryTelemetry(
+        int Attempt,
+        string Classification,
+        string Outcome,
+        string? Message);
+
     public static int Main() => Execute<_Build>(x => x.Build);
 
     // ──────────────────────────────── Parameters ────────────────────────────────
@@ -74,6 +90,10 @@ class _Build : NukeBuild
     AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
     AbsolutePath PackageOutputDirectory => ArtifactsDirectory / "packages";
     AbsolutePath TestResultsDirectory => ArtifactsDirectory / "test-results";
+    AbsolutePath AutomationLaneReportFile => TestResultsDirectory / "automation-lane-report.json";
+    AbsolutePath NugetSmokeTelemetryFile => TestResultsDirectory / "nuget-smoke-retry-telemetry.json";
+    AbsolutePath AutomationLaneManifestFile => TestsDirectory / "automation-lanes.json";
+    AbsolutePath RuntimeCriticalPathManifestFile => TestsDirectory / "runtime-critical-path.manifest.json";
 
     AbsolutePath SolutionFile => RootDirectory / "Agibuild.Avalonia.WebView.sln";
     AbsolutePath CoverageDirectory => ArtifactsDirectory / "coverage";
@@ -284,6 +304,94 @@ class _Build : NukeBuild
                 .EnableNoBuild()
                 .SetResultsDirectory(TestResultsDirectory)
                 .SetLoggers("trx;LogFileName=integration-tests.trx"));
+        });
+
+    Target ContractAutomation => _ => _
+        .Description("Runs ContractAutomation lane (mock-driven unit tests).")
+        .DependsOn(Build)
+        .Executes(() =>
+        {
+            RunContractAutomationTests("contract-automation.trx");
+        });
+
+    Target RuntimeAutomation => _ => _
+        .Description("Runs RuntimeAutomation lane (real adapter/runtime automation tests).")
+        .DependsOn(Build)
+        .Executes(() =>
+        {
+            RunRuntimeAutomationTests("runtime-automation.trx");
+        });
+
+    Target AutomationLaneReport => _ => _
+        .Description("Runs automation lanes and writes pass/fail/skip report.")
+        .DependsOn(Build)
+        .Executes(() =>
+        {
+            var lanes = new List<AutomationLaneResult>();
+            var failures = new List<string>();
+
+            RunLaneWithReporting(
+                lane: ContractAutomationLane,
+                project: UnitTestsProject,
+                run: () => RunContractAutomationTests("contract-automation.trx"),
+                lanes,
+                failures);
+
+            RunLaneWithReporting(
+                lane: RuntimeAutomationLane,
+                project: IntegrationTestsProject,
+                run: () => RunRuntimeAutomationTests("runtime-automation.trx"),
+                lanes,
+                failures);
+
+            if (!OperatingSystem.IsMacOS())
+            {
+                lanes.Add(new AutomationLaneResult(
+                    Lane: $"{RuntimeAutomationLane}.iOS",
+                    Status: "skipped",
+                    Project: E2EiOSProject.ToString(),
+                    Reason: "Requires macOS host with iOS simulator tooling."));
+            }
+            else if (!HasDotNetWorkload("ios"))
+            {
+                lanes.Add(new AutomationLaneResult(
+                    Lane: $"{RuntimeAutomationLane}.iOS",
+                    Status: "skipped",
+                    Project: E2EiOSProject.ToString(),
+                    Reason: "iOS workload not installed."));
+            }
+
+            if (!HasDotNetWorkload("android"))
+            {
+                lanes.Add(new AutomationLaneResult(
+                    Lane: $"{RuntimeAutomationLane}.Android",
+                    Status: "skipped",
+                    Project: E2EAndroidProject.ToString(),
+                    Reason: "Android workload not installed."));
+            }
+
+            TestResultsDirectory.CreateDirectory();
+            var laneManifestExists = File.Exists(AutomationLaneManifestFile);
+            var criticalPathManifestExists = File.Exists(RuntimeCriticalPathManifestFile);
+            var reportPayload = new
+            {
+                generatedAtUtc = DateTime.UtcNow,
+                laneManifestPath = AutomationLaneManifestFile.ToString(),
+                runtimeCriticalPathManifestPath = RuntimeCriticalPathManifestFile.ToString(),
+                laneManifestExists,
+                runtimeCriticalPathManifestExists = criticalPathManifestExists,
+                lanes
+            };
+
+            File.WriteAllText(
+                AutomationLaneReportFile,
+                JsonSerializer.Serialize(reportPayload, new JsonSerializerOptions { WriteIndented = true }));
+            Serilog.Log.Information("Automation lane report written to {Path}", AutomationLaneReportFile);
+
+            if (failures.Count > 0)
+            {
+                Assert.Fail("Automation lane failures:\n" + string.Join('\n', failures));
+            }
         });
 
     Target Test => _ => _
@@ -905,15 +1013,13 @@ class _Build : NukeBuild
         .Executes(() =>
         {
             // 1. Purge all cached Agibuild package versions so *-* resolves to the freshly packed build
-            var nugetPackagesRoot = Environment.GetEnvironmentVariable("NUGET_PACKAGES");
-            if (string.IsNullOrWhiteSpace(nugetPackagesRoot))
-            {
-                nugetPackagesRoot = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-                    ".nuget", "packages");
-            }
+            var resolvedRoot = ResolveNugetPackagesRoot();
+            var nugetPackagesRoot = resolvedRoot.Path;
+            Serilog.Log.Information(
+                "NuGet global packages root: {Path} (resolved via {Source})",
+                nugetPackagesRoot,
+                resolvedRoot.Source);
 
-            Serilog.Log.Information("NuGet global packages root: {Path}", nugetPackagesRoot);
             var agibuildPackageDirs = Directory.Exists(nugetPackagesRoot)
                 ? Directory.GetDirectories(nugetPackagesRoot, "agibuild.avalonia.webview*")
                 : [];
@@ -922,6 +1028,10 @@ class _Build : NukeBuild
                 Serilog.Log.Information("Clearing NuGet cache: {Path}", dir);
                 Directory.Delete(dir, recursive: true);
             }
+            var afterCleanup = Directory.Exists(nugetPackagesRoot)
+                ? Directory.GetDirectories(nugetPackagesRoot, "agibuild.avalonia.webview*")
+                : [];
+            Assert.True(afterCleanup.Length == 0, "Expected clean NuGet cache for Agibuild packages before restore.");
 
             // 2. Clean previous build outputs to avoid stale DLLs
             var testProjectDir = TestsDirectory / "Agibuild.Avalonia.WebView.Integration.NugetPackageTests";
@@ -934,6 +1044,11 @@ class _Build : NukeBuild
             Serilog.Log.Information("Restoring NuGet package test project...");
             DotNetRestore(s => s
                 .SetProjectFile(NugetPackageTestProject));
+            var restoredDirs = Directory.Exists(nugetPackagesRoot)
+                ? Directory.GetDirectories(nugetPackagesRoot, "agibuild.avalonia.webview*")
+                : [];
+            Assert.NotEmpty(restoredDirs);
+            Serilog.Log.Information("NuGet restore populated {Count} Agibuild package cache path(s).", restoredDirs.Length);
 
             // 4. Build
             DotNetBuild(s => s
@@ -946,12 +1061,29 @@ class _Build : NukeBuild
             var resultFile = testProjectDir / "bin" / Configuration / "net10.0" / "smoke-test-result.txt";
             if (File.Exists(resultFile)) File.Delete(resultFile);
 
-            DotNet(
-                $"run --project \"{NugetPackageTestProject}\" " +
-                $"--configuration {Configuration} --no-restore --no-build " +
-                $"-- --smoke-test",
-                workingDirectory: RootDirectory,
-                timeout: 60_000);
+            var retryTelemetry = new List<NugetSmokeRetryTelemetry>();
+            try
+            {
+                RunNugetSmokeWithRetry(
+                    project: NugetPackageTestProject,
+                    retryTelemetry: retryTelemetry,
+                    maxAttempts: 3);
+            }
+            finally
+            {
+                TestResultsDirectory.CreateDirectory();
+                var telemetryPayload = new
+                {
+                    generatedAtUtc = DateTime.UtcNow,
+                    nugetPackagesRoot,
+                    resolutionSource = resolvedRoot.Source,
+                    attempts = retryTelemetry
+                };
+                File.WriteAllText(
+                    NugetSmokeTelemetryFile,
+                    JsonSerializer.Serialize(telemetryPayload, new JsonSerializerOptions { WriteIndented = true }));
+                Serilog.Log.Information("NuGet smoke retry telemetry written to {Path}", NugetSmokeTelemetryFile);
+            }
 
             // 6. Verify the result file
             if (!File.Exists(resultFile))
@@ -1226,15 +1358,57 @@ class _Build : NukeBuild
         }
         """;
 
+    void RunContractAutomationTests(string trxFileName)
+    {
+        DotNetTest(s => s
+            .SetProjectFile(UnitTestsProject)
+            .SetConfiguration(Configuration)
+            .EnableNoRestore()
+            .EnableNoBuild()
+            .SetResultsDirectory(TestResultsDirectory)
+            .SetLoggers($"trx;LogFileName={trxFileName}"));
+    }
+
+    void RunRuntimeAutomationTests(string trxFileName)
+    {
+        DotNetTest(s => s
+            .SetProjectFile(IntegrationTestsProject)
+            .SetConfiguration(Configuration)
+            .EnableNoRestore()
+            .EnableNoBuild()
+            .SetResultsDirectory(TestResultsDirectory)
+            .SetLoggers($"trx;LogFileName={trxFileName}"));
+    }
+
+    static void RunLaneWithReporting(
+        string lane,
+        AbsolutePath project,
+        Action run,
+        IList<AutomationLaneResult> lanes,
+        IList<string> failures)
+    {
+        try
+        {
+            run();
+            lanes.Add(new AutomationLaneResult(lane, "passed", project.ToString()));
+        }
+        catch (Exception ex)
+        {
+            var message = ex.Message.Split('\n').FirstOrDefault() ?? ex.Message;
+            lanes.Add(new AutomationLaneResult(lane, "failed", project.ToString(), message));
+            failures.Add($"{lane}: {message}");
+        }
+    }
+
     // ──────────────────────────────── CI Targets ─────────────────────────────
 
     Target Ci => _ => _
-        .Description("Full CI pipeline: compile → coverage → pack → validate.")
-        .DependsOn(Coverage, ValidatePackage);
+        .Description("Full CI pipeline: compile → coverage → lane automation → pack → validate.")
+        .DependsOn(Coverage, AutomationLaneReport, ValidatePackage);
 
     Target CiPublish => _ => _
-        .Description("Full release pipeline: compile → coverage → integration tests → pack → validate → NuGet package test → publish.")
-        .DependsOn(Coverage, IntegrationTests, NugetPackageTest, PackTemplate, Publish);
+        .Description("Full release pipeline: compile → coverage → lane automation → package smoke → publish.")
+        .DependsOn(Coverage, AutomationLaneReport, NugetPackageTest, PackTemplate, Publish);
 
     // ──────────────────────────────── Helpers ────────────────────────────────────
 
@@ -1338,6 +1512,124 @@ class _Build : NukeBuild
         }
 
         return output;
+    }
+
+    private sealed record NugetPackagesRootResolution(string Path, string Source);
+
+    static NugetPackagesRootResolution ResolveNugetPackagesRoot()
+    {
+        var fromEnv = Environment.GetEnvironmentVariable("NUGET_PACKAGES");
+        if (!string.IsNullOrWhiteSpace(fromEnv))
+        {
+            return new NugetPackagesRootResolution(
+                NormalizePath(fromEnv),
+                "NUGET_PACKAGES");
+        }
+
+        try
+        {
+            var output = RunProcess("dotnet", "nuget locals global-packages --list", timeoutMs: 15_000);
+            const string marker = "global-packages:";
+            var pathFromCli = output
+                .Split('\n')
+                .Select(line => line.Trim())
+                .Where(line => line.StartsWith(marker, StringComparison.OrdinalIgnoreCase))
+                .Select(line => line[(line.IndexOf(':') + 1)..].Trim())
+                .FirstOrDefault();
+
+            if (!string.IsNullOrWhiteSpace(pathFromCli))
+            {
+                return new NugetPackagesRootResolution(
+                    NormalizePath(pathFromCli),
+                    "dotnet-nuget-locals");
+            }
+        }
+        catch (Exception ex)
+        {
+            Serilog.Log.Warning("Failed to resolve NuGet root via dotnet CLI: {Message}", ex.Message);
+        }
+
+        return new NugetPackagesRootResolution(
+            NormalizePath(Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                ".nuget",
+                "packages")),
+            "user-profile-default");
+    }
+
+    static string NormalizePath(string path)
+    {
+        var expanded = Environment.ExpandEnvironmentVariables(path.Trim().Trim('"'));
+        return Path.GetFullPath(expanded);
+    }
+
+    static string ClassifyNugetSmokeFailure(string message)
+    {
+        var transientMarkers = new[]
+        {
+            "XARLP7000",
+            "Xamarin.Tools.Zip.ZipException",
+            "being used by another process",
+            "The process cannot access the file",
+            "An existing connection was forcibly closed",
+            "Unable to load the service index",
+            "The SSL connection could not be established",
+            "timed out"
+        };
+
+        return transientMarkers.Any(marker => message.Contains(marker, StringComparison.OrdinalIgnoreCase))
+            ? "transient"
+            : "deterministic";
+    }
+
+    void RunNugetSmokeWithRetry(AbsolutePath project, IList<NugetSmokeRetryTelemetry> retryTelemetry, int maxAttempts)
+    {
+        for (var attempt = 1; attempt <= maxAttempts; attempt++)
+        {
+            try
+            {
+                DotNet(
+                    $"run --project \"{project}\" " +
+                    $"--configuration {Configuration} --no-restore --no-build " +
+                    $"-- --smoke-test",
+                    workingDirectory: RootDirectory,
+                    timeout: 60_000);
+
+                retryTelemetry.Add(new NugetSmokeRetryTelemetry(
+                    Attempt: attempt,
+                    Classification: attempt == 1 ? "none" : "transient",
+                    Outcome: "success",
+                    Message: null));
+                return;
+            }
+            catch (Exception ex)
+            {
+                var message = ex.ToString();
+                var classification = ClassifyNugetSmokeFailure(message);
+                var isFinalAttempt = attempt >= maxAttempts || string.Equals(classification, "deterministic", StringComparison.Ordinal);
+                var outcome = isFinalAttempt ? "failed" : "retrying";
+
+                retryTelemetry.Add(new NugetSmokeRetryTelemetry(
+                    Attempt: attempt,
+                    Classification: classification,
+                    Outcome: outcome,
+                    Message: ex.Message));
+
+                if (isFinalAttempt)
+                {
+                    throw;
+                }
+
+                var delayMs = 1000 * attempt;
+                Serilog.Log.Warning(
+                    "NuGet smoke attempt {Attempt}/{MaxAttempts} failed ({Classification}). Retrying after {DelayMs}ms...",
+                    attempt,
+                    maxAttempts,
+                    classification,
+                    delayMs);
+                Thread.Sleep(delayMs);
+            }
+        }
     }
 
     IEnumerable<AbsolutePath> GetProjectsToBuild()

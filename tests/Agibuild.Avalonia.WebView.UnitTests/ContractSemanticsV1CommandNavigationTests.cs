@@ -3,6 +3,7 @@ using Xunit;
 
 namespace Agibuild.Avalonia.WebView.UnitTests;
 
+[Collection("NavigationSemantics")]
 public sealed class ContractSemanticsV1CommandNavigationTests
 {
     [Fact]

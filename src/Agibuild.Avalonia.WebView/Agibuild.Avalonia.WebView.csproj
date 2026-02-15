@@ -30,6 +30,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="Agibuild.Avalonia.WebView.UnitTests" />
+    <InternalsVisibleTo Include="Agibuild.Avalonia.WebView.Integration.Tests" />
+    <InternalsVisibleTo Include="Agibuild.Avalonia.WebView.Integration.Tests.Automation" />
+  </ItemGroup>
+
+  <ItemGroup>
     <!-- Compile-time assets (dependency DLLs manually packed). -->
     <None Include="..\Agibuild.Avalonia.WebView.Core\bin\$(Configuration)\net10.0\Agibuild.Avalonia.WebView.Core.dll"
           Pack="true"

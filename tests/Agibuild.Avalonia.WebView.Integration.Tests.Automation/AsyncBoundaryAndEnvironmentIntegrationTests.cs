@@ -1,4 +1,3 @@
-using System.Reflection;
 using Agibuild.Avalonia.WebView;
 using Agibuild.Avalonia.WebView.Testing;
 using Avalonia.Headless.XUnit;
@@ -32,8 +31,8 @@ public sealed class AsyncBoundaryAndEnvironmentIntegrationTests
         var webView = new WebView();
 
         core.Attach(new PlatformHandle(nint.Zero, "test-parent"));
-        SetPrivateField(webView, "_core", core);
-        InvokePrivate(webView, "SubscribeCoreEvents");
+        webView.TestOnlyAttachCore(core);
+        webView.TestOnlySubscribeCoreEvents();
 
         var attachedHandle = await webView.TryGetWebViewHandleAsync();
         Assert.NotNull(attachedHandle);
@@ -150,7 +149,7 @@ public sealed class AsyncBoundaryAndEnvironmentIntegrationTests
             Assert.Same(globalOptions, WebViewEnvironment.Options);
             Assert.Equal("global-agent", WebViewEnvironment.Options.CustomUserAgent);
 
-            var innerWebView = GetPrivateField<WebView>(dialog, "_webView");
+            var innerWebView = dialog.TestOnlyInnerWebView;
             var instanceOptions = Assert.IsType<WebViewEnvironmentOptions>(innerWebView.EnvironmentOptions);
             Assert.NotSame(dialogOptions, instanceOptions);
             Assert.Equal("dialog-agent", instanceOptions.CustomUserAgent);
@@ -161,28 +160,6 @@ public sealed class AsyncBoundaryAndEnvironmentIntegrationTests
         {
             WebViewEnvironment.Options = original;
         }
-    }
-
-    private static void SetPrivateField(object target, string fieldName, object value)
-    {
-        var field = target.GetType().GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic);
-        Assert.NotNull(field);
-        field!.SetValue(target, value);
-    }
-
-    private static T GetPrivateField<T>(object target, string fieldName) where T : class
-    {
-        var field = target.GetType().GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic);
-        Assert.NotNull(field);
-        var value = field!.GetValue(target);
-        return Assert.IsType<T>(value);
-    }
-
-    private static void InvokePrivate(object target, string methodName)
-    {
-        var method = target.GetType().GetMethod(methodName, BindingFlags.Instance | BindingFlags.NonPublic);
-        Assert.NotNull(method);
-        method!.Invoke(target, null);
     }
 
     private sealed class ThreadAwareHandleAdapter : MockWebViewAdapter, INativeWebViewHandleProvider

@@ -27,6 +27,9 @@ public sealed class AvaloniaWebDialog : IWebDialog
     private bool _disposed;
     private bool _shown;
 
+    // Internal test seam for validating option propagation without private reflection.
+    internal WebView TestOnlyInnerWebView => _webView;
+
     public AvaloniaWebDialog(IWebViewEnvironmentOptions? options = null)
     {
         _webView = new WebView
