@@ -1,29 +1,4 @@
-# build-pipeline-resilience Specification
-
-## Purpose
-TBD - created by archiving change refactor-test-layers-pipeline-and-api-boundaries. Update Purpose after archive.
-## Requirements
-### Requirement: Package smoke cache root resolution is deterministic
-Package smoke and restore-cleanup logic SHALL resolve NuGet global package roots deterministically by honoring explicit environment configuration first, then documented fallback rules.
-
-#### Scenario: Environment-defined package root exists
-- **WHEN** `NUGET_PACKAGES` is set for the pipeline
-- **THEN** package smoke cleanup and verification use that root and record it in logs
-
-### Requirement: Transient packaging failures are classified before retry
-The pipeline MUST classify packaging failures into transient vs deterministic categories before applying retries.  
-Retries SHALL be bounded and applied only to failures classified as transient.
-
-#### Scenario: Deterministic failure is encountered
-- **WHEN** a deterministic failure category is detected during package smoke
-- **THEN** the pipeline fails immediately without retry and preserves diagnostics
-
-### Requirement: Retry behavior is auditable
-When retries occur, the pipeline SHALL emit retry count, failure category, and final disposition in machine-readable logs.
-
-#### Scenario: Transient retry succeeds
-- **WHEN** a transient category failure succeeds on retry
-- **THEN** logs record the original category, retry attempts, and successful final status
+## ADDED Requirements
 
 ### Requirement: WindowsBase conflict warnings are eliminated in governed builds
 Governed build targets MUST NOT emit `MSB3277` warnings whose message indicates `WindowsBase` version conflict.
@@ -58,4 +33,3 @@ The build system MUST allow any supported host OS to build and pack all platform
 #### Scenario: Windows adapter compile still succeeds with explicit core reference
 - **WHEN** `Agibuild.Avalonia.WebView.Adapters.Windows` is built on any host
 - **THEN** compile-time WebView2 API binding resolves through explicit `Microsoft.Web.WebView2.Core` reference without requiring WPF/WinForms assemblies
-

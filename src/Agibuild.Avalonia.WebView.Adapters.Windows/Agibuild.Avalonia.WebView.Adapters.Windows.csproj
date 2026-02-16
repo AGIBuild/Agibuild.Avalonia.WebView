@@ -3,9 +3,8 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <!-- CA2255: ModuleInitializer is the correct pattern for adapter auto-registration.
-         MSB3277: WindowsBase version conflict from WebView2 SDK's WPF dependency — harmless on non-Windows. -->
-    <NoWarn>$(NoWarn);CA2255;MSB3277</NoWarn>
+    <!-- CA2255: ModuleInitializer is the correct pattern for adapter auto-registration. -->
+    <NoWarn>$(NoWarn);CA2255</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,6 +13,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3719.77" />
+    <!-- Keep package restore graph, but avoid WebView2 build target auto-injection (which brings WPF/WinForms references). -->
+    <PackageReference Include="Microsoft.Web.WebView2"
+                      Version="1.0.3719.77"
+                      GeneratePathProperty="true"
+                      ExcludeAssets="compile;build;buildTransitive" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Bind compile-time API surface explicitly to Core only, host-agnostic and without WindowsBase conflict side effects. -->
+    <Reference Include="Microsoft.Web.WebView2.Core">
+      <HintPath>$(PkgMicrosoft_Web_WebView2)\lib_manual\netcoreapp3.0\Microsoft.Web.WebView2.Core.dll</HintPath>
+    </Reference>
   </ItemGroup>
 </Project>
