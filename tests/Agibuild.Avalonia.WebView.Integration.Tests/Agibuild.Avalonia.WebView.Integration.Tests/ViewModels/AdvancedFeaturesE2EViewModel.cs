@@ -468,11 +468,11 @@ public partial class AdvancedFeaturesE2EViewModel : ViewModelBase
             LogLine("[Auth] Starting OAuth flow simulation...");
             Status = "Running OAuth flow...";
 
-            // Use a real OAuth-like flow:
-            // AuthorizeUri -> navigate to httpbin.org which will redirect.
-            // For a real test, the user should see the auth page, then we detect callback.
-            var authorizeUri = new Uri("https://httpbin.org/redirect-to?url=https%3A%2F%2Fexample.com%2Fcallback%3Fcode%3Dtest123&status_code=302");
-            var callbackUri = new Uri("https://example.com/callback");
+            // Use a fully local deterministic OAuth simulation with zero network dependency.
+            // Custom-scheme callback is matched by WebAuthBroker before adapter navigation,
+            // so flaky DNS/SSL/external endpoint failures cannot affect this simulation path.
+            var authorizeUri = new Uri("agibuild-auth://callback?code=test123&state=simulated");
+            var callbackUri = new Uri("agibuild-auth://callback");
 
             var options = new AuthOptions
             {

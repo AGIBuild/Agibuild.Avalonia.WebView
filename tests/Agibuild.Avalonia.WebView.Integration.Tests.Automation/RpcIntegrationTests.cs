@@ -118,8 +118,8 @@ public sealed class RpcIntegrationTests
         // Start the C#→JS call (it will wait for a response)
         var callTask = rpc.InvokeAsync<string>("getTitle");
 
-        // Give the async call time to send the script
-        await Task.Delay(100);
+        // Pump deterministically until request script is emitted.
+        DispatcherTestPump.WaitUntil(_dispatcher, () => adapter.LastScript is not null);
 
         // Extract the RPC request ID from the script the adapter received
         var callId = ExtractRpcId(adapter.LastScript!);
@@ -128,7 +128,7 @@ public sealed class RpcIntegrationTests
         adapter.RaiseWebMessage(
             "{\"jsonrpc\":\"2.0\",\"id\":\"" + callId + "\",\"result\":\"My Page Title\"}",
             "*", core.ChannelId);
-        _dispatcher.RunAll();
+        DispatcherTestPump.WaitUntil(_dispatcher, () => callTask.IsCompleted);
 
         // Assert
         var title = await callTask;

@@ -33,6 +33,12 @@ public sealed class TestGetAwaiterGetResultUsageTests
         foreach (var file in files)
         {
             var relative = Path.GetRelativePath(repoRoot, file).Replace('\\', '/');
+            if (relative.Contains("/obj/", StringComparison.Ordinal)
+                || relative.Contains("/bin/", StringComparison.Ordinal))
+            {
+                continue;
+            }
+
             if (relative.EndsWith("GetAwaiterGetResultUsageTests.cs", StringComparison.Ordinal))
             {
                 continue;

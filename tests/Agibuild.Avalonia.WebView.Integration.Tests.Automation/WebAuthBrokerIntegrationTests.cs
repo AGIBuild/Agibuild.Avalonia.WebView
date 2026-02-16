@@ -56,6 +56,27 @@ public sealed class WebAuthBrokerIntegrationTests
         Assert.Contains("code=auth_code_123", result.CallbackUri!.Query);
     }
 
+    [AvaloniaFact]
+    public async Task Success_flow_with_local_callback_uri_does_not_depend_on_network()
+    {
+        var factory = new AuthTestDialogFactory(_dispatcher);
+        var broker = new WebAuthBroker(factory);
+        var owner = new TestTopLevelWindow();
+
+        // Local custom-scheme callback simulation: should complete without external navigation.
+        var options = MakeOptions(
+            authorizeUrl: "agibuild-auth://callback?code=local_simulated_code&state=deterministic",
+            callbackUrl: "agibuild-auth://callback",
+            timeout: TimeSpan.FromSeconds(2));
+
+        var result = await broker.AuthenticateAsync(owner, options);
+
+        Assert.Equal(WebAuthStatus.Success, result.Status);
+        Assert.NotNull(result.CallbackUri);
+        Assert.Equal("agibuild-auth", result.CallbackUri!.Scheme);
+        Assert.Contains("code=local_simulated_code", result.CallbackUri.Query, StringComparison.Ordinal);
+    }
+
     // --- User Cancel Flow ---
 
     [AvaloniaFact]

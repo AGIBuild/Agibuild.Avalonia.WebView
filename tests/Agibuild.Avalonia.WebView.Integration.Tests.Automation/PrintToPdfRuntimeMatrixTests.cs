@@ -1,3 +1,4 @@
+using Avalonia.Headless.XUnit;
 using Xunit;
 
 namespace Agibuild.Avalonia.WebView.Integration.Tests.Automation;
@@ -8,7 +9,7 @@ namespace Agibuild.Avalonia.WebView.Integration.Tests.Automation;
 /// </summary>
 public sealed class PrintToPdfRuntimeMatrixTests
 {
-    [Fact]
+    [AvaloniaFact]
     public void Matrix_classification_distinguishes_threading_and_runtime_interface_failures()
     {
         var rows = new[]

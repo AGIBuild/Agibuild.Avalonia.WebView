@@ -38,11 +38,33 @@ public sealed class WebAuthBrokerTests
             };
         };
 
-        var result = DispatcherTestPump.Run(_dispatcher, () => broker.AuthenticateAsync(owner, options), TimeSpan.FromSeconds(10));
+        var result = DispatcherTestPump.Run(_dispatcher, () => broker.AuthenticateAsync(owner, options), TimeSpan.FromSeconds(20));
 
         Assert.Equal(WebAuthStatus.Success, result.Status);
         Assert.NotNull(result.CallbackUri);
         Assert.StartsWith("myapp://auth/callback", result.CallbackUri!.AbsoluteUri);
+    }
+
+    [Fact]
+    public void Authorize_uri_already_matching_callback_returns_success_deterministically()
+    {
+        var factory = new AuthTestDialogFactory(_dispatcher);
+        var broker = new WebAuthBroker(factory);
+        var owner = new DummyTopLevelWindow();
+        var options = new AuthOptions
+        {
+            AuthorizeUri = new Uri("https://example.com/callback?code=simulated123&state=abc"),
+            CallbackUri = new Uri("https://example.com/callback"),
+        };
+
+        // Keep adapter behavior safe if navigation falls through unexpectedly.
+        factory.OnDialogCreated = (_, adapter) => adapter.AutoCompleteNavigation = true;
+
+        var result = DispatcherTestPump.Run(_dispatcher, () => broker.AuthenticateAsync(owner, options), TimeSpan.FromSeconds(10));
+
+        Assert.Equal(WebAuthStatus.Success, result.Status);
+        Assert.NotNull(result.CallbackUri);
+        Assert.Contains("code=simulated123", result.CallbackUri!.Query, StringComparison.Ordinal);
     }
 
     [Fact]

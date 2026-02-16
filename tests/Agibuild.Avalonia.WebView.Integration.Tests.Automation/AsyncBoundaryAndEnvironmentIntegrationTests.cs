@@ -12,34 +12,38 @@ public sealed class AsyncBoundaryAndEnvironmentIntegrationTests
     [AvaloniaFact]
     public async Task TryGetWebViewHandleAsync_returns_null_before_core_attach()
     {
-        var webView = new WebView();
-
-        var handle = await webView.TryGetWebViewHandleAsync();
-
-        Assert.Null(handle);
+        await AvaloniaUiThreadRunner.RunAsync(async () =>
+        {
+            var webView = new WebView();
+            var handle = await webView.TryGetWebViewHandleAsync();
+            Assert.Null(handle);
+        });
     }
 
     [AvaloniaFact]
     public async Task TryGetWebViewHandleAsync_returns_handle_after_attach_and_null_after_dispose()
     {
-        var dispatcher = new TestDispatcher();
-        var adapter = new ThreadAwareHandleAdapter
+        await AvaloniaUiThreadRunner.RunAsync(async () =>
         {
-            HandleToReturn = new TestWindowsWebView2PlatformHandle((nint)123, (nint)456, (nint)789)
-        };
-        using var core = new WebViewCore(adapter, dispatcher, NullLogger<WebViewCore>.Instance);
-        var webView = new WebView();
+            var dispatcher = new TestDispatcher();
+            var adapter = new ThreadAwareHandleAdapter
+            {
+                HandleToReturn = new TestWindowsWebView2PlatformHandle((nint)123, (nint)456, (nint)789)
+            };
+            using var core = new WebViewCore(adapter, dispatcher, NullLogger<WebViewCore>.Instance);
+            var webView = new WebView();
 
-        core.Attach(new PlatformHandle(nint.Zero, "test-parent"));
-        webView.TestOnlyAttachCore(core);
-        webView.TestOnlySubscribeCoreEvents();
+            core.Attach(new PlatformHandle(nint.Zero, "test-parent"));
+            webView.TestOnlyAttachCore(core);
+            webView.TestOnlySubscribeCoreEvents();
 
-        var attachedHandle = await webView.TryGetWebViewHandleAsync();
-        Assert.NotNull(attachedHandle);
+            var attachedHandle = await webView.TryGetWebViewHandleAsync();
+            Assert.NotNull(attachedHandle);
 
-        core.Dispose();
-        var disposedHandle = await webView.TryGetWebViewHandleAsync();
-        Assert.Null(disposedHandle);
+            core.Dispose();
+            var disposedHandle = await webView.TryGetWebViewHandleAsync();
+            Assert.Null(disposedHandle);
+        });
     }
 
     [AvaloniaFact]
@@ -144,17 +148,20 @@ public sealed class AsyncBoundaryAndEnvironmentIntegrationTests
                 PreloadScripts = ["window.__dialog = true;"]
             };
 
-            using var dialog = new AvaloniaWebDialog(dialogOptions);
+            AvaloniaUiThreadRunner.Run(() =>
+            {
+                using var dialog = new AvaloniaWebDialog(dialogOptions);
 
-            Assert.Same(globalOptions, WebViewEnvironment.Options);
-            Assert.Equal("global-agent", WebViewEnvironment.Options.CustomUserAgent);
+                Assert.Same(globalOptions, WebViewEnvironment.Options);
+                Assert.Equal("global-agent", WebViewEnvironment.Options.CustomUserAgent);
 
-            var innerWebView = dialog.TestOnlyInnerWebView;
-            var instanceOptions = Assert.IsType<WebViewEnvironmentOptions>(innerWebView.EnvironmentOptions);
-            Assert.NotSame(dialogOptions, instanceOptions);
-            Assert.Equal("dialog-agent", instanceOptions.CustomUserAgent);
-            Assert.NotSame(dialogOptions.CustomSchemes, instanceOptions.CustomSchemes);
-            Assert.NotSame(dialogOptions.PreloadScripts, instanceOptions.PreloadScripts);
+                var innerWebView = dialog.TestOnlyInnerWebView;
+                var instanceOptions = Assert.IsType<WebViewEnvironmentOptions>(innerWebView.EnvironmentOptions);
+                Assert.NotSame(dialogOptions, instanceOptions);
+                Assert.Equal("dialog-agent", instanceOptions.CustomUserAgent);
+                Assert.NotSame(dialogOptions.CustomSchemes, instanceOptions.CustomSchemes);
+                Assert.NotSame(dialogOptions.PreloadScripts, instanceOptions.PreloadScripts);
+            });
         }
         finally
         {

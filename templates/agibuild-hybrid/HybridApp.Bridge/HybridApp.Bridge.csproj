@@ -7,12 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Agibuild.Avalonia.WebView.Core" Version="*" />
+    <PackageReference Include="Agibuild.Avalonia.WebView.Core" Version="*-*" />
   </ItemGroup>
 
   <!-- Source generator for typed bridge -->
   <ItemGroup>
-    <PackageReference Include="Agibuild.Avalonia.WebView.Bridge.Generator" Version="*"
+    <PackageReference Include="Agibuild.Avalonia.WebView.Bridge.Generator" Version="*-*"
                       OutputItemType="Analyzer"
                       ReferenceOutputAssembly="false" />
   </ItemGroup>

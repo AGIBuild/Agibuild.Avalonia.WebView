@@ -47,7 +47,9 @@
         "TemplateE2E",
         "Test",
         "UnitTests",
-        "ValidatePackage"
+        "ValidatePackage",
+        "WarningGovernance",
+        "WarningGovernanceSyntheticCheck"
       ]
     },
     "Verbosity": {
@@ -154,6 +156,10 @@
         "PackageVersion": {
           "type": "string",
           "description": "NuGet package version override. When set, overrides MinVer auto-calculated version"
+        },
+        "WarningGovernanceInput": {
+          "type": "string",
+          "description": "Optional warning scanner input file path. If set, scanner consumes this file instead of live build output"
         }
       }
     },

@@ -2,8 +2,11 @@ using Avalonia;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Avalonia.Themes.Fluent;
+using Xunit;
 
-[assembly: AvaloniaTestApplication(typeof(Agibuild.Avalonia.WebView.Integration.Tests.Automation.TestAppBuilder))]
+[assembly: global::Avalonia.Headless.XUnit.AvaloniaTestApplication(typeof(Agibuild.Avalonia.WebView.Integration.Tests.Automation.TestAppBuilder))]
+[assembly: AssemblyFixture(typeof(global::Avalonia.Headless.XUnit.AvaloniaHeadlessFixture))]
+[assembly: CollectionBehavior(DisableTestParallelization = true, MaxParallelThreads = 1)]
 
 namespace Agibuild.Avalonia.WebView.Integration.Tests.Automation;
 
