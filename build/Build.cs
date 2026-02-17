@@ -418,6 +418,34 @@ class _Build : NukeBuild
                     Reason: "Android workload not installed."));
             }
 
+            // GTK/Linux smoke validation (Phase 3 Deliverable 3.5)
+            if (!OperatingSystem.IsLinux())
+            {
+                lanes.Add(new AutomationLaneResult(
+                    Lane: $"{RuntimeAutomationLane}.Gtk",
+                    Status: "skipped",
+                    Project: E2EDesktopProject.ToString(),
+                    Reason: "Requires Linux host with WebKitGTK and a display server (Xvfb on CI)."));
+            }
+            else if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("DISPLAY"))
+                     && string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("WAYLAND_DISPLAY")))
+            {
+                lanes.Add(new AutomationLaneResult(
+                    Lane: $"{RuntimeAutomationLane}.Gtk",
+                    Status: "skipped",
+                    Project: E2EDesktopProject.ToString(),
+                    Reason: "No DISPLAY/WAYLAND_DISPLAY detected; cannot run GTK smoke without a display server."));
+            }
+            else
+            {
+                RunLaneWithReporting(
+                    lane: $"{RuntimeAutomationLane}.Gtk",
+                    project: E2EDesktopProject,
+                    run: () => RunGtkSmokeDesktopApp(),
+                    lanes,
+                    failures);
+            }
+
             TestResultsDirectory.CreateDirectory();
             var laneManifestExists = File.Exists(AutomationLaneManifestFile);
             var criticalPathManifestExists = File.Exists(RuntimeCriticalPathManifestFile);
@@ -1060,6 +1088,13 @@ class _Build : NukeBuild
         .DependsOn(ValidatePackage)
         .Executes(() =>
         {
+            // NuGet selects the highest version across all sources (even if local feed is first).
+            // When nuget.org contains newer prerelease packages than the local build, "*-*" would
+            // restore the remote versions and invalidate this smoke test. Pin restore to the
+            // freshly packed local artifact version.
+            var packedVersion = ResolvePackedAgibuildVersion("Agibuild.Avalonia.WebView");
+            Serilog.Log.Information("NuGet package smoke pinned to packed version: {Version}", packedVersion);
+
             // 1. Purge all cached Agibuild package versions so *-* resolves to the freshly packed build
             var resolvedRoot = ResolveNugetPackagesRoot();
             var nugetPackagesRoot = resolvedRoot.Path;
@@ -1091,7 +1126,8 @@ class _Build : NukeBuild
             // 3. Restore — nuget.config in the test project dir points to artifacts/packages
             Serilog.Log.Information("Restoring NuGet package test project...");
             DotNetRestore(s => s
-                .SetProjectFile(NugetPackageTestProject));
+                .SetProjectFile(NugetPackageTestProject)
+                .SetProperty("AgibuildPackageVersion", packedVersion));
             var restoredDirs = Directory.Exists(nugetPackagesRoot)
                 ? Directory.GetDirectories(nugetPackagesRoot, "agibuild.avalonia.webview*")
                 : [];
@@ -1102,6 +1138,7 @@ class _Build : NukeBuild
             DotNetBuild(s => s
                 .SetProjectFile(NugetPackageTestProject)
                 .SetConfiguration(Configuration)
+                .SetProperty("AgibuildPackageVersion", packedVersion)
                 .EnableNoRestore());
 
             // 5. Run the smoke test (headless — auto-closes after verification)
@@ -1149,6 +1186,28 @@ class _Build : NukeBuild
 
             Serilog.Log.Information("NuGet package integration test PASSED.");
         });
+
+    string ResolvePackedAgibuildVersion(string packageId)
+    {
+        var versionPattern = new Regex(
+            $"^{Regex.Escape(packageId)}\\.(?<v>\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z\\.]+)?(?:\\+[0-9A-Za-z\\.]+)?)\\.nupkg$",
+            RegexOptions.CultureInvariant | RegexOptions.Compiled);
+
+        var packages = PackageOutputDirectory
+            .GlobFiles("*.nupkg")
+            .Where(p => !p.Name.EndsWith(".symbols.nupkg", StringComparison.OrdinalIgnoreCase))
+            .Select(p => new FileInfo(p))
+            .Select(p => new { File = p, Match = versionPattern.Match(p.Name) })
+            .Where(x => x.Match.Success)
+            .OrderByDescending(x => x.File.LastWriteTimeUtc)
+            .ToList();
+
+        Assert.NotEmpty(packages, $"No packed nupkg found for {packageId} in {PackageOutputDirectory}.");
+
+        var chosen = packages.First();
+        Serilog.Log.Information("Using packed nupkg: {File}", chosen.File.Name);
+        return chosen.Match.Groups["v"].Value;
+    }
 
     // ──────────────────────── Template Targets ────────────────────────
 
@@ -1426,6 +1485,21 @@ class _Build : NukeBuild
             .EnableNoBuild()
             .SetResultsDirectory(TestResultsDirectory)
             .SetLoggers($"trx;LogFileName={trxFileName}"));
+    }
+
+    void RunGtkSmokeDesktopApp()
+    {
+        TestResultsDirectory.CreateDirectory();
+
+        // Use the desktop integration test app in self-terminating "--gtk-smoke" mode.
+        // The app writes detailed logs to stdout/stderr which we persist as an artifact.
+        var output = RunProcessCaptureAllChecked(
+            "dotnet",
+            $"run --project \"{E2EDesktopProject}\" --configuration {Configuration} --no-build -- --gtk-smoke",
+            workingDirectory: RootDirectory,
+            timeoutMs: 180_000);
+
+        File.WriteAllText(TestResultsDirectory / "gtk-smoke.log", output);
     }
 
     static void RunLaneWithReporting(
@@ -2069,6 +2143,41 @@ class _Build : NukeBuild
         }
 
         return string.Join('\n', new[] { output, error }.Where(x => !string.IsNullOrWhiteSpace(x)));
+    }
+
+    static string RunProcessCaptureAllChecked(string fileName, string arguments, string? workingDirectory = null, int timeoutMs = 30_000)
+    {
+        var psi = new ProcessStartInfo
+        {
+            FileName = fileName,
+            Arguments = arguments,
+            UseShellExecute = false,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            CreateNoWindow = true,
+        };
+
+        if (!string.IsNullOrEmpty(workingDirectory))
+            psi.WorkingDirectory = workingDirectory;
+
+        using var process = Process.Start(psi)!;
+        var output = process.StandardOutput.ReadToEnd();
+        var error = process.StandardError.ReadToEnd();
+
+        if (!process.WaitForExit(timeoutMs))
+        {
+            process.Kill();
+            throw new TimeoutException($"Process '{fileName} {arguments}' timed out after {timeoutMs}ms.");
+        }
+
+        var combined = string.Join('\n', new[] { output, error }.Where(x => !string.IsNullOrWhiteSpace(x)));
+        if (process.ExitCode != 0)
+        {
+            throw new InvalidOperationException(
+                $"Process '{fileName} {arguments}' failed with exit code {process.ExitCode}.\n{combined}");
+        }
+
+        return combined;
     }
 
     private sealed record NugetPackagesRootResolution(string Path, string Source);

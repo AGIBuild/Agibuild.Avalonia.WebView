@@ -1,7 +1,7 @@
 # build-pipeline-resilience Specification
 
 ## Purpose
-TBD - created by archiving change refactor-test-layers-pipeline-and-api-boundaries. Update Purpose after archive.
+Define governance and invariants for the build/packaging pipeline so CI is deterministic across hosts, retries are auditable and bounded, and governed warning classes (e.g., WindowsBase conflicts) are treated as release-blocking regressions.
 ## Requirements
 ### Requirement: Package smoke cache root resolution is deterministic
 Package smoke and restore-cleanup logic SHALL resolve NuGet global package roots deterministically by honoring explicit environment configuration first, then documented fallback rules.

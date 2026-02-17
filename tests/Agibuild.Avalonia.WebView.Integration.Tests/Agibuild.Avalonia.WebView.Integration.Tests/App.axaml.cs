@@ -58,6 +58,13 @@ namespace Agibuild.Avalonia.WebView.Integration.Tests
                     mainVm.WkWebViewSmoke.AutoRunCompleted += exitCode =>
                         Dispatcher.UIThread.Post(() => desktop.Shutdown(exitCode));
                 }
+                else if (args.Contains("--gtk-smoke"))
+                {
+                    mainVm.SelectedTabIndex = 2;
+                    mainVm.GtkWebViewSmoke.AutoRun = true;
+                    mainVm.GtkWebViewSmoke.AutoRunCompleted += exitCode =>
+                        Dispatcher.UIThread.Post(() => desktop.Shutdown(exitCode));
+                }
                 else if (args.Contains("--wv2-smoke"))
                 {
                     mainVm.SelectedTabIndex = 2;

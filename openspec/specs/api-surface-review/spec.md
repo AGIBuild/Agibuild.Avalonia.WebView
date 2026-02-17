@@ -1,6 +1,13 @@
 ## Purpose
 Define baseline rules for pre-1.0 API surface review, focusing on consistency, naming quality, and actionable remediation.
 ## Requirements
+### Requirement: API surface review outputs are stored in a canonical, reviewable location
+Each API surface review execution SHALL produce a human-reviewable report and SHALL store it at a canonical path within the repository so it can be reviewed by pull request diff.
+
+#### Scenario: Review output is discoverable
+- **WHEN** a contributor performs a pre-1.0 API surface review for the release train
+- **THEN** the report SHALL be updated in `docs/API_SURFACE_REVIEW.md` (or an explicitly referenced canonical successor file)
+
 ### Requirement: Public type inventory is complete
 The API review SHALL include an inventory of all public types and their exposed members.
 
@@ -58,9 +65,9 @@ API surface review SHALL track remaining sync wrappers and global mutable coupli
 - **THEN** each boundary-coupling item is marked as closed, accepted risk, or scheduled removal with owner and target milestone
 
 ### Requirement: API review maps public boundaries to executable evidence
-API surface review MUST include traceability from boundary-sensitive public APIs to executable contract/runtime tests.
+API surface review MUST include traceability pointers from boundary-sensitive public APIs to executable contract/runtime tests, or explicitly record the gap as an actionable item.
 
 #### Scenario: Boundary API has no runtime evidence mapping
 - **WHEN** audit checks API-to-test traceability
-- **THEN** review fails until at least one runtime evidence path is linked for that API boundary
+- **THEN** review fails until at least one runtime evidence path is linked for that API boundary OR a tracked action item is recorded to add such evidence
 

@@ -1,7 +1,7 @@
 # blocking-wait-governance Specification
 
 ## Purpose
-TBD - created by archiving change refactor-async-boundaries-and-test-stability. Update Purpose after archive.
+Define governance rules that restrict blocking waits in production and test/orchestration code, requiring explicit allowlists with rationale and bounded, condition-driven synchronization.
 ## Requirements
 ### Requirement: Production blocking waits are allowlist-governed
 Production source code under `src/` MUST keep `GetAwaiter().GetResult()` usage within an explicit allowlist enforced by automated tests.

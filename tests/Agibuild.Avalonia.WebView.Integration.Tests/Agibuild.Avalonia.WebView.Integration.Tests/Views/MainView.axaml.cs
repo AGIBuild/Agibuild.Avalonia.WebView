@@ -130,6 +130,9 @@ namespace Agibuild.Avalonia.WebView.Integration.Tests.Views
                 };
             }
 
+            if (OperatingSystem.IsLinux())
+                return new GtkWebViewSmokeView { DataContext = _vm.GtkWebViewSmoke };
+
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 return new WkWebViewSmokeView { DataContext = _vm.WkWebViewSmoke };
 

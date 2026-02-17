@@ -1,6 +1,6 @@
 # API Surface Review — Agibuild.Avalonia.WebView
 
-**Date**: 2026-02-12  
+**Date**: 2026-02-17  
 **Status**: Pre-1.0 Audit  
 **Test Count**: 525 CTs passing
 
@@ -79,3 +79,29 @@ All naming follows .NET conventions:
 | 3 | Graduate AGWV004 from Experimental | Low | Non-breaking |
 | 4 | Document event lifecycle on WebView control | Low | N/A |
 | 5 | Version as 1.0.0-preview.1 → 1.0.0 | — | — |
+
+---
+
+## Evidence Pointers (API → Executable)
+
+- **Navigation cancel semantics**: `tests/Agibuild.Avalonia.WebView.UnitTests/ContractSemanticsV1NavigationTests.cs`
+- **Native navigation cancel**: `tests/Agibuild.Avalonia.WebView.UnitTests/ContractSemanticsV1NativeNavigationTests.cs`
+- **WebMessage bridge policy/drop**: `tests/Agibuild.Avalonia.WebView.UnitTests/WebViewCoreHotspotCoverageTests.cs`
+- **DevTools toggle (core)**: `tests/Agibuild.Avalonia.WebView.UnitTests/RuntimeCoverageTests.cs`
+- **DevTools toggle (GTK smoke)**: `tests/Agibuild.Avalonia.WebView.Integration.Tests/Agibuild.Avalonia.WebView.Integration.Tests/ViewModels/GtkWebViewSmokeViewModel.cs`
+
+---
+
+## Public API Inventory (generated)
+
+Regenerate:
+- `dotnet build -c Release`
+- `dotnet run --project tools/ApiSurfaceInventory/ApiSurfaceInventory.csproj -c Release -- --config=Release`
+
+<details><summary>Inventory (Release)</summary>
+
+```text
+See `docs/API_SURFACE_INVENTORY.release.txt`.
+```
+
+</details>

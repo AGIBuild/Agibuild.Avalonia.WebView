@@ -100,6 +100,7 @@ typedef struct
 
     atomic_uint_fast64_t next_request_id;
     atomic_bool detached;
+    atomic_bool dev_tools_open;
     gboolean gtk_initialized;
 
     /* Pending policy decisions: request_id -> WebKitPolicyDecision* */
@@ -634,6 +635,8 @@ static void do_detach(void* data)
     if (was_detached)
         return;
 
+    atomic_store(&s->dev_tools_open, FALSE);
+
     /* Unregister script message handler */
     if (s->content_manager != NULL)
     {
@@ -683,6 +686,7 @@ ag_gtk_handle ag_gtk_create(const struct ag_gtk_callbacks* callbacks, void* user
     s->user_data = user_data;
     atomic_init(&s->next_request_id, 1);
     atomic_init(&s->detached, FALSE);
+    atomic_init(&s->dev_tools_open, FALSE);
     s->pending_policy = g_hash_table_new(g_direct_hash, g_direct_equal);
 
     return (ag_gtk_handle)s;
@@ -1039,6 +1043,8 @@ void ag_gtk_set_enable_dev_tools(ag_gtk_handle handle, bool enable)
     if (!handle) return;
     shim_state* s = (shim_state*)handle;
     s->opt_enable_dev_tools = enable;
+    if (!enable)
+        atomic_store(&s->dev_tools_open, FALSE);
 
     /* Also apply to live WebView if already attached. */
     if (s->web_view != NULL && !atomic_load(&s->detached))
@@ -1046,6 +1052,55 @@ void ag_gtk_set_enable_dev_tools(ag_gtk_handle handle, bool enable)
         WebKitSettings* settings = webkit_web_view_get_settings(s->web_view);
         webkit_settings_set_enable_developer_extras(settings, enable);
     }
+}
+
+/* ========== DevTools runtime toggle ========== */
+
+static void do_open_dev_tools(void* data)
+{
+    shim_state* s = (shim_state*)data;
+    if (atomic_load(&s->detached) || s->web_view == NULL) return;
+    if (!s->opt_enable_dev_tools) return;
+
+    WebKitWebInspector* inspector = webkit_web_view_get_inspector(s->web_view);
+    if (inspector == NULL) return;
+
+    webkit_web_inspector_show(inspector);
+    atomic_store(&s->dev_tools_open, TRUE);
+}
+
+static void do_close_dev_tools(void* data)
+{
+    shim_state* s = (shim_state*)data;
+    if (atomic_load(&s->detached) || s->web_view == NULL) return;
+    if (!s->opt_enable_dev_tools) return;
+
+    WebKitWebInspector* inspector = webkit_web_view_get_inspector(s->web_view);
+    if (inspector == NULL) return;
+
+    webkit_web_inspector_close(inspector);
+    atomic_store(&s->dev_tools_open, FALSE);
+}
+
+void ag_gtk_open_dev_tools(ag_gtk_handle handle)
+{
+    if (!handle) return;
+    shim_state* s = (shim_state*)handle;
+    run_on_gtk_thread(do_open_dev_tools, s);
+}
+
+void ag_gtk_close_dev_tools(ag_gtk_handle handle)
+{
+    if (!handle) return;
+    shim_state* s = (shim_state*)handle;
+    run_on_gtk_thread(do_close_dev_tools, s);
+}
+
+bool ag_gtk_is_dev_tools_open(ag_gtk_handle handle)
+{
+    if (!handle) return false;
+    shim_state* s = (shim_state*)handle;
+    return atomic_load(&s->dev_tools_open);
 }
 
 void ag_gtk_set_ephemeral(ag_gtk_handle handle, bool ephemeral)

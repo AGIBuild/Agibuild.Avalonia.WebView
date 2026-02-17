@@ -1108,6 +1108,16 @@ internal sealed class GtkWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
         [DllImport(LibraryName, EntryPoint = "ag_gtk_set_enable_dev_tools", CallingConvention = CallingConvention.Cdecl)]
         internal static extern void SetEnableDevTools(IntPtr handle, [MarshalAs(UnmanagedType.I1)] bool enable);
 
+        [DllImport(LibraryName, EntryPoint = "ag_gtk_open_dev_tools", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void OpenDevTools(IntPtr handle);
+
+        [DllImport(LibraryName, EntryPoint = "ag_gtk_close_dev_tools", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void CloseDevTools(IntPtr handle);
+
+        [DllImport(LibraryName, EntryPoint = "ag_gtk_is_dev_tools_open", CallingConvention = CallingConvention.Cdecl)]
+        [return: MarshalAs(UnmanagedType.I1)]
+        internal static extern bool IsDevToolsOpen(IntPtr handle);
+
         [DllImport(LibraryName, EntryPoint = "ag_gtk_set_ephemeral", CallingConvention = CallingConvention.Cdecl)]
         internal static extern void SetEphemeral(IntPtr handle, [MarshalAs(UnmanagedType.I1)] bool ephemeral);
 
@@ -1278,8 +1288,18 @@ internal sealed class GtkWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
 
     // ==================== IDevToolsAdapter ====================
     // WebKitGTK supports runtime inspector toggle via webkit_web_inspector_show/close.
-    // TODO: Wire native calls when GTK adapter is production-ready.
-    public void OpenDevTools() { }
-    public void CloseDevTools() { }
-    public bool IsDevToolsOpen => false;
+    public void OpenDevTools()
+    {
+        if (_native == IntPtr.Zero || _detached) return;
+        NativeMethods.OpenDevTools(_native);
+    }
+
+    public void CloseDevTools()
+    {
+        if (_native == IntPtr.Zero || _detached) return;
+        NativeMethods.CloseDevTools(_native);
+    }
+
+    public bool IsDevToolsOpen
+        => _native != IntPtr.Zero && !_detached && NativeMethods.IsDevToolsOpen(_native);
 }

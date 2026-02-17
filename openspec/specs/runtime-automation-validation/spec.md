@@ -1,7 +1,7 @@
 # runtime-automation-validation Specification
 
 ## Purpose
-TBD - created by archiving change refactor-test-layers-pipeline-and-api-boundaries. Update Purpose after archive.
+Define the RuntimeAutomation lane requirements for validating real runtime/adapter behaviors (async-boundary, lifecycle, environment isolation, and package smoke), with explicit per-platform execution and skip reporting in CI.
 ## Requirements
 ### Requirement: Runtime automation lane is explicitly separated from contract automation
 The system SHALL define `RuntimeAutomation` as a distinct lane from mock-based contract tests, with independent execution target(s), result reporting, and pass/fail gating semantics.

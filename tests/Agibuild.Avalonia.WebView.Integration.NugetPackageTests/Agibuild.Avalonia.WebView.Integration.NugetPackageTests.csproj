@@ -9,6 +9,11 @@
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     <MinVerSkip>true</MinVerSkip>
     <GenerateRuntimeConfigDevFile>true</GenerateRuntimeConfigDevFile>
+    <!--
+      NuGet smoke test must validate the freshly packed local artifacts (artifacts/packages),
+      not whatever highest version exists on nuget.org. The build target passes this property.
+    -->
+    <AgibuildPackageVersion Condition="'$(AgibuildPackageVersion)' == ''">*-*</AgibuildPackageVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,9 +23,9 @@
     <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.11" />
     <!-- *-* = always resolve the latest version (including prerelease) from configured sources.
          The nuget.config in this directory points to ../../artifacts/packages/ as a local feed. -->
-    <PackageReference Include="Agibuild.Avalonia.WebView" Version="*-*" />
-    <PackageReference Include="Agibuild.Avalonia.WebView.Core" Version="*-*" />
-    <PackageReference Include="Agibuild.Avalonia.WebView.Bridge.Generator" Version="*-*"
+    <PackageReference Include="Agibuild.Avalonia.WebView" Version="$(AgibuildPackageVersion)" />
+    <PackageReference Include="Agibuild.Avalonia.WebView.Core" Version="$(AgibuildPackageVersion)" />
+    <PackageReference Include="Agibuild.Avalonia.WebView.Bridge.Generator" Version="$(AgibuildPackageVersion)"
                       OutputItemType="Analyzer"
                       ReferenceOutputAssembly="false" />
     <PackageReference Include="Avalonia.Diagnostics" Version="11.3.11">

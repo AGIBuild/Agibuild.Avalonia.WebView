@@ -12,6 +12,7 @@ namespace Agibuild.Avalonia.WebView.Integration.Tests.ViewModels
             AdvancedE2E = new AdvancedFeaturesE2EViewModel(AppendLog);
             WkWebViewSmoke = new WkWebViewSmokeViewModel(AppendLog);
             WebView2Smoke = new WebView2SmokeViewModel(AppendLog);
+            GtkWebViewSmoke = new GtkWebViewSmokeViewModel(AppendLog);
             FeatureE2E = new FeatureE2EViewModel(AppendLog);
         }
 
@@ -67,6 +68,9 @@ namespace Agibuild.Avalonia.WebView.Integration.Tests.ViewModels
 
         /// <summary>Tab 2 (Windows): WebView2 smoke tests.</summary>
         public WebView2SmokeViewModel WebView2Smoke { get; }
+
+        /// <summary>Tab 2 (Linux): WebKitGTK smoke tests.</summary>
+        public GtkWebViewSmokeViewModel GtkWebViewSmoke { get; }
 
         /// <summary>Tab 3: Feature E2E — automated 8-feature test dashboard.</summary>
         public FeatureE2EViewModel FeatureE2E { get; }

@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using Xunit;
 
 namespace Agibuild.Avalonia.WebView.UnitTests;
@@ -138,6 +139,41 @@ public sealed class AutomationLaneGovernanceTests
     }
 
     [Fact]
+    public void Xunit_v3_package_versions_are_aligned_across_repo_tests_templates_and_samples()
+    {
+        var repoRoot = FindRepoRoot();
+
+        var projects = new[]
+        {
+            "tests/Agibuild.Avalonia.WebView.UnitTests/Agibuild.Avalonia.WebView.UnitTests.csproj",
+            "tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/Agibuild.Avalonia.WebView.Integration.Tests.Automation.csproj",
+            "templates/agibuild-hybrid/HybridApp.Tests/HybridApp.Tests.csproj",
+            "samples/avalonia-react/AvaloniReact.Tests/AvaloniReact.Tests.csproj",
+        };
+
+        var xunitV3Versions = new Dictionary<string, string>(StringComparer.Ordinal);
+        var runnerVersions = new Dictionary<string, string>(StringComparer.Ordinal);
+
+        foreach (var relative in projects)
+        {
+            var path = Path.Combine(repoRoot, relative.Replace('/', Path.DirectorySeparatorChar));
+            Assert.True(File.Exists(path), $"Expected project file does not exist: {path}");
+            var xml = File.ReadAllText(path);
+
+            var xunitV3 = ExtractPackageVersion(xml, "xunit.v3");
+            Assert.False(string.IsNullOrWhiteSpace(xunitV3), $"Missing PackageReference Include=\"xunit.v3\" in {relative}");
+            xunitV3Versions[relative] = xunitV3!;
+
+            var runner = ExtractPackageVersion(xml, "xunit.runner.visualstudio");
+            Assert.False(string.IsNullOrWhiteSpace(runner), $"Missing PackageReference Include=\"xunit.runner.visualstudio\" in {relative}");
+            runnerVersions[relative] = runner!;
+        }
+
+        AssertSingleVersion("xunit.v3", xunitV3Versions);
+        AssertSingleVersion("xunit.runner.visualstudio", runnerVersions);
+    }
+
+    [Fact]
     public void Warning_governance_treats_windowsbase_conflicts_as_regressions()
     {
         var repoRoot = FindRepoRoot();
@@ -168,5 +204,46 @@ public sealed class AutomationLaneGovernanceTests
         }
 
         throw new DirectoryNotFoundException("Could not locate repository root.");
+    }
+
+    private static string? ExtractPackageVersion(string csprojXml, string packageId)
+    {
+        // Supports:
+        //   <PackageReference Include="xunit.v3" Version="3.2.2" />
+        //   <PackageReference Include="xunit.runner.visualstudio"><Version>3.1.5</Version></PackageReference>
+
+        var attrPattern = new Regex(
+            $@"<PackageReference\s+[^>]*Include=""{Regex.Escape(packageId)}""[^>]*\s+Version=""(?<v>[^""]+)""",
+            RegexOptions.Compiled | RegexOptions.CultureInvariant);
+        var attrMatch = attrPattern.Match(csprojXml);
+        if (attrMatch.Success)
+            return attrMatch.Groups["v"].Value.Trim();
+
+        var elementPattern = new Regex(
+            $@"<PackageReference\s+[^>]*Include=""{Regex.Escape(packageId)}""[^>]*>[\s\S]*?<Version>(?<v>[^<]+)</Version>[\s\S]*?</PackageReference>",
+            RegexOptions.Compiled | RegexOptions.CultureInvariant);
+        var elementMatch = elementPattern.Match(csprojXml);
+        if (elementMatch.Success)
+            return elementMatch.Groups["v"].Value.Trim();
+
+        return null;
+    }
+
+    private static void AssertSingleVersion(string packageId, IReadOnlyDictionary<string, string> versionsByProject)
+    {
+        var distinct = versionsByProject
+            .Select(kvp => kvp.Value)
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
+
+        if (distinct.Count == 1)
+            return;
+
+        var details = string.Join(
+            Environment.NewLine,
+            versionsByProject.OrderBy(x => x.Key, StringComparer.Ordinal)
+                .Select(kvp => $"{kvp.Key}: {kvp.Value}"));
+
+        Assert.Fail($"Package version drift detected for '{packageId}'.\n{details}");
     }
 }
