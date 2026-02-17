@@ -16,7 +16,9 @@ public sealed class ContractSemanticsV1BaseUrlTests
         webView.NavigationStarted += (_, e) => started = e;
 
         var baseUrl = new Uri("https://example.com/assets/");
-        var navTask = Task.Run(() => webView.NavigateToStringAsync("<html></html>", baseUrl));
+        var navTask = Task.Run(
+            () => webView.NavigateToStringAsync("<html></html>", baseUrl),
+            TestContext.Current.CancellationToken);
         DispatcherTestPump.WaitUntil(dispatcher, () => started is not null);
 
         Assert.NotNull(started);
@@ -39,7 +41,9 @@ public sealed class ContractSemanticsV1BaseUrlTests
         NavigationStartingEventArgs? started = null;
         webView.NavigationStarted += (_, e) => started = e;
 
-        var navTask = Task.Run(() => webView.NavigateToStringAsync("<html></html>", null));
+        var navTask = Task.Run(
+            () => webView.NavigateToStringAsync("<html></html>", null),
+            TestContext.Current.CancellationToken);
         DispatcherTestPump.WaitUntil(dispatcher, () => started is not null);
 
         Assert.NotNull(started);
@@ -59,7 +63,9 @@ public sealed class ContractSemanticsV1BaseUrlTests
         var adapter = new MockWebViewAdapter();
         var webView = new WebViewCore(adapter, dispatcher);
 
-        var navTask = Task.Run(() => webView.NavigateToStringAsync("<html></html>"));
+        var navTask = Task.Run(
+            () => webView.NavigateToStringAsync("<html></html>"),
+            TestContext.Current.CancellationToken);
         DispatcherTestPump.WaitUntil(dispatcher, () => adapter.LastNavigationId.HasValue);
 
         Assert.Null(adapter.LastBaseUrl);

@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Collections.Concurrent;
 using System.Runtime.ExceptionServices;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
@@ -20,11 +21,23 @@ public sealed class AvaloniaTestApplicationAttribute : Attribute
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
 public sealed class AvaloniaFactAttribute : FactAttribute
 {
+    public AvaloniaFactAttribute(
+        [CallerFilePath] string? sourceFilePath = null,
+        [CallerLineNumber] int sourceLineNumber = 0)
+        : base(sourceFilePath, sourceLineNumber)
+    {
+    }
 }
 
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
 public sealed class AvaloniaTheoryAttribute : TheoryAttribute
 {
+    public AvaloniaTheoryAttribute(
+        [CallerFilePath] string? sourceFilePath = null,
+        [CallerLineNumber] int sourceLineNumber = 0)
+        : base(sourceFilePath, sourceLineNumber)
+    {
+    }
 }
 
 public sealed class AvaloniaHeadlessFixture

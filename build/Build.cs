@@ -2254,12 +2254,23 @@ class _Build : NukeBuild
         {
             try
             {
-                DotNet(
+                var output = RunProcessCaptureAllChecked(
+                    "dotnet",
                     $"run --project \"{project}\" " +
                     $"--configuration {Configuration} --no-restore --no-build " +
                     $"-- --smoke-test",
                     workingDirectory: RootDirectory,
-                    timeout: 60_000);
+                    timeoutMs: 60_000);
+
+                // Guardrail: this Chromium teardown error indicates WebView2 lifecycle issues.
+                // It does not fail the smoke test by itself, so we explicitly fail the lane to prevent regressions.
+                if (output.Contains("Failed to unregister class Chrome_WidgetWin_0", StringComparison.Ordinal) ||
+                    output.Contains("ui\\gfx\\win\\window_impl.cc:124", StringComparison.Ordinal))
+                {
+                    throw new InvalidOperationException(
+                        "NuGet smoke produced a Chromium teardown error: " +
+                        "Failed to unregister class Chrome_WidgetWin_0 (window_impl.cc:124).");
+                }
 
                 retryTelemetry.Add(new NugetSmokeRetryTelemetry(
                     Attempt: attempt,

@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Platform;
+using Avalonia.VisualTree;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -43,6 +44,8 @@ public class WebView : NativeControlHost, IWebView
     private bool _adapterUnavailable;
     private ILoggerFactory? _loggerFactory;
     private EventHandler<ContextMenuRequestedEventArgs>? _contextMenuRequestedHandlers;
+    private Window? _hostWindow;
+    private EventHandler<WindowClosingEventArgs>? _hostWindowClosingHandler;
 
     // ---------------------------------------------------------------------------
     //  Constructor
@@ -420,6 +423,18 @@ public class WebView : NativeControlHost, IWebView
     //  NativeControlHost lifecycle
     // ---------------------------------------------------------------------------
 
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnAttachedToVisualTree(e);
+        HookHostWindowClosing();
+    }
+
+    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        UnhookHostWindowClosing();
+        base.OnDetachedFromVisualTree(e);
+    }
+
     protected override IPlatformHandle CreateNativeControlCore(IPlatformHandle parent)
     {
         var handle = base.CreateNativeControlCore(parent);
@@ -438,6 +453,7 @@ public class WebView : NativeControlHost, IWebView
 
             _core.Attach(handle);
             _coreAttached = true;
+            HookHostWindowClosing();
 
             // If Source was set before attachment, navigate now (after AdapterCreated).
             var pendingSource = Source;
@@ -467,6 +483,7 @@ public class WebView : NativeControlHost, IWebView
 
     protected override void DestroyNativeControlCore(IPlatformHandle control)
     {
+        UnhookHostWindowClosing();
         UnsubscribeCoreEvents();
 
         if (_coreAttached)
@@ -638,6 +655,7 @@ public class WebView : NativeControlHost, IWebView
 
     public void Dispose()
     {
+        UnhookHostWindowClosing();
         UnsubscribeCoreEvents();
 
         if (_coreAttached)
@@ -648,5 +666,53 @@ public class WebView : NativeControlHost, IWebView
 
         _core?.Dispose();
         _core = null;
+    }
+
+    private void HookHostWindowClosing()
+    {
+        var window = TopLevel.GetTopLevel(this) as Window;
+        if (ReferenceEquals(window, _hostWindow))
+            return;
+
+        UnhookHostWindowClosing();
+
+        if (window is null)
+            return;
+
+        _hostWindow = window;
+        _hostWindowClosingHandler = (_, e) =>
+        {
+            // WebView2/Chromium cleanup is sensitive to teardown ordering during process exit.
+            // We only force early Detach when the close is clearly non-interactive / non-reversible:
+            // - programmatic closes (e.g. smoke test auto-exit)
+            // - application shutdown / OS shutdown
+            //
+            // Avoid detaching on user-initiated closings that may be canceled (e.g. "Do you want to save?"),
+            // since Detach is not reversible for some adapters.
+            if (!e.IsProgrammatic &&
+                e.CloseReason is not WindowCloseReason.ApplicationShutdown and not WindowCloseReason.OSShutdown)
+            {
+                return;
+            }
+
+            // Ensure we detach while the UI loop and native HWND are still alive.
+            if (_coreAttached)
+            {
+                try { _core?.Detach(); }
+                catch { /* best effort */ }
+            }
+        };
+        _hostWindow.Closing += _hostWindowClosingHandler;
+    }
+
+    private void UnhookHostWindowClosing()
+    {
+        if (_hostWindow is not null && _hostWindowClosingHandler is not null)
+        {
+            _hostWindow.Closing -= _hostWindowClosingHandler;
+        }
+
+        _hostWindow = null;
+        _hostWindowClosingHandler = null;
     }
 }

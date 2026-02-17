@@ -10,6 +10,7 @@ public sealed class ContractSemanticsV1AnyThreadAsyncApiTests
     [Fact]
     public void Core_async_apis_called_off_thread_execute_adapter_on_ui_thread()
     {
+        var ct = TestContext.Current.CancellationToken;
         var dispatcher = new TestDispatcher();
         var adapter = new AnyThreadCaptureAdapter
         {
@@ -18,41 +19,41 @@ public sealed class ContractSemanticsV1AnyThreadAsyncApiTests
         };
         using var core = new WebViewCore(adapter, dispatcher);
 
-        var navigateTask = Task.Run(() => core.NavigateAsync(new Uri("https://example.test/nav")));
+        var navigateTask = Task.Run(() => core.NavigateAsync(new Uri("https://example.test/nav")), ct);
         PumpUntilCompleted(dispatcher, navigateTask);
         navigateTask.GetAwaiter().GetResult();
         Assert.Equal(dispatcher.UiThreadId, adapter.NavigateThreadId);
 
-        var navigateToStringTask = Task.Run(() => core.NavigateToStringAsync("<html><body>ok</body></html>"));
+        var navigateToStringTask = Task.Run(() => core.NavigateToStringAsync("<html><body>ok</body></html>"), ct);
         PumpUntilCompleted(dispatcher, navigateToStringTask);
         navigateToStringTask.GetAwaiter().GetResult();
         Assert.Equal(dispatcher.UiThreadId, adapter.NavigateToStringThreadId);
 
-        var invokeScriptTask = Task.Run(() => core.InvokeScriptAsync("1+1"));
+        var invokeScriptTask = Task.Run(() => core.InvokeScriptAsync("1+1"), ct);
         PumpUntilCompleted(dispatcher, invokeScriptTask);
         Assert.Equal("ok", invokeScriptTask.GetAwaiter().GetResult());
         Assert.Equal(dispatcher.UiThreadId, adapter.InvokeScriptThreadId);
 
-        var goBackTask = Task.Run(() => core.GoBackAsync());
+        var goBackTask = Task.Run(() => core.GoBackAsync(), ct);
         PumpUntilCompleted(dispatcher, goBackTask);
         Assert.True(goBackTask.GetAwaiter().GetResult());
         Assert.Equal(dispatcher.UiThreadId, adapter.GoBackThreadId);
 
-        var goForwardTask = Task.Run(() => core.GoForwardAsync());
+        var goForwardTask = Task.Run(() => core.GoForwardAsync(), ct);
         PumpUntilCompleted(dispatcher, goForwardTask);
         Assert.True(goForwardTask.GetAwaiter().GetResult());
         Assert.Equal(dispatcher.UiThreadId, adapter.GoForwardThreadId);
 
-        var refreshTask = Task.Run(() => core.RefreshAsync());
+        var refreshTask = Task.Run(() => core.RefreshAsync(), ct);
         PumpUntilCompleted(dispatcher, refreshTask);
         Assert.True(refreshTask.GetAwaiter().GetResult());
         Assert.Equal(dispatcher.UiThreadId, adapter.RefreshThreadId);
 
         adapter.AutoCompleteNavigation = false;
-        var pendingNavigationTask = Task.Run(() => core.NavigateAsync(new Uri("https://example.test/pending")));
+        var pendingNavigationTask = Task.Run(() => core.NavigateAsync(new Uri("https://example.test/pending")), ct);
         ThreadingTestHelper.PumpUntil(dispatcher, () => adapter.HasPendingNavigation);
 
-        var stopTask = Task.Run(() => core.StopAsync());
+        var stopTask = Task.Run(() => core.StopAsync(), ct);
         PumpUntilCompleted(dispatcher, stopTask);
         Assert.True(stopTask.GetAwaiter().GetResult());
         Assert.Equal(dispatcher.UiThreadId, adapter.StopThreadId);
@@ -63,61 +64,62 @@ public sealed class ContractSemanticsV1AnyThreadAsyncApiTests
     [Fact]
     public void Feature_async_apis_called_off_thread_execute_adapter_on_ui_thread()
     {
+        var ct = TestContext.Current.CancellationToken;
         var dispatcher = new TestDispatcher();
         var adapter = new AnyThreadCaptureAdapter();
         using var core = new WebViewCore(adapter, dispatcher);
 
-        var openDevToolsTask = Task.Run(() => core.OpenDevToolsAsync());
+        var openDevToolsTask = Task.Run(() => core.OpenDevToolsAsync(), ct);
         PumpUntilCompleted(dispatcher, openDevToolsTask);
         openDevToolsTask.GetAwaiter().GetResult();
         Assert.Equal(dispatcher.UiThreadId, adapter.OpenDevToolsThreadId);
 
-        var closeDevToolsTask = Task.Run(() => core.CloseDevToolsAsync());
+        var closeDevToolsTask = Task.Run(() => core.CloseDevToolsAsync(), ct);
         PumpUntilCompleted(dispatcher, closeDevToolsTask);
         closeDevToolsTask.GetAwaiter().GetResult();
         Assert.Equal(dispatcher.UiThreadId, adapter.CloseDevToolsThreadId);
 
-        var isDevToolsOpenTask = Task.Run(() => core.IsDevToolsOpenAsync());
+        var isDevToolsOpenTask = Task.Run(() => core.IsDevToolsOpenAsync(), ct);
         PumpUntilCompleted(dispatcher, isDevToolsOpenTask);
         Assert.False(isDevToolsOpenTask.GetAwaiter().GetResult());
         Assert.Equal(dispatcher.UiThreadId, adapter.IsDevToolsOpenThreadId);
 
-        var screenshotTask = Task.Run(() => core.CaptureScreenshotAsync());
+        var screenshotTask = Task.Run(() => core.CaptureScreenshotAsync(), ct);
         PumpUntilCompleted(dispatcher, screenshotTask);
         Assert.NotEmpty(screenshotTask.GetAwaiter().GetResult());
         Assert.Equal(dispatcher.UiThreadId, adapter.CaptureScreenshotThreadId);
 
-        var printTask = Task.Run(() => core.PrintToPdfAsync(new PdfPrintOptions()));
+        var printTask = Task.Run(() => core.PrintToPdfAsync(new PdfPrintOptions()), ct);
         PumpUntilCompleted(dispatcher, printTask);
         Assert.NotEmpty(printTask.GetAwaiter().GetResult());
         Assert.Equal(dispatcher.UiThreadId, adapter.PrintToPdfThreadId);
 
-        var getZoomTask = Task.Run(() => core.GetZoomFactorAsync());
+        var getZoomTask = Task.Run(() => core.GetZoomFactorAsync(), ct);
         PumpUntilCompleted(dispatcher, getZoomTask);
         Assert.Equal(1.0, getZoomTask.GetAwaiter().GetResult());
         Assert.Equal(dispatcher.UiThreadId, adapter.GetZoomThreadId);
 
-        var setZoomTask = Task.Run(() => core.SetZoomFactorAsync(1.25));
+        var setZoomTask = Task.Run(() => core.SetZoomFactorAsync(1.25), ct);
         PumpUntilCompleted(dispatcher, setZoomTask);
         setZoomTask.GetAwaiter().GetResult();
         Assert.Equal(dispatcher.UiThreadId, adapter.SetZoomThreadId);
 
-        var findTask = Task.Run(() => core.FindInPageAsync("hello"));
+        var findTask = Task.Run(() => core.FindInPageAsync("hello"), ct);
         PumpUntilCompleted(dispatcher, findTask);
         Assert.Equal(3, findTask.GetAwaiter().GetResult().TotalMatches);
         Assert.Equal(dispatcher.UiThreadId, adapter.FindThreadId);
 
-        var stopFindTask = Task.Run(() => core.StopFindInPageAsync(clearHighlights: false));
+        var stopFindTask = Task.Run(() => core.StopFindInPageAsync(clearHighlights: false), ct);
         PumpUntilCompleted(dispatcher, stopFindTask);
         stopFindTask.GetAwaiter().GetResult();
         Assert.Equal(dispatcher.UiThreadId, adapter.StopFindThreadId);
 
-        var addPreloadTask = Task.Run(() => core.AddPreloadScriptAsync("console.log('x')"));
+        var addPreloadTask = Task.Run(() => core.AddPreloadScriptAsync("console.log('x')"), ct);
         PumpUntilCompleted(dispatcher, addPreloadTask);
         var preloadId = addPreloadTask.GetAwaiter().GetResult();
         Assert.Equal(dispatcher.UiThreadId, adapter.AddPreloadThreadId);
 
-        var removePreloadTask = Task.Run(() => core.RemovePreloadScriptAsync(preloadId));
+        var removePreloadTask = Task.Run(() => core.RemovePreloadScriptAsync(preloadId), ct);
         PumpUntilCompleted(dispatcher, removePreloadTask);
         removePreloadTask.GetAwaiter().GetResult();
         Assert.Equal(dispatcher.UiThreadId, adapter.RemovePreloadThreadId);
@@ -126,6 +128,7 @@ public sealed class ContractSemanticsV1AnyThreadAsyncApiTests
     [Fact]
     public void Manager_async_apis_called_off_thread_execute_adapter_on_ui_thread()
     {
+        var ct = TestContext.Current.CancellationToken;
         var dispatcher = new TestDispatcher();
         var adapter = new AnyThreadCaptureAdapter();
         using var core = new WebViewCore(adapter, dispatcher);
@@ -136,27 +139,31 @@ public sealed class ContractSemanticsV1AnyThreadAsyncApiTests
         var cookieManager = core.TryGetCookieManager();
         Assert.NotNull(cookieManager);
 
-        var copyTask = Task.Run(() => commandManager!.CopyAsync());
+        var copyTask = Task.Run(() => commandManager!.CopyAsync(), ct);
         PumpUntilCompleted(dispatcher, copyTask);
         copyTask.GetAwaiter().GetResult();
         Assert.Equal(dispatcher.UiThreadId, adapter.LastCommandThreadId);
 
-        var setCookieTask = Task.Run(() => cookieManager!.SetCookieAsync(new WebViewCookie("k", "v", ".example.test", "/", null, false, false)));
+        var setCookieTask = Task.Run(
+            () => cookieManager!.SetCookieAsync(new WebViewCookie("k", "v", ".example.test", "/", null, false, false)),
+            ct);
         PumpUntilCompleted(dispatcher, setCookieTask);
         setCookieTask.GetAwaiter().GetResult();
         Assert.Equal(dispatcher.UiThreadId, adapter.SetCookieThreadId);
 
-        var getCookiesTask = Task.Run(() => cookieManager!.GetCookiesAsync(new Uri("https://example.test/")));
+        var getCookiesTask = Task.Run(() => cookieManager!.GetCookiesAsync(new Uri("https://example.test/")), ct);
         PumpUntilCompleted(dispatcher, getCookiesTask);
         Assert.Single(getCookiesTask.GetAwaiter().GetResult());
         Assert.Equal(dispatcher.UiThreadId, adapter.GetCookiesThreadId);
 
-        var deleteCookieTask = Task.Run(() => cookieManager!.DeleteCookieAsync(new WebViewCookie("k", "v", ".example.test", "/", null, false, false)));
+        var deleteCookieTask = Task.Run(
+            () => cookieManager!.DeleteCookieAsync(new WebViewCookie("k", "v", ".example.test", "/", null, false, false)),
+            ct);
         PumpUntilCompleted(dispatcher, deleteCookieTask);
         deleteCookieTask.GetAwaiter().GetResult();
         Assert.Equal(dispatcher.UiThreadId, adapter.DeleteCookieThreadId);
 
-        var clearCookiesTask = Task.Run(() => cookieManager!.ClearAllCookiesAsync());
+        var clearCookiesTask = Task.Run(() => cookieManager!.ClearAllCookiesAsync(), ct);
         PumpUntilCompleted(dispatcher, clearCookiesTask);
         clearCookiesTask.GetAwaiter().GetResult();
         Assert.Equal(dispatcher.UiThreadId, adapter.ClearCookiesThreadId);
@@ -180,8 +187,6 @@ public sealed class ContractSemanticsV1AnyThreadAsyncApiTests
         ICookieAdapter
     {
         private bool _initialized;
-        private bool _attached;
-        private bool _detached;
         private readonly Dictionary<string, WebViewCookie> _cookies = new();
         private readonly Dictionary<string, string> _preloadScripts = new();
         private int _preloadIdCounter;
@@ -219,10 +224,10 @@ public sealed class ContractSemanticsV1AnyThreadAsyncApiTests
         public int? ClearCookiesThreadId { get; private set; }
 
         public event EventHandler<NavigationCompletedEventArgs>? NavigationCompleted;
-        public event EventHandler<NewWindowRequestedEventArgs>? NewWindowRequested;
-        public event EventHandler<WebMessageReceivedEventArgs>? WebMessageReceived;
-        public event EventHandler<WebResourceRequestedEventArgs>? WebResourceRequested;
-        public event EventHandler<EnvironmentRequestedEventArgs>? EnvironmentRequested;
+        public event EventHandler<NewWindowRequestedEventArgs>? NewWindowRequested { add { } remove { } }
+        public event EventHandler<WebMessageReceivedEventArgs>? WebMessageReceived { add { } remove { } }
+        public event EventHandler<WebResourceRequestedEventArgs>? WebResourceRequested { add { } remove { } }
+        public event EventHandler<EnvironmentRequestedEventArgs>? EnvironmentRequested { add { } remove { } }
         public event EventHandler<double>? ZoomFactorChanged;
 
         public void Initialize(IWebViewAdapterHost host)
@@ -236,13 +241,10 @@ public sealed class ContractSemanticsV1AnyThreadAsyncApiTests
             {
                 throw new InvalidOperationException("Adapter must be initialized before attach.");
             }
-
-            _attached = true;
         }
 
         public void Detach()
         {
-            _detached = true;
         }
 
         public Task NavigateAsync(Guid navigationId, Uri uri)

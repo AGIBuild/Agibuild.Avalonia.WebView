@@ -95,8 +95,8 @@ public sealed class ContractSemanticsV1NavigationTests
         adapter.RaiseNavigationCompleted(NavigationCompletedStatus.Success);
 
         // Await both tasks after all dispatch work is done (avoids thread affinity issues).
-        await nav1.WaitAsync(TimeSpan.FromSeconds(5));
-        await nav2.WaitAsync(TimeSpan.FromSeconds(5));
+        await nav1.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+        await nav2.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
     }
 
     [Fact]

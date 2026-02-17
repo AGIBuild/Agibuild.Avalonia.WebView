@@ -371,7 +371,7 @@ public sealed class RuntimeCoverageTests
     public void TryHandle_returns_false_when_uri_is_null()
     {
         using var svc = CreateEmbeddedSpaService();
-        var e = new WebResourceRequestedEventArgs(null, "GET");
+        var e = new WebResourceRequestedEventArgs { RequestUri = null, Method = "GET" };
 
         Assert.False(svc.TryHandle(e));
     }
@@ -973,11 +973,12 @@ public sealed class RuntimeCoverageTests
         listener.Prefixes.Add($"http://127.0.0.1:{port}/");
         listener.Start();
 
+        var ct = TestContext.Current.CancellationToken;
         _ = Task.Run(() =>
         {
             try
             {
-                while (listener.IsListening)
+                while (listener.IsListening && !ct.IsCancellationRequested)
                 {
                     var ctx = listener.GetContext();
                     var body = Encoding.UTF8.GetBytes("<html>Dev Server OK</html>");
@@ -989,7 +990,7 @@ public sealed class RuntimeCoverageTests
                 }
             }
             catch { /* listener stopped */ }
-        });
+        }, ct);
 
         using var svc = new SpaHostingService(new SpaHostingOptions
         {
@@ -1020,11 +1021,12 @@ public sealed class RuntimeCoverageTests
         listener.Prefixes.Add($"http://127.0.0.1:{port}/");
         listener.Start();
 
+        var ct = TestContext.Current.CancellationToken;
         _ = Task.Run(() =>
         {
             try
             {
-                while (listener.IsListening)
+                while (listener.IsListening && !ct.IsCancellationRequested)
                 {
                     var ctx = listener.GetContext();
                     var path = ctx.Request.Url!.AbsolutePath;
@@ -1045,7 +1047,7 @@ public sealed class RuntimeCoverageTests
                 }
             }
             catch { /* listener stopped */ }
-        });
+        }, ct);
 
         using var svc = new SpaHostingService(new SpaHostingOptions
         {
@@ -1076,11 +1078,12 @@ public sealed class RuntimeCoverageTests
         listener.Prefixes.Add($"http://127.0.0.1:{port}/");
         listener.Start();
 
+        var ct = TestContext.Current.CancellationToken;
         _ = Task.Run(() =>
         {
             try
             {
-                while (listener.IsListening)
+                while (listener.IsListening && !ct.IsCancellationRequested)
                 {
                     var ctx = listener.GetContext();
                     ctx.Response.StatusCode = 500;
@@ -1088,7 +1091,7 @@ public sealed class RuntimeCoverageTests
                 }
             }
             catch { /* listener stopped */ }
-        });
+        }, ct);
 
         using var svc = new SpaHostingService(new SpaHostingOptions
         {
@@ -1115,11 +1118,12 @@ public sealed class RuntimeCoverageTests
         listener.Prefixes.Add($"http://127.0.0.1:{port}/");
         listener.Start();
 
+        var ct = TestContext.Current.CancellationToken;
         _ = Task.Run(() =>
         {
             try
             {
-                while (listener.IsListening)
+                while (listener.IsListening && !ct.IsCancellationRequested)
                 {
                     var ctx = listener.GetContext();
                     var body = Encoding.UTF8.GetBytes("OK");
@@ -1131,7 +1135,7 @@ public sealed class RuntimeCoverageTests
                 }
             }
             catch { /* listener stopped */ }
-        });
+        }, ct);
 
         using var svc = new SpaHostingService(new SpaHostingOptions
         {
@@ -1212,7 +1216,7 @@ public sealed class RuntimeCoverageTests
         core.Bridge.Expose<IReflectionExportService>(impl);
 
         // JS stub should have been injected.
-        Assert.True(scripts.Any(s => s.Contains("ReflectionExportService")));
+        Assert.Contains(scripts, s => s.Contains("ReflectionExportService"));
     }
 
     [Fact]
@@ -1224,7 +1228,7 @@ public sealed class RuntimeCoverageTests
         core.Bridge.Expose<IReflectionCustomNameExport>(impl);
 
         // Custom service name should be used.
-        Assert.True(scripts.Any(s => s.Contains("reflectionCustomName")));
+        Assert.Contains(scripts, s => s.Contains("reflectionCustomName"));
     }
 
     [Fact]

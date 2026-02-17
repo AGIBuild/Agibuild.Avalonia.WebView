@@ -195,7 +195,7 @@ public sealed class BridgeIntegrationTests
             }
         }));
 
-        Task.WaitAll(tasks.ToArray());
+        Task.WaitAll(tasks.ToArray(), TestContext.Current.CancellationToken);
 
         // At least one should have succeeded.
         adapter.ScriptCallback = script => { scripts.Add(script); return null; };

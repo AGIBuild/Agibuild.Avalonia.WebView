@@ -61,7 +61,7 @@ public sealed class ContractSemanticsV1NativeNavigationTests
 
         adapter.RaiseNavigationCompleted(NavigationCompletedStatus.Success);
 
-        Assert.True(completedRaised.Wait(TimeSpan.FromSeconds(5)));
+        Assert.True(completedRaised.Wait(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
         Assert.NotNull(completed);
         Assert.Equal(NavigationCompletedStatus.Success, completed!.Status);
         Assert.Equal(decision.NavigationId, completed.NavigationId);

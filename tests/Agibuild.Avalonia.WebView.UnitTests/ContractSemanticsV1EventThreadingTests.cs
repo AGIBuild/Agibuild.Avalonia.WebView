@@ -52,10 +52,10 @@ public sealed class ContractSemanticsV1EventThreadingTests
         };
         bgThread.Start();
 
-        Assert.True(messageEnqueued.Wait(TimeSpan.FromSeconds(5)));
+        Assert.True(messageEnqueued.Wait(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
         dispatcher.RunAll();
 
-        Assert.True(messageRaised.Wait(TimeSpan.FromSeconds(5)));
+        Assert.True(messageRaised.Wait(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
         Assert.Equal(dispatcher.UiThreadId, messageThreadId);
     }
 

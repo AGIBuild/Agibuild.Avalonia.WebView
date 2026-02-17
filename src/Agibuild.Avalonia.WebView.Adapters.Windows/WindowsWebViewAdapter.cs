@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+using System.Threading;
 using Avalonia.Platform;
 using Agibuild.Avalonia.WebView;
 using Agibuild.Avalonia.WebView.Adapters.Abstractions;
@@ -34,6 +35,7 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
     // Readiness: Attach starts async init; operations queue until ready.
     private TaskCompletionSource? _readyTcs;
     private readonly Queue<Action> _pendingOps = new();
+    private CancellationTokenSource? _initCts;
 
     // The SynchronizationContext captured during WebView2 initialization (UI thread).
     // All COM calls must be dispatched to this context.
@@ -137,8 +139,9 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
 
         _attached = true;
         _readyTcs = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        _initCts = new CancellationTokenSource();
 
-        _ = InitializeWebView2Async(parentHandle.Handle);
+        _ = InitializeWebView2Async(parentHandle.Handle, _initCts.Token);
     }
 
     public void Detach()
@@ -155,27 +158,28 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
 
         try
         {
-            RestoreParentWindowProc();
-
-            if (_webView is not null)
+            try
             {
-                _webView.NavigationStarting -= OnNavigationStarting;
-                _webView.NavigationCompleted -= OnNavigationCompleted;
-                _webView.NewWindowRequested -= OnNewWindowRequested;
-                _webView.WebMessageReceived -= OnWebMessageReceived;
-                _webView.WebResourceRequested -= OnWebResourceRequested;
-                _webView.DownloadStarting -= OnDownloadStarting;
-                _webView.PermissionRequested -= OnPermissionRequested;
+                _initCts?.Cancel();
+            }
+            catch
+            {
+                // Best effort
+            }
+            finally
+            {
+                _initCts?.Dispose();
+                _initCts = null;
             }
 
-            _controller?.Close();
+            // Detach must be safe regardless of caller thread. We do all WebView2/Win32 teardown
+            // on the captured UI SynchronizationContext when available, and avoid indefinite waits.
+            TearDownWebView2BestEffort();
+
+            _readyTcs?.TrySetCanceled();
         }
         finally
         {
-            _controller = null;
-            _webView = null;
-            _environment = null;
-
             lock (_navLock)
             {
                 _correlationMap.Clear();
@@ -190,7 +194,7 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
         }
     }
 
-    private async Task InitializeWebView2Async(IntPtr parentHwnd)
+    private async Task InitializeWebView2Async(IntPtr parentHwnd, CancellationToken ct)
     {
         try
         {
@@ -200,10 +204,25 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
             }
 
             _environment = await CoreWebView2Environment.CreateAsync().ConfigureAwait(true);
+            if (_detached || ct.IsCancellationRequested)
+            {
+                // Detach requested while initializing: ensure we don't leak WebView2 objects.
+                TearDownWebView2OnInitThread();
+                _readyTcs?.TrySetCanceled();
+                return;
+            }
+
             _controller = await _environment.CreateCoreWebView2ControllerAsync(parentHwnd).ConfigureAwait(true);
             _webView = _controller.CoreWebView2;
             _parentHwnd = parentHwnd;
             _uiSyncContext = SynchronizationContext.Current;
+
+            if (_detached || ct.IsCancellationRequested)
+            {
+                TearDownWebView2OnInitThread();
+                _readyTcs?.TrySetCanceled();
+                return;
+            }
 
             // Size the controller to fill the parent window and track future resizes.
             UpdateControllerBounds();
@@ -248,6 +267,13 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
             await _webView.AddScriptToExecuteOnDocumentCreatedAsync(bridgeScript).ConfigureAwait(true);
 
             // Replay queued operations
+            if (_detached || ct.IsCancellationRequested)
+            {
+                TearDownWebView2OnInitThread();
+                _readyTcs?.TrySetCanceled();
+                return;
+            }
+
             while (_pendingOps.Count > 0)
             {
                 var op = _pendingOps.Dequeue();
@@ -263,12 +289,106 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
         }
         catch (Exception ex)
         {
+            if (_detached || ct.IsCancellationRequested)
+            {
+                TearDownWebView2OnInitThread();
+                _readyTcs?.TrySetCanceled();
+                return;
+            }
+
             if (DiagnosticsEnabled)
             {
                 Console.WriteLine($"[Agibuild.WebView] WebView2 initialization failed: {ex.Message}");
             }
 
             _readyTcs?.TrySetException(ex);
+        }
+    }
+
+    private void TearDownWebView2BestEffort()
+    {
+        if (_uiSyncContext is null || SynchronizationContext.Current == _uiSyncContext)
+        {
+            TearDownWebView2OnInitThread();
+            return;
+        }
+
+        using var completed = new ManualResetEventSlim(false);
+        _uiSyncContext.Post(_ =>
+        {
+            try
+            {
+                TearDownWebView2OnInitThread();
+            }
+            catch
+            {
+                // Best effort
+            }
+            finally
+            {
+                completed.Set();
+            }
+        }, null);
+
+        // Avoid deadlocks when UI thread is already exiting.
+        completed.Wait(TimeSpan.FromSeconds(5));
+    }
+
+    /// <summary>
+    /// Tears down WebView2 objects on the UI thread / init thread.
+    /// This is safe to call multiple times.
+    /// </summary>
+    private void TearDownWebView2OnInitThread()
+    {
+        try
+        {
+            RestoreParentWindowProc();
+
+            if (_webView is not null)
+            {
+                _webView.NavigationStarting -= OnNavigationStarting;
+                _webView.NavigationCompleted -= OnNavigationCompleted;
+                _webView.NewWindowRequested -= OnNewWindowRequested;
+                _webView.WebMessageReceived -= OnWebMessageReceived;
+                _webView.WebResourceRequested -= OnWebResourceRequested;
+                _webView.DownloadStarting -= OnDownloadStarting;
+                _webView.PermissionRequested -= OnPermissionRequested;
+            }
+
+            _controller?.Close();
+        }
+        finally
+        {
+            var webView = _webView;
+            var controller = _controller;
+            var environment = _environment;
+
+            _webView = null;
+            _controller = null;
+            _environment = null;
+            _uiSyncContext = null;
+            _parentHwnd = IntPtr.Zero;
+
+            ReleaseComObject(webView);
+            ReleaseComObject(controller);
+            ReleaseComObject(environment);
+        }
+    }
+
+    private static void ReleaseComObject(object? obj)
+    {
+        if (obj is null) return;
+
+        try
+        {
+            if (Marshal.IsComObject(obj))
+            {
+                Marshal.FinalReleaseComObject(obj);
+            }
+        }
+        catch
+        {
+            // Best effort: COM release should never crash cleanup.
         }
     }
 

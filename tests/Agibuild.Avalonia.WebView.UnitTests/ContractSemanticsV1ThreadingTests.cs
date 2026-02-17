@@ -8,11 +8,12 @@ public sealed class ContractSemanticsV1ThreadingTests
     [Fact]
     public void Async_apis_are_callable_from_non_ui_thread()
     {
+        var ct = TestContext.Current.CancellationToken;
         var dispatcher = new TestDispatcher();
         var adapter = new MockWebViewAdapter();
         var webView = new WebViewCore(adapter, dispatcher);
 
-        var stopTask = Task.Run(() => webView.StopAsync());
+        var stopTask = Task.Run(() => webView.StopAsync(), ct);
         SpinWait.SpinUntil(() => dispatcher.QueuedCount > 0, TimeSpan.FromSeconds(2));
         dispatcher.RunAll();
         var result = stopTask.GetAwaiter().GetResult();
@@ -22,6 +23,7 @@ public sealed class ContractSemanticsV1ThreadingTests
     [Fact]
     public async Task InvokeScriptAsync_from_non_ui_thread_is_marshaled_to_ui_thread()
     {
+        var ct = TestContext.Current.CancellationToken;
         var dispatcher = new TestDispatcher();
         var adapter = new MockWebViewAdapter
         {
@@ -29,7 +31,7 @@ public sealed class ContractSemanticsV1ThreadingTests
         };
         using var webView = new WebViewCore(adapter, dispatcher);
 
-        var task = Task.Run(() => webView.InvokeScriptAsync("1+1"));
+        var task = Task.Run(() => webView.InvokeScriptAsync("1+1"), ct);
         SpinWait.SpinUntil(() => dispatcher.QueuedCount > 0, TimeSpan.FromSeconds(2));
         dispatcher.RunAll();
 
@@ -40,12 +42,13 @@ public sealed class ContractSemanticsV1ThreadingTests
     [Fact]
     public async Task CommandManager_async_calls_from_non_ui_thread_use_queue()
     {
+        var ct = TestContext.Current.CancellationToken;
         var dispatcher = new TestDispatcher();
         var adapter = MockWebViewAdapter.CreateWithCommands();
         using var webView = new WebViewCore(adapter, dispatcher);
         var commands = webView.TryGetCommandManager()!;
 
-        var task = Task.Run(() => commands.CopyAsync());
+        var task = Task.Run(() => commands.CopyAsync(), ct);
         SpinWait.SpinUntil(() => dispatcher.QueuedCount > 0, TimeSpan.FromSeconds(2));
         dispatcher.RunAll();
         await task;

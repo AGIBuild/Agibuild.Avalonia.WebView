@@ -1068,7 +1068,14 @@ public sealed class CoverageGapTests
             NavigationCompletedStatus.Failure,
             new WebViewNetworkException("Net error", navId, new Uri("https://error.test")));
 
-        await navTask.ContinueWith(_ => { }); // Absorb any fault
+        try
+        {
+            await navTask;
+        }
+        catch
+        {
+            // Absorb any fault
+        }
 
         Assert.NotNull(completedArgs);
         Assert.Equal(NavigationCompletedStatus.Failure, completedArgs!.Status);

@@ -135,7 +135,7 @@ public sealed class WebDialogTests
         var uri = new Uri("https://example.com");
 
         // Start navigation (it won't complete without raising NavigationCompleted).
-        var navTask = Task.Run(() => dialog.NavigateAsync(uri));
+        var navTask = Task.Run(() => dialog.NavigateAsync(uri), TestContext.Current.CancellationToken);
         DispatcherTestPump.WaitUntil(_dispatcher, () => adapter.LastNavigationId.HasValue);
 
         // Adapter should have received the navigation request.
@@ -238,7 +238,7 @@ public sealed class WebDialogTests
         adapter.AutoCompleteNavigation = false;
 
         // Need an active navigation for Stop to work
-        var navTask = Task.Run(() => dialog.NavigateAsync(new Uri("https://example.com")));
+        var navTask = Task.Run(() => dialog.NavigateAsync(new Uri("https://example.com")), TestContext.Current.CancellationToken);
         DispatcherTestPump.WaitUntil(_dispatcher, () => adapter.LastNavigationId.HasValue);
         var result = DispatcherTestPump.Run(_dispatcher, () => dialog.StopAsync());
         Assert.True(result);
