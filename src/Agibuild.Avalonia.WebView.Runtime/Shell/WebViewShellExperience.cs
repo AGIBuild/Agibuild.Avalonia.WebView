@@ -199,6 +199,8 @@ public sealed class WebViewShellExperienceOptions
 {
     /// <summary>Optional policy for handling <see cref="IWebView.NewWindowRequested"/>.</summary>
     public IWebViewNewWindowPolicy? NewWindowPolicy { get; init; }
+    /// <summary>Optional typed host capability bridge.</summary>
+    public WebViewHostCapabilityBridge? HostCapabilityBridge { get; init; }
     /// <summary>Optional factory that creates a managed child window when strategy is <c>ManagedWindow</c>.</summary>
     public Func<WebViewManagedWindowCreateContext, IWebView?>? ManagedWindowFactory { get; init; }
     /// <summary>Optional external-open handler for <c>ExternalBrowser</c> strategy.</summary>
@@ -486,6 +488,61 @@ public sealed class WebViewShellExperience : IDisposable
         return false;
     }
 
+    /// <summary>
+    /// Reads host clipboard text via typed capability bridge.
+    /// Returns denied result when bridge is not configured.
+    /// </summary>
+    public WebViewHostCapabilityCallResult<string?> ReadClipboardText()
+    {
+        if (_options.HostCapabilityBridge is null)
+            return WebViewHostCapabilityCallResult<string?>.Denied("Host capability bridge is not configured.");
+        return _options.HostCapabilityBridge.ReadClipboardText(_rootWindowId, parentWindowId: null, targetWindowId: _rootWindowId);
+    }
+
+    /// <summary>
+    /// Writes host clipboard text via typed capability bridge.
+    /// Returns denied result when bridge is not configured.
+    /// </summary>
+    public WebViewHostCapabilityCallResult<object?> WriteClipboardText(string text)
+    {
+        if (_options.HostCapabilityBridge is null)
+            return WebViewHostCapabilityCallResult<object?>.Denied("Host capability bridge is not configured.");
+        return _options.HostCapabilityBridge.WriteClipboardText(text, _rootWindowId, parentWindowId: null, targetWindowId: _rootWindowId);
+    }
+
+    /// <summary>
+    /// Shows host open-file dialog via typed capability bridge.
+    /// Returns denied result when bridge is not configured.
+    /// </summary>
+    public WebViewHostCapabilityCallResult<WebViewFileDialogResult> ShowOpenFileDialog(WebViewOpenFileDialogRequest request)
+    {
+        if (_options.HostCapabilityBridge is null)
+            return WebViewHostCapabilityCallResult<WebViewFileDialogResult>.Denied("Host capability bridge is not configured.");
+        return _options.HostCapabilityBridge.ShowOpenFileDialog(request, _rootWindowId, parentWindowId: null, targetWindowId: _rootWindowId);
+    }
+
+    /// <summary>
+    /// Shows host save-file dialog via typed capability bridge.
+    /// Returns denied result when bridge is not configured.
+    /// </summary>
+    public WebViewHostCapabilityCallResult<WebViewFileDialogResult> ShowSaveFileDialog(WebViewSaveFileDialogRequest request)
+    {
+        if (_options.HostCapabilityBridge is null)
+            return WebViewHostCapabilityCallResult<WebViewFileDialogResult>.Denied("Host capability bridge is not configured.");
+        return _options.HostCapabilityBridge.ShowSaveFileDialog(request, _rootWindowId, parentWindowId: null, targetWindowId: _rootWindowId);
+    }
+
+    /// <summary>
+    /// Shows host notification via typed capability bridge.
+    /// Returns denied result when bridge is not configured.
+    /// </summary>
+    public WebViewHostCapabilityCallResult<object?> ShowNotification(WebViewNotificationRequest request)
+    {
+        if (_options.HostCapabilityBridge is null)
+            return WebViewHostCapabilityCallResult<object?>.Denied("Host capability bridge is not configured.");
+        return _options.HostCapabilityBridge.ShowNotification(request, _rootWindowId, parentWindowId: null, targetWindowId: _rootWindowId);
+    }
+
     private void OnNewWindowRequested(object? sender, NewWindowRequestedEventArgs e)
     {
         if (_disposed) return;
@@ -615,7 +672,37 @@ public sealed class WebViewShellExperience : IDisposable
             }
             case WebViewNewWindowStrategy.ExternalBrowser:
             {
-                if (args.Uri is null || _options.ExternalOpenHandler is null)
+                if (args.Uri is null)
+                {
+                    args.Handled = false;
+                    return;
+                }
+
+                if (_options.HostCapabilityBridge is not null)
+                {
+                    var openResult = _options.HostCapabilityBridge.OpenExternal(
+                        args.Uri,
+                        _rootWindowId,
+                        parentWindowId: _rootWindowId,
+                        targetWindowId: null);
+
+                    args.Handled = true;
+                    if (!openResult.IsAllowed)
+                    {
+                        ReportPolicyFailure(
+                            WebViewShellPolicyDomain.ExternalOpen,
+                            new UnauthorizedAccessException(openResult.DenyReason ?? "External open was denied by host capability policy."));
+                        return;
+                    }
+
+                    if (!openResult.IsSuccess && openResult.Error is not null)
+                    {
+                        ReportPolicyFailure(WebViewShellPolicyDomain.ExternalOpen, openResult.Error);
+                    }
+                    return;
+                }
+
+                if (_options.ExternalOpenHandler is null)
                 {
                     args.Handled = false;
                     return;
@@ -624,7 +711,7 @@ public sealed class WebViewShellExperience : IDisposable
                 args.Handled = true;
                 ExecutePolicyDomain(
                     WebViewShellPolicyDomain.ExternalOpen,
-                    () => _options.ExternalOpenHandler?.Invoke(_webView, args.Uri));
+                    () => _options.ExternalOpenHandler.Invoke(_webView, args.Uri));
                 return;
             }
             case WebViewNewWindowStrategy.Delegate:

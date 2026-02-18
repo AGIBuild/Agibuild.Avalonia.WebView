@@ -1,8 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -29,21 +27,36 @@ public sealed class WebView2TeardownStabilityIntegrationTests
 
         Assert.True(File.Exists(desktopProject), $"Desktop integration test project not found: {desktopProject}");
 
-        var args =
-            $"run --project \"{desktopProject}\" --configuration Debug " +
+        const int iterations = 10;
+        var buildArgs = $"build \"{desktopProject}\" --configuration Debug";
+        var runArgs =
+            $"run --project \"{desktopProject}\" --configuration Debug --no-build --no-restore " +
             "-- " +
-            "--wv2-teardown-stress --wv2-teardown-iterations 10";
+            $"--wv2-teardown-stress --wv2-teardown-iterations {iterations}";
 
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(90));
+        // Build and runtime are split on purpose: teardown correctness should not be coupled
+        // to cold-start compile cost fluctuations in CI environments.
+        var buildResult = await RunProcessCaptureAsync(
+            fileName: "dotnet",
+            arguments: buildArgs,
+            workingDirectory: repoRoot,
+            timeout: TimeSpan.FromMinutes(3),
+            ct: TestContext.Current.CancellationToken);
+
+        Assert.False(buildResult.TimedOut, FormatFailureMessage("build", buildResult, buildArgs));
+        Assert.True(buildResult.ExitCode == 0, FormatFailureMessage("build", buildResult, buildArgs));
+
         var result = await RunProcessCaptureAsync(
             fileName: "dotnet",
-            arguments: args,
+            arguments: runArgs,
             workingDirectory: repoRoot,
-            ct: cts.Token);
+            timeout: TimeSpan.FromMinutes(2),
+            ct: TestContext.Current.CancellationToken);
+
+        Assert.False(result.TimedOut, FormatFailureMessage("run", result, runArgs));
 
         var combinedOutput = $"{result.StdOut}\n{result.StdErr}".Trim();
-
-        Assert.True(result.ExitCode == 0, $"Desktop WV2 teardown stress exited with code {result.ExitCode}.\n\n{combinedOutput}");
+        Assert.True(result.ExitCode == 0, FormatFailureMessage("run", result, runArgs));
 
         Assert.DoesNotContain("Failed to unregister class Chrome_WidgetWin_0", combinedOutput, StringComparison.Ordinal);
         Assert.DoesNotContain(@"ui\gfx\win\window_impl.cc:124", combinedOutput, StringComparison.Ordinal);
@@ -70,6 +83,7 @@ public sealed class WebView2TeardownStabilityIntegrationTests
         string fileName,
         string arguments,
         string workingDirectory,
+        TimeSpan timeout,
         CancellationToken ct)
     {
         var psi = new ProcessStartInfo
@@ -83,32 +97,62 @@ public sealed class WebView2TeardownStabilityIntegrationTests
             CreateNoWindow = true
         };
 
-        var stdout = new StringBuilder();
-        var stderr = new StringBuilder();
-
         using var process = new Process { StartInfo = psi, EnableRaisingEvents = true };
-        process.OutputDataReceived += (_, e) =>
-        {
-            if (e.Data is not null) stdout.AppendLine(e.Data);
-        };
-        process.ErrorDataReceived += (_, e) =>
-        {
-            if (e.Data is not null) stderr.AppendLine(e.Data);
-        };
 
         if (!process.Start())
         {
             throw new InvalidOperationException($"Failed to start process: {fileName} {arguments}");
         }
 
-        process.BeginOutputReadLine();
-        process.BeginErrorReadLine();
+        var stdoutTask = process.StandardOutput.ReadToEndAsync(ct);
+        var stderrTask = process.StandardError.ReadToEndAsync(ct);
+        var timedOut = false;
 
-        await process.WaitForExitAsync(ct);
+        using var timeoutCts = new CancellationTokenSource(timeout);
+        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(ct, timeoutCts.Token);
+        try
+        {
+            await process.WaitForExitAsync(linkedCts.Token);
+        }
+        catch (OperationCanceledException) when (timeoutCts.IsCancellationRequested && !ct.IsCancellationRequested)
+        {
+            timedOut = true;
+            TryKillProcessTree(process);
+            await process.WaitForExitAsync(CancellationToken.None);
+        }
 
-        return new ProcessResult(process.ExitCode, stdout.ToString(), stderr.ToString());
+        var stdout = await stdoutTask;
+        var stderr = await stderrTask;
+        return new ProcessResult(process.ExitCode, stdout, stderr, timedOut, timeout);
     }
 
-    private sealed record ProcessResult(int ExitCode, string StdOut, string StdErr);
+    private static void TryKillProcessTree(Process process)
+    {
+        try
+        {
+            if (!process.HasExited)
+            {
+                process.Kill(entireProcessTree: true);
+            }
+        }
+        catch
+        {
+            // Ignore kill race/errors; exit state is validated by caller assertions.
+        }
+    }
+
+    private static string FormatFailureMessage(string phase, ProcessResult result, string args)
+    {
+        var combinedOutput = $"{result.StdOut}\n{result.StdErr}".Trim();
+        return
+            $"WV2 teardown stress {phase} failed.\n" +
+            $"Command: dotnet {args}\n" +
+            $"ExitCode: {result.ExitCode}\n" +
+            $"TimedOut: {result.TimedOut}\n" +
+            $"Timeout: {result.Timeout}\n\n" +
+            $"{combinedOutput}";
+    }
+
+    private sealed record ProcessResult(int ExitCode, string StdOut, string StdErr, bool TimedOut, TimeSpan Timeout);
 }
 

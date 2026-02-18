@@ -1,6 +1,5 @@
-## Purpose
-Define cross-platform, contract-driven multi-window lifecycle semantics for shell scenarios, including strategy selection, lifecycle transitions, identity correlation, and bounded teardown behavior.
-## Requirements
+## MODIFIED Requirements
+
 ### Requirement: Multi-window strategy decisions are explicit and contract-driven
 The runtime SHALL evaluate each new-window request into an explicit multi-window strategy decision with at least: in-place, managed-window, external-browser, and host-delegate.
 
@@ -20,39 +19,6 @@ The runtime SHALL evaluate each new-window request into an explicit multi-window
 - **WHEN** a new-window request is resolved as host-delegate
 - **THEN** runtime invokes host delegate contract and applies its decision deterministically
 
-### Requirement: Managed windows have deterministic lifecycle states
-The runtime SHALL define deterministic lifecycle states for managed windows: Created, Attached, Ready, Closing, Closed.
-
-#### Scenario: Lifecycle state order is deterministic for successful window open and close
-- **WHEN** a managed window is opened and then closed normally
-- **THEN** lifecycle state transitions occur in the fixed order Created -> Attached -> Ready -> Closing -> Closed
-
-#### Scenario: Closed state is terminal
-- **WHEN** a managed window reaches Closed
-- **THEN** no further lifecycle state transitions are emitted for that window identity
-
-### Requirement: Window identity and relationships are stable
-Each managed window SHALL have a stable window id, and runtime SHALL track optional parent window id for child-window relationships.
-
-#### Scenario: Child window records parent identity
-- **WHEN** runtime creates a managed window from a parent window new-window request
-- **THEN** the child window lifecycle metadata includes the parent window id
-
-#### Scenario: Window id remains stable across lifecycle events
-- **WHEN** lifecycle events are emitted for a managed window
-- **THEN** all events for that window carry the same window id
-
-### Requirement: Multi-window teardown is bounded and leak-safe
-Managed window close operations SHALL complete in bounded time and release runtime references deterministically.
-
-#### Scenario: Repeated open-close stress does not leak active window references
-- **WHEN** a stress scenario repeatedly opens and closes managed windows
-- **THEN** runtime active-window tracking returns to zero after each completed close cycle
-
-#### Scenario: Close request with in-flight operations still reaches Closed
-- **WHEN** a managed window receives close while in-flight operations exist
-- **THEN** runtime completes teardown and emits Closed within bounded completion constraints
-
 ### Requirement: Multi-window semantics are testable in contract and integration lanes
 The system SHALL make multi-window lifecycle behavior testable via MockAdapter contract tests and focused platform integration tests.
 
@@ -67,4 +33,3 @@ The system SHALL make multi-window lifecycle behavior testable via MockAdapter c
 #### Scenario: Integration tests validate external-open capability routing
 - **WHEN** integration automation runs external-browser strategy with host capability bridge enabled
 - **THEN** external-open capability execution and authorization outcomes are validated deterministically
-

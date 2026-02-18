@@ -230,4 +230,85 @@ public sealed class MultiWindowLifecycleTests
         Assert.Equal(0, shell.ManagedWindowCount);
         Assert.Contains(policyErrors, e => e.Domain == WebViewShellPolicyDomain.ManagedWindowLifecycle);
     }
+
+    [Fact]
+    public void External_browser_strategy_routes_through_host_capability_bridge_when_configured()
+    {
+        var dispatcher = new TestDispatcher();
+        var adapter = MockWebViewAdapter.Create();
+        using var core = new WebViewCore(adapter, dispatcher);
+        var provider = new ExternalOpenOnlyProvider();
+        var bridge = new WebViewHostCapabilityBridge(provider, new AllowExternalOnlyPolicy());
+
+        using var shell = new WebViewShellExperience(core, new WebViewShellExperienceOptions
+        {
+            NewWindowPolicy = new DelegateNewWindowPolicy((_, _, _) => WebViewNewWindowStrategyDecision.ExternalBrowser()),
+            HostCapabilityBridge = bridge,
+            ExternalOpenHandler = (_, _) => throw new InvalidOperationException("legacy handler should not be used")
+        });
+
+        var target = new Uri("https://example.com/external");
+        adapter.RaiseNewWindowRequested(target);
+        dispatcher.RunAll();
+
+        Assert.Single(provider.ExternalOpens);
+        Assert.Equal(target, provider.ExternalOpens[0]);
+        Assert.Equal(0, adapter.NavigateCallCount);
+    }
+
+    [Fact]
+    public void External_browser_deny_is_reported_without_fallback_navigation()
+    {
+        var dispatcher = new TestDispatcher();
+        var adapter = MockWebViewAdapter.Create();
+        using var core = new WebViewCore(adapter, dispatcher);
+        var provider = new ExternalOpenOnlyProvider();
+        var bridge = new WebViewHostCapabilityBridge(provider, new DenyExternalPolicy());
+        WebViewShellPolicyErrorEventArgs? observedError = null;
+
+        using var shell = new WebViewShellExperience(core, new WebViewShellExperienceOptions
+        {
+            NewWindowPolicy = new DelegateNewWindowPolicy((_, _, _) => WebViewNewWindowStrategyDecision.ExternalBrowser()),
+            HostCapabilityBridge = bridge,
+            PolicyErrorHandler = (_, e) => observedError = e
+        });
+
+        adapter.RaiseNewWindowRequested(new Uri("https://example.com/denied"));
+        dispatcher.RunAll();
+
+        Assert.Empty(provider.ExternalOpens);
+        Assert.Equal(0, adapter.NavigateCallCount);
+        Assert.NotNull(observedError);
+        Assert.Equal(WebViewShellPolicyDomain.ExternalOpen, observedError!.Domain);
+    }
+
+    private sealed class ExternalOpenOnlyProvider : IWebViewHostCapabilityProvider
+    {
+        public List<Uri> ExternalOpens { get; } = [];
+
+        public string? ReadClipboardText() => throw new NotSupportedException();
+        public void WriteClipboardText(string text) => throw new NotSupportedException();
+        public WebViewFileDialogResult ShowOpenFileDialog(WebViewOpenFileDialogRequest request) => throw new NotSupportedException();
+        public WebViewFileDialogResult ShowSaveFileDialog(WebViewSaveFileDialogRequest request) => throw new NotSupportedException();
+
+        public void OpenExternal(Uri uri) => ExternalOpens.Add(uri);
+
+        public void ShowNotification(WebViewNotificationRequest request) => throw new NotSupportedException();
+    }
+
+    private sealed class AllowExternalOnlyPolicy : IWebViewHostCapabilityPolicy
+    {
+        public WebViewHostCapabilityDecision Evaluate(in WebViewHostCapabilityRequestContext context)
+        {
+            return context.Operation == WebViewHostCapabilityOperation.ExternalOpen
+                ? WebViewHostCapabilityDecision.Allow()
+                : WebViewHostCapabilityDecision.Deny("unsupported");
+        }
+    }
+
+    private sealed class DenyExternalPolicy : IWebViewHostCapabilityPolicy
+    {
+        public WebViewHostCapabilityDecision Evaluate(in WebViewHostCapabilityRequestContext context)
+            => WebViewHostCapabilityDecision.Deny("external-blocked");
+    }
 }

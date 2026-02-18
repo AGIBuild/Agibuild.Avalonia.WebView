@@ -1,18 +1,16 @@
 ## Purpose
 Define opt-in, UI-agnostic runtime policies that improve common “shell-like” WebView host behaviors (new windows, downloads, permissions) without changing baseline contract semantics when not enabled.
-
 ## Requirements
-
 ### Requirement: Shell experience is opt-in and non-breaking
-The system SHALL provide an opt-in shell policy foundation that improves common host behaviors (new-window, downloads, permissions) without changing baseline WebView contract semantics when not enabled.
+The system SHALL provide an opt-in shell policy foundation that improves common host behaviors (new-window, downloads, permissions) and optional host capability bridge integration without changing baseline WebView contract semantics when not enabled.
 
 #### Scenario: Default runtime behavior is unchanged when shell experience is not enabled
 - **WHEN** an app uses `Agibuild.Avalonia.WebView` without enabling shell experience
 - **THEN** the baseline behaviors defined by existing specs remain unchanged
 
-#### Scenario: Shell policy foundation is composable by hosts
-- **WHEN** a host enables shell experience with only a subset of policy domains configured
-- **THEN** configured policy domains are applied and unconfigured domains continue using baseline semantics
+#### Scenario: Host capability bridge is optional in shell experience
+- **WHEN** shell experience is enabled without host capability bridge configuration
+- **THEN** shell policy domains continue to work without host capability execution
 
 ### Requirement: New window policy strategies are configurable
 The shell experience component SHALL provide a configurable policy for `NewWindowRequested` with at least the following strategies:
@@ -33,9 +31,9 @@ The shell experience component SHALL provide a configurable policy for `NewWindo
 - **WHEN** the policy is configured for managed-window and a new-window request occurs
 - **THEN** shell runtime routes the request to the managed-window lifecycle orchestrator with deterministic window identity assignment
 
-#### Scenario: External-browser strategy does not create managed window
-- **WHEN** the policy is configured for external-browser and a new-window request occurs
-- **THEN** shell runtime routes the target URI to external open execution and does not create a managed window
+#### Scenario: External-browser strategy routes through host capability bridge when configured
+- **WHEN** the policy is configured for external-browser and host capability bridge is enabled
+- **THEN** shell runtime routes the target URI to typed external-open capability execution with authorization policy enforcement
 
 ### Requirement: Policy execution is UI-thread consistent and testable
 Shell experience policy handlers SHALL execute on the WebView UI thread, and policy behavior SHALL be testable via MockAdapter without a real browser.
@@ -96,3 +94,4 @@ A failure in one shell policy handler SHALL NOT corrupt unrelated runtime state,
 #### Scenario: Handler exception does not mutate unrelated domains
 - **WHEN** a shell policy handler throws during event processing
 - **THEN** the failure is reported through defined runtime error paths and unrelated shell policy domains continue functioning
+
