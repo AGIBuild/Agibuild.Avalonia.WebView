@@ -4,47 +4,84 @@ using Avalonia.Platform;
 
 namespace Agibuild.Avalonia.WebView;
 
+/// <summary>
+/// Status of a navigation completion.
+/// </summary>
 public enum NavigationCompletedStatus
 {
+    /// <summary>Navigation completed successfully.</summary>
     Success,
+    /// <summary>Navigation failed.</summary>
     Failure,
+    /// <summary>Navigation was canceled.</summary>
     Canceled,
+    /// <summary>Navigation was superseded by a newer navigation.</summary>
     Superseded
 }
 
+/// <summary>
+/// Result status for a web authentication operation.
+/// </summary>
 public enum WebAuthStatus
 {
+    /// <summary>Authentication succeeded.</summary>
     Success,
+    /// <summary>Authentication was canceled by the user.</summary>
     UserCancel,
+    /// <summary>Authentication timed out.</summary>
     Timeout,
+    /// <summary>Authentication failed due to an error.</summary>
     Error
 }
 
+/// <summary>
+/// Reason why an incoming WebMessage was dropped.
+/// </summary>
 public enum WebMessageDropReason
 {
+    /// <summary>The message origin is not allowed by policy.</summary>
     OriginNotAllowed,
+    /// <summary>The message protocol version does not match.</summary>
     ProtocolMismatch,
+    /// <summary>The message channel id does not match.</summary>
     ChannelMismatch
 }
 
+/// <summary>
+/// Categorizes operational failures to enable consistent error handling across adapters.
+/// </summary>
 public enum WebViewOperationFailureCategory
 {
+    /// <summary>The operation failed because the WebView was disposed/detached.</summary>
     Disposed,
+    /// <summary>The operation failed because the WebView was not yet ready.</summary>
     NotReady,
+    /// <summary>The operation failed because dispatching to the UI thread failed.</summary>
     DispatchFailed,
+    /// <summary>The operation failed due to an adapter/platform failure.</summary>
     AdapterFailed
 }
 
+/// <summary>
+/// Helpers to annotate exceptions with <see cref="WebViewOperationFailureCategory"/> for governance and diagnostics.
+/// </summary>
 public static class WebViewOperationFailure
 {
     private const string CategoryDataKey = "Agibuild.WebView.OperationFailureCategory";
 
+    /// <summary>Associates a failure category with an exception.</summary>
+    /// <param name="exception">The exception to annotate.</param>
+    /// <param name="category">The failure category.</param>
     public static void SetCategory(Exception exception, WebViewOperationFailureCategory category)
     {
         ArgumentNullException.ThrowIfNull(exception);
         exception.Data[CategoryDataKey] = category;
     }
 
+    /// <summary>Attempts to read a failure category from an exception.</summary>
+    /// <param name="exception">The exception to inspect.</param>
+    /// <param name="category">When true is returned, receives the parsed category.</param>
+    /// <returns>True when a category is present and can be parsed; otherwise false.</returns>
     public static bool TryGetCategory(Exception exception, out WebViewOperationFailureCategory category)
     {
         ArgumentNullException.ThrowIfNull(exception);
@@ -67,27 +104,51 @@ public static class WebViewOperationFailure
     }
 }
 
+/// <summary>
+/// Public WebView contract surface for navigation, scripting, events, and feature adapters.
+/// </summary>
 public interface IWebView : IDisposable
 {
+    /// <summary>Gets or sets the current navigation URI.</summary>
     Uri Source { get; set; }
+    /// <summary>Gets whether the WebView can navigate back in history.</summary>
     bool CanGoBack { get; }
+    /// <summary>Gets whether the WebView can navigate forward in history.</summary>
     bool CanGoForward { get; }
+    /// <summary>Gets whether a navigation is currently in progress.</summary>
     bool IsLoading { get; }
 
+    /// <summary>Gets the channel id used to isolate WebMessage traffic.</summary>
     Guid ChannelId { get; }
 
+    /// <summary>Navigates to the specified URI.</summary>
+    /// <param name="uri">The target URI.</param>
     Task NavigateAsync(Uri uri);
+    /// <summary>Navigates to a string of HTML.</summary>
+    /// <param name="html">The HTML content.</param>
     Task NavigateToStringAsync(string html);
+    /// <summary>Navigates to a string of HTML with an optional base URL.</summary>
+    /// <param name="html">The HTML content.</param>
+    /// <param name="baseUrl">Optional base URI for relative URL resolution.</param>
     Task NavigateToStringAsync(string html, Uri? baseUrl);
+    /// <summary>Executes JavaScript in the context of the current document.</summary>
+    /// <param name="script">The JavaScript source.</param>
     Task<string?> InvokeScriptAsync(string script);
 
+    /// <summary>Attempts to navigate back.</summary>
     Task<bool> GoBackAsync();
+    /// <summary>Attempts to navigate forward.</summary>
     Task<bool> GoForwardAsync();
+    /// <summary>Reloads the current page.</summary>
     Task<bool> RefreshAsync();
+    /// <summary>Stops an active navigation, if any.</summary>
     Task<bool> StopAsync();
 
+    /// <summary>Gets the cookie manager if supported by the adapter; otherwise null.</summary>
     ICookieManager? TryGetCookieManager();
+    /// <summary>Gets the command manager if supported by the adapter; otherwise null.</summary>
     ICommandManager? TryGetCommandManager();
+    /// <summary>Gets the typed native WebView handle if supported; otherwise null.</summary>
     Task<IPlatformHandle?> TryGetWebViewHandleAsync();
 
     /// <summary>
@@ -135,11 +196,17 @@ public interface IWebView : IDisposable
     /// </summary>
     Task<byte[]> PrintToPdfAsync(PdfPrintOptions? options = null);
 
+    /// <summary>Raised when a navigation starts. Handlers may cancel the navigation.</summary>
     event EventHandler<NavigationStartingEventArgs>? NavigationStarted;
+    /// <summary>Raised when a navigation completes (success, failure, canceled, superseded).</summary>
     event EventHandler<NavigationCompletedEventArgs>? NavigationCompleted;
+    /// <summary>Raised when content requests opening a new window.</summary>
     event EventHandler<NewWindowRequestedEventArgs>? NewWindowRequested;
+    /// <summary>Raised when a WebMessage is received from the page.</summary>
     event EventHandler<WebMessageReceivedEventArgs>? WebMessageReceived;
+    /// <summary>Raised when a custom-scheme request is intercepted.</summary>
     event EventHandler<WebResourceRequestedEventArgs>? WebResourceRequested;
+    /// <summary>Raised when the environment is requested (placeholder).</summary>
     event EventHandler<EnvironmentRequestedEventArgs>? EnvironmentRequested;
 
     /// <summary>Raised when a file download is initiated. The handler can set <c>DownloadPath</c> or <c>Cancel</c>.</summary>
@@ -160,6 +227,9 @@ public interface IWebView : IDisposable
     /// Gets or sets the zoom factor. 1.0 = 100%. Returns 1.0 if zoom is not supported.
     /// </summary>
     Task<double> GetZoomFactorAsync();
+
+    /// <summary>Sets the zoom factor. 1.0 = 100%.</summary>
+    /// <param name="zoomFactor">The zoom factor to set.</param>
     Task SetZoomFactorAsync(double zoomFactor);
 
     // ==================== Find in Page ====================
@@ -197,32 +267,62 @@ public interface IWebView : IDisposable
     event EventHandler<ContextMenuRequestedEventArgs>? ContextMenuRequested;
 }
 
+/// <summary>
+/// Dialog-style WebView contract for displaying web content in a separate top-level window.
+/// </summary>
 public interface IWebDialog : IWebView
 {
+    /// <summary>Gets or sets the dialog title.</summary>
     string? Title { get; set; }
+    /// <summary>Gets or sets whether the user can resize the dialog.</summary>
     bool CanUserResize { get; set; }
 
+    /// <summary>Shows the dialog without an owner.</summary>
     void Show();
+    /// <summary>Shows the dialog with the specified owner.</summary>
+    /// <param name="owner">Owner platform handle.</param>
     bool Show(IPlatformHandle owner);
+    /// <summary>Closes the dialog.</summary>
     void Close();
+    /// <summary>Resizes the dialog.</summary>
+    /// <param name="width">New width in device-independent pixels.</param>
+    /// <param name="height">New height in device-independent pixels.</param>
     bool Resize(int width, int height);
+    /// <summary>Moves the dialog.</summary>
+    /// <param name="x">New X position.</param>
+    /// <param name="y">New Y position.</param>
     bool Move(int x, int y);
 
+    /// <summary>Raised when the dialog is closing.</summary>
     event EventHandler? Closing;
 }
 
+/// <summary>
+/// Web authentication broker used for platform-specific auth flows (e.g. OAuth via external browser or embedded WebView).
+/// </summary>
 public interface IWebAuthBroker
 {
+    /// <summary>Starts an authentication flow and returns the result.</summary>
+    /// <param name="owner">Owner top-level window.</param>
+    /// <param name="options">Authentication options.</param>
     Task<WebAuthResult> AuthenticateAsync(ITopLevelWindow owner, AuthOptions options);
 }
 
+/// <summary>
+/// Dispatcher abstraction used by WebViewCore to marshal work to the UI thread.
+/// </summary>
 public interface IWebViewDispatcher
 {
+    /// <summary>Returns true when called from the UI thread.</summary>
     bool CheckAccess();
 
+    /// <summary>Invokes an action on the UI thread.</summary>
     Task InvokeAsync(Action action);
+    /// <summary>Invokes a function on the UI thread.</summary>
     Task<T> InvokeAsync<T>(Func<T> func);
+    /// <summary>Invokes an async function on the UI thread.</summary>
     Task InvokeAsync(Func<Task> func);
+    /// <summary>Invokes an async function on the UI thread.</summary>
     Task<T> InvokeAsync<T>(Func<Task<T>> func);
 }
 
@@ -242,31 +342,63 @@ internal interface IWebViewAdapterHost
     ValueTask<NativeNavigationStartingDecision> OnNativeNavigationStartingAsync(NativeNavigationStartingInfo info);
 }
 
+/// <summary>
+/// Envelope for a WebMessage bridge message.
+/// </summary>
+/// <param name="Body">The raw message body.</param>
+/// <param name="Origin">The message origin.</param>
+/// <param name="ChannelId">The channel id.</param>
+/// <param name="ProtocolVersion">The protocol version.</param>
 public readonly record struct WebMessageEnvelope(
     string Body,
     string Origin,
     Guid ChannelId,
     int ProtocolVersion);
 
+/// <summary>
+/// Result of evaluating a <see cref="WebMessageEnvelope"/> against an <see cref="IWebMessagePolicy"/>.
+/// </summary>
+/// <param name="IsAllowed">Whether the message is allowed.</param>
+/// <param name="DropReason">Reason for denial, when not allowed.</param>
 public readonly record struct WebMessagePolicyDecision(bool IsAllowed, WebMessageDropReason? DropReason)
 {
+    /// <summary>Creates an allow decision.</summary>
     public static WebMessagePolicyDecision Allow() => new(true, null);
 
+    /// <summary>Creates a deny decision.</summary>
+    /// <param name="reason">Drop reason.</param>
     public static WebMessagePolicyDecision Deny(WebMessageDropReason reason) => new(false, reason);
 }
 
+/// <summary>
+/// Evaluates incoming WebMessage envelopes to determine whether they should be processed or dropped.
+/// </summary>
 public interface IWebMessagePolicy
 {
+    /// <summary>Evaluates an envelope and returns the decision.</summary>
     WebMessagePolicyDecision Evaluate(in WebMessageEnvelope envelope);
 }
 
+/// <summary>
+/// Diagnostic payload describing a dropped WebMessage.
+/// </summary>
+/// <param name="Reason">Drop reason.</param>
+/// <param name="Origin">Message origin.</param>
+/// <param name="ChannelId">Message channel id.</param>
 public readonly record struct WebMessageDropDiagnostic(WebMessageDropReason Reason, string Origin, Guid ChannelId);
 
+/// <summary>
+/// Sink for dropped WebMessage diagnostics.
+/// </summary>
 public interface IWebMessageDropDiagnosticsSink
 {
+    /// <summary>Called when a message is dropped.</summary>
     void OnMessageDropped(in WebMessageDropDiagnostic diagnostic);
 }
 
+/// <summary>
+/// Options applied to the WebView runtime environment (devtools, user agent, storage, custom schemes, preload scripts).
+/// </summary>
 public interface IWebViewEnvironmentOptions
 {
     /// <summary>Enable browser developer tools (Inspector). Platform-specific: macOS requires 13.3+.</summary>
@@ -304,8 +436,12 @@ public sealed class CustomSchemeRegistration
     public bool TreatAsSecure { get; init; }
 }
 
+/// <summary>
+/// Provides access to the native WebView handle for adapter-specific interop scenarios.
+/// </summary>
 public interface INativeWebViewHandleProvider
 {
+    /// <summary>Returns the platform handle when available; otherwise null.</summary>
     IPlatformHandle? TryGetWebViewHandle();
 }
 
@@ -344,9 +480,16 @@ public interface IAndroidWebViewPlatformHandle : IPlatformHandle
 [Experimental("AGWV001")]
 public interface ICookieManager
 {
+    /// <summary>Gets cookies for the given URI.</summary>
+    /// <param name="uri">The URI to retrieve cookies for.</param>
     Task<IReadOnlyList<WebViewCookie>> GetCookiesAsync(Uri uri);
+    /// <summary>Adds or updates a cookie.</summary>
+    /// <param name="cookie">The cookie to set.</param>
     Task SetCookieAsync(WebViewCookie cookie);
+    /// <summary>Deletes a cookie.</summary>
+    /// <param name="cookie">The cookie to delete.</param>
     Task DeleteCookieAsync(WebViewCookie cookie);
+    /// <summary>Clears all cookies.</summary>
     Task ClearAllCookiesAsync();
 }
 
@@ -407,6 +550,7 @@ public sealed class ContextMenuRequestedEventArgs : EventArgs
     public bool Handled { get; set; }
 }
 
+/// <summary>Options for <see cref="IWebView.FindInPageAsync"/>.</summary>
 public sealed class FindInPageOptions
 {
     /// <summary>Whether the search is case-sensitive. Default: false.</summary>
@@ -475,6 +619,7 @@ public interface IWebDialogFactory
     IWebDialog Create(IWebViewEnvironmentOptions? options = null);
 }
 
+/// <summary>Options for <see cref="IWebAuthBroker.AuthenticateAsync"/>.</summary>
 public sealed class AuthOptions
 {
     /// <summary>The OAuth authorization URL to navigate to.</summary>
@@ -490,34 +635,49 @@ public sealed class AuthOptions
     public TimeSpan? Timeout { get; set; }
 }
 
+/// <summary>Result returned by <see cref="IWebAuthBroker.AuthenticateAsync"/>.</summary>
 public sealed class WebAuthResult
 {
+    /// <summary>Authentication status.</summary>
     public WebAuthStatus Status { get; init; }
+    /// <summary>Callback URI when available (e.g. redirect URI).</summary>
     public Uri? CallbackUri { get; init; }
+    /// <summary>Optional error string when <see cref="Status"/> is <see cref="WebAuthStatus.Error"/>.</summary>
     public string? Error { get; init; }
 }
 
+/// <summary>Event args raised when a navigation starts.</summary>
 public sealed class NavigationStartingEventArgs : EventArgs
 {
+    /// <summary>Creates new args with an empty navigation id.</summary>
+    /// <param name="requestUri">The requested URI.</param>
     public NavigationStartingEventArgs(Uri requestUri)
     {
         NavigationId = Guid.Empty;
         RequestUri = requestUri;
     }
 
+    /// <summary>Creates new args with the specified navigation id.</summary>
+    /// <param name="navigationId">Navigation correlation id.</param>
+    /// <param name="requestUri">The requested URI.</param>
     public NavigationStartingEventArgs(Guid navigationId, Uri requestUri)
     {
         NavigationId = navigationId;
         RequestUri = requestUri;
     }
 
+    /// <summary>Navigation correlation id (may be empty when not available).</summary>
     public Guid NavigationId { get; }
+    /// <summary>The requested URI.</summary>
     public Uri RequestUri { get; }
+    /// <summary>Set to true to cancel the navigation.</summary>
     public bool Cancel { get; set; }
 }
 
+/// <summary>Event args raised when a navigation completes.</summary>
 public sealed class NavigationCompletedEventArgs : EventArgs
 {
+    /// <summary>Creates default event args.</summary>
     public NavigationCompletedEventArgs()
     {
         NavigationId = Guid.Empty;
@@ -526,6 +686,11 @@ public sealed class NavigationCompletedEventArgs : EventArgs
         Error = null;
     }
 
+    /// <summary>Creates event args for a completed navigation.</summary>
+    /// <param name="navigationId">Navigation correlation id.</param>
+    /// <param name="requestUri">The request URI.</param>
+    /// <param name="status">Completion status.</param>
+    /// <param name="error">Failure exception when <paramref name="status"/> is <see cref="NavigationCompletedStatus.Failure"/>.</param>
     public NavigationCompletedEventArgs(
         Guid navigationId,
         Uri requestUri,
@@ -548,14 +713,21 @@ public sealed class NavigationCompletedEventArgs : EventArgs
         Error = error;
     }
 
+    /// <summary>Navigation correlation id.</summary>
     public Guid NavigationId { get; }
+    /// <summary>The requested URI.</summary>
     public Uri RequestUri { get; }
+    /// <summary>Completion status.</summary>
     public NavigationCompletedStatus Status { get; }
+    /// <summary>Failure exception when <see cref="Status"/> is <see cref="NavigationCompletedStatus.Failure"/>.</summary>
     public Exception? Error { get; }
 }
 
+/// <summary>Event args raised when content requests opening a new window.</summary>
 public sealed class NewWindowRequestedEventArgs : EventArgs
 {
+    /// <summary>Creates new event args.</summary>
+    /// <param name="uri">The requested URI.</param>
     public NewWindowRequestedEventArgs(Uri? uri = null)
     {
         Uri = uri;
@@ -572,8 +744,10 @@ public sealed class NewWindowRequestedEventArgs : EventArgs
     public bool Handled { get; set; }
 }
 
+/// <summary>Event args raised when a WebMessage is received from the page.</summary>
 public sealed class WebMessageReceivedEventArgs : EventArgs
 {
+    /// <summary>Creates a default WebMessage event args.</summary>
     public WebMessageReceivedEventArgs()
     {
         Body = string.Empty;
@@ -582,6 +756,10 @@ public sealed class WebMessageReceivedEventArgs : EventArgs
         ProtocolVersion = 1;
     }
 
+    /// <summary>Creates event args for a WebMessage.</summary>
+    /// <param name="body">Message body.</param>
+    /// <param name="origin">Message origin.</param>
+    /// <param name="channelId">Message channel id.</param>
     public WebMessageReceivedEventArgs(string body, string origin, Guid channelId)
     {
         Body = body;
@@ -590,6 +768,11 @@ public sealed class WebMessageReceivedEventArgs : EventArgs
         ProtocolVersion = 1;
     }
 
+    /// <summary>Creates event args for a WebMessage.</summary>
+    /// <param name="body">Message body.</param>
+    /// <param name="origin">Message origin.</param>
+    /// <param name="channelId">Message channel id.</param>
+    /// <param name="protocolVersion">Protocol version.</param>
     public WebMessageReceivedEventArgs(string body, string origin, Guid channelId, int protocolVersion)
     {
         Body = body;
@@ -598,9 +781,13 @@ public sealed class WebMessageReceivedEventArgs : EventArgs
         ProtocolVersion = protocolVersion;
     }
 
+    /// <summary>Message body.</summary>
     public string Body { get; }
+    /// <summary>Message origin.</summary>
     public string Origin { get; }
+    /// <summary>Message channel id.</summary>
     public Guid ChannelId { get; }
+    /// <summary>Message protocol version.</summary>
     public int ProtocolVersion { get; }
 }
 
@@ -612,8 +799,13 @@ public sealed class WebMessageReceivedEventArgs : EventArgs
 /// </summary>
 public sealed class WebResourceRequestedEventArgs : EventArgs
 {
+    /// <summary>Creates a new instance.</summary>
     public WebResourceRequestedEventArgs() { }
 
+    /// <summary>Creates a new instance.</summary>
+    /// <param name="requestUri">Intercepted request URI.</param>
+    /// <param name="method">HTTP method.</param>
+    /// <param name="requestHeaders">Optional request headers.</param>
     public WebResourceRequestedEventArgs(Uri requestUri, string method, IReadOnlyDictionary<string, string>? requestHeaders = null)
     {
         RequestUri = requestUri;
@@ -655,6 +847,11 @@ public sealed class EnvironmentRequestedEventArgs : EventArgs
 /// <summary>Raised when a file download is initiated by the web content.</summary>
 public sealed class DownloadRequestedEventArgs : EventArgs
 {
+    /// <summary>Creates a new instance.</summary>
+    /// <param name="downloadUri">The download URI.</param>
+    /// <param name="suggestedFileName">Suggested file name.</param>
+    /// <param name="contentType">MIME type.</param>
+    /// <param name="contentLength">Content length in bytes.</param>
     public DownloadRequestedEventArgs(Uri downloadUri, string? suggestedFileName = null, string? contentType = null, long? contentLength = null)
     {
         DownloadUri = downloadUri;
@@ -688,15 +885,25 @@ public sealed class DownloadRequestedEventArgs : EventArgs
 /// <summary>The type of permission being requested by web content.</summary>
 public enum WebViewPermissionKind
 {
+    /// <summary>Unknown permission kind.</summary>
     Unknown = 0,
+    /// <summary>Camera access.</summary>
     Camera,
+    /// <summary>Microphone access.</summary>
     Microphone,
+    /// <summary>Geolocation access.</summary>
     Geolocation,
+    /// <summary>Notifications.</summary>
     Notifications,
+    /// <summary>Clipboard read.</summary>
     ClipboardRead,
+    /// <summary>Clipboard write.</summary>
     ClipboardWrite,
+    /// <summary>MIDI access.</summary>
     Midi,
+    /// <summary>Sensors access.</summary>
     Sensors,
+    /// <summary>Other / platform-specific permission.</summary>
     Other
 }
 
@@ -714,6 +921,9 @@ public enum PermissionState
 /// <summary>Raised when web content requests a permission (camera, microphone, geolocation, etc.).</summary>
 public sealed class PermissionRequestedEventArgs : EventArgs
 {
+    /// <summary>Creates a new instance.</summary>
+    /// <param name="permissionKind">The permission kind being requested.</param>
+    /// <param name="origin">The origin requesting the permission.</param>
     public PermissionRequestedEventArgs(WebViewPermissionKind permissionKind, Uri? origin = null)
     {
         PermissionKind = permissionKind;
@@ -733,6 +943,8 @@ public sealed class PermissionRequestedEventArgs : EventArgs
 /// <summary>Event args for the <see cref="IWebView.AdapterCreated"/> event, carrying the typed native platform handle.</summary>
 public sealed class AdapterCreatedEventArgs : EventArgs
 {
+    /// <summary>Creates a new instance.</summary>
+    /// <param name="platformHandle">The typed native platform handle, when available.</param>
     public AdapterCreatedEventArgs(IPlatformHandle? platformHandle)
     {
         PlatformHandle = platformHandle;
@@ -745,8 +957,14 @@ public sealed class AdapterCreatedEventArgs : EventArgs
     public IPlatformHandle? PlatformHandle { get; }
 }
 
+/// <summary>Base exception for navigation failures with correlation metadata.</summary>
 public class WebViewNavigationException : Exception
 {
+    /// <summary>Creates a new navigation exception.</summary>
+    /// <param name="message">The exception message.</param>
+    /// <param name="navigationId">The navigation correlation id.</param>
+    /// <param name="requestUri">The request URI.</param>
+    /// <param name="innerException">Optional inner exception.</param>
     public WebViewNavigationException(string message, Guid navigationId, Uri requestUri, Exception? innerException = null)
         : base(message, innerException)
     {
@@ -754,13 +972,16 @@ public class WebViewNavigationException : Exception
         RequestUri = requestUri;
     }
 
+    /// <summary>Navigation correlation id.</summary>
     public Guid NavigationId { get; }
+    /// <summary>The request URI.</summary>
     public Uri RequestUri { get; }
 }
 
 /// <summary>Navigation failed due to a network connectivity issue (DNS, unreachable host, connection lost, no internet).</summary>
 public class WebViewNetworkException : WebViewNavigationException
 {
+    /// <summary>Creates a new instance.</summary>
     public WebViewNetworkException(string message, Guid navigationId, Uri requestUri, Exception? innerException = null)
         : base(message, navigationId, requestUri, innerException)
     {
@@ -770,6 +991,7 @@ public class WebViewNetworkException : WebViewNavigationException
 /// <summary>Navigation failed due to a TLS/certificate issue.</summary>
 public class WebViewSslException : WebViewNavigationException
 {
+    /// <summary>Creates a new instance.</summary>
     public WebViewSslException(string message, Guid navigationId, Uri requestUri, Exception? innerException = null)
         : base(message, navigationId, requestUri, innerException)
     {
@@ -779,6 +1001,13 @@ public class WebViewSslException : WebViewNavigationException
 /// <summary>Navigation failed due to a request timeout.</summary>
 public class WebViewTimeoutException : WebViewNavigationException
 {
+    /// <summary>
+    /// Initializes a new instance of <see cref="WebViewTimeoutException"/>.
+    /// </summary>
+    /// <param name="message">The exception message.</param>
+    /// <param name="navigationId">The navigation id associated with the timed out request.</param>
+    /// <param name="requestUri">The request URI.</param>
+    /// <param name="innerException">The optional inner exception.</param>
     public WebViewTimeoutException(string message, Guid navigationId, Uri requestUri, Exception? innerException = null)
         : base(message, navigationId, requestUri, innerException)
     {
@@ -795,8 +1024,12 @@ public sealed record WebViewCookie(
     bool IsSecure,
     bool IsHttpOnly);
 
+/// <summary>Exception thrown when script execution fails.</summary>
 public class WebViewScriptException : Exception
 {
+    /// <summary>Creates a new instance.</summary>
+    /// <param name="message">The exception message.</param>
+    /// <param name="innerException">Optional inner exception.</param>
     public WebViewScriptException(string message, Exception? innerException = null)
         : base(message, innerException)
     {
@@ -827,6 +1060,9 @@ public interface IWebViewRpcService
 /// <summary>Exception thrown when an RPC call fails.</summary>
 public class WebViewRpcException : Exception
 {
+    /// <summary>Creates a new instance.</summary>
+    /// <param name="code">JSON-RPC error code.</param>
+    /// <param name="message">Error message.</param>
     public WebViewRpcException(int code, string message) : base(message)
     {
         Code = code;

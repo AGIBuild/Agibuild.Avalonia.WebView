@@ -33,11 +33,18 @@ public interface IBridgeServiceRegistration<in T> where T : class
 [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
 public sealed class BridgeRegistrationAttribute : Attribute
 {
+    /// <summary>The <see cref="JsExportAttribute"/> interface type.</summary>
     public Type InterfaceType { get; }
 
+    /// <summary>The source-generated registration type for <see cref="InterfaceType"/>.</summary>
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
     public Type RegistrationType { get; }
 
+    /// <summary>
+    /// Creates a new <see cref="BridgeRegistrationAttribute"/> linking an exported interface to its generated registration.
+    /// </summary>
+    /// <param name="interfaceType">The <see cref="JsExportAttribute"/> interface type.</param>
+    /// <param name="registrationType">The generated registration type.</param>
     public BridgeRegistrationAttribute(
         Type interfaceType,
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type registrationType)
@@ -54,11 +61,18 @@ public sealed class BridgeRegistrationAttribute : Attribute
 [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
 public sealed class BridgeProxyAttribute : Attribute
 {
+    /// <summary>The <see cref="JsImportAttribute"/> interface type.</summary>
     public Type InterfaceType { get; }
 
+    /// <summary>The generated proxy type implementing <see cref="InterfaceType"/>.</summary>
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
     public Type ProxyType { get; }
 
+    /// <summary>
+    /// Creates a new <see cref="BridgeProxyAttribute"/> linking an imported interface to its generated proxy type.
+    /// </summary>
+    /// <param name="interfaceType">The <see cref="JsImportAttribute"/> interface type.</param>
+    /// <param name="proxyType">The generated proxy type.</param>
     public BridgeProxyAttribute(
         Type interfaceType,
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type proxyType)

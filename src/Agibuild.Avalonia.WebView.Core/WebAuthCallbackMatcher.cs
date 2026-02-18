@@ -1,7 +1,15 @@
 namespace Agibuild.Avalonia.WebView;
 
+/// <summary>
+/// Helpers for matching web authentication callback URIs.
+/// </summary>
 public static class WebAuthCallbackMatcher
 {
+    /// <summary>
+    /// Returns true when the URIs match exactly (scheme/host/port/path) using strict semantics.
+    /// </summary>
+    /// <param name="expectedCallbackUri">The expected callback URI configured for the auth flow.</param>
+    /// <param name="actualUri">The actual navigated URI.</param>
     public static bool IsStrictMatch(Uri expectedCallbackUri, Uri actualUri)
     {
         ArgumentNullException.ThrowIfNull(expectedCallbackUri);

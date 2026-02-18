@@ -70,9 +70,15 @@ public sealed class BridgeOptions
 /// </summary>
 public sealed class RateLimit
 {
+    /// <summary>Maximum number of calls allowed within <see cref="Window"/>.</summary>
     public int MaxCalls { get; }
+
+    /// <summary>Time window for the sliding-window rate limit.</summary>
     public TimeSpan Window { get; }
 
+    /// <summary>Creates a new sliding-window rate limit.</summary>
+    /// <param name="maxCalls">Maximum number of calls allowed within <paramref name="window"/>.</param>
+    /// <param name="window">Time window for the rate limit.</param>
     public RateLimit(int maxCalls, TimeSpan window)
     {
         ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(maxCalls, 0);

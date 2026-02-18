@@ -33,13 +33,21 @@ public interface IBridgeTracer
 /// </summary>
 public sealed class NullBridgeTracer : IBridgeTracer
 {
+    /// <summary>Singleton instance.</summary>
     public static readonly NullBridgeTracer Instance = new();
 
+    /// <inheritdoc />
     public void OnExportCallStart(string serviceName, string methodName, string? paramsJson) { }
+    /// <inheritdoc />
     public void OnExportCallEnd(string serviceName, string methodName, long elapsedMs, string? resultType) { }
+    /// <inheritdoc />
     public void OnExportCallError(string serviceName, string methodName, long elapsedMs, Exception error) { }
+    /// <inheritdoc />
     public void OnImportCallStart(string serviceName, string methodName, string? paramsJson) { }
+    /// <inheritdoc />
     public void OnImportCallEnd(string serviceName, string methodName, long elapsedMs) { }
+    /// <inheritdoc />
     public void OnServiceExposed(string serviceName, int methodCount, bool isSourceGenerated) { }
+    /// <inheritdoc />
     public void OnServiceRemoved(string serviceName) { }
 }
