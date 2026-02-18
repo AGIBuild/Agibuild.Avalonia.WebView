@@ -65,6 +65,16 @@ namespace Agibuild.Avalonia.WebView.Integration.Tests
                     mainVm.GtkWebViewSmoke.AutoRunCompleted += exitCode =>
                         Dispatcher.UIThread.Post(() => desktop.Shutdown(exitCode));
                 }
+                else if (args.Contains("--wv2-teardown-stress"))
+                {
+                    mainVm.SelectedTabIndex = 2;
+                    mainVm.WebView2Smoke.AutoRun = true;
+                    mainVm.WebView2Smoke.AutoRunMode = WebView2AutoRunMode.TeardownStress;
+                    mainVm.WebView2Smoke.TeardownStressIterations =
+                        TryGetIntArg(args, "--wv2-teardown-iterations", defaultValue: 10);
+                    mainVm.WebView2Smoke.AutoRunCompleted += exitCode =>
+                        Dispatcher.UIThread.Post(() => desktop.Shutdown(exitCode));
+                }
                 else if (args.Contains("--wv2-smoke"))
                 {
                     mainVm.SelectedTabIndex = 2;
@@ -91,6 +101,21 @@ namespace Agibuild.Avalonia.WebView.Integration.Tests
             }
 
             base.OnFrameworkInitializationCompleted();
+        }
+
+        private static int TryGetIntArg(string[] args, string key, int defaultValue)
+        {
+            for (var i = 0; i < args.Length - 1; i++)
+            {
+                if (string.Equals(args[i], key, StringComparison.Ordinal) &&
+                    int.TryParse(args[i + 1], out var value) &&
+                    value > 0)
+                {
+                    return value;
+                }
+            }
+
+            return defaultValue;
         }
 
         [UnconditionalSuppressMessage("Trimming", "IL2026",

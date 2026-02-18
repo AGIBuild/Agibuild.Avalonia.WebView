@@ -16,6 +16,18 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
     private static bool DiagnosticsEnabled
         => string.Equals(Environment.GetEnvironmentVariable("AGIBUILD_WEBVIEW_DIAG"), "1", StringComparison.Ordinal);
 
+    private void Diag(string evt, string? detail = null)
+    {
+        if (!DiagnosticsEnabled) return;
+        var tid = Environment.CurrentManagedThreadId;
+        var uiTid = _uiThreadId;
+        var hasWv = _webView is not null;
+        var hasCtl = _controller is not null;
+        var hasEnv = _environment is not null;
+        var msg = detail is null ? "" : $" detail=\"{detail}\"";
+        Console.WriteLine($"[Agibuild.WebView] {evt} tid={tid} uiTid={uiTid} attached={_attached} detached={_detached} webView={hasWv} controller={hasCtl} env={hasEnv}{msg}");
+    }
+
     private IWebViewAdapterHost? _host;
 
     private bool _initialized;
@@ -35,7 +47,11 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
     // Readiness: Attach starts async init; operations queue until ready.
     private TaskCompletionSource? _readyTcs;
     private readonly Queue<Action> _pendingOps = new();
+    private readonly object _pendingOpsLock = new();
     private CancellationTokenSource? _initCts;
+    private int _teardownStarted;
+    private int _teardownCompleted;
+    private int _uiThreadId;
 
     // The SynchronizationContext captured during WebView2 initialization (UI thread).
     // All COM calls must be dispatched to this context.
@@ -140,6 +156,9 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
         _attached = true;
         _readyTcs = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         _initCts = new CancellationTokenSource();
+        _uiSyncContext ??= SynchronizationContext.Current;
+        _uiThreadId = Environment.CurrentManagedThreadId;
+        Diag("Attach: start", $"parentHwnd=0x{parentHandle.Handle.ToInt64():x}");
 
         _ = InitializeWebView2Async(parentHandle.Handle, _initCts.Token);
     }
@@ -155,6 +174,8 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
 
         _detached = true;
         _attached = false;
+        Interlocked.Exchange(ref _teardownStarted, 1);
+        Diag("Detach: start");
 
         try
         {
@@ -175,6 +196,7 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
             // Detach must be safe regardless of caller thread. We do all WebView2/Win32 teardown
             // on the captured UI SynchronizationContext when available, and avoid indefinite waits.
             TearDownWebView2BestEffort();
+            Diag("Detach: teardown returned");
 
             _readyTcs?.TrySetCanceled();
         }
@@ -190,7 +212,11 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
                 _pendingApiNavigation = false;
             }
 
-            _pendingOps.Clear();
+            lock (_pendingOpsLock)
+            {
+                _pendingOps.Clear();
+            }
+            Diag("Detach: completed");
         }
     }
 
@@ -215,7 +241,8 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
             _controller = await _environment.CreateCoreWebView2ControllerAsync(parentHwnd).ConfigureAwait(true);
             _webView = _controller.CoreWebView2;
             _parentHwnd = parentHwnd;
-            _uiSyncContext = SynchronizationContext.Current;
+            _uiSyncContext ??= SynchronizationContext.Current;
+            _uiThreadId = Environment.CurrentManagedThreadId;
 
             if (_detached || ct.IsCancellationRequested)
             {
@@ -274,10 +301,24 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
                 return;
             }
 
-            while (_pendingOps.Count > 0)
+            List<Action>? opsToReplay = null;
+            lock (_pendingOpsLock)
             {
-                var op = _pendingOps.Dequeue();
-                op();
+                if (_pendingOps.Count > 0)
+                {
+                    opsToReplay = new List<Action>(_pendingOps);
+                    _pendingOps.Clear();
+                }
+            }
+
+            if (opsToReplay is not null)
+            {
+                foreach (var op in opsToReplay)
+                {
+                    if (_detached || ct.IsCancellationRequested || Volatile.Read(ref _teardownStarted) == 1)
+                        break;
+                    op();
+                }
             }
 
             if (DiagnosticsEnabled)
@@ -307,9 +348,18 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
 
     private void TearDownWebView2BestEffort()
     {
+        if (Volatile.Read(ref _teardownCompleted) == 1)
+        {
+            return;
+        }
+
+        Diag("Teardown: start");
+
         if (_uiSyncContext is null || SynchronizationContext.Current == _uiSyncContext)
         {
             TearDownWebView2OnInitThread();
+            Interlocked.Exchange(ref _teardownCompleted, 1);
+            Diag("Teardown: done (inline)");
             return;
         }
 
@@ -318,6 +368,7 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
         {
             try
             {
+                Diag("Teardown: on-ui begin");
                 TearDownWebView2OnInitThread();
             }
             catch
@@ -326,12 +377,18 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
             }
             finally
             {
+                Interlocked.Exchange(ref _teardownCompleted, 1);
+                Diag("Teardown: on-ui end");
                 completed.Set();
             }
         }, null);
 
         // Avoid deadlocks when UI thread is already exiting.
-        completed.Wait(TimeSpan.FromSeconds(5));
+        var ok = completed.Wait(TimeSpan.FromSeconds(5));
+        if (!ok)
+        {
+            Diag("Teardown: wait timed out");
+        }
     }
 
     /// <summary>
@@ -340,6 +397,7 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
     /// </summary>
     private void TearDownWebView2OnInitThread()
     {
+        Diag("Teardown: core begin");
         try
         {
             RestoreParentWindowProc();
@@ -373,6 +431,7 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
             ReleaseComObject(controller);
             ReleaseComObject(environment);
         }
+        Diag("Teardown: core end");
     }
 
     private static void ReleaseComObject(object? obj)
@@ -1036,13 +1095,23 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
 
     private void ExecuteOrQueue(Action action)
     {
+        if (_detached || Volatile.Read(ref _teardownStarted) == 1)
+        {
+            return;
+        }
+
         if (_webView is not null)
         {
             RunOnUiThread(action);
         }
         else
         {
-            _pendingOps.Enqueue(action);
+            lock (_pendingOpsLock)
+            {
+                if (_detached || Volatile.Read(ref _teardownStarted) == 1)
+                    return;
+                _pendingOps.Enqueue(action);
+            }
         }
     }
 

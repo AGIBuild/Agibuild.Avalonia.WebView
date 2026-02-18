@@ -26,6 +26,7 @@ internal class MockWebViewAdapter : IWebViewAdapter
     public int? LastNavigateThreadId { get; private set; }
     public int? LastNavigateToStringThreadId { get; private set; }
     public int? LastInvokeScriptThreadId { get; private set; }
+    public int NavigateCallCount { get; private set; }
     public string? ScriptResult { get; set; }
     public Exception? ScriptException { get; set; }
 
@@ -99,6 +100,7 @@ internal class MockWebViewAdapter : IWebViewAdapter
 
     public Task NavigateAsync(Guid navigationId, Uri uri)
     {
+        NavigateCallCount++;
         LastNavigateThreadId = Environment.CurrentManagedThreadId;
         LastNavigationId = navigationId;
         LastNavigationUri = uri;

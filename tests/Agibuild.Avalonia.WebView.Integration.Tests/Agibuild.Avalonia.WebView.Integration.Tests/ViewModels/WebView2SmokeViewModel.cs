@@ -8,11 +8,18 @@ using System.Threading;
 using System.Threading.Tasks;
 using Agibuild.Avalonia.WebView;
 using Agibuild.Avalonia.WebView.Adapters.Abstractions;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using IPlatformHandle = global::Avalonia.Platform.IPlatformHandle;
 
 namespace Agibuild.Avalonia.WebView.Integration.Tests.ViewModels;
+
+public enum WebView2AutoRunMode
+{
+    Smoke = 0,
+    TeardownStress = 1
+}
 
 public partial class WebView2SmokeViewModel : ViewModelBase, IWebViewAdapterHost
 {
@@ -39,6 +46,10 @@ public partial class WebView2SmokeViewModel : ViewModelBase, IWebViewAdapterHost
     public Guid ChannelId { get; }
 
     public bool AutoRun { get; set; }
+
+    public WebView2AutoRunMode AutoRunMode { get; set; } = WebView2AutoRunMode.Smoke;
+
+    public int TeardownStressIterations { get; set; } = 10;
 
     public event Action<int>? AutoRunCompleted;
 
@@ -96,6 +107,13 @@ public partial class WebView2SmokeViewModel : ViewModelBase, IWebViewAdapterHost
         AutoRunCompleted?.Invoke(ok ? 0 : 1);
     }
 
+    private async Task RunTeardownStressForAutoRunAsync()
+    {
+        var ok = await RunTeardownStressCoreAsync().ConfigureAwait(false);
+        LogLine(ok ? "WV2 teardown stress: PASS" : "WV2 teardown stress: FAIL");
+        AutoRunCompleted?.Invoke(ok ? 0 : 1);
+    }
+
     private async Task<bool> RunAllCoreAsync()
     {
         if (Interlocked.Exchange(ref _runAllInProgress, 1) != 0)
@@ -142,6 +160,97 @@ public partial class WebView2SmokeViewModel : ViewModelBase, IWebViewAdapterHost
         }
         finally
         {
+            Interlocked.Exchange(ref _runAllInProgress, 0);
+        }
+    }
+
+    private async Task<bool> RunTeardownStressCoreAsync()
+    {
+        if (Interlocked.Exchange(ref _runAllInProgress, 1) != 0)
+        {
+            LogLine("TeardownStress ignored: already in progress.");
+            return false;
+        }
+
+        if (_hostHandle is null)
+        {
+            Status = "Waiting for native host handle...";
+            Interlocked.Exchange(ref _runAllInProgress, 0);
+            return false;
+        }
+
+        var iterations = Math.Clamp(TeardownStressIterations, 1, 50);
+        EnsureServerStarted();
+
+        try
+        {
+            Status = $"Teardown stress: {iterations} iteration(s)...";
+
+            for (var i = 1; i <= iterations; i++)
+            {
+                Status = $"Teardown stress {i}/{iterations}: attach";
+
+                _navigationIdByCorrelation.Clear();
+                ClearNativeStarts();
+
+                IWebViewAdapter? adapter = null;
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    adapter = global::Agibuild.Avalonia.WebView.WebViewAdapterFactory.CreateDefaultAdapter();
+                    adapter.Initialize(this);
+                    adapter.Attach(_hostHandle);
+                    _adapter = adapter;
+                });
+                var adapterLocal = adapter!;
+
+                var iterationOk = true;
+                try
+                {
+                    // Force readiness with a simple script call (adapter waits internally for WebView2 init).
+                    _ = await WaitAsync(adapterLocal.InvokeScriptAsync("1 + 1"), TimeSpan.FromSeconds(20)).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    iterationOk = false;
+                    LogLine($"Teardown stress {i}/{iterations}: readiness check failed: {ex.GetType().Name}: {ex.Message}");
+                }
+
+                Status = $"Teardown stress {i}/{iterations}: detach";
+                try
+                {
+                    await Dispatcher.UIThread.InvokeAsync(() => adapterLocal.Detach());
+                }
+                catch (Exception ex)
+                {
+                    iterationOk = false;
+                    LogLine($"Teardown stress {i}/{iterations}: detach threw: {ex.GetType().Name}: {ex.Message}");
+                }
+                finally
+                {
+                    _adapter = null;
+                }
+
+                // Small delay to allow native teardown to settle before re-attaching.
+                await Task.Delay(150).ConfigureAwait(false);
+
+                if (!iterationOk)
+                {
+                    return false;
+                }
+            }
+
+            Status = "Teardown stress: Done.";
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Status = $"Teardown stress failed: {ex.Message}";
+            LogLine(ex.ToString());
+            return false;
+        }
+        finally
+        {
+            try { Detach(); } catch { /* best effort */ }
             Interlocked.Exchange(ref _runAllInProgress, 0);
         }
     }
@@ -478,7 +587,9 @@ public partial class WebView2SmokeViewModel : ViewModelBase, IWebViewAdapterHost
 
         if (AutoRun && Interlocked.Exchange(ref _autoRunStarted, 1) == 0)
         {
-            _ = RunAllForAutoRunAsync();
+            _ = AutoRunMode == WebView2AutoRunMode.TeardownStress
+                ? RunTeardownStressForAutoRunAsync()
+                : RunAllForAutoRunAsync();
         }
     }
 
