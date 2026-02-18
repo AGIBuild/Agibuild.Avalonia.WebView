@@ -18,6 +18,8 @@ The system SHALL provide an opt-in shell policy foundation that improves common 
 The shell experience component SHALL provide a configurable policy for `NewWindowRequested` with at least the following strategies:
 - navigate in the current view
 - delegate to host-provided callback
+- open a runtime-managed secondary window
+- open in an external browser
 
 #### Scenario: Navigate-in-place strategy handles NewWindowRequested
 - **WHEN** the policy is configured to navigate in the current view and a new-window request occurs with a non-null target URI
@@ -26,6 +28,14 @@ The shell experience component SHALL provide a configurable policy for `NewWindo
 #### Scenario: Delegate strategy routes the decision to host code
 - **WHEN** the policy is configured to delegate and a new-window request occurs
 - **THEN** the host callback is invoked with the target URI and can mark the request handled
+
+#### Scenario: Managed-window strategy routes request into lifecycle orchestrator
+- **WHEN** the policy is configured for managed-window and a new-window request occurs
+- **THEN** shell runtime routes the request to the managed-window lifecycle orchestrator with deterministic window identity assignment
+
+#### Scenario: External-browser strategy does not create managed window
+- **WHEN** the policy is configured for external-browser and a new-window request occurs
+- **THEN** shell runtime routes the target URI to external open execution and does not create a managed window
 
 ### Requirement: Policy execution is UI-thread consistent and testable
 Shell experience policy handlers SHALL execute on the WebView UI thread, and policy behavior SHALL be testable via MockAdapter without a real browser.
@@ -75,6 +85,10 @@ The shell experience foundation SHALL define deterministic execution order for p
 #### Scenario: Runtime fallback remains deterministic
 - **WHEN** handler output is absent or explicitly defers to baseline behavior
 - **THEN** runtime uses the same fallback behavior for equivalent inputs
+
+#### Scenario: New-window strategy resolution is evaluated before lifecycle execution
+- **WHEN** a new-window policy is configured to use managed-window strategy
+- **THEN** runtime finalizes strategy resolution before executing lifecycle state transitions for the target window
 
 ### Requirement: Policy failures are isolated
 A failure in one shell policy handler SHALL NOT corrupt unrelated runtime state, and failure handling SHALL be explicit.
