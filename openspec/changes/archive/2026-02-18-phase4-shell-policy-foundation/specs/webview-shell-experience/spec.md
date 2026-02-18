@@ -1,7 +1,4 @@
-## Purpose
-Define opt-in, UI-agnostic runtime policies that improve common “shell-like” WebView host behaviors (new windows, downloads, permissions) without changing baseline contract semantics when not enabled.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Shell experience is opt-in and non-breaking
 The system SHALL provide an opt-in shell policy foundation that improves common host behaviors (new-window, downloads, permissions) without changing baseline WebView contract semantics when not enabled.
@@ -13,19 +10,6 @@ The system SHALL provide an opt-in shell policy foundation that improves common 
 #### Scenario: Shell policy foundation is composable by hosts
 - **WHEN** a host enables shell experience with only a subset of policy domains configured
 - **THEN** configured policy domains are applied and unconfigured domains continue using baseline semantics
-
-### Requirement: New window policy strategies are configurable
-The shell experience component SHALL provide a configurable policy for `NewWindowRequested` with at least the following strategies:
-- navigate in the current view
-- delegate to host-provided callback
-
-#### Scenario: Navigate-in-place strategy handles NewWindowRequested
-- **WHEN** the policy is configured to navigate in the current view and a new-window request occurs with a non-null target URI
-- **THEN** the current view navigates to that URI in-place (via existing v1 fallback semantics) and no new window is opened
-
-#### Scenario: Delegate strategy routes the decision to host code
-- **WHEN** the policy is configured to delegate and a new-window request occurs
-- **THEN** the host callback is invoked with the target URI and can mark the request handled
 
 ### Requirement: Policy execution is UI-thread consistent and testable
 Shell experience policy handlers SHALL execute on the WebView UI thread, and policy behavior SHALL be testable via MockAdapter without a real browser.
@@ -64,6 +48,8 @@ The shell experience component SHALL allow host-defined policy handlers to gover
 #### Scenario: Permission request falls back to baseline behavior when no policy is configured
 - **WHEN** a permission request is raised and no permission policy is configured
 - **THEN** runtime keeps baseline permission behavior unchanged
+
+## ADDED Requirements
 
 ### Requirement: Shell policy execution order is deterministic
 The shell experience foundation SHALL define deterministic execution order for policy domains and runtime fallback behavior.
