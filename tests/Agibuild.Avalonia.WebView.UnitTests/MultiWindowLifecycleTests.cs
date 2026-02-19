@@ -282,6 +282,117 @@ public sealed class MultiWindowLifecycleTests
         Assert.Equal(WebViewShellPolicyDomain.ExternalOpen, observedError!.Domain);
     }
 
+    [Fact]
+    public void Session_permission_profile_inheritance_and_override_matrix_is_deterministic()
+    {
+        var dispatcher = new TestDispatcher();
+        var adapter = MockWebViewAdapter.Create();
+        using var core = new WebViewCore(adapter, dispatcher);
+
+        var createdEvents = new List<WebViewManagedWindowLifecycleEventArgs>();
+        using var shell = new WebViewShellExperience(core, new WebViewShellExperienceOptions
+        {
+            SessionContext = new WebViewShellSessionContext("root-scope"),
+            SessionPolicy = new SharedSessionPolicy(),
+            SessionPermissionProfileResolver = new DelegateSessionPermissionProfileResolver((ctx, parent) =>
+            {
+                if (ctx.ParentWindowId is null)
+                {
+                    return new WebViewSessionPermissionProfile
+                    {
+                        ProfileIdentity = "root-profile",
+                        SessionDecisionOverride = new WebViewShellSessionDecision(WebViewShellSessionScope.Shared, "root-session")
+                    };
+                }
+
+                var shouldOverride = ctx.RequestUri?.AbsolutePath.Contains("override", StringComparison.Ordinal) == true;
+                return shouldOverride
+                    ? new WebViewSessionPermissionProfile
+                    {
+                        ProfileIdentity = "child-override-profile",
+                        SessionDecisionOverride = new WebViewShellSessionDecision(WebViewShellSessionScope.Isolated, $"isolated:{ctx.WindowId}")
+                    }
+                    : new WebViewSessionPermissionProfile
+                    {
+                        ProfileIdentity = "child-inherit-profile",
+                        InheritParentSessionDecision = true
+                    };
+            }),
+            NewWindowPolicy = new DelegateNewWindowPolicy((_, _, _) => WebViewNewWindowStrategyDecision.ManagedWindow()),
+            ManagedWindowFactory = _ => new WebViewCore(MockWebViewAdapter.Create(), dispatcher)
+        });
+
+        shell.ManagedWindowLifecycleChanged += (_, e) =>
+        {
+            if (e.State == WebViewManagedWindowLifecycleState.Created)
+                createdEvents.Add(e);
+        };
+
+        adapter.RaiseNewWindowRequested(new Uri("https://example.com/inherit"));
+        adapter.RaiseNewWindowRequested(new Uri("https://example.com/override"));
+        DispatcherTestPump.WaitUntil(dispatcher, () => shell.ManagedWindowCount == 2);
+
+        Assert.Equal(2, createdEvents.Count);
+
+        var inherited = createdEvents[0];
+        Assert.Equal("child-inherit-profile", inherited.ProfileIdentity);
+        Assert.NotNull(inherited.SessionDecision);
+        Assert.Equal("root-session", inherited.SessionDecision!.ScopeIdentity);
+
+        var overridden = createdEvents[1];
+        Assert.Equal("child-override-profile", overridden.ProfileIdentity);
+        Assert.NotNull(overridden.SessionDecision);
+        Assert.Equal(WebViewShellSessionScope.Isolated, overridden.SessionDecision!.Scope);
+        Assert.StartsWith("isolated:", overridden.SessionDecision.ScopeIdentity, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Child_profile_resolution_failure_isolated_and_falls_back_to_root_profile_context()
+    {
+        var dispatcher = new TestDispatcher();
+        var adapter = MockWebViewAdapter.Create();
+        using var core = new WebViewCore(adapter, dispatcher);
+        var policyErrors = new List<WebViewShellPolicyErrorEventArgs>();
+        WebViewManagedWindowLifecycleEventArgs? createdEvent = null;
+
+        using var shell = new WebViewShellExperience(core, new WebViewShellExperienceOptions
+        {
+            SessionContext = new WebViewShellSessionContext("fallback-root"),
+            SessionPolicy = new SharedSessionPolicy(),
+            SessionPermissionProfileResolver = new DelegateSessionPermissionProfileResolver((ctx, _) =>
+            {
+                if (ctx.ParentWindowId is null)
+                {
+                    return new WebViewSessionPermissionProfile
+                    {
+                        ProfileIdentity = "root-profile",
+                        SessionDecisionOverride = new WebViewShellSessionDecision(WebViewShellSessionScope.Shared, "root-profile-session")
+                    };
+                }
+
+                throw new InvalidOperationException("child profile resolution failed");
+            }),
+            PolicyErrorHandler = (_, error) => policyErrors.Add(error),
+            NewWindowPolicy = new DelegateNewWindowPolicy((_, _, _) => WebViewNewWindowStrategyDecision.ManagedWindow()),
+            ManagedWindowFactory = _ => new WebViewCore(MockWebViewAdapter.Create(), dispatcher)
+        });
+
+        shell.ManagedWindowLifecycleChanged += (_, e) =>
+        {
+            if (e.State == WebViewManagedWindowLifecycleState.Created)
+                createdEvent = e;
+        };
+
+        adapter.RaiseNewWindowRequested(new Uri("https://example.com/failure"));
+        DispatcherTestPump.WaitUntil(dispatcher, () => shell.ManagedWindowCount == 1);
+
+        Assert.NotNull(createdEvent);
+        Assert.Equal("root-profile", createdEvent!.ProfileIdentity);
+        Assert.NotNull(createdEvent.SessionDecision);
+        Assert.Equal("fallback-root", createdEvent.SessionDecision!.ScopeIdentity);
+        Assert.Contains(policyErrors, e => e.Domain == WebViewShellPolicyDomain.Session);
+    }
+
     private sealed class ExternalOpenOnlyProvider : IWebViewHostCapabilityProvider
     {
         public List<Uri> ExternalOpens { get; } = [];

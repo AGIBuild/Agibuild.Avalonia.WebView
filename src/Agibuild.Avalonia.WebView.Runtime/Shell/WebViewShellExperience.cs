@@ -118,13 +118,15 @@ public sealed class WebViewManagedWindowCreateContext
         Guid parentWindowId,
         Uri? targetUri,
         string scopeIdentity,
-        WebViewShellSessionDecision? sessionDecision)
+        WebViewShellSessionDecision? sessionDecision,
+        string? profileIdentity)
     {
         WindowId = windowId;
         ParentWindowId = parentWindowId;
         TargetUri = targetUri;
         ScopeIdentity = scopeIdentity;
         SessionDecision = sessionDecision;
+        ProfileIdentity = profileIdentity;
     }
 
     /// <summary>Managed child window id.</summary>
@@ -137,6 +139,8 @@ public sealed class WebViewManagedWindowCreateContext
     public string ScopeIdentity { get; }
     /// <summary>Resolved session decision for the child window.</summary>
     public WebViewShellSessionDecision? SessionDecision { get; }
+    /// <summary>Resolved profile identity for this managed window.</summary>
+    public string? ProfileIdentity { get; }
 }
 
 /// <summary>
@@ -149,12 +153,14 @@ public sealed class WebViewManagedWindowLifecycleEventArgs : EventArgs
         Guid windowId,
         Guid parentWindowId,
         WebViewManagedWindowLifecycleState state,
-        WebViewShellSessionDecision? sessionDecision)
+        WebViewShellSessionDecision? sessionDecision,
+        string? profileIdentity)
     {
         WindowId = windowId;
         ParentWindowId = parentWindowId;
         State = state;
         SessionDecision = sessionDecision;
+        ProfileIdentity = profileIdentity;
     }
 
     /// <summary>Managed window identity.</summary>
@@ -165,6 +171,8 @@ public sealed class WebViewManagedWindowLifecycleEventArgs : EventArgs
     public WebViewManagedWindowLifecycleState State { get; }
     /// <summary>Session decision correlated to this window.</summary>
     public WebViewShellSessionDecision? SessionDecision { get; }
+    /// <summary>Resolved profile identity correlated to this window.</summary>
+    public string? ProfileIdentity { get; }
 }
 
 /// <summary>
@@ -215,6 +223,8 @@ public sealed class WebViewShellExperienceOptions
     public IWebViewPermissionPolicy? PermissionPolicy { get; init; }
     /// <summary>Optional policy object for session scope resolution.</summary>
     public IWebViewShellSessionPolicy? SessionPolicy { get; init; }
+    /// <summary>Optional resolver for session-permission profiles.</summary>
+    public IWebViewSessionPermissionProfileResolver? SessionPermissionProfileResolver { get; init; }
     /// <summary>Optional context used to resolve <see cref="SessionPolicy"/>.</summary>
     public WebViewShellSessionContext SessionContext { get; init; } = new();
     /// <summary>Optional handler for download requests.</summary>
@@ -401,6 +411,7 @@ public sealed class WebViewShellExperience : IDisposable
     private readonly Dictionary<Guid, ManagedWindowEntry> _managedWindows = new();
     private readonly Guid _rootWindowId;
     private readonly WebViewShellSessionDecision? _sessionDecision;
+    private readonly WebViewSessionPermissionProfile? _rootProfile;
     private bool _disposed;
 
     /// <summary>Creates a new shell experience instance for the given WebView.</summary>
@@ -414,20 +425,60 @@ public sealed class WebViewShellExperience : IDisposable
             _webView.NewWindowRequested += OnNewWindowRequested;
         if (_options.DownloadPolicy is not null || _options.DownloadHandler is not null)
             _webView.DownloadRequested += OnDownloadRequested;
-        if (_options.PermissionPolicy is not null || _options.PermissionHandler is not null)
+        if (_options.PermissionPolicy is not null ||
+            _options.PermissionHandler is not null ||
+            _options.SessionPermissionProfileResolver is not null)
             _webView.PermissionRequested += OnPermissionRequested;
 
+        var rootSessionContext = _options.SessionContext with
+        {
+            WindowId = _rootWindowId,
+            ParentWindowId = null
+        };
+
+        WebViewShellSessionDecision? resolvedRootSessionDecision = null;
         if (_options.SessionPolicy is not null)
         {
-            var rootSessionContext = _options.SessionContext with
-            {
-                WindowId = _rootWindowId,
-                ParentWindowId = null
-            };
-            _sessionDecision = ExecutePolicyDomain(
+            resolvedRootSessionDecision = ExecutePolicyDomain(
                 WebViewShellPolicyDomain.Session,
                 () => _options.SessionPolicy.Resolve(rootSessionContext));
         }
+
+        WebViewSessionPermissionProfile? resolvedRootProfile = null;
+        if (_options.SessionPermissionProfileResolver is not null)
+        {
+            var rootProfileContext = new WebViewSessionPermissionProfileContext(
+                _rootWindowId,
+                ParentWindowId: null,
+                WindowId: _rootWindowId,
+                ScopeIdentity: rootSessionContext.ScopeIdentity,
+                RequestUri: rootSessionContext.RequestUri,
+                PermissionKind: null);
+
+            resolvedRootProfile = ExecutePolicyDomain(
+                WebViewShellPolicyDomain.Session,
+                () => _options.SessionPermissionProfileResolver.Resolve(rootProfileContext, parentProfile: null));
+
+            if (resolvedRootProfile is not null)
+            {
+                resolvedRootSessionDecision = resolvedRootProfile.ResolveSessionDecision(
+                    parentDecision: null,
+                    fallbackDecision: resolvedRootSessionDecision,
+                    scopeIdentity: rootSessionContext.ScopeIdentity);
+
+                RaiseSessionPermissionProfileDiagnostic(
+                    _rootWindowId,
+                    parentWindowId: null,
+                    scopeIdentity: rootSessionContext.ScopeIdentity,
+                    profile: resolvedRootProfile,
+                    sessionDecision: resolvedRootSessionDecision,
+                    permissionKind: null,
+                    permissionDecision: WebViewPermissionProfileDecision.DefaultFallback());
+            }
+        }
+
+        _sessionDecision = resolvedRootSessionDecision;
+        _rootProfile = resolvedRootProfile;
     }
 
     /// <summary>
@@ -438,11 +489,19 @@ public sealed class WebViewShellExperience : IDisposable
     /// Raised whenever a managed window lifecycle state changes.
     /// </summary>
     public event EventHandler<WebViewManagedWindowLifecycleEventArgs>? ManagedWindowLifecycleChanged;
+    /// <summary>
+    /// Raised when profile resolution/evaluation completes for session or permission paths.
+    /// </summary>
+    public event EventHandler<WebViewSessionPermissionProfileDiagnosticEventArgs>? SessionPermissionProfileEvaluated;
 
     /// <summary>
     /// Gets the session decision resolved at construction time when <see cref="WebViewShellExperienceOptions.SessionPolicy"/> is configured.
     /// </summary>
     public WebViewShellSessionDecision? SessionDecision => _sessionDecision;
+    /// <summary>
+    /// Gets root profile identity when profile resolver is configured.
+    /// </summary>
+    public string? RootProfileIdentity => _rootProfile?.ProfileIdentity;
 
     /// <summary>
     /// Stable identity of the root window associated with this shell experience.
@@ -582,6 +641,10 @@ public sealed class WebViewShellExperience : IDisposable
     {
         if (_disposed) return;
 
+        var appliedProfileDecision = TryApplyProfilePermissionDecision(e);
+        if (appliedProfileDecision)
+            return;
+
         // Deterministic execution order:
         // 1) policy object
         // 2) delegate handler
@@ -591,6 +654,49 @@ public sealed class WebViewShellExperience : IDisposable
         ExecutePolicyDomain(
             WebViewShellPolicyDomain.Permission,
             () => _options.PermissionHandler?.Invoke(_webView, e));
+    }
+
+    private bool TryApplyProfilePermissionDecision(PermissionRequestedEventArgs e)
+    {
+        if (_options.SessionPermissionProfileResolver is null)
+            return false;
+
+        var scopeIdentity = _sessionDecision?.ScopeIdentity ?? _options.SessionContext.ScopeIdentity;
+        var profileContext = new WebViewSessionPermissionProfileContext(
+            _rootWindowId,
+            ParentWindowId: null,
+            WindowId: _rootWindowId,
+            ScopeIdentity: scopeIdentity,
+            RequestUri: e.Origin,
+            PermissionKind: e.PermissionKind);
+
+        var resolvedProfile = ExecutePolicyDomain(
+            WebViewShellPolicyDomain.Permission,
+            () => _options.SessionPermissionProfileResolver.Resolve(profileContext, _rootProfile));
+
+        if (resolvedProfile is null)
+            return false;
+
+        var effectiveSessionDecision = resolvedProfile.ResolveSessionDecision(
+            parentDecision: null,
+            fallbackDecision: _sessionDecision,
+            scopeIdentity: scopeIdentity);
+        var profileDecision = resolvedProfile.ResolvePermissionDecision(e.PermissionKind);
+
+        RaiseSessionPermissionProfileDiagnostic(
+            windowId: _rootWindowId,
+            parentWindowId: null,
+            scopeIdentity: scopeIdentity,
+            profile: resolvedProfile,
+            sessionDecision: effectiveSessionDecision,
+            permissionKind: e.PermissionKind,
+            permissionDecision: profileDecision);
+
+        if (!profileDecision.IsExplicit || profileDecision.State == PermissionState.Default)
+            return false;
+
+        e.State = profileDecision.State;
+        return true;
     }
 
     /// <summary>
@@ -744,12 +850,51 @@ public sealed class WebViewShellExperience : IDisposable
             ? _sessionDecision
             : ExecutePolicyDomain(WebViewShellPolicyDomain.Session, () => _options.SessionPolicy.Resolve(sessionContext));
 
+        WebViewSessionPermissionProfile? resolvedProfile = null;
+        var profileIdentity = _rootProfile?.ProfileIdentity;
+        if (_options.SessionPermissionProfileResolver is not null)
+        {
+            var profileContext = new WebViewSessionPermissionProfileContext(
+                _rootWindowId,
+                ParentWindowId: _rootWindowId,
+                WindowId: windowId,
+                ScopeIdentity: scopeIdentity,
+                RequestUri: targetUri,
+                PermissionKind: null);
+
+            resolvedProfile = ExecutePolicyDomain(
+                WebViewShellPolicyDomain.Session,
+                () => _options.SessionPermissionProfileResolver.Resolve(profileContext, _rootProfile));
+
+            if (resolvedProfile is not null)
+            {
+                sessionDecision = resolvedProfile.ResolveSessionDecision(
+                    parentDecision: _sessionDecision,
+                    fallbackDecision: sessionDecision,
+                    scopeIdentity: scopeIdentity);
+                profileIdentity = resolvedProfile.ProfileIdentity;
+
+                if (sessionDecision is not null)
+                {
+                    RaiseSessionPermissionProfileDiagnostic(
+                        windowId,
+                        _rootWindowId,
+                        scopeIdentity,
+                        resolvedProfile,
+                        sessionDecision,
+                        permissionKind: null,
+                        permissionDecision: WebViewPermissionProfileDecision.DefaultFallback());
+                }
+            }
+        }
+
         var createContext = new WebViewManagedWindowCreateContext(
             windowId,
             _rootWindowId,
             targetUri,
             scopeIdentity,
-            sessionDecision);
+            sessionDecision,
+            profileIdentity);
 
         var managedWindow = ExecutePolicyDomain(
             WebViewShellPolicyDomain.ManagedWindowLifecycle,
@@ -758,7 +903,7 @@ public sealed class WebViewShellExperience : IDisposable
         if (managedWindow is null)
             return false;
 
-        var entry = new ManagedWindowEntry(windowId, _rootWindowId, managedWindow, sessionDecision);
+        var entry = new ManagedWindowEntry(windowId, _rootWindowId, managedWindow, sessionDecision, profileIdentity);
         lock (_managedWindowsLock)
             _managedWindows[windowId] = entry;
 
@@ -791,7 +936,8 @@ public sealed class WebViewShellExperience : IDisposable
                 entry.WindowId,
                 entry.ParentWindowId,
                 nextState,
-                entry.SessionDecision));
+                entry.SessionDecision,
+                entry.ProfileIdentity));
         return true;
     }
 
@@ -838,6 +984,30 @@ public sealed class WebViewShellExperience : IDisposable
             ReportPolicyFailure(domain, ex);
             return default;
         }
+    }
+
+    private void RaiseSessionPermissionProfileDiagnostic(
+        Guid windowId,
+        Guid? parentWindowId,
+        string scopeIdentity,
+        WebViewSessionPermissionProfile profile,
+        WebViewShellSessionDecision sessionDecision,
+        WebViewPermissionKind? permissionKind,
+        WebViewPermissionProfileDecision permissionDecision)
+    {
+        ArgumentNullException.ThrowIfNull(profile);
+        ArgumentNullException.ThrowIfNull(sessionDecision);
+
+        SessionPermissionProfileEvaluated?.Invoke(
+            this,
+            new WebViewSessionPermissionProfileDiagnosticEventArgs(
+                windowId,
+                parentWindowId,
+                profile.ProfileIdentity,
+                scopeIdentity,
+                sessionDecision,
+                permissionKind,
+                permissionDecision));
     }
 
     private void ReportPolicyFailure(WebViewShellPolicyDomain domain, Exception ex)
@@ -896,18 +1066,21 @@ public sealed class WebViewShellExperience : IDisposable
             Guid windowId,
             Guid parentWindowId,
             IWebView window,
-            WebViewShellSessionDecision? sessionDecision)
+            WebViewShellSessionDecision? sessionDecision,
+            string? profileIdentity)
         {
             WindowId = windowId;
             ParentWindowId = parentWindowId;
             Window = window;
             SessionDecision = sessionDecision;
+            ProfileIdentity = profileIdentity;
         }
 
         public Guid WindowId { get; }
         public Guid ParentWindowId { get; }
         public IWebView Window { get; }
         public WebViewShellSessionDecision? SessionDecision { get; }
+        public string? ProfileIdentity { get; }
         public WebViewManagedWindowLifecycleState? State { get; set; }
     }
 }

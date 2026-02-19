@@ -242,6 +242,200 @@ public sealed class ShellExperienceTests
     }
 
     [Fact]
+    public void Session_permission_profile_resolution_is_deterministic_for_equivalent_contexts()
+    {
+        var dispatcher = new TestDispatcher();
+        var adapter1 = MockWebViewAdapter.Create();
+        var adapter2 = MockWebViewAdapter.Create();
+        using var core1 = new WebViewCore(adapter1, dispatcher);
+        using var core2 = new WebViewCore(adapter2, dispatcher);
+
+        var contexts = new List<WebViewSessionPermissionProfileContext>();
+        var options = new WebViewShellExperienceOptions
+        {
+            SessionContext = new WebViewShellSessionContext("tenant-a"),
+            SessionPermissionProfileResolver = new DelegateSessionPermissionProfileResolver((ctx, _) =>
+            {
+                contexts.Add(ctx);
+                return new WebViewSessionPermissionProfile
+                {
+                    ProfileIdentity = $"profile:{ctx.ScopeIdentity}",
+                    SessionDecisionOverride = new WebViewShellSessionDecision(WebViewShellSessionScope.Isolated, $"profile-session:{ctx.ScopeIdentity}")
+                };
+            })
+        };
+
+        using var shell1 = new WebViewShellExperience(core1, options);
+        using var shell2 = new WebViewShellExperience(core2, options);
+
+        Assert.NotNull(shell1.SessionDecision);
+        Assert.NotNull(shell2.SessionDecision);
+        Assert.Equal(shell1.SessionDecision, shell2.SessionDecision);
+        Assert.Equal("profile:tenant-a", shell1.RootProfileIdentity);
+        Assert.Equal("profile:tenant-a", shell2.RootProfileIdentity);
+
+        Assert.Equal(2, contexts.Count);
+        Assert.All(contexts, ctx =>
+        {
+            Assert.Equal("tenant-a", ctx.ScopeIdentity);
+            Assert.Null(ctx.ParentWindowId);
+            Assert.Equal(ctx.RootWindowId, ctx.WindowId);
+            Assert.Null(ctx.PermissionKind);
+        });
+    }
+
+    [Fact]
+    public void Permission_profile_decision_precedes_fallback_policy_and_handler()
+    {
+        var dispatcher = new TestDispatcher();
+        var adapter = new MockWebViewAdapterFull();
+        using var core = new WebViewCore(adapter, dispatcher);
+
+        var order = new List<string>();
+        using var shell = new WebViewShellExperience(core, new WebViewShellExperienceOptions
+        {
+            SessionPermissionProfileResolver = new DelegateSessionPermissionProfileResolver((ctx, _) =>
+                new WebViewSessionPermissionProfile
+                {
+                    ProfileIdentity = "profile-deny-camera",
+                    SessionDecisionOverride = new WebViewShellSessionDecision(WebViewShellSessionScope.Shared, "profile"),
+                    PermissionDecisions = new Dictionary<WebViewPermissionKind, WebViewPermissionProfileDecision>
+                    {
+                        [WebViewPermissionKind.Camera] = WebViewPermissionProfileDecision.Deny()
+                    }
+                }),
+            PermissionPolicy = new DelegatePermissionPolicy((_, e) =>
+            {
+                order.Add("policy");
+                e.State = PermissionState.Allow;
+            }),
+            PermissionHandler = (_, e) =>
+            {
+                order.Add("handler");
+                e.State = PermissionState.Allow;
+            }
+        });
+
+        var args = new PermissionRequestedEventArgs(WebViewPermissionKind.Camera, new Uri("https://example.com"));
+        adapter.RaisePermissionRequested(args);
+
+        Assert.Equal(PermissionState.Deny, args.State);
+        Assert.Empty(order);
+    }
+
+    [Fact]
+    public void Permission_profile_default_falls_back_to_existing_pipeline()
+    {
+        var dispatcher = new TestDispatcher();
+        var adapter = new MockWebViewAdapterFull();
+        using var core = new WebViewCore(adapter, dispatcher);
+
+        var order = new List<string>();
+        using var shell = new WebViewShellExperience(core, new WebViewShellExperienceOptions
+        {
+            SessionPermissionProfileResolver = new DelegateSessionPermissionProfileResolver((_, _) =>
+                new WebViewSessionPermissionProfile
+                {
+                    ProfileIdentity = "profile-default",
+                    SessionDecisionOverride = new WebViewShellSessionDecision(WebViewShellSessionScope.Shared, "profile-default"),
+                    DefaultPermissionDecision = WebViewPermissionProfileDecision.DefaultFallback()
+                }),
+            PermissionPolicy = new DelegatePermissionPolicy((_, e) =>
+            {
+                order.Add("policy");
+                e.State = PermissionState.Allow;
+            }),
+            PermissionHandler = (_, e) =>
+            {
+                order.Add("handler");
+                e.State = PermissionState.Deny;
+            }
+        });
+
+        var args = new PermissionRequestedEventArgs(WebViewPermissionKind.Camera, new Uri("https://example.com"));
+        adapter.RaisePermissionRequested(args);
+
+        Assert.Equal(new[] { "policy", "handler" }, order);
+        Assert.Equal(PermissionState.Deny, args.State);
+    }
+
+    [Fact]
+    public void Profile_resolution_failure_isolated_and_reports_error_metadata()
+    {
+        var dispatcher = new TestDispatcher();
+        var adapter = new MockWebViewAdapterFull();
+        using var core = new WebViewCore(adapter, dispatcher);
+
+        WebViewShellPolicyErrorEventArgs? observedError = null;
+        var diagnostics = new List<WebViewSessionPermissionProfileDiagnosticEventArgs>();
+        using var shell = new WebViewShellExperience(core, new WebViewShellExperienceOptions
+        {
+            SessionPermissionProfileResolver = new DelegateSessionPermissionProfileResolver((ctx, _) =>
+            {
+                if (ctx.PermissionKind is not null)
+                    throw new InvalidOperationException("profile resolver failed");
+
+                return new WebViewSessionPermissionProfile
+                {
+                    ProfileIdentity = "root-profile",
+                    SessionDecisionOverride = new WebViewShellSessionDecision(WebViewShellSessionScope.Shared, "root")
+                };
+            }),
+            PermissionHandler = (_, e) => e.State = PermissionState.Deny,
+            PolicyErrorHandler = (_, err) => observedError = err
+        });
+
+        shell.SessionPermissionProfileEvaluated += (_, e) => diagnostics.Add(e);
+
+        var args = new PermissionRequestedEventArgs(WebViewPermissionKind.Microphone, new Uri("https://example.com"));
+        adapter.RaisePermissionRequested(args);
+
+        Assert.NotNull(observedError);
+        Assert.Equal(WebViewShellPolicyDomain.Permission, observedError!.Domain);
+        Assert.Equal(PermissionState.Deny, args.State);
+        Assert.Empty(diagnostics);
+    }
+
+    [Fact]
+    public void Profile_diagnostics_include_identity_permission_and_decision()
+    {
+        var dispatcher = new TestDispatcher();
+        var adapter = new MockWebViewAdapterFull();
+        using var core = new WebViewCore(adapter, dispatcher);
+
+        WebViewSessionPermissionProfileDiagnosticEventArgs? observedPermissionDiagnostic = null;
+        using var shell = new WebViewShellExperience(core, new WebViewShellExperienceOptions
+        {
+            SessionPermissionProfileResolver = new DelegateSessionPermissionProfileResolver((_, _) =>
+                new WebViewSessionPermissionProfile
+                {
+                    ProfileIdentity = "audit-profile",
+                    SessionDecisionOverride = new WebViewShellSessionDecision(WebViewShellSessionScope.Shared, "audit-scope"),
+                    PermissionDecisions = new Dictionary<WebViewPermissionKind, WebViewPermissionProfileDecision>
+                    {
+                        [WebViewPermissionKind.Notifications] = WebViewPermissionProfileDecision.Allow()
+                    }
+                })
+        });
+
+        shell.SessionPermissionProfileEvaluated += (_, e) =>
+        {
+            if (e.PermissionKind is not null)
+                observedPermissionDiagnostic = e;
+        };
+
+        var args = new PermissionRequestedEventArgs(WebViewPermissionKind.Notifications, new Uri("https://example.com"));
+        adapter.RaisePermissionRequested(args);
+
+        Assert.Equal(PermissionState.Allow, args.State);
+        Assert.NotNull(observedPermissionDiagnostic);
+        Assert.Equal("audit-profile", observedPermissionDiagnostic!.ProfileIdentity);
+        Assert.Equal(WebViewPermissionKind.Notifications, observedPermissionDiagnostic.PermissionKind);
+        Assert.Equal(PermissionState.Allow, observedPermissionDiagnostic.PermissionDecision.State);
+        Assert.True(observedPermissionDiagnostic.PermissionDecision.IsExplicit);
+    }
+
+    [Fact]
     public async Task New_window_policy_executes_on_ui_thread()
     {
         var dispatcher = new TestDispatcher();
