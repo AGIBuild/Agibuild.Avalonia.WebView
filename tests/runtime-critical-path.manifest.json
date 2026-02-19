@@ -30,6 +30,30 @@
       "lane": "RuntimeAutomation.PackageSmoke",
       "file": "build/Build.cs",
       "testMethod": "NugetPackageTest"
+    },
+    {
+      "id": "shell-attach-detach-soak",
+      "lane": "RuntimeAutomation",
+      "file": "tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/ShellProductionValidationIntegrationTests.cs",
+      "testMethod": "Shell_scope_attach_detach_soak_keeps_event_wiring_and_cleanup_deterministic"
+    },
+    {
+      "id": "shell-multi-window-stress",
+      "lane": "RuntimeAutomation",
+      "file": "tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/MultiWindowLifecycleIntegrationTests.cs",
+      "testMethod": "Managed_window_stress_open_close_cycles_leave_no_active_windows"
+    },
+    {
+      "id": "shell-host-capability-stress",
+      "lane": "RuntimeAutomation",
+      "file": "tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/HostCapabilityBridgeIntegrationTests.cs",
+      "testMethod": "Host_capability_bridge_stress_external_open_cycles_remain_deterministic"
+    },
+    {
+      "id": "windows-webview2-teardown-stress",
+      "lane": "RuntimeAutomation",
+      "file": "tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/WebView2TeardownStabilityIntegrationTests.cs",
+      "testMethod": "WebView2_teardown_stress_does_not_emit_chromium_teardown_markers"
     }
   ]
 }

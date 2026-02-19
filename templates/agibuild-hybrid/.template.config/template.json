@@ -22,6 +22,16 @@
         { "choice": "react", "description": "React with Vite" },
         { "choice": "vue", "description": "Vue with Vite" }
       ]
+    },
+    "shellPreset": {
+      "type": "parameter",
+      "datatype": "choice",
+      "description": "Desktop shell wiring preset",
+      "defaultValue": "app-shell",
+      "choices": [
+        { "choice": "baseline", "description": "Minimal startup wiring without shell orchestration presets" },
+        { "choice": "app-shell", "description": "Starter shell wiring with policy/session profile bootstrap" }
+      ]
     }
   },
   "sources": [
@@ -34,6 +44,10 @@
         {
           "condition": "(framework == 'vanilla')",
           "exclude": ["HybridApp.Web.Vite/**"]
+        },
+        {
+          "condition": "(shellPreset == 'baseline')",
+          "exclude": ["HybridApp.Desktop/MainWindow.AppShellPreset.cs"]
         }
       ]
     }

@@ -53,7 +53,11 @@ public sealed class AutomationLaneGovernanceTests
             "off-thread-navigation-marshaling",
             "lifecycle-contextmenu-reattach-wiring",
             "instance-options-isolation",
-            "package-consumption-smoke"
+            "package-consumption-smoke",
+            "shell-attach-detach-soak",
+            "shell-multi-window-stress",
+            "shell-host-capability-stress",
+            "windows-webview2-teardown-stress"
         };
 
         var scenarioIds = scenarios
@@ -97,6 +101,7 @@ public sealed class AutomationLaneGovernanceTests
         Assert.Contains("warning-governance-report.json", source, StringComparison.Ordinal);
         Assert.Contains("warning-governance.baseline.json", source, StringComparison.Ordinal);
         Assert.Contains("nuget-smoke-retry-telemetry.json", source, StringComparison.Ordinal);
+        Assert.Contains("--shellPreset app-shell", source, StringComparison.Ordinal);
         Assert.Contains("RunNugetSmokeWithRetry", source, StringComparison.Ordinal);
         Assert.Contains("ClassifyNugetSmokeFailure", source, StringComparison.Ordinal);
         Assert.Contains("ResolveNugetPackagesRoot", source, StringComparison.Ordinal);
@@ -171,6 +176,159 @@ public sealed class AutomationLaneGovernanceTests
 
         AssertSingleVersion("xunit.v3", xunitV3Versions);
         AssertSingleVersion("xunit.runner.visualstudio", runnerVersions);
+    }
+
+    [Fact]
+    public void Hybrid_template_metadata_exposes_shell_preset_choices()
+    {
+        var repoRoot = FindRepoRoot();
+        var templatePath = Path.Combine(
+            repoRoot,
+            "templates",
+            "agibuild-hybrid",
+            ".template.config",
+            "template.json");
+        Assert.True(File.Exists(templatePath), $"Missing template metadata file: {templatePath}");
+
+        using var doc = JsonDocument.Parse(File.ReadAllText(templatePath));
+        var symbols = doc.RootElement.GetProperty("symbols");
+        var shellPreset = symbols.GetProperty("shellPreset");
+
+        Assert.Equal("choice", shellPreset.GetProperty("datatype").GetString());
+        Assert.Equal("app-shell", shellPreset.GetProperty("defaultValue").GetString());
+
+        var choices = shellPreset.GetProperty("choices")
+            .EnumerateArray()
+            .Select(c => c.GetProperty("choice").GetString())
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .ToHashSet(StringComparer.Ordinal);
+
+        Assert.Contains("baseline", choices);
+        Assert.Contains("app-shell", choices);
+    }
+
+    [Fact]
+    public void Hybrid_template_source_contains_shell_preset_wiring_markers()
+    {
+        var repoRoot = FindRepoRoot();
+        var desktopMainWindowPath = Path.Combine(
+            repoRoot,
+            "templates",
+            "agibuild-hybrid",
+            "HybridApp.Desktop",
+            "MainWindow.axaml.cs");
+        var appShellPresetPath = Path.Combine(
+            repoRoot,
+            "templates",
+            "agibuild-hybrid",
+            "HybridApp.Desktop",
+            "MainWindow.AppShellPreset.cs");
+        var desktopProjectPath = Path.Combine(
+            repoRoot,
+            "templates",
+            "agibuild-hybrid",
+            "HybridApp.Desktop",
+            "HybridApp.Desktop.csproj");
+        var desktopProgramPath = Path.Combine(
+            repoRoot,
+            "templates",
+            "agibuild-hybrid",
+            "HybridApp.Desktop",
+            "Program.cs");
+
+        Assert.True(File.Exists(desktopMainWindowPath), $"Missing template source file: {desktopMainWindowPath}");
+        Assert.True(File.Exists(appShellPresetPath), $"Missing app-shell preset source file: {appShellPresetPath}");
+        Assert.True(File.Exists(desktopProjectPath), $"Missing desktop template project file: {desktopProjectPath}");
+        Assert.True(File.Exists(desktopProgramPath), $"Missing desktop template program file: {desktopProgramPath}");
+
+        var desktopMainWindow = File.ReadAllText(desktopMainWindowPath);
+        var appShellPreset = File.ReadAllText(appShellPresetPath);
+        var desktopProject = File.ReadAllText(desktopProjectPath);
+        var desktopProgram = File.ReadAllText(desktopProgramPath);
+
+        Assert.Contains("InitializeShellPreset();", desktopMainWindow, StringComparison.Ordinal);
+        Assert.Contains("DisposeShellPreset();", desktopMainWindow, StringComparison.Ordinal);
+        Assert.Contains("partial void InitializeShellPreset();", desktopMainWindow, StringComparison.Ordinal);
+        Assert.Contains("partial void DisposeShellPreset();", desktopMainWindow, StringComparison.Ordinal);
+
+        Assert.Contains("WebView.NewWindowRequested +=", appShellPreset, StringComparison.Ordinal);
+        Assert.Contains("WebView.PermissionRequested +=", appShellPreset, StringComparison.Ordinal);
+        Assert.Contains("WebView.DownloadRequested +=", appShellPreset, StringComparison.Ordinal);
+        Assert.Contains("Agibuild.Avalonia.WebView", desktopProject, StringComparison.Ordinal);
+        Assert.DoesNotContain(".WithInterFont()", desktopProgram, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Shell_production_matrix_declares_platform_coverage_and_executable_evidence()
+    {
+        var repoRoot = FindRepoRoot();
+        var matrixPath = Path.Combine(repoRoot, "tests", "shell-production-matrix.json");
+        var lanesPath = Path.Combine(repoRoot, "tests", "automation-lanes.json");
+
+        Assert.True(File.Exists(matrixPath), $"Missing shell production matrix: {matrixPath}");
+        Assert.True(File.Exists(lanesPath), $"Missing automation lanes manifest: {lanesPath}");
+
+        using var matrixDoc = JsonDocument.Parse(File.ReadAllText(matrixPath));
+        using var lanesDoc = JsonDocument.Parse(File.ReadAllText(lanesPath));
+
+        var requiredPlatforms = new[] { "windows", "macos", "linux" };
+        var laneNames = lanesDoc.RootElement.GetProperty("lanes")
+            .EnumerateArray()
+            .Select(x => x.GetProperty("name").GetString())
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .ToHashSet(StringComparer.Ordinal);
+
+        var platforms = matrixDoc.RootElement.GetProperty("platforms")
+            .EnumerateArray()
+            .Select(x => x.GetString())
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .ToHashSet(StringComparer.Ordinal);
+        foreach (var platform in requiredPlatforms)
+        {
+            Assert.Contains(platform, platforms);
+        }
+
+        var capabilities = matrixDoc.RootElement.GetProperty("capabilities").EnumerateArray().ToList();
+        Assert.NotEmpty(capabilities);
+
+        foreach (var capability in capabilities)
+        {
+            var capabilityId = capability.GetProperty("id").GetString();
+            Assert.False(string.IsNullOrWhiteSpace(capabilityId));
+
+            var supportLevel = capability.GetProperty("supportLevel").GetString();
+            Assert.False(string.IsNullOrWhiteSpace(supportLevel));
+
+            var coverage = capability.GetProperty("coverage");
+            foreach (var platform in requiredPlatforms)
+            {
+                Assert.True(
+                    coverage.TryGetProperty(platform, out var coverageItems),
+                    $"Missing platform coverage '{platform}' in capability '{capabilityId}'.");
+                Assert.NotEmpty(coverageItems.EnumerateArray());
+            }
+
+            var evidenceItems = capability.GetProperty("evidence").EnumerateArray().ToList();
+            Assert.NotEmpty(evidenceItems);
+
+            foreach (var evidence in evidenceItems)
+            {
+                var lane = evidence.GetProperty("lane").GetString();
+                var file = evidence.GetProperty("file").GetString();
+                var testMethod = evidence.GetProperty("testMethod").GetString();
+
+                Assert.False(string.IsNullOrWhiteSpace(lane));
+                Assert.False(string.IsNullOrWhiteSpace(file));
+                Assert.False(string.IsNullOrWhiteSpace(testMethod));
+                Assert.Contains(lane!, laneNames);
+
+                var sourcePath = Path.Combine(repoRoot, file!.Replace('/', Path.DirectorySeparatorChar));
+                Assert.True(File.Exists(sourcePath), $"Matrix evidence source file does not exist: {sourcePath}");
+
+                var source = File.ReadAllText(sourcePath);
+                Assert.Contains(testMethod!, source, StringComparison.Ordinal);
+            }
+        }
     }
 
     [Fact]

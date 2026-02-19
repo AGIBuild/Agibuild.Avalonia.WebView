@@ -1277,7 +1277,7 @@ class _Build : NukeBuild
 
                 // ── Step 3: Create project from template ──
                 Serilog.Log.Information("Creating SmokeApp from template...");
-                DotNet($"new agibuild-hybrid -n SmokeApp -o \"{projectDir}\"");
+                DotNet($"new agibuild-hybrid -n SmokeApp -o \"{projectDir}\" --shellPreset app-shell");
 
                 // ── Step 4: Write nuget.config pointing to local feed ──
                 var nugetConfigPath = projectDir / "nuget.config";
