@@ -1,5 +1,6 @@
 using System.IO;
 using Agibuild.Avalonia.WebView;
+using Avalonia.Input;
 
 namespace HybridApp.Desktop;
 
@@ -8,6 +9,8 @@ public partial class MainWindow
     private EventHandler<NewWindowRequestedEventArgs>? _newWindowHandler;
     private EventHandler<PermissionRequestedEventArgs>? _permissionHandler;
     private EventHandler<DownloadRequestedEventArgs>? _downloadHandler;
+    private EventHandler<KeyEventArgs>? _shortcutHandler;
+    private WebViewShortcutRouter? _shortcutRouter;
 
     partial void InitializeShellPreset()
     {
@@ -41,9 +44,20 @@ public partial class MainWindow
             e.DownloadPath = Path.Combine(Path.GetTempPath(), fileName);
         };
 
+        _shortcutRouter = new WebViewShortcutRouter(WebView);
+        _shortcutHandler = async (_, e) =>
+        {
+            if (_shortcutRouter is null)
+                return;
+
+            if (await _shortcutRouter.TryExecuteAsync(e))
+                e.Handled = true;
+        };
+
         WebView.NewWindowRequested += _newWindowHandler;
         WebView.PermissionRequested += _permissionHandler;
         WebView.DownloadRequested += _downloadHandler;
+        KeyDown += _shortcutHandler;
     }
 
     partial void DisposeShellPreset()
@@ -54,9 +68,13 @@ public partial class MainWindow
             WebView.PermissionRequested -= _permissionHandler;
         if (_downloadHandler is not null)
             WebView.DownloadRequested -= _downloadHandler;
+        if (_shortcutHandler is not null)
+            KeyDown -= _shortcutHandler;
 
         _newWindowHandler = null;
         _permissionHandler = null;
         _downloadHandler = null;
+        _shortcutHandler = null;
+        _shortcutRouter = null;
     }
 }

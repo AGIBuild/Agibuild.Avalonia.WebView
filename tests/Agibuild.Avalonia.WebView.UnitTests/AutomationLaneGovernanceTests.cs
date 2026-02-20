@@ -254,6 +254,10 @@ public sealed class AutomationLaneGovernanceTests
         Assert.Contains("WebView.NewWindowRequested +=", appShellPreset, StringComparison.Ordinal);
         Assert.Contains("WebView.PermissionRequested +=", appShellPreset, StringComparison.Ordinal);
         Assert.Contains("WebView.DownloadRequested +=", appShellPreset, StringComparison.Ordinal);
+        Assert.Contains("WebViewShortcutRouter", appShellPreset, StringComparison.Ordinal);
+        Assert.Contains("KeyDown +=", appShellPreset, StringComparison.Ordinal);
+        Assert.Contains("KeyDown -=", appShellPreset, StringComparison.Ordinal);
+        Assert.Contains("TryExecuteAsync(e)", appShellPreset, StringComparison.Ordinal);
         Assert.Contains("Agibuild.Avalonia.WebView", desktopProject, StringComparison.Ordinal);
         Assert.DoesNotContain(".WithInterFont()", desktopProgram, StringComparison.Ordinal);
     }

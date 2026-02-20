@@ -505,6 +505,112 @@ public sealed class ShellExperienceTests
     }
 
     [Fact]
+    public async Task DevTools_policy_allow_executes_open_close_and_query_operations()
+    {
+        using var webView = new DevToolsTrackingWebView();
+        using var shell = new WebViewShellExperience(webView, new WebViewShellExperienceOptions
+        {
+            DevToolsPolicy = new DelegateDevToolsPolicy((_, _) => WebViewShellDevToolsDecision.Allow())
+        });
+
+        var opened = await shell.OpenDevToolsAsync();
+        var openState = await shell.IsDevToolsOpenAsync();
+        var closed = await shell.CloseDevToolsAsync();
+        var closedState = await shell.IsDevToolsOpenAsync();
+
+        Assert.True(opened);
+        Assert.True(openState);
+        Assert.True(closed);
+        Assert.False(closedState);
+        Assert.Equal(1, webView.OpenDevToolsCallCount);
+        Assert.Equal(1, webView.CloseDevToolsCallCount);
+        Assert.Equal(2, webView.IsDevToolsOpenCallCount);
+    }
+
+    [Fact]
+    public async Task DevTools_policy_deny_blocks_operation_and_reports_error()
+    {
+        using var webView = new DevToolsTrackingWebView();
+        WebViewShellPolicyErrorEventArgs? observedError = null;
+        using var shell = new WebViewShellExperience(webView, new WebViewShellExperienceOptions
+        {
+            DevToolsPolicy = new DelegateDevToolsPolicy((_, _) => WebViewShellDevToolsDecision.Deny("devtools-disabled")),
+            PolicyErrorHandler = (_, error) => observedError = error
+        });
+
+        var opened = await shell.OpenDevToolsAsync();
+        var openState = await shell.IsDevToolsOpenAsync();
+
+        Assert.False(opened);
+        Assert.False(openState);
+        Assert.Equal(0, webView.OpenDevToolsCallCount);
+        Assert.Equal(0, webView.IsDevToolsOpenCallCount);
+        Assert.NotNull(observedError);
+        Assert.Equal(WebViewShellPolicyDomain.DevTools, observedError!.Domain);
+    }
+
+    [Fact]
+    public async Task Command_policy_allow_executes_underlying_command_manager()
+    {
+        var commandManager = new TrackingCommandManager();
+        using var webView = new DevToolsTrackingWebView
+        {
+            CommandManager = commandManager
+        };
+        using var shell = new WebViewShellExperience(webView, new WebViewShellExperienceOptions
+        {
+            CommandPolicy = new DelegateCommandPolicy((_, _) => WebViewShellCommandDecision.Allow())
+        });
+
+        var executed = await shell.ExecuteCommandAsync(WebViewCommand.Copy);
+
+        Assert.True(executed);
+        Assert.Equal([WebViewCommand.Copy], commandManager.ExecutedCommands);
+    }
+
+    [Fact]
+    public async Task Command_policy_deny_blocks_execution_and_reports_error()
+    {
+        var commandManager = new TrackingCommandManager();
+        using var webView = new DevToolsTrackingWebView
+        {
+            CommandManager = commandManager
+        };
+
+        WebViewShellPolicyErrorEventArgs? observedError = null;
+        using var shell = new WebViewShellExperience(webView, new WebViewShellExperienceOptions
+        {
+            CommandPolicy = new DelegateCommandPolicy((_, _) => WebViewShellCommandDecision.Deny("command-blocked")),
+            PolicyErrorHandler = (_, error) => observedError = error
+        });
+
+        var executed = await shell.ExecuteCommandAsync(WebViewCommand.Paste);
+
+        Assert.False(executed);
+        Assert.Empty(commandManager.ExecutedCommands);
+        Assert.NotNull(observedError);
+        Assert.Equal(WebViewShellPolicyDomain.Command, observedError!.Domain);
+    }
+
+    [Fact]
+    public async Task Command_execution_reports_failure_when_manager_is_missing()
+    {
+        using var webView = new DevToolsTrackingWebView();
+        WebViewShellPolicyErrorEventArgs? observedError = null;
+        using var shell = new WebViewShellExperience(webView, new WebViewShellExperienceOptions
+        {
+            CommandPolicy = new DelegateCommandPolicy((_, _) => WebViewShellCommandDecision.Allow()),
+            PolicyErrorHandler = (_, error) => observedError = error
+        });
+
+        var executed = await shell.ExecuteCommandAsync(WebViewCommand.Undo);
+
+        Assert.False(executed);
+        Assert.NotNull(observedError);
+        Assert.Equal(WebViewShellPolicyDomain.Command, observedError!.Domain);
+    }
+
+    [Fact]
     public void Disposing_shell_experience_unsubscribes_handlers()
     {
         var dispatcher = new TestDispatcher();
@@ -525,6 +631,99 @@ public sealed class ShellExperienceTests
 
         Assert.NotNull(observedArgs);
         Assert.Equal(PermissionState.Default, observedArgs!.State);
+    }
+
+    private sealed class DevToolsTrackingWebView : IWebView
+    {
+        public Uri Source { get; set; } = new("about:blank");
+        public bool CanGoBack => false;
+        public bool CanGoForward => false;
+        public bool IsLoading => false;
+        public Guid ChannelId { get; } = Guid.NewGuid();
+
+        public int OpenDevToolsCallCount { get; private set; }
+        public int CloseDevToolsCallCount { get; private set; }
+        public int IsDevToolsOpenCallCount { get; private set; }
+        public ICommandManager? CommandManager { get; init; }
+        private bool _isDevToolsOpen;
+
+        public event EventHandler<NavigationStartingEventArgs>? NavigationStarted { add { } remove { } }
+        public event EventHandler<NavigationCompletedEventArgs>? NavigationCompleted { add { } remove { } }
+        public event EventHandler<NewWindowRequestedEventArgs>? NewWindowRequested { add { } remove { } }
+        public event EventHandler<WebMessageReceivedEventArgs>? WebMessageReceived { add { } remove { } }
+        public event EventHandler<WebResourceRequestedEventArgs>? WebResourceRequested { add { } remove { } }
+        public event EventHandler<EnvironmentRequestedEventArgs>? EnvironmentRequested { add { } remove { } }
+        public event EventHandler<DownloadRequestedEventArgs>? DownloadRequested { add { } remove { } }
+        public event EventHandler<PermissionRequestedEventArgs>? PermissionRequested { add { } remove { } }
+        public event EventHandler<AdapterCreatedEventArgs>? AdapterCreated { add { } remove { } }
+        public event EventHandler? AdapterDestroyed { add { } remove { } }
+        public event EventHandler<ContextMenuRequestedEventArgs>? ContextMenuRequested { add { } remove { } }
+
+        public Task NavigateAsync(Uri uri) => Task.CompletedTask;
+        public Task NavigateToStringAsync(string html) => Task.CompletedTask;
+        public Task NavigateToStringAsync(string html, Uri? baseUrl) => Task.CompletedTask;
+        public Task<string?> InvokeScriptAsync(string script) => Task.FromResult<string?>(null);
+        public Task<bool> GoBackAsync() => Task.FromResult(false);
+        public Task<bool> GoForwardAsync() => Task.FromResult(false);
+        public Task<bool> RefreshAsync() => Task.FromResult(false);
+        public Task<bool> StopAsync() => Task.FromResult(false);
+        public ICookieManager? TryGetCookieManager() => null;
+        public ICommandManager? TryGetCommandManager() => CommandManager;
+        public Task<global::Avalonia.Platform.IPlatformHandle?> TryGetWebViewHandleAsync()
+            => Task.FromResult<global::Avalonia.Platform.IPlatformHandle?>(null);
+        public IWebViewRpcService? Rpc => null;
+        public IBridgeService Bridge => throw new NotSupportedException();
+        public Task<byte[]> CaptureScreenshotAsync() => Task.FromException<byte[]>(new NotSupportedException());
+        public Task<byte[]> PrintToPdfAsync(PdfPrintOptions? options = null) => Task.FromException<byte[]>(new NotSupportedException());
+        public Task<double> GetZoomFactorAsync() => Task.FromResult(1.0);
+        public Task SetZoomFactorAsync(double zoomFactor) => Task.CompletedTask;
+        public Task<FindInPageResult> FindInPageAsync(string text, FindInPageOptions? options = null)
+            => Task.FromException<FindInPageResult>(new NotSupportedException());
+        public Task StopFindInPageAsync(bool clearHighlights = true) => Task.CompletedTask;
+        public Task<string> AddPreloadScriptAsync(string javaScript) => Task.FromException<string>(new NotSupportedException());
+        public Task RemovePreloadScriptAsync(string scriptId) => Task.FromException(new NotSupportedException());
+
+        public Task OpenDevToolsAsync()
+        {
+            OpenDevToolsCallCount++;
+            _isDevToolsOpen = true;
+            return Task.CompletedTask;
+        }
+
+        public Task CloseDevToolsAsync()
+        {
+            CloseDevToolsCallCount++;
+            _isDevToolsOpen = false;
+            return Task.CompletedTask;
+        }
+
+        public Task<bool> IsDevToolsOpenAsync()
+        {
+            IsDevToolsOpenCallCount++;
+            return Task.FromResult(_isDevToolsOpen);
+        }
+
+        public void Dispose()
+        {
+        }
+    }
+
+    private sealed class TrackingCommandManager : ICommandManager
+    {
+        public List<WebViewCommand> ExecutedCommands { get; } = [];
+
+        public Task CopyAsync() => Track(WebViewCommand.Copy);
+        public Task CutAsync() => Track(WebViewCommand.Cut);
+        public Task PasteAsync() => Track(WebViewCommand.Paste);
+        public Task SelectAllAsync() => Track(WebViewCommand.SelectAll);
+        public Task UndoAsync() => Track(WebViewCommand.Undo);
+        public Task RedoAsync() => Track(WebViewCommand.Redo);
+
+        private Task Track(WebViewCommand command)
+        {
+            ExecutedCommands.Add(command);
+            return Task.CompletedTask;
+        }
     }
 }
 

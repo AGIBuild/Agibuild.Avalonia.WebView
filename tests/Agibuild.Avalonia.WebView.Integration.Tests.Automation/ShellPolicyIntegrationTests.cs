@@ -114,4 +114,58 @@ public sealed class ShellPolicyIntegrationTests
             Assert.Equal(WebViewOperationFailureCategory.AdapterFailed, category);
         }
     }
+
+    [AvaloniaFact]
+    public async Task DevTools_policy_deny_is_isolated_and_permission_domain_remains_deterministic()
+    {
+        var dispatcher = new TestDispatcher();
+        var adapter = new MockWebViewAdapterFull();
+        using var core = new WebViewCore(adapter, dispatcher);
+
+        WebViewShellPolicyErrorEventArgs? observedError = null;
+        using var shell = new WebViewShellExperience(core, new WebViewShellExperienceOptions
+        {
+            DevToolsPolicy = new DelegateDevToolsPolicy((_, _) => WebViewShellDevToolsDecision.Deny("devtools-blocked")),
+            PermissionPolicy = new DelegatePermissionPolicy((_, e) => e.State = PermissionState.Deny),
+            PolicyErrorHandler = (_, error) => observedError = error
+        });
+
+        var opened = await shell.OpenDevToolsAsync();
+        var openState = await shell.IsDevToolsOpenAsync();
+
+        var permissionArgs = new PermissionRequestedEventArgs(WebViewPermissionKind.Camera, new Uri("https://example.com"));
+        adapter.RaisePermissionRequested(permissionArgs);
+
+        Assert.False(opened);
+        Assert.False(openState);
+        Assert.Equal(PermissionState.Deny, permissionArgs.State);
+        Assert.NotNull(observedError);
+        Assert.Equal(WebViewShellPolicyDomain.DevTools, observedError!.Domain);
+    }
+
+    [AvaloniaFact]
+    public async Task Command_policy_deny_is_isolated_and_permission_domain_remains_deterministic()
+    {
+        var dispatcher = new TestDispatcher();
+        var adapter = new MockWebViewAdapterFull();
+        using var core = new WebViewCore(adapter, dispatcher);
+
+        WebViewShellPolicyErrorEventArgs? observedError = null;
+        using var shell = new WebViewShellExperience(core, new WebViewShellExperienceOptions
+        {
+            CommandPolicy = new DelegateCommandPolicy((_, _) => WebViewShellCommandDecision.Deny("shortcut-denied")),
+            PermissionPolicy = new DelegatePermissionPolicy((_, e) => e.State = PermissionState.Deny),
+            PolicyErrorHandler = (_, error) => observedError = error
+        });
+
+        var commandExecuted = await shell.ExecuteCommandAsync(WebViewCommand.Copy);
+
+        var permissionArgs = new PermissionRequestedEventArgs(WebViewPermissionKind.Camera, new Uri("https://example.com"));
+        adapter.RaisePermissionRequested(permissionArgs);
+
+        Assert.False(commandExecuted);
+        Assert.Equal(PermissionState.Deny, permissionArgs.State);
+        Assert.NotNull(observedError);
+        Assert.Equal(WebViewShellPolicyDomain.Command, observedError!.Domain);
+    }
 }
