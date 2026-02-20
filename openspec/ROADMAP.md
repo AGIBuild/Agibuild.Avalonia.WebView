@@ -8,7 +8,7 @@
 ## Phase Overview
 
 ```
-Phase 0 (✅ Done)        Phase 1 (✅ Done)       Phase 2 (✅ Core Done)  Phase 3 (✅ Done)      Phase 4 (🚧 Planned)
+Phase 0 (✅ Done)        Phase 1 (✅ Done)       Phase 2 (✅ Core Done)  Phase 3 (✅ Done)      Phase 4 (✅ Done)
 Foundation               Type-Safe Bridge       SPA Hosting            Polish & GA            Application Shell
 ─────────────────────    ────────────────────   ────────────────────   ────────────────────   ────────────────────
 • Cross-platform         • Source Generator     • Custom protocol      • Project template      • Shell policy kit
@@ -371,14 +371,14 @@ dotnet new agibuild-hybrid -n MyApp --frontend react
 | 3.2 | ✅ Bridge call tracing + logging (IBridgeTracer) | Phase 1 | Low |
 | 3.3 | ✅ DevTools runtime toggle API (IDevToolsAdapter) | F4 | Low |
 | 3.4 | ✅ Performance benchmarks (BenchmarkDotNet) | Phase 1 + 2 | Medium |
-| 3.5 | GTK/Linux smoke tests | F1 | Medium |
+| 3.5 | ✅ GTK/Linux smoke tests | F1 | Medium |
 | 3.6 | ✅ API reference site (docfx + XML docs) | — | Medium |
 | 3.7 | ✅ Getting Started + topic guides | Phase 1 + 2 | Medium |
 | 3.8 | ✅ API surface review + breaking change audit | All | Low |
 
 ---
 
-## Phase 4: Application Shell Capabilities (🚧 Planned)
+## Phase 4: Application Shell Capabilities (✅ Completed)
 
 **Goal**: Extend the framework from "hybrid WebView runtime" to "application shell platform" for Electron-migration scenarios, while preserving **G3 (Secure by Default)** and **G4 (Contract-Driven Testability)**.
 
@@ -399,12 +399,12 @@ dotnet new agibuild-hybrid -n MyApp --frontend react
 
 | # | Deliverable | Depends On | Est. Complexity |
 |---|---|---|---|
-| 4.1 | Shell policy contracts + runtime wiring (opt-in, non-breaking) | Phase 3 + F2/F3/F4 | Medium |
-| 4.2 | Multi-window strategy framework + lifecycle semantics tests | 4.1 | High |
-| 4.3 | Typed host capability bridge (initial capability set) | 4.1 + G1 | High |
-| 4.4 | Session/permission profiles and governance rules | 4.1 + G3 | Medium |
-| 4.5 | Template shell presets + samples (migration-oriented) | 4.1-4.4 + E1 | Medium |
-| 4.6 | Shell stress/soak lane + release-readiness checklist | 4.1-4.5 + G4 | Medium |
+| 4.1 | ✅ Shell policy contracts + runtime wiring (opt-in, non-breaking) | Phase 3 + F2/F3/F4 | Medium |
+| 4.2 | ✅ Multi-window strategy framework + lifecycle semantics tests | 4.1 | High |
+| 4.3 | ✅ Typed host capability bridge (initial capability set) | 4.1 + G1 | High |
+| 4.4 | ✅ Session/permission profiles and governance rules | 4.1 + G3 | Medium |
+| 4.5 | ✅ Template shell presets + samples (migration-oriented) | 4.1-4.4 + E1 | Medium |
+| 4.6 | ✅ Shell stress/soak lane + release-readiness checklist | 4.1-4.5 + G4 | Medium |
 
 ### Phase 4 Exit Criteria
 
@@ -418,7 +418,7 @@ dotnet new agibuild-hybrid -n MyApp --frontend react
 ## Dependencies & Prerequisites
 
 ```
-Phase 0 (✅ Done) ──► Phase 1 (✅ Done) ──► Phase 2 (✅ Core Done) ──► Phase 3 (✅ Done) ──► Phase 4 (🚧 Planned)
+Phase 0 (✅ Done) ──► Phase 1 (✅ Done) ──► Phase 2 (✅ Core Done) ──► Phase 3 (✅ Done) ──► Phase 4 (✅ Done)
      │                      │                       │                         │
      │                      │                       └── 2.4 depends on Phase 1│
      │                      └── Builds on F6 (RPC) + F3 (Policy)             └── Shell layer builds on stable GA baseline

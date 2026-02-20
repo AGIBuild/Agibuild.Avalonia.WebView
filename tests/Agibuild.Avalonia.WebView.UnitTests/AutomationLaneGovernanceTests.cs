@@ -57,7 +57,9 @@ public sealed class AutomationLaneGovernanceTests
             "shell-attach-detach-soak",
             "shell-multi-window-stress",
             "shell-host-capability-stress",
-            "windows-webview2-teardown-stress"
+            "windows-webview2-teardown-stress",
+            "shell-devtools-policy-isolation",
+            "shell-shortcut-routing"
         };
 
         var scenarioIds = scenarios
@@ -294,6 +296,25 @@ public sealed class AutomationLaneGovernanceTests
 
         var capabilities = matrixDoc.RootElement.GetProperty("capabilities").EnumerateArray().ToList();
         Assert.NotEmpty(capabilities);
+        var capabilityIds = capabilities
+            .Select(x => x.GetProperty("id").GetString())
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .ToHashSet(StringComparer.Ordinal);
+
+        var requiredCapabilityIds = new[]
+        {
+            "shell-attach-detach-soak",
+            "shell-multi-window-stress",
+            "shell-host-capability-stress",
+            "windows-webview2-teardown-stress",
+            "shell-devtools-policy-isolation",
+            "shell-shortcut-routing"
+        };
+
+        foreach (var capabilityId in requiredCapabilityIds)
+        {
+            Assert.Contains(capabilityId, capabilityIds);
+        }
 
         foreach (var capability in capabilities)
         {

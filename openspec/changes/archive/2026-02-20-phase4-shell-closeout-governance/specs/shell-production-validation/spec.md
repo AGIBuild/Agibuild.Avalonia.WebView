@@ -1,14 +1,4 @@
-# shell-production-validation Specification
-
-## Purpose
-Define deterministic shell production-readiness validation requirements for long-run soak workloads, platform coverage tracking, and auditable release-critical evidence.
-## Requirements
-### Requirement: Shell production soak validation is deterministic and repeatable
-The system SHALL provide deterministic long-run shell soak validation that exercises repeated shell-scope attach/detach cycles with multi-window and policy/capability orchestration, including deterministic policy/capability cleanup between cycles.
-
-#### Scenario: Repeated shell-scope attach/detach cycles preserve cleanup invariants
-- **WHEN** runtime automation executes the shell production soak test workload
-- **THEN** each cycle completes without stale managed windows, leaked policy handlers, or residual shell state
+## MODIFIED Requirements
 
 ### Requirement: Shell production matrix is machine-readable and auditable
 The repository SHALL include a machine-readable shell production matrix artifact that declares shell capabilities, platform coverage, and executable evidence mappings, including release-critical shell domains (soak/lifecycle, host capability, DevTools policy governance, shortcut routing governance).
@@ -23,4 +13,3 @@ Shell production soak and governance-critical shell scenarios SHALL be listed in
 #### Scenario: Missing shell soak critical-path scenario fails governance
 - **WHEN** required shell soak/governance scenario IDs are missing from the runtime critical-path manifest
 - **THEN** governance validation fails with deterministic diagnostics
-
