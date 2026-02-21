@@ -228,7 +228,11 @@ public sealed class HostCapabilityBridgeIntegrationTests
         {
             Kind = WebViewSystemIntegrationEventKind.TrayInteracted,
             ItemId = "tray-main",
-            Context = "clicked"
+            Context = "clicked",
+            Metadata = new Dictionary<string, string>
+            {
+                ["source"] = "integration-test"
+            }
         });
 
         Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, menu.Outcome);
@@ -240,6 +244,7 @@ public sealed class HostCapabilityBridgeIntegrationTests
         Assert.Single(received);
         Assert.Equal(WebViewSystemIntegrationEventKind.TrayInteracted, received[0].Kind);
         Assert.Equal("tray-main", received[0].ItemId);
+        Assert.Equal("integration-test", received[0].Metadata["source"]);
 
         Assert.Contains(diagnostics, x => x.Operation == WebViewHostCapabilityOperation.MenuApplyModel
             && x.Outcome == WebViewHostCapabilityCallOutcome.Allow);
@@ -247,13 +252,115 @@ public sealed class HostCapabilityBridgeIntegrationTests
             && x.Outcome == WebViewHostCapabilityCallOutcome.Allow);
     }
 
+    [AvaloniaFact]
+    public void Host_system_integration_federated_roundtrip_enforces_showabout_whitelist_and_metadata_boundary()
+    {
+        var dispatcher = new TestDispatcher();
+        var adapter = MockWebViewAdapter.Create();
+        using var core = new WebViewCore(adapter, dispatcher);
+        var provider = new IntegrationHostCapabilityProvider();
+        var bridge = new WebViewHostCapabilityBridge(provider, new IntegrationCapabilityPolicy(allowSystemAction: true));
+        var diagnostics = new List<WebViewHostCapabilityDiagnosticEventArgs>();
+        var profileDiagnostics = new List<WebViewSessionPermissionProfileDiagnosticEventArgs>();
+        var received = new List<WebViewSystemIntegrationEventRequest>();
+        bridge.CapabilityCallCompleted += (_, e) => diagnostics.Add(e);
+
+        using var shell = new WebViewShellExperience(core, new WebViewShellExperienceOptions
+        {
+            HostCapabilityBridge = bridge,
+            SessionPermissionProfileResolver = new DelegateSessionPermissionProfileResolver((context, _) =>
+                new WebViewSessionPermissionProfile
+                {
+                    ProfileIdentity = "integration-shell-profile",
+                    PermissionDecisions = new Dictionary<WebViewPermissionKind, WebViewPermissionProfileDecision>
+                    {
+                        [WebViewPermissionKind.Other] = WebViewPermissionProfileDecision.Allow()
+                    }
+                }),
+            MenuPruningPolicy = new DelegateMenuPruningPolicy((_, context) =>
+            {
+                var effective = context.RequestedMenuModel.Items
+                    .GroupBy(item => item.Id, StringComparer.Ordinal)
+                    .Select(group => group.First())
+                    .ToArray();
+                return WebViewMenuPruningDecision.Allow(new WebViewMenuModelRequest { Items = effective });
+            })
+        });
+        shell.SystemIntegrationEventReceived += (_, evt) => received.Add(evt);
+        shell.SessionPermissionProfileEvaluated += (_, evt) => profileDiagnostics.Add(evt);
+
+        var menu = shell.ApplyMenuModel(new WebViewMenuModelRequest
+        {
+            Items =
+            [
+                new WebViewMenuItemModel { Id = "file", Label = "File" },
+                new WebViewMenuItemModel { Id = "file", Label = "File duplicate" },
+                new WebViewMenuItemModel { Id = "help", Label = "Help" }
+            ]
+        });
+        var showAbout = shell.ExecuteSystemAction(new WebViewSystemActionRequest
+        {
+            Action = WebViewSystemAction.ShowAbout
+        });
+        var invalidTrayEvent = shell.PublishSystemIntegrationEvent(new WebViewSystemIntegrationEventRequest
+        {
+            Kind = WebViewSystemIntegrationEventKind.TrayInteracted,
+            ItemId = "tray-invalid",
+            Metadata = new Dictionary<string, string>
+            {
+                [""] = "invalid-metadata"
+            }
+        });
+        var validTrayEvent = shell.PublishSystemIntegrationEvent(new WebViewSystemIntegrationEventRequest
+        {
+            Kind = WebViewSystemIntegrationEventKind.TrayInteracted,
+            ItemId = "tray-main",
+            Context = "clicked",
+            Metadata = new Dictionary<string, string>
+            {
+                ["source"] = "integration-test"
+            }
+        });
+
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, menu.Outcome);
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Deny, showAbout.Outcome);
+        Assert.Equal("system-action-not-whitelisted", showAbout.DenyReason);
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Deny, invalidTrayEvent.Outcome);
+        Assert.Equal("system-integration-event-metadata-envelope-invalid", invalidTrayEvent.DenyReason);
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, validTrayEvent.Outcome);
+        Assert.Equal(0, provider.SystemActionCalls);
+
+        var appliedMenu = Assert.Single(provider.AppliedMenus);
+        Assert.Equal(2, appliedMenu.Items.Count);
+        Assert.Single(received);
+        Assert.Equal("tray-main", received[0].ItemId);
+        Assert.Equal("integration-test", received[0].Metadata["source"]);
+
+        Assert.Contains(profileDiagnostics, x =>
+            x.PermissionKind == WebViewPermissionKind.Other &&
+            x.ProfileIdentity == "integration-shell-profile" &&
+            x.PermissionDecision.State == PermissionState.Allow);
+
+        Assert.Contains(diagnostics, x => x.Operation == WebViewHostCapabilityOperation.MenuApplyModel
+            && x.Outcome == WebViewHostCapabilityCallOutcome.Allow);
+        Assert.Contains(diagnostics, x => x.Operation == WebViewHostCapabilityOperation.TrayInteractionEventDispatch
+            && x.Outcome == WebViewHostCapabilityCallOutcome.Deny
+            && x.DenyReason == "system-integration-event-metadata-envelope-invalid");
+        Assert.Contains(diagnostics, x => x.Operation == WebViewHostCapabilityOperation.TrayInteractionEventDispatch
+            && x.Outcome == WebViewHostCapabilityCallOutcome.Allow);
+    }
+
     private sealed class IntegrationCapabilityPolicy : IWebViewHostCapabilityPolicy
     {
         private readonly Func<Uri?, WebViewHostCapabilityDecision>? _externalDecision;
+        private readonly bool _allowSystemAction;
 
-        public IntegrationCapabilityPolicy(Func<Uri?, WebViewHostCapabilityDecision>? externalDecision = null)
+        public IntegrationCapabilityPolicy(
+            Func<Uri?, WebViewHostCapabilityDecision>? externalDecision = null,
+            bool allowSystemAction = false)
         {
             _externalDecision = externalDecision;
+            _allowSystemAction = allowSystemAction;
         }
 
         public WebViewHostCapabilityDecision Evaluate(in WebViewHostCapabilityRequestContext context)
@@ -261,7 +368,7 @@ public sealed class HostCapabilityBridgeIntegrationTests
             return context.Operation switch
             {
                 WebViewHostCapabilityOperation.NotificationShow => WebViewHostCapabilityDecision.Deny("notification-disabled"),
-                WebViewHostCapabilityOperation.SystemActionExecute => WebViewHostCapabilityDecision.Deny("system-action-disabled"),
+                WebViewHostCapabilityOperation.SystemActionExecute when !_allowSystemAction => WebViewHostCapabilityDecision.Deny("system-action-disabled"),
                 WebViewHostCapabilityOperation.ExternalOpen when _externalDecision is not null => _externalDecision(context.RequestUri),
                 _ => WebViewHostCapabilityDecision.Allow()
             };
@@ -273,6 +380,7 @@ public sealed class HostCapabilityBridgeIntegrationTests
         public List<Uri> ExternalOpens { get; } = [];
         public List<WebViewMenuModelRequest> AppliedMenus { get; } = [];
         public bool LastTrayVisible { get; private set; }
+        public int SystemActionCalls { get; private set; }
 
         public string? ReadClipboardText() => "integration-clipboard";
 
@@ -308,6 +416,9 @@ public sealed class HostCapabilityBridgeIntegrationTests
             => LastTrayVisible = request.IsVisible;
 
         public void ExecuteSystemAction(WebViewSystemActionRequest request)
-            => throw new NotSupportedException("System action is policy-disabled in integration provider.");
+        {
+            SystemActionCalls++;
+            throw new NotSupportedException("System action is policy-disabled in integration provider.");
+        }
     }
 }

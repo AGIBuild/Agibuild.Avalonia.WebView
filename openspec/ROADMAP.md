@@ -8,7 +8,7 @@
 ## Phase Overview
 
 ```
-Phase 0 (✅ Done)        Phase 1 (✅ Done)       Phase 2 (✅ Core Done)  Phase 3 (✅ Done)      Phase 4 (✅ Done)      Phase 5 (🟡 Planned)
+Phase 0 (✅ Done)        Phase 1 (✅ Done)       Phase 2 (✅ Core Done)  Phase 3 (✅ Done)      Phase 4 (✅ Done)      Phase 5 (🟡 In Progress)
 Foundation               Type-Safe Bridge       SPA Hosting            Polish & GA            Application Shell       Electron Replacement Foundation
 ─────────────────────    ────────────────────   ────────────────────   ────────────────────   ────────────────────    ─────────────────────────────────
 • Cross-platform         • Source Generator     • Custom protocol      • Project template      • Shell policy kit      • Typed capability gateway
@@ -415,7 +415,7 @@ dotnet new agibuild-hybrid -n MyApp --frontend react
 
 ---
 
-## Phase 5: Electron Replacement Foundation (🟡 Planned)
+## Phase 5: Electron Replacement Foundation (🟡 In Progress)
 
 **Goal**: Make Electron migration-grade developer experience the primary outcome by addressing core pain points with a web-first, AI-agent-friendly architecture.
 
@@ -425,22 +425,29 @@ dotnet new agibuild-hybrid -n MyApp --frontend react
 
 | Milestone | Focus | Outcome |
 |---|---|---|
-| **M5.0 Objective Reset** | Lock acceptance criteria around Electron pain-point closure | Prevent roadmap drift toward host-count objectives |
-| **M5.1 Typed Capability Gateway** | Unify host capability entry points and result semantics | Single typed gateway for desktop capabilities with deterministic allow/deny/failure outcomes |
-| **M5.2 Policy-first Runtime** | Enforce policy before provider execution | Auditable security behavior with explicit deny reasons and zero bypass paths |
-| **M5.3 Agent-friendly Observability** | Structured runtime diagnostics for critical flows | CI/automation/AI agents can machine-validate lifecycle and capability paths |
-| **M5.4 Web-first Template Flow** | Template-level best-practice architecture path | Minimal host glue, typed bridge contracts, production-ready starter workflow |
-| **M5.5 Production Governance** | Release evidence tied to pain-point metrics | Contract/integration/automation proof that architecture improves developer outcomes |
+| **M5.0 Objective Reset** | Lock acceptance criteria around Electron pain-point closure | ✅ Done — roadmap objective pivot locked to Electron pain-point closure |
+| **M5.1 Typed Capability Gateway** | Unify host capability entry points and result semantics | ✅ Done — typed gateway with deterministic allow/deny/failure outcomes |
+| **M5.2 Policy-first Runtime** | Enforce policy before provider execution | ✅ Done — zero-bypass, explicit deny reason, provider zero-execution deny path |
+| **M5.3 Agent-friendly Observability** | Structured runtime diagnostics for critical flows | ✅ Done — structured diagnostics for outbound + inbound system-integration flows |
+| **M5.4 Web-first Template Flow** | Template-level best-practice architecture path | ✅ Done — app-shell template demonstrates command + event roundtrip |
+| **M5.5 Production Governance** | Release evidence tied to pain-point metrics | ✅ Done — CT/IT/automation/governance matrix and release evidence completed |
 
 ### Phase 5 Deliverables
 
 | # | Deliverable | Depends On | Est. Complexity |
 |---|---|---|---|
-| 5.1 | Typed capability gateway consolidation | Phase 4 capability bridge | High |
-| 5.2 | Policy-first deterministic execution contract | 5.1 + Phase 4 policy foundation | Medium |
-| 5.3 | Machine-checkable diagnostics contract for critical paths | 5.1-5.2 | Medium |
-| 5.4 | Template workflow for web-first desktop delivery | 5.1-5.3 + Phase 3 template base | Medium |
-| 5.5 | Governance suite + release-readiness matrix aligned to pain-point KPIs | 5.1-5.4 | Medium |
+| 5.1 | ✅ Typed capability gateway consolidation | Phase 4 capability bridge | High |
+| 5.2 | ✅ Policy-first deterministic execution contract | 5.1 + Phase 4 policy foundation | Medium |
+| 5.3 | ✅ Machine-checkable diagnostics contract for critical paths | 5.1-5.2 | Medium |
+| 5.4 | ✅ Template workflow for web-first desktop delivery | 5.1-5.3 + Phase 3 template base | Medium |
+| 5.5 | ✅ Governance suite + release-readiness matrix aligned to pain-point KPIs | 5.1-5.4 | Medium |
+
+### Latest Evidence Snapshot
+
+- Release: `v0.1.15-preview` (pre-release)
+- `nuke Test`: Unit `742`, Integration `146`, Total `888` (pass)
+- `nuke Coverage`: Line `96.0%`, Branch `84.8%`, Method `98.2%` (pass)
+- OpenSpec: `shell-system-integration-event-flow` archived and synced to main specs (`2026-02-21-shell-system-integration-event-flow`)
 
 ### Phase 5 Exit Criteria
 
@@ -454,7 +461,7 @@ dotnet new agibuild-hybrid -n MyApp --frontend react
 ## Dependencies & Prerequisites
 
 ```
-Phase 0 (✅ Done) ──► Phase 1 (✅ Done) ──► Phase 2 (✅ Core Done) ──► Phase 3 (✅ Done) ──► Phase 4 (✅ Done) ──► Phase 5 (🟡 Planned)
+Phase 0 (✅ Done) ──► Phase 1 (✅ Done) ──► Phase 2 (✅ Core Done) ──► Phase 3 (✅ Done) ──► Phase 4 (✅ Done) ──► Phase 5 (🟡 In Progress)
      │                      │                       │                         │                         │
      │                      │                       └── 2.4 depends on Phase 1│                         └── Electron-replacement baseline
      │                      └── Builds on F6 (RPC) + F3 (Policy)             └── Shell layer builds on stable GA baseline   builds on shell + bridge + governance

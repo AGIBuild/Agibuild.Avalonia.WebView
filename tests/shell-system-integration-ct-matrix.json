@@ -12,16 +12,36 @@
         {
           "file": "tests/Agibuild.Avalonia.WebView.UnitTests/HostCapabilityBridgeTests.cs",
           "testMethod": "Denied_inbound_system_integration_event_never_reaches_dispatch_subscribers"
+        },
+        {
+          "file": "tests/Agibuild.Avalonia.WebView.UnitTests/ShellSystemIntegrationCapabilityTests.cs",
+          "testMethod": "Invalid_inbound_tray_metadata_is_denied_before_web_delivery"
+        },
+        {
+          "file": "tests/Agibuild.Avalonia.WebView.UnitTests/HostCapabilityBridgeTests.cs",
+          "testMethod": "Invalid_inbound_system_integration_metadata_is_denied_before_policy_and_dispatch"
         }
       ]
     },
     {
       "id": "menu-pruning",
-      "coverage": ["allow", "deny"],
+      "coverage": ["allow", "deny", "failure"],
       "evidence": [
         {
           "file": "tests/Agibuild.Avalonia.WebView.UnitTests/ShellSystemIntegrationCapabilityTests.cs",
           "testMethod": "Menu_pruning_policy_is_deterministic_and_denied_pruning_does_not_mutate_effective_menu_state"
+        },
+        {
+          "file": "tests/Agibuild.Avalonia.WebView.UnitTests/ShellSystemIntegrationCapabilityTests.cs",
+          "testMethod": "Profile_denied_menu_pruning_short_circuits_policy_stage_and_preserves_state"
+        },
+        {
+          "file": "tests/Agibuild.Avalonia.WebView.UnitTests/ShellSystemIntegrationCapabilityTests.cs",
+          "testMethod": "Profile_allow_then_policy_deny_keeps_previous_effective_menu_state"
+        },
+        {
+          "file": "tests/Agibuild.Avalonia.WebView.UnitTests/ShellSystemIntegrationCapabilityTests.cs",
+          "testMethod": "Menu_pruning_profile_failure_is_isolated_from_permission_download_and_new_window_domains"
         },
         {
           "file": "tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/HostCapabilityBridgeIntegrationTests.cs",
@@ -36,6 +56,10 @@
         {
           "file": "tests/Agibuild.Avalonia.WebView.UnitTests/ShellSystemIntegrationCapabilityTests.cs",
           "testMethod": "Non_whitelisted_system_action_is_denied_before_provider_execution"
+        },
+        {
+          "file": "tests/Agibuild.Avalonia.WebView.UnitTests/ShellSystemIntegrationCapabilityTests.cs",
+          "testMethod": "ShowAbout_system_action_executes_only_when_explicitly_allowlisted"
         },
         {
           "file": "tests/Agibuild.Avalonia.WebView.UnitTests/ShellSystemIntegrationCapabilityTests.cs",

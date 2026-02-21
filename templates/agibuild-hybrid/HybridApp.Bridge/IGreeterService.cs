@@ -82,13 +82,17 @@ public enum DesktopSystemAction
 {
     Quit = 0,
     Restart = 1,
-    FocusMainWindow = 2
+    FocusMainWindow = 2,
+    ShowAbout = 3
 }
 
 public sealed class DesktopMenuApplyResult
 {
     public DesktopCapabilityOutcome Outcome { get; init; }
     public int AppliedTopLevelItems { get; init; }
+    public string? ProfileIdentity { get; init; }
+    public string? ProfilePermissionState { get; init; }
+    public string? PruningStage { get; init; }
     public string? DenyReason { get; init; }
     public string? Error { get; init; }
 }
@@ -120,6 +124,7 @@ public sealed class DesktopSystemIntegrationEvent
     public DesktopSystemIntegrationEventKind Kind { get; init; }
     public string? ItemId { get; init; }
     public string? Context { get; init; }
+    public IReadOnlyDictionary<string, string> Metadata { get; init; } = new Dictionary<string, string>(StringComparer.Ordinal);
 }
 
 public sealed class DesktopSystemIntegrationEventsResult

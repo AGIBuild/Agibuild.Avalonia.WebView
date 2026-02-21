@@ -26,6 +26,11 @@ public partial class MainWindow
         _shell = new WebViewShellExperience(WebView, new WebViewShellExperienceOptions
         {
             NewWindowPolicy = new NavigateInPlaceNewWindowPolicy(),
+            // Explicit allowlist marker: ShowAbout remains disabled unless explicitly added.
+            SystemActionWhitelist = new HashSet<WebViewSystemAction>
+            {
+                WebViewSystemAction.FocusMainWindow
+            },
             MenuPruningPolicy = new DelegateMenuPruningPolicy((_, context) =>
             {
                 // Template policy keeps top-level menu compact and deterministic.
@@ -40,6 +45,17 @@ public partial class MainWindow
                     Items = topLevel
                 });
             }),
+            // Federated pruning marker: profile stage participates before menu policy stage.
+            SessionPermissionProfileResolver = new DelegateSessionPermissionProfileResolver((context, _) =>
+                new WebViewSessionPermissionProfile
+                {
+                    ProfileIdentity = "template-shell-profile",
+                    DefaultPermissionDecision = WebViewPermissionProfileDecision.DefaultFallback(),
+                    PermissionDecisions = new Dictionary<WebViewPermissionKind, WebViewPermissionProfileDecision>
+                    {
+                        [WebViewPermissionKind.Other] = WebViewPermissionProfileDecision.Allow()
+                    }
+                }),
             PermissionPolicy = new DelegatePermissionPolicy((_, e) =>
             {
                 if (e.PermissionKind == WebViewPermissionKind.Notifications)
@@ -126,11 +142,14 @@ public partial class MainWindow
         private readonly WebViewShellExperience _shell;
         private readonly Queue<DesktopSystemIntegrationEvent> _inboundEvents = new();
         private readonly object _eventsLock = new();
+        private readonly object _menuPruningProfileLock = new();
+        private MenuPruningProfileSnapshot _menuPruningProfileSnapshot = new(null, null);
 
         public DesktopHostService(WebViewShellExperience shell)
         {
             _shell = shell;
             _shell.SystemIntegrationEventReceived += OnSystemIntegrationEventReceived;
+            _shell.SessionPermissionProfileEvaluated += OnSessionPermissionProfileEvaluated;
         }
 
         public Task<DesktopClipboardProbeResult> ReadClipboardText()
@@ -163,20 +182,32 @@ public partial class MainWindow
             {
                 Items = model.Items.Select(MapMenuItem).ToArray()
             };
+            var profileSnapshot = GetMenuPruningProfileSnapshot();
             var result = _shell.ApplyMenuModel(request);
+            var pruningStage = ResolveMenuPruningStage(result);
             if (result.Outcome == WebViewHostCapabilityCallOutcome.Allow)
             {
                 _ = _shell.PublishSystemIntegrationEvent(new WebViewSystemIntegrationEventRequest
                 {
                     Kind = WebViewSystemIntegrationEventKind.MenuItemInvoked,
                     ItemId = request.Items.FirstOrDefault()?.Id,
-                    Context = "template-menu-applied"
+                    Context = "template-menu-applied",
+                    Metadata = new Dictionary<string, string>(StringComparer.Ordinal)
+                    {
+                        ["source"] = "template-menu",
+                        ["profileIdentity"] = profileSnapshot.ProfileIdentity ?? "unknown",
+                        ["profilePermissionState"] = profileSnapshot.PermissionState ?? "unknown",
+                        ["pruningStage"] = pruningStage
+                    }
                 });
             }
             return Task.FromResult(new DesktopMenuApplyResult
             {
                 Outcome = MapOutcome(result.Outcome),
                 AppliedTopLevelItems = request.Items.Count,
+                ProfileIdentity = profileSnapshot.ProfileIdentity,
+                ProfilePermissionState = profileSnapshot.PermissionState,
+                PruningStage = pruningStage,
                 DenyReason = result.DenyReason,
                 Error = result.Error?.Message
             });
@@ -197,7 +228,13 @@ public partial class MainWindow
                 {
                     Kind = WebViewSystemIntegrationEventKind.TrayInteracted,
                     ItemId = state.IsVisible ? "tray-visible" : "tray-hidden",
-                    Context = state.Tooltip
+                    Context = state.Tooltip,
+                    Metadata = new Dictionary<string, string>(StringComparer.Ordinal)
+                    {
+                        ["source"] = "template-tray",
+                        ["visibility"] = state.IsVisible ? "visible" : "hidden",
+                        ["tooltipPresent"] = string.IsNullOrWhiteSpace(state.Tooltip) ? "false" : "true"
+                    }
                 });
             }
             return Task.FromResult(new DesktopTrayUpdateResult
@@ -258,6 +295,7 @@ public partial class MainWindow
                 DesktopSystemAction.Quit => WebViewSystemAction.Quit,
                 DesktopSystemAction.Restart => WebViewSystemAction.Restart,
                 DesktopSystemAction.FocusMainWindow => WebViewSystemAction.FocusMainWindow,
+                DesktopSystemAction.ShowAbout => WebViewSystemAction.ShowAbout,
                 _ => throw new ArgumentOutOfRangeException(nameof(action), action, "Unsupported desktop system action.")
             };
 
@@ -270,6 +308,38 @@ public partial class MainWindow
                 _ => DesktopCapabilityOutcome.Failure
             };
 
+        private MenuPruningProfileSnapshot GetMenuPruningProfileSnapshot()
+        {
+            lock (_menuPruningProfileLock)
+            {
+                return _menuPruningProfileSnapshot;
+            }
+        }
+
+        private static string ResolveMenuPruningStage(WebViewHostCapabilityCallResult<object?> result)
+            => result.Outcome switch
+            {
+                WebViewHostCapabilityCallOutcome.Allow => "profile-policy-applied",
+                WebViewHostCapabilityCallOutcome.Deny when result.DenyReason?.StartsWith("menu-pruning-profile-denied", StringComparison.Ordinal) == true
+                    => "profile-denied",
+                WebViewHostCapabilityCallOutcome.Deny => "policy-denied",
+                WebViewHostCapabilityCallOutcome.Failure => "profile-or-policy-failure",
+                _ => "unknown"
+            };
+
+        private void OnSessionPermissionProfileEvaluated(object? sender, WebViewSessionPermissionProfileDiagnosticEventArgs diagnostic)
+        {
+            if (diagnostic.PermissionKind != WebViewPermissionKind.Other)
+                return;
+
+            lock (_menuPruningProfileLock)
+            {
+                _menuPruningProfileSnapshot = new MenuPruningProfileSnapshot(
+                    diagnostic.ProfileIdentity,
+                    diagnostic.PermissionDecision.State.ToString());
+            }
+        }
+
         private void OnSystemIntegrationEventReceived(object? sender, WebViewSystemIntegrationEventRequest request)
         {
             var mapped = new DesktopSystemIntegrationEvent
@@ -281,7 +351,8 @@ public partial class MainWindow
                     _ => throw new ArgumentOutOfRangeException(nameof(request), request.Kind, "Unsupported system integration event kind.")
                 },
                 ItemId = request.ItemId,
-                Context = request.Context
+                Context = request.Context,
+                Metadata = new Dictionary<string, string>(request.Metadata, StringComparer.Ordinal)
             };
 
             lock (_eventsLock)
@@ -289,7 +360,14 @@ public partial class MainWindow
         }
 
         public void Dispose()
-            => _shell.SystemIntegrationEventReceived -= OnSystemIntegrationEventReceived;
+        {
+            _shell.SystemIntegrationEventReceived -= OnSystemIntegrationEventReceived;
+            _shell.SessionPermissionProfileEvaluated -= OnSessionPermissionProfileEvaluated;
+        }
+
+        private readonly record struct MenuPruningProfileSnapshot(
+            string? ProfileIdentity,
+            string? PermissionState);
     }
 
     private sealed class TemplateHostCapabilityPolicy : IWebViewHostCapabilityPolicy

@@ -279,12 +279,17 @@ public sealed class HostCapabilityBridgeTests
         {
             Kind = WebViewSystemIntegrationEventKind.TrayInteracted,
             ItemId = "tray-main",
-            Context = "clicked"
+            Context = "clicked",
+            Metadata = new Dictionary<string, string>
+            {
+                ["source"] = "unit-test"
+            }
         }, root);
 
         Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, eventResult.Outcome);
         Assert.Single(dispatched);
         Assert.Equal("tray-main", dispatched[0].ItemId);
+        Assert.Equal("unit-test", dispatched[0].Metadata["source"]);
 
         var diagnostic = Assert.Single(diagnostics);
         Assert.Equal(WebViewHostCapabilityOperation.TrayInteractionEventDispatch, diagnostic.Operation);
@@ -309,6 +314,37 @@ public sealed class HostCapabilityBridgeTests
         Assert.Equal(WebViewHostCapabilityCallOutcome.Deny, eventResult.Outcome);
         Assert.Equal("inbound-event-denied", eventResult.DenyReason);
         Assert.Equal(0, dispatched);
+    }
+
+    [Fact]
+    public void Invalid_inbound_system_integration_metadata_is_denied_before_policy_and_dispatch()
+    {
+        var provider = new TestHostCapabilityProvider();
+        var bridge = new WebViewHostCapabilityBridge(provider, new AllowAllPolicy());
+        var dispatched = 0;
+        var diagnostics = new List<WebViewHostCapabilityDiagnosticEventArgs>();
+        bridge.SystemIntegrationEventDispatched += (_, _) => dispatched++;
+        bridge.CapabilityCallCompleted += (_, e) => diagnostics.Add(e);
+
+        var eventResult = bridge.DispatchSystemIntegrationEvent(new WebViewSystemIntegrationEventRequest
+        {
+            Kind = WebViewSystemIntegrationEventKind.TrayInteracted,
+            ItemId = "tray-main",
+            Metadata = new Dictionary<string, string>
+            {
+                [""] = "invalid-key"
+            }
+        }, Guid.NewGuid());
+
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Deny, eventResult.Outcome);
+        Assert.Equal("system-integration-event-metadata-envelope-invalid", eventResult.DenyReason);
+        Assert.Equal(0, dispatched);
+
+        var diagnostic = Assert.Single(diagnostics);
+        Assert.Equal(WebViewHostCapabilityOperation.TrayInteractionEventDispatch, diagnostic.Operation);
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Deny, diagnostic.Outcome);
+        Assert.False(diagnostic.WasAuthorized);
+        Assert.Equal("system-integration-event-metadata-envelope-invalid", diagnostic.DenyReason);
     }
 
     private sealed class AllowAllPolicy : IWebViewHostCapabilityPolicy

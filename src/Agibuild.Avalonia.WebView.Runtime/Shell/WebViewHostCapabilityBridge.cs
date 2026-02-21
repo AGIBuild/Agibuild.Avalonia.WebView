@@ -177,7 +177,9 @@ public enum WebViewSystemAction
     /// <summary>Restart application.</summary>
     Restart = 1,
     /// <summary>Focus main window.</summary>
-    FocusMainWindow = 2
+    FocusMainWindow = 2,
+    /// <summary>Show application about dialog.</summary>
+    ShowAbout = 3
 }
 
 /// <summary>
@@ -202,6 +204,10 @@ public sealed class WebViewSystemIntegrationEventRequest
     public string? ItemId { get; init; }
     /// <summary>Optional context payload for diagnostics and UI reaction.</summary>
     public string? Context { get; init; }
+    /// <summary>
+    /// Optional bounded metadata envelope. Keys and values must satisfy runtime schema limits.
+    /// </summary>
+    public IReadOnlyDictionary<string, string> Metadata { get; init; } = new Dictionary<string, string>(StringComparer.Ordinal);
 }
 
 /// <summary>
@@ -354,6 +360,11 @@ public sealed class WebViewHostCapabilityDiagnosticEventArgs : EventArgs
 /// </summary>
 public sealed class WebViewHostCapabilityBridge
 {
+    private const int MaxSystemIntegrationMetadataEntries = 8;
+    private const int MaxSystemIntegrationMetadataKeyLength = 64;
+    private const int MaxSystemIntegrationMetadataValueLength = 256;
+    private const string SystemIntegrationMetadataEnvelopeInvalid = "system-integration-event-metadata-envelope-invalid";
+
     private readonly IWebViewHostCapabilityProvider _provider;
     private readonly IWebViewHostCapabilityPolicy? _policy;
 
@@ -564,12 +575,16 @@ public sealed class WebViewHostCapabilityBridge
             _ => throw new ArgumentOutOfRangeException(nameof(request), request.Kind, "Unsupported system integration event kind.")
         };
 
+        var context = new WebViewHostCapabilityRequestContext(
+            rootWindowId,
+            parentWindowId,
+            targetWindowId,
+            operation);
+        if (!IsMetadataEnvelopeValid(request.Metadata))
+            return DenyWithDiagnostic<WebViewSystemIntegrationEventRequest>(context, SystemIntegrationMetadataEnvelopeInvalid);
+
         return Execute(
-            new WebViewHostCapabilityRequestContext(
-                rootWindowId,
-                parentWindowId,
-                targetWindowId,
-                operation),
+            context,
             () =>
             {
                 SystemIntegrationEventDispatched?.Invoke(this, request);
@@ -640,6 +655,36 @@ public sealed class WebViewHostCapabilityBridge
             failure = ex;
             return false;
         }
+    }
+
+    private static bool IsMetadataEnvelopeValid(IReadOnlyDictionary<string, string> metadata)
+    {
+        if (metadata.Count > MaxSystemIntegrationMetadataEntries)
+            return false;
+
+        foreach (var pair in metadata)
+        {
+            if (string.IsNullOrWhiteSpace(pair.Key) || pair.Key.Length > MaxSystemIntegrationMetadataKeyLength)
+                return false;
+
+            if (pair.Value is null || pair.Value.Length > MaxSystemIntegrationMetadataValueLength)
+                return false;
+        }
+
+        return true;
+    }
+
+    private WebViewHostCapabilityCallResult<T> DenyWithDiagnostic<T>(
+        in WebViewHostCapabilityRequestContext context,
+        string denyReason)
+    {
+        var result = WebViewHostCapabilityCallResult<T>.Denied(denyReason);
+        EmitCapabilityDiagnostic(
+            Guid.NewGuid(),
+            context,
+            result,
+            durationMilliseconds: 0);
+        return result;
     }
 
     private void EmitCapabilityDiagnostic<T>(

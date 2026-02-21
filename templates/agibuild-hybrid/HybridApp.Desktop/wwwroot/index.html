@@ -150,8 +150,15 @@
             try {
                 const result = await window.agWebView.rpc.invoke('DesktopHostService.ApplyMenuModel', { model });
                 if (result.outcome === 0) {
-                    el.textContent = 'Menu model applied: ' + result.appliedTopLevelItems + ' top-level items';
-                    await drainSystemIntegrationEvents('Menu update event');
+                    const profile = result.profileIdentity ?? 'unknown-profile';
+                    const state = result.profilePermissionState ?? 'unknown-state';
+                    const stage = result.pruningStage ?? 'unknown-stage';
+                    el.textContent =
+                        'Menu model applied: ' + result.appliedTopLevelItems + ' top-level items' +
+                        ' | profile=' + profile +
+                        ' | permissionState=' + state +
+                        ' | pruningStage=' + stage;
+                    await drainSystemIntegrationEvents('Menu federated event');
                 } else if (result.outcome === 1) {
                     el.textContent = 'Menu apply denied: ' + (result.denyReason ?? 'unknown');
                 } else {
@@ -235,12 +242,35 @@
                     const kind = evt.kind === 0 ? 'tray' : 'menu';
                     const item = evt.itemId ?? 'n/a';
                     const context = evt.context ?? 'n/a';
-                    return `${kind}:${item}:${context}`;
+                    const metadata = readBoundedMetadata(evt.metadata);
+                    const source = metadata.source ?? 'n/a';
+                    const stage = metadata.pruningStage ?? 'n/a';
+                    return `${kind}:${item}:${context}:source=${source}:stage=${stage}`;
                 });
                 el.textContent = prefix + ': ' + lines.join(' | ');
             } catch (err) {
                 el.textContent = 'Error: ' + err.message;
             }
+        }
+
+        function readBoundedMetadata(metadata) {
+            if (!metadata || typeof metadata !== 'object') {
+                return {};
+            }
+
+            // Bounded metadata envelope: only consume explicit keys with capped value size.
+            const allowedKeys = ['source', 'visibility', 'tooltipPresent', 'profileIdentity', 'profilePermissionState', 'pruningStage'];
+            const bounded = {};
+            for (const key of allowedKeys) {
+                const raw = metadata[key];
+                if (typeof raw !== 'string') {
+                    continue;
+                }
+
+                bounded[key] = raw.length > 48 ? raw.slice(0, 48) : raw;
+            }
+
+            return bounded;
         }
     </script>
 </body>

@@ -313,6 +313,11 @@ public sealed class AutomationLaneGovernanceTests
         Assert.Contains("ApplyMenuModel(", appShellPreset, StringComparison.Ordinal);
         Assert.Contains("UpdateTrayState(", appShellPreset, StringComparison.Ordinal);
         Assert.Contains("ExecuteSystemAction(", appShellPreset, StringComparison.Ordinal);
+        Assert.Contains("SystemActionWhitelist = new HashSet<WebViewSystemAction>", appShellPreset, StringComparison.Ordinal);
+        Assert.Contains("ShowAbout remains disabled unless explicitly added", appShellPreset, StringComparison.Ordinal);
+        Assert.Contains("SessionPermissionProfileResolver = new DelegateSessionPermissionProfileResolver", appShellPreset, StringComparison.Ordinal);
+        Assert.Contains("WebViewPermissionKind.Other", appShellPreset, StringComparison.Ordinal);
+        Assert.Contains("ResolveMenuPruningStage", appShellPreset, StringComparison.Ordinal);
         Assert.Contains("DrainSystemIntegrationEvents(", appShellPreset, StringComparison.Ordinal);
         Assert.Contains("PublishSystemIntegrationEvent(", appShellPreset, StringComparison.Ordinal);
         Assert.DoesNotContain("ExternalOpenHandler", appShellPreset, StringComparison.Ordinal);
@@ -328,6 +333,9 @@ public sealed class AutomationLaneGovernanceTests
         Assert.Contains("DesktopHostService.ExecuteSystemAction", desktopIndex, StringComparison.Ordinal);
         Assert.Contains("DesktopHostService.DrainSystemIntegrationEvents", desktopIndex, StringComparison.Ordinal);
         Assert.Contains("result.appliedTopLevelItems", desktopIndex, StringComparison.Ordinal);
+        Assert.Contains("result.pruningStage", desktopIndex, StringComparison.Ordinal);
+        Assert.Contains("readBoundedMetadata(", desktopIndex, StringComparison.Ordinal);
+        Assert.Contains("source=", desktopIndex, StringComparison.Ordinal);
         Assert.Contains("result.isVisible", desktopIndex, StringComparison.Ordinal);
         Assert.Contains("Host events", desktopIndex, StringComparison.Ordinal);
         Assert.Contains("System action denied", desktopIndex, StringComparison.Ordinal);
@@ -467,6 +475,7 @@ public sealed class AutomationLaneGovernanceTests
         Assert.Contains("SystemActionExecute = 8", bridgeSource, StringComparison.Ordinal);
         Assert.Contains("TrayInteractionEventDispatch = 9", bridgeSource, StringComparison.Ordinal);
         Assert.Contains("MenuInteractionEventDispatch = 10", bridgeSource, StringComparison.Ordinal);
+        Assert.Contains("ShowAbout = 3", bridgeSource, StringComparison.Ordinal);
 
         // Diagnostic payload must remain machine-checkable.
         Assert.Contains("public sealed class WebViewHostCapabilityDiagnosticEventArgs", bridgeSource, StringComparison.Ordinal);
