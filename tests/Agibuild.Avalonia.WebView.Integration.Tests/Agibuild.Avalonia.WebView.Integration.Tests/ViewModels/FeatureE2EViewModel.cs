@@ -832,15 +832,22 @@ public partial class FeatureE2EViewModel : ViewModelBase
     private async Task LoadTestHtmlAndWaitAsync()
     {
         LogLine("Loading test HTML...");
+
         var readyTcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
         void Handler(object? s, NavigationCompletedEventArgs e) => readyTcs.TrySetResult(true);
 
         WebViewControl!.NavigationCompleted += Handler;
         try
         {
-            await Dispatcher.UIThread.InvokeAsync(
-                () => WebViewControl.NavigateToStringAsync(TestHtml)
-            ).ConfigureAwait(false);
+            try
+            {
+                await WebViewControl.NavigateToStringAsync(TestHtml).ConfigureAwait(false);
+            }
+            catch (WebViewNetworkException ex) when (
+                ex.Message.Contains("ConnectionAborted", StringComparison.OrdinalIgnoreCase))
+            {
+                LogLine("Load HTML: transient ConnectionAborted observed, waiting for final completion...");
+            }
             await WaitAsync(readyTcs.Task, TimeSpan.FromSeconds(15)).ConfigureAwait(false);
             LogLine("Test HTML loaded.");
         }

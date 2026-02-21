@@ -7,10 +7,15 @@ namespace Agibuild.Avalonia.WebView;
 /// </summary>
 public sealed class WebViewEnvironmentOptions : IWebViewEnvironmentOptions
 {
+    /// <inheritdoc />
     public bool EnableDevTools { get; set; }
+    /// <inheritdoc />
     public string? CustomUserAgent { get; set; }
+    /// <inheritdoc />
     public bool UseEphemeralSession { get; set; }
+    /// <inheritdoc />
     public IReadOnlyList<CustomSchemeRegistration> CustomSchemes { get; set; } = [];
+    /// <inheritdoc />
     public IReadOnlyList<string> PreloadScripts { get; set; } = [];
 }
 

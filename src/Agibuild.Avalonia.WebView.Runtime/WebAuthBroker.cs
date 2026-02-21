@@ -17,11 +17,13 @@ public sealed class WebAuthBroker : IWebAuthBroker
 {
     private readonly IWebDialogFactory _dialogFactory;
 
+    /// <inheritdoc />
     public WebAuthBroker(IWebDialogFactory dialogFactory)
     {
         _dialogFactory = dialogFactory ?? throw new ArgumentNullException(nameof(dialogFactory));
     }
 
+    /// <inheritdoc />
     public async Task<WebAuthResult> AuthenticateAsync(ITopLevelWindow owner, AuthOptions options)
     {
         ArgumentNullException.ThrowIfNull(owner);

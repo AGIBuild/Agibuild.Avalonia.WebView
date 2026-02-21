@@ -30,6 +30,7 @@ public sealed class AvaloniaWebDialog : IWebDialog
     // Internal test seam for validating option propagation without private reflection.
     internal WebView TestOnlyInnerWebView => _webView;
 
+    /// <inheritdoc />
     public AvaloniaWebDialog(IWebViewEnvironmentOptions? options = null)
     {
         _webView = new WebView
@@ -99,24 +100,28 @@ public sealed class AvaloniaWebDialog : IWebDialog
     // All window-management methods are thread-safe: if called from a non-UI thread
     // the operation is marshalled to the Avalonia UI thread automatically.
 
+    /// <inheritdoc />
     public string? Title
     {
         get => _window.Title;
         set => RunOnUIThread(() => _window.Title = value);
     }
 
+    /// <inheritdoc />
     public bool CanUserResize
     {
         get => _window.CanResize;
         set => RunOnUIThread(() => _window.CanResize = value);
     }
 
+    /// <inheritdoc />
     public void Show()
     {
         _shown = true;
         RunOnUIThread(() => _window.Show());
     }
 
+    /// <inheritdoc />
     public bool Show(IPlatformHandle owner)
     {
         _shown = true;
@@ -124,12 +129,14 @@ public sealed class AvaloniaWebDialog : IWebDialog
         return true;
     }
 
+    /// <inheritdoc />
     public void Close()
     {
         if (_disposed) return;
         RunOnUIThread(() => _window.Close());
     }
 
+    /// <inheritdoc />
     public bool Resize(int width, int height)
     {
         RunOnUIThread(() =>
@@ -140,27 +147,35 @@ public sealed class AvaloniaWebDialog : IWebDialog
         return true;
     }
 
+    /// <inheritdoc />
     public bool Move(int x, int y)
     {
         RunOnUIThread(() => _window.Position = new PixelPoint(x, y));
         return true;
     }
 
+    /// <inheritdoc />
     public event EventHandler? Closing;
 
     // ==== IWebView — Delegated to embedded WebView control ====
 
+    /// <inheritdoc />
     public Uri Source
     {
         get => _webView.Source ?? new Uri("about:blank");
         set => _webView.Source = value;
     }
 
+    /// <inheritdoc />
     public bool CanGoBack => _webView.CanGoBack;
+    /// <inheritdoc />
     public bool CanGoForward => _webView.CanGoForward;
+    /// <inheritdoc />
     public bool IsLoading => _webView.IsLoading;
+    /// <inheritdoc />
     public Guid ChannelId => _webView.ChannelId;
 
+    /// <inheritdoc />
     public async Task NavigateAsync(Uri uri)
     {
         // Do NOT use ConfigureAwait(false) here: _webView is an Avalonia UI control
@@ -171,6 +186,7 @@ public sealed class AvaloniaWebDialog : IWebDialog
         await _webView.NavigateAsync(uri);
     }
 
+    /// <inheritdoc />
     public async Task NavigateToStringAsync(string html)
     {
         await EnsureReadyAsync();
@@ -178,6 +194,7 @@ public sealed class AvaloniaWebDialog : IWebDialog
         await _webView.NavigateToStringAsync(html);
     }
 
+    /// <inheritdoc />
     public async Task NavigateToStringAsync(string html, Uri? baseUrl)
     {
         await EnsureReadyAsync();
@@ -185,6 +202,7 @@ public sealed class AvaloniaWebDialog : IWebDialog
         await _webView.NavigateToStringAsync(html, baseUrl);
     }
 
+    /// <inheritdoc />
     public async Task<string?> InvokeScriptAsync(string script)
     {
         await EnsureReadyAsync();
@@ -192,23 +210,39 @@ public sealed class AvaloniaWebDialog : IWebDialog
         return await _webView.InvokeScriptAsync(script);
     }
 
+    /// <inheritdoc />
     public Task<bool> GoBackAsync() => _webView.GoBackAsync();
+    /// <inheritdoc />
     public Task<bool> GoForwardAsync() => _webView.GoForwardAsync();
+    /// <inheritdoc />
     public Task<bool> RefreshAsync() => _webView.RefreshAsync();
+    /// <inheritdoc />
     public Task<bool> StopAsync() => _webView.StopAsync();
 
+    /// <inheritdoc />
     public ICookieManager? TryGetCookieManager() => _webView.TryGetCookieManager();
+    /// <inheritdoc />
     public ICommandManager? TryGetCommandManager() => _webView.TryGetCommandManager();
+    /// <inheritdoc />
     public Task<IPlatformHandle?> TryGetWebViewHandleAsync() => _webView.TryGetWebViewHandleAsync();
+    /// <inheritdoc />
     public IWebViewRpcService? Rpc => _webView.Rpc;
+    /// <inheritdoc />
     public IBridgeService Bridge => _webView.Bridge;
+    /// <inheritdoc />
     public Task OpenDevToolsAsync() => _webView.OpenDevToolsAsync();
+    /// <inheritdoc />
     public Task CloseDevToolsAsync() => _webView.CloseDevToolsAsync();
+    /// <inheritdoc />
     public Task<bool> IsDevToolsOpenAsync() => _webView.IsDevToolsOpenAsync();
+    /// <inheritdoc />
     public Task<byte[]> CaptureScreenshotAsync() => _webView.CaptureScreenshotAsync();
+    /// <inheritdoc />
     public Task<byte[]> PrintToPdfAsync(PdfPrintOptions? options = null) => _webView.PrintToPdfAsync(options);
 
+    /// <inheritdoc />
     public Task<double> GetZoomFactorAsync() => _webView.GetZoomFactorAsync();
+    /// <inheritdoc />
     public Task SetZoomFactorAsync(double zoomFactor) => _webView.SetZoomFactorAsync(zoomFactor);
 
     /// <inheritdoc cref="WebViewCore.FindInPageAsync"/>
@@ -228,60 +262,70 @@ public sealed class AvaloniaWebDialog : IWebDialog
         remove => _webView.ContextMenuRequested -= value;
     }
 
+    /// <inheritdoc />
     public event EventHandler<NavigationStartingEventArgs>? NavigationStarted
     {
         add => _webView.NavigationStarted += value;
         remove => _webView.NavigationStarted -= value;
     }
 
+    /// <inheritdoc />
     public event EventHandler<NavigationCompletedEventArgs>? NavigationCompleted
     {
         add => _webView.NavigationCompleted += value;
         remove => _webView.NavigationCompleted -= value;
     }
 
+    /// <inheritdoc />
     public event EventHandler<NewWindowRequestedEventArgs>? NewWindowRequested
     {
         add => _webView.NewWindowRequested += value;
         remove => _webView.NewWindowRequested -= value;
     }
 
+    /// <inheritdoc />
     public event EventHandler<WebMessageReceivedEventArgs>? WebMessageReceived
     {
         add => _webView.WebMessageReceived += value;
         remove => _webView.WebMessageReceived -= value;
     }
 
+    /// <inheritdoc />
     public event EventHandler<WebResourceRequestedEventArgs>? WebResourceRequested
     {
         add => _webView.WebResourceRequested += value;
         remove => _webView.WebResourceRequested -= value;
     }
 
+    /// <inheritdoc />
     public event EventHandler<EnvironmentRequestedEventArgs>? EnvironmentRequested
     {
         add => _webView.EnvironmentRequested += value;
         remove => _webView.EnvironmentRequested -= value;
     }
 
+    /// <inheritdoc />
     public event EventHandler<DownloadRequestedEventArgs>? DownloadRequested
     {
         add => _webView.DownloadRequested += value;
         remove => _webView.DownloadRequested -= value;
     }
 
+    /// <inheritdoc />
     public event EventHandler<PermissionRequestedEventArgs>? PermissionRequested
     {
         add => _webView.PermissionRequested += value;
         remove => _webView.PermissionRequested -= value;
     }
 
+    /// <inheritdoc />
     public event EventHandler<AdapterCreatedEventArgs>? AdapterCreated
     {
         add => _webView.AdapterCreated += value;
         remove => _webView.AdapterCreated -= value;
     }
 
+    /// <inheritdoc />
     public event EventHandler? AdapterDestroyed
     {
         add => _webView.AdapterDestroyed += value;
@@ -290,6 +334,7 @@ public sealed class AvaloniaWebDialog : IWebDialog
 
     // ==== IDisposable ====
 
+    /// <inheritdoc />
     public void Dispose()
     {
         if (_disposed) return;

@@ -1,5 +1,8 @@
 namespace Agibuild.Avalonia.WebView;
 
+/// <summary>
+/// Configuration options for enabling the web message bridge.
+/// </summary>
 public sealed class WebMessageBridgeOptions
 {
     /// <summary>
@@ -7,8 +10,15 @@ public sealed class WebMessageBridgeOptions
     /// </summary>
     public IReadOnlySet<string> AllowedOrigins { get; init; } = new HashSet<string>(StringComparer.Ordinal);
 
+    /// <summary>
+    /// Expected protocol version for incoming bridge envelopes.
+    /// Messages with different versions are dropped.
+    /// </summary>
     public int ProtocolVersion { get; init; } = 1;
 
+    /// <summary>
+    /// Optional sink for diagnostics when inbound messages are dropped by policy.
+    /// </summary>
     public IWebMessageDropDiagnosticsSink? DropDiagnosticsSink { get; init; }
 }
 

@@ -11,13 +11,21 @@ namespace Agibuild.Avalonia.WebView.Shell;
 /// </summary>
 public enum WebViewShellPolicyDomain
 {
+    /// <summary>Policy domain for new-window handling.</summary>
     NewWindow = 0,
+    /// <summary>Policy domain for download handling.</summary>
     Download = 1,
+    /// <summary>Policy domain for permission handling.</summary>
     Permission = 2,
+    /// <summary>Policy domain for session resolution.</summary>
     Session = 3,
+    /// <summary>Policy domain for managed window lifecycle.</summary>
     ManagedWindowLifecycle = 4,
+    /// <summary>Policy domain for external URL open actions.</summary>
     ExternalOpen = 5,
+    /// <summary>Policy domain for DevTools actions.</summary>
     DevTools = 6,
+    /// <summary>Policy domain for shell command actions.</summary>
     Command = 7
 }
 
@@ -26,9 +34,13 @@ public enum WebViewShellPolicyDomain
 /// </summary>
 public enum WebViewNewWindowStrategy
 {
+    /// <summary>Navigate inside current WebView.</summary>
     InPlace = 0,
+    /// <summary>Create and route to a managed child window.</summary>
     ManagedWindow = 1,
+    /// <summary>Open in external browser.</summary>
     ExternalBrowser = 2,
+    /// <summary>Delegate decision to host callback.</summary>
     Delegate = 3
 }
 
@@ -37,10 +49,15 @@ public enum WebViewNewWindowStrategy
 /// </summary>
 public enum WebViewManagedWindowLifecycleState
 {
+    /// <summary>Window entry created but not attached.</summary>
     Created = 0,
+    /// <summary>Window attached and active.</summary>
     Attached = 1,
+    /// <summary>Window ready for interaction.</summary>
     Ready = 2,
+    /// <summary>Window closing in progress.</summary>
     Closing = 3,
+    /// <summary>Window fully closed.</summary>
     Closed = 4
 }
 
@@ -49,8 +66,11 @@ public enum WebViewManagedWindowLifecycleState
 /// </summary>
 public enum WebViewShellDevToolsAction
 {
+    /// <summary>Open DevTools.</summary>
     Open = 0,
+    /// <summary>Close DevTools.</summary>
     Close = 1,
+    /// <summary>Query DevTools state.</summary>
     Query = 2
 }
 
@@ -141,7 +161,9 @@ public sealed record WebViewNewWindowStrategyDecision(
 /// </summary>
 public enum WebViewShellSessionScope
 {
+    /// <summary>Share session state across windows in same scope.</summary>
     Shared = 0,
+    /// <summary>Use isolated session state.</summary>
     Isolated = 1
 }
 
@@ -356,6 +378,7 @@ public interface IWebViewShellCommandPolicy
 /// </summary>
 public sealed class NavigateInPlaceNewWindowPolicy : IWebViewNewWindowPolicy
 {
+    /// <inheritdoc />
     public WebViewNewWindowStrategyDecision Decide(IWebView webView, NewWindowRequestedEventArgs e, WebViewNewWindowPolicyContext context)
         => WebViewNewWindowStrategyDecision.InPlace();
 }
@@ -385,6 +408,7 @@ public sealed class DelegateNewWindowPolicy : IWebViewNewWindowPolicy
         };
     }
 
+    /// <inheritdoc />
     public WebViewNewWindowStrategyDecision Decide(IWebView webView, NewWindowRequestedEventArgs e, WebViewNewWindowPolicyContext context)
         => _decider(webView, e, context);
 }
@@ -402,6 +426,7 @@ public sealed class DelegateDownloadPolicy : IWebViewDownloadPolicy
         _handler = handler ?? throw new ArgumentNullException(nameof(handler));
     }
 
+    /// <inheritdoc />
     public void Handle(IWebView webView, DownloadRequestedEventArgs e)
         => _handler(webView, e);
 }
@@ -419,6 +444,7 @@ public sealed class DelegatePermissionPolicy : IWebViewPermissionPolicy
         _handler = handler ?? throw new ArgumentNullException(nameof(handler));
     }
 
+    /// <inheritdoc />
     public void Handle(IWebView webView, PermissionRequestedEventArgs e)
         => _handler(webView, e);
 }
@@ -428,6 +454,7 @@ public sealed class DelegatePermissionPolicy : IWebViewPermissionPolicy
 /// </summary>
 public sealed class SharedSessionPolicy : IWebViewShellSessionPolicy
 {
+    /// <inheritdoc />
     public WebViewShellSessionDecision Resolve(WebViewShellSessionContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
@@ -445,6 +472,7 @@ public sealed class SharedSessionPolicy : IWebViewShellSessionPolicy
 /// </summary>
 public sealed class IsolatedSessionPolicy : IWebViewShellSessionPolicy
 {
+    /// <inheritdoc />
     public WebViewShellSessionDecision Resolve(WebViewShellSessionContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
@@ -470,6 +498,7 @@ public sealed class DelegateSessionPolicy : IWebViewShellSessionPolicy
         _resolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
     }
 
+    /// <inheritdoc />
     public WebViewShellSessionDecision Resolve(WebViewShellSessionContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
@@ -490,6 +519,7 @@ public sealed class DelegateDevToolsPolicy : IWebViewShellDevToolsPolicy
         _resolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
     }
 
+    /// <inheritdoc />
     public WebViewShellDevToolsDecision Decide(IWebView webView, WebViewShellDevToolsPolicyContext context)
         => _resolver(webView, context);
 }
@@ -507,6 +537,7 @@ public sealed class DelegateCommandPolicy : IWebViewShellCommandPolicy
         _resolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
     }
 
+    /// <inheritdoc />
     public WebViewShellCommandDecision Decide(IWebView webView, WebViewShellCommandPolicyContext context)
         => _resolver(webView, context);
 }
@@ -1335,6 +1366,7 @@ public sealed class WebViewShellExperience : IDisposable
         }
     }
 
+    /// <inheritdoc />
     public void Dispose()
     {
         if (_disposed) return;

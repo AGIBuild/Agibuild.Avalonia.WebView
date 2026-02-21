@@ -3,6 +3,9 @@ using Microsoft.Extensions.Logging;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
+/// <summary>
+/// Convenience DI extensions for Agibuild WebView.
+/// </summary>
 public static class WebViewServiceCollectionExtensions
 {
     /// <inheritdoc cref="Agibuild.Avalonia.WebView.DependencyInjection.ServiceCollectionExtensions.AddWebView"/>

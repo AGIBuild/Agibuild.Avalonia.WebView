@@ -799,8 +799,13 @@ public partial class ConsumerWebViewE2EViewModel : ViewModelBase
             WebViewControl!.NavigationCompleted += DoneHandler;
             try
             {
-                await WebViewControl.NavigateAsync(new Uri("https://github.com/search?q=isloading")).ConfigureAwait(false);
-                await WaitAsync(completedTcs.Task, TimeSpan.FromSeconds(30)).ConfigureAwait(false);
+                // Use an in-memory HTML navigation with a synthetic base URL to avoid flaky
+                // external network dependencies while still validating IsLoading transitions.
+                const string html = "<html><body><h1>isloading test</h1><p>consumer e2e</p></body></html>";
+                await WebViewControl.NavigateToStringAsync(
+                    html,
+                    new Uri("https://isloading-test.example.com/")).ConfigureAwait(false);
+                await WaitAsync(completedTcs.Task, TimeSpan.FromSeconds(15)).ConfigureAwait(false);
 
                 // After completion, IsLoading should be false.
                 var isLoadingAfter = await Dispatcher.UIThread.InvokeAsync(() => WebViewControl.IsLoading);
@@ -1260,20 +1265,11 @@ public partial class ConsumerWebViewE2EViewModel : ViewModelBase
     {
         LogLine("Waiting for WebView to become ready...");
 
-        // Step 1: navigate to about:blank to verify the WebView is attached and responsive.
-        var blankTcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-        void BlankHandler(object? s, NavigationCompletedEventArgs e) => blankTcs.TrySetResult(true);
+        // Step 0: clear any in-flight navigation so readiness check starts from a deterministic state.
+        await WebViewControl!.StopAsync().ConfigureAwait(false);
 
-        WebViewControl!.NavigationCompleted += BlankHandler;
-        try
-        {
-            await Dispatcher.UIThread.InvokeAsync(() => WebViewControl.Source = new Uri("about:blank"));
-            await WaitAsync(blankTcs.Task, TimeSpan.FromSeconds(10)).ConfigureAwait(false);
-        }
-        finally
-        {
-            WebViewControl!.NavigationCompleted -= BlankHandler;
-        }
+        // Step 1: navigate to about:blank to verify the WebView is attached and responsive.
+        await NavigateAndWaitAsync(new Uri("about:blank"), TimeSpan.FromSeconds(10)).ConfigureAwait(false);
 
         LogLine("WebView attached (about:blank). Navigating to test home...");
 
@@ -1287,19 +1283,9 @@ public partial class ConsumerWebViewE2EViewModel : ViewModelBase
     /// </summary>
     private async Task NavigateAndWaitAsync(Uri uri, TimeSpan? timeout = null)
     {
-        var tcs = new TaskCompletionSource<NavigationCompletedEventArgs>(TaskCreationOptions.RunContinuationsAsynchronously);
-        void Handler(object? s, NavigationCompletedEventArgs e) => tcs.TrySetResult(e);
-
-        WebViewControl!.NavigationCompleted += Handler;
-        try
-        {
-            await WebViewControl.NavigateAsync(uri).ConfigureAwait(false);
-            await WaitAsync(tcs.Task, timeout ?? TimeSpan.FromSeconds(30)).ConfigureAwait(false);
-        }
-        finally
-        {
-            WebViewControl!.NavigationCompleted -= Handler;
-        }
+        await WaitAsync(
+            WebViewControl!.NavigateAsync(uri),
+            timeout ?? TimeSpan.FromSeconds(30)).ConfigureAwait(false);
     }
 
     private static async Task<T> WaitAsync<T>(Task<T> task, TimeSpan timeout)
@@ -1311,6 +1297,17 @@ public partial class ConsumerWebViewE2EViewModel : ViewModelBase
             throw new TimeoutException($"Timed out after {timeout}.");
         }
         return await task.ConfigureAwait(false);
+    }
+
+    private static async Task WaitAsync(Task task, TimeSpan timeout)
+    {
+        using var cts = new CancellationTokenSource(timeout);
+        var completed = await Task.WhenAny(task, Task.Delay(Timeout.InfiniteTimeSpan, cts.Token)).ConfigureAwait(false);
+        if (completed != task)
+        {
+            throw new TimeoutException($"Timed out after {timeout}.");
+        }
+        await task.ConfigureAwait(false);
     }
 
     private void LogLine(string message)

@@ -82,6 +82,46 @@ namespace Agibuild.Avalonia.WebView.Integration.Tests
                     mainVm.WebView2Smoke.AutoRunCompleted += exitCode =>
                         Dispatcher.UIThread.Post(() => desktop.Shutdown(exitCode));
                 }
+                else if (args.Contains("--wv2-feature-seq"))
+                {
+                    mainVm.SelectedTabIndex = 2;
+                    mainVm.WebView2Smoke.AutoRun = true;
+                    mainVm.WebView2Smoke.AutoRunCompleted += exitCode =>
+                    {
+                        if (exitCode != 0)
+                        {
+                            Dispatcher.UIThread.Post(() => desktop.Shutdown(exitCode));
+                            return;
+                        }
+
+                        Dispatcher.UIThread.Post(() =>
+                        {
+                            mainVm.FeatureE2E.AutoRun = true;
+                            mainVm.SelectedTabIndex = 3;
+                        });
+                    };
+                    mainVm.FeatureE2E.AutoRunCompleted += exitCode =>
+                        Dispatcher.UIThread.Post(() => desktop.Shutdown(exitCode));
+                }
+                else if (args.Contains("--wv2-feature-seq-no-exit"))
+                {
+                    mainVm.SelectedTabIndex = 2;
+                    mainVm.WebView2Smoke.AutoRun = true;
+                    mainVm.WebView2Smoke.AutoRunCompleted += exitCode =>
+                    {
+                        if (exitCode != 0)
+                        {
+                            Dispatcher.UIThread.Post(() => desktop.Shutdown(exitCode));
+                            return;
+                        }
+
+                        Dispatcher.UIThread.Post(() =>
+                        {
+                            mainVm.FeatureE2E.AutoRun = true;
+                            mainVm.SelectedTabIndex = 3;
+                        });
+                    };
+                }
                 else if (args.Contains("--feature-e2e"))
                 {
                     mainVm.SelectedTabIndex = 3;

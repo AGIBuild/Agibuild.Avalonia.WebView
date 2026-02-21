@@ -14,6 +14,10 @@ public sealed class WebViewBridgeGenerator : IIncrementalGenerator
     private const string JsExportFullName = "Agibuild.Avalonia.WebView.JsExportAttribute";
     private const string JsImportFullName = "Agibuild.Avalonia.WebView.JsImportAttribute";
 
+    /// <summary>
+    /// Configures incremental pipelines for JsExport and JsImport bridge source generation.
+    /// </summary>
+    /// <param name="context">The generator initialization context.</param>
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         // [JsExport] interfaces

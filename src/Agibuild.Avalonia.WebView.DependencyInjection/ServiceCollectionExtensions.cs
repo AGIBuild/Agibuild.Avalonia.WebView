@@ -4,6 +4,9 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Agibuild.Avalonia.WebView.DependencyInjection;
 
+/// <summary>
+/// Dependency injection registrations for Agibuild WebView services.
+/// </summary>
 public static class ServiceCollectionExtensions
 {
     /// <summary>

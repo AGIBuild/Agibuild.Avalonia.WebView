@@ -4,6 +4,9 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Agibuild.Avalonia.WebView;
 
+/// <summary>
+/// Core runtime implementation of <see cref="IWebView"/> over a platform adapter.
+/// </summary>
 public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
 {
     private static readonly Uri AboutBlank = new("about:blank");
@@ -24,6 +27,7 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
     public static IWebView CreateDefault(IWebViewDispatcher dispatcher)
         => CreateDefault(dispatcher, NullLogger<WebViewCore>.Instance);
 
+    /// <inheritdoc />
     [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     public static IWebView CreateDefault(IWebViewDispatcher dispatcher, ILogger<WebViewCore> logger)
     {
@@ -219,6 +223,7 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         _adapter.EnvironmentRequested += OnAdapterEnvironmentRequested;
     }
 
+    /// <inheritdoc />
     public Uri Source
     {
         get => _source;
@@ -240,25 +245,40 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         }
     }
 
+    /// <inheritdoc />
     public bool CanGoBack => _adapter.CanGoBack;
 
+    /// <inheritdoc />
     public bool CanGoForward => _adapter.CanGoForward;
 
+    /// <inheritdoc />
     public bool IsLoading => _activeNavigation is not null;
 
+    /// <inheritdoc />
     public Guid ChannelId { get; }
 
+    /// <inheritdoc />
     public event EventHandler<NavigationStartingEventArgs>? NavigationStarted;
+    /// <inheritdoc />
     public event EventHandler<NavigationCompletedEventArgs>? NavigationCompleted;
+    /// <inheritdoc />
     public event EventHandler<NewWindowRequestedEventArgs>? NewWindowRequested;
+    /// <inheritdoc />
     public event EventHandler<WebMessageReceivedEventArgs>? WebMessageReceived;
+    /// <inheritdoc />
     public event EventHandler<WebResourceRequestedEventArgs>? WebResourceRequested;
+    /// <inheritdoc />
     public event EventHandler<EnvironmentRequestedEventArgs>? EnvironmentRequested;
+    /// <inheritdoc />
     public event EventHandler<DownloadRequestedEventArgs>? DownloadRequested;
+    /// <inheritdoc />
     public event EventHandler<PermissionRequestedEventArgs>? PermissionRequested;
+    /// <inheritdoc />
     public event EventHandler<AdapterCreatedEventArgs>? AdapterCreated;
+    /// <inheritdoc />
     public event EventHandler? AdapterDestroyed;
 
+    /// <inheritdoc />
     public void Dispose()
     {
         if (_disposed)
@@ -307,6 +327,7 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         _logger.LogDebug("Dispose: completed");
     }
 
+    /// <inheritdoc />
     public Task NavigateAsync(Uri uri)
     {
         ArgumentNullException.ThrowIfNull(uri);
@@ -317,9 +338,11 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
             adapterInvoke: navigationId => _adapter.NavigateAsync(navigationId, uri))).Unwrap();
     }
 
+    /// <inheritdoc />
     public Task NavigateToStringAsync(string html)
         => NavigateToStringAsync(html, baseUrl: null);
 
+    /// <inheritdoc />
     public Task NavigateToStringAsync(string html, Uri? baseUrl)
     {
         ArgumentNullException.ThrowIfNull(html);
@@ -331,6 +354,7 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
             adapterInvoke: navigationId => _adapter.NavigateToStringAsync(navigationId, html, baseUrl))).Unwrap();
     }
 
+    /// <inheritdoc />
     public Task<string?> InvokeScriptAsync(string script)
     {
         ArgumentNullException.ThrowIfNull(script);
@@ -361,6 +385,7 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         }
     }
 
+    /// <inheritdoc />
     public Task<bool> GoBackAsync()
         => EnqueueOperationAsync(nameof(GoBackAsync), () => Task.FromResult(GoBackCore()));
 
@@ -394,6 +419,7 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         return true;
     }
 
+    /// <inheritdoc />
     public Task<bool> GoForwardAsync()
         => EnqueueOperationAsync(nameof(GoForwardAsync), () => Task.FromResult(GoForwardCore()));
 
@@ -427,6 +453,7 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         return true;
     }
 
+    /// <inheritdoc />
     public Task<bool> RefreshAsync()
         => EnqueueOperationAsync(nameof(RefreshAsync), () => Task.FromResult(RefreshCore()));
 
@@ -454,6 +481,7 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         return true;
     }
 
+    /// <inheritdoc />
     public Task<bool> StopAsync()
         => EnqueueOperationAsync(nameof(StopAsync), () => Task.FromResult(StopCore()));
 
@@ -566,14 +594,18 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         return new NativeNavigationStartingDecision(IsAllowed: true, NavigationId: navigationId);
     }
 
+    /// <inheritdoc />
     public ICookieManager? TryGetCookieManager() => _cookieManager;
 
+    /// <inheritdoc />
     public ICommandManager? TryGetCommandManager() => _commandManager;
 
+    /// <inheritdoc />
     public IWebViewRpcService? Rpc => _rpcService;
 
     // ==================== DevTools ====================
 
+    /// <inheritdoc />
     public Task OpenDevToolsAsync()
     {
         return EnqueueOperationAsync(nameof(OpenDevToolsAsync), () =>
@@ -588,6 +620,7 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         });
     }
 
+    /// <inheritdoc />
     public Task CloseDevToolsAsync()
     {
         return EnqueueOperationAsync(nameof(CloseDevToolsAsync), () =>
@@ -600,6 +633,7 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         });
     }
 
+    /// <inheritdoc />
     public Task<bool> IsDevToolsOpenAsync()
     {
         return EnqueueOperationAsync(nameof(IsDevToolsOpenAsync), () =>
@@ -611,6 +645,7 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
 
     // ==================== Bridge ====================
 
+    /// <inheritdoc />
     public IBridgeService Bridge
     {
         get
@@ -637,6 +672,7 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         }
     }
 
+    /// <inheritdoc />
     public Task<byte[]> CaptureScreenshotAsync()
     {
         return EnqueueOperationAsync(nameof(CaptureScreenshotAsync), () =>
@@ -648,6 +684,7 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         });
     }
 
+    /// <inheritdoc />
     public Task<byte[]> PrintToPdfAsync(PdfPrintOptions? options = null)
     {
         return EnqueueOperationAsync(nameof(PrintToPdfAsync), () =>
@@ -680,6 +717,7 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         });
     }
 
+    /// <inheritdoc />
     public Task SetZoomFactorAsync(double zoomFactor)
     {
         return EnqueueOperationAsync(nameof(SetZoomFactorAsync), () =>
@@ -844,6 +882,7 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         }
     }
 
+    /// <inheritdoc />
     public void EnableWebMessageBridge(WebMessageBridgeOptions options)
     {
         ArgumentNullException.ThrowIfNull(options);
@@ -862,6 +901,7 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
             options.AllowedOrigins?.Count ?? 0, options.ProtocolVersion);
     }
 
+    /// <inheritdoc />
     public void DisableWebMessageBridge()
     {
         ThrowIfDisposed();

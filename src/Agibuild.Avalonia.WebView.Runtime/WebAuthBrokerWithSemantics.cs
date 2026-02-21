@@ -7,11 +7,13 @@ public sealed class WebAuthBrokerWithSemantics : IWebAuthBroker
 {
     private readonly IWebAuthBroker _inner;
 
+    /// <inheritdoc />
     public WebAuthBrokerWithSemantics(IWebAuthBroker inner)
     {
         _inner = inner ?? throw new ArgumentNullException(nameof(inner));
     }
 
+    /// <inheritdoc />
     public async Task<WebAuthResult> AuthenticateAsync(ITopLevelWindow owner, AuthOptions options)
     {
         ArgumentNullException.ThrowIfNull(owner);

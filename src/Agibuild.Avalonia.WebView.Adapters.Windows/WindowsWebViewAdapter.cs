@@ -75,6 +75,9 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
     // Set when an API navigation is about to start; the next NavigationStarting event picks it up.
     private Guid _pendingApiNavigationId;
     private bool _pendingApiNavigation;
+    private Guid _lastApiNavigationId;
+    private Uri? _lastApiNavigationRequestUri;
+    private long _lastApiNavigationStartedAtMs;
 
     // Guard exactly-once completion per NavigationId.
     private readonly HashSet<Guid> _completedNavIds = new();
@@ -355,7 +358,11 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
 
         Diag("Teardown: start");
 
-        if (_uiSyncContext is null || SynchronizationContext.Current == _uiSyncContext)
+        // SynchronizationContext instances can differ even on the same UI thread.
+        // Rely on thread identity as the authoritative signal to avoid self-post + wait timeout.
+        if (_uiSyncContext is null ||
+            SynchronizationContext.Current == _uiSyncContext ||
+            Environment.CurrentManagedThreadId == _uiThreadId)
         {
             TearDownWebView2OnInitThread();
             Interlocked.Exchange(ref _teardownCompleted, 1);
@@ -530,7 +537,14 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
                 if (!string.IsNullOrWhiteSpace(e.Uri) && Uri.TryCreate(e.Uri, UriKind.Absolute, out var apiUri))
                 {
                     _requestUriMap[wv2NavId] = apiUri;
+                    _lastApiNavigationRequestUri = apiUri;
                 }
+                else
+                {
+                    _lastApiNavigationRequestUri = null;
+                }
+                _lastApiNavigationId = _pendingApiNavigationId;
+                _lastApiNavigationStartedAtMs = Environment.TickCount64;
 
                 if (DiagnosticsEnabled)
                 {
@@ -538,6 +552,20 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
                 }
 
                 return; // Allow API navigation to proceed.
+            }
+
+            // WebView2 may emit an additional non-user-initiated start for the same
+            // adapter-initiated navigation (for example around about:blank transitions),
+            // sometimes with a different WebView2 navigation id. Treat it as the same
+            // API navigation instead of re-entering native host arbitration.
+            if (TryMapApiContinuationNavigationLocked(wv2NavId, e))
+            {
+                if (DiagnosticsEnabled)
+                {
+                    Console.WriteLine($"[Agibuild.WebView] NavigationStarting (API continuation): wv2Id={wv2NavId}, uri={e.Uri}");
+                }
+
+                return;
             }
 
             // Check if this is a redirect for an already-tracked navigation.
@@ -629,6 +657,106 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
         }
     }
 
+    private bool TryMapApiContinuationNavigationLocked(ulong wv2NavId, CoreWebView2NavigationStartingEventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(e.Uri) || !Uri.TryCreate(e.Uri, UriKind.Absolute, out var requestUri))
+        {
+            return false;
+        }
+
+        Guid matchedApiNavigationId = Guid.Empty;
+        var matched = false;
+
+        foreach (var apiWv2NavId in _apiNavIds)
+        {
+            if (!_navigationIdMap.TryGetValue(apiWv2NavId, out var apiNavigationId))
+            {
+                continue;
+            }
+
+            if (!_requestUriMap.TryGetValue(apiWv2NavId, out var trackedUri))
+            {
+                continue;
+            }
+
+            if (!string.Equals(trackedUri.AbsoluteUri, requestUri.AbsoluteUri, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            matchedApiNavigationId = apiNavigationId;
+            matched = true;
+            break;
+        }
+
+        if (matched)
+        {
+            _apiNavIds.Add(wv2NavId);
+            _navigationIdMap[wv2NavId] = matchedApiNavigationId;
+            _correlationMap[wv2NavId] = matchedApiNavigationId;
+            _requestUriMap[wv2NavId] = requestUri;
+            return true;
+        }
+
+        if (Environment.TickCount64 - _lastApiNavigationStartedAtMs > 2_000)
+        {
+            return false;
+        }
+
+        if (TryGetSingleInFlightApiNavigationIdLocked(out var singleApiNavigationId) &&
+            _lastApiNavigationRequestUri is not null &&
+            string.Equals(_lastApiNavigationRequestUri.AbsoluteUri, "about:blank", StringComparison.OrdinalIgnoreCase))
+        {
+            _apiNavIds.Add(wv2NavId);
+            _navigationIdMap[wv2NavId] = singleApiNavigationId;
+            _correlationMap[wv2NavId] = singleApiNavigationId;
+            _requestUriMap[wv2NavId] = requestUri;
+            return true;
+        }
+
+        if (_lastApiNavigationId != Guid.Empty &&
+            _lastApiNavigationRequestUri is not null &&
+            string.Equals(_lastApiNavigationRequestUri.AbsoluteUri, "about:blank", StringComparison.OrdinalIgnoreCase))
+        {
+            _apiNavIds.Add(wv2NavId);
+            _navigationIdMap[wv2NavId] = _lastApiNavigationId;
+            _correlationMap[wv2NavId] = _lastApiNavigationId;
+            _requestUriMap[wv2NavId] = requestUri;
+            return true;
+        }
+
+        return false;
+    }
+
+    private bool TryGetSingleInFlightApiNavigationIdLocked(out Guid navigationId)
+    {
+        navigationId = Guid.Empty;
+        var hasValue = false;
+
+        foreach (var apiWv2NavId in _apiNavIds)
+        {
+            if (!_navigationIdMap.TryGetValue(apiWv2NavId, out var mappedNavigationId))
+            {
+                continue;
+            }
+
+            if (!hasValue)
+            {
+                navigationId = mappedNavigationId;
+                hasValue = true;
+                continue;
+            }
+
+            if (navigationId != mappedNavigationId)
+            {
+                navigationId = Guid.Empty;
+                return false;
+            }
+        }
+
+        return hasValue;
+    }
+
     // ==================== Navigation — completion and error mapping ====================
 
     private void OnNavigationCompleted(object? sender, CoreWebView2NavigationCompletedEventArgs e)
@@ -649,6 +777,7 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
 
         Guid navigationId;
         Uri? trackedUri;
+        var deferConnectionAbortedCompletion = false;
         lock (_navLock)
         {
             if (!_navigationIdMap.TryGetValue(wv2NavId, out navigationId))
@@ -660,20 +789,33 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
                 return;
             }
 
+            // If this is a transient abort while the same logical navigation still has
+            // another tracked WebView2 navigation id, defer completion and wait for the
+            // sibling completion to determine final status.
+            deferConnectionAbortedCompletion =
+                !e.IsSuccess &&
+                e.WebErrorStatus == CoreWebView2WebErrorStatus.ConnectionAborted &&
+                HasSiblingNavigationMappingLocked(navigationId, wv2NavId);
+
+            // Retrieve tracked URI before cleanup.
+            _requestUriMap.TryGetValue(wv2NavId, out trackedUri);
+
+            // Clean up current WebView2 navigation id state.
+            _navigationIdMap.Remove(wv2NavId);
+            _correlationMap.Remove(wv2NavId);
+            _apiNavIds.Remove(wv2NavId);
+            _requestUriMap.Remove(wv2NavId);
+
+            if (deferConnectionAbortedCompletion)
+            {
+                return;
+            }
+
             // Exactly-once guard.
             if (!_completedNavIds.Add(navigationId))
             {
                 return;
             }
-
-            // Retrieve tracked URI.
-            _requestUriMap.TryGetValue(wv2NavId, out trackedUri);
-
-            // Clean up state.
-            _navigationIdMap.Remove(wv2NavId);
-            _correlationMap.Remove(wv2NavId);
-            _apiNavIds.Remove(wv2NavId);
-            _requestUriMap.Remove(wv2NavId);
         }
 
         var requestUri = trackedUri ?? new Uri("about:blank");
@@ -692,10 +834,38 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
             return;
         }
 
+        if (status == CoreWebView2WebErrorStatus.ConnectionAborted &&
+            string.Equals(requestUri.AbsoluteUri, "about:blank", StringComparison.OrdinalIgnoreCase))
+        {
+            // WebView2 may report an intermediate about:blank navigation as aborted
+            // while transitioning into the final document (e.g., NavigateToString/baseUrl flows).
+            // Do not surface this as a hard failure to callers.
+            RaiseNavigationCompleted(navigationId, requestUri, NavigationCompletedStatus.Canceled, error: null);
+            return;
+        }
+
         var errorMessage = $"Navigation failed: {status}";
         Exception error = MapWebErrorStatus(status, errorMessage, navigationId, requestUri);
 
         RaiseNavigationCompleted(navigationId, requestUri, NavigationCompletedStatus.Failure, error);
+    }
+
+    private bool HasSiblingNavigationMappingLocked(Guid navigationId, ulong excludeWv2NavigationId)
+    {
+        foreach (var kvp in _navigationIdMap)
+        {
+            if (kvp.Key == excludeWv2NavigationId)
+            {
+                continue;
+            }
+
+            if (kvp.Value == navigationId)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static Exception MapWebErrorStatus(CoreWebView2WebErrorStatus status, string message, Guid navigationId, Uri requestUri)

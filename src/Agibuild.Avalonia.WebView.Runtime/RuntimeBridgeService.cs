@@ -560,6 +560,7 @@ public class BridgeImportProxy : DispatchProxy
         _serviceName = serviceName;
     }
 
+    /// <inheritdoc />
     protected override object? Invoke(MethodInfo? targetMethod, object?[]? args)
     {
         if (_rpc is null || targetMethod is null)

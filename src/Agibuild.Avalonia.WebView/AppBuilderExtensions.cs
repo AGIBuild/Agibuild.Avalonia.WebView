@@ -9,28 +9,17 @@ namespace Agibuild.Avalonia.WebView;
 public static class AppBuilderExtensions
 {
     /// <summary>
-    /// Initializes the Agibuild WebView environment from a DI <see cref="IServiceProvider"/>.
-    /// <para>
-    /// Call this in your <c>AppBuilder</c> chain so that all <c>&lt;agw:WebView /&gt;</c>
-    /// controls automatically receive logging and other shared services.
-    /// </para>
-    /// <example>
-    /// <code>
-    /// var provider = services.BuildServiceProvider();
-    ///
-    /// AppBuilder.Configure&lt;App&gt;()
-    ///     .UsePlatformDetect()
-    ///     .UseAgibuildWebView(provider.GetService&lt;ILoggerFactory&gt;())
-    ///     .StartWithClassicDesktopLifetime(args);
-    /// </code>
-    /// </example>
-    /// </summary>
-    /// <summary>
     /// Initializes the Agibuild WebView environment with default settings (no logging).
     /// </summary>
     public static AppBuilder UseAgibuildWebView(this AppBuilder builder)
         => UseAgibuildWebView(builder, loggerFactory: null);
 
+    /// <summary>
+    /// Initializes the Agibuild WebView environment with an optional logger factory.
+    /// </summary>
+    /// <param name="builder">The Avalonia app builder.</param>
+    /// <param name="loggerFactory">Optional logger factory used by WebView internals.</param>
+    /// <returns>The same <see cref="AppBuilder"/> for fluent chaining.</returns>
     public static AppBuilder UseAgibuildWebView(this AppBuilder builder, ILoggerFactory? loggerFactory)
     {
         ArgumentNullException.ThrowIfNull(builder);

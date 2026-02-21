@@ -13,6 +13,8 @@ namespace Agibuild.Avalonia.WebView.Integration.Tests.Views
 {
     public partial class MainView : UserControl
     {
+        private const int SmokeTabIndex = 2;
+
         public MainView()
         {
             InitializeComponent();
@@ -28,6 +30,7 @@ namespace Agibuild.Avalonia.WebView.Integration.Tests.Views
         /// NativeControlHost from detaching / disposing the native WebView handle.
         /// </summary>
         private readonly Dictionary<int, Control?> _pageCache = new();
+        private int _currentTabIndex = -1;
 
         private void OnDataContextChanged(object? sender, EventArgs e)
         {
@@ -38,6 +41,7 @@ namespace Agibuild.Avalonia.WebView.Integration.Tests.Views
 
             // Clear the cache when the ViewModel changes (fresh start)
             _pageCache.Clear();
+            _currentTabIndex = -1;
             var host = this.FindControl<Grid>("PageHost");
             host?.Children.Clear();
 
@@ -64,6 +68,15 @@ namespace Agibuild.Avalonia.WebView.Integration.Tests.Views
         {
             if (_vm is null) return;
 
+            if (_currentTabIndex == SmokeTabIndex &&
+                index != SmokeTabIndex &&
+                ShouldUseWebView2Smoke())
+            {
+                // Keep only one active WebView2 instance when leaving the smoke tab.
+                // This prevents teardown races between cached smoke adapter and feature WebView.
+                _vm.WebView2Smoke.Detach();
+            }
+
             if (!_pageCache.TryGetValue(index, out var content))
             {
                 content = index switch
@@ -89,6 +102,7 @@ namespace Agibuild.Avalonia.WebView.Integration.Tests.Views
             foreach (var child in host.Children)
                 child.IsVisible = false;
             content.IsVisible = true;
+            _currentTabIndex = index;
         }
 
         /// <summary>
@@ -138,6 +152,16 @@ namespace Agibuild.Avalonia.WebView.Integration.Tests.Views
 
             // Windows and other platforms use WebView2 smoke
             return new WebView2SmokeView { DataContext = _vm.WebView2Smoke };
+        }
+
+        private static bool ShouldUseWebView2Smoke()
+        {
+            if (OperatingSystem.IsAndroid() || OperatingSystem.IsIOS() || OperatingSystem.IsLinux())
+            {
+                return false;
+            }
+
+            return !RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
         }
 
         private void OnNavSelectionChanged(object? sender, SelectionChangedEventArgs e)

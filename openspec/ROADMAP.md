@@ -8,14 +8,14 @@
 ## Phase Overview
 
 ```
-Phase 0 (✅ Done)        Phase 1 (✅ Done)       Phase 2 (✅ Core Done)  Phase 3 (✅ Done)      Phase 4 (✅ Done)
-Foundation               Type-Safe Bridge       SPA Hosting            Polish & GA            Application Shell
-─────────────────────    ────────────────────   ────────────────────   ────────────────────   ────────────────────
-• Cross-platform         • Source Generator     • Custom protocol      • Project template      • Shell policy kit
-  adapters (5 platforms)   for C# → JS proxy      file serving        • API docs site           (new window/download/
-• Full-control           • Source Generator     • Embedded resource    • Performance             permission/session)
-  navigation               for JS → C# proxy     provider               benchmarks             • Multi-window lifecycle
-• WebMessage bridge      • TypeScript .d.ts     • Dev mode HMR proxy   • GA release            • Host capability bridge
+Phase 0 (✅ Done)        Phase 1 (✅ Done)       Phase 2 (✅ Core Done)  Phase 3 (✅ Done)      Phase 4 (✅ Done)      Phase 5 (🟡 Planned)
+Foundation               Type-Safe Bridge       SPA Hosting            Polish & GA            Application Shell       Electron Replacement Foundation
+─────────────────────    ────────────────────   ────────────────────   ────────────────────   ────────────────────    ─────────────────────────────────
+• Cross-platform         • Source Generator     • Custom protocol      • Project template      • Shell policy kit      • Typed capability gateway
+  adapters (5 platforms)   for C# → JS proxy      file serving        • API docs site           (new window/download/ • Policy-first execution model
+• Full-control           • Source Generator     • Embedded resource    • Performance             permission/session)   • Agent-friendly diagnostics
+  navigation               for JS → C# proxy     provider               benchmarks             • Multi-window lifecycle • Web-first template flow
+• WebMessage bridge      • TypeScript .d.ts     • Dev mode HMR proxy   • GA release            • Host capability bridge • Pain-point-driven governance
   with policy              generation           • SPA router fallback    readiness review         (clipboard/file dialogs/
 • Cookies, Commands,     • Bridge security      • Bridge + SPA         • Breaking change         external open/notify)
   Screenshot, PDF,         integration            integration            audit                  • Shell presets in template
@@ -415,17 +415,53 @@ dotnet new agibuild-hybrid -n MyApp --frontend react
 
 ---
 
+## Phase 5: Electron Replacement Foundation (🟡 Planned)
+
+**Goal**: Make Electron migration-grade developer experience the primary outcome by addressing core pain points with a web-first, AI-agent-friendly architecture.
+
+**Why now**: Phase 4 established shell capabilities, but replacing Electron in real teams requires a stronger focus on typed capability workflows, policy governance, deterministic diagnostics, and template-driven delivery ergonomics.
+
+### Milestones
+
+| Milestone | Focus | Outcome |
+|---|---|---|
+| **M5.0 Objective Reset** | Lock acceptance criteria around Electron pain-point closure | Prevent roadmap drift toward host-count objectives |
+| **M5.1 Typed Capability Gateway** | Unify host capability entry points and result semantics | Single typed gateway for desktop capabilities with deterministic allow/deny/failure outcomes |
+| **M5.2 Policy-first Runtime** | Enforce policy before provider execution | Auditable security behavior with explicit deny reasons and zero bypass paths |
+| **M5.3 Agent-friendly Observability** | Structured runtime diagnostics for critical flows | CI/automation/AI agents can machine-validate lifecycle and capability paths |
+| **M5.4 Web-first Template Flow** | Template-level best-practice architecture path | Minimal host glue, typed bridge contracts, production-ready starter workflow |
+| **M5.5 Production Governance** | Release evidence tied to pain-point metrics | Contract/integration/automation proof that architecture improves developer outcomes |
+
+### Phase 5 Deliverables
+
+| # | Deliverable | Depends On | Est. Complexity |
+|---|---|---|---|
+| 5.1 | Typed capability gateway consolidation | Phase 4 capability bridge | High |
+| 5.2 | Policy-first deterministic execution contract | 5.1 + Phase 4 policy foundation | Medium |
+| 5.3 | Machine-checkable diagnostics contract for critical paths | 5.1-5.2 | Medium |
+| 5.4 | Template workflow for web-first desktop delivery | 5.1-5.3 + Phase 3 template base | Medium |
+| 5.5 | Governance suite + release-readiness matrix aligned to pain-point KPIs | 5.1-5.4 | Medium |
+
+### Phase 5 Exit Criteria
+
+- Electron pain-point KPIs are defined and verified by automated evidence.
+- Capability calls are typed, policy-governed, and produce deterministic outcomes.
+- Critical runtime flows emit structured diagnostics consumable by CI and AI agents.
+- Default template demonstrates the recommended Electron-replacement architecture path.
+
+---
+
 ## Dependencies & Prerequisites
 
 ```
-Phase 0 (✅ Done) ──► Phase 1 (✅ Done) ──► Phase 2 (✅ Core Done) ──► Phase 3 (✅ Done) ──► Phase 4 (✅ Done)
-     │                      │                       │                         │
-     │                      │                       └── 2.4 depends on Phase 1│
-     │                      └── Builds on F6 (RPC) + F3 (Policy)             └── Shell layer builds on stable GA baseline
+Phase 0 (✅ Done) ──► Phase 1 (✅ Done) ──► Phase 2 (✅ Core Done) ──► Phase 3 (✅ Done) ──► Phase 4 (✅ Done) ──► Phase 5 (🟡 Planned)
+     │                      │                       │                         │                         │
+     │                      │                       └── 2.4 depends on Phase 1│                         └── Electron-replacement baseline
+     │                      └── Builds on F6 (RPC) + F3 (Policy)             └── Shell layer builds on stable GA baseline   builds on shell + bridge + governance
      └── F4 (WebResource) used by Phase 2                                       and reuses bridge/policy/testability core
 ```
 
-Phase 1 and Phase 2 are mostly independent in implementation but compose together. Phase 4 depends on completed GA-grade stability from Phase 3 and focuses on product-level shell capabilities.
+Phase 1 and Phase 2 are mostly independent in implementation but compose together. Phase 4 depends on completed GA-grade stability from Phase 3 and focuses on product-level shell capabilities. Phase 5 pivots from "host count" to "Electron pain-point closure" with web-first developer productivity and AI-agent operability as primary outcomes.
 
 ---
 

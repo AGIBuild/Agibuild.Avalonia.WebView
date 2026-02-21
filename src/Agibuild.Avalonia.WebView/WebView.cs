@@ -20,18 +20,33 @@ public class WebView : NativeControlHost, IWebView
     //  Avalonia StyledProperties
     // ---------------------------------------------------------------------------
 
+    /// <summary>
+    /// Styled property backing <see cref="Source"/>.
+    /// </summary>
     public static readonly StyledProperty<Uri?> SourceProperty =
         AvaloniaProperty.Register<WebView, Uri?>(nameof(Source));
 
+    /// <summary>
+    /// Direct property backing <see cref="CanGoBack"/>.
+    /// </summary>
     public static readonly DirectProperty<WebView, bool> CanGoBackProperty =
         AvaloniaProperty.RegisterDirect<WebView, bool>(nameof(CanGoBack), o => o.CanGoBack);
 
+    /// <summary>
+    /// Direct property backing <see cref="CanGoForward"/>.
+    /// </summary>
     public static readonly DirectProperty<WebView, bool> CanGoForwardProperty =
         AvaloniaProperty.RegisterDirect<WebView, bool>(nameof(CanGoForward), o => o.CanGoForward);
 
+    /// <summary>
+    /// Direct property backing <see cref="IsLoading"/>.
+    /// </summary>
     public static readonly DirectProperty<WebView, bool> IsLoadingProperty =
         AvaloniaProperty.RegisterDirect<WebView, bool>(nameof(IsLoading), o => o.IsLoading);
 
+    /// <summary>
+    /// Styled property backing <see cref="ZoomFactor"/>.
+    /// </summary>
     public static readonly StyledProperty<double> ZoomFactorProperty =
         AvaloniaProperty.Register<WebView, double>(nameof(ZoomFactor), defaultValue: 1.0);
 
@@ -88,8 +103,10 @@ public class WebView : NativeControlHost, IWebView
         set => SetValue(SourceProperty, value);
     }
 
+    /// <inheritdoc />
     public bool CanGoBack => _core?.CanGoBack ?? false;
 
+    /// <inheritdoc />
     public bool CanGoForward => _core?.CanGoForward ?? false;
 
     /// <summary>
@@ -119,6 +136,7 @@ public class WebView : NativeControlHost, IWebView
         set => SetValue(ZoomFactorProperty, value);
     }
 
+    /// <inheritdoc />
     public Task<double> GetZoomFactorAsync()
     {
         if (_core is null)
@@ -126,6 +144,7 @@ public class WebView : NativeControlHost, IWebView
         return _core.GetZoomFactorAsync();
     }
 
+    /// <inheritdoc />
     public Task SetZoomFactorAsync(double zoomFactor)
     {
         if (_core is null)
@@ -138,6 +157,7 @@ public class WebView : NativeControlHost, IWebView
 
     // --- Navigation ---
 
+    /// <inheritdoc />
     public Task NavigateAsync(Uri uri)
     {
         ArgumentNullException.ThrowIfNull(uri);
@@ -145,6 +165,7 @@ public class WebView : NativeControlHost, IWebView
         return _core!.NavigateAsync(uri);
     }
 
+    /// <inheritdoc />
     public Task NavigateToStringAsync(string html)
     {
         ArgumentNullException.ThrowIfNull(html);
@@ -152,6 +173,7 @@ public class WebView : NativeControlHost, IWebView
         return _core!.NavigateToStringAsync(html);
     }
 
+    /// <inheritdoc />
     public Task NavigateToStringAsync(string html, Uri? baseUrl)
     {
         ArgumentNullException.ThrowIfNull(html);
@@ -375,6 +397,7 @@ public class WebView : NativeControlHost, IWebView
         _core!.EnableSpaHosting(options);
     }
 
+    /// <inheritdoc />
     public Task<string?> InvokeScriptAsync(string script)
     {
         ArgumentNullException.ThrowIfNull(script);
@@ -382,24 +405,28 @@ public class WebView : NativeControlHost, IWebView
         return _core!.InvokeScriptAsync(script);
     }
 
+    /// <inheritdoc />
     public Task<bool> GoBackAsync()
     {
         if (_core is null) return Task.FromResult(false);
         return _core.GoBackAsync();
     }
 
+    /// <inheritdoc />
     public Task<bool> GoForwardAsync()
     {
         if (_core is null) return Task.FromResult(false);
         return _core.GoForwardAsync();
     }
 
+    /// <inheritdoc />
     public Task<bool> RefreshAsync()
     {
         if (_core is null) return Task.FromResult(false);
         return _core.RefreshAsync();
     }
 
+    /// <inheritdoc />
     public Task<bool> StopAsync()
     {
         if (_core is null) return Task.FromResult(false);
@@ -408,33 +435,52 @@ public class WebView : NativeControlHost, IWebView
 
     // --- Events (bubbled from WebViewCore) ---
 
+    /// <inheritdoc />
     public event EventHandler<NavigationStartingEventArgs>? NavigationStarted;
+    /// <inheritdoc />
     public event EventHandler<NavigationCompletedEventArgs>? NavigationCompleted;
+    /// <inheritdoc />
     public event EventHandler<NewWindowRequestedEventArgs>? NewWindowRequested;
+    /// <inheritdoc />
     public event EventHandler<WebMessageReceivedEventArgs>? WebMessageReceived;
+    /// <inheritdoc />
     public event EventHandler<WebResourceRequestedEventArgs>? WebResourceRequested;
+    /// <inheritdoc />
     public event EventHandler<EnvironmentRequestedEventArgs>? EnvironmentRequested;
+    /// <inheritdoc />
     public event EventHandler<DownloadRequestedEventArgs>? DownloadRequested;
+    /// <inheritdoc />
     public event EventHandler<PermissionRequestedEventArgs>? PermissionRequested;
+    /// <inheritdoc />
     public event EventHandler<AdapterCreatedEventArgs>? AdapterCreated;
+    /// <inheritdoc />
     public event EventHandler? AdapterDestroyed;
 
     // ---------------------------------------------------------------------------
     //  NativeControlHost lifecycle
     // ---------------------------------------------------------------------------
 
+    /// <summary>
+    /// Hooks host window closing events when attached to the visual tree.
+    /// </summary>
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnAttachedToVisualTree(e);
         HookHostWindowClosing();
     }
 
+    /// <summary>
+    /// Unhooks host window closing events when detached from the visual tree.
+    /// </summary>
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
         UnhookHostWindowClosing();
         base.OnDetachedFromVisualTree(e);
     }
 
+    /// <summary>
+    /// Creates and attaches the underlying native WebView host.
+    /// </summary>
     protected override IPlatformHandle CreateNativeControlCore(IPlatformHandle parent)
     {
         var handle = base.CreateNativeControlCore(parent);
@@ -481,6 +527,9 @@ public class WebView : NativeControlHost, IWebView
         return handle;
     }
 
+    /// <summary>
+    /// Detaches and disposes the underlying native WebView host.
+    /// </summary>
     protected override void DestroyNativeControlCore(IPlatformHandle control)
     {
         UnhookHostWindowClosing();
@@ -653,6 +702,9 @@ public class WebView : NativeControlHost, IWebView
     private void OnCoreAdapterDestroyed(object? sender, EventArgs e)
         => AdapterDestroyed?.Invoke(this, EventArgs.Empty);
 
+    /// <summary>
+    /// Releases the native WebView resources and detaches from the host window lifecycle.
+    /// </summary>
     public void Dispose()
     {
         UnhookHostWindowClosing();
@@ -666,6 +718,35 @@ public class WebView : NativeControlHost, IWebView
 
         _core?.Dispose();
         _core = null;
+    }
+
+    // Close events can be user-triggered, app-triggered, or OS-triggered.
+    // For Chromium/WebView2 teardown safety, all close paths should detach early.
+    internal static bool ShouldDetachForHostWindowClosing(bool isProgrammatic, WindowCloseReason closeReason)
+        => true;
+
+    internal bool HandleHostWindowClosing(bool isProgrammatic, WindowCloseReason closeReason)
+    {
+        if (!ShouldDetachForHostWindowClosing(isProgrammatic, closeReason))
+        {
+            return false;
+        }
+
+        if (!_coreAttached)
+        {
+            return false;
+        }
+
+        try
+        {
+            _core?.Detach();
+            _coreAttached = false;
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     private void HookHostWindowClosing()
@@ -682,25 +763,7 @@ public class WebView : NativeControlHost, IWebView
         _hostWindow = window;
         _hostWindowClosingHandler = (_, e) =>
         {
-            // WebView2/Chromium cleanup is sensitive to teardown ordering during process exit.
-            // We only force early Detach when the close is clearly non-interactive / non-reversible:
-            // - programmatic closes (e.g. smoke test auto-exit)
-            // - application shutdown / OS shutdown
-            //
-            // Avoid detaching on user-initiated closings that may be canceled (e.g. "Do you want to save?"),
-            // since Detach is not reversible for some adapters.
-            if (!e.IsProgrammatic &&
-                e.CloseReason is not WindowCloseReason.ApplicationShutdown and not WindowCloseReason.OSShutdown)
-            {
-                return;
-            }
-
-            // Ensure we detach while the UI loop and native HWND are still alive.
-            if (_coreAttached)
-            {
-                try { _core?.Detach(); }
-                catch { /* best effort */ }
-            }
+            _ = HandleHostWindowClosing(e.IsProgrammatic, e.CloseReason);
         };
         _hostWindow.Closing += _hostWindowClosingHandler;
     }

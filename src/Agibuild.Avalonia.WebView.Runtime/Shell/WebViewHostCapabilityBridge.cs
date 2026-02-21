@@ -8,11 +8,17 @@ namespace Agibuild.Avalonia.WebView.Shell;
 /// </summary>
 public enum WebViewHostCapabilityOperation
 {
+    /// <summary>Read text from host clipboard.</summary>
     ClipboardReadText = 0,
+    /// <summary>Write text to host clipboard.</summary>
     ClipboardWriteText = 1,
+    /// <summary>Open-file picker operation.</summary>
     FileDialogOpen = 2,
+    /// <summary>Save-file picker operation.</summary>
     FileDialogSave = 3,
+    /// <summary>Open URI in external application/browser.</summary>
     ExternalOpen = 4,
+    /// <summary>Show a host notification.</summary>
     NotificationShow = 5
 }
 
@@ -31,7 +37,9 @@ public readonly record struct WebViewHostCapabilityRequestContext(
 /// </summary>
 public enum WebViewHostCapabilityDecisionKind
 {
+    /// <summary>Request is allowed.</summary>
     Allow = 0,
+    /// <summary>Request is denied.</summary>
     Deny = 1
 }
 
