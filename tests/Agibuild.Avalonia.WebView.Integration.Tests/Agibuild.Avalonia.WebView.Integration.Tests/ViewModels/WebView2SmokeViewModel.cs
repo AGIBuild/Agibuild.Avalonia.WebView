@@ -206,6 +206,12 @@ public partial class WebView2SmokeViewModel : ViewModelBase, IWebViewAdapterHost
                 var iterationOk = true;
                 try
                 {
+                    // Give the native WebView2 host process a short settle window after Attach.
+                    var settleDelay = i == 1
+                        ? TimeSpan.FromSeconds(3)
+                        : TimeSpan.FromMilliseconds(500);
+                    await Task.Delay(settleDelay).ConfigureAwait(false);
+
                     // The first iteration can be noticeably slower on cold CI hosts because WebView2 runtime
                     // and profile bootstrap happen for the first time in the worker session.
                     var readinessTimeout = i == 1
