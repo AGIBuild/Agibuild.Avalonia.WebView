@@ -272,6 +272,8 @@ public sealed class HostCapabilityBridgeIntegrationTests
                 new WebViewSessionPermissionProfile
                 {
                     ProfileIdentity = "integration-shell-profile",
+                    ProfileVersion = "2026.02.21",
+                    ProfileHash = "sha256:integration-shell-profile",
                     PermissionDecisions = new Dictionary<WebViewPermissionKind, WebViewPermissionProfileDecision>
                     {
                         [WebViewPermissionKind.Other] = WebViewPermissionProfileDecision.Allow()
@@ -321,6 +323,18 @@ public sealed class HostCapabilityBridgeIntegrationTests
                 ["source"] = "integration-test"
             }
         });
+        var overBudgetTrayEvent = shell.PublishSystemIntegrationEvent(new WebViewSystemIntegrationEventRequest
+        {
+            Kind = WebViewSystemIntegrationEventKind.TrayInteracted,
+            ItemId = "tray-budget-over",
+            Metadata = new Dictionary<string, string>
+            {
+                ["a"] = new string('x', 256),
+                ["b"] = new string('x', 256),
+                ["c"] = new string('x', 256),
+                ["d"] = new string('x', 256)
+            }
+        });
 
         Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, menu.Outcome);
         Assert.Equal(WebViewHostCapabilityCallOutcome.Deny, showAbout.Outcome);
@@ -328,6 +342,8 @@ public sealed class HostCapabilityBridgeIntegrationTests
         Assert.Equal(WebViewHostCapabilityCallOutcome.Deny, invalidTrayEvent.Outcome);
         Assert.Equal("system-integration-event-metadata-envelope-invalid", invalidTrayEvent.DenyReason);
         Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, validTrayEvent.Outcome);
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Deny, overBudgetTrayEvent.Outcome);
+        Assert.Equal("system-integration-event-metadata-budget-exceeded", overBudgetTrayEvent.DenyReason);
         Assert.Equal(0, provider.SystemActionCalls);
 
         var appliedMenu = Assert.Single(provider.AppliedMenus);
@@ -339,6 +355,8 @@ public sealed class HostCapabilityBridgeIntegrationTests
         Assert.Contains(profileDiagnostics, x =>
             x.PermissionKind == WebViewPermissionKind.Other &&
             x.ProfileIdentity == "integration-shell-profile" &&
+            x.ProfileVersion == "2026.02.21" &&
+            x.ProfileHash == "sha256:integration-shell-profile" &&
             x.PermissionDecision.State == PermissionState.Allow);
 
         Assert.Contains(diagnostics, x => x.Operation == WebViewHostCapabilityOperation.MenuApplyModel
@@ -346,6 +364,9 @@ public sealed class HostCapabilityBridgeIntegrationTests
         Assert.Contains(diagnostics, x => x.Operation == WebViewHostCapabilityOperation.TrayInteractionEventDispatch
             && x.Outcome == WebViewHostCapabilityCallOutcome.Deny
             && x.DenyReason == "system-integration-event-metadata-envelope-invalid");
+        Assert.Contains(diagnostics, x => x.Operation == WebViewHostCapabilityOperation.TrayInteractionEventDispatch
+            && x.Outcome == WebViewHostCapabilityCallOutcome.Deny
+            && x.DenyReason == "system-integration-event-metadata-budget-exceeded");
         Assert.Contains(diagnostics, x => x.Operation == WebViewHostCapabilityOperation.TrayInteractionEventDispatch
             && x.Outcome == WebViewHostCapabilityCallOutcome.Allow);
     }

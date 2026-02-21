@@ -254,6 +254,8 @@ public sealed class ShellSystemIntegrationCapabilityTests
                 new WebViewSessionPermissionProfile
                 {
                     ProfileIdentity = "deny-profile",
+                    ProfileVersion = "2026.02.21",
+                    ProfileHash = "sha256:deny-profile",
                     PermissionDecisions = new Dictionary<WebViewPermissionKind, WebViewPermissionProfileDecision>
                     {
                         [WebViewPermissionKind.Other] = WebViewPermissionProfileDecision.Deny()
@@ -281,6 +283,8 @@ public sealed class ShellSystemIntegrationCapabilityTests
 
         var profileDiagnostic = Assert.Single(profileDiagnostics);
         Assert.Equal("deny-profile", profileDiagnostic.ProfileIdentity);
+        Assert.Equal("2026.02.21", profileDiagnostic.ProfileVersion);
+        Assert.Equal("sha256:deny-profile", profileDiagnostic.ProfileHash);
         Assert.Equal(WebViewPermissionKind.Other, profileDiagnostic.PermissionKind);
         Assert.Equal(PermissionState.Deny, profileDiagnostic.PermissionDecision.State);
         Assert.True(profileDiagnostic.PermissionDecision.IsExplicit);
@@ -306,6 +310,8 @@ public sealed class ShellSystemIntegrationCapabilityTests
                 new WebViewSessionPermissionProfile
                 {
                     ProfileIdentity = "allow-profile",
+                    ProfileVersion = "2026.02.21",
+                    ProfileHash = "sha256:allow-profile",
                     PermissionDecisions = new Dictionary<WebViewPermissionKind, WebViewPermissionProfileDecision>
                     {
                         [WebViewPermissionKind.Other] = WebViewPermissionProfileDecision.Allow()
@@ -346,10 +352,55 @@ public sealed class ShellSystemIntegrationCapabilityTests
         Assert.All(profileDiagnostics, diag =>
         {
             Assert.Equal("allow-profile", diag.ProfileIdentity);
+            Assert.Equal("2026.02.21", diag.ProfileVersion);
+            Assert.Equal("sha256:allow-profile", diag.ProfileHash);
             Assert.Equal(WebViewPermissionKind.Other, diag.PermissionKind);
             Assert.Equal(PermissionState.Allow, diag.PermissionDecision.State);
             Assert.True(diag.PermissionDecision.IsExplicit);
         });
+    }
+
+    [Fact]
+    public void Profile_revision_metadata_is_optional_and_emits_stable_null_fields()
+    {
+        var dispatcher = new TestDispatcher();
+        var adapter = MockWebViewAdapter.Create();
+        using var core = new WebViewCore(adapter, dispatcher);
+        var provider = new TrackingProvider();
+        var bridge = new WebViewHostCapabilityBridge(provider, new AllowAllPolicy());
+        var profileDiagnostics = new List<WebViewSessionPermissionProfileDiagnosticEventArgs>();
+
+        using var shell = new WebViewShellExperience(core, new WebViewShellExperienceOptions
+        {
+            HostCapabilityBridge = bridge,
+            MenuPruningPolicy = new CountingMenuPruningPolicy(),
+            SessionPermissionProfileResolver = new DelegateSessionPermissionProfileResolver((_, _) =>
+                new WebViewSessionPermissionProfile
+                {
+                    ProfileIdentity = "null-revision-profile",
+                    PermissionDecisions = new Dictionary<WebViewPermissionKind, WebViewPermissionProfileDecision>
+                    {
+                        [WebViewPermissionKind.Other] = WebViewPermissionProfileDecision.Allow()
+                    }
+                })
+        });
+        shell.SessionPermissionProfileEvaluated += (_, e) => profileDiagnostics.Add(e);
+
+        var menu = shell.ApplyMenuModel(new WebViewMenuModelRequest
+        {
+            Items =
+            [
+                new WebViewMenuItemModel { Id = "file", Label = "File" }
+            ]
+        });
+
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, menu.Outcome);
+        var diagnostic = Assert.Single(profileDiagnostics);
+        Assert.Equal("null-revision-profile", diagnostic.ProfileIdentity);
+        Assert.Null(diagnostic.ProfileVersion);
+        Assert.Null(diagnostic.ProfileHash);
+        Assert.Equal(WebViewPermissionKind.Other, diagnostic.PermissionKind);
+        Assert.Equal(PermissionState.Allow, diagnostic.PermissionDecision.State);
     }
 
     [Fact]
@@ -556,6 +607,44 @@ public sealed class ShellSystemIntegrationCapabilityTests
         Assert.Empty(received);
         Assert.Single(policyErrors);
         Assert.Contains("system-integration-event-metadata-envelope-invalid", policyErrors[0].Exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Over_budget_inbound_tray_metadata_is_denied_before_web_delivery()
+    {
+        var dispatcher = new TestDispatcher();
+        var adapter = MockWebViewAdapter.Create();
+        using var core = new WebViewCore(adapter, dispatcher);
+        var provider = new TrackingProvider();
+        var bridge = new WebViewHostCapabilityBridge(provider, new AllowAllPolicy());
+        var received = new List<WebViewSystemIntegrationEventRequest>();
+        var policyErrors = new List<WebViewShellPolicyErrorEventArgs>();
+
+        using var shell = new WebViewShellExperience(core, new WebViewShellExperienceOptions
+        {
+            HostCapabilityBridge = bridge,
+            PolicyErrorHandler = (_, error) => policyErrors.Add(error)
+        });
+        shell.SystemIntegrationEventReceived += (_, evt) => received.Add(evt);
+
+        var denied = shell.PublishSystemIntegrationEvent(new WebViewSystemIntegrationEventRequest
+        {
+            Kind = WebViewSystemIntegrationEventKind.TrayInteracted,
+            ItemId = "tray-budget-over",
+            Metadata = new Dictionary<string, string>
+            {
+                ["a"] = new string('x', 256),
+                ["b"] = new string('x', 256),
+                ["c"] = new string('x', 256),
+                ["d"] = new string('x', 256)
+            }
+        });
+
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Deny, denied.Outcome);
+        Assert.Equal("system-integration-event-metadata-budget-exceeded", denied.DenyReason);
+        Assert.Empty(received);
+        Assert.Single(policyErrors);
+        Assert.Contains("system-integration-event-metadata-budget-exceeded", policyErrors[0].Exception.Message, StringComparison.Ordinal);
     }
 
     private sealed class AllowAllPolicy : IWebViewHostCapabilityPolicy

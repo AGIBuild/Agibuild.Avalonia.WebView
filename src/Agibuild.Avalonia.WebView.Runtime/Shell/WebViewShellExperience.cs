@@ -1545,6 +1545,8 @@ public sealed class WebViewShellExperience : IDisposable
                 windowId,
                 parentWindowId,
                 profile.ProfileIdentity,
+                profile.ProfileVersion,
+                profile.ProfileHash,
                 scopeIdentity,
                 sessionDecision,
                 permissionKind,

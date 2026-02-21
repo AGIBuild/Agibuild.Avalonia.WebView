@@ -43,6 +43,12 @@ public sealed class WebViewSessionPermissionProfile
     /// <summary>Stable profile identity for diagnostics/auditing.</summary>
     public required string ProfileIdentity { get; init; }
 
+    /// <summary>Optional profile revision version for diagnostics/auditing.</summary>
+    public string? ProfileVersion { get; init; }
+
+    /// <summary>Optional profile revision hash for diagnostics/auditing.</summary>
+    public string? ProfileHash { get; init; }
+
     /// <summary>
     /// Whether this profile inherits parent session decision when override is absent.
     /// </summary>
@@ -141,6 +147,8 @@ public sealed class WebViewSessionPermissionProfileDiagnosticEventArgs : EventAr
         Guid windowId,
         Guid? parentWindowId,
         string profileIdentity,
+        string? profileVersion,
+        string? profileHash,
         string scopeIdentity,
         WebViewShellSessionDecision sessionDecision,
         WebViewPermissionKind? permissionKind,
@@ -149,6 +157,8 @@ public sealed class WebViewSessionPermissionProfileDiagnosticEventArgs : EventAr
         WindowId = windowId;
         ParentWindowId = parentWindowId;
         ProfileIdentity = profileIdentity;
+        ProfileVersion = profileVersion;
+        ProfileHash = profileHash;
         ScopeIdentity = scopeIdentity;
         SessionDecision = sessionDecision;
         PermissionKind = permissionKind;
@@ -163,6 +173,12 @@ public sealed class WebViewSessionPermissionProfileDiagnosticEventArgs : EventAr
 
     /// <summary>Resolved profile identity.</summary>
     public string ProfileIdentity { get; }
+
+    /// <summary>Resolved profile version when provided.</summary>
+    public string? ProfileVersion { get; }
+
+    /// <summary>Resolved profile hash when provided.</summary>
+    public string? ProfileHash { get; }
 
     /// <summary>Scope identity at evaluation time.</summary>
     public string ScopeIdentity { get; }

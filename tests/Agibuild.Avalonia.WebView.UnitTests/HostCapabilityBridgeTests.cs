@@ -347,6 +347,69 @@ public sealed class HostCapabilityBridgeTests
         Assert.Equal("system-integration-event-metadata-envelope-invalid", diagnostic.DenyReason);
     }
 
+    [Fact]
+    public void Exact_budget_inbound_system_integration_metadata_is_allowed_and_dispatched()
+    {
+        var provider = new TestHostCapabilityProvider();
+        var policy = new CountingAllowPolicy();
+        var bridge = new WebViewHostCapabilityBridge(provider, policy);
+        var dispatched = 0;
+        bridge.SystemIntegrationEventDispatched += (_, _) => dispatched++;
+
+        var eventResult = bridge.DispatchSystemIntegrationEvent(new WebViewSystemIntegrationEventRequest
+        {
+            Kind = WebViewSystemIntegrationEventKind.TrayInteracted,
+            ItemId = "tray-budget-edge",
+            Metadata = new Dictionary<string, string>
+            {
+                ["a"] = new string('x', 255),
+                ["b"] = new string('x', 255),
+                ["c"] = new string('x', 255),
+                ["d"] = new string('x', 255)
+            }
+        }, Guid.NewGuid());
+
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, eventResult.Outcome);
+        Assert.Equal(1, dispatched);
+        Assert.Equal(1, policy.EvaluateCalls);
+    }
+
+    [Fact]
+    public void Over_budget_inbound_system_integration_metadata_is_denied_before_policy_and_dispatch()
+    {
+        var provider = new TestHostCapabilityProvider();
+        var policy = new CountingAllowPolicy();
+        var bridge = new WebViewHostCapabilityBridge(provider, policy);
+        var dispatched = 0;
+        var diagnostics = new List<WebViewHostCapabilityDiagnosticEventArgs>();
+        bridge.SystemIntegrationEventDispatched += (_, _) => dispatched++;
+        bridge.CapabilityCallCompleted += (_, e) => diagnostics.Add(e);
+
+        var eventResult = bridge.DispatchSystemIntegrationEvent(new WebViewSystemIntegrationEventRequest
+        {
+            Kind = WebViewSystemIntegrationEventKind.TrayInteracted,
+            ItemId = "tray-budget-over",
+            Metadata = new Dictionary<string, string>
+            {
+                ["a"] = new string('x', 256),
+                ["b"] = new string('x', 256),
+                ["c"] = new string('x', 256),
+                ["d"] = new string('x', 256)
+            }
+        }, Guid.NewGuid());
+
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Deny, eventResult.Outcome);
+        Assert.Equal("system-integration-event-metadata-budget-exceeded", eventResult.DenyReason);
+        Assert.Equal(0, dispatched);
+        Assert.Equal(0, policy.EvaluateCalls);
+
+        var diagnostic = Assert.Single(diagnostics);
+        Assert.Equal(WebViewHostCapabilityOperation.TrayInteractionEventDispatch, diagnostic.Operation);
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Deny, diagnostic.Outcome);
+        Assert.False(diagnostic.WasAuthorized);
+        Assert.Equal("system-integration-event-metadata-budget-exceeded", diagnostic.DenyReason);
+    }
+
     private sealed class AllowAllPolicy : IWebViewHostCapabilityPolicy
     {
         public WebViewHostCapabilityDecision Evaluate(in WebViewHostCapabilityRequestContext context)
@@ -371,6 +434,17 @@ public sealed class HostCapabilityBridgeTests
             => context.Operation == WebViewHostCapabilityOperation.NotificationShow
                 ? WebViewHostCapabilityDecision.Deny("notification-denied")
                 : WebViewHostCapabilityDecision.Allow();
+    }
+
+    private sealed class CountingAllowPolicy : IWebViewHostCapabilityPolicy
+    {
+        public int EvaluateCalls { get; private set; }
+
+        public WebViewHostCapabilityDecision Evaluate(in WebViewHostCapabilityRequestContext context)
+        {
+            EvaluateCalls++;
+            return WebViewHostCapabilityDecision.Allow();
+        }
     }
 
     private sealed class DenySystemIntegrationPolicy : IWebViewHostCapabilityPolicy

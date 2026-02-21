@@ -313,8 +313,11 @@ public sealed class AutomationLaneGovernanceTests
         Assert.Contains("ApplyMenuModel(", appShellPreset, StringComparison.Ordinal);
         Assert.Contains("UpdateTrayState(", appShellPreset, StringComparison.Ordinal);
         Assert.Contains("ExecuteSystemAction(", appShellPreset, StringComparison.Ordinal);
-        Assert.Contains("SystemActionWhitelist = new HashSet<WebViewSystemAction>", appShellPreset, StringComparison.Ordinal);
+        Assert.Contains("var systemActionWhitelist = new HashSet<WebViewSystemAction>", appShellPreset, StringComparison.Ordinal);
+        Assert.Contains("SystemActionWhitelist = systemActionWhitelist", appShellPreset, StringComparison.Ordinal);
         Assert.Contains("ShowAbout remains disabled unless explicitly added", appShellPreset, StringComparison.Ordinal);
+        Assert.Contains("ShowAbout opt-in snippet marker", appShellPreset, StringComparison.Ordinal);
+        Assert.Contains("enableShowAboutAction", appShellPreset, StringComparison.Ordinal);
         Assert.Contains("SessionPermissionProfileResolver = new DelegateSessionPermissionProfileResolver", appShellPreset, StringComparison.Ordinal);
         Assert.Contains("WebViewPermissionKind.Other", appShellPreset, StringComparison.Ordinal);
         Assert.Contains("ResolveMenuPruningStage", appShellPreset, StringComparison.Ordinal);
@@ -458,12 +461,20 @@ public sealed class AutomationLaneGovernanceTests
             "Agibuild.Avalonia.WebView.Runtime",
             "Shell",
             "WebViewShellExperience.cs");
+        var profilePath = Path.Combine(
+            repoRoot,
+            "src",
+            "Agibuild.Avalonia.WebView.Runtime",
+            "Shell",
+            "WebViewSessionPermissionProfiles.cs");
 
         Assert.True(File.Exists(bridgePath), $"Missing host capability bridge source: {bridgePath}");
         Assert.True(File.Exists(shellPath), $"Missing shell experience source: {shellPath}");
+        Assert.True(File.Exists(profilePath), $"Missing session permission profile source: {profilePath}");
 
         var bridgeSource = File.ReadAllText(bridgePath);
         var shellSource = File.ReadAllText(shellPath);
+        var profileSource = File.ReadAllText(profilePath);
 
         // Outcome schema must keep deterministic allow/deny/failure model.
         Assert.Contains("public enum WebViewHostCapabilityCallOutcome", bridgeSource, StringComparison.Ordinal);
@@ -476,6 +487,8 @@ public sealed class AutomationLaneGovernanceTests
         Assert.Contains("TrayInteractionEventDispatch = 9", bridgeSource, StringComparison.Ordinal);
         Assert.Contains("MenuInteractionEventDispatch = 10", bridgeSource, StringComparison.Ordinal);
         Assert.Contains("ShowAbout = 3", bridgeSource, StringComparison.Ordinal);
+        Assert.Contains("MaxSystemIntegrationMetadataTotalLength = 1024", bridgeSource, StringComparison.Ordinal);
+        Assert.Contains("system-integration-event-metadata-budget-exceeded", bridgeSource, StringComparison.Ordinal);
 
         // Diagnostic payload must remain machine-checkable.
         Assert.Contains("public sealed class WebViewHostCapabilityDiagnosticEventArgs", bridgeSource, StringComparison.Ordinal);
@@ -493,6 +506,12 @@ public sealed class AutomationLaneGovernanceTests
         Assert.Contains("_options.HostCapabilityBridge.ExecuteSystemAction(", shellSource, StringComparison.Ordinal);
         Assert.Contains("_options.HostCapabilityBridge.DispatchSystemIntegrationEvent(", shellSource, StringComparison.Ordinal);
         Assert.Contains("SystemIntegrationEventReceived", shellSource, StringComparison.Ordinal);
+        Assert.Contains("profile.ProfileVersion", shellSource, StringComparison.Ordinal);
+        Assert.Contains("profile.ProfileHash", shellSource, StringComparison.Ordinal);
+        Assert.Contains("public string? ProfileVersion { get; init; }", profileSource, StringComparison.Ordinal);
+        Assert.Contains("public string? ProfileHash { get; init; }", profileSource, StringComparison.Ordinal);
+        Assert.Contains("public string? ProfileVersion { get; }", profileSource, StringComparison.Ordinal);
+        Assert.Contains("public string? ProfileHash { get; }", profileSource, StringComparison.Ordinal);
     }
 
     [Fact]

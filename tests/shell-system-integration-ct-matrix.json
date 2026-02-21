@@ -20,6 +20,14 @@
         {
           "file": "tests/Agibuild.Avalonia.WebView.UnitTests/HostCapabilityBridgeTests.cs",
           "testMethod": "Invalid_inbound_system_integration_metadata_is_denied_before_policy_and_dispatch"
+        },
+        {
+          "file": "tests/Agibuild.Avalonia.WebView.UnitTests/HostCapabilityBridgeTests.cs",
+          "testMethod": "Over_budget_inbound_system_integration_metadata_is_denied_before_policy_and_dispatch"
+        },
+        {
+          "file": "tests/Agibuild.Avalonia.WebView.UnitTests/ShellSystemIntegrationCapabilityTests.cs",
+          "testMethod": "Over_budget_inbound_tray_metadata_is_denied_before_web_delivery"
         }
       ]
     },
@@ -38,6 +46,10 @@
         {
           "file": "tests/Agibuild.Avalonia.WebView.UnitTests/ShellSystemIntegrationCapabilityTests.cs",
           "testMethod": "Profile_allow_then_policy_deny_keeps_previous_effective_menu_state"
+        },
+        {
+          "file": "tests/Agibuild.Avalonia.WebView.UnitTests/ShellSystemIntegrationCapabilityTests.cs",
+          "testMethod": "Profile_revision_metadata_is_optional_and_emits_stable_null_fields"
         },
         {
           "file": "tests/Agibuild.Avalonia.WebView.UnitTests/ShellSystemIntegrationCapabilityTests.cs",

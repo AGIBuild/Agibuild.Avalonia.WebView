@@ -363,7 +363,9 @@ public sealed class WebViewHostCapabilityBridge
     private const int MaxSystemIntegrationMetadataEntries = 8;
     private const int MaxSystemIntegrationMetadataKeyLength = 64;
     private const int MaxSystemIntegrationMetadataValueLength = 256;
+    private const int MaxSystemIntegrationMetadataTotalLength = 1024;
     private const string SystemIntegrationMetadataEnvelopeInvalid = "system-integration-event-metadata-envelope-invalid";
+    private const string SystemIntegrationMetadataBudgetExceeded = "system-integration-event-metadata-budget-exceeded";
 
     private readonly IWebViewHostCapabilityProvider _provider;
     private readonly IWebViewHostCapabilityPolicy? _policy;
@@ -580,8 +582,8 @@ public sealed class WebViewHostCapabilityBridge
             parentWindowId,
             targetWindowId,
             operation);
-        if (!IsMetadataEnvelopeValid(request.Metadata))
-            return DenyWithDiagnostic<WebViewSystemIntegrationEventRequest>(context, SystemIntegrationMetadataEnvelopeInvalid);
+        if (!TryValidateMetadataEnvelope(request.Metadata, out var metadataDenyReason))
+            return DenyWithDiagnostic<WebViewSystemIntegrationEventRequest>(context, metadataDenyReason);
 
         return Execute(
             context,
@@ -657,20 +659,39 @@ public sealed class WebViewHostCapabilityBridge
         }
     }
 
-    private static bool IsMetadataEnvelopeValid(IReadOnlyDictionary<string, string> metadata)
+    private static bool TryValidateMetadataEnvelope(IReadOnlyDictionary<string, string> metadata, out string denyReason)
     {
         if (metadata.Count > MaxSystemIntegrationMetadataEntries)
+        {
+            denyReason = SystemIntegrationMetadataEnvelopeInvalid;
             return false;
+        }
+
+        var totalLength = 0;
 
         foreach (var pair in metadata)
         {
             if (string.IsNullOrWhiteSpace(pair.Key) || pair.Key.Length > MaxSystemIntegrationMetadataKeyLength)
+            {
+                denyReason = SystemIntegrationMetadataEnvelopeInvalid;
                 return false;
+            }
 
             if (pair.Value is null || pair.Value.Length > MaxSystemIntegrationMetadataValueLength)
+            {
+                denyReason = SystemIntegrationMetadataEnvelopeInvalid;
                 return false;
+            }
+
+            totalLength += pair.Key.Length + pair.Value.Length;
+            if (totalLength > MaxSystemIntegrationMetadataTotalLength)
+            {
+                denyReason = SystemIntegrationMetadataBudgetExceeded;
+                return false;
+            }
         }
 
+        denyReason = string.Empty;
         return true;
     }
 

@@ -23,14 +23,19 @@ public partial class MainWindow
         var capabilityBridge = new WebViewHostCapabilityBridge(
             new TemplateHostCapabilityProvider(),
             new TemplateHostCapabilityPolicy());
+        var systemActionWhitelist = new HashSet<WebViewSystemAction>
+        {
+            WebViewSystemAction.FocusMainWindow
+        };
+        const bool enableShowAboutAction = false;
+        // ShowAbout opt-in snippet marker: keep default deny unless host explicitly enables this flag.
+        if (enableShowAboutAction)
+            systemActionWhitelist.Add(WebViewSystemAction.ShowAbout);
         _shell = new WebViewShellExperience(WebView, new WebViewShellExperienceOptions
         {
             NewWindowPolicy = new NavigateInPlaceNewWindowPolicy(),
             // Explicit allowlist marker: ShowAbout remains disabled unless explicitly added.
-            SystemActionWhitelist = new HashSet<WebViewSystemAction>
-            {
-                WebViewSystemAction.FocusMainWindow
-            },
+            SystemActionWhitelist = systemActionWhitelist,
             MenuPruningPolicy = new DelegateMenuPruningPolicy((_, context) =>
             {
                 // Template policy keeps top-level menu compact and deterministic.
@@ -50,6 +55,8 @@ public partial class MainWindow
                 new WebViewSessionPermissionProfile
                 {
                     ProfileIdentity = "template-shell-profile",
+                    ProfileVersion = "2026.02.21",
+                    ProfileHash = "sha256:template-shell-profile",
                     DefaultPermissionDecision = WebViewPermissionProfileDecision.DefaultFallback(),
                     PermissionDecisions = new Dictionary<WebViewPermissionKind, WebViewPermissionProfileDecision>
                     {
