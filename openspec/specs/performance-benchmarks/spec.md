@@ -1,15 +1,25 @@
-# Performance Benchmarks Spec
-
-## Overview
-BenchmarkDotNet-based micro-benchmarks for Bridge and RPC dispatch overhead.
+## Purpose
+Define benchmark governance for bridge and RPC dispatch performance baselines.
 
 ## Requirements
 
-### PB-1: Bridge typed call benchmark
-- Measure full JS→C# typed call dispatch via MockWebViewAdapter
+### Requirement: Typed bridge call benchmark is maintained
+The benchmark suite SHALL include typed bridge-call dispatch measurements through deterministic harnesses such as `MockWebViewAdapter`.
 
-### PB-2: Lifecycle benchmark
-- Measure Expose + Remove cycle overhead
+#### Scenario: Typed bridge benchmark can be executed
+- **WHEN** benchmark automation runs typed call benchmarks
+- **THEN** typed dispatch metrics are produced deterministically
 
-### PB-3: Raw RPC baseline
-- Measure raw handler dispatch for comparison
+### Requirement: Bridge lifecycle benchmark is maintained
+The benchmark suite SHALL measure lifecycle overhead for expose/remove operations.
+
+#### Scenario: Expose/remove overhead is measurable
+- **WHEN** lifecycle benchmark runs
+- **THEN** expose/remove cost metrics are captured for regression tracking
+
+### Requirement: Raw RPC baseline benchmark is maintained
+The benchmark suite SHALL include raw RPC handler dispatch as a baseline for comparing higher-level bridge abstractions.
+
+#### Scenario: Raw baseline provides comparison anchor
+- **WHEN** both raw RPC and typed bridge benchmarks are executed
+- **THEN** output includes comparable metrics for baseline and layered dispatch paths

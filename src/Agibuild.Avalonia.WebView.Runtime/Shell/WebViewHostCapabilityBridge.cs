@@ -304,6 +304,9 @@ public sealed class WebViewHostCapabilityCallResult<T>
 /// </summary>
 public sealed class WebViewHostCapabilityDiagnosticEventArgs : EventArgs
 {
+    /// <summary>Current schema version for host capability diagnostics.</summary>
+    public const int CurrentDiagnosticSchemaVersion = 1;
+
     /// <summary>Create diagnostic payload.</summary>
     public WebViewHostCapabilityDiagnosticEventArgs(
         Guid correlationId,
@@ -329,6 +332,7 @@ public sealed class WebViewHostCapabilityDiagnosticEventArgs : EventArgs
         DenyReason = denyReason;
         FailureCategory = failureCategory;
         DurationMilliseconds = durationMilliseconds;
+        DiagnosticSchemaVersion = CurrentDiagnosticSchemaVersion;
     }
 
     /// <summary>Stable call correlation id.</summary>
@@ -353,6 +357,8 @@ public sealed class WebViewHostCapabilityDiagnosticEventArgs : EventArgs
     public WebViewOperationFailureCategory? FailureCategory { get; }
     /// <summary>Elapsed duration in milliseconds.</summary>
     public long DurationMilliseconds { get; }
+    /// <summary>Diagnostic payload schema version.</summary>
+    public int DiagnosticSchemaVersion { get; }
 }
 
 /// <summary>

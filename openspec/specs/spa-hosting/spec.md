@@ -1,43 +1,39 @@
-# SPA Hosting Spec
-
-## Overview
-First-class SPA hosting via custom URL schemes with embedded resources or dev server proxy.
+## Purpose
+Define SPA hosting contracts for embedded-resource serving and development proxy behavior.
 
 ## Requirements
 
-### SH-1: SpaHostingOptions
-- Scheme (default: "app"), Host (default: "localhost"), FallbackDocument (default: "index.html")
-- EmbeddedResourcePrefix + ResourceAssembly for production mode
-- DevServerUrl for development proxy mode
-- AutoInjectBridgeScript (default: true)
-- DefaultHeaders for CSP/CORS
+### Requirement: SpaHostingOptions define deterministic hosting configuration
+`SpaHostingOptions` SHALL define scheme/host/fallback configuration, production resource settings, development proxy URL, bridge auto-injection behavior, and default headers.
 
-### SH-2: Embedded resource serving
-- Resolves `app://localhost/{path}` to Assembly.GetManifestResourceStream
-- Resource name: `{AssemblyName}.{Prefix}.{path.Replace('/','.') }`
-- Returns 404 with "Not Found" body if resource missing
+#### Scenario: Hosting options configure both production and development paths
+- **WHEN** an app configures `SpaHostingOptions`
+- **THEN** the runtime can resolve deterministic production and development hosting behavior
 
-### SH-3: SPA router fallback
-- Paths without file extension serve FallbackDocument
-- Missing files also fallback to FallbackDocument before returning 404
+### Requirement: Embedded-resource serving and SPA fallback are deterministic
+SPA hosting SHALL resolve custom-scheme requests from embedded resources and SHALL apply fallback-document behavior for router paths according to configured policy.
 
-### SH-4: Dev server proxy
-- Synchronous HttpClient.Send to dev server URL
-- Fallback to FallbackDocument on non-success responses
-- Returns 502 on connection failures
+#### Scenario: Missing route resolves to fallback document
+- **WHEN** a route without a physical asset is requested under SPA hosting
+- **THEN** the configured fallback document is served before terminal not-found handling
 
-### SH-5: MIME type detection
-- 40+ extension→MIME mappings for common web assets
-- Default: application/octet-stream
+### Requirement: Development proxy behavior is governed
+Development mode SHALL proxy to the configured dev server, SHALL apply configured fallback behavior on non-success responses, and SHALL return deterministic gateway failure diagnostics when the upstream is unreachable.
 
-### SH-6: Caching headers
-- Hashed filenames (8+ hex chars): `Cache-Control: public, max-age=31536000, immutable`
-- Other files: `Cache-Control: no-cache`
+#### Scenario: Unreachable dev server returns gateway failure
+- **WHEN** the configured dev server is unavailable
+- **THEN** SPA hosting returns deterministic gateway-failure behavior for the request
 
-### SH-7: WebViewCore integration
-- `EnableSpaHosting(options)`: registers custom scheme, subscribes WebResourceRequested
-- Auto-enables WebMessage bridge if AutoInjectBridgeScript
-- Dispose cleans up SpaHostingService
+### Requirement: MIME and cache policy behavior is explicit
+SPA hosting SHALL apply deterministic MIME detection and cache headers for hashed and non-hashed assets.
 
-## Test Coverage
-- 28 CTs in `SpaHostingTests`
+#### Scenario: Hashed assets receive immutable cache policy
+- **WHEN** a hashed static asset is served
+- **THEN** response headers include long-lived immutable cache directives
+
+### Requirement: WebViewCore integration lifecycle is deterministic
+`EnableSpaHosting(options)` SHALL register scheme/resource interception hooks and SHALL dispose hosting resources during runtime teardown.
+
+#### Scenario: Hosting resources are released on dispose
+- **WHEN** runtime teardown is executed
+- **THEN** SPA hosting integration resources are disposed without leakage

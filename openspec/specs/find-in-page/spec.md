@@ -1,3 +1,6 @@
+## Purpose
+Define find-in-page contracts for search execution, lifecycle, and adapter support detection.
+
 ## Requirements
 
 ### Requirement: FindInPageAsync initiates text search

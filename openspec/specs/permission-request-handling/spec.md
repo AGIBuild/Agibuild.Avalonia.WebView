@@ -1,3 +1,6 @@
+## Purpose
+Define permission request contracts for policy control and adapter event propagation.
+
 ## Requirements
 
 ### Requirement: WebViewPermissionKind enum in Core
@@ -50,7 +53,7 @@ The runtime SHALL detect `IPermissionAdapter` support via type check and subscri
 - **THEN** `PermissionRequested` is never raised and no error occurs
 
 ### Requirement: Consumer can control permission via event args
-When `PermissionRequested` is raised:
+The runtime SHALL honor consumer permission decisions when `PermissionRequested` is raised:
 - If consumer sets `State = Allow`, the permission SHALL be granted
 - If consumer sets `State = Deny`, the permission SHALL be denied
 - If `State` remains `Default`, the platform's native handling applies

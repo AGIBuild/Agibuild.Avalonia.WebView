@@ -1,3 +1,6 @@
+## Purpose
+Define deterministic webmessage policy contracts and drop diagnostics.
+
 ## Requirements
 
 ### Requirement: WebMessage policy contracts are platform-agnostic

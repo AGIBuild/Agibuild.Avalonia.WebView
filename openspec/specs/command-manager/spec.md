@@ -1,3 +1,6 @@
+## Purpose
+Define command-manager contracts for editing commands across runtime and adapters.
+
 ## Requirements
 
 ### Requirement: ICommandManager defines standard editing commands

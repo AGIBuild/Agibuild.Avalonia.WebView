@@ -1,26 +1,25 @@
-# Bridge Mock Spec
-
-## Overview
-MockBridgeService for unit testing ViewModels and services that depend on IBridgeService.
+## Purpose
+Define deterministic mock-bridge contracts for unit testing bridge-dependent components.
 
 ## Requirements
 
-### RM-1: MockBridgeService implements IBridgeService
-- `Expose<T>`: records implementation in ConcurrentDictionary
-- `GetProxy<T>`: returns pre-configured proxy (via SetupProxy)
-- `Remove<T>`: removes recorded implementation
+### Requirement: MockBridgeService implements IBridgeService semantics
+The testing harness SHALL provide `MockBridgeService` implementing `IBridgeService` with deterministic behavior for `Expose<T>`, `GetProxy<T>`, and `Remove<T>`.
 
-### RM-2: Setup helpers
-- `SetupProxy<T>(T proxy)`: configures proxy returned by GetProxy
+#### Scenario: Expose and remove operations are observable
+- **WHEN** a test exposes and then removes a service type
+- **THEN** the mock records the exposure and removes the registration deterministically
 
-### RM-3: Assertion helpers
-- `WasExposed<T>()`: returns true if Expose was called
-- `GetExposedImplementation<T>()`: returns stored implementation
-- `ExposedCount`: number of exposed services
-- `Reset()`: clears all state
+### Requirement: MockBridgeService supports proxy setup and assertions
+`MockBridgeService` SHALL provide setup and assertion helpers including `SetupProxy<T>`, `WasExposed<T>`, `GetExposedImplementation<T>`, `ExposedCount`, and `Reset()`.
 
-### RM-4: Lifecycle
-- `Dispose()` makes all operations throw ObjectDisposedException
+#### Scenario: Proxy setup drives GetProxy deterministically
+- **WHEN** a test configures a proxy via `SetupProxy<T>(proxy)`
+- **THEN** subsequent `GetProxy<T>()` returns the configured proxy instance
 
-## Test Coverage
-- 8 CTs in `MockBridgeServiceTests`
+### Requirement: MockBridgeService enforces disposal lifecycle
+After `Dispose()` is called, mock bridge operations SHALL fail with `ObjectDisposedException`.
+
+#### Scenario: Operations after dispose are rejected
+- **WHEN** a test invokes bridge operations after `Dispose()`
+- **THEN** the mock throws `ObjectDisposedException` deterministically

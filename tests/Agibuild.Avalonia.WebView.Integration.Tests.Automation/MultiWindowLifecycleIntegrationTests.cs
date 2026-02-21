@@ -239,5 +239,6 @@ public sealed class MultiWindowLifecycleIntegrationTests
         Assert.Equal(iterations, createdWindowIds.Count);
         Assert.Equal(createdWindowIds.Count, closedWindowIds.Count);
         Assert.Equal(iterations, profileDecisionDiagnostics.Count);
+        Assert.All(profileDecisionDiagnostics, DiagnosticSchemaAssertionHelper.AssertSessionProfileDiagnostic);
     }
 }

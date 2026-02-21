@@ -254,6 +254,10 @@ The smoke suite SHALL validate, at minimum:
 ### Requirement: Repository test projects SHALL use xUnit v3 package baseline
 All repository-owned test projects that currently depend on xUnit v2 packages SHALL migrate to `xunit.v3` while preserving compatibility with `dotnet test` execution in local and CI environments.
 
+#### Scenario: Repository-owned tests migrate from xUnit v2 to v3 baseline
+- **WHEN** repository-owned test projects are inspected after migration
+- **THEN** legacy `xunit` v2 references are replaced by `xunit.v3` baseline packages
+
 ### Requirement: xUnit v3 package versions are consistent across repository-owned test projects
 All repository-owned test projects (including templates and samples) that use xUnit v3 SHALL use a single, consistent package version baseline for the xUnit v3 stack to avoid discovery/execution drift.
 

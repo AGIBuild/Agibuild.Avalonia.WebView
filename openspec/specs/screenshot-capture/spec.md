@@ -1,3 +1,6 @@
+## Purpose
+Define screenshot capture contracts across runtime, adapter facets, and surfaces.
+
 ## Requirements
 
 ### Requirement: IWebView includes CaptureScreenshotAsync

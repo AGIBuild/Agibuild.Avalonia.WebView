@@ -1,4 +1,7 @@
-## ADDED Requirements
+## Purpose
+Define the React sample application contracts for bridge services, hosting, and E2E behavior.
+
+## Requirements
 
 ### Requirement: Sample project structure
 The sample SHALL be organized as a multi-project solution at `samples/avalonia-react/` with four projects: `AvaloniReact.Desktop` (Avalonia host), `AvaloniReact.Bridge` (shared interfaces/models/implementations), `AvaloniReact.Web` (React + Vite + TypeScript), and `AvaloniReact.Tests` (xUnit unit tests).

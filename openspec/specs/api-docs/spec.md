@@ -1,23 +1,32 @@
-# API Docs Spec
-
-## Overview
-API reference site and topical guides for Agibuild.Avalonia.WebView.
+## Purpose
+Define API documentation governance for reference generation and user-facing guides.
 
 ## Requirements
 
-### AD-1: XML doc generation
-- GenerateDocumentationFile enabled globally (Directory.Build.props)
-- Disabled for tests and benchmarks
+### Requirement: XML documentation generation is enabled for product assemblies
+The build system SHALL enable XML documentation generation for product assemblies and SHALL disable it for tests and benchmarks.
 
-### AD-2: docfx configuration
-- docfx.json for Core, Runtime, WebView projects
-- Metadata from project files; flattened namespace layout
-- Modern template; output to _site
+#### Scenario: XML docs are generated for product projects
+- **WHEN** product projects are built
+- **THEN** XML documentation files are emitted and included in doc metadata inputs
 
-### AD-3: Getting Started guide
-- Prerequisites, Quick Start (template), Manual Setup, Navigation
+### Requirement: docfx configuration is repository-governed
+The repository SHALL include docfx configuration for the core runtime/public surface and SHALL publish site output to a deterministic `_site` directory.
 
-### AD-4: Topic guides
-- Bridge guide: [JsExport]/[JsImport], bridge usage
-- SPA Hosting guide: embedded resources, dev proxy
-- Architecture guide: design overview
+#### Scenario: docfx metadata and site output are deterministic
+- **WHEN** docfx build runs in CI or local automation
+- **THEN** metadata is produced from project files and site content is generated under `_site`
+
+### Requirement: Getting Started guide is maintained
+The documentation set SHALL include a Getting Started guide covering prerequisites, template quick start, manual setup, and navigation basics.
+
+#### Scenario: Getting Started guide covers onboarding path
+- **WHEN** a new contributor follows the Getting Started article
+- **THEN** they can complete setup and run a baseline sample flow
+
+### Requirement: Topic guides are maintained for core workflows
+The documentation set SHALL include dedicated topic guides for bridge usage, SPA hosting, and architecture overview.
+
+#### Scenario: Topic guides are discoverable from docs index
+- **WHEN** a user browses documentation topics
+- **THEN** bridge, SPA hosting, and architecture guides are available and linked

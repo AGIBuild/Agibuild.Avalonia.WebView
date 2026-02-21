@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using Agibuild.Avalonia.WebView.Testing;
 using Xunit;
 
 namespace Agibuild.Avalonia.WebView.UnitTests;
@@ -470,14 +471,42 @@ public sealed class AutomationLaneGovernanceTests
             "Agibuild.Avalonia.WebView.Runtime",
             "Shell",
             "WebViewSessionPermissionProfiles.cs");
+        var helperPath = Path.Combine(
+            repoRoot,
+            "tests",
+            "Agibuild.Avalonia.WebView.Testing",
+            "DiagnosticSchemaAssertionHelper.cs");
+        var hostCapabilityUnitTestPath = Path.Combine(
+            repoRoot,
+            "tests",
+            "Agibuild.Avalonia.WebView.UnitTests",
+            "HostCapabilityBridgeTests.cs");
+        var hostCapabilityIntegrationTestPath = Path.Combine(
+            repoRoot,
+            "tests",
+            "Agibuild.Avalonia.WebView.Integration.Tests.Automation",
+            "HostCapabilityBridgeIntegrationTests.cs");
+        var profileIntegrationTestPath = Path.Combine(
+            repoRoot,
+            "tests",
+            "Agibuild.Avalonia.WebView.Integration.Tests.Automation",
+            "MultiWindowLifecycleIntegrationTests.cs");
 
         Assert.True(File.Exists(bridgePath), $"Missing host capability bridge source: {bridgePath}");
         Assert.True(File.Exists(shellPath), $"Missing shell experience source: {shellPath}");
         Assert.True(File.Exists(profilePath), $"Missing session permission profile source: {profilePath}");
+        Assert.True(File.Exists(helperPath), $"Missing diagnostic schema helper source: {helperPath}");
+        Assert.True(File.Exists(hostCapabilityUnitTestPath), $"Missing host capability unit test source: {hostCapabilityUnitTestPath}");
+        Assert.True(File.Exists(hostCapabilityIntegrationTestPath), $"Missing host capability integration test source: {hostCapabilityIntegrationTestPath}");
+        Assert.True(File.Exists(profileIntegrationTestPath), $"Missing profile integration test source: {profileIntegrationTestPath}");
 
         var bridgeSource = File.ReadAllText(bridgePath);
         var shellSource = File.ReadAllText(shellPath);
         var profileSource = File.ReadAllText(profilePath);
+        var helperSource = File.ReadAllText(helperPath);
+        var hostCapabilityUnitTestSource = File.ReadAllText(hostCapabilityUnitTestPath);
+        var hostCapabilityIntegrationTestSource = File.ReadAllText(hostCapabilityIntegrationTestPath);
+        var profileIntegrationTestSource = File.ReadAllText(profileIntegrationTestPath);
 
         // Outcome schema must keep deterministic allow/deny/failure model.
         Assert.Contains("public enum WebViewHostCapabilityCallOutcome", bridgeSource, StringComparison.Ordinal);
@@ -498,10 +527,21 @@ public sealed class AutomationLaneGovernanceTests
 
         // Diagnostic payload must remain machine-checkable.
         Assert.Contains("public sealed class WebViewHostCapabilityDiagnosticEventArgs", bridgeSource, StringComparison.Ordinal);
+        Assert.Contains(
+            $"CurrentDiagnosticSchemaVersion = {DiagnosticSchemaAssertionHelper.HostCapabilitySchemaVersion}",
+            bridgeSource,
+            StringComparison.Ordinal);
+        Assert.Contains("public int DiagnosticSchemaVersion { get; }", bridgeSource, StringComparison.Ordinal);
         Assert.Contains("public Guid CorrelationId { get; }", bridgeSource, StringComparison.Ordinal);
         Assert.Contains("public WebViewHostCapabilityCallOutcome Outcome { get; }", bridgeSource, StringComparison.Ordinal);
         Assert.Contains("public WebViewOperationFailureCategory? FailureCategory { get; }", bridgeSource, StringComparison.Ordinal);
         Assert.Contains("CapabilityCallCompleted", bridgeSource, StringComparison.Ordinal);
+        Assert.Contains("public static class DiagnosticSchemaAssertionHelper", helperSource, StringComparison.Ordinal);
+        Assert.Contains("AssertHostCapabilityDiagnostic", helperSource, StringComparison.Ordinal);
+        Assert.Contains("AssertSessionProfileDiagnostic", helperSource, StringComparison.Ordinal);
+        Assert.Contains("DiagnosticSchemaAssertionHelper.AssertHostCapabilityDiagnostic", hostCapabilityUnitTestSource, StringComparison.Ordinal);
+        Assert.Contains("DiagnosticSchemaAssertionHelper.AssertHostCapabilityDiagnostic", hostCapabilityIntegrationTestSource, StringComparison.Ordinal);
+        Assert.Contains("DiagnosticSchemaAssertionHelper.AssertSessionProfileDiagnostic", profileIntegrationTestSource, StringComparison.Ordinal);
 
         // External open must route through typed capability bridge without legacy fallback handler path.
         Assert.Contains("Host capability bridge is required for ExternalBrowser strategy.", shellSource, StringComparison.Ordinal);
@@ -518,8 +558,34 @@ public sealed class AutomationLaneGovernanceTests
         Assert.Contains("public string? ProfileHash { get; init; }", profileSource, StringComparison.Ordinal);
         Assert.Contains("public string? ProfileVersion { get; }", profileSource, StringComparison.Ordinal);
         Assert.Contains("public string? ProfileHash { get; }", profileSource, StringComparison.Ordinal);
+        Assert.Contains(
+            $"CurrentDiagnosticSchemaVersion = {DiagnosticSchemaAssertionHelper.SessionProfileSchemaVersion}",
+            profileSource,
+            StringComparison.Ordinal);
+        Assert.Contains("public int DiagnosticSchemaVersion { get; }", profileSource, StringComparison.Ordinal);
         Assert.Contains("NormalizeProfileVersion", profileSource, StringComparison.Ordinal);
         Assert.Contains("NormalizeProfileHash", profileSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Ci_targets_enforce_openspec_strict_governance_gate()
+    {
+        var repoRoot = FindRepoRoot();
+        var buildPath = Path.Combine(repoRoot, "build", "Build.cs");
+        Assert.True(File.Exists(buildPath), $"Missing build source: {buildPath}");
+
+        var source = File.ReadAllText(buildPath);
+        Assert.Contains("Target OpenSpecStrictGovernance", source, StringComparison.Ordinal);
+        Assert.Contains("validate --all --strict", source, StringComparison.Ordinal);
+        Assert.Contains("RunProcessCaptureAllChecked(", source, StringComparison.Ordinal);
+        Assert.Contains("OpenSpecStrictGovernanceReportFile", source, StringComparison.Ordinal);
+
+        Assert.Matches(
+            new Regex(@"Target\s+Ci\s*=>[\s\S]*?\.DependsOn\([\s\S]*OpenSpecStrictGovernance[\s\S]*\);", RegexOptions.Multiline),
+            source);
+        Assert.Matches(
+            new Regex(@"Target\s+CiPublish\s*=>[\s\S]*?\.DependsOn\([\s\S]*OpenSpecStrictGovernance[\s\S]*\);", RegexOptions.Multiline),
+            source);
     }
 
     [Fact]

@@ -1,3 +1,6 @@
+## Purpose
+Define platform-agnostic dispatcher contracts for deterministic UI-thread marshaling.
+
 ## Requirements
 
 ### Requirement: Dispatcher contracts are platform-agnostic

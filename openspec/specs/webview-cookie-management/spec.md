@@ -1,3 +1,6 @@
+## Purpose
+Define cookie-management contracts for runtime APIs and adapter-dependent availability.
+
 ## Requirements
 
 ### Requirement: ICookieManager provides async CRUD operations

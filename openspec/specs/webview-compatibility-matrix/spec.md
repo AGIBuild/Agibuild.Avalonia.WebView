@@ -1,3 +1,6 @@
+## Purpose
+Define compatibility-matrix governance contracts and acceptance-criteria traceability.
+
 ## Requirements
 
 ### Requirement: Compatibility matrix exists and is versioned

@@ -1,3 +1,6 @@
+## Purpose
+Define preload script contracts for early injection, removal, and adapter capability checks.
+
 ## Requirements
 
 ### Requirement: AddPreloadScript registers early JS injection

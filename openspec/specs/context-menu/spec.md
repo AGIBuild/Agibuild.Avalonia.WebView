@@ -1,3 +1,6 @@
+## Purpose
+Define context-menu interception contracts and forwarding behavior for WebView surfaces.
+
 ## Requirements
 
 ### Requirement: ContextMenuRequested event fires on right-click

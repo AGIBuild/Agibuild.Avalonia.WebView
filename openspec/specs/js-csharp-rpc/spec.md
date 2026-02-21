@@ -1,3 +1,6 @@
+## Purpose
+Define deterministic JSON-RPC contracts for JS and C# bidirectional invocation.
+
 ## Requirements
 
 ### Requirement: IWebViewRpcService interface in Core
@@ -64,7 +67,7 @@ The `params` and `result` fields SHALL be serialized using `CamelCase` naming po
 - **THEN** the deserialized `UserProfile` has `UserName == "Alice"` and `IsAdmin == true`
 
 ### Requirement: Error propagation
-When a handler throws an exception:
+The RPC runtime SHALL propagate errors when a handler throws an exception:
 - C# exception → JS receives rejected Promise with error message
 - JS error → C# receives exception with error message
 

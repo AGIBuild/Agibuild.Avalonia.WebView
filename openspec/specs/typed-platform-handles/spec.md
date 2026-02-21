@@ -1,3 +1,6 @@
+## Purpose
+Define typed platform-handle contracts for cross-platform native handle access.
+
 ## Requirements
 
 ### Requirement: Typed Windows WebView2 platform handle interface

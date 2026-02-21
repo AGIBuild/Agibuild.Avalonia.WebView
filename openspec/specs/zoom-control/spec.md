@@ -1,3 +1,6 @@
+## Purpose
+Define zoom-control contracts for WebView runtime, adapter facets, and UI surfaces.
+
 ## Requirements
 
 ### Requirement: ZoomFactor property get/set

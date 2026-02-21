@@ -1,3 +1,6 @@
+## Purpose
+Define platform adapter skeleton contracts and scope boundaries for baseline support.
+
 ## Requirements
 
 ### Requirement: Platform adapter project skeletons

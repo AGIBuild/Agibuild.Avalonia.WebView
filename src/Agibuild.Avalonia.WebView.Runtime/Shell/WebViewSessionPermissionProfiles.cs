@@ -176,6 +176,9 @@ public sealed class DelegateSessionPermissionProfileResolver : IWebViewSessionPe
 /// </summary>
 public sealed class WebViewSessionPermissionProfileDiagnosticEventArgs : EventArgs
 {
+    /// <summary>Current schema version for session permission profile diagnostics.</summary>
+    public const int CurrentDiagnosticSchemaVersion = 1;
+
     /// <summary>Create profile diagnostic args.</summary>
     public WebViewSessionPermissionProfileDiagnosticEventArgs(
         Guid windowId,
@@ -197,6 +200,7 @@ public sealed class WebViewSessionPermissionProfileDiagnosticEventArgs : EventAr
         SessionDecision = sessionDecision;
         PermissionKind = permissionKind;
         PermissionDecision = permissionDecision;
+        DiagnosticSchemaVersion = CurrentDiagnosticSchemaVersion;
     }
 
     /// <summary>Window identity associated with this evaluation.</summary>
@@ -225,4 +229,7 @@ public sealed class WebViewSessionPermissionProfileDiagnosticEventArgs : EventAr
 
     /// <summary>Resolved permission profile decision.</summary>
     public WebViewPermissionProfileDecision PermissionDecision { get; }
+
+    /// <summary>Diagnostic payload schema version.</summary>
+    public int DiagnosticSchemaVersion { get; }
 }

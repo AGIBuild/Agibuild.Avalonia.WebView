@@ -1,3 +1,6 @@
+## Purpose
+Define web-resource interception contracts for custom schemes and request/response handling.
+
 ## Requirements
 
 ### Requirement: CustomSchemeRegistration type in Core

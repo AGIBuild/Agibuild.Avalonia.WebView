@@ -136,6 +136,7 @@ class _Build : NukeBuild
     AbsolutePath AutomationLaneReportFile => TestResultsDirectory / "automation-lane-report.json";
     AbsolutePath NugetSmokeTelemetryFile => TestResultsDirectory / "nuget-smoke-retry-telemetry.json";
     AbsolutePath WarningGovernanceReportFile => TestResultsDirectory / "warning-governance-report.json";
+    AbsolutePath OpenSpecStrictGovernanceReportFile => TestResultsDirectory / "openspec-strict-governance.log";
     AbsolutePath AutomationLaneManifestFile => TestsDirectory / "automation-lanes.json";
     AbsolutePath RuntimeCriticalPathManifestFile => TestsDirectory / "runtime-critical-path.manifest.json";
     AbsolutePath WarningGovernanceBaselineFile => TestsDirectory / "warning-governance.baseline.json";
@@ -488,6 +489,26 @@ class _Build : NukeBuild
         .Executes(() =>
         {
             RunSyntheticWarningGovernanceChecks();
+        });
+
+    Target OpenSpecStrictGovernance => _ => _
+        .Description("Runs OpenSpec strict validation as a hard governance gate.")
+        .Executes(() =>
+        {
+            TestResultsDirectory.CreateDirectory();
+            var output = OperatingSystem.IsWindows()
+                ? RunProcessCaptureAllChecked(
+                    "powershell",
+                    "-NoLogo -NoProfile -ExecutionPolicy Bypass -Command \"openspec validate --all --strict\"",
+                    workingDirectory: RootDirectory,
+                    timeoutMs: 180_000)
+                : RunProcessCaptureAllChecked(
+                    "bash",
+                    "-lc \"openspec validate --all --strict\"",
+                    workingDirectory: RootDirectory,
+                    timeoutMs: 180_000);
+            File.WriteAllText(OpenSpecStrictGovernanceReportFile, output);
+            Serilog.Log.Information("OpenSpec strict governance report written to {Path}", OpenSpecStrictGovernanceReportFile);
         });
 
     Target Pack => _ => _
@@ -1526,11 +1547,11 @@ class _Build : NukeBuild
 
     Target Ci => _ => _
         .Description("Full CI pipeline: compile → coverage → lane automation → pack → validate.")
-        .DependsOn(Coverage, AutomationLaneReport, WarningGovernance, ValidatePackage);
+        .DependsOn(Coverage, AutomationLaneReport, WarningGovernance, OpenSpecStrictGovernance, ValidatePackage);
 
     Target CiPublish => _ => _
         .Description("Full release pipeline: compile → coverage → lane automation → package smoke → publish.")
-        .DependsOn(Coverage, AutomationLaneReport, WarningGovernance, NugetPackageTest, PackTemplate, Publish);
+        .DependsOn(Coverage, AutomationLaneReport, WarningGovernance, OpenSpecStrictGovernance, NugetPackageTest, PackTemplate, Publish);
 
     void EvaluateWarningGovernance(bool failOnIssues)
     {

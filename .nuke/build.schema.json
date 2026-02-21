@@ -33,6 +33,7 @@
         "Coverage",
         "IntegrationTests",
         "NugetPackageTest",
+        "OpenSpecStrictGovernance",
         "Pack",
         "PackTemplate",
         "Publish",

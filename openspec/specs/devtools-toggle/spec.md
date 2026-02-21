@@ -1,23 +1,25 @@
-# DevTools Toggle Spec
-
-## Overview
-Runtime API to open/close browser developer tools.
+## Purpose
+Define devtools-toggle contracts for runtime API surface and adapter support behavior.
 
 ## Requirements
 
-### DT-1: IDevToolsAdapter
-- Internal interface in Abstractions
-- OpenDevTools(), CloseDevTools(), IsDevToolsOpen
+### Requirement: DevTools adapter facet contract is defined
+Adapter abstractions SHALL define a devtools facet exposing open, close, and state-query operations.
 
-### DT-2: IWebView surface
-- Public OpenDevTools(), CloseDevTools(), IsDevToolsOpen on IWebView
-- No-op when adapter does not implement IDevToolsAdapter
+#### Scenario: DevTools facet members are available
+- **WHEN** consumers inspect adapter devtools contracts
+- **THEN** open/close/state members are present with deterministic signatures
 
-### DT-3: Platform support
-- Windows (WebView2): OpenDevTools via OpenDevToolsWindow()
-- macOS/iOS: no-op (no public WKWebView API)
-- Android: no-op (debug controlled at init)
-- GTK: no-op (TODO: webkit_web_inspector_show)
+### Requirement: IWebView exposes devtools control surface
+`IWebView` SHALL expose devtools open/close/state APIs and SHALL preserve deterministic no-op behavior when the active adapter does not provide devtools support.
 
-## Test Coverage
-- 3 CTs in DevToolsTests
+#### Scenario: Unsupported adapter path is deterministic no-op
+- **WHEN** devtools APIs are called on an adapter without devtools capability
+- **THEN** calls complete without throwing and without side effects
+
+### Requirement: Platform support matrix is explicit
+Devtools behavior SHALL document platform-specific support, including supported Windows path and explicit no-op behavior on unsupported platforms.
+
+#### Scenario: Platform behavior is predictable by contract
+- **WHEN** platform-specific devtools behavior is reviewed
+- **THEN** support and no-op expectations are explicitly documented

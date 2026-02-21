@@ -109,7 +109,8 @@ public sealed class HostCapabilityBridgeIntegrationTests
         Assert.Equal("system-action-disabled", diagnostics[7].DenyReason);
         Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, diagnostics[8].Outcome);
         Assert.Equal(WebViewHostCapabilityOperation.ExternalOpen, diagnostics[8].Operation);
-        Assert.All(diagnostics, d => Assert.True(d.DurationMilliseconds >= 0));
+        var expectedRootWindowId = diagnostics[0].RootWindowId;
+        Assert.All(diagnostics, d => DiagnosticSchemaAssertionHelper.AssertHostCapabilityDiagnostic(d, expectedRootWindowId));
 
         Assert.Single(policyErrors);
         Assert.Equal(WebViewShellPolicyDomain.SystemIntegration, policyErrors[0].Domain);
@@ -358,6 +359,7 @@ public sealed class HostCapabilityBridgeIntegrationTests
             x.ProfileVersion == "2026.02.21" &&
             x.ProfileHash == $"sha256:{new string('a', 64)}" &&
             x.PermissionDecision.State == PermissionState.Allow);
+        Assert.All(profileDiagnostics, DiagnosticSchemaAssertionHelper.AssertSessionProfileDiagnostic);
 
         Assert.Contains(diagnostics, x => x.Operation == WebViewHostCapabilityOperation.MenuApplyModel
             && x.Outcome == WebViewHostCapabilityCallOutcome.Allow);
@@ -369,6 +371,7 @@ public sealed class HostCapabilityBridgeIntegrationTests
             && x.DenyReason == "system-integration-event-metadata-budget-exceeded");
         Assert.Contains(diagnostics, x => x.Operation == WebViewHostCapabilityOperation.TrayInteractionEventDispatch
             && x.Outcome == WebViewHostCapabilityCallOutcome.Allow);
+        Assert.All(diagnostics, d => DiagnosticSchemaAssertionHelper.AssertHostCapabilityDiagnostic(d, d.RootWindowId));
     }
 
     private sealed class IntegrationCapabilityPolicy : IWebViewHostCapabilityPolicy

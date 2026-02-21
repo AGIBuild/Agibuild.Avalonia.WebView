@@ -120,3 +120,10 @@ The host capability bridge SHALL apply configurable aggregate metadata budget va
 - **WHEN** host configures an in-range aggregate budget value
 - **THEN** bridge uses that value consistently for equivalent inbound payload evaluations
 
+### Requirement: Host capability diagnostics expose explicit schema version
+`WebViewHostCapabilityDiagnosticEventArgs` SHALL expose a deterministic `DiagnosticSchemaVersion` field, and runtime emission SHALL set it for every diagnostic event.
+
+#### Scenario: Allow/deny/failure diagnostics carry schema version
+- **WHEN** host capability diagnostic events are emitted for allow, deny, or failure outcomes
+- **THEN** each event includes a non-zero `DiagnosticSchemaVersion` matching the runtime contract constant
+

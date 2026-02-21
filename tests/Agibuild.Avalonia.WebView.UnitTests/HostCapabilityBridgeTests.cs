@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Agibuild.Avalonia.WebView.Shell;
+using Agibuild.Avalonia.WebView.Testing;
 using Xunit;
 
 namespace Agibuild.Avalonia.WebView.UnitTests;
@@ -180,10 +181,9 @@ public sealed class HostCapabilityBridgeTests
 
         Assert.All(diagnostics, d =>
         {
-            Assert.NotEqual(Guid.Empty, d.CorrelationId);
-            Assert.Equal(root, d.RootWindowId);
-            Assert.True(d.DurationMilliseconds >= 0);
+            DiagnosticSchemaAssertionHelper.AssertHostCapabilityDiagnostic(d, root);
         });
+        Assert.Equal(1, WebViewHostCapabilityDiagnosticEventArgs.CurrentDiagnosticSchemaVersion);
     }
 
     [Fact]

@@ -1,3 +1,6 @@
+## Purpose
+Define download management contracts for events, adapter facets, and consumer control.
+
 ## Requirements
 
 ### Requirement: DownloadRequestedEventArgs type in Core
@@ -38,7 +41,7 @@ The runtime SHALL detect `IDownloadAdapter` support via type check and subscribe
 - **THEN** `DownloadRequested` is never raised and no error occurs
 
 ### Requirement: Consumer can control download via event args
-When `DownloadRequested` is raised:
+The runtime SHALL honor consumer-controlled download outcomes when `DownloadRequested` is raised:
 - If consumer sets `Cancel = true`, the download SHALL be canceled
 - If consumer sets `DownloadPath`, the download SHALL save to that path
 - If consumer sets `Handled = true`, the adapter SHALL not perform any default download action

@@ -1,3 +1,6 @@
+## Purpose
+Define platform-agnostic adapter abstraction contracts and lifecycle guarantees.
+
 ## Requirements
 
 ### Requirement: Adapter abstractions assembly
@@ -138,7 +141,7 @@ The runtime SHALL detect `IPermissionAdapter` support via type check and subscri
 - **THEN** permission events are propagated to consumers via `IWebView.PermissionRequested`
 
 ### Requirement: INativeWebViewHandleProvider is implementable by adapters
-Platform adapters MAY implement `INativeWebViewHandleProvider` to expose the underlying native WebView handle.
+Platform adapters SHALL expose the underlying native WebView handle through `INativeWebViewHandleProvider` when native-handle access is supported.
 The `HandleDescriptor` property of the returned `IPlatformHandle` SHALL identify the native type (e.g., `"WKWebView"`, `"WebView2"`).
 The returned `IPlatformHandle` SHALL also implement the appropriate typed platform handle interface from Core:
 - Windows adapters: `IWindowsWebView2PlatformHandle`

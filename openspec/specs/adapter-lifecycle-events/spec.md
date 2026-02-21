@@ -1,3 +1,6 @@
+## Purpose
+Define adapter lifecycle event contracts for attach/detach sequencing and handle visibility.
+
 ## Requirements
 
 ### Requirement: AdapterCreated event is raised when the adapter is attached

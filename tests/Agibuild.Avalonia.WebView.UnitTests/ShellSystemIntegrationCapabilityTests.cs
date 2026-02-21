@@ -351,6 +351,7 @@ public sealed class ShellSystemIntegrationCapabilityTests
         Assert.Equal(2, profileDiagnostics.Count);
         Assert.All(profileDiagnostics, diag =>
         {
+            DiagnosticSchemaAssertionHelper.AssertSessionProfileDiagnostic(diag);
             Assert.Equal("allow-profile", diag.ProfileIdentity);
             Assert.Equal("2026.02.21", diag.ProfileVersion);
             Assert.Equal($"sha256:{new string('c', 64)}", diag.ProfileHash);
@@ -403,6 +404,7 @@ public sealed class ShellSystemIntegrationCapabilityTests
         Assert.Null(diagnostic.ProfileHash);
         Assert.Equal(WebViewPermissionKind.Other, diagnostic.PermissionKind);
         Assert.Equal(PermissionState.Allow, diagnostic.PermissionDecision.State);
+        DiagnosticSchemaAssertionHelper.AssertSessionProfileDiagnostic(diagnostic);
     }
 
     [Fact]

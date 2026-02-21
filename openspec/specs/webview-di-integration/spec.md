@@ -1,3 +1,6 @@
+## Purpose
+Define dependency-injection integration contracts for WebView adapter factory registration.
+
 ## Requirements
 
 ### Requirement: Dependency injection project

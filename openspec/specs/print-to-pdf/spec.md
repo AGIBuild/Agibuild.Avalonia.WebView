@@ -1,3 +1,6 @@
+## Purpose
+Define print-to-pdf contracts for options, adapter support, and WebView surface APIs.
+
 ## Requirements
 
 ### Requirement: PdfPrintOptions type in Core

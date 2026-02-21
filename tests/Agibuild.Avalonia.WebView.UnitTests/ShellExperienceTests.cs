@@ -433,6 +433,7 @@ public sealed class ShellExperienceTests
         Assert.Equal(WebViewPermissionKind.Notifications, observedPermissionDiagnostic.PermissionKind);
         Assert.Equal(PermissionState.Allow, observedPermissionDiagnostic.PermissionDecision.State);
         Assert.True(observedPermissionDiagnostic.PermissionDecision.IsExplicit);
+        DiagnosticSchemaAssertionHelper.AssertSessionProfileDiagnostic(observedPermissionDiagnostic);
     }
 
     [Fact]

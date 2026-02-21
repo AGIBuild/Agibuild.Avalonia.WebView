@@ -47,3 +47,10 @@ Session-permission profile behavior SHALL be testable via MockAdapter contract t
 - **WHEN** integration automation runs multi-window shell flow with configured profiles
 - **THEN** session isolation and permission decisions follow configured profile outcomes deterministically
 
+### Requirement: Session permission profile diagnostics expose explicit schema version
+`WebViewSessionPermissionProfileDiagnosticEventArgs` SHALL expose a deterministic `DiagnosticSchemaVersion` field, and runtime emission SHALL set it for every profile diagnostic event.
+
+#### Scenario: Profile diagnostics include schema version across evaluation outcomes
+- **WHEN** session/profile diagnostics are emitted for resolved, denied, or fallback permission evaluations
+- **THEN** each diagnostic event includes `DiagnosticSchemaVersion` matching the runtime contract constant
+
