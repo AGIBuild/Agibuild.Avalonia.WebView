@@ -499,12 +499,12 @@ class _Build : NukeBuild
             var output = OperatingSystem.IsWindows()
                 ? RunProcessCaptureAllChecked(
                     "powershell",
-                    "-NoLogo -NoProfile -ExecutionPolicy Bypass -Command \"openspec validate --all --strict\"",
+                    "-NoLogo -NoProfile -ExecutionPolicy Bypass -Command \"npm exec --yes @fission-ai/openspec -- validate --all --strict\"",
                     workingDirectory: RootDirectory,
                     timeoutMs: 180_000)
                 : RunProcessCaptureAllChecked(
                     "bash",
-                    "-lc \"openspec validate --all --strict\"",
+                    "-lc \"npm exec --yes @fission-ai/openspec -- validate --all --strict\"",
                     workingDirectory: RootDirectory,
                     timeoutMs: 180_000);
             File.WriteAllText(OpenSpecStrictGovernanceReportFile, output);
