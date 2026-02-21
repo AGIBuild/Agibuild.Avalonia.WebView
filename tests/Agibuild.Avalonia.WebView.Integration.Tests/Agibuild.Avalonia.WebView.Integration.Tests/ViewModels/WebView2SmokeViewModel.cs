@@ -209,7 +209,7 @@ public partial class WebView2SmokeViewModel : ViewModelBase, IWebViewAdapterHost
                     // The first iteration can be noticeably slower on cold CI hosts because WebView2 runtime
                     // and profile bootstrap happen for the first time in the worker session.
                     var readinessTimeout = i == 1
-                        ? TimeSpan.FromSeconds(45)
+                        ? TimeSpan.FromSeconds(90)
                         : TimeSpan.FromSeconds(20);
                     _ = await WaitAsync(adapterLocal.InvokeScriptAsync("1 + 1"), readinessTimeout).ConfigureAwait(false);
                 }
