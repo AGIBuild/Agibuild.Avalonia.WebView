@@ -325,5 +325,8 @@ public sealed class BridgeIntegrationTests
         public WebViewFileDialogResult ShowSaveFileDialog(WebViewSaveFileDialogRequest request) => throw new NotSupportedException();
         public void OpenExternal(Uri uri) => throw new NotSupportedException();
         public void ShowNotification(WebViewNotificationRequest request) => throw new NotSupportedException();
+        public void ApplyMenuModel(WebViewMenuModelRequest request) => throw new NotSupportedException();
+        public void UpdateTrayState(WebViewTrayStateRequest request) => throw new NotSupportedException();
+        public void ExecuteSystemAction(WebViewSystemActionRequest request) => throw new NotSupportedException();
     }
 }

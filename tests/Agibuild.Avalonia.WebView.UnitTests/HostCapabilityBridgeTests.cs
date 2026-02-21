@@ -21,6 +21,26 @@ public sealed class HostCapabilityBridgeTests
         var save = bridge.ShowSaveFileDialog(new WebViewSaveFileDialogRequest { Title = "Save", SuggestedFileName = "a.txt" }, root);
         var notify = bridge.ShowNotification(new WebViewNotificationRequest { Title = "T", Message = "M" }, root);
         var external = bridge.OpenExternal(new Uri("https://example.com"), root);
+        var menu = bridge.ApplyMenuModel(new WebViewMenuModelRequest
+        {
+            Items =
+            [
+                new WebViewMenuItemModel
+                {
+                    Id = "file",
+                    Label = "File"
+                }
+            ]
+        }, root);
+        var tray = bridge.UpdateTrayState(new WebViewTrayStateRequest
+        {
+            IsVisible = true,
+            Tooltip = "host-tray"
+        }, root);
+        var action = bridge.ExecuteSystemAction(new WebViewSystemActionRequest
+        {
+            Action = WebViewSystemAction.FocusMainWindow
+        }, root);
 
         Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, read.Outcome);
         Assert.True(read.IsAllowed && read.IsSuccess);
@@ -37,8 +57,14 @@ public sealed class HostCapabilityBridgeTests
         Assert.True(notify.IsAllowed && notify.IsSuccess);
         Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, external.Outcome);
         Assert.True(external.IsAllowed && external.IsSuccess);
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, menu.Outcome);
+        Assert.True(menu.IsAllowed && menu.IsSuccess);
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, tray.Outcome);
+        Assert.True(tray.IsAllowed && tray.IsSuccess);
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, action.Outcome);
+        Assert.True(action.IsAllowed && action.IsSuccess);
 
-        Assert.Equal(6, provider.CallCount);
+        Assert.Equal(9, provider.CallCount);
     }
 
     [Fact]
@@ -116,12 +142,24 @@ public sealed class HostCapabilityBridgeTests
         var read = bridge.ReadClipboardText(root);
         var denied = bridge.ShowNotification(new WebViewNotificationRequest { Title = "T", Message = "M" }, root);
         var failed = bridge.OpenExternal(new Uri("https://example.com"), root);
+        var menu = bridge.ApplyMenuModel(new WebViewMenuModelRequest
+        {
+            Items =
+            [
+                new WebViewMenuItemModel
+                {
+                    Id = "view",
+                    Label = "View"
+                }
+            ]
+        }, root);
 
         Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, read.Outcome);
         Assert.Equal(WebViewHostCapabilityCallOutcome.Deny, denied.Outcome);
         Assert.Equal(WebViewHostCapabilityCallOutcome.Failure, failed.Outcome);
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, menu.Outcome);
 
-        Assert.Equal(3, diagnostics.Count);
+        Assert.Equal(4, diagnostics.Count);
         Assert.Equal(WebViewHostCapabilityOperation.ClipboardReadText, diagnostics[0].Operation);
         Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, diagnostics[0].Outcome);
         Assert.True(diagnostics[0].WasAuthorized);
@@ -136,12 +174,94 @@ public sealed class HostCapabilityBridgeTests
         Assert.True(diagnostics[2].WasAuthorized);
         Assert.Equal(WebViewOperationFailureCategory.AdapterFailed, diagnostics[2].FailureCategory);
 
+        Assert.Equal(WebViewHostCapabilityOperation.MenuApplyModel, diagnostics[3].Operation);
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, diagnostics[3].Outcome);
+        Assert.True(diagnostics[3].WasAuthorized);
+
         Assert.All(diagnostics, d =>
         {
             Assert.NotEqual(Guid.Empty, d.CorrelationId);
             Assert.Equal(root, d.RootWindowId);
             Assert.True(d.DurationMilliseconds >= 0);
         });
+    }
+
+    [Fact]
+    public void Denied_system_integration_operations_skip_provider_execution()
+    {
+        var provider = new TestHostCapabilityProvider();
+        var bridge = new WebViewHostCapabilityBridge(provider, new DenySystemIntegrationPolicy());
+        var root = Guid.NewGuid();
+
+        var menu = bridge.ApplyMenuModel(new WebViewMenuModelRequest
+        {
+            Items =
+            [
+                new WebViewMenuItemModel
+                {
+                    Id = "file",
+                    Label = "File"
+                }
+            ]
+        }, root);
+        var tray = bridge.UpdateTrayState(new WebViewTrayStateRequest
+        {
+            IsVisible = true
+        }, root);
+        var action = bridge.ExecuteSystemAction(new WebViewSystemActionRequest
+        {
+            Action = WebViewSystemAction.FocusMainWindow
+        }, root);
+        var clipboard = bridge.ReadClipboardText(root);
+
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Deny, menu.Outcome);
+        Assert.Equal("system-integration-denied", menu.DenyReason);
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Deny, tray.Outcome);
+        Assert.Equal("system-integration-denied", tray.DenyReason);
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Deny, action.Outcome);
+        Assert.Equal("system-integration-denied", action.DenyReason);
+
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, clipboard.Outcome);
+        Assert.Equal("from-clipboard", clipboard.Value);
+        Assert.Equal(1, provider.CallCount);
+    }
+
+    [Fact]
+    public void System_integration_provider_failure_does_not_break_other_system_integration_operations()
+    {
+        var provider = new TestHostCapabilityProvider
+        {
+            ThrowOn = WebViewHostCapabilityOperation.MenuApplyModel
+        };
+        var bridge = new WebViewHostCapabilityBridge(provider, new AllowAllPolicy());
+        var root = Guid.NewGuid();
+
+        var menu = bridge.ApplyMenuModel(new WebViewMenuModelRequest
+        {
+            Items =
+            [
+                new WebViewMenuItemModel
+                {
+                    Id = "view",
+                    Label = "View"
+                }
+            ]
+        }, root);
+        var tray = bridge.UpdateTrayState(new WebViewTrayStateRequest
+        {
+            IsVisible = true,
+            Tooltip = "tray-ok"
+        }, root);
+
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Failure, menu.Outcome);
+        Assert.True(menu.IsAllowed);
+        Assert.NotNull(menu.Error);
+        Assert.True(WebViewOperationFailure.TryGetCategory(menu.Error!, out var category));
+        Assert.Equal(WebViewOperationFailureCategory.AdapterFailed, category);
+
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, tray.Outcome);
+        Assert.True(tray.IsAllowed && tray.IsSuccess);
+        Assert.Equal(1, provider.CallCount);
     }
 
     private sealed class AllowAllPolicy : IWebViewHostCapabilityPolicy
@@ -167,6 +287,16 @@ public sealed class HostCapabilityBridgeTests
         public WebViewHostCapabilityDecision Evaluate(in WebViewHostCapabilityRequestContext context)
             => context.Operation == WebViewHostCapabilityOperation.NotificationShow
                 ? WebViewHostCapabilityDecision.Deny("notification-denied")
+                : WebViewHostCapabilityDecision.Allow();
+    }
+
+    private sealed class DenySystemIntegrationPolicy : IWebViewHostCapabilityPolicy
+    {
+        public WebViewHostCapabilityDecision Evaluate(in WebViewHostCapabilityRequestContext context)
+            => context.Operation is WebViewHostCapabilityOperation.MenuApplyModel
+                or WebViewHostCapabilityOperation.TrayUpdateState
+                or WebViewHostCapabilityOperation.SystemActionExecute
+                ? WebViewHostCapabilityDecision.Deny("system-integration-denied")
                 : WebViewHostCapabilityDecision.Allow();
     }
 
@@ -221,6 +351,24 @@ public sealed class HostCapabilityBridgeTests
         public void ShowNotification(WebViewNotificationRequest request)
         {
             ThrowIfNeeded(WebViewHostCapabilityOperation.NotificationShow);
+            CallCount++;
+        }
+
+        public void ApplyMenuModel(WebViewMenuModelRequest request)
+        {
+            ThrowIfNeeded(WebViewHostCapabilityOperation.MenuApplyModel);
+            CallCount++;
+        }
+
+        public void UpdateTrayState(WebViewTrayStateRequest request)
+        {
+            ThrowIfNeeded(WebViewHostCapabilityOperation.TrayUpdateState);
+            CallCount++;
+        }
+
+        public void ExecuteSystemAction(WebViewSystemActionRequest request)
+        {
+            ThrowIfNeeded(WebViewHostCapabilityOperation.SystemActionExecute);
             CallCount++;
         }
 

@@ -429,6 +429,9 @@ public sealed class MultiWindowLifecycleTests
         public void OpenExternal(Uri uri) => ExternalOpens.Add(uri);
 
         public void ShowNotification(WebViewNotificationRequest request) => throw new NotSupportedException();
+        public void ApplyMenuModel(WebViewMenuModelRequest request) => throw new NotSupportedException();
+        public void UpdateTrayState(WebViewTrayStateRequest request) => throw new NotSupportedException();
+        public void ExecuteSystemAction(WebViewSystemActionRequest request) => throw new NotSupportedException();
     }
 
     private sealed class AllowExternalOnlyPolicy : IWebViewHostCapabilityPolicy

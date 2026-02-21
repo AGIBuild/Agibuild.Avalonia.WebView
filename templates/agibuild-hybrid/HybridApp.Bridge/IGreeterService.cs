@@ -30,6 +30,9 @@ public interface IDesktopHostService
 {
     Task<DesktopClipboardProbeResult> ReadClipboardText();
     Task<DesktopClipboardWriteResult> WriteClipboardText(string text);
+    Task<DesktopMenuApplyResult> ApplyMenuModel(DesktopMenuModel model);
+    Task<DesktopTrayUpdateResult> UpdateTrayState(DesktopTrayState state);
+    Task<DesktopSystemActionResult> ExecuteSystemAction(DesktopSystemAction action);
 }
 
 public enum DesktopCapabilityOutcome
@@ -50,6 +53,57 @@ public sealed class DesktopClipboardProbeResult
 public sealed class DesktopClipboardWriteResult
 {
     public DesktopCapabilityOutcome Outcome { get; init; }
+    public string? DenyReason { get; init; }
+    public string? Error { get; init; }
+}
+
+public sealed class DesktopMenuModel
+{
+    public IReadOnlyList<DesktopMenuItem> Items { get; init; } = [];
+}
+
+public sealed class DesktopMenuItem
+{
+    public required string Id { get; init; }
+    public required string Label { get; init; }
+    public bool IsEnabled { get; init; } = true;
+    public IReadOnlyList<DesktopMenuItem> Children { get; init; } = [];
+}
+
+public sealed class DesktopTrayState
+{
+    public bool IsVisible { get; init; }
+    public string? Tooltip { get; init; }
+    public string? IconPath { get; init; }
+}
+
+public enum DesktopSystemAction
+{
+    Quit = 0,
+    Restart = 1,
+    FocusMainWindow = 2
+}
+
+public sealed class DesktopMenuApplyResult
+{
+    public DesktopCapabilityOutcome Outcome { get; init; }
+    public int AppliedTopLevelItems { get; init; }
+    public string? DenyReason { get; init; }
+    public string? Error { get; init; }
+}
+
+public sealed class DesktopTrayUpdateResult
+{
+    public DesktopCapabilityOutcome Outcome { get; init; }
+    public bool IsVisible { get; init; }
+    public string? DenyReason { get; init; }
+    public string? Error { get; init; }
+}
+
+public sealed class DesktopSystemActionResult
+{
+    public DesktopCapabilityOutcome Outcome { get; init; }
+    public DesktopSystemAction Action { get; init; }
     public string? DenyReason { get; init; }
     public string? Error { get; init; }
 }

@@ -21,12 +21,14 @@ public sealed class HostCapabilityBridgeIntegrationTests
         var provider = new IntegrationHostCapabilityProvider();
         var bridge = new WebViewHostCapabilityBridge(provider, new IntegrationCapabilityPolicy());
         var diagnostics = new List<WebViewHostCapabilityDiagnosticEventArgs>();
+        var policyErrors = new List<WebViewShellPolicyErrorEventArgs>();
         bridge.CapabilityCallCompleted += (_, e) => diagnostics.Add(e);
 
         using var shell = new WebViewShellExperience(core, new WebViewShellExperienceOptions
         {
             HostCapabilityBridge = bridge,
-            NewWindowPolicy = new DelegateNewWindowPolicy((_, _, _) => WebViewNewWindowStrategyDecision.ExternalBrowser())
+            NewWindowPolicy = new DelegateNewWindowPolicy((_, _, _) => WebViewNewWindowStrategyDecision.ExternalBrowser()),
+            PolicyErrorHandler = (_, error) => policyErrors.Add(error)
         });
 
         var read = shell.ReadClipboardText();
@@ -37,6 +39,26 @@ public sealed class HostCapabilityBridgeIntegrationTests
         {
             Title = "Denied",
             Message = "Notification blocked in policy"
+        });
+        var menu = shell.ApplyMenuModel(new WebViewMenuModelRequest
+        {
+            Items =
+            [
+                new WebViewMenuItemModel
+                {
+                    Id = "file",
+                    Label = "File"
+                }
+            ]
+        });
+        var tray = shell.UpdateTrayState(new WebViewTrayStateRequest
+        {
+            IsVisible = true,
+            Tooltip = "integration-tray"
+        });
+        var deniedAction = shell.ExecuteSystemAction(new WebViewSystemActionRequest
+        {
+            Action = WebViewSystemAction.Restart
         });
 
         adapter.RaiseNewWindowRequested(new Uri("https://example.com/external"));
@@ -59,18 +81,38 @@ public sealed class HostCapabilityBridgeIntegrationTests
         Assert.False(deniedNotification.IsAllowed);
         Assert.False(deniedNotification.IsSuccess);
         Assert.Equal("notification-disabled", deniedNotification.DenyReason);
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, menu.Outcome);
+        Assert.True(menu.IsAllowed && menu.IsSuccess);
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, tray.Outcome);
+        Assert.True(tray.IsAllowed && tray.IsSuccess);
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Deny, deniedAction.Outcome);
+        Assert.False(deniedAction.IsAllowed);
+        Assert.Equal("system-action-disabled", deniedAction.DenyReason);
 
         Assert.Single(provider.ExternalOpens);
         Assert.Equal(new Uri("https://example.com/external"), provider.ExternalOpens[0]);
         Assert.Equal(0, adapter.NavigateCallCount);
+        Assert.NotEmpty(provider.AppliedMenus);
+        Assert.True(provider.LastTrayVisible);
 
-        Assert.Equal(6, diagnostics.Count);
+        Assert.Equal(9, diagnostics.Count);
         Assert.Equal(WebViewHostCapabilityCallOutcome.Deny, diagnostics[4].Outcome);
         Assert.Equal(WebViewHostCapabilityOperation.NotificationShow, diagnostics[4].Operation);
         Assert.Equal("notification-disabled", diagnostics[4].DenyReason);
         Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, diagnostics[5].Outcome);
-        Assert.Equal(WebViewHostCapabilityOperation.ExternalOpen, diagnostics[5].Operation);
+        Assert.Equal(WebViewHostCapabilityOperation.MenuApplyModel, diagnostics[5].Operation);
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, diagnostics[6].Outcome);
+        Assert.Equal(WebViewHostCapabilityOperation.TrayUpdateState, diagnostics[6].Operation);
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Deny, diagnostics[7].Outcome);
+        Assert.Equal(WebViewHostCapabilityOperation.SystemActionExecute, diagnostics[7].Operation);
+        Assert.Equal("system-action-disabled", diagnostics[7].DenyReason);
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, diagnostics[8].Outcome);
+        Assert.Equal(WebViewHostCapabilityOperation.ExternalOpen, diagnostics[8].Operation);
         Assert.All(diagnostics, d => Assert.True(d.DurationMilliseconds >= 0));
+
+        Assert.Single(policyErrors);
+        Assert.Equal(WebViewShellPolicyDomain.SystemIntegration, policyErrors[0].Domain);
+        Assert.Contains("system-action-disabled", policyErrors[0].Exception.Message, StringComparison.Ordinal);
     }
 
     [AvaloniaFact]
@@ -160,6 +202,7 @@ public sealed class HostCapabilityBridgeIntegrationTests
             return context.Operation switch
             {
                 WebViewHostCapabilityOperation.NotificationShow => WebViewHostCapabilityDecision.Deny("notification-disabled"),
+                WebViewHostCapabilityOperation.SystemActionExecute => WebViewHostCapabilityDecision.Deny("system-action-disabled"),
                 WebViewHostCapabilityOperation.ExternalOpen when _externalDecision is not null => _externalDecision(context.RequestUri),
                 _ => WebViewHostCapabilityDecision.Allow()
             };
@@ -169,6 +212,8 @@ public sealed class HostCapabilityBridgeIntegrationTests
     private sealed class IntegrationHostCapabilityProvider : IWebViewHostCapabilityProvider
     {
         public List<Uri> ExternalOpens { get; } = [];
+        public List<WebViewMenuModelRequest> AppliedMenus { get; } = [];
+        public bool LastTrayVisible { get; private set; }
 
         public string? ReadClipboardText() => "integration-clipboard";
 
@@ -196,5 +241,14 @@ public sealed class HostCapabilityBridgeIntegrationTests
         public void ShowNotification(WebViewNotificationRequest request)
         {
         }
+
+        public void ApplyMenuModel(WebViewMenuModelRequest request)
+            => AppliedMenus.Add(request);
+
+        public void UpdateTrayState(WebViewTrayStateRequest request)
+            => LastTrayVisible = request.IsVisible;
+
+        public void ExecuteSystemAction(WebViewSystemActionRequest request)
+            => throw new NotSupportedException("System action is policy-disabled in integration provider.");
     }
 }

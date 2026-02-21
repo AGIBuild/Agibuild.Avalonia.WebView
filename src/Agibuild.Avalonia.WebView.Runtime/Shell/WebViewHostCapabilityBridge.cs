@@ -20,7 +20,13 @@ public enum WebViewHostCapabilityOperation
     /// <summary>Open URI in external application/browser.</summary>
     ExternalOpen = 4,
     /// <summary>Show a host notification.</summary>
-    NotificationShow = 5
+    NotificationShow = 5,
+    /// <summary>Apply host app menu model.</summary>
+    MenuApplyModel = 6,
+    /// <summary>Update host tray state.</summary>
+    TrayUpdateState = 7,
+    /// <summary>Execute host system action.</summary>
+    SystemActionExecute = 8
 }
 
 /// <summary>
@@ -121,6 +127,65 @@ public sealed class WebViewNotificationRequest
 }
 
 /// <summary>
+/// Typed menu model payload for host app-shell integration.
+/// </summary>
+public sealed class WebViewMenuModelRequest
+{
+    /// <summary>Top-level menu items.</summary>
+    public IReadOnlyList<WebViewMenuItemModel> Items { get; init; } = [];
+}
+
+/// <summary>
+/// Typed menu item model.
+/// </summary>
+public sealed class WebViewMenuItemModel
+{
+    /// <summary>Stable item id.</summary>
+    public required string Id { get; init; }
+    /// <summary>User-visible label.</summary>
+    public required string Label { get; init; }
+    /// <summary>Whether this item is enabled.</summary>
+    public bool IsEnabled { get; init; } = true;
+    /// <summary>Nested child menu items.</summary>
+    public IReadOnlyList<WebViewMenuItemModel> Children { get; init; } = [];
+}
+
+/// <summary>
+/// Typed tray state payload for host app-shell integration.
+/// </summary>
+public sealed class WebViewTrayStateRequest
+{
+    /// <summary>Whether tray entry should be visible.</summary>
+    public bool IsVisible { get; init; }
+    /// <summary>Optional tray tooltip text.</summary>
+    public string? Tooltip { get; init; }
+    /// <summary>Optional tray icon path.</summary>
+    public string? IconPath { get; init; }
+}
+
+/// <summary>
+/// Supported typed system actions.
+/// </summary>
+public enum WebViewSystemAction
+{
+    /// <summary>Quit application.</summary>
+    Quit = 0,
+    /// <summary>Restart application.</summary>
+    Restart = 1,
+    /// <summary>Focus main window.</summary>
+    FocusMainWindow = 2
+}
+
+/// <summary>
+/// Typed request payload for host system action execution.
+/// </summary>
+public sealed class WebViewSystemActionRequest
+{
+    /// <summary>Action to execute.</summary>
+    public WebViewSystemAction Action { get; init; }
+}
+
+/// <summary>
 /// Result of file dialog operations.
 /// </summary>
 public sealed class WebViewFileDialogResult
@@ -148,6 +213,12 @@ public interface IWebViewHostCapabilityProvider
     void OpenExternal(Uri uri);
     /// <summary>Shows host notification.</summary>
     void ShowNotification(WebViewNotificationRequest request);
+    /// <summary>Applies host app menu model.</summary>
+    void ApplyMenuModel(WebViewMenuModelRequest request);
+    /// <summary>Updates host tray state.</summary>
+    void UpdateTrayState(WebViewTrayStateRequest request);
+    /// <summary>Executes host system action.</summary>
+    void ExecuteSystemAction(WebViewSystemActionRequest request);
 }
 
 /// <summary>
@@ -377,6 +448,69 @@ public sealed class WebViewHostCapabilityBridge
             () =>
             {
                 _provider.ShowNotification(request);
+                return null;
+            });
+    }
+
+    /// <summary>Applies host app menu model.</summary>
+    public WebViewHostCapabilityCallResult<object?> ApplyMenuModel(
+        WebViewMenuModelRequest request,
+        Guid rootWindowId,
+        Guid? parentWindowId = null,
+        Guid? targetWindowId = null)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        return Execute<object?>(
+            new WebViewHostCapabilityRequestContext(
+                rootWindowId,
+                parentWindowId,
+                targetWindowId,
+                WebViewHostCapabilityOperation.MenuApplyModel),
+            () =>
+            {
+                _provider.ApplyMenuModel(request);
+                return null;
+            });
+    }
+
+    /// <summary>Updates host tray state.</summary>
+    public WebViewHostCapabilityCallResult<object?> UpdateTrayState(
+        WebViewTrayStateRequest request,
+        Guid rootWindowId,
+        Guid? parentWindowId = null,
+        Guid? targetWindowId = null)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        return Execute<object?>(
+            new WebViewHostCapabilityRequestContext(
+                rootWindowId,
+                parentWindowId,
+                targetWindowId,
+                WebViewHostCapabilityOperation.TrayUpdateState),
+            () =>
+            {
+                _provider.UpdateTrayState(request);
+                return null;
+            });
+    }
+
+    /// <summary>Executes host system action.</summary>
+    public WebViewHostCapabilityCallResult<object?> ExecuteSystemAction(
+        WebViewSystemActionRequest request,
+        Guid rootWindowId,
+        Guid? parentWindowId = null,
+        Guid? targetWindowId = null)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        return Execute<object?>(
+            new WebViewHostCapabilityRequestContext(
+                rootWindowId,
+                parentWindowId,
+                targetWindowId,
+                WebViewHostCapabilityOperation.SystemActionExecute),
+            () =>
+            {
+                _provider.ExecuteSystemAction(request);
                 return null;
             });
     }

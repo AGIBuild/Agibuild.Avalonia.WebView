@@ -56,6 +56,9 @@
         <button onclick="greet()">Greet from C#</button>
         <button style="margin-left:.5rem" onclick="readClipboard()">Read host clipboard (typed)</button>
         <button style="margin-left:.5rem" onclick="writeClipboard()">Write host clipboard (typed)</button>
+        <button style="margin-top:.5rem" onclick="applyMenuModel()">Apply menu model (typed)</button>
+        <button style="margin-left:.5rem" onclick="toggleTray()">Toggle tray state (typed)</button>
+        <button style="margin-left:.5rem" onclick="focusMainWindow()">Execute system action (typed)</button>
         <div id="result"></div>
     </div>
 
@@ -121,6 +124,85 @@
                     el.textContent = 'Write denied: ' + (result.denyReason ?? 'unknown');
                 } else {
                     el.textContent = 'Write failure: ' + (result.error ?? 'unknown');
+                }
+            } catch (err) {
+                el.textContent = 'Error: ' + err.message;
+            }
+        }
+
+        let trayVisible = false;
+
+        async function applyMenuModel() {
+            const el = document.getElementById('result');
+            if (!await waitForBridge()) {
+                el.textContent = 'Bridge not available';
+                return;
+            }
+
+            const model = {
+                items: [
+                    { id: 'file', label: 'File', isEnabled: true, children: [{ id: 'focus', label: 'Focus Main Window', isEnabled: true, children: [] }] },
+                    { id: 'help', label: 'Help', isEnabled: true, children: [] }
+                ]
+            };
+
+            try {
+                const result = await window.agWebView.rpc.invoke('DesktopHostService.ApplyMenuModel', { model });
+                if (result.outcome === 0) {
+                    el.textContent = 'Menu model applied: ' + result.appliedTopLevelItems + ' top-level items';
+                } else if (result.outcome === 1) {
+                    el.textContent = 'Menu apply denied: ' + (result.denyReason ?? 'unknown');
+                } else {
+                    el.textContent = 'Menu apply failure: ' + (result.error ?? 'unknown');
+                }
+            } catch (err) {
+                el.textContent = 'Error: ' + err.message;
+            }
+        }
+
+        async function toggleTray() {
+            const el = document.getElementById('result');
+            if (!await waitForBridge()) {
+                el.textContent = 'Bridge not available';
+                return;
+            }
+
+            trayVisible = !trayVisible;
+            const state = {
+                isVisible: trayVisible,
+                tooltip: trayVisible ? 'HybridApp tray enabled' : 'HybridApp tray hidden',
+                iconPath: null
+            };
+
+            try {
+                const result = await window.agWebView.rpc.invoke('DesktopHostService.UpdateTrayState', { state });
+                if (result.outcome === 0) {
+                    el.textContent = 'Tray visibility: ' + (result.isVisible ? 'visible' : 'hidden');
+                } else if (result.outcome === 1) {
+                    el.textContent = 'Tray update denied: ' + (result.denyReason ?? 'unknown');
+                } else {
+                    el.textContent = 'Tray update failure: ' + (result.error ?? 'unknown');
+                }
+            } catch (err) {
+                el.textContent = 'Error: ' + err.message;
+            }
+        }
+
+        async function focusMainWindow() {
+            const el = document.getElementById('result');
+            if (!await waitForBridge()) {
+                el.textContent = 'Bridge not available';
+                return;
+            }
+
+            try {
+                const result = await window.agWebView.rpc.invoke('DesktopHostService.ExecuteSystemAction', { action: 2 });
+                if (result.outcome === 0) {
+                    el.textContent = 'System action executed: focus main window';
+                } else if (result.outcome === 1) {
+                    el.textContent = 'System action denied: ' + (result.denyReason ?? 'unknown');
+                } else {
+                    el.textContent = 'System action failure: ' + (result.error ?? 'unknown');
                 }
             } catch (err) {
                 el.textContent = 'Error: ' + err.message;

@@ -128,5 +128,17 @@ public sealed class ShellProductionValidationIntegrationTests
         public void ShowNotification(WebViewNotificationRequest request)
         {
         }
+
+        public void ApplyMenuModel(WebViewMenuModelRequest request)
+        {
+        }
+
+        public void UpdateTrayState(WebViewTrayStateRequest request)
+        {
+        }
+
+        public void ExecuteSystemAction(WebViewSystemActionRequest request)
+        {
+        }
     }
 }

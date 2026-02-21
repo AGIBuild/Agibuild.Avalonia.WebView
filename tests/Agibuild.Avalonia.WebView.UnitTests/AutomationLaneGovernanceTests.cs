@@ -268,6 +268,9 @@ public sealed class AutomationLaneGovernanceTests
         Assert.Contains("new WebViewHostCapabilityBridge(", appShellPreset, StringComparison.Ordinal);
         Assert.Contains("WebView.Bridge.Expose<IDesktopHostService>", appShellPreset, StringComparison.Ordinal);
         Assert.Contains("TryHandleShellShortcutAsync", appShellPreset, StringComparison.Ordinal);
+        Assert.Contains("ApplyMenuModel(", appShellPreset, StringComparison.Ordinal);
+        Assert.Contains("UpdateTrayState(", appShellPreset, StringComparison.Ordinal);
+        Assert.Contains("ExecuteSystemAction(", appShellPreset, StringComparison.Ordinal);
         Assert.DoesNotContain("ExternalOpenHandler", appShellPreset, StringComparison.Ordinal);
         Assert.Contains("KeyDown +=", appShellPreset, StringComparison.Ordinal);
         Assert.Contains("KeyDown -=", appShellPreset, StringComparison.Ordinal);
@@ -276,6 +279,12 @@ public sealed class AutomationLaneGovernanceTests
         Assert.DoesNotContain(".WithInterFont()", desktopProgram, StringComparison.Ordinal);
         Assert.Contains("DesktopHostService.ReadClipboardText", desktopIndex, StringComparison.Ordinal);
         Assert.Contains("DesktopHostService.WriteClipboardText", desktopIndex, StringComparison.Ordinal);
+        Assert.Contains("DesktopHostService.ApplyMenuModel", desktopIndex, StringComparison.Ordinal);
+        Assert.Contains("DesktopHostService.UpdateTrayState", desktopIndex, StringComparison.Ordinal);
+        Assert.Contains("DesktopHostService.ExecuteSystemAction", desktopIndex, StringComparison.Ordinal);
+        Assert.Contains("result.appliedTopLevelItems", desktopIndex, StringComparison.Ordinal);
+        Assert.Contains("result.isVisible", desktopIndex, StringComparison.Ordinal);
+        Assert.Contains("System action denied", desktopIndex, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -398,6 +407,9 @@ public sealed class AutomationLaneGovernanceTests
         Assert.Contains("Allow = 0", bridgeSource, StringComparison.Ordinal);
         Assert.Contains("Deny = 1", bridgeSource, StringComparison.Ordinal);
         Assert.Contains("Failure = 2", bridgeSource, StringComparison.Ordinal);
+        Assert.Contains("MenuApplyModel = 6", bridgeSource, StringComparison.Ordinal);
+        Assert.Contains("TrayUpdateState = 7", bridgeSource, StringComparison.Ordinal);
+        Assert.Contains("SystemActionExecute = 8", bridgeSource, StringComparison.Ordinal);
 
         // Diagnostic payload must remain machine-checkable.
         Assert.Contains("public sealed class WebViewHostCapabilityDiagnosticEventArgs", bridgeSource, StringComparison.Ordinal);
@@ -409,6 +421,10 @@ public sealed class AutomationLaneGovernanceTests
         // External open must route through typed capability bridge without legacy fallback handler path.
         Assert.Contains("Host capability bridge is required for ExternalBrowser strategy.", shellSource, StringComparison.Ordinal);
         Assert.DoesNotContain("ExternalOpenHandler", shellSource, StringComparison.Ordinal);
+        Assert.Contains("SystemIntegration = 8", shellSource, StringComparison.Ordinal);
+        Assert.Contains("_options.HostCapabilityBridge.ApplyMenuModel(", shellSource, StringComparison.Ordinal);
+        Assert.Contains("_options.HostCapabilityBridge.UpdateTrayState(", shellSource, StringComparison.Ordinal);
+        Assert.Contains("_options.HostCapabilityBridge.ExecuteSystemAction(", shellSource, StringComparison.Ordinal);
     }
 
     [Fact]

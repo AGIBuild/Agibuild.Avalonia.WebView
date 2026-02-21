@@ -26,7 +26,9 @@ public enum WebViewShellPolicyDomain
     /// <summary>Policy domain for DevTools actions.</summary>
     DevTools = 6,
     /// <summary>Policy domain for shell command actions.</summary>
-    Command = 7
+    Command = 7,
+    /// <summary>Policy domain for shell system integration actions.</summary>
+    SystemIntegration = 8
 }
 
 /// <summary>
@@ -744,6 +746,84 @@ public sealed class WebViewShellExperience : IDisposable
     }
 
     /// <summary>
+    /// Applies host app menu model via typed capability bridge.
+    /// Reports deterministic policy failures for deny/failure outcomes.
+    /// </summary>
+    public WebViewHostCapabilityCallResult<object?> ApplyMenuModel(WebViewMenuModelRequest request)
+    {
+        if (_options.HostCapabilityBridge is null)
+        {
+            var unavailable = WebViewHostCapabilityCallResult<object?>.Denied("Host capability bridge is not configured.");
+            ReportSystemIntegrationOutcome(
+                unavailable,
+                "Menu model operation was denied by host capability policy.");
+            return unavailable;
+        }
+
+        var result = _options.HostCapabilityBridge.ApplyMenuModel(
+            request,
+            _rootWindowId,
+            parentWindowId: null,
+            targetWindowId: _rootWindowId);
+        ReportSystemIntegrationOutcome(
+            result,
+            "Menu model operation was denied by host capability policy.");
+        return result;
+    }
+
+    /// <summary>
+    /// Updates host tray state via typed capability bridge.
+    /// Reports deterministic policy failures for deny/failure outcomes.
+    /// </summary>
+    public WebViewHostCapabilityCallResult<object?> UpdateTrayState(WebViewTrayStateRequest request)
+    {
+        if (_options.HostCapabilityBridge is null)
+        {
+            var unavailable = WebViewHostCapabilityCallResult<object?>.Denied("Host capability bridge is not configured.");
+            ReportSystemIntegrationOutcome(
+                unavailable,
+                "Tray state operation was denied by host capability policy.");
+            return unavailable;
+        }
+
+        var result = _options.HostCapabilityBridge.UpdateTrayState(
+            request,
+            _rootWindowId,
+            parentWindowId: null,
+            targetWindowId: _rootWindowId);
+        ReportSystemIntegrationOutcome(
+            result,
+            "Tray state operation was denied by host capability policy.");
+        return result;
+    }
+
+    /// <summary>
+    /// Executes host system action via typed capability bridge.
+    /// Reports deterministic policy failures for deny/failure outcomes.
+    /// </summary>
+    public WebViewHostCapabilityCallResult<object?> ExecuteSystemAction(WebViewSystemActionRequest request)
+    {
+        if (_options.HostCapabilityBridge is null)
+        {
+            var unavailable = WebViewHostCapabilityCallResult<object?>.Denied("Host capability bridge is not configured.");
+            ReportSystemIntegrationOutcome(
+                unavailable,
+                "System action operation was denied by host capability policy.");
+            return unavailable;
+        }
+
+        var result = _options.HostCapabilityBridge.ExecuteSystemAction(
+            request,
+            _rootWindowId,
+            parentWindowId: null,
+            targetWindowId: _rootWindowId);
+        ReportSystemIntegrationOutcome(
+            result,
+            "System action operation was denied by host capability policy.");
+        return result;
+    }
+
+    /// <summary>
     /// Opens DevTools through shell policy governance.
     /// Returns false when blocked by policy or when execution fails.
     /// </summary>
@@ -1360,6 +1440,26 @@ public sealed class WebViewShellExperience : IDisposable
         catch
         {
             // Policy error reporting is best-effort and must not crash event flow.
+        }
+    }
+
+    private void ReportSystemIntegrationOutcome<T>(
+        WebViewHostCapabilityCallResult<T> result,
+        string defaultDenyReason)
+    {
+        if (result.Outcome == WebViewHostCapabilityCallOutcome.Deny)
+        {
+            ReportPolicyFailure(
+                WebViewShellPolicyDomain.SystemIntegration,
+                new UnauthorizedAccessException(result.DenyReason ?? defaultDenyReason));
+            return;
+        }
+
+        if (result.Outcome == WebViewHostCapabilityCallOutcome.Failure)
+        {
+            ReportPolicyFailure(
+                WebViewShellPolicyDomain.SystemIntegration,
+                result.Error ?? new InvalidOperationException("System integration capability failed without an exception payload."));
         }
     }
 

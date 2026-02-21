@@ -1,4 +1,5 @@
 using System.IO;
+using System.Linq;
 using Agibuild.Avalonia.WebView;
 using Agibuild.Avalonia.WebView.Shell;
 using Avalonia.Input;
@@ -136,6 +137,77 @@ public partial class MainWindow
             });
         }
 
+        public Task<DesktopMenuApplyResult> ApplyMenuModel(DesktopMenuModel model)
+        {
+            ArgumentNullException.ThrowIfNull(model);
+            var request = new WebViewMenuModelRequest
+            {
+                Items = model.Items.Select(MapMenuItem).ToArray()
+            };
+            var result = _shell.ApplyMenuModel(request);
+            return Task.FromResult(new DesktopMenuApplyResult
+            {
+                Outcome = MapOutcome(result.Outcome),
+                AppliedTopLevelItems = request.Items.Count,
+                DenyReason = result.DenyReason,
+                Error = result.Error?.Message
+            });
+        }
+
+        public Task<DesktopTrayUpdateResult> UpdateTrayState(DesktopTrayState state)
+        {
+            ArgumentNullException.ThrowIfNull(state);
+            var result = _shell.UpdateTrayState(new WebViewTrayStateRequest
+            {
+                IsVisible = state.IsVisible,
+                Tooltip = state.Tooltip,
+                IconPath = state.IconPath
+            });
+            return Task.FromResult(new DesktopTrayUpdateResult
+            {
+                Outcome = MapOutcome(result.Outcome),
+                IsVisible = state.IsVisible,
+                DenyReason = result.DenyReason,
+                Error = result.Error?.Message
+            });
+        }
+
+        public Task<DesktopSystemActionResult> ExecuteSystemAction(DesktopSystemAction action)
+        {
+            var result = _shell.ExecuteSystemAction(new WebViewSystemActionRequest
+            {
+                Action = MapSystemAction(action)
+            });
+            return Task.FromResult(new DesktopSystemActionResult
+            {
+                Outcome = MapOutcome(result.Outcome),
+                Action = action,
+                DenyReason = result.DenyReason,
+                Error = result.Error?.Message
+            });
+        }
+
+        private static WebViewMenuItemModel MapMenuItem(DesktopMenuItem item)
+        {
+            ArgumentNullException.ThrowIfNull(item);
+            return new WebViewMenuItemModel
+            {
+                Id = item.Id,
+                Label = item.Label,
+                IsEnabled = item.IsEnabled,
+                Children = item.Children.Select(MapMenuItem).ToArray()
+            };
+        }
+
+        private static WebViewSystemAction MapSystemAction(DesktopSystemAction action)
+            => action switch
+            {
+                DesktopSystemAction.Quit => WebViewSystemAction.Quit,
+                DesktopSystemAction.Restart => WebViewSystemAction.Restart,
+                DesktopSystemAction.FocusMainWindow => WebViewSystemAction.FocusMainWindow,
+                _ => throw new ArgumentOutOfRangeException(nameof(action), action, "Unsupported desktop system action.")
+            };
+
         private static DesktopCapabilityOutcome MapOutcome(WebViewHostCapabilityCallOutcome outcome)
             => outcome switch
             {
@@ -153,6 +225,9 @@ public partial class MainWindow
             {
                 WebViewHostCapabilityOperation.ClipboardReadText => WebViewHostCapabilityDecision.Allow(),
                 WebViewHostCapabilityOperation.ClipboardWriteText => WebViewHostCapabilityDecision.Allow(),
+                WebViewHostCapabilityOperation.MenuApplyModel => WebViewHostCapabilityDecision.Allow(),
+                WebViewHostCapabilityOperation.TrayUpdateState => WebViewHostCapabilityDecision.Allow(),
+                WebViewHostCapabilityOperation.SystemActionExecute => WebViewHostCapabilityDecision.Deny("template-system-action-not-enabled"),
                 _ => WebViewHostCapabilityDecision.Deny("template-capability-not-enabled")
             };
     }
@@ -178,5 +253,17 @@ public partial class MainWindow
 
         public void ShowNotification(WebViewNotificationRequest request)
             => throw new NotSupportedException("Notification is not enabled in this template preset.");
+
+        public void ApplyMenuModel(WebViewMenuModelRequest request)
+            => _ = request;
+
+        public void UpdateTrayState(WebViewTrayStateRequest request)
+            => _ = request;
+
+        public void ExecuteSystemAction(WebViewSystemActionRequest request)
+        {
+            _ = request;
+            throw new NotSupportedException("System action is not enabled in this template preset.");
+        }
     }
 }
