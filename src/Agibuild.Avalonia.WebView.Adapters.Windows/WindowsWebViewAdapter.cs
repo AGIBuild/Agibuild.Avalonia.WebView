@@ -1616,7 +1616,13 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
 
     // ==================== IContextMenuAdapter ====================
 
-    public event EventHandler<ContextMenuRequestedEventArgs>? ContextMenuRequested;
+    // WebView2 context-menu interception is not wired in this adapter yet.
+    // Keep no-op accessors to satisfy IContextMenuAdapter without triggering unused-event warnings.
+    public event EventHandler<ContextMenuRequestedEventArgs>? ContextMenuRequested
+    {
+        add { }
+        remove { }
+    }
 
     // ==================== IDevToolsAdapter ====================
 

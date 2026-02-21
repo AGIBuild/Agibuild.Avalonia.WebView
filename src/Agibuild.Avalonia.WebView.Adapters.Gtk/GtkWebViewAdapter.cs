@@ -1284,7 +1284,13 @@ internal sealed class GtkWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
 
     // ==================== IContextMenuAdapter ====================
 
-    public event EventHandler<ContextMenuRequestedEventArgs>? ContextMenuRequested;
+    // WebKitGTK context-menu interception is not wired in this adapter yet.
+    // Keep no-op accessors to satisfy IContextMenuAdapter without triggering unused-event warnings.
+    public event EventHandler<ContextMenuRequestedEventArgs>? ContextMenuRequested
+    {
+        add { }
+        remove { }
+    }
 
     // ==================== IDevToolsAdapter ====================
     // WebKitGTK supports runtime inspector toggle via webkit_web_inspector_show/close.

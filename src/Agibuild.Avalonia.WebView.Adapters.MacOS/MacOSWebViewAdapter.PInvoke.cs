@@ -1330,7 +1330,13 @@ internal sealed class MacOSWebViewAdapter : IWebViewAdapter, INativeWebViewHandl
 
     // ==================== IContextMenuAdapter ====================
 
-    public event EventHandler<ContextMenuRequestedEventArgs>? ContextMenuRequested;
+    // macOS WKWebView context-menu interception is not wired in this adapter yet.
+    // Keep no-op accessors to satisfy IContextMenuAdapter without triggering unused-event warnings.
+    public event EventHandler<ContextMenuRequestedEventArgs>? ContextMenuRequested
+    {
+        add { }
+        remove { }
+    }
 
     // ==================== IDevToolsAdapter ====================
     // WKWebView does not have a public API to programmatically open/close the Web Inspector.

@@ -16,6 +16,8 @@ namespace Agibuild.Avalonia.WebView;
 /// </summary>
 public class WebView : NativeControlHost, IWebView
 {
+    private static readonly Uri AboutBlankUri = new("about:blank");
+
     // ---------------------------------------------------------------------------
     //  Avalonia StyledProperties
     // ---------------------------------------------------------------------------
@@ -101,6 +103,13 @@ public class WebView : NativeControlHost, IWebView
     {
         get => GetValue(SourceProperty);
         set => SetValue(SourceProperty, value);
+    }
+
+    // IWebView requires non-null Uri; the control surface remains nullable for XAML binding.
+    Uri IWebView.Source
+    {
+        get => Source ?? AboutBlankUri;
+        set => Source = value;
     }
 
     /// <inheritdoc />
