@@ -1,115 +1,147 @@
 # Bridge Guide
 
-## Overview
+Typed bridge is the foundation of this project’s Electron-replacement architecture.
+It keeps host/web interaction explicit, testable, and automation-friendly.
 
-The Bridge provides type-safe, bidirectional C# ↔ JavaScript interop using `[JsExport]` and `[JsImport]` attributes with compile-time code generation.
+## Why It Matters in Phase 5
 
-## Concepts
+Bridge contracts are the entry point for:
+
+- type-safe C# <-> JavaScript collaboration
+- deterministic runtime behavior over string-based IPC
+- policy and diagnostics integration for production governance
+
+## Core Concepts
 
 | Concept | Description |
 |---------|-------------|
-| `[JsExport]` | Marks a C# interface whose implementation is exposed to JavaScript |
-| `[JsImport]` | Marks a C# interface that represents a JavaScript service callable from C# |
-| `IBridgeService` | Core service: `Expose<T>()`, `GetProxy<T>()`, `Remove<T>()` |
-| Source Generator | Roslyn-based compile-time code gen for AOT compatibility |
+| `[JsExport]` | Exposes a C# interface implementation to JavaScript |
+| `[JsImport]` | Declares a JavaScript-facing contract callable from C# |
+| `IBridgeService` | Core API: `Expose<T>()`, `GetProxy<T>()`, `Remove<T>()` |
+| Source Generator | Compile-time proxy/stub generation for AOT-safe interop |
+| `BridgeOptions` | Security/governance knobs such as rate limiting and origin restrictions |
 
-## Exposing C# Services
+## Contract-First Flow
+
+### 1) Define and expose C# service (`[JsExport]`)
 
 ```csharp
-[JsExport(Name = "Calculator")]  // Custom JS name (optional)
-public interface ICalculator
+[JsExport(Name = "Calculator")]
+public interface ICalculatorService
 {
     Task<double> Add(double a, double b);
     Task<double> Multiply(double a, double b);
 }
 
-public class Calculator : ICalculator
+public sealed class CalculatorService : ICalculatorService
 {
     public Task<double> Add(double a, double b) => Task.FromResult(a + b);
     public Task<double> Multiply(double a, double b) => Task.FromResult(a * b);
 }
 
-// Expose
-webView.Bridge.Expose<ICalculator>(new Calculator());
+webView.Bridge.Expose<ICalculatorService>(new CalculatorService());
 ```
 
-JavaScript calls:
+### 2) Call from JavaScript
+
 ```javascript
-const sum = await window.agWebView.rpc.invoke('Calculator.Add', { a: 3, b: 4 });
+const sum = await window.agWebView.rpc.invoke("Calculator.add", { a: 3, b: 4 });
 ```
 
-## Calling JavaScript from C#
+### 3) Call JavaScript service from C# (`[JsImport]`)
 
 ```csharp
-[JsImport(Name = "UI")]
+[JsImport(Name = "Ui")]
 public interface IUiService
 {
     Task ShowToast(string message, int durationMs);
     Task<bool> Confirm(string question);
 }
 
-// JavaScript must register handlers:
-// window.agWebView.rpc.handle('UI.ShowToast', (params) => { ... });
-// window.agWebView.rpc.handle('UI.Confirm', (params) => { ... });
-
 var ui = webView.Bridge.GetProxy<IUiService>();
-bool ok = await ui.Confirm("Delete this item?");
+var ok = await ui.Confirm("Delete this item?");
 ```
 
-## Rate Limiting
+JavaScript handler registration example:
 
-```csharp
-webView.Bridge.Expose<ICalculator>(new Calculator(), new BridgeOptions
-{
-    RateLimit = new RateLimit(maxCalls: 100, window: TimeSpan.FromSeconds(10))
+```javascript
+window.agWebView.rpc.handle("Ui.confirm", async (params) => {
+  return window.confirm(params.question);
 });
 ```
 
-Exceeding the limit returns JSON-RPC error code `-32029`.
+## Policy and Rate Limiting
 
-## Tracing
+Bridge calls should be policy-governed and bounded.
 
 ```csharp
-// Attach a tracer for debugging
-var tracer = new LoggingBridgeTracer(logger);
-// Pass to WebViewCore constructor or configure via DI
+webView.Bridge.Expose<ICalculatorService>(
+    new CalculatorService(),
+    new BridgeOptions
+    {
+        AllowedOrigins = ["app://localhost"],
+        RateLimit = new RateLimit(maxCalls: 100, window: TimeSpan.FromSeconds(10))
+    });
 ```
 
-Custom tracer:
+When limits are exceeded, calls fail deterministically with JSON-RPC error code `-32029`.
+
+## Diagnostics and Tracing
+
+Use tracing to make bridge behavior machine-checkable in automation:
+
 ```csharp
-public class MyTracer : IBridgeTracer
+var tracer = new LoggingBridgeTracer(logger);
+// Register via DI/runtime configuration
+```
+
+Custom tracer sketch:
+
+```csharp
+public sealed class MyBridgeTracer : IBridgeTracer
 {
-    public void OnExportCallStart(string svc, string method, string? paramsJson)
-        => Console.WriteLine($"→ {svc}.{method}");
-    // ... implement other methods
+    public void OnExportCallStart(string service, string method, string? paramsJson)
+        => Console.WriteLine($"bridge:start {service}.{method}");
+
+    public void OnExportCallEnd(string service, string method, bool success, string? error)
+        => Console.WriteLine($"bridge:end {service}.{method} success={success}");
 }
 ```
 
-## Testing with MockBridgeService
+## Testing Strategy
+
+`MockBridgeService` lets you validate bridge behavior without a real WebView runtime:
 
 ```csharp
 var mock = new MockBridgeService();
 
-// Test that your ViewModel exposes the right service
-mock.Expose<ICalculator>(new Calculator());
-Assert.True(mock.WasExposed<ICalculator>());
+mock.Expose<ICalculatorService>(new CalculatorService());
+Assert.True(mock.WasExposed<ICalculatorService>());
 
-// Test that your code calls the proxy correctly
 mock.SetupProxy<IUiService>(new FakeUiService());
 var proxy = mock.GetProxy<IUiService>();
 ```
 
-## Source Generator
+## Source Generator Outputs
 
-The Roslyn Source Generator produces:
-- `*BridgeRegistration` classes for `[JsExport]` interfaces
-- `*BridgeProxy` classes for `[JsImport]` interfaces
-- `BridgeTypeScriptDeclarations` with `.d.ts` string constants
-- `BridgeGeneratedJsonOptions` for AOT-safe serialization
+The generator emits:
 
-Add to your `.csproj`:
+- `*BridgeRegistration` for `[JsExport]` contracts
+- `*BridgeProxy` for `[JsImport]` contracts
+- Type declaration artifacts for JavaScript/TypeScript consumption
+- AOT-safe JSON serialization helpers
+
+Analyzer package reference:
+
 ```xml
 <PackageReference Include="Agibuild.Avalonia.WebView.Bridge.Generator"
                   OutputItemType="Analyzer"
                   ReferenceOutputAssembly="false" />
 ```
+
+## Related Documents
+
+- [Getting Started](./getting-started.md)
+- [Architecture](./architecture.md)
+- [SPA Hosting](./spa-hosting.md)
+- [Roadmap](../../openspec/ROADMAP.md)

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Agibuild.Avalonia.WebView;
@@ -25,6 +26,20 @@ public partial class MainWindow
         _shell = new WebViewShellExperience(WebView, new WebViewShellExperienceOptions
         {
             NewWindowPolicy = new NavigateInPlaceNewWindowPolicy(),
+            MenuPruningPolicy = new DelegateMenuPruningPolicy((_, context) =>
+            {
+                // Template policy keeps top-level menu compact and deterministic.
+                var topLevel = context.RequestedMenuModel.Items
+                    .Where(item => !string.IsNullOrWhiteSpace(item.Id))
+                    .GroupBy(item => item.Id, StringComparer.Ordinal)
+                    .Select(group => group.First())
+                    .Take(4)
+                    .ToArray();
+                return WebViewMenuPruningDecision.Allow(new WebViewMenuModelRequest
+                {
+                    Items = topLevel
+                });
+            }),
             PermissionPolicy = new DelegatePermissionPolicy((_, e) =>
             {
                 if (e.PermissionKind == WebViewPermissionKind.Notifications)
@@ -71,6 +86,7 @@ public partial class MainWindow
             KeyDown -= _shortcutHandler;
 
         _shortcutHandler = null;
+        _desktopHostService?.Dispose();
         _desktopHostService = null;
 
         _shell?.Dispose();
@@ -105,13 +121,16 @@ public partial class MainWindow
         return false;
     }
 
-    private sealed class DesktopHostService : IDesktopHostService
+    private sealed class DesktopHostService : IDesktopHostService, IDisposable
     {
         private readonly WebViewShellExperience _shell;
+        private readonly Queue<DesktopSystemIntegrationEvent> _inboundEvents = new();
+        private readonly object _eventsLock = new();
 
         public DesktopHostService(WebViewShellExperience shell)
         {
             _shell = shell;
+            _shell.SystemIntegrationEventReceived += OnSystemIntegrationEventReceived;
         }
 
         public Task<DesktopClipboardProbeResult> ReadClipboardText()
@@ -145,6 +164,15 @@ public partial class MainWindow
                 Items = model.Items.Select(MapMenuItem).ToArray()
             };
             var result = _shell.ApplyMenuModel(request);
+            if (result.Outcome == WebViewHostCapabilityCallOutcome.Allow)
+            {
+                _ = _shell.PublishSystemIntegrationEvent(new WebViewSystemIntegrationEventRequest
+                {
+                    Kind = WebViewSystemIntegrationEventKind.MenuItemInvoked,
+                    ItemId = request.Items.FirstOrDefault()?.Id,
+                    Context = "template-menu-applied"
+                });
+            }
             return Task.FromResult(new DesktopMenuApplyResult
             {
                 Outcome = MapOutcome(result.Outcome),
@@ -163,6 +191,15 @@ public partial class MainWindow
                 Tooltip = state.Tooltip,
                 IconPath = state.IconPath
             });
+            if (result.Outcome == WebViewHostCapabilityCallOutcome.Allow)
+            {
+                _ = _shell.PublishSystemIntegrationEvent(new WebViewSystemIntegrationEventRequest
+                {
+                    Kind = WebViewSystemIntegrationEventKind.TrayInteracted,
+                    ItemId = state.IsVisible ? "tray-visible" : "tray-hidden",
+                    Context = state.Tooltip
+                });
+            }
             return Task.FromResult(new DesktopTrayUpdateResult
             {
                 Outcome = MapOutcome(result.Outcome),
@@ -184,6 +221,22 @@ public partial class MainWindow
                 Action = action,
                 DenyReason = result.DenyReason,
                 Error = result.Error?.Message
+            });
+        }
+
+        public Task<DesktopSystemIntegrationEventsResult> DrainSystemIntegrationEvents()
+        {
+            DesktopSystemIntegrationEvent[] snapshot;
+            lock (_eventsLock)
+            {
+                snapshot = _inboundEvents.ToArray();
+                _inboundEvents.Clear();
+            }
+
+            return Task.FromResult(new DesktopSystemIntegrationEventsResult
+            {
+                Outcome = DesktopCapabilityOutcome.Allow,
+                Events = snapshot
             });
         }
 
@@ -216,6 +269,27 @@ public partial class MainWindow
                 WebViewHostCapabilityCallOutcome.Failure => DesktopCapabilityOutcome.Failure,
                 _ => DesktopCapabilityOutcome.Failure
             };
+
+        private void OnSystemIntegrationEventReceived(object? sender, WebViewSystemIntegrationEventRequest request)
+        {
+            var mapped = new DesktopSystemIntegrationEvent
+            {
+                Kind = request.Kind switch
+                {
+                    WebViewSystemIntegrationEventKind.TrayInteracted => DesktopSystemIntegrationEventKind.TrayInteracted,
+                    WebViewSystemIntegrationEventKind.MenuItemInvoked => DesktopSystemIntegrationEventKind.MenuItemInvoked,
+                    _ => throw new ArgumentOutOfRangeException(nameof(request), request.Kind, "Unsupported system integration event kind.")
+                },
+                ItemId = request.ItemId,
+                Context = request.Context
+            };
+
+            lock (_eventsLock)
+                _inboundEvents.Enqueue(mapped);
+        }
+
+        public void Dispose()
+            => _shell.SystemIntegrationEventReceived -= OnSystemIntegrationEventReceived;
     }
 
     private sealed class TemplateHostCapabilityPolicy : IWebViewHostCapabilityPolicy
@@ -228,6 +302,8 @@ public partial class MainWindow
                 WebViewHostCapabilityOperation.MenuApplyModel => WebViewHostCapabilityDecision.Allow(),
                 WebViewHostCapabilityOperation.TrayUpdateState => WebViewHostCapabilityDecision.Allow(),
                 WebViewHostCapabilityOperation.SystemActionExecute => WebViewHostCapabilityDecision.Deny("template-system-action-not-enabled"),
+                WebViewHostCapabilityOperation.TrayInteractionEventDispatch => WebViewHostCapabilityDecision.Allow(),
+                WebViewHostCapabilityOperation.MenuInteractionEventDispatch => WebViewHostCapabilityDecision.Allow(),
                 _ => WebViewHostCapabilityDecision.Deny("template-capability-not-enabled")
             };
     }

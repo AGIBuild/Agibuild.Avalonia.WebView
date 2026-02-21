@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Agibuild.Avalonia.WebView;
 using Agibuild.Avalonia.WebView.Shell;
@@ -186,6 +187,64 @@ public sealed class HostCapabilityBridgeIntegrationTests
         Assert.Equal(WebViewShellPolicyDomain.ExternalOpen, policyErrors[0].Domain);
         Assert.True(WebViewOperationFailure.TryGetCategory(policyErrors[0].Exception, out var category));
         Assert.Equal(WebViewOperationFailureCategory.AdapterFailed, category);
+    }
+
+    [AvaloniaFact]
+    public void Host_system_integration_event_roundtrip_and_menu_pruning_are_deterministic()
+    {
+        var dispatcher = new TestDispatcher();
+        var adapter = MockWebViewAdapter.Create();
+        using var core = new WebViewCore(adapter, dispatcher);
+        var provider = new IntegrationHostCapabilityProvider();
+        var bridge = new WebViewHostCapabilityBridge(provider, new IntegrationCapabilityPolicy());
+        var diagnostics = new List<WebViewHostCapabilityDiagnosticEventArgs>();
+        var received = new List<WebViewSystemIntegrationEventRequest>();
+        bridge.CapabilityCallCompleted += (_, e) => diagnostics.Add(e);
+
+        using var shell = new WebViewShellExperience(core, new WebViewShellExperienceOptions
+        {
+            HostCapabilityBridge = bridge,
+            MenuPruningPolicy = new DelegateMenuPruningPolicy((_, context) =>
+            {
+                var effective = context.RequestedMenuModel.Items
+                    .GroupBy(item => item.Id, StringComparer.Ordinal)
+                    .Select(group => group.First())
+                    .ToArray();
+                return WebViewMenuPruningDecision.Allow(new WebViewMenuModelRequest { Items = effective });
+            })
+        });
+        shell.SystemIntegrationEventReceived += (_, evt) => received.Add(evt);
+
+        var menu = shell.ApplyMenuModel(new WebViewMenuModelRequest
+        {
+            Items =
+            [
+                new WebViewMenuItemModel { Id = "file", Label = "File" },
+                new WebViewMenuItemModel { Id = "file", Label = "File duplicate" },
+                new WebViewMenuItemModel { Id = "help", Label = "Help" }
+            ]
+        });
+        var trayEvent = shell.PublishSystemIntegrationEvent(new WebViewSystemIntegrationEventRequest
+        {
+            Kind = WebViewSystemIntegrationEventKind.TrayInteracted,
+            ItemId = "tray-main",
+            Context = "clicked"
+        });
+
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, menu.Outcome);
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, trayEvent.Outcome);
+        var appliedMenu = Assert.Single(provider.AppliedMenus);
+        Assert.Equal(2, appliedMenu.Items.Count);
+        Assert.Equal("file", appliedMenu.Items[0].Id);
+        Assert.Equal("help", appliedMenu.Items[1].Id);
+        Assert.Single(received);
+        Assert.Equal(WebViewSystemIntegrationEventKind.TrayInteracted, received[0].Kind);
+        Assert.Equal("tray-main", received[0].ItemId);
+
+        Assert.Contains(diagnostics, x => x.Operation == WebViewHostCapabilityOperation.MenuApplyModel
+            && x.Outcome == WebViewHostCapabilityCallOutcome.Allow);
+        Assert.Contains(diagnostics, x => x.Operation == WebViewHostCapabilityOperation.TrayInteractionEventDispatch
+            && x.Outcome == WebViewHostCapabilityCallOutcome.Allow);
     }
 
     private sealed class IntegrationCapabilityPolicy : IWebViewHostCapabilityPolicy

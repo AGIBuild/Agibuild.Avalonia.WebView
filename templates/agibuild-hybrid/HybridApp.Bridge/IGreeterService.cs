@@ -33,6 +33,7 @@ public interface IDesktopHostService
     Task<DesktopMenuApplyResult> ApplyMenuModel(DesktopMenuModel model);
     Task<DesktopTrayUpdateResult> UpdateTrayState(DesktopTrayState state);
     Task<DesktopSystemActionResult> ExecuteSystemAction(DesktopSystemAction action);
+    Task<DesktopSystemIntegrationEventsResult> DrainSystemIntegrationEvents();
 }
 
 public enum DesktopCapabilityOutcome
@@ -104,6 +105,27 @@ public sealed class DesktopSystemActionResult
 {
     public DesktopCapabilityOutcome Outcome { get; init; }
     public DesktopSystemAction Action { get; init; }
+    public string? DenyReason { get; init; }
+    public string? Error { get; init; }
+}
+
+public enum DesktopSystemIntegrationEventKind
+{
+    TrayInteracted = 0,
+    MenuItemInvoked = 1
+}
+
+public sealed class DesktopSystemIntegrationEvent
+{
+    public DesktopSystemIntegrationEventKind Kind { get; init; }
+    public string? ItemId { get; init; }
+    public string? Context { get; init; }
+}
+
+public sealed class DesktopSystemIntegrationEventsResult
+{
+    public DesktopCapabilityOutcome Outcome { get; init; }
+    public IReadOnlyList<DesktopSystemIntegrationEvent> Events { get; init; } = [];
     public string? DenyReason { get; init; }
     public string? Error { get; init; }
 }

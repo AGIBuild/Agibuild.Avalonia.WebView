@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using Agibuild.Avalonia.WebView;
 using Agibuild.Avalonia.WebView.Shell;
 using Agibuild.Avalonia.WebView.Testing;
 using Xunit;
@@ -182,6 +185,121 @@ public sealed class ShellSystemIntegrationCapabilityTests
         Assert.Empty(policyErrors);
     }
 
+    [Fact]
+    public void Menu_pruning_policy_is_deterministic_and_denied_pruning_does_not_mutate_effective_menu_state()
+    {
+        var dispatcher = new TestDispatcher();
+        var adapter = MockWebViewAdapter.Create();
+        using var core = new WebViewCore(adapter, dispatcher);
+        var provider = new TrackingProvider();
+        var pruningPolicy = new ToggleMenuPruningPolicy();
+        var bridge = new WebViewHostCapabilityBridge(provider, new AllowAllPolicy());
+
+        using var shell = new WebViewShellExperience(core, new WebViewShellExperienceOptions
+        {
+            HostCapabilityBridge = bridge,
+            MenuPruningPolicy = pruningPolicy
+        });
+
+        var first = shell.ApplyMenuModel(new WebViewMenuModelRequest
+        {
+            Items =
+            [
+                new WebViewMenuItemModel { Id = "file", Label = "File" },
+                new WebViewMenuItemModel { Id = "file", Label = "File Duplicate" },
+                new WebViewMenuItemModel { Id = "edit", Label = "Edit" }
+            ]
+        });
+        var snapshot = shell.EffectiveMenuModel;
+
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, first.Outcome);
+        Assert.NotNull(snapshot);
+        Assert.Equal(2, snapshot!.Items.Count);
+        Assert.Equal("file", snapshot.Items[0].Id);
+        Assert.Equal("edit", snapshot.Items[1].Id);
+
+        pruningPolicy.DenyNext = true;
+        var denied = shell.ApplyMenuModel(new WebViewMenuModelRequest
+        {
+            Items =
+            [
+                new WebViewMenuItemModel { Id = "tools", Label = "Tools" }
+            ]
+        });
+
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Deny, denied.Outcome);
+        Assert.Equal("menu-pruning-denied", denied.DenyReason);
+        Assert.NotNull(shell.EffectiveMenuModel);
+        Assert.Equal(2, shell.EffectiveMenuModel!.Items.Count);
+        Assert.Equal(1, provider.MenuApplyCalls);
+    }
+
+    [Fact]
+    public void Non_whitelisted_system_action_is_denied_before_provider_execution()
+    {
+        var dispatcher = new TestDispatcher();
+        var adapter = MockWebViewAdapter.Create();
+        using var core = new WebViewCore(adapter, dispatcher);
+        var provider = new TrackingProvider();
+        var bridge = new WebViewHostCapabilityBridge(provider, new AllowAllPolicy());
+        var policyErrors = new List<WebViewShellPolicyErrorEventArgs>();
+
+        using var shell = new WebViewShellExperience(core, new WebViewShellExperienceOptions
+        {
+            HostCapabilityBridge = bridge,
+            SystemActionWhitelist = new HashSet<WebViewSystemAction> { WebViewSystemAction.FocusMainWindow },
+            PolicyErrorHandler = (_, error) => policyErrors.Add(error)
+        });
+
+        var denied = shell.ExecuteSystemAction(new WebViewSystemActionRequest
+        {
+            Action = WebViewSystemAction.Restart
+        });
+
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Deny, denied.Outcome);
+        Assert.Equal("system-action-not-whitelisted", denied.DenyReason);
+        Assert.Equal(0, provider.SystemActionCalls);
+        Assert.Single(policyErrors);
+        Assert.Equal(WebViewShellPolicyDomain.SystemIntegration, policyErrors[0].Domain);
+    }
+
+    [Fact]
+    public void Inbound_system_integration_events_are_delivered_only_when_policy_allows()
+    {
+        var dispatcher = new TestDispatcher();
+        var adapter = MockWebViewAdapter.Create();
+        using var core = new WebViewCore(adapter, dispatcher);
+        var provider = new TrackingProvider();
+        var bridge = new WebViewHostCapabilityBridge(provider, new DenyMenuInboundPolicy());
+        var received = new List<WebViewSystemIntegrationEventRequest>();
+        var policyErrors = new List<WebViewShellPolicyErrorEventArgs>();
+
+        using var shell = new WebViewShellExperience(core, new WebViewShellExperienceOptions
+        {
+            HostCapabilityBridge = bridge,
+            PolicyErrorHandler = (_, error) => policyErrors.Add(error)
+        });
+        shell.SystemIntegrationEventReceived += (_, evt) => received.Add(evt);
+
+        var tray = shell.PublishSystemIntegrationEvent(new WebViewSystemIntegrationEventRequest
+        {
+            Kind = WebViewSystemIntegrationEventKind.TrayInteracted,
+            ItemId = "tray-main"
+        });
+        var menu = shell.PublishSystemIntegrationEvent(new WebViewSystemIntegrationEventRequest
+        {
+            Kind = WebViewSystemIntegrationEventKind.MenuItemInvoked,
+            ItemId = "menu-file-open"
+        });
+
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, tray.Outcome);
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Deny, menu.Outcome);
+        Assert.Single(received);
+        Assert.Equal(WebViewSystemIntegrationEventKind.TrayInteracted, received[0].Kind);
+        Assert.Single(policyErrors);
+        Assert.Contains("inbound-menu-event-denied", policyErrors[0].Exception.Message, StringComparison.Ordinal);
+    }
+
     private sealed class AllowAllPolicy : IWebViewHostCapabilityPolicy
     {
         public WebViewHostCapabilityDecision Evaluate(in WebViewHostCapabilityRequestContext context)
@@ -194,6 +312,30 @@ public sealed class ShellSystemIntegrationCapabilityTests
             => context.Operation == WebViewHostCapabilityOperation.TrayUpdateState
                 ? WebViewHostCapabilityDecision.Deny("tray-denied")
                 : WebViewHostCapabilityDecision.Allow();
+    }
+
+    private sealed class DenyMenuInboundPolicy : IWebViewHostCapabilityPolicy
+    {
+        public WebViewHostCapabilityDecision Evaluate(in WebViewHostCapabilityRequestContext context)
+            => context.Operation == WebViewHostCapabilityOperation.MenuInteractionEventDispatch
+                ? WebViewHostCapabilityDecision.Deny("inbound-menu-event-denied")
+                : WebViewHostCapabilityDecision.Allow();
+    }
+
+    private sealed class ToggleMenuPruningPolicy : IWebViewShellMenuPruningPolicy
+    {
+        public bool DenyNext { get; set; }
+
+        public WebViewMenuPruningDecision Decide(IWebView webView, WebViewMenuPruningPolicyContext context)
+        {
+            if (DenyNext)
+            {
+                DenyNext = false;
+                return WebViewMenuPruningDecision.Deny("menu-pruning-denied");
+            }
+
+            return WebViewMenuPruningDecision.Allow(context.RequestedMenuModel);
+        }
     }
 
     private sealed class TrackingProvider : IWebViewHostCapabilityProvider

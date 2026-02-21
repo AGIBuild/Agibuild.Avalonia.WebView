@@ -97,6 +97,22 @@
           "testMethod": "Default_shell_bindings_include_expected_command_and_devtools_actions"
         }
       ]
+    },
+    {
+      "id": "shell-system-integration-roundtrip",
+      "supportLevel": "extended",
+      "coverage": {
+        "windows": ["ct", "it-smoke"],
+        "macos": ["ct"],
+        "linux": ["ct"]
+      },
+      "evidence": [
+        {
+          "lane": "RuntimeAutomation",
+          "file": "tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/HostCapabilityBridgeIntegrationTests.cs",
+          "testMethod": "Host_system_integration_event_roundtrip_and_menu_pruning_are_deterministic"
+        }
+      ]
     }
   ]
 }

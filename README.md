@@ -8,50 +8,103 @@
 <h1 align="center">Agibuild.Avalonia.WebView</h1>
 
 <p align="center">
-  <strong>One package. Five platforms. Native WebView in Avalonia — with a type-safe C# &harr; JS bridge.</strong>
+  <strong>Electron-level web productivity. Avalonia-native performance, control, and security.</strong>
 </p>
 
 ---
 
-## The Problem
+> **Product direction update**  
+> This project is now driven by the **Electron Replacement Foundation** goal (Roadmap Phase 5).  
+> We are building a **hybrid application platform**, not just a WebView control.
 
-Building hybrid desktop/mobile apps with Avalonia? You'll quickly hit these walls:
+## Why This Exists
 
-- **No built-in WebView** &mdash; Avalonia doesn't ship one.
-- **Platform fragmentation** &mdash; WebView2 on Windows, WKWebView on macOS/iOS, WebKitGTK on Linux, Android WebView... each has a different API.
-- **JS interop is painful** &mdash; Passing strings through `InvokeScriptAsync` and parsing `WebMessageReceived` gets messy fast.
-- **SPA hosting is DIY** &mdash; Serving your React/Vue/Svelte app from embedded resources requires custom plumbing.
+Teams migrating from Electron usually want two things at the same time:
 
-## The Solution
+1. Keep web development speed (React/Vue/Svelte, HMR, fast iteration)
+2. Regain native footprint, stronger security boundaries, and deterministic host behavior
 
-**One NuGet package.** Drop it in, call `.UseAgibuildWebView()`, and you get a native WebView on every platform &mdash; plus a type-safe bridge that lets C# and JavaScript call each other like they're in the same process.
+Traditional WebView wrappers often solve rendering, but still leave you to hand-build:
 
-```
-dotnet add package Agibuild.Avalonia.WebView
-```
+- string-based host/web IPC
+- policy governance for host capabilities
+- diagnosable runtime behavior for CI and automation
+- scalable app-shell patterns across platforms
+
+`Agibuild.Avalonia.WebView` targets that full gap.
+
+## What This Is Now (Not Just a Control)
+
+### 1) Typed bridge at the center
+- `[JsExport]` / `[JsImport]` contracts
+- source-generated C# and JS-facing proxies
+- AOT-safe, reflection-free path
+
+### 2) Typed capability gateway for host/system operations
+- desktop/system capabilities converge into one typed entry model
+- avoid scattered host API calls in app-layer code
+
+### 3) Policy-first runtime semantics
+- policy is evaluated before capability/provider execution
+- deterministic outcomes: `allow` / `deny` / `failure`
+
+### 4) Agent-friendly diagnostics
+- machine-checkable diagnostics for critical runtime flows
+- usable by CI, test automation, and AI agents
+
+### 5) Web-first template flow
+- starter path optimized for web-first hybrid desktop/mobile delivery
+- minimal host glue, typed contracts preserved end-to-end
+
+## Roadmap Alignment
+
+| Phase | Theme | Status |
+|---|---|---|
+| Phase 0 | Foundation | ✅ Done |
+| Phase 1 | Type-Safe Bridge | ✅ Done |
+| Phase 2 | SPA Hosting | ✅ Core Done |
+| Phase 3 | Polish & GA | ✅ Done |
+| Phase 4 | Application Shell | ✅ Done |
+| Phase 5 | Electron Replacement Foundation | 🟡 Planned / In Progress |
+
+Read more:
+- [Roadmap](openspec/ROADMAP.md)
+- [Project Vision & Goals](openspec/PROJECT.md)
+- [Electron Replacement Foundation spec](openspec/specs/electron-replacement-foundation/spec.md)
+
+## Platform Coverage
 
 | Platform | Engine | Status |
 |----------|--------|--------|
-| macOS | WKWebView | Preview |
 | Windows | WebView2 | Preview |
+| macOS | WKWebView | Preview |
 | Linux | WebKitGTK | Preview |
 | iOS | WKWebView | Preview |
 | Android | Android WebView | Preview |
 
+> Avalonia provides an official commercial WebView option.  
+> This project focuses on an open, cross-platform, contract-driven hybrid app platform.
+
 ---
 
-## 30 Seconds to Your First WebView
+## 60-Second Start
 
-**1. Initialize** (one line in `Program.cs`):
+Install package:
+
+```bash
+dotnet add package Agibuild.Avalonia.WebView
+```
+
+Enable in `Program.cs`:
 
 ```csharp
 AppBuilder.Configure<App>()
     .UsePlatformDetect()
-    .UseAgibuildWebView()   // <-- this is it
+    .UseAgibuildWebView()
     .StartWithClassicDesktopLifetime(args);
 ```
 
-**2. Add the control** (XAML):
+Add control in XAML:
 
 ```xml
 <Window xmlns:wv="using:Agibuild.Avalonia.WebView">
@@ -59,43 +112,39 @@ AppBuilder.Configure<App>()
 </Window>
 ```
 
-**That's it.** You have a native WebView running on macOS, Windows, Linux, iOS, and Android.
+For full guides:
+- [Getting Started](docs/articles/getting-started.md)
+- [Architecture](docs/articles/architecture.md)
+- [Documentation Index](docs/index.md)
 
 ---
 
-## The Bridge: Type-Safe C# &harr; JS
+## Typed Bridge in Practice
 
-This is where it gets interesting. No more string-based messaging. Define a C# interface, and it just works on both sides.
-
-### Expose C# to JavaScript
+Expose C# service to JavaScript:
 
 ```csharp
-// 1. Define a contract
 [JsExport]
 public interface IGreeterService
 {
     Task<string> Greet(string name);
 }
 
-// 2. Implement it
-public class GreeterService : IGreeterService
+public sealed class GreeterService : IGreeterService
 {
-    public Task<string> Greet(string name)
-        => Task.FromResult($"Hello, {name}!");
+    public Task<string> Greet(string name) => Task.FromResult($"Hello, {name}!");
 }
 
-// 3. Expose it (one line)
 webView.Bridge.Expose<IGreeterService>(new GreeterService());
 ```
 
-Now JavaScript can call it directly:
+Call from JavaScript:
 
 ```javascript
-const msg = await window.agWebView.rpc.invoke('GreeterService.greet', { name: 'World' });
-// => "Hello, World!"
+const msg = await window.agWebView.rpc.invoke("GreeterService.greet", { name: "World" });
 ```
 
-### Call JavaScript from C#
+Call JavaScript from C#:
 
 ```csharp
 [JsImport]
@@ -104,26 +153,15 @@ public interface INotificationService
     Task ShowNotification(string message);
 }
 
-// Get a typed proxy — calls are forwarded to JS via RPC
 var notifications = webView.Bridge.GetProxy<INotificationService>();
 await notifications.ShowNotification("File saved!");
 ```
 
-JavaScript registers the handler:
-
-```javascript
-window.agWebView.rpc.handle('NotificationService.showNotification', (params) => {
-    showToast(params.message);
-});
-```
-
-The bridge is powered by JSON-RPC 2.0 under the hood. A Roslyn source generator produces AOT-safe, reflection-free proxy code at compile time.
-
 ---
 
-## SPA Hosting: Ship Your Frontend Inside the App
+## Web-First SPA Hosting
 
-Embed your React / Vue / Svelte / vanilla build output as resources. No external web server needed.
+Production (embedded assets):
 
 ```csharp
 webView.EnableSpaHosting(new SpaHostingOptions
@@ -135,7 +173,7 @@ webView.EnableSpaHosting(new SpaHostingOptions
 await webView.NavigateAsync(new Uri("app://localhost/index.html"));
 ```
 
-During development, proxy to your dev server with HMR:
+Development (HMR proxy):
 
 ```csharp
 webView.EnableSpaHosting(new SpaHostingOptions
@@ -144,180 +182,94 @@ webView.EnableSpaHosting(new SpaHostingOptions
 });
 ```
 
-The custom `app://` scheme handles MIME types, SPA fallback routing, immutable asset caching, and default security headers automatically.
 
 ---
 
-## See It in Action: Avalonia + React Demo
+## Demo: Avalonia + React
 
-A full-featured sample app ships in [`samples/avalonia-react/`](samples/avalonia-react/) — React 19 + TypeScript + Tailwind CSS running inside Avalonia's native window, powered by the type-safe bridge.
+Sample project: [`samples/avalonia-react/`](samples/avalonia-react/)
 
-### Dashboard — Live .NET Metrics via Bridge
-
+### Dashboard
 <p align="center"><img src="docs/demo/images/dashboard.jpg" width="720" /></p>
 
-Real-time process metrics (working set, GC memory, threads, uptime) and platform details (OS, .NET version, WebView engine) fetched from C# every 2 seconds via `ISystemInfoService` — data that JavaScript alone cannot access.
-
-### Chat — Bidirectional C# ↔ JS Communication
-
+### Chat
 <p align="center"><img src="docs/demo/images/chat.jpg" width="720" /></p>
 
-Send messages to a C# service and receive contextual responses. Demonstrates request/response RPC, chat history persistence, optimistic UI updates, and error handling — all through `IChatService`.
-
-### Settings — Persistent Configuration with Live UI Updates
-
+### Settings
 <p align="center"><img src="docs/demo/images/settings.jpg" width="720" /></p>
 
-Theme switching (light/dark/system), multi-language i18n (EN/ZH/JA/KO), font size scaling, and sidebar state — all persisted to native app data via `ISettingsService` and applied in real-time across components.
-
-> **[Full demo walkthrough with code examples →](docs/demo/index.md)**
+Deep dive:
+- [Demo walkthrough](docs/demo/index.md)
 
 ---
 
-## More Capabilities
+## Capability Snapshot
 
-<details>
-<summary><strong>OAuth / Web Authentication</strong></summary>
+- OAuth / Web authentication (`IWebAuthBroker`)
+- Web dialog flows (`IWebDialog`)
+- Screenshot and PDF export
+- Cookie and command manager support
+- Environment options (DevTools, User-Agent, session modes)
+- Dependency injection integration
 
-```csharp
-var broker = serviceProvider.GetRequiredService<IWebAuthBroker>();
-var result = await broker.AuthenticateAsync(window, new AuthOptions
-{
-    AuthorizeUri = new Uri("https://provider.com/oauth/authorize?..."),
-    CallbackUri  = new Uri("myapp://callback"),
-    Timeout      = TimeSpan.FromMinutes(5),
-});
-
-if (result.Status == WebAuthStatus.Success)
-{
-    // result.CallbackUri contains the tokens
-}
-```
-</details>
-
-<details>
-<summary><strong>Web Dialog (Popup Window)</strong></summary>
-
-```csharp
-var dialog = factory.Create();
-dialog.Title = "Sign In";
-dialog.Resize(800, 600);
-dialog.Show();
-await dialog.NavigateAsync(new Uri("https://example.com/login"));
-```
-</details>
-
-<details>
-<summary><strong>Screenshot & PDF Export</strong></summary>
-
-```csharp
-byte[] png = await webView.CaptureScreenshotAsync();
-byte[] pdf = await webView.PrintToPdfAsync(new PdfPrintOptions { Landscape = true });
-```
-</details>
-
-<details>
-<summary><strong>Cookie Management</strong></summary>
-
-```csharp
-var cookies = webView.TryGetCookieManager();
-var all = await cookies!.GetCookiesAsync(new Uri("https://example.com"));
-await cookies.ClearAllCookiesAsync();
-```
-</details>
-
-<details>
-<summary><strong>Clipboard / Command Manager</strong></summary>
-
-```csharp
-var cmd = webView.TryGetCommandManager();
-cmd?.Copy(); cmd?.Paste(); cmd?.SelectAll(); cmd?.Undo(); cmd?.Redo();
-```
-</details>
-
-<details>
-<summary><strong>Environment Options</strong></summary>
-
-```csharp
-WebViewEnvironment.Initialize(loggerFactory, new WebViewEnvironmentOptions
-{
-    EnableDevTools    = true,
-    CustomUserAgent   = "MyApp/1.0",
-    UseEphemeralSession = false,
-});
-```
-</details>
-
-<details>
-<summary><strong>Dependency Injection</strong></summary>
-
-```csharp
-var services = new ServiceCollection();
-services.AddWebView();
-services.AddWebViewDialogServices(); // dialogs + OAuth
-
-var provider = services.BuildServiceProvider();
-provider.UseAgibuildWebView();
-```
-</details>
+For detailed API usage, see:
+- [Architecture notes](docs/articles/architecture.md)
+- [Bridge guide](docs/articles/bridge-guide.md)
+- [SPA hosting guide](docs/articles/spa-hosting.md)
 
 ---
 
 ## Architecture at a Glance
 
 ```
-┌──────────────────────────────────────────────┐
-│              Your Avalonia App                │
-│                                              │
-│  ┌──────────┐  ┌────────┐  ┌─────────────┐  │
-│  │ WebView  │  │ Bridge │  │ SPA Hosting │  │
-│  │ Control  │  │C# ↔ JS │  │ app://      │  │
-│  └────┬─────┘  └───┬────┘  └──────┬──────┘  │
-│       │            │               │         │
-│  ┌────┴────────────┴───────────────┴──────┐  │
-│  │          WebViewCore (Runtime)         │  │
-│  │   Navigation · RPC · Events · Policy  │  │
-│  └────────────────┬──────────────────────┘  │
-│                   │ IWebViewAdapter          │
-│  ┌────────────────┴──────────────────────┐  │
-│  │     Platform Adapter (auto-selected)   │  │
-│  │  WKWebView│WebView2│WebKitGTK│Android │  │
-│  └────────────────────────────────────────┘  │
-└──────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────┐
+│                   Your Avalonia App                     │
+│                                                          │
+│  ┌───────────┐   ┌─────────────┐   ┌─────────────────┐  │
+│  │ WebView   │   │ Typed Bridge│   │ Capability Gate │  │
+│  │ Control   │   │ C# <-> JS   │   │ Host/System API │  │
+│  └─────┬─────┘   └──────┬──────┘   └────────┬────────┘  │
+│        │                │                    │           │
+│  ┌─────┴────────────────┴────────────────────┴────────┐  │
+│  │         Runtime Core (policy-first execution)      │  │
+│  │  Navigation · RPC · Shell · Diagnostics · Policy   │  │
+│  └──────────────────────────┬──────────────────────────┘  │
+│                             │ IWebViewAdapter             │
+│  ┌──────────────────────────┴──────────────────────────┐  │
+│  │      WKWebView · WebView2 · WebKitGTK · Android    │  │
+│  └─────────────────────────────────────────────────────┘  │
+└──────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Project Template
-
-Scaffold a hybrid app with the built-in template:
+## Template Workflow
 
 ```bash
 dotnet new install Agibuild.Avalonia.WebView.Templates
 dotnet new agibuild-hybrid -n MyApp
-cd MyApp && dotnet run --project MyApp.Desktop
+cd MyApp
+dotnet run --project MyApp.Desktop
 ```
 
 ---
 
-## Testing
+## Quality Signals
 
 | Metric | Value |
 |--------|-------|
-| Unit tests | 626 |
-| Integration tests | 112 |
-| Line coverage | **95.4%** |
-| Branch coverage | **88.2%** |
-| Method coverage | **97.7%** |
+| Unit tests | 742 |
+| Integration tests | 146 |
+| Line coverage | **96.0%** |
+| Branch coverage | **84.8%** |
+| Method coverage | **98.2%** |
 
 ```bash
-nuke Test            # Unit + Integration (738 tests)
+nuke Test            # Unit + Integration (888 tests)
 nuke Coverage        # Coverage report + threshold enforcement
 nuke NugetPackageTest  # Pack → install → run smoke test
 nuke TemplateE2E     # Template end-to-end test
 ```
-
----
 
 ## License
 

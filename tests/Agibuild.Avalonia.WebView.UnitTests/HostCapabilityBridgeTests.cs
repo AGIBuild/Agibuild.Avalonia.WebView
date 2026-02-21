@@ -264,6 +264,53 @@ public sealed class HostCapabilityBridgeTests
         Assert.Equal(1, provider.CallCount);
     }
 
+    [Fact]
+    public void Inbound_system_integration_event_dispatch_is_policy_first_and_machine_checkable()
+    {
+        var provider = new TestHostCapabilityProvider();
+        var bridge = new WebViewHostCapabilityBridge(provider, new AllowAllPolicy());
+        var root = Guid.NewGuid();
+        var dispatched = new List<WebViewSystemIntegrationEventRequest>();
+        var diagnostics = new List<WebViewHostCapabilityDiagnosticEventArgs>();
+        bridge.SystemIntegrationEventDispatched += (_, e) => dispatched.Add(e);
+        bridge.CapabilityCallCompleted += (_, e) => diagnostics.Add(e);
+
+        var eventResult = bridge.DispatchSystemIntegrationEvent(new WebViewSystemIntegrationEventRequest
+        {
+            Kind = WebViewSystemIntegrationEventKind.TrayInteracted,
+            ItemId = "tray-main",
+            Context = "clicked"
+        }, root);
+
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, eventResult.Outcome);
+        Assert.Single(dispatched);
+        Assert.Equal("tray-main", dispatched[0].ItemId);
+
+        var diagnostic = Assert.Single(diagnostics);
+        Assert.Equal(WebViewHostCapabilityOperation.TrayInteractionEventDispatch, diagnostic.Operation);
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, diagnostic.Outcome);
+        Assert.True(diagnostic.WasAuthorized);
+    }
+
+    [Fact]
+    public void Denied_inbound_system_integration_event_never_reaches_dispatch_subscribers()
+    {
+        var provider = new TestHostCapabilityProvider();
+        var bridge = new WebViewHostCapabilityBridge(provider, new DenyInboundEventPolicy());
+        var dispatched = 0;
+        bridge.SystemIntegrationEventDispatched += (_, _) => dispatched++;
+
+        var eventResult = bridge.DispatchSystemIntegrationEvent(new WebViewSystemIntegrationEventRequest
+        {
+            Kind = WebViewSystemIntegrationEventKind.MenuItemInvoked,
+            ItemId = "menu-file-open"
+        }, Guid.NewGuid());
+
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Deny, eventResult.Outcome);
+        Assert.Equal("inbound-event-denied", eventResult.DenyReason);
+        Assert.Equal(0, dispatched);
+    }
+
     private sealed class AllowAllPolicy : IWebViewHostCapabilityPolicy
     {
         public WebViewHostCapabilityDecision Evaluate(in WebViewHostCapabilityRequestContext context)
@@ -297,6 +344,15 @@ public sealed class HostCapabilityBridgeTests
                 or WebViewHostCapabilityOperation.TrayUpdateState
                 or WebViewHostCapabilityOperation.SystemActionExecute
                 ? WebViewHostCapabilityDecision.Deny("system-integration-denied")
+                : WebViewHostCapabilityDecision.Allow();
+    }
+
+    private sealed class DenyInboundEventPolicy : IWebViewHostCapabilityPolicy
+    {
+        public WebViewHostCapabilityDecision Evaluate(in WebViewHostCapabilityRequestContext context)
+            => context.Operation is WebViewHostCapabilityOperation.TrayInteractionEventDispatch
+                or WebViewHostCapabilityOperation.MenuInteractionEventDispatch
+                ? WebViewHostCapabilityDecision.Deny("inbound-event-denied")
                 : WebViewHostCapabilityDecision.Allow();
     }
 

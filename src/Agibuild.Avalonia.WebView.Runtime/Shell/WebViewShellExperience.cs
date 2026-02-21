@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Agibuild.Avalonia.WebView;
@@ -118,6 +119,32 @@ public sealed record WebViewShellCommandDecision(bool IsAllowed, string? DenyRea
     /// <summary>Create deny decision.</summary>
     public static WebViewShellCommandDecision Deny(string? reason = null)
         => new(false, reason);
+}
+
+/// <summary>
+/// Context for menu pruning policy evaluation.
+/// </summary>
+public sealed record WebViewMenuPruningPolicyContext(
+    Guid RootWindowId,
+    Guid? TargetWindowId,
+    WebViewMenuModelRequest RequestedMenuModel,
+    WebViewMenuModelRequest? CurrentEffectiveMenuModel);
+
+/// <summary>
+/// Decision returned by <see cref="IWebViewShellMenuPruningPolicy"/>.
+/// </summary>
+public sealed record WebViewMenuPruningDecision(
+    bool IsAllowed,
+    WebViewMenuModelRequest? EffectiveMenuModel = null,
+    string? DenyReason = null)
+{
+    /// <summary>Create allow decision.</summary>
+    public static WebViewMenuPruningDecision Allow(WebViewMenuModelRequest? effectiveMenuModel = null)
+        => new(true, effectiveMenuModel);
+
+    /// <summary>Create deny decision.</summary>
+    public static WebViewMenuPruningDecision Deny(string? reason = null)
+        => new(false, EffectiveMenuModel: null, reason);
 }
 
 /// <summary>
@@ -303,6 +330,10 @@ public sealed class WebViewShellExperienceOptions
     public IWebViewShellDevToolsPolicy? DevToolsPolicy { get; init; }
     /// <summary>Optional policy object for command/shortcut governance.</summary>
     public IWebViewShellCommandPolicy? CommandPolicy { get; init; }
+    /// <summary>Optional policy object for menu pruning governance.</summary>
+    public IWebViewShellMenuPruningPolicy? MenuPruningPolicy { get; init; }
+    /// <summary>Optional whitelist of allowed typed system actions.</summary>
+    public IReadOnlySet<WebViewSystemAction>? SystemActionWhitelist { get; init; }
     /// <summary>Optional policy object for session scope resolution.</summary>
     public IWebViewShellSessionPolicy? SessionPolicy { get; init; }
     /// <summary>Optional resolver for session-permission profiles.</summary>
@@ -371,6 +402,15 @@ public interface IWebViewShellCommandPolicy
 {
     /// <summary>Resolves allow/deny decision for a command action.</summary>
     WebViewShellCommandDecision Decide(IWebView webView, WebViewShellCommandPolicyContext context);
+}
+
+/// <summary>
+/// Policy for pruning menu model state in shell governance pipeline.
+/// </summary>
+public interface IWebViewShellMenuPruningPolicy
+{
+    /// <summary>Resolves allow/deny decision and effective menu model.</summary>
+    WebViewMenuPruningDecision Decide(IWebView webView, WebViewMenuPruningPolicyContext context);
 }
 
 /// <summary>
@@ -543,11 +583,36 @@ public sealed class DelegateCommandPolicy : IWebViewShellCommandPolicy
 }
 
 /// <summary>
+/// Menu pruning policy that delegates decision logic to host callback.
+/// </summary>
+public sealed class DelegateMenuPruningPolicy : IWebViewShellMenuPruningPolicy
+{
+    private readonly Func<IWebView, WebViewMenuPruningPolicyContext, WebViewMenuPruningDecision> _resolver;
+
+    /// <summary>Creates a delegating menu pruning policy.</summary>
+    public DelegateMenuPruningPolicy(Func<IWebView, WebViewMenuPruningPolicyContext, WebViewMenuPruningDecision> resolver)
+    {
+        _resolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
+    }
+
+    /// <inheritdoc />
+    public WebViewMenuPruningDecision Decide(IWebView webView, WebViewMenuPruningPolicyContext context)
+        => _resolver(webView, context);
+}
+
+/// <summary>
 /// Opt-in runtime helper that wires common host policies (new window, downloads, permissions)
 /// onto an <see cref="IWebView"/> instance.
 /// </summary>
 public sealed class WebViewShellExperience : IDisposable
 {
+    private static readonly HashSet<WebViewSystemAction> DefaultSystemActionWhitelist =
+    [
+        WebViewSystemAction.Quit,
+        WebViewSystemAction.Restart,
+        WebViewSystemAction.FocusMainWindow
+    ];
+
     private readonly IWebView _webView;
     private readonly WebViewShellExperienceOptions _options;
     private readonly object _managedWindowsLock = new();
@@ -555,6 +620,7 @@ public sealed class WebViewShellExperience : IDisposable
     private readonly Guid _rootWindowId;
     private readonly WebViewShellSessionDecision? _sessionDecision;
     private readonly WebViewSessionPermissionProfile? _rootProfile;
+    private WebViewMenuModelRequest? _effectiveMenuModel;
     private bool _disposed;
 
     /// <summary>Creates a new shell experience instance for the given WebView.</summary>
@@ -572,6 +638,8 @@ public sealed class WebViewShellExperience : IDisposable
             _options.PermissionHandler is not null ||
             _options.SessionPermissionProfileResolver is not null)
             _webView.PermissionRequested += OnPermissionRequested;
+        if (_options.HostCapabilityBridge is not null)
+            _options.HostCapabilityBridge.SystemIntegrationEventDispatched += OnSystemIntegrationEventDispatched;
 
         var rootSessionContext = _options.SessionContext with
         {
@@ -636,6 +704,10 @@ public sealed class WebViewShellExperience : IDisposable
     /// Raised when profile resolution/evaluation completes for session or permission paths.
     /// </summary>
     public event EventHandler<WebViewSessionPermissionProfileDiagnosticEventArgs>? SessionPermissionProfileEvaluated;
+    /// <summary>
+    /// Raised when an inbound system integration event is delivered through shell governance.
+    /// </summary>
+    public event EventHandler<WebViewSystemIntegrationEventRequest>? SystemIntegrationEventReceived;
 
     /// <summary>
     /// Gets the session decision resolved at construction time when <see cref="WebViewShellExperienceOptions.SessionPolicy"/> is configured.
@@ -645,6 +717,10 @@ public sealed class WebViewShellExperience : IDisposable
     /// Gets root profile identity when profile resolver is configured.
     /// </summary>
     public string? RootProfileIdentity => _rootProfile?.ProfileIdentity;
+    /// <summary>
+    /// Current effective menu model after pruning and successful application.
+    /// </summary>
+    public WebViewMenuModelRequest? EffectiveMenuModel => _effectiveMenuModel is null ? null : CloneMenuModel(_effectiveMenuModel);
 
     /// <summary>
     /// Stable identity of the root window associated with this shell experience.
@@ -751,6 +827,14 @@ public sealed class WebViewShellExperience : IDisposable
     /// </summary>
     public WebViewHostCapabilityCallResult<object?> ApplyMenuModel(WebViewMenuModelRequest request)
     {
+        ArgumentNullException.ThrowIfNull(request);
+
+        var normalizedRequest = NormalizeMenuModel(request);
+        var prunedResult = TryPruneMenuModel(normalizedRequest);
+        if (prunedResult.Result is not null)
+            return prunedResult.Result;
+        var effectiveMenuModel = prunedResult.EffectiveMenuModel ?? normalizedRequest;
+
         if (_options.HostCapabilityBridge is null)
         {
             var unavailable = WebViewHostCapabilityCallResult<object?>.Denied("Host capability bridge is not configured.");
@@ -761,10 +845,12 @@ public sealed class WebViewShellExperience : IDisposable
         }
 
         var result = _options.HostCapabilityBridge.ApplyMenuModel(
-            request,
+            effectiveMenuModel,
             _rootWindowId,
             parentWindowId: null,
             targetWindowId: _rootWindowId);
+        if (result.Outcome == WebViewHostCapabilityCallOutcome.Allow)
+            _effectiveMenuModel = CloneMenuModel(effectiveMenuModel);
         ReportSystemIntegrationOutcome(
             result,
             "Menu model operation was denied by host capability policy.");
@@ -803,6 +889,16 @@ public sealed class WebViewShellExperience : IDisposable
     /// </summary>
     public WebViewHostCapabilityCallResult<object?> ExecuteSystemAction(WebViewSystemActionRequest request)
     {
+        ArgumentNullException.ThrowIfNull(request);
+        if (!IsSystemActionWhitelisted(request.Action))
+        {
+            var denied = WebViewHostCapabilityCallResult<object?>.Denied("system-action-not-whitelisted");
+            ReportSystemIntegrationOutcome(
+                denied,
+                "System action is not in shell whitelist.");
+            return denied;
+        }
+
         if (_options.HostCapabilityBridge is null)
         {
             var unavailable = WebViewHostCapabilityCallResult<object?>.Denied("Host capability bridge is not configured.");
@@ -820,6 +916,33 @@ public sealed class WebViewShellExperience : IDisposable
         ReportSystemIntegrationOutcome(
             result,
             "System action operation was denied by host capability policy.");
+        return result;
+    }
+
+    /// <summary>
+    /// Publishes a host-originated system integration event through typed capability governance.
+    /// </summary>
+    public WebViewHostCapabilityCallResult<WebViewSystemIntegrationEventRequest> PublishSystemIntegrationEvent(
+        WebViewSystemIntegrationEventRequest request)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        if (_options.HostCapabilityBridge is null)
+        {
+            var unavailable = WebViewHostCapabilityCallResult<WebViewSystemIntegrationEventRequest>.Denied("Host capability bridge is not configured.");
+            ReportSystemIntegrationOutcome(
+                unavailable,
+                "System integration event dispatch was denied by host capability policy.");
+            return unavailable;
+        }
+
+        var result = _options.HostCapabilityBridge.DispatchSystemIntegrationEvent(
+            request,
+            _rootWindowId,
+            parentWindowId: null,
+            targetWindowId: _rootWindowId);
+        ReportSystemIntegrationOutcome(
+            result,
+            "System integration event dispatch was denied by host capability policy.");
         return result;
     }
 
@@ -1425,6 +1548,109 @@ public sealed class WebViewShellExperience : IDisposable
                 permissionDecision));
     }
 
+    private void OnSystemIntegrationEventDispatched(object? sender, WebViewSystemIntegrationEventRequest request)
+        => SystemIntegrationEventReceived?.Invoke(this, request);
+
+    private bool IsSystemActionWhitelisted(WebViewSystemAction action)
+    {
+        var whitelist = _options.SystemActionWhitelist;
+        if (whitelist is not null)
+            return whitelist.Contains(action);
+        return DefaultSystemActionWhitelist.Contains(action);
+    }
+
+    private (WebViewMenuModelRequest? EffectiveMenuModel, WebViewHostCapabilityCallResult<object?>? Result) TryPruneMenuModel(
+        WebViewMenuModelRequest requestedMenuModel)
+    {
+        if (_options.MenuPruningPolicy is null)
+            return (requestedMenuModel, null);
+
+        var context = new WebViewMenuPruningPolicyContext(
+            RootWindowId: _rootWindowId,
+            TargetWindowId: _rootWindowId,
+            RequestedMenuModel: requestedMenuModel,
+            CurrentEffectiveMenuModel: _effectiveMenuModel is null ? null : CloneMenuModel(_effectiveMenuModel));
+
+        WebViewMenuPruningDecision decision;
+        try
+        {
+            decision = _options.MenuPruningPolicy.Decide(_webView, context);
+        }
+        catch (Exception ex)
+        {
+            if (!WebViewOperationFailure.TryGetCategory(ex, out _))
+                WebViewOperationFailure.SetCategory(ex, WebViewOperationFailureCategory.AdapterFailed);
+            var failed = WebViewHostCapabilityCallResult<object?>.Failure(ex, wasAuthorized: false);
+            ReportSystemIntegrationOutcome(
+                failed,
+                "Menu pruning policy failed.");
+            return (null, failed);
+        }
+
+        if (!decision.IsAllowed)
+        {
+            var denied = WebViewHostCapabilityCallResult<object?>.Denied(decision.DenyReason ?? "menu-pruning-denied");
+            ReportSystemIntegrationOutcome(
+                denied,
+                "Menu pruning was denied by shell policy.");
+            return (null, denied);
+        }
+
+        var effective = NormalizeMenuModel(decision.EffectiveMenuModel ?? requestedMenuModel);
+        return (effective, null);
+    }
+
+    private static WebViewMenuModelRequest NormalizeMenuModel(WebViewMenuModelRequest request)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        return new WebViewMenuModelRequest
+        {
+            Items = NormalizeMenuItems(request.Items)
+        };
+    }
+
+    private static IReadOnlyList<WebViewMenuItemModel> NormalizeMenuItems(IReadOnlyList<WebViewMenuItemModel> items)
+    {
+        var normalized = new List<WebViewMenuItemModel>(items.Count);
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var item in items)
+        {
+            if (item is null)
+                continue;
+
+            var id = item.Id?.Trim();
+            if (string.IsNullOrWhiteSpace(id))
+                continue;
+            if (!seen.Add(id))
+                continue;
+
+            normalized.Add(new WebViewMenuItemModel
+            {
+                Id = id,
+                Label = item.Label,
+                IsEnabled = item.IsEnabled,
+                Children = NormalizeMenuItems(item.Children)
+            });
+        }
+
+        return normalized;
+    }
+
+    private static WebViewMenuModelRequest CloneMenuModel(WebViewMenuModelRequest model)
+        => new()
+        {
+            Items = CloneMenuItems(model.Items)
+        };
+
+    private static IReadOnlyList<WebViewMenuItemModel> CloneMenuItems(IReadOnlyList<WebViewMenuItemModel> items)
+        => items.Select(item => new WebViewMenuItemModel
+        {
+            Id = item.Id,
+            Label = item.Label,
+            IsEnabled = item.IsEnabled,
+            Children = CloneMenuItems(item.Children)
+        }).ToArray();
+
     private void ReportPolicyFailure(WebViewShellPolicyDomain domain, Exception ex)
     {
         if (!WebViewOperationFailure.TryGetCategory(ex, out _))
@@ -1494,6 +1720,8 @@ public sealed class WebViewShellExperience : IDisposable
         _webView.NewWindowRequested -= OnNewWindowRequested;
         _webView.DownloadRequested -= OnDownloadRequested;
         _webView.PermissionRequested -= OnPermissionRequested;
+        if (_options.HostCapabilityBridge is not null)
+            _options.HostCapabilityBridge.SystemIntegrationEventDispatched -= OnSystemIntegrationEventDispatched;
     }
 
     private sealed class ManagedWindowEntry

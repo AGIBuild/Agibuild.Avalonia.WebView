@@ -26,7 +26,11 @@ public enum WebViewHostCapabilityOperation
     /// <summary>Update host tray state.</summary>
     TrayUpdateState = 7,
     /// <summary>Execute host system action.</summary>
-    SystemActionExecute = 8
+    SystemActionExecute = 8,
+    /// <summary>Dispatch tray interaction event to web pipeline.</summary>
+    TrayInteractionEventDispatch = 9,
+    /// <summary>Dispatch menu interaction event to web pipeline.</summary>
+    MenuInteractionEventDispatch = 10
 }
 
 /// <summary>
@@ -174,6 +178,30 @@ public enum WebViewSystemAction
     Restart = 1,
     /// <summary>Focus main window.</summary>
     FocusMainWindow = 2
+}
+
+/// <summary>
+/// Typed system integration event kinds emitted from host to web pipeline.
+/// </summary>
+public enum WebViewSystemIntegrationEventKind
+{
+    /// <summary>Tray icon was interacted with.</summary>
+    TrayInteracted = 0,
+    /// <summary>Menu item was invoked.</summary>
+    MenuItemInvoked = 1
+}
+
+/// <summary>
+/// Typed inbound system integration event payload.
+/// </summary>
+public sealed class WebViewSystemIntegrationEventRequest
+{
+    /// <summary>Event kind.</summary>
+    public WebViewSystemIntegrationEventKind Kind { get; init; }
+    /// <summary>Optional item id for menu/tray events.</summary>
+    public string? ItemId { get; init; }
+    /// <summary>Optional context payload for diagnostics and UI reaction.</summary>
+    public string? Context { get; init; }
 }
 
 /// <summary>
@@ -333,6 +361,10 @@ public sealed class WebViewHostCapabilityBridge
     /// Raised when a typed capability call is completed with deterministic outcome metadata.
     /// </summary>
     public event EventHandler<WebViewHostCapabilityDiagnosticEventArgs>? CapabilityCallCompleted;
+    /// <summary>
+    /// Raised when a typed inbound system integration event is allowed and dispatched.
+    /// </summary>
+    public event EventHandler<WebViewSystemIntegrationEventRequest>? SystemIntegrationEventDispatched;
 
     /// <summary>Create bridge with provider and optional authorization policy.</summary>
     public WebViewHostCapabilityBridge(IWebViewHostCapabilityProvider provider, IWebViewHostCapabilityPolicy? policy = null)
@@ -512,6 +544,36 @@ public sealed class WebViewHostCapabilityBridge
             {
                 _provider.ExecuteSystemAction(request);
                 return null;
+            });
+    }
+
+    /// <summary>
+    /// Dispatches a typed inbound system integration event through policy-first capability flow.
+    /// </summary>
+    public WebViewHostCapabilityCallResult<WebViewSystemIntegrationEventRequest> DispatchSystemIntegrationEvent(
+        WebViewSystemIntegrationEventRequest request,
+        Guid rootWindowId,
+        Guid? parentWindowId = null,
+        Guid? targetWindowId = null)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        var operation = request.Kind switch
+        {
+            WebViewSystemIntegrationEventKind.TrayInteracted => WebViewHostCapabilityOperation.TrayInteractionEventDispatch,
+            WebViewSystemIntegrationEventKind.MenuItemInvoked => WebViewHostCapabilityOperation.MenuInteractionEventDispatch,
+            _ => throw new ArgumentOutOfRangeException(nameof(request), request.Kind, "Unsupported system integration event kind.")
+        };
+
+        return Execute(
+            new WebViewHostCapabilityRequestContext(
+                rootWindowId,
+                parentWindowId,
+                targetWindowId,
+                operation),
+            () =>
+            {
+                SystemIntegrationEventDispatched?.Invoke(this, request);
+                return request;
             });
     }
 

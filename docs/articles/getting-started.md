@@ -1,44 +1,65 @@
 # Getting Started
 
+Build your first **Electron-replacement-ready** hybrid app with Avalonia + web UI.
+
+This guide follows the current product direction (Roadmap Phase 5):
+
+- typed bridge contracts
+- typed capability gateway
+- policy-first runtime behavior
+- automation-friendly diagnostics
+- web-first template architecture
+
 ## Prerequisites
 
 - .NET 10 SDK
-- Platform-specific WebView runtime:
-  - **Windows**: WebView2 (auto-installs with Edge)
+- Platform runtime:
+  - **Windows**: WebView2 (usually installed with Edge)
   - **macOS/iOS**: WKWebView (built-in)
   - **Android**: Android WebView (built-in)
   - **Linux**: WebKitGTK (`libwebkit2gtk-4.1`)
 
-## Quick Start (Template)
+## Recommended Path: Template Workflow
+
+Use this path for most teams. It matches the recommended architecture with minimal host glue.
 
 ```bash
-# Install the template (once)
+# Install template (once)
 dotnet new install Agibuild.Avalonia.WebView.Templates
 
-# Create a new hybrid app
+# Create app
 dotnet new agibuild-hybrid -n MyApp
 
-# Run
+# Run desktop host
 cd MyApp
 dotnet run --project MyApp.Desktop
 ```
 
-## Manual Setup
+What you get immediately:
 
-### 1. Create an Avalonia Desktop project
+- ready-to-run host + web structure
+- typed bridge contract wiring
+- web-first development flow
+- production-oriented project layout
+
+## Manual Path: Build from Scratch
+
+Use this when you need full control over project composition.
+
+### 1) Create an Avalonia app
 
 ```bash
 dotnet new avalonia.app -n MyApp
 cd MyApp
 ```
 
-### 2. Add NuGet packages
+### 2) Add package
 
 ```bash
 dotnet add package Agibuild.Avalonia.WebView
 ```
 
-### 3. Add WebView to your window
+### 3) Add WebView control
 
 ```xml
 <!-- MainWindow.axaml -->
@@ -47,7 +68,7 @@ dotnet add package Agibuild.Avalonia.WebView
 </Window>
 ```
 
-### 4. Navigate to a URL
+### 4) Navigate to a page
 
 ```csharp
 // MainWindow.axaml.cs
@@ -61,52 +82,47 @@ public MainWindow()
 }
 ```
 
-## Type-Safe Bridge
+## First Typed Bridge Contract
 
-### Define bridge interfaces
-
-Create a shared project with your bridge contracts:
+Define contracts once, then call across C# and JavaScript with type safety.
 
 ```csharp
-// IGreeterService.cs
-[JsExport]  // C# → JS
+[JsExport] // C# -> JS
 public interface IGreeterService
 {
     Task<string> Greet(string name);
 }
 
-[JsImport]  // JS → C#
+[JsImport] // JS -> C#
 public interface INotificationService
 {
     Task ShowNotification(string message);
 }
 ```
 
-### Expose a C# service to JavaScript
+Expose C# service:
 
 ```csharp
-// In your window code-behind
 WebView.Bridge.Expose<IGreeterService>(new GreeterServiceImpl());
 ```
 
-### Call from JavaScript
+Call from JavaScript:
 
 ```javascript
-// In your web page
-const result = await window.agWebView.rpc.invoke('GreeterService.Greet', { name: 'World' });
-console.log(result); // "Hello, World!"
+const result = await window.agWebView.rpc.invoke("GreeterService.greet", { name: "World" });
+console.log(result);
 ```
 
-### Call JavaScript from C#
+Call JavaScript from C#:
 
 ```csharp
 var notifier = WebView.Bridge.GetProxy<INotificationService>();
 await notifier.ShowNotification("Hello from C#!");
 ```
 
-## SPA Hosting
+## First Web-First SPA Hosting Setup
 
-Serve your React/Vue/vanilla frontend from embedded resources:
+Production mode (embedded assets):
 
 ```csharp
 WebView.EnableSpaHosting(new SpaHostingOptions
@@ -118,7 +134,7 @@ WebView.EnableSpaHosting(new SpaHostingOptions
 await WebView.NavigateAsync(new Uri("app://localhost/index.html"));
 ```
 
-During development, proxy to your dev server for HMR:
+Development mode (HMR proxy):
 
 ```csharp
 WebView.EnableSpaHosting(new SpaHostingOptions
@@ -127,22 +143,10 @@ WebView.EnableSpaHosting(new SpaHostingOptions
 });
 ```
 
-## Unit Testing with MockBridge
-
-```csharp
-[Fact]
-public async Task ViewModel_exposes_greeter()
-{
-    var mock = new MockBridgeService();
-    var vm = new MainViewModel(mock);
-
-    Assert.True(mock.WasExposed<IGreeterService>());
-}
-```
-
 ## Next Steps
 
+- [Architecture](architecture.md) — Runtime topology and Phase 5 invariants
 - [Bridge Guide](bridge-guide.md) — Advanced bridge patterns
-- [SPA Hosting](spa-hosting.md) — Detailed SPA hosting configuration
-- [Architecture](architecture.md) — Framework internals
-- [API Reference](../api/index.md) — Full API documentation
+- [SPA Hosting](spa-hosting.md) — Detailed hosting configuration
+- [Demo walkthrough](../demo/index.md) — End-to-end sample experience
+- [Roadmap](../../openspec/ROADMAP.md) — Product direction and milestones

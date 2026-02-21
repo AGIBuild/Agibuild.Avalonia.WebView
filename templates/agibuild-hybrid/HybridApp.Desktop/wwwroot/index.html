@@ -59,6 +59,7 @@
         <button style="margin-top:.5rem" onclick="applyMenuModel()">Apply menu model (typed)</button>
         <button style="margin-left:.5rem" onclick="toggleTray()">Toggle tray state (typed)</button>
         <button style="margin-left:.5rem" onclick="focusMainWindow()">Execute system action (typed)</button>
+        <button style="margin-top:.5rem" onclick="drainSystemIntegrationEvents()">Drain host events (typed)</button>
         <div id="result"></div>
     </div>
 
@@ -150,6 +151,7 @@
                 const result = await window.agWebView.rpc.invoke('DesktopHostService.ApplyMenuModel', { model });
                 if (result.outcome === 0) {
                     el.textContent = 'Menu model applied: ' + result.appliedTopLevelItems + ' top-level items';
+                    await drainSystemIntegrationEvents('Menu update event');
                 } else if (result.outcome === 1) {
                     el.textContent = 'Menu apply denied: ' + (result.denyReason ?? 'unknown');
                 } else {
@@ -178,6 +180,7 @@
                 const result = await window.agWebView.rpc.invoke('DesktopHostService.UpdateTrayState', { state });
                 if (result.outcome === 0) {
                     el.textContent = 'Tray visibility: ' + (result.isVisible ? 'visible' : 'hidden');
+                    await drainSystemIntegrationEvents('Tray event');
                 } else if (result.outcome === 1) {
                     el.textContent = 'Tray update denied: ' + (result.denyReason ?? 'unknown');
                 } else {
@@ -204,6 +207,37 @@
                 } else {
                     el.textContent = 'System action failure: ' + (result.error ?? 'unknown');
                 }
+            } catch (err) {
+                el.textContent = 'Error: ' + err.message;
+            }
+        }
+
+        async function drainSystemIntegrationEvents(prefix = 'Host events') {
+            const el = document.getElementById('result');
+            if (!await waitForBridge()) {
+                el.textContent = 'Bridge not available';
+                return;
+            }
+
+            try {
+                const result = await window.agWebView.rpc.invoke('DesktopHostService.DrainSystemIntegrationEvents', {});
+                if (result.outcome !== 0) {
+                    el.textContent = 'Event drain failed: ' + (result.error ?? result.denyReason ?? 'unknown');
+                    return;
+                }
+
+                if (!result.events || result.events.length === 0) {
+                    el.textContent = prefix + ': no pending typed events';
+                    return;
+                }
+
+                const lines = result.events.map(evt => {
+                    const kind = evt.kind === 0 ? 'tray' : 'menu';
+                    const item = evt.itemId ?? 'n/a';
+                    const context = evt.context ?? 'n/a';
+                    return `${kind}:${item}:${context}`;
+                });
+                el.textContent = prefix + ': ' + lines.join(' | ');
             } catch (err) {
                 el.textContent = 'Error: ' + err.message;
             }

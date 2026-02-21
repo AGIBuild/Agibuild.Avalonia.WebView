@@ -59,7 +59,8 @@ public sealed class AutomationLaneGovernanceTests
             "shell-host-capability-stress",
             "windows-webview2-teardown-stress",
             "shell-devtools-policy-isolation",
-            "shell-shortcut-routing"
+            "shell-shortcut-routing",
+            "shell-system-integration-roundtrip"
         };
 
         var scenarioIds = scenarios
@@ -84,6 +85,47 @@ public sealed class AutomationLaneGovernanceTests
 
             var source = File.ReadAllText(sourcePath);
             Assert.Contains(testMethod!, source, StringComparison.Ordinal);
+        }
+    }
+
+    [Fact]
+    public void System_integration_ct_matrix_contains_required_rows_and_machine_checkable_evidence()
+    {
+        var repoRoot = FindRepoRoot();
+        var matrixPath = Path.Combine(repoRoot, "tests", "shell-system-integration-ct-matrix.json");
+        Assert.True(File.Exists(matrixPath), $"Missing system integration CT matrix: {matrixPath}");
+
+        using var doc = JsonDocument.Parse(File.ReadAllText(matrixPath));
+        var rows = doc.RootElement.GetProperty("rows").EnumerateArray().ToList();
+        Assert.NotEmpty(rows);
+
+        var rowIds = rows
+            .Select(x => x.GetProperty("id").GetString())
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .ToHashSet(StringComparer.Ordinal);
+        Assert.Contains("tray-event-inbound", rowIds);
+        Assert.Contains("menu-pruning", rowIds);
+        Assert.Contains("system-action-whitelist", rowIds);
+
+        foreach (var row in rows)
+        {
+            var coverage = row.GetProperty("coverage").EnumerateArray().Select(x => x.GetString()).ToList();
+            Assert.NotEmpty(coverage);
+
+            var evidenceItems = row.GetProperty("evidence").EnumerateArray().ToList();
+            Assert.NotEmpty(evidenceItems);
+            foreach (var evidence in evidenceItems)
+            {
+                var file = evidence.GetProperty("file").GetString();
+                var testMethod = evidence.GetProperty("testMethod").GetString();
+                Assert.False(string.IsNullOrWhiteSpace(file));
+                Assert.False(string.IsNullOrWhiteSpace(testMethod));
+
+                var sourcePath = Path.Combine(repoRoot, file!.Replace('/', Path.DirectorySeparatorChar));
+                Assert.True(File.Exists(sourcePath), $"CT matrix evidence file does not exist: {sourcePath}");
+                var source = File.ReadAllText(sourcePath);
+                Assert.Contains(testMethod!, source, StringComparison.Ordinal);
+            }
         }
     }
 
@@ -271,6 +313,8 @@ public sealed class AutomationLaneGovernanceTests
         Assert.Contains("ApplyMenuModel(", appShellPreset, StringComparison.Ordinal);
         Assert.Contains("UpdateTrayState(", appShellPreset, StringComparison.Ordinal);
         Assert.Contains("ExecuteSystemAction(", appShellPreset, StringComparison.Ordinal);
+        Assert.Contains("DrainSystemIntegrationEvents(", appShellPreset, StringComparison.Ordinal);
+        Assert.Contains("PublishSystemIntegrationEvent(", appShellPreset, StringComparison.Ordinal);
         Assert.DoesNotContain("ExternalOpenHandler", appShellPreset, StringComparison.Ordinal);
         Assert.Contains("KeyDown +=", appShellPreset, StringComparison.Ordinal);
         Assert.Contains("KeyDown -=", appShellPreset, StringComparison.Ordinal);
@@ -282,9 +326,19 @@ public sealed class AutomationLaneGovernanceTests
         Assert.Contains("DesktopHostService.ApplyMenuModel", desktopIndex, StringComparison.Ordinal);
         Assert.Contains("DesktopHostService.UpdateTrayState", desktopIndex, StringComparison.Ordinal);
         Assert.Contains("DesktopHostService.ExecuteSystemAction", desktopIndex, StringComparison.Ordinal);
+        Assert.Contains("DesktopHostService.DrainSystemIntegrationEvents", desktopIndex, StringComparison.Ordinal);
         Assert.Contains("result.appliedTopLevelItems", desktopIndex, StringComparison.Ordinal);
         Assert.Contains("result.isVisible", desktopIndex, StringComparison.Ordinal);
+        Assert.Contains("Host events", desktopIndex, StringComparison.Ordinal);
         Assert.Contains("System action denied", desktopIndex, StringComparison.Ordinal);
+
+        // Baseline preset must remain free from app-shell bidirectional wiring.
+        var templateJsonPath = Path.Combine(repoRoot, "templates", "agibuild-hybrid", ".template.config", "template.json");
+        var templateJson = File.ReadAllText(templateJsonPath);
+        Assert.Contains("\"condition\": \"(shellPreset == 'baseline')\"", templateJson, StringComparison.Ordinal);
+        Assert.Contains("\"exclude\": [\"HybridApp.Desktop/MainWindow.AppShellPreset.cs\"]", templateJson, StringComparison.Ordinal);
+        Assert.DoesNotContain("DesktopHostService.DrainSystemIntegrationEvents", desktopMainWindow, StringComparison.Ordinal);
+        Assert.DoesNotContain("PublishSystemIntegrationEvent", desktopMainWindow, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -331,7 +385,8 @@ public sealed class AutomationLaneGovernanceTests
             "shell-host-capability-stress",
             "windows-webview2-teardown-stress",
             "shell-devtools-policy-isolation",
-            "shell-shortcut-routing"
+            "shell-shortcut-routing",
+            "shell-system-integration-roundtrip"
         };
 
         foreach (var capabilityId in requiredCapabilityIds)
@@ -410,6 +465,8 @@ public sealed class AutomationLaneGovernanceTests
         Assert.Contains("MenuApplyModel = 6", bridgeSource, StringComparison.Ordinal);
         Assert.Contains("TrayUpdateState = 7", bridgeSource, StringComparison.Ordinal);
         Assert.Contains("SystemActionExecute = 8", bridgeSource, StringComparison.Ordinal);
+        Assert.Contains("TrayInteractionEventDispatch = 9", bridgeSource, StringComparison.Ordinal);
+        Assert.Contains("MenuInteractionEventDispatch = 10", bridgeSource, StringComparison.Ordinal);
 
         // Diagnostic payload must remain machine-checkable.
         Assert.Contains("public sealed class WebViewHostCapabilityDiagnosticEventArgs", bridgeSource, StringComparison.Ordinal);
@@ -425,6 +482,8 @@ public sealed class AutomationLaneGovernanceTests
         Assert.Contains("_options.HostCapabilityBridge.ApplyMenuModel(", shellSource, StringComparison.Ordinal);
         Assert.Contains("_options.HostCapabilityBridge.UpdateTrayState(", shellSource, StringComparison.Ordinal);
         Assert.Contains("_options.HostCapabilityBridge.ExecuteSystemAction(", shellSource, StringComparison.Ordinal);
+        Assert.Contains("_options.HostCapabilityBridge.DispatchSystemIntegrationEvent(", shellSource, StringComparison.Ordinal);
+        Assert.Contains("SystemIntegrationEventReceived", shellSource, StringComparison.Ordinal);
     }
 
     [Fact]

@@ -1,88 +1,100 @@
 # Architecture
 
-## Layer Diagram
+## Architectural North Star
+
+Architecture is aligned to **Roadmap Phase 5: Electron Replacement Foundation**.
+The goal is not only rendering web content, but delivering a deterministic, policy-governed hybrid app platform.
+
+## System Topology
 
 ```
-┌─────────────────────────────────────────────────┐
-│  Consumer App (Avalonia XAML + Code-behind)      │
-│  ┌──────────┐  ┌────────────┐  ┌─────────────┐  │
-│  │ WebView  │  │ WebDialog  │  │ Ava.Dialog  │  │
-│  └────┬─────┘  └─────┬──────┘  └──────┬──────┘  │
-│       │               │                │         │
-│  ┌────┴───────────────┴────────────────┘         │
-│  │            WebViewCore                        │
-│  │  ┌─────────────┐  ┌──────────────────┐        │
-│  │  │ Bridge      │  │ SPA Hosting      │        │
-│  │  │ (IBridge)   │  │ (SpaHostingSvc)  │        │
-│  │  └──────┬──────┘  └────────┬─────────┘        │
-│  │         │                  │                  │
-│  │  ┌──────┴──────┐  ┌───────┴──────────┐        │
-│  │  │ RPC Service │  │ WebResource      │        │
-│  │  │ (JSON-RPC)  │  │ Interception     │        │
-│  │  └──────┬──────┘  └────────┬─────────┘        │
-│  └─────────┼──────────────────┼──────────────────┘
-│            │                  │                   │
-│  ┌─────────┴──────────────────┴──────────────────┐
-│  │          IWebViewAdapter (Abstraction)         │
-│  └────────────────────┬──────────────────────────┘
-│                       │                           │
-│  ┌────────┬───────────┼───────────┬──────────────┐
-│  │Windows │  macOS    │  Android  │  GTK/Linux   │
-│  │WebView2│  WKWebView│  WebView  │  WebKitGTK   │
-│  └────────┴───────────┴───────────┴──────────────┘
-└─────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────┐
+│                   Consumer Application                  │
+│      Avalonia UI + Web UI + Bridge Contracts           │
+└──────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌──────────────────────────────────────────────────────────┐
+│                         Runtime Core                    │
+│  Typed Bridge · Capability Gateway · Policy Engine      │
+│  Diagnostics Pipeline · Shell Experience · SPA Hosting  │
+└──────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌──────────────────────────────────────────────────────────┐
+│                   Adapter Abstraction Layer             │
+│                    IWebViewAdapter + Facets            │
+└──────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌──────────────────────────────────────────────────────────┐
+│   WebView2 (Win) · WKWebView (macOS/iOS) · Android     │
+│                     WebKitGTK (Linux)                   │
+└──────────────────────────────────────────────────────────┘
 ```
 
-## Key Design Principles
+## Core Invariants
 
-### 1. Contract-First
-Every feature starts as an interface in Core. Implementation is in Runtime. Platform specifics are in Adapters.
+1. **Contract-first**
+   - Public behavior starts from explicit contracts.
+   - Runtime is the single semantic owner for contract execution.
 
-### 2. Facet-Based Adapters
-Platform adapters implement optional interfaces (facets):
-- `IWebViewAdapter` (required) — lifecycle, navigation
-- `ICookieAdapter` — cookie management
-- `IZoomAdapter` — zoom control
-- `IFindInPageAdapter` — find in page
-- `IDevToolsAdapter` — runtime DevTools toggle
-- etc.
+2. **Single typed capability gateway**
+   - Desktop/system operations converge through one typed capability entry model.
+   - App-layer code avoids scattered direct host API invocation paths.
 
-WebViewCore uses pattern matching (`adapter as IFoo`) to check capabilities.
+3. **Policy-first deterministic execution**
+   - Policy evaluation happens before provider execution.
+   - Every capability request resolves to `allow`, `deny`, or `failure`.
 
-### 3. AOT-Safe by Design
-- Roslyn Source Generator eliminates reflection for bridge dispatch
-- `System.Text.Json` with source-generated contexts
-- No `dynamic`, no `Activator.CreateInstance` in hot paths
+4. **Automation-first diagnostics**
+   - Critical runtime paths emit machine-checkable diagnostics.
+   - CI and AI agents can assert behavior without manual log reading.
 
-### 4. Testable Without a Browser
-- `MockWebViewAdapter` simulates all adapter behavior
-- `TestDispatcher` controls async execution timing
-- `MockBridgeService` for consumer unit tests
+5. **Web-first template architecture**
+   - Starter projects keep host glue minimal.
+   - Typed bridge and capability contracts remain first-class from day one.
 
-## Bridge Architecture
+## Bridge Model (C# <-> JS)
 
-```
-C# Service                    JavaScript
-  │                               │
-  │  [JsExport]                   │
-  ├──→ RuntimeBridgeService       │
-  │    ├─ SG path (AOT)           │
-  │    └─ Reflection fallback     │
-  │         │                     │
-  │    WebViewRpcService          │
-  │    (JSON-RPC 2.0)             │
-  │         │                     │
-  │    WebMessage ◄──────────────►│ window.agWebView.rpc
-  │                               │
-  │  [JsImport]                   │
-  │    GetProxy<T>()              │
-  │    ├─ SG proxy (AOT)          │
-  │    └─ DispatchProxy fallback  │
-  └──→ JSON-RPC invoke ──────────►│
-```
+Bridge communication is centered on typed contracts:
 
-## Security Layers
+- `[JsExport]`: expose C# services to JavaScript
+- `[JsImport]`: consume JavaScript services from C#
+- Source generation enforces AOT-safe, reflection-free stubs/proxies
+- JSON-RPC transport stays internal; contract surface stays typed
 
-1. **WebMessage Policy** — origin + channel + protocol filtering
-2. **Rate Limiting** — per-service sliding-window (`BridgeOptions.RateLimit`)
-3. **Explicit Exposure** — only `[JsExport]`-decorated interfaces are accessible
+## Capability Execution Semantics
+
+Capability calls follow the same runtime sequence:
+
+1. request enters typed capability gateway
+2. policy engine evaluates authorization/governance
+3. provider executes only when policy permits
+4. deterministic result is returned
+5. diagnostics event is emitted for automation
+
+| Outcome | Meaning | Expected behavior |
+|---|---|---|
+| `allow` | Policy approved and operation completed | Return success result + diagnostics |
+| `deny` | Policy rejected before execution | Return explicit deny result + diagnostics |
+| `failure` | Execution attempted but failed deterministically | Return failure result + diagnostics |
+
+## Security and Governance Layers
+
+- **WebMessage policy**: origin, channel, and protocol boundaries
+- **Capability policy**: explicit policy evaluation before host provider execution
+- **Rate limiting**: bounded request pressure on bridge/capability paths
+- **Explicit exposure**: only declared contracts are reachable from web content
+
+## Testability and Verification
+
+- Contract tests validate behavior semantics independent of platform engine
+- Integration tests validate runtime wiring on real platform adapters
+- Automation lanes validate diagnostics/governance expectations for release readiness
+
+## Related Documents
+
+- [Roadmap](../../openspec/ROADMAP.md)
+- [Project Vision & Goals](../../openspec/PROJECT.md)
+- [Getting Started](./getting-started.md)
