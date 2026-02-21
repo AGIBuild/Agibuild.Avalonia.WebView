@@ -410,6 +410,61 @@ public sealed class HostCapabilityBridgeTests
         Assert.Equal("system-integration-event-metadata-budget-exceeded", diagnostic.DenyReason);
     }
 
+    [Fact]
+    public void Inbound_metadata_budget_configuration_outside_bounds_is_rejected_deterministically()
+    {
+        var provider = new TestHostCapabilityProvider();
+
+        var low = Assert.Throws<ArgumentOutOfRangeException>(() =>
+            _ = new WebViewHostCapabilityBridge(
+                provider,
+                new AllowAllPolicy(),
+                new WebViewHostCapabilityBridgeOptions
+                {
+                    SystemIntegrationMetadataTotalLength = WebViewHostCapabilityBridgeOptions.MinSystemIntegrationMetadataTotalLength - 1
+                }));
+        Assert.Contains("System integration metadata total length must be within", low.Message, StringComparison.Ordinal);
+
+        var high = Assert.Throws<ArgumentOutOfRangeException>(() =>
+            _ = new WebViewHostCapabilityBridge(
+                provider,
+                new AllowAllPolicy(),
+                new WebViewHostCapabilityBridgeOptions
+                {
+                    SystemIntegrationMetadataTotalLength = WebViewHostCapabilityBridgeOptions.MaxSystemIntegrationMetadataTotalLength + 1
+                }));
+        Assert.Contains("System integration metadata total length must be within", high.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Inbound_metadata_budget_uses_configured_in_range_value_deterministically()
+    {
+        var provider = new TestHostCapabilityProvider();
+        var policy = new CountingAllowPolicy();
+        var bridge = new WebViewHostCapabilityBridge(
+            provider,
+            policy,
+            new WebViewHostCapabilityBridgeOptions
+            {
+                SystemIntegrationMetadataTotalLength = 1200
+            });
+
+        var eventResult = bridge.DispatchSystemIntegrationEvent(new WebViewSystemIntegrationEventRequest
+        {
+            Kind = WebViewSystemIntegrationEventKind.TrayInteracted,
+            Metadata = new Dictionary<string, string>
+            {
+                ["a"] = new string('x', 256),
+                ["b"] = new string('x', 256),
+                ["c"] = new string('x', 256),
+                ["d"] = new string('x', 256)
+            }
+        }, Guid.NewGuid());
+
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, eventResult.Outcome);
+        Assert.Equal(1, policy.EvaluateCalls);
+    }
+
     private sealed class AllowAllPolicy : IWebViewHostCapabilityPolicy
     {
         public WebViewHostCapabilityDecision Evaluate(in WebViewHostCapabilityRequestContext context)

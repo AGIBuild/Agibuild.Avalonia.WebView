@@ -356,6 +356,26 @@ public sealed class WebViewHostCapabilityDiagnosticEventArgs : EventArgs
 }
 
 /// <summary>
+/// Options for host capability bridge boundary validation.
+/// </summary>
+public sealed class WebViewHostCapabilityBridgeOptions
+{
+    /// <summary>Minimum supported aggregate metadata budget.</summary>
+    public const int MinSystemIntegrationMetadataTotalLength = 256;
+    /// <summary>Maximum supported aggregate metadata budget.</summary>
+    public const int MaxSystemIntegrationMetadataTotalLength = 4096;
+    /// <summary>Default aggregate metadata budget.</summary>
+    public const int DefaultSystemIntegrationMetadataTotalLength = 1024;
+
+    /// <summary>
+    /// Aggregate metadata budget for inbound system-integration events.
+    /// Must be within <see cref="MinSystemIntegrationMetadataTotalLength"/> and
+    /// <see cref="MaxSystemIntegrationMetadataTotalLength"/>.
+    /// </summary>
+    public int SystemIntegrationMetadataTotalLength { get; init; } = DefaultSystemIntegrationMetadataTotalLength;
+}
+
+/// <summary>
 /// Runtime host capability bridge with policy-first deterministic execution semantics.
 /// </summary>
 public sealed class WebViewHostCapabilityBridge
@@ -363,12 +383,12 @@ public sealed class WebViewHostCapabilityBridge
     private const int MaxSystemIntegrationMetadataEntries = 8;
     private const int MaxSystemIntegrationMetadataKeyLength = 64;
     private const int MaxSystemIntegrationMetadataValueLength = 256;
-    private const int MaxSystemIntegrationMetadataTotalLength = 1024;
     private const string SystemIntegrationMetadataEnvelopeInvalid = "system-integration-event-metadata-envelope-invalid";
     private const string SystemIntegrationMetadataBudgetExceeded = "system-integration-event-metadata-budget-exceeded";
 
     private readonly IWebViewHostCapabilityProvider _provider;
     private readonly IWebViewHostCapabilityPolicy? _policy;
+    private readonly int _maxSystemIntegrationMetadataTotalLength;
 
     /// <summary>
     /// Raised when a typed capability call is completed with deterministic outcome metadata.
@@ -379,11 +399,16 @@ public sealed class WebViewHostCapabilityBridge
     /// </summary>
     public event EventHandler<WebViewSystemIntegrationEventRequest>? SystemIntegrationEventDispatched;
 
-    /// <summary>Create bridge with provider and optional authorization policy.</summary>
-    public WebViewHostCapabilityBridge(IWebViewHostCapabilityProvider provider, IWebViewHostCapabilityPolicy? policy = null)
+    /// <summary>Create bridge with provider, optional authorization policy and boundary options.</summary>
+    public WebViewHostCapabilityBridge(
+        IWebViewHostCapabilityProvider provider,
+        IWebViewHostCapabilityPolicy? policy = null,
+        WebViewHostCapabilityBridgeOptions? options = null)
     {
         _provider = provider ?? throw new ArgumentNullException(nameof(provider));
         _policy = policy;
+        options ??= new WebViewHostCapabilityBridgeOptions();
+        _maxSystemIntegrationMetadataTotalLength = ValidateSystemIntegrationMetadataTotalLength(options.SystemIntegrationMetadataTotalLength);
     }
 
     /// <summary>Reads text from clipboard.</summary>
@@ -659,7 +684,7 @@ public sealed class WebViewHostCapabilityBridge
         }
     }
 
-    private static bool TryValidateMetadataEnvelope(IReadOnlyDictionary<string, string> metadata, out string denyReason)
+    private bool TryValidateMetadataEnvelope(IReadOnlyDictionary<string, string> metadata, out string denyReason)
     {
         if (metadata.Count > MaxSystemIntegrationMetadataEntries)
         {
@@ -684,7 +709,7 @@ public sealed class WebViewHostCapabilityBridge
             }
 
             totalLength += pair.Key.Length + pair.Value.Length;
-            if (totalLength > MaxSystemIntegrationMetadataTotalLength)
+            if (totalLength > _maxSystemIntegrationMetadataTotalLength)
             {
                 denyReason = SystemIntegrationMetadataBudgetExceeded;
                 return false;
@@ -693,6 +718,20 @@ public sealed class WebViewHostCapabilityBridge
 
         denyReason = string.Empty;
         return true;
+    }
+
+    private static int ValidateSystemIntegrationMetadataTotalLength(int budget)
+    {
+        if (budget < WebViewHostCapabilityBridgeOptions.MinSystemIntegrationMetadataTotalLength ||
+            budget > WebViewHostCapabilityBridgeOptions.MaxSystemIntegrationMetadataTotalLength)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(budget),
+                budget,
+                $"System integration metadata total length must be within [{WebViewHostCapabilityBridgeOptions.MinSystemIntegrationMetadataTotalLength}, {WebViewHostCapabilityBridgeOptions.MaxSystemIntegrationMetadataTotalLength}].");
+        }
+
+        return budget;
     }
 
     private WebViewHostCapabilityCallResult<T> DenyWithDiagnostic<T>(

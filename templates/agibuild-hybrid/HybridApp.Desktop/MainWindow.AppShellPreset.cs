@@ -56,7 +56,8 @@ public partial class MainWindow
                 {
                     ProfileIdentity = "template-shell-profile",
                     ProfileVersion = "2026.02.21",
-                    ProfileHash = "sha256:template-shell-profile",
+                    // Contract v2 marker: canonical profile hash format is sha256:<64-lower-hex>.
+                    ProfileHash = $"sha256:{new string('a', 64)}",
                     DefaultPermissionDecision = WebViewPermissionProfileDecision.DefaultFallback(),
                     PermissionDecisions = new Dictionary<WebViewPermissionKind, WebViewPermissionProfileDecision>
                     {
@@ -150,7 +151,7 @@ public partial class MainWindow
         private readonly Queue<DesktopSystemIntegrationEvent> _inboundEvents = new();
         private readonly object _eventsLock = new();
         private readonly object _menuPruningProfileLock = new();
-        private MenuPruningProfileSnapshot _menuPruningProfileSnapshot = new(null, null);
+        private MenuPruningProfileSnapshot _menuPruningProfileSnapshot = new(null, null, null, null);
 
         public DesktopHostService(WebViewShellExperience shell)
         {
@@ -203,6 +204,8 @@ public partial class MainWindow
                     {
                         ["source"] = "template-menu",
                         ["profileIdentity"] = profileSnapshot.ProfileIdentity ?? "unknown",
+                        ["profileVersion"] = profileSnapshot.ProfileVersion ?? "unknown",
+                        ["profileHash"] = profileSnapshot.ProfileHash ?? "unknown",
                         ["profilePermissionState"] = profileSnapshot.PermissionState ?? "unknown",
                         ["pruningStage"] = pruningStage
                     }
@@ -343,6 +346,8 @@ public partial class MainWindow
             {
                 _menuPruningProfileSnapshot = new MenuPruningProfileSnapshot(
                     diagnostic.ProfileIdentity,
+                    diagnostic.ProfileVersion,
+                    diagnostic.ProfileHash,
                     diagnostic.PermissionDecision.State.ToString());
             }
         }
@@ -374,6 +379,8 @@ public partial class MainWindow
 
         private readonly record struct MenuPruningProfileSnapshot(
             string? ProfileIdentity,
+            string? ProfileVersion,
+            string? ProfileHash,
             string? PermissionState);
     }
 

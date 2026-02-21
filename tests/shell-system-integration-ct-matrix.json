@@ -26,6 +26,14 @@
           "testMethod": "Over_budget_inbound_system_integration_metadata_is_denied_before_policy_and_dispatch"
         },
         {
+          "file": "tests/Agibuild.Avalonia.WebView.UnitTests/HostCapabilityBridgeTests.cs",
+          "testMethod": "Inbound_metadata_budget_uses_configured_in_range_value_deterministically"
+        },
+        {
+          "file": "tests/Agibuild.Avalonia.WebView.UnitTests/HostCapabilityBridgeTests.cs",
+          "testMethod": "Inbound_metadata_budget_configuration_outside_bounds_is_rejected_deterministically"
+        },
+        {
           "file": "tests/Agibuild.Avalonia.WebView.UnitTests/ShellSystemIntegrationCapabilityTests.cs",
           "testMethod": "Over_budget_inbound_tray_metadata_is_denied_before_web_delivery"
         }

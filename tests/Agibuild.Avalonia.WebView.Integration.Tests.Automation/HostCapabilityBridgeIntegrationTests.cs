@@ -273,7 +273,7 @@ public sealed class HostCapabilityBridgeIntegrationTests
                 {
                     ProfileIdentity = "integration-shell-profile",
                     ProfileVersion = "2026.02.21",
-                    ProfileHash = "sha256:integration-shell-profile",
+                    ProfileHash = $"SHA256:{new string('A', 64)}",
                     PermissionDecisions = new Dictionary<WebViewPermissionKind, WebViewPermissionProfileDecision>
                     {
                         [WebViewPermissionKind.Other] = WebViewPermissionProfileDecision.Allow()
@@ -356,7 +356,7 @@ public sealed class HostCapabilityBridgeIntegrationTests
             x.PermissionKind == WebViewPermissionKind.Other &&
             x.ProfileIdentity == "integration-shell-profile" &&
             x.ProfileVersion == "2026.02.21" &&
-            x.ProfileHash == "sha256:integration-shell-profile" &&
+            x.ProfileHash == $"sha256:{new string('a', 64)}" &&
             x.PermissionDecision.State == PermissionState.Allow);
 
         Assert.Contains(diagnostics, x => x.Operation == WebViewHostCapabilityOperation.MenuApplyModel

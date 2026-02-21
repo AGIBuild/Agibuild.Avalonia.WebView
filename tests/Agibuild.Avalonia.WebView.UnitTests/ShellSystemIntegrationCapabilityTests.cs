@@ -255,7 +255,7 @@ public sealed class ShellSystemIntegrationCapabilityTests
                 {
                     ProfileIdentity = "deny-profile",
                     ProfileVersion = "2026.02.21",
-                    ProfileHash = "sha256:deny-profile",
+                    ProfileHash = $"SHA256:{new string('B', 64)}",
                     PermissionDecisions = new Dictionary<WebViewPermissionKind, WebViewPermissionProfileDecision>
                     {
                         [WebViewPermissionKind.Other] = WebViewPermissionProfileDecision.Deny()
@@ -284,7 +284,7 @@ public sealed class ShellSystemIntegrationCapabilityTests
         var profileDiagnostic = Assert.Single(profileDiagnostics);
         Assert.Equal("deny-profile", profileDiagnostic.ProfileIdentity);
         Assert.Equal("2026.02.21", profileDiagnostic.ProfileVersion);
-        Assert.Equal("sha256:deny-profile", profileDiagnostic.ProfileHash);
+        Assert.Equal($"sha256:{new string('b', 64)}", profileDiagnostic.ProfileHash);
         Assert.Equal(WebViewPermissionKind.Other, profileDiagnostic.PermissionKind);
         Assert.Equal(PermissionState.Deny, profileDiagnostic.PermissionDecision.State);
         Assert.True(profileDiagnostic.PermissionDecision.IsExplicit);
@@ -311,7 +311,7 @@ public sealed class ShellSystemIntegrationCapabilityTests
                 {
                     ProfileIdentity = "allow-profile",
                     ProfileVersion = "2026.02.21",
-                    ProfileHash = "sha256:allow-profile",
+                    ProfileHash = $"SHA256:{new string('C', 64)}",
                     PermissionDecisions = new Dictionary<WebViewPermissionKind, WebViewPermissionProfileDecision>
                     {
                         [WebViewPermissionKind.Other] = WebViewPermissionProfileDecision.Allow()
@@ -353,7 +353,7 @@ public sealed class ShellSystemIntegrationCapabilityTests
         {
             Assert.Equal("allow-profile", diag.ProfileIdentity);
             Assert.Equal("2026.02.21", diag.ProfileVersion);
-            Assert.Equal("sha256:allow-profile", diag.ProfileHash);
+            Assert.Equal($"sha256:{new string('c', 64)}", diag.ProfileHash);
             Assert.Equal(WebViewPermissionKind.Other, diag.PermissionKind);
             Assert.Equal(PermissionState.Allow, diag.PermissionDecision.State);
             Assert.True(diag.PermissionDecision.IsExplicit);
@@ -378,6 +378,8 @@ public sealed class ShellSystemIntegrationCapabilityTests
                 new WebViewSessionPermissionProfile
                 {
                     ProfileIdentity = "null-revision-profile",
+                    ProfileVersion = " 2026.02.21 ",
+                    ProfileHash = "sha256:invalid-hash",
                     PermissionDecisions = new Dictionary<WebViewPermissionKind, WebViewPermissionProfileDecision>
                     {
                         [WebViewPermissionKind.Other] = WebViewPermissionProfileDecision.Allow()
@@ -397,7 +399,7 @@ public sealed class ShellSystemIntegrationCapabilityTests
         Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, menu.Outcome);
         var diagnostic = Assert.Single(profileDiagnostics);
         Assert.Equal("null-revision-profile", diagnostic.ProfileIdentity);
-        Assert.Null(diagnostic.ProfileVersion);
+        Assert.Equal("2026.02.21", diagnostic.ProfileVersion);
         Assert.Null(diagnostic.ProfileHash);
         Assert.Equal(WebViewPermissionKind.Other, diagnostic.PermissionKind);
         Assert.Equal(PermissionState.Allow, diagnostic.PermissionDecision.State);

@@ -245,7 +245,8 @@
                     const metadata = readBoundedMetadata(evt.metadata);
                     const source = metadata.source ?? 'n/a';
                     const stage = metadata.pruningStage ?? 'n/a';
-                    return `${kind}:${item}:${context}:source=${source}:stage=${stage}`;
+                    const profileVersion = metadata.profileVersion ?? 'n/a';
+                    return `${kind}:${item}:${context}:source=${source}:stage=${stage}:profileVersion=${profileVersion}`;
                 });
                 el.textContent = prefix + ': ' + lines.join(' | ');
             } catch (err) {
@@ -259,7 +260,7 @@
             }
 
             // Bounded metadata envelope: only consume explicit keys with capped value size.
-            const allowedKeys = ['source', 'visibility', 'tooltipPresent', 'profileIdentity', 'profilePermissionState', 'pruningStage'];
+            const allowedKeys = ['source', 'visibility', 'tooltipPresent', 'profileIdentity', 'profileVersion', 'profileHash', 'profilePermissionState', 'pruningStage'];
             const bounded = {};
             for (const key of allowedKeys) {
                 const raw = metadata[key];

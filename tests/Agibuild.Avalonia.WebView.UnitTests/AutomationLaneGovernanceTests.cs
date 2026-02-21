@@ -318,6 +318,7 @@ public sealed class AutomationLaneGovernanceTests
         Assert.Contains("ShowAbout remains disabled unless explicitly added", appShellPreset, StringComparison.Ordinal);
         Assert.Contains("ShowAbout opt-in snippet marker", appShellPreset, StringComparison.Ordinal);
         Assert.Contains("enableShowAboutAction", appShellPreset, StringComparison.Ordinal);
+        Assert.Contains("canonical profile hash format", appShellPreset, StringComparison.Ordinal);
         Assert.Contains("SessionPermissionProfileResolver = new DelegateSessionPermissionProfileResolver", appShellPreset, StringComparison.Ordinal);
         Assert.Contains("WebViewPermissionKind.Other", appShellPreset, StringComparison.Ordinal);
         Assert.Contains("ResolveMenuPruningStage", appShellPreset, StringComparison.Ordinal);
@@ -339,6 +340,8 @@ public sealed class AutomationLaneGovernanceTests
         Assert.Contains("result.pruningStage", desktopIndex, StringComparison.Ordinal);
         Assert.Contains("readBoundedMetadata(", desktopIndex, StringComparison.Ordinal);
         Assert.Contains("source=", desktopIndex, StringComparison.Ordinal);
+        Assert.Contains("profileVersion=", desktopIndex, StringComparison.Ordinal);
+        Assert.Contains("'profileHash'", desktopIndex, StringComparison.Ordinal);
         Assert.Contains("result.isVisible", desktopIndex, StringComparison.Ordinal);
         Assert.Contains("Host events", desktopIndex, StringComparison.Ordinal);
         Assert.Contains("System action denied", desktopIndex, StringComparison.Ordinal);
@@ -487,7 +490,10 @@ public sealed class AutomationLaneGovernanceTests
         Assert.Contains("TrayInteractionEventDispatch = 9", bridgeSource, StringComparison.Ordinal);
         Assert.Contains("MenuInteractionEventDispatch = 10", bridgeSource, StringComparison.Ordinal);
         Assert.Contains("ShowAbout = 3", bridgeSource, StringComparison.Ordinal);
-        Assert.Contains("MaxSystemIntegrationMetadataTotalLength = 1024", bridgeSource, StringComparison.Ordinal);
+        Assert.Contains("public sealed class WebViewHostCapabilityBridgeOptions", bridgeSource, StringComparison.Ordinal);
+        Assert.Contains("MinSystemIntegrationMetadataTotalLength = 256", bridgeSource, StringComparison.Ordinal);
+        Assert.Contains("MaxSystemIntegrationMetadataTotalLength = 4096", bridgeSource, StringComparison.Ordinal);
+        Assert.Contains("DefaultSystemIntegrationMetadataTotalLength = 1024", bridgeSource, StringComparison.Ordinal);
         Assert.Contains("system-integration-event-metadata-budget-exceeded", bridgeSource, StringComparison.Ordinal);
 
         // Diagnostic payload must remain machine-checkable.
@@ -512,6 +518,8 @@ public sealed class AutomationLaneGovernanceTests
         Assert.Contains("public string? ProfileHash { get; init; }", profileSource, StringComparison.Ordinal);
         Assert.Contains("public string? ProfileVersion { get; }", profileSource, StringComparison.Ordinal);
         Assert.Contains("public string? ProfileHash { get; }", profileSource, StringComparison.Ordinal);
+        Assert.Contains("NormalizeProfileVersion", profileSource, StringComparison.Ordinal);
+        Assert.Contains("NormalizeProfileHash", profileSource, StringComparison.Ordinal);
     }
 
     [Fact]

@@ -98,6 +98,40 @@ public sealed class WebViewSessionPermissionProfile
             ? decision
             : DefaultPermissionDecision;
     }
+
+    internal static string? NormalizeProfileVersion(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return null;
+        return value.Trim();
+    }
+
+    internal static string? NormalizeProfileHash(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return null;
+
+        var trimmed = value.Trim();
+        const string algorithm = "sha256:";
+        if (!trimmed.StartsWith(algorithm, StringComparison.OrdinalIgnoreCase))
+            return null;
+
+        var hex = trimmed[algorithm.Length..];
+        if (hex.Length != 64)
+            return null;
+
+        for (var i = 0; i < hex.Length; i++)
+        {
+            var c = hex[i];
+            var isDecimal = c is >= '0' and <= '9';
+            var isLowerHex = c is >= 'a' and <= 'f';
+            var isUpperHex = c is >= 'A' and <= 'F';
+            if (!isDecimal && !isLowerHex && !isUpperHex)
+                return null;
+        }
+
+        return algorithm + hex.ToLowerInvariant();
+    }
 }
 
 /// <summary>
