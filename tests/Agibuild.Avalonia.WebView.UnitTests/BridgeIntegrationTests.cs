@@ -1,8 +1,22 @@
 using System.Text.Json;
+using Agibuild.Avalonia.WebView.Shell;
 using Agibuild.Avalonia.WebView.Testing;
 using Xunit;
 
 namespace Agibuild.Avalonia.WebView.UnitTests;
+
+[JsExport]
+public interface IDesktopHostProbeService
+{
+    Task<DesktopHostProbeResult> ProbeClipboard();
+}
+
+public sealed class DesktopHostProbeResult
+{
+    public int Outcome { get; init; }
+    public string? ClipboardText { get; init; }
+    public string? DenyReason { get; init; }
+}
 
 /// <summary>
 /// Comprehensive integration and edge-case tests for the Bridge system.
@@ -205,5 +219,111 @@ public sealed class BridgeIntegrationTests
             "*", core.ChannelId);
         DispatcherTestPump.WaitUntil(_dispatcher, () => scripts.Any(s => s.Contains("Alice")), TimeSpan.FromSeconds(2));
         Assert.True(scripts.Any(s => s.Contains("Alice")), "Expected 'Alice' in response after concurrent expose");
+    }
+
+    private sealed class DesktopHostProbeService : IDesktopHostProbeService
+    {
+        private readonly WebViewShellExperience _shell;
+
+        public DesktopHostProbeService(WebViewShellExperience shell)
+        {
+            _shell = shell;
+        }
+
+        public Task<DesktopHostProbeResult> ProbeClipboard()
+        {
+            var result = _shell.ReadClipboardText();
+            return Task.FromResult(new DesktopHostProbeResult
+            {
+                Outcome = (int)result.Outcome,
+                ClipboardText = result.Value,
+                DenyReason = result.DenyReason
+            });
+        }
+    }
+
+    [Fact]
+    public void Web_rpc_call_to_exported_service_routes_through_shell_capability_gateway()
+    {
+        var (core, adapter, scripts) = CreateCore();
+        var bridge = new WebViewHostCapabilityBridge(
+            new TestClipboardCapabilityProvider("bridge-text"),
+            new AllowAllCapabilityPolicy());
+        using var shell = new WebViewShellExperience(core, new WebViewShellExperienceOptions
+        {
+            HostCapabilityBridge = bridge
+        });
+        core.Bridge.Expose<IDesktopHostProbeService>(new DesktopHostProbeService(shell));
+        _dispatcher.RunAll();
+
+        scripts.Clear();
+        adapter.RaiseWebMessage(
+            """{"jsonrpc":"2.0","id":"probe-1","method":"DesktopHostProbeService.probeClipboard","params":{}}""",
+            "*",
+            core.ChannelId);
+        _dispatcher.RunAll();
+
+        Assert.Contains(scripts, s => s.Contains("probe-1", StringComparison.Ordinal));
+        Assert.Contains(scripts, s =>
+            s.Contains("\"clipboardText\":\"bridge-text\"", StringComparison.Ordinal) ||
+            s.Contains("\"ClipboardText\":\"bridge-text\"", StringComparison.Ordinal) ||
+            s.Contains("bridge-text", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void Web_rpc_call_to_exported_service_returns_deny_outcome_when_policy_blocks_capability()
+    {
+        var (core, adapter, scripts) = CreateCore();
+        var bridge = new WebViewHostCapabilityBridge(
+            new TestClipboardCapabilityProvider("blocked"),
+            new DenyAllCapabilityPolicy());
+        using var shell = new WebViewShellExperience(core, new WebViewShellExperienceOptions
+        {
+            HostCapabilityBridge = bridge
+        });
+        core.Bridge.Expose<IDesktopHostProbeService>(new DesktopHostProbeService(shell));
+        _dispatcher.RunAll();
+
+        scripts.Clear();
+        adapter.RaiseWebMessage(
+            """{"jsonrpc":"2.0","id":"probe-2","method":"DesktopHostProbeService.probeClipboard","params":{}}""",
+            "*",
+            core.ChannelId);
+        _dispatcher.RunAll();
+
+        Assert.Contains(scripts, s => s.Contains("probe-2", StringComparison.Ordinal));
+        Assert.Contains(scripts, s =>
+            s.Contains("\"denyReason\":\"denied-by-policy\"", StringComparison.Ordinal) ||
+            s.Contains("\"DenyReason\":\"denied-by-policy\"", StringComparison.Ordinal) ||
+            s.Contains("denied-by-policy", StringComparison.Ordinal));
+    }
+
+    private sealed class AllowAllCapabilityPolicy : IWebViewHostCapabilityPolicy
+    {
+        public WebViewHostCapabilityDecision Evaluate(in WebViewHostCapabilityRequestContext context)
+            => WebViewHostCapabilityDecision.Allow();
+    }
+
+    private sealed class DenyAllCapabilityPolicy : IWebViewHostCapabilityPolicy
+    {
+        public WebViewHostCapabilityDecision Evaluate(in WebViewHostCapabilityRequestContext context)
+            => WebViewHostCapabilityDecision.Deny("denied-by-policy");
+    }
+
+    private sealed class TestClipboardCapabilityProvider : IWebViewHostCapabilityProvider
+    {
+        private readonly string _clipboardText;
+
+        public TestClipboardCapabilityProvider(string clipboardText)
+        {
+            _clipboardText = clipboardText;
+        }
+
+        public string? ReadClipboardText() => _clipboardText;
+        public void WriteClipboardText(string text) { }
+        public WebViewFileDialogResult ShowOpenFileDialog(WebViewOpenFileDialogRequest request) => throw new NotSupportedException();
+        public WebViewFileDialogResult ShowSaveFileDialog(WebViewSaveFileDialogRequest request) => throw new NotSupportedException();
+        public void OpenExternal(Uri uri) => throw new NotSupportedException();
+        public void ShowNotification(WebViewNotificationRequest request) => throw new NotSupportedException();
     }
 }

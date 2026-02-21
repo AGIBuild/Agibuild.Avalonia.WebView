@@ -20,6 +20,8 @@ public sealed class HostCapabilityBridgeIntegrationTests
 
         var provider = new IntegrationHostCapabilityProvider();
         var bridge = new WebViewHostCapabilityBridge(provider, new IntegrationCapabilityPolicy());
+        var diagnostics = new List<WebViewHostCapabilityDiagnosticEventArgs>();
+        bridge.CapabilityCallCompleted += (_, e) => diagnostics.Add(e);
 
         using var shell = new WebViewShellExperience(core, new WebViewShellExperienceOptions
         {
@@ -40,15 +42,20 @@ public sealed class HostCapabilityBridgeIntegrationTests
         adapter.RaiseNewWindowRequested(new Uri("https://example.com/external"));
         dispatcher.RunAll();
 
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, read.Outcome);
         Assert.True(read.IsAllowed && read.IsSuccess);
         Assert.Equal("integration-clipboard", read.Value);
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, write.Outcome);
         Assert.True(write.IsAllowed && write.IsSuccess);
 
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, open.Outcome);
         Assert.True(open.IsAllowed && open.IsSuccess);
         Assert.Single(open.Value!.Paths);
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, save.Outcome);
         Assert.True(save.IsAllowed && save.IsSuccess);
         Assert.False(save.Value!.IsCanceled);
 
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Deny, deniedNotification.Outcome);
         Assert.False(deniedNotification.IsAllowed);
         Assert.False(deniedNotification.IsSuccess);
         Assert.Equal("notification-disabled", deniedNotification.DenyReason);
@@ -56,6 +63,14 @@ public sealed class HostCapabilityBridgeIntegrationTests
         Assert.Single(provider.ExternalOpens);
         Assert.Equal(new Uri("https://example.com/external"), provider.ExternalOpens[0]);
         Assert.Equal(0, adapter.NavigateCallCount);
+
+        Assert.Equal(6, diagnostics.Count);
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Deny, diagnostics[4].Outcome);
+        Assert.Equal(WebViewHostCapabilityOperation.NotificationShow, diagnostics[4].Operation);
+        Assert.Equal("notification-disabled", diagnostics[4].DenyReason);
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, diagnostics[5].Outcome);
+        Assert.Equal(WebViewHostCapabilityOperation.ExternalOpen, diagnostics[5].Operation);
+        Assert.All(diagnostics, d => Assert.True(d.DurationMilliseconds >= 0));
     }
 
     [AvaloniaFact]
@@ -99,6 +114,36 @@ public sealed class HostCapabilityBridgeIntegrationTests
         }
 
         Assert.Equal(iterations - (iterations / 4 + 1), provider.ExternalOpens.Count);
+    }
+
+    [AvaloniaFact]
+    public void Host_capability_policy_failure_blocks_provider_and_reports_external_open_domain_error()
+    {
+        var dispatcher = new TestDispatcher();
+        var adapter = MockWebViewAdapter.Create();
+        using var core = new WebViewCore(adapter, dispatcher);
+        var provider = new IntegrationHostCapabilityProvider();
+        var bridge = new WebViewHostCapabilityBridge(
+            provider,
+            new IntegrationCapabilityPolicy(_ => throw new InvalidOperationException("external-policy-fault")));
+        var policyErrors = new List<WebViewShellPolicyErrorEventArgs>();
+
+        using var shell = new WebViewShellExperience(core, new WebViewShellExperienceOptions
+        {
+            HostCapabilityBridge = bridge,
+            NewWindowPolicy = new DelegateNewWindowPolicy((_, _, _) => WebViewNewWindowStrategyDecision.ExternalBrowser()),
+            PolicyErrorHandler = (_, error) => policyErrors.Add(error)
+        });
+
+        adapter.RaiseNewWindowRequested(new Uri("https://example.com/policy-fault"));
+        dispatcher.RunAll();
+
+        Assert.Empty(provider.ExternalOpens);
+        Assert.Equal(0, adapter.NavigateCallCount);
+        Assert.Single(policyErrors);
+        Assert.Equal(WebViewShellPolicyDomain.ExternalOpen, policyErrors[0].Domain);
+        Assert.True(WebViewOperationFailure.TryGetCategory(policyErrors[0].Exception, out var category));
+        Assert.Equal(WebViewOperationFailureCategory.AdapterFailed, category);
     }
 
     private sealed class IntegrationCapabilityPolicy : IWebViewHostCapabilityPolicy

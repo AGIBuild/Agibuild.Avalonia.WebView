@@ -22,14 +22,20 @@ public sealed class HostCapabilityBridgeTests
         var notify = bridge.ShowNotification(new WebViewNotificationRequest { Title = "T", Message = "M" }, root);
         var external = bridge.OpenExternal(new Uri("https://example.com"), root);
 
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, read.Outcome);
         Assert.True(read.IsAllowed && read.IsSuccess);
         Assert.Equal("from-clipboard", read.Value);
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, write.Outcome);
         Assert.True(write.IsAllowed && write.IsSuccess);
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, open.Outcome);
         Assert.True(open.IsAllowed && open.IsSuccess);
         Assert.Single(open.Value!.Paths);
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, save.Outcome);
         Assert.True(save.IsAllowed && save.IsSuccess);
         Assert.False(save.Value!.IsCanceled);
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, notify.Outcome);
         Assert.True(notify.IsAllowed && notify.IsSuccess);
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, external.Outcome);
         Assert.True(external.IsAllowed && external.IsSuccess);
 
         Assert.Equal(6, provider.CallCount);
@@ -44,6 +50,7 @@ public sealed class HostCapabilityBridgeTests
 
         var result = bridge.OpenExternal(new Uri("https://example.com"), Guid.NewGuid());
 
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Deny, result.Outcome);
         Assert.False(result.IsAllowed);
         Assert.False(result.IsSuccess);
         Assert.Equal("denied-by-policy", result.DenyReason);
@@ -63,18 +70,20 @@ public sealed class HostCapabilityBridgeTests
         var failed = bridge.ReadClipboardText(root);
         var external = bridge.OpenExternal(new Uri("https://example.com"), root);
 
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Failure, failed.Outcome);
         Assert.True(failed.IsAllowed);
         Assert.False(failed.IsSuccess);
         Assert.NotNull(failed.Error);
         Assert.True(WebViewOperationFailure.TryGetCategory(failed.Error!, out var category));
         Assert.Equal(WebViewOperationFailureCategory.AdapterFailed, category);
 
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, external.Outcome);
         Assert.True(external.IsAllowed);
         Assert.True(external.IsSuccess);
     }
 
     [Fact]
-    public void Policy_exception_converts_to_deny_with_reason()
+    public void Policy_exception_returns_failure_without_provider_execution()
     {
         var provider = new TestHostCapabilityProvider();
         var bridge = new WebViewHostCapabilityBridge(provider, new ThrowingPolicy());
@@ -83,10 +92,56 @@ public sealed class HostCapabilityBridgeTests
             new WebViewNotificationRequest { Title = "A", Message = "B" },
             Guid.NewGuid());
 
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Failure, result.Outcome);
         Assert.False(result.IsAllowed);
         Assert.False(result.IsSuccess);
-        Assert.Contains("policy exploded", result.DenyReason, StringComparison.Ordinal);
+        Assert.NotNull(result.Error);
+        Assert.True(WebViewOperationFailure.TryGetCategory(result.Error!, out var category));
+        Assert.Equal(WebViewOperationFailureCategory.AdapterFailed, category);
         Assert.Equal(0, provider.CallCount);
+    }
+
+    [Fact]
+    public void Capability_diagnostics_are_machine_checkable_with_allow_deny_and_failure_outcomes()
+    {
+        var provider = new TestHostCapabilityProvider
+        {
+            ThrowOn = WebViewHostCapabilityOperation.ExternalOpen
+        };
+        var bridge = new WebViewHostCapabilityBridge(provider, new SelectivePolicy());
+        var diagnostics = new List<WebViewHostCapabilityDiagnosticEventArgs>();
+        bridge.CapabilityCallCompleted += (_, e) => diagnostics.Add(e);
+        var root = Guid.NewGuid();
+
+        var read = bridge.ReadClipboardText(root);
+        var denied = bridge.ShowNotification(new WebViewNotificationRequest { Title = "T", Message = "M" }, root);
+        var failed = bridge.OpenExternal(new Uri("https://example.com"), root);
+
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, read.Outcome);
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Deny, denied.Outcome);
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Failure, failed.Outcome);
+
+        Assert.Equal(3, diagnostics.Count);
+        Assert.Equal(WebViewHostCapabilityOperation.ClipboardReadText, diagnostics[0].Operation);
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, diagnostics[0].Outcome);
+        Assert.True(diagnostics[0].WasAuthorized);
+
+        Assert.Equal(WebViewHostCapabilityOperation.NotificationShow, diagnostics[1].Operation);
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Deny, diagnostics[1].Outcome);
+        Assert.False(diagnostics[1].WasAuthorized);
+        Assert.Equal("notification-denied", diagnostics[1].DenyReason);
+
+        Assert.Equal(WebViewHostCapabilityOperation.ExternalOpen, diagnostics[2].Operation);
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Failure, diagnostics[2].Outcome);
+        Assert.True(diagnostics[2].WasAuthorized);
+        Assert.Equal(WebViewOperationFailureCategory.AdapterFailed, diagnostics[2].FailureCategory);
+
+        Assert.All(diagnostics, d =>
+        {
+            Assert.NotEqual(Guid.Empty, d.CorrelationId);
+            Assert.Equal(root, d.RootWindowId);
+            Assert.True(d.DurationMilliseconds >= 0);
+        });
     }
 
     private sealed class AllowAllPolicy : IWebViewHostCapabilityPolicy
@@ -105,6 +160,14 @@ public sealed class HostCapabilityBridgeTests
     {
         public WebViewHostCapabilityDecision Evaluate(in WebViewHostCapabilityRequestContext context)
             => throw new InvalidOperationException("policy exploded");
+    }
+
+    private sealed class SelectivePolicy : IWebViewHostCapabilityPolicy
+    {
+        public WebViewHostCapabilityDecision Evaluate(in WebViewHostCapabilityRequestContext context)
+            => context.Operation == WebViewHostCapabilityOperation.NotificationShow
+                ? WebViewHostCapabilityDecision.Deny("notification-denied")
+                : WebViewHostCapabilityDecision.Allow();
     }
 
     private sealed class TestHostCapabilityProvider : IWebViewHostCapabilityProvider

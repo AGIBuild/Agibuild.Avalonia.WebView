@@ -23,6 +23,7 @@ public partial class MainWindow : Window
 
             // Expose the C# greeter service to JavaScript
             WebView.Bridge.Expose<IGreeterService>(new GreeterServiceImpl());
+            RegisterShellPresetBridgeServices();
 
             // Navigate to the embedded SPA entry point
             await WebView.NavigateAsync(new Uri("app://localhost/index.html"));
@@ -33,4 +34,5 @@ public partial class MainWindow : Window
 
     partial void InitializeShellPreset();
     partial void DisposeShellPreset();
+    partial void RegisterShellPresetBridgeServices();
 }

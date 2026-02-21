@@ -289,8 +289,6 @@ public sealed class WebViewShellExperienceOptions
     public WebViewHostCapabilityBridge? HostCapabilityBridge { get; init; }
     /// <summary>Optional factory that creates a managed child window when strategy is <c>ManagedWindow</c>.</summary>
     public Func<WebViewManagedWindowCreateContext, IWebView?>? ManagedWindowFactory { get; init; }
-    /// <summary>Optional external-open handler for <c>ExternalBrowser</c> strategy.</summary>
-    public Action<IWebView, Uri>? ExternalOpenHandler { get; init; }
     /// <summary>Optional managed-window close handler used by lifecycle orchestrator.</summary>
     public Func<IWebView, CancellationToken, Task>? ManagedWindowCloseAsync { get; init; }
     /// <summary>Timeout budget for managed-window close operations.</summary>
@@ -1118,44 +1116,43 @@ public sealed class WebViewShellExperience : IDisposable
             {
                 if (args.Uri is null)
                 {
-                    args.Handled = false;
-                    return;
-                }
-
-                if (_options.HostCapabilityBridge is not null)
-                {
-                    var openResult = _options.HostCapabilityBridge.OpenExternal(
-                        args.Uri,
-                        _rootWindowId,
-                        parentWindowId: _rootWindowId,
-                        targetWindowId: null);
-
                     args.Handled = true;
-                    if (!openResult.IsAllowed)
-                    {
-                        ReportPolicyFailure(
-                            WebViewShellPolicyDomain.ExternalOpen,
-                            new UnauthorizedAccessException(openResult.DenyReason ?? "External open was denied by host capability policy."));
-                        return;
-                    }
-
-                    if (!openResult.IsSuccess && openResult.Error is not null)
-                    {
-                        ReportPolicyFailure(WebViewShellPolicyDomain.ExternalOpen, openResult.Error);
-                    }
+                    ReportPolicyFailure(
+                        WebViewShellPolicyDomain.ExternalOpen,
+                        new InvalidOperationException("External open strategy requires a non-null target URI."));
                     return;
                 }
 
-                if (_options.ExternalOpenHandler is null)
+                if (_options.HostCapabilityBridge is null)
                 {
-                    args.Handled = false;
+                    args.Handled = true;
+                    ReportPolicyFailure(
+                        WebViewShellPolicyDomain.ExternalOpen,
+                        new InvalidOperationException("Host capability bridge is required for ExternalBrowser strategy."));
                     return;
                 }
+
+                var openResult = _options.HostCapabilityBridge.OpenExternal(
+                    args.Uri,
+                    _rootWindowId,
+                    parentWindowId: _rootWindowId,
+                    targetWindowId: null);
 
                 args.Handled = true;
-                ExecutePolicyDomain(
-                    WebViewShellPolicyDomain.ExternalOpen,
-                    () => _options.ExternalOpenHandler.Invoke(_webView, args.Uri));
+                if (openResult.Outcome == WebViewHostCapabilityCallOutcome.Deny)
+                {
+                    ReportPolicyFailure(
+                        WebViewShellPolicyDomain.ExternalOpen,
+                        new UnauthorizedAccessException(openResult.DenyReason ?? "External open was denied by host capability policy."));
+                    return;
+                }
+
+                if (openResult.Outcome == WebViewHostCapabilityCallOutcome.Failure)
+                {
+                    ReportPolicyFailure(
+                        WebViewShellPolicyDomain.ExternalOpen,
+                        openResult.Error ?? new InvalidOperationException("External open failed without an exception payload."));
+                }
                 return;
             }
             case WebViewNewWindowStrategy.Delegate:

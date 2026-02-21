@@ -237,31 +237,45 @@ public sealed class AutomationLaneGovernanceTests
             "agibuild-hybrid",
             "HybridApp.Desktop",
             "Program.cs");
+        var desktopIndexPath = Path.Combine(
+            repoRoot,
+            "templates",
+            "agibuild-hybrid",
+            "HybridApp.Desktop",
+            "wwwroot",
+            "index.html");
 
         Assert.True(File.Exists(desktopMainWindowPath), $"Missing template source file: {desktopMainWindowPath}");
         Assert.True(File.Exists(appShellPresetPath), $"Missing app-shell preset source file: {appShellPresetPath}");
         Assert.True(File.Exists(desktopProjectPath), $"Missing desktop template project file: {desktopProjectPath}");
         Assert.True(File.Exists(desktopProgramPath), $"Missing desktop template program file: {desktopProgramPath}");
+        Assert.True(File.Exists(desktopIndexPath), $"Missing desktop template index file: {desktopIndexPath}");
 
         var desktopMainWindow = File.ReadAllText(desktopMainWindowPath);
         var appShellPreset = File.ReadAllText(appShellPresetPath);
         var desktopProject = File.ReadAllText(desktopProjectPath);
         var desktopProgram = File.ReadAllText(desktopProgramPath);
+        var desktopIndex = File.ReadAllText(desktopIndexPath);
 
         Assert.Contains("InitializeShellPreset();", desktopMainWindow, StringComparison.Ordinal);
         Assert.Contains("DisposeShellPreset();", desktopMainWindow, StringComparison.Ordinal);
+        Assert.Contains("RegisterShellPresetBridgeServices();", desktopMainWindow, StringComparison.Ordinal);
         Assert.Contains("partial void InitializeShellPreset();", desktopMainWindow, StringComparison.Ordinal);
         Assert.Contains("partial void DisposeShellPreset();", desktopMainWindow, StringComparison.Ordinal);
+        Assert.Contains("partial void RegisterShellPresetBridgeServices();", desktopMainWindow, StringComparison.Ordinal);
 
-        Assert.Contains("WebView.NewWindowRequested +=", appShellPreset, StringComparison.Ordinal);
-        Assert.Contains("WebView.PermissionRequested +=", appShellPreset, StringComparison.Ordinal);
-        Assert.Contains("WebView.DownloadRequested +=", appShellPreset, StringComparison.Ordinal);
-        Assert.Contains("WebViewShortcutRouter", appShellPreset, StringComparison.Ordinal);
+        Assert.Contains("new WebViewShellExperience(", appShellPreset, StringComparison.Ordinal);
+        Assert.Contains("new WebViewHostCapabilityBridge(", appShellPreset, StringComparison.Ordinal);
+        Assert.Contains("WebView.Bridge.Expose<IDesktopHostService>", appShellPreset, StringComparison.Ordinal);
+        Assert.Contains("TryHandleShellShortcutAsync", appShellPreset, StringComparison.Ordinal);
+        Assert.DoesNotContain("ExternalOpenHandler", appShellPreset, StringComparison.Ordinal);
         Assert.Contains("KeyDown +=", appShellPreset, StringComparison.Ordinal);
         Assert.Contains("KeyDown -=", appShellPreset, StringComparison.Ordinal);
-        Assert.Contains("TryExecuteAsync(e)", appShellPreset, StringComparison.Ordinal);
+        Assert.Contains("WebViewHostCapabilityCallOutcome", appShellPreset, StringComparison.Ordinal);
         Assert.Contains("Agibuild.Avalonia.WebView", desktopProject, StringComparison.Ordinal);
         Assert.DoesNotContain(".WithInterFont()", desktopProgram, StringComparison.Ordinal);
+        Assert.Contains("DesktopHostService.ReadClipboardText", desktopIndex, StringComparison.Ordinal);
+        Assert.Contains("DesktopHostService.WriteClipboardText", desktopIndex, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -354,6 +368,47 @@ public sealed class AutomationLaneGovernanceTests
                 Assert.Contains(testMethod!, source, StringComparison.Ordinal);
             }
         }
+    }
+
+    [Fact]
+    public void Host_capability_diagnostic_contract_and_external_open_path_remain_schema_stable()
+    {
+        var repoRoot = FindRepoRoot();
+        var bridgePath = Path.Combine(
+            repoRoot,
+            "src",
+            "Agibuild.Avalonia.WebView.Runtime",
+            "Shell",
+            "WebViewHostCapabilityBridge.cs");
+        var shellPath = Path.Combine(
+            repoRoot,
+            "src",
+            "Agibuild.Avalonia.WebView.Runtime",
+            "Shell",
+            "WebViewShellExperience.cs");
+
+        Assert.True(File.Exists(bridgePath), $"Missing host capability bridge source: {bridgePath}");
+        Assert.True(File.Exists(shellPath), $"Missing shell experience source: {shellPath}");
+
+        var bridgeSource = File.ReadAllText(bridgePath);
+        var shellSource = File.ReadAllText(shellPath);
+
+        // Outcome schema must keep deterministic allow/deny/failure model.
+        Assert.Contains("public enum WebViewHostCapabilityCallOutcome", bridgeSource, StringComparison.Ordinal);
+        Assert.Contains("Allow = 0", bridgeSource, StringComparison.Ordinal);
+        Assert.Contains("Deny = 1", bridgeSource, StringComparison.Ordinal);
+        Assert.Contains("Failure = 2", bridgeSource, StringComparison.Ordinal);
+
+        // Diagnostic payload must remain machine-checkable.
+        Assert.Contains("public sealed class WebViewHostCapabilityDiagnosticEventArgs", bridgeSource, StringComparison.Ordinal);
+        Assert.Contains("public Guid CorrelationId { get; }", bridgeSource, StringComparison.Ordinal);
+        Assert.Contains("public WebViewHostCapabilityCallOutcome Outcome { get; }", bridgeSource, StringComparison.Ordinal);
+        Assert.Contains("public WebViewOperationFailureCategory? FailureCategory { get; }", bridgeSource, StringComparison.Ordinal);
+        Assert.Contains("CapabilityCallCompleted", bridgeSource, StringComparison.Ordinal);
+
+        // External open must route through typed capability bridge without legacy fallback handler path.
+        Assert.Contains("Host capability bridge is required for ExternalBrowser strategy.", shellSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("ExternalOpenHandler", shellSource, StringComparison.Ordinal);
     }
 
     [Fact]

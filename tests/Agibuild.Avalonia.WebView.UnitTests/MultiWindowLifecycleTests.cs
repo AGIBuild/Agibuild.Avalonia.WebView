@@ -16,8 +16,8 @@ public sealed class MultiWindowLifecycleTests
         var dispatcher = new TestDispatcher();
         var adapter = MockWebViewAdapter.Create();
         using var core = new WebViewCore(adapter, dispatcher);
-
-        var externalOpened = false;
+        var provider = new ExternalOpenOnlyProvider();
+        var bridge = new WebViewHostCapabilityBridge(provider, new AllowExternalOnlyPolicy());
         using var shell = new WebViewShellExperience(core, new WebViewShellExperienceOptions
         {
             NewWindowPolicy = new DelegateNewWindowPolicy((_, e, _) =>
@@ -33,7 +33,7 @@ public sealed class MultiWindowLifecycleTests
                 return WebViewNewWindowStrategyDecision.InPlace();
             }),
             ManagedWindowFactory = _ => new WebViewCore(MockWebViewAdapter.Create(), dispatcher),
-            ExternalOpenHandler = (_, _) => externalOpened = true
+            HostCapabilityBridge = bridge
         });
 
         adapter.RaiseNewWindowRequested(new Uri("https://example.com/managed"));
@@ -41,9 +41,11 @@ public sealed class MultiWindowLifecycleTests
         Assert.Equal(1, shell.ManagedWindowCount);
         Assert.Equal(0, adapter.NavigateCallCount);
 
-        adapter.RaiseNewWindowRequested(new Uri("https://example.com/external"));
+        var externalUri = new Uri("https://example.com/external");
+        adapter.RaiseNewWindowRequested(externalUri);
         dispatcher.RunAll();
-        Assert.True(externalOpened);
+        Assert.Single(provider.ExternalOpens);
+        Assert.Equal(externalUri, provider.ExternalOpens[0]);
         Assert.Equal(1, shell.ManagedWindowCount);
         Assert.Equal(0, adapter.NavigateCallCount);
 
@@ -243,8 +245,7 @@ public sealed class MultiWindowLifecycleTests
         using var shell = new WebViewShellExperience(core, new WebViewShellExperienceOptions
         {
             NewWindowPolicy = new DelegateNewWindowPolicy((_, _, _) => WebViewNewWindowStrategyDecision.ExternalBrowser()),
-            HostCapabilityBridge = bridge,
-            ExternalOpenHandler = (_, _) => throw new InvalidOperationException("legacy handler should not be used")
+            HostCapabilityBridge = bridge
         });
 
         var target = new Uri("https://example.com/external");
@@ -280,6 +281,29 @@ public sealed class MultiWindowLifecycleTests
         Assert.Equal(0, adapter.NavigateCallCount);
         Assert.NotNull(observedError);
         Assert.Equal(WebViewShellPolicyDomain.ExternalOpen, observedError!.Domain);
+    }
+
+    [Fact]
+    public void External_browser_without_capability_bridge_is_blocked_and_never_falls_back_to_navigation()
+    {
+        var dispatcher = new TestDispatcher();
+        var adapter = MockWebViewAdapter.Create();
+        using var core = new WebViewCore(adapter, dispatcher);
+        WebViewShellPolicyErrorEventArgs? observedError = null;
+
+        using var shell = new WebViewShellExperience(core, new WebViewShellExperienceOptions
+        {
+            NewWindowPolicy = new DelegateNewWindowPolicy((_, _, _) => WebViewNewWindowStrategyDecision.ExternalBrowser()),
+            PolicyErrorHandler = (_, error) => observedError = error
+        });
+
+        adapter.RaiseNewWindowRequested(new Uri("https://example.com/no-bridge"));
+        dispatcher.RunAll();
+
+        Assert.Equal(0, adapter.NavigateCallCount);
+        Assert.NotNull(observedError);
+        Assert.Equal(WebViewShellPolicyDomain.ExternalOpen, observedError!.Domain);
+        Assert.Contains("Host capability bridge is required", observedError.Exception.Message, StringComparison.Ordinal);
     }
 
     [Fact]

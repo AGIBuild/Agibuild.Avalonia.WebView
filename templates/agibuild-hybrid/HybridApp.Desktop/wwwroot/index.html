@@ -54,6 +54,8 @@
         <p style="margin-bottom:1.5rem;opacity:0.8">Avalonia + WebView hybrid demo</p>
         <input id="nameInput" type="text" placeholder="Enter your name..." />
         <button onclick="greet()">Greet from C#</button>
+        <button style="margin-left:.5rem" onclick="readClipboard()">Read host clipboard (typed)</button>
+        <button style="margin-left:.5rem" onclick="writeClipboard()">Write host clipboard (typed)</button>
         <div id="result"></div>
     </div>
 
@@ -77,6 +79,49 @@
             try {
                 const result = await window.agWebView.rpc.invoke('GreeterService.Greet', { name });
                 el.textContent = result;
+            } catch (err) {
+                el.textContent = 'Error: ' + err.message;
+            }
+        }
+
+        async function readClipboard() {
+            const el = document.getElementById('result');
+            if (!await waitForBridge()) {
+                el.textContent = 'Bridge not available';
+                return;
+            }
+
+            try {
+                const result = await window.agWebView.rpc.invoke('DesktopHostService.ReadClipboardText', {});
+                if (result.outcome === 0) {
+                    el.textContent = 'Clipboard: ' + (result.clipboardText ?? '(empty)');
+                } else if (result.outcome === 1) {
+                    el.textContent = 'Clipboard denied: ' + (result.denyReason ?? 'unknown');
+                } else {
+                    el.textContent = 'Clipboard failure: ' + (result.error ?? 'unknown');
+                }
+            } catch (err) {
+                el.textContent = 'Error: ' + err.message;
+            }
+        }
+
+        async function writeClipboard() {
+            const el = document.getElementById('result');
+            const name = document.getElementById('nameInput').value || 'HybridApp';
+            if (!await waitForBridge()) {
+                el.textContent = 'Bridge not available';
+                return;
+            }
+
+            try {
+                const result = await window.agWebView.rpc.invoke('DesktopHostService.WriteClipboardText', { text: name });
+                if (result.outcome === 0) {
+                    el.textContent = 'Clipboard updated via typed host capability';
+                } else if (result.outcome === 1) {
+                    el.textContent = 'Write denied: ' + (result.denyReason ?? 'unknown');
+                } else {
+                    el.textContent = 'Write failure: ' + (result.error ?? 'unknown');
+                }
             } catch (err) {
                 el.textContent = 'Error: ' + err.message;
             }

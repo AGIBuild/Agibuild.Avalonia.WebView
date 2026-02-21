@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Agibuild.Avalonia.WebView.Shell;
 
@@ -62,6 +63,19 @@ public readonly record struct WebViewHostCapabilityDecision(
     /// True when this request is allowed.
     /// </summary>
     public bool IsAllowed => Kind == WebViewHostCapabilityDecisionKind.Allow;
+}
+
+/// <summary>
+/// Deterministic outcome model for host capability calls.
+/// </summary>
+public enum WebViewHostCapabilityCallOutcome
+{
+    /// <summary>Capability is authorized and executed successfully.</summary>
+    Allow = 0,
+    /// <summary>Capability is denied by policy before provider execution.</summary>
+    Deny = 1,
+    /// <summary>Capability flow failed deterministically (policy/provider error).</summary>
+    Failure = 2
 }
 
 /// <summary>
@@ -142,23 +156,27 @@ public interface IWebViewHostCapabilityProvider
 public sealed class WebViewHostCapabilityCallResult<T>
 {
     private WebViewHostCapabilityCallResult(
-        bool isAllowed,
-        bool isSuccess,
+        WebViewHostCapabilityCallOutcome outcome,
+        bool wasAuthorized,
         T? value,
         string? denyReason,
         Exception? error)
     {
-        IsAllowed = isAllowed;
-        IsSuccess = isSuccess;
+        Outcome = outcome;
+        WasAuthorized = wasAuthorized;
         Value = value;
         DenyReason = denyReason;
         Error = error;
     }
 
+    /// <summary>Deterministic capability outcome.</summary>
+    public WebViewHostCapabilityCallOutcome Outcome { get; }
+    /// <summary>Whether policy authorization succeeded before execution.</summary>
+    public bool WasAuthorized { get; }
     /// <summary>Whether the capability request was authorized.</summary>
-    public bool IsAllowed { get; }
+    public bool IsAllowed => WasAuthorized;
     /// <summary>Whether the authorized operation completed successfully.</summary>
-    public bool IsSuccess { get; }
+    public bool IsSuccess => Outcome == WebViewHostCapabilityCallOutcome.Allow;
     /// <summary>Typed return value.</summary>
     public T? Value { get; }
     /// <summary>Deny reason when request is denied.</summary>
@@ -167,13 +185,69 @@ public sealed class WebViewHostCapabilityCallResult<T>
     public Exception? Error { get; }
 
     internal static WebViewHostCapabilityCallResult<T> Success(T? value)
-        => new(isAllowed: true, isSuccess: true, value, denyReason: null, error: null);
+        => new(WebViewHostCapabilityCallOutcome.Allow, wasAuthorized: true, value, denyReason: null, error: null);
 
     internal static WebViewHostCapabilityCallResult<T> Denied(string? reason)
-        => new(isAllowed: false, isSuccess: false, value: default, denyReason: reason, error: null);
+        => new(WebViewHostCapabilityCallOutcome.Deny, wasAuthorized: false, value: default, denyReason: reason, error: null);
 
-    internal static WebViewHostCapabilityCallResult<T> Failure(Exception error)
-        => new(isAllowed: true, isSuccess: false, value: default, denyReason: null, error);
+    internal static WebViewHostCapabilityCallResult<T> Failure(Exception error, bool wasAuthorized)
+        => new(WebViewHostCapabilityCallOutcome.Failure, wasAuthorized, value: default, denyReason: null, error);
+}
+
+/// <summary>
+/// Structured diagnostic payload for a completed host capability call.
+/// </summary>
+public sealed class WebViewHostCapabilityDiagnosticEventArgs : EventArgs
+{
+    /// <summary>Create diagnostic payload.</summary>
+    public WebViewHostCapabilityDiagnosticEventArgs(
+        Guid correlationId,
+        Guid rootWindowId,
+        Guid? parentWindowId,
+        Guid? targetWindowId,
+        WebViewHostCapabilityOperation operation,
+        Uri? requestUri,
+        WebViewHostCapabilityCallOutcome outcome,
+        bool wasAuthorized,
+        string? denyReason,
+        WebViewOperationFailureCategory? failureCategory,
+        long durationMilliseconds)
+    {
+        CorrelationId = correlationId;
+        RootWindowId = rootWindowId;
+        ParentWindowId = parentWindowId;
+        TargetWindowId = targetWindowId;
+        Operation = operation;
+        RequestUri = requestUri;
+        Outcome = outcome;
+        WasAuthorized = wasAuthorized;
+        DenyReason = denyReason;
+        FailureCategory = failureCategory;
+        DurationMilliseconds = durationMilliseconds;
+    }
+
+    /// <summary>Stable call correlation id.</summary>
+    public Guid CorrelationId { get; }
+    /// <summary>Root shell window id.</summary>
+    public Guid RootWindowId { get; }
+    /// <summary>Optional parent window id.</summary>
+    public Guid? ParentWindowId { get; }
+    /// <summary>Optional target window id.</summary>
+    public Guid? TargetWindowId { get; }
+    /// <summary>Capability operation.</summary>
+    public WebViewHostCapabilityOperation Operation { get; }
+    /// <summary>Optional request URI for URI-bound operations.</summary>
+    public Uri? RequestUri { get; }
+    /// <summary>Deterministic capability outcome.</summary>
+    public WebViewHostCapabilityCallOutcome Outcome { get; }
+    /// <summary>Whether policy authorization succeeded before execution.</summary>
+    public bool WasAuthorized { get; }
+    /// <summary>Deny reason when outcome is deny.</summary>
+    public string? DenyReason { get; }
+    /// <summary>Failure category when outcome is failure.</summary>
+    public WebViewOperationFailureCategory? FailureCategory { get; }
+    /// <summary>Elapsed duration in milliseconds.</summary>
+    public long DurationMilliseconds { get; }
 }
 
 /// <summary>
@@ -183,6 +257,11 @@ public sealed class WebViewHostCapabilityBridge
 {
     private readonly IWebViewHostCapabilityProvider _provider;
     private readonly IWebViewHostCapabilityPolicy? _policy;
+
+    /// <summary>
+    /// Raised when a typed capability call is completed with deterministic outcome metadata.
+    /// </summary>
+    public event EventHandler<WebViewHostCapabilityDiagnosticEventArgs>? CapabilityCallCompleted;
 
     /// <summary>Create bridge with provider and optional authorization policy.</summary>
     public WebViewHostCapabilityBridge(IWebViewHostCapabilityProvider provider, IWebViewHostCapabilityPolicy? policy = null)
@@ -307,38 +386,89 @@ public sealed class WebViewHostCapabilityBridge
         Func<T> action)
     {
         ArgumentNullException.ThrowIfNull(action);
+        var correlationId = Guid.NewGuid();
+        var stopwatch = Stopwatch.StartNew();
+        WebViewHostCapabilityCallResult<T> result;
 
-        var decision = EvaluatePolicy(context);
-        if (!decision.IsAllowed)
-            return WebViewHostCapabilityCallResult<T>.Denied(decision.Reason);
+        if (!TryEvaluatePolicy(context, out var decision, out var policyFailure))
+        {
+            result = WebViewHostCapabilityCallResult<T>.Failure(policyFailure!, wasAuthorized: false);
+        }
+        else if (!decision.IsAllowed)
+        {
+            result = WebViewHostCapabilityCallResult<T>.Denied(decision.Reason);
+        }
+        else
+        {
+            try
+            {
+                var value = action();
+                result = WebViewHostCapabilityCallResult<T>.Success(value);
+            }
+            catch (Exception ex)
+            {
+                if (!WebViewOperationFailure.TryGetCategory(ex, out _))
+                    WebViewOperationFailure.SetCategory(ex, WebViewOperationFailureCategory.AdapterFailed);
+                result = WebViewHostCapabilityCallResult<T>.Failure(ex, wasAuthorized: true);
+            }
+        }
+
+        stopwatch.Stop();
+        EmitCapabilityDiagnostic(correlationId, context, result, stopwatch.ElapsedMilliseconds);
+        return result;
+    }
+
+    private bool TryEvaluatePolicy(
+        in WebViewHostCapabilityRequestContext context,
+        out WebViewHostCapabilityDecision decision,
+        out Exception? failure)
+    {
+        if (_policy is null)
+        {
+            decision = WebViewHostCapabilityDecision.Allow();
+            failure = null;
+            return true;
+        }
 
         try
         {
-            var result = action();
-            return WebViewHostCapabilityCallResult<T>.Success(result);
+            decision = _policy.Evaluate(context);
+            failure = null;
+            return true;
         }
         catch (Exception ex)
         {
             if (!WebViewOperationFailure.TryGetCategory(ex, out _))
                 WebViewOperationFailure.SetCategory(ex, WebViewOperationFailureCategory.AdapterFailed);
-            return WebViewHostCapabilityCallResult<T>.Failure(ex);
+            decision = default;
+            failure = ex;
+            return false;
         }
     }
 
-    private WebViewHostCapabilityDecision EvaluatePolicy(in WebViewHostCapabilityRequestContext context)
+    private void EmitCapabilityDiagnostic<T>(
+        Guid correlationId,
+        in WebViewHostCapabilityRequestContext context,
+        WebViewHostCapabilityCallResult<T> result,
+        long durationMilliseconds)
     {
-        if (_policy is null)
-            return WebViewHostCapabilityDecision.Allow();
+        WebViewOperationFailureCategory? failureCategory = null;
+        if (result.Error is not null && WebViewOperationFailure.TryGetCategory(result.Error, out var category))
+            failureCategory = category;
 
-        try
-        {
-            return _policy.Evaluate(context);
-        }
-        catch (Exception ex)
-        {
-            if (!WebViewOperationFailure.TryGetCategory(ex, out _))
-                WebViewOperationFailure.SetCategory(ex, WebViewOperationFailureCategory.AdapterFailed);
-            return WebViewHostCapabilityDecision.Deny(ex.Message);
-        }
+        CapabilityCallCompleted?.Invoke(
+            this,
+            new WebViewHostCapabilityDiagnosticEventArgs(
+                correlationId,
+                context.RootWindowId,
+                context.ParentWindowId,
+                context.TargetWindowId,
+                context.Operation,
+                context.RequestUri,
+                result.Outcome,
+                result.WasAuthorized,
+                result.DenyReason,
+                failureCategory,
+                durationMilliseconds));
     }
 }
