@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
@@ -33,6 +34,13 @@ public sealed class WebView2TeardownStabilityIntegrationTests
             $"run --project \"{desktopProject}\" --configuration Debug --no-build --no-restore " +
             "-- " +
             $"--wv2-teardown-stress --wv2-teardown-iterations {iterations}";
+        var userDataFolder = Path.Combine(
+            repoRoot,
+            "artifacts",
+            "test-results",
+            "wv2-teardown-profile",
+            Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(userDataFolder);
 
         // Build and runtime are split on purpose: teardown correctness should not be coupled
         // to cold-start compile cost fluctuations in CI environments.
@@ -51,6 +59,10 @@ public sealed class WebView2TeardownStabilityIntegrationTests
             arguments: runArgs,
             workingDirectory: repoRoot,
             timeout: TimeSpan.FromMinutes(4),
+            environmentVariables: new Dictionary<string, string>
+            {
+                ["WEBVIEW2_USER_DATA_FOLDER"] = userDataFolder
+            },
             ct: TestContext.Current.CancellationToken);
 
         Assert.False(result.TimedOut, FormatFailureMessage("run", result, runArgs));
@@ -84,7 +96,8 @@ public sealed class WebView2TeardownStabilityIntegrationTests
         string arguments,
         string workingDirectory,
         TimeSpan timeout,
-        CancellationToken ct)
+        CancellationToken ct,
+        IReadOnlyDictionary<string, string>? environmentVariables = null)
     {
         var psi = new ProcessStartInfo
         {
@@ -96,6 +109,14 @@ public sealed class WebView2TeardownStabilityIntegrationTests
             UseShellExecute = false,
             CreateNoWindow = true
         };
+
+        if (environmentVariables is not null)
+        {
+            foreach (var pair in environmentVariables)
+            {
+                psi.Environment[pair.Key] = pair.Value;
+            }
+        }
 
         using var process = new Process { StartInfo = psi, EnableRaisingEvents = true };
 
