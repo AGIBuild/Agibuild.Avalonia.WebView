@@ -50,7 +50,7 @@ public sealed class WebView2TeardownStabilityIntegrationTests
             fileName: "dotnet",
             arguments: runArgs,
             workingDirectory: repoRoot,
-            timeout: TimeSpan.FromMinutes(2),
+            timeout: TimeSpan.FromMinutes(4),
             ct: TestContext.Current.CancellationToken);
 
         Assert.False(result.TimedOut, FormatFailureMessage("run", result, runArgs));

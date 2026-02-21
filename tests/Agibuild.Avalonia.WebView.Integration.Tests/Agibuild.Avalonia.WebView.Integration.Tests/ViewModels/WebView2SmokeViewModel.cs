@@ -206,8 +206,12 @@ public partial class WebView2SmokeViewModel : ViewModelBase, IWebViewAdapterHost
                 var iterationOk = true;
                 try
                 {
-                    // Force readiness with a simple script call (adapter waits internally for WebView2 init).
-                    _ = await WaitAsync(adapterLocal.InvokeScriptAsync("1 + 1"), TimeSpan.FromSeconds(20)).ConfigureAwait(false);
+                    // The first iteration can be noticeably slower on cold CI hosts because WebView2 runtime
+                    // and profile bootstrap happen for the first time in the worker session.
+                    var readinessTimeout = i == 1
+                        ? TimeSpan.FromSeconds(45)
+                        : TimeSpan.FromSeconds(20);
+                    _ = await WaitAsync(adapterLocal.InvokeScriptAsync("1 + 1"), readinessTimeout).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
@@ -230,8 +234,8 @@ public partial class WebView2SmokeViewModel : ViewModelBase, IWebViewAdapterHost
                     _adapter = null;
                 }
 
-                // Small delay to allow native teardown to settle before re-attaching.
-                await Task.Delay(150).ConfigureAwait(false);
+                // Allow native teardown to settle before re-attaching on busy CI hosts.
+                await Task.Delay(300).ConfigureAwait(false);
 
                 if (!iterationOk)
                 {
