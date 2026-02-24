@@ -113,6 +113,22 @@
           "testMethod": "Host_system_integration_event_roundtrip_and_menu_pruning_are_deterministic"
         }
       ]
+    },
+    {
+      "id": "shell-system-integration-v2-tray-payload",
+      "supportLevel": "extended",
+      "coverage": {
+        "windows": ["ct", "it-smoke"],
+        "macos": ["ct"],
+        "linux": ["ct"]
+      },
+      "evidence": [
+        {
+          "lane": "RuntimeAutomation",
+          "file": "tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/HostCapabilityBridgeIntegrationTests.cs",
+          "testMethod": "Tray_payload_v2_roundtrip_with_platform_extensions_is_machine_checkable"
+        }
+      ]
     }
   ]
 }

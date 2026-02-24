@@ -61,7 +61,8 @@ public sealed class AutomationLaneGovernanceTests
             "windows-webview2-teardown-stress",
             "shell-devtools-policy-isolation",
             "shell-shortcut-routing",
-            "shell-system-integration-roundtrip"
+            "shell-system-integration-roundtrip",
+            "shell-system-integration-v2-tray-payload"
         };
 
         var scenarioIds = scenarios
@@ -107,6 +108,7 @@ public sealed class AutomationLaneGovernanceTests
         Assert.Contains("tray-event-inbound", rowIds);
         Assert.Contains("menu-pruning", rowIds);
         Assert.Contains("system-action-whitelist", rowIds);
+        Assert.Contains("tray-payload-v2-schema", rowIds);
 
         foreach (var row in rows)
         {
@@ -325,6 +327,8 @@ public sealed class AutomationLaneGovernanceTests
         Assert.Contains("ResolveMenuPruningStage", appShellPreset, StringComparison.Ordinal);
         Assert.Contains("DrainSystemIntegrationEvents(", appShellPreset, StringComparison.Ordinal);
         Assert.Contains("PublishSystemIntegrationEvent(", appShellPreset, StringComparison.Ordinal);
+        Assert.Contains("platform.source", appShellPreset, StringComparison.Ordinal);
+        Assert.Contains("platform.pruningStage", appShellPreset, StringComparison.Ordinal);
         Assert.DoesNotContain("ExternalOpenHandler", appShellPreset, StringComparison.Ordinal);
         Assert.Contains("KeyDown +=", appShellPreset, StringComparison.Ordinal);
         Assert.Contains("KeyDown -=", appShellPreset, StringComparison.Ordinal);
@@ -340,9 +344,11 @@ public sealed class AutomationLaneGovernanceTests
         Assert.Contains("result.appliedTopLevelItems", desktopIndex, StringComparison.Ordinal);
         Assert.Contains("result.pruningStage", desktopIndex, StringComparison.Ordinal);
         Assert.Contains("readBoundedMetadata(", desktopIndex, StringComparison.Ordinal);
+        Assert.Contains("platform.source", desktopIndex, StringComparison.Ordinal);
+        Assert.Contains("platform.pruningStage", desktopIndex, StringComparison.Ordinal);
         Assert.Contains("source=", desktopIndex, StringComparison.Ordinal);
         Assert.Contains("profileVersion=", desktopIndex, StringComparison.Ordinal);
-        Assert.Contains("'profileHash'", desktopIndex, StringComparison.Ordinal);
+        Assert.Contains("platform.profileHash", desktopIndex, StringComparison.Ordinal);
         Assert.Contains("result.isVisible", desktopIndex, StringComparison.Ordinal);
         Assert.Contains("Host events", desktopIndex, StringComparison.Ordinal);
         Assert.Contains("System action denied", desktopIndex, StringComparison.Ordinal);
@@ -401,7 +407,8 @@ public sealed class AutomationLaneGovernanceTests
             "windows-webview2-teardown-stress",
             "shell-devtools-policy-isolation",
             "shell-shortcut-routing",
-            "shell-system-integration-roundtrip"
+            "shell-system-integration-roundtrip",
+            "shell-system-integration-v2-tray-payload"
         };
 
         foreach (var capabilityId in requiredCapabilityIds)
@@ -523,6 +530,9 @@ public sealed class AutomationLaneGovernanceTests
         Assert.Contains("MinSystemIntegrationMetadataTotalLength = 256", bridgeSource, StringComparison.Ordinal);
         Assert.Contains("MaxSystemIntegrationMetadataTotalLength = 4096", bridgeSource, StringComparison.Ordinal);
         Assert.Contains("DefaultSystemIntegrationMetadataTotalLength = 1024", bridgeSource, StringComparison.Ordinal);
+        Assert.Contains("SystemIntegrationMetadataAllowedPrefix = \"platform.\"", bridgeSource, StringComparison.Ordinal);
+        Assert.Contains("system-integration-event-core-field-missing", bridgeSource, StringComparison.Ordinal);
+        Assert.Contains("system-integration-event-metadata-namespace-invalid", bridgeSource, StringComparison.Ordinal);
         Assert.Contains("system-integration-event-metadata-budget-exceeded", bridgeSource, StringComparison.Ordinal);
 
         // Diagnostic payload must remain machine-checkable.

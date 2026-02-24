@@ -198,6 +198,10 @@ public enum WebViewSystemIntegrationEventKind
 /// </summary>
 public sealed class WebViewSystemIntegrationEventRequest
 {
+    /// <summary>Stable host-originated event source identity.</summary>
+    public string? Source { get; init; }
+    /// <summary>UTC timestamp of when the host event occurred.</summary>
+    public DateTimeOffset OccurredAtUtc { get; init; }
     /// <summary>Event kind.</summary>
     public WebViewSystemIntegrationEventKind Kind { get; init; }
     /// <summary>Optional item id for menu/tray events.</summary>
@@ -389,7 +393,10 @@ public sealed class WebViewHostCapabilityBridge
     private const int MaxSystemIntegrationMetadataEntries = 8;
     private const int MaxSystemIntegrationMetadataKeyLength = 64;
     private const int MaxSystemIntegrationMetadataValueLength = 256;
+    private const string SystemIntegrationMetadataAllowedPrefix = "platform.";
+    private const string SystemIntegrationCoreFieldMissing = "system-integration-event-core-field-missing";
     private const string SystemIntegrationMetadataEnvelopeInvalid = "system-integration-event-metadata-envelope-invalid";
+    private const string SystemIntegrationMetadataNamespaceInvalid = "system-integration-event-metadata-namespace-invalid";
     private const string SystemIntegrationMetadataBudgetExceeded = "system-integration-event-metadata-budget-exceeded";
 
     private readonly IWebViewHostCapabilityProvider _provider;
@@ -613,6 +620,8 @@ public sealed class WebViewHostCapabilityBridge
             parentWindowId,
             targetWindowId,
             operation);
+        if (!TryValidateSystemIntegrationEventCore(request, out var coreDenyReason))
+            return DenyWithDiagnostic<WebViewSystemIntegrationEventRequest>(context, coreDenyReason);
         if (!TryValidateMetadataEnvelope(request.Metadata, out var metadataDenyReason))
             return DenyWithDiagnostic<WebViewSystemIntegrationEventRequest>(context, metadataDenyReason);
 
@@ -707,6 +716,11 @@ public sealed class WebViewHostCapabilityBridge
                 denyReason = SystemIntegrationMetadataEnvelopeInvalid;
                 return false;
             }
+            if (!pair.Key.StartsWith(SystemIntegrationMetadataAllowedPrefix, StringComparison.Ordinal))
+            {
+                denyReason = SystemIntegrationMetadataNamespaceInvalid;
+                return false;
+            }
 
             if (pair.Value is null || pair.Value.Length > MaxSystemIntegrationMetadataValueLength)
             {
@@ -720,6 +734,23 @@ public sealed class WebViewHostCapabilityBridge
                 denyReason = SystemIntegrationMetadataBudgetExceeded;
                 return false;
             }
+        }
+
+        denyReason = string.Empty;
+        return true;
+    }
+
+    private static bool TryValidateSystemIntegrationEventCore(
+        WebViewSystemIntegrationEventRequest request,
+        out string denyReason)
+    {
+        if (string.IsNullOrWhiteSpace(request.Source) ||
+            request.OccurredAtUtc == default ||
+            request.OccurredAtUtc.Offset != TimeSpan.Zero ||
+            string.IsNullOrWhiteSpace(request.ItemId))
+        {
+            denyReason = SystemIntegrationCoreFieldMissing;
+            return false;
         }
 
         denyReason = string.Empty;

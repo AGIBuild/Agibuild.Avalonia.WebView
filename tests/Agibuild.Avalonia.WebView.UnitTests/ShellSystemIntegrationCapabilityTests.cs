@@ -537,6 +537,38 @@ public sealed class ShellSystemIntegrationCapabilityTests
     }
 
     [Fact]
+    public void ShowAbout_whitelist_allow_still_honors_policy_deny_before_provider_execution()
+    {
+        var dispatcher = new TestDispatcher();
+        var adapter = MockWebViewAdapter.Create();
+        using var core = new WebViewCore(adapter, dispatcher);
+        var provider = new TrackingProvider();
+        var bridge = new WebViewHostCapabilityBridge(provider, new DenyShowAboutPolicy());
+        var policyErrors = new List<WebViewShellPolicyErrorEventArgs>();
+
+        using var shell = new WebViewShellExperience(core, new WebViewShellExperienceOptions
+        {
+            HostCapabilityBridge = bridge,
+            SystemActionWhitelist = new HashSet<WebViewSystemAction>
+            {
+                WebViewSystemAction.ShowAbout
+            },
+            PolicyErrorHandler = (_, error) => policyErrors.Add(error)
+        });
+
+        var denied = shell.ExecuteSystemAction(new WebViewSystemActionRequest
+        {
+            Action = WebViewSystemAction.ShowAbout
+        });
+
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Deny, denied.Outcome);
+        Assert.Equal("policy-showabout-denied", denied.DenyReason);
+        Assert.Equal(0, provider.SystemActionCalls);
+        Assert.Single(policyErrors);
+        Assert.Contains("policy-showabout-denied", policyErrors[0].Exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Inbound_system_integration_events_are_delivered_only_when_policy_allows()
     {
         var dispatcher = new TestDispatcher();
@@ -556,15 +588,19 @@ public sealed class ShellSystemIntegrationCapabilityTests
 
         var tray = shell.PublishSystemIntegrationEvent(new WebViewSystemIntegrationEventRequest
         {
+            Source = "unit-test-shell",
+            OccurredAtUtc = DateTimeOffset.UtcNow,
             Kind = WebViewSystemIntegrationEventKind.TrayInteracted,
             ItemId = "tray-main",
             Metadata = new Dictionary<string, string>
             {
-                ["source"] = "unit-test"
+                ["platform.source"] = "unit-test"
             }
         });
         var menu = shell.PublishSystemIntegrationEvent(new WebViewSystemIntegrationEventRequest
         {
+            Source = "unit-test-shell",
+            OccurredAtUtc = DateTimeOffset.UtcNow,
             Kind = WebViewSystemIntegrationEventKind.MenuItemInvoked,
             ItemId = "menu-file-open"
         });
@@ -573,7 +609,7 @@ public sealed class ShellSystemIntegrationCapabilityTests
         Assert.Equal(WebViewHostCapabilityCallOutcome.Deny, menu.Outcome);
         Assert.Single(received);
         Assert.Equal(WebViewSystemIntegrationEventKind.TrayInteracted, received[0].Kind);
-        Assert.Equal("unit-test", received[0].Metadata["source"]);
+        Assert.Equal("unit-test", received[0].Metadata["platform.source"]);
         Assert.Single(policyErrors);
         Assert.Contains("inbound-menu-event-denied", policyErrors[0].Exception.Message, StringComparison.Ordinal);
     }
@@ -598,6 +634,8 @@ public sealed class ShellSystemIntegrationCapabilityTests
 
         var invalid = shell.PublishSystemIntegrationEvent(new WebViewSystemIntegrationEventRequest
         {
+            Source = "unit-test-shell",
+            OccurredAtUtc = DateTimeOffset.UtcNow,
             Kind = WebViewSystemIntegrationEventKind.TrayInteracted,
             ItemId = "tray-main",
             Metadata = new Dictionary<string, string>
@@ -633,14 +671,16 @@ public sealed class ShellSystemIntegrationCapabilityTests
 
         var denied = shell.PublishSystemIntegrationEvent(new WebViewSystemIntegrationEventRequest
         {
+            Source = "unit-test-shell",
+            OccurredAtUtc = DateTimeOffset.UtcNow,
             Kind = WebViewSystemIntegrationEventKind.TrayInteracted,
             ItemId = "tray-budget-over",
             Metadata = new Dictionary<string, string>
             {
-                ["a"] = new string('x', 256),
-                ["b"] = new string('x', 256),
-                ["c"] = new string('x', 256),
-                ["d"] = new string('x', 256)
+                ["platform.a"] = new string('x', 256),
+                ["platform.b"] = new string('x', 256),
+                ["platform.c"] = new string('x', 256),
+                ["platform.d"] = new string('x', 256)
             }
         });
 
@@ -649,6 +689,100 @@ public sealed class ShellSystemIntegrationCapabilityTests
         Assert.Empty(received);
         Assert.Single(policyErrors);
         Assert.Contains("system-integration-event-metadata-budget-exceeded", policyErrors[0].Exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Non_platform_metadata_key_is_denied_before_web_delivery()
+    {
+        var dispatcher = new TestDispatcher();
+        var adapter = MockWebViewAdapter.Create();
+        using var core = new WebViewCore(adapter, dispatcher);
+        var provider = new TrackingProvider();
+        var bridge = new WebViewHostCapabilityBridge(provider, new AllowAllPolicy());
+        var received = new List<WebViewSystemIntegrationEventRequest>();
+        var policyErrors = new List<WebViewShellPolicyErrorEventArgs>();
+
+        using var shell = new WebViewShellExperience(core, new WebViewShellExperienceOptions
+        {
+            HostCapabilityBridge = bridge,
+            PolicyErrorHandler = (_, error) => policyErrors.Add(error)
+        });
+        shell.SystemIntegrationEventReceived += (_, evt) => received.Add(evt);
+
+        var denied = shell.PublishSystemIntegrationEvent(new WebViewSystemIntegrationEventRequest
+        {
+            Source = "unit-test-shell",
+            OccurredAtUtc = DateTimeOffset.UtcNow,
+            Kind = WebViewSystemIntegrationEventKind.TrayInteracted,
+            ItemId = "tray-main",
+            Metadata = new Dictionary<string, string>
+            {
+                ["source"] = "invalid-namespace"
+            }
+        });
+
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Deny, denied.Outcome);
+        Assert.Equal("system-integration-event-metadata-namespace-invalid", denied.DenyReason);
+        Assert.Empty(received);
+        Assert.Single(policyErrors);
+        Assert.Contains("system-integration-event-metadata-namespace-invalid", policyErrors[0].Exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Invalid_tray_payload_v2_is_isolated_from_permission_download_and_new_window_domains()
+    {
+        var dispatcher = new TestDispatcher();
+        var adapter = new MockWebViewAdapterFull();
+        using var core = new WebViewCore(adapter, dispatcher);
+        var provider = new TrackingProvider();
+        var bridge = new WebViewHostCapabilityBridge(provider, new AllowAllPolicy());
+        var policyErrors = new List<WebViewShellPolicyErrorEventArgs>();
+
+        using var shell = new WebViewShellExperience(core, new WebViewShellExperienceOptions
+        {
+            HostCapabilityBridge = bridge,
+            DownloadPolicy = new DelegateDownloadPolicy((_, e) =>
+            {
+                e.DownloadPath = "D:\\tmp\\tray-v2-isolated.bin";
+            }),
+            PermissionPolicy = new DelegatePermissionPolicy((_, e) =>
+            {
+                e.State = PermissionState.Allow;
+            }),
+            NewWindowPolicy = new NavigateInPlaceNewWindowPolicy(),
+            PolicyErrorHandler = (_, error) => policyErrors.Add(error)
+        });
+
+        var denied = shell.PublishSystemIntegrationEvent(new WebViewSystemIntegrationEventRequest
+        {
+            Source = "unit-test-shell",
+            OccurredAtUtc = DateTimeOffset.UtcNow,
+            Kind = WebViewSystemIntegrationEventKind.TrayInteracted,
+            ItemId = "tray-main",
+            Metadata = new Dictionary<string, string>
+            {
+                ["source"] = "invalid-namespace"
+            }
+        });
+        var permissionArgs = new PermissionRequestedEventArgs(WebViewPermissionKind.Camera, new Uri("https://example.com"));
+        var downloadArgs = new DownloadRequestedEventArgs(new Uri("https://example.com/file.bin"));
+        var popupUri = new Uri("https://example.com/popup");
+        adapter.RaisePermissionRequested(permissionArgs);
+        adapter.RaiseDownloadRequested(downloadArgs);
+        adapter.RaiseNewWindowRequested(popupUri);
+        dispatcher.RunAll();
+
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Deny, denied.Outcome);
+        Assert.Equal("system-integration-event-metadata-namespace-invalid", denied.DenyReason);
+        Assert.Equal(0, provider.TrayUpdateCalls);
+        Assert.Equal(PermissionState.Allow, permissionArgs.State);
+        Assert.Equal("D:\\tmp\\tray-v2-isolated.bin", downloadArgs.DownloadPath);
+        Assert.Equal(1, adapter.NavigateCallCount);
+        Assert.Equal(popupUri, adapter.LastNavigationUri);
+
+        Assert.Contains(policyErrors, e =>
+            e.Domain == WebViewShellPolicyDomain.SystemIntegration &&
+            e.Exception.Message.Contains("system-integration-event-metadata-namespace-invalid", StringComparison.Ordinal));
     }
 
     private sealed class AllowAllPolicy : IWebViewHostCapabilityPolicy
@@ -670,6 +804,14 @@ public sealed class ShellSystemIntegrationCapabilityTests
         public WebViewHostCapabilityDecision Evaluate(in WebViewHostCapabilityRequestContext context)
             => context.Operation == WebViewHostCapabilityOperation.MenuInteractionEventDispatch
                 ? WebViewHostCapabilityDecision.Deny("inbound-menu-event-denied")
+                : WebViewHostCapabilityDecision.Allow();
+    }
+
+    private sealed class DenyShowAboutPolicy : IWebViewHostCapabilityPolicy
+    {
+        public WebViewHostCapabilityDecision Evaluate(in WebViewHostCapabilityRequestContext context)
+            => context.Operation == WebViewHostCapabilityOperation.SystemActionExecute
+                ? WebViewHostCapabilityDecision.Deny("policy-showabout-denied")
                 : WebViewHostCapabilityDecision.Allow();
     }
 

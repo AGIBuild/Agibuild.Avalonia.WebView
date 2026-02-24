@@ -197,17 +197,19 @@ public partial class MainWindow
             {
                 _ = _shell.PublishSystemIntegrationEvent(new WebViewSystemIntegrationEventRequest
                 {
+                    Source = "template-menu",
+                    OccurredAtUtc = DateTimeOffset.UtcNow,
                     Kind = WebViewSystemIntegrationEventKind.MenuItemInvoked,
                     ItemId = request.Items.FirstOrDefault()?.Id,
                     Context = "template-menu-applied",
                     Metadata = new Dictionary<string, string>(StringComparer.Ordinal)
                     {
-                        ["source"] = "template-menu",
-                        ["profileIdentity"] = profileSnapshot.ProfileIdentity ?? "unknown",
-                        ["profileVersion"] = profileSnapshot.ProfileVersion ?? "unknown",
-                        ["profileHash"] = profileSnapshot.ProfileHash ?? "unknown",
-                        ["profilePermissionState"] = profileSnapshot.PermissionState ?? "unknown",
-                        ["pruningStage"] = pruningStage
+                        ["platform.source"] = "template-menu",
+                        ["platform.profileIdentity"] = profileSnapshot.ProfileIdentity ?? "unknown",
+                        ["platform.profileVersion"] = profileSnapshot.ProfileVersion ?? "unknown",
+                        ["platform.profileHash"] = profileSnapshot.ProfileHash ?? "unknown",
+                        ["platform.profilePermissionState"] = profileSnapshot.PermissionState ?? "unknown",
+                        ["platform.pruningStage"] = pruningStage
                     }
                 });
             }
@@ -236,14 +238,16 @@ public partial class MainWindow
             {
                 _ = _shell.PublishSystemIntegrationEvent(new WebViewSystemIntegrationEventRequest
                 {
+                    Source = "template-tray",
+                    OccurredAtUtc = DateTimeOffset.UtcNow,
                     Kind = WebViewSystemIntegrationEventKind.TrayInteracted,
                     ItemId = state.IsVisible ? "tray-visible" : "tray-hidden",
                     Context = state.Tooltip,
                     Metadata = new Dictionary<string, string>(StringComparer.Ordinal)
                     {
-                        ["source"] = "template-tray",
-                        ["visibility"] = state.IsVisible ? "visible" : "hidden",
-                        ["tooltipPresent"] = string.IsNullOrWhiteSpace(state.Tooltip) ? "false" : "true"
+                        ["platform.source"] = "template-tray",
+                        ["platform.visibility"] = state.IsVisible ? "visible" : "hidden",
+                        ["platform.tooltipPresent"] = string.IsNullOrWhiteSpace(state.Tooltip) ? "false" : "true"
                     }
                 });
             }
@@ -356,6 +360,8 @@ public partial class MainWindow
         {
             var mapped = new DesktopSystemIntegrationEvent
             {
+                Source = request.Source,
+                OccurredAtUtc = request.OccurredAtUtc,
                 Kind = request.Kind switch
                 {
                     WebViewSystemIntegrationEventKind.TrayInteracted => DesktopSystemIntegrationEventKind.TrayInteracted,

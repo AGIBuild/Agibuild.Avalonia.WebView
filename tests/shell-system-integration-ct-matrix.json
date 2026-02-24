@@ -83,7 +83,37 @@
         },
         {
           "file": "tests/Agibuild.Avalonia.WebView.UnitTests/ShellSystemIntegrationCapabilityTests.cs",
+          "testMethod": "ShowAbout_whitelist_allow_still_honors_policy_deny_before_provider_execution"
+        },
+        {
+          "file": "tests/Agibuild.Avalonia.WebView.UnitTests/ShellSystemIntegrationCapabilityTests.cs",
           "testMethod": "System_action_provider_failure_is_reported_and_isolated_from_other_system_integration_operations"
+        }
+      ]
+    },
+    {
+      "id": "tray-payload-v2-schema",
+      "coverage": ["allow", "deny", "failure"],
+      "evidence": [
+        {
+          "file": "tests/Agibuild.Avalonia.WebView.UnitTests/HostCapabilityBridgeTests.cs",
+          "testMethod": "Missing_core_fields_are_denied_before_policy_and_dispatch"
+        },
+        {
+          "file": "tests/Agibuild.Avalonia.WebView.UnitTests/HostCapabilityBridgeTests.cs",
+          "testMethod": "Non_platform_metadata_key_is_denied_before_policy_and_dispatch"
+        },
+        {
+          "file": "tests/Agibuild.Avalonia.WebView.UnitTests/ShellSystemIntegrationCapabilityTests.cs",
+          "testMethod": "Non_platform_metadata_key_is_denied_before_web_delivery"
+        },
+        {
+          "file": "tests/Agibuild.Avalonia.WebView.UnitTests/ShellSystemIntegrationCapabilityTests.cs",
+          "testMethod": "Invalid_tray_payload_v2_is_isolated_from_permission_download_and_new_window_domains"
+        },
+        {
+          "file": "tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/HostCapabilityBridgeIntegrationTests.cs",
+          "testMethod": "Tray_payload_v2_roundtrip_with_platform_extensions_is_machine_checkable"
         }
       ]
     }

@@ -84,6 +84,14 @@ The host capability bridge SHALL expose typed inbound tray event contracts with 
 - **WHEN** host publishes inbound tray event through typed bridge contract
 - **THEN** bridge validates metadata envelope against declared schema bounds before event dispatch
 
+#### Scenario: Missing required v2 field blocks dispatch
+- **WHEN** bridge receives tray event payload without required v2 core fields
+- **THEN** bridge rejects request deterministically before policy evaluation and does not raise dispatch callbacks
+
+#### Scenario: Disallowed extension key blocks dispatch
+- **WHEN** bridge receives tray event payload with extension key outside `platform.*` namespace
+- **THEN** bridge rejects request deterministically before policy evaluation and does not raise dispatch callbacks
+
 ### Requirement: Inbound diagnostics SHALL encode payload boundary decisions
 Inbound bridge diagnostics SHALL include machine-checkable fields that identify semantic payload validity and metadata envelope acceptance or rejection.
 
@@ -94,6 +102,10 @@ Inbound bridge diagnostics SHALL include machine-checkable fields that identify 
 #### Scenario: Valid metadata envelope keeps unrelated capabilities isolated
 - **WHEN** one inbound event passes payload boundary validation and another fails in the same runtime session
 - **THEN** unrelated capability operations remain functional and deterministic
+
+#### Scenario: Non-whitelisted ShowAbout emits stable deny reason
+- **WHEN** `ShowAbout` is blocked before provider execution in system integration flow
+- **THEN** diagnostics include stable deny reason taxonomy and correlation metadata for machine validation
 
 ### Requirement: Bridge inbound metadata validation SHALL include aggregate budget stage
 The host capability bridge SHALL validate inbound system-integration metadata with an explicit aggregate payload budget stage before policy evaluation and dispatch callbacks.

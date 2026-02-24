@@ -277,19 +277,21 @@ public sealed class HostCapabilityBridgeTests
 
         var eventResult = bridge.DispatchSystemIntegrationEvent(new WebViewSystemIntegrationEventRequest
         {
+            Source = "unit-test-host",
+            OccurredAtUtc = DateTimeOffset.UtcNow,
             Kind = WebViewSystemIntegrationEventKind.TrayInteracted,
             ItemId = "tray-main",
             Context = "clicked",
             Metadata = new Dictionary<string, string>
             {
-                ["source"] = "unit-test"
+                ["platform.source"] = "unit-test"
             }
         }, root);
 
         Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, eventResult.Outcome);
         Assert.Single(dispatched);
         Assert.Equal("tray-main", dispatched[0].ItemId);
-        Assert.Equal("unit-test", dispatched[0].Metadata["source"]);
+        Assert.Equal("unit-test", dispatched[0].Metadata["platform.source"]);
 
         var diagnostic = Assert.Single(diagnostics);
         Assert.Equal(WebViewHostCapabilityOperation.TrayInteractionEventDispatch, diagnostic.Operation);
@@ -307,6 +309,8 @@ public sealed class HostCapabilityBridgeTests
 
         var eventResult = bridge.DispatchSystemIntegrationEvent(new WebViewSystemIntegrationEventRequest
         {
+            Source = "unit-test-host",
+            OccurredAtUtc = DateTimeOffset.UtcNow,
             Kind = WebViewSystemIntegrationEventKind.MenuItemInvoked,
             ItemId = "menu-file-open"
         }, Guid.NewGuid());
@@ -328,6 +332,8 @@ public sealed class HostCapabilityBridgeTests
 
         var eventResult = bridge.DispatchSystemIntegrationEvent(new WebViewSystemIntegrationEventRequest
         {
+            Source = "unit-test-host",
+            OccurredAtUtc = DateTimeOffset.UtcNow,
             Kind = WebViewSystemIntegrationEventKind.TrayInteracted,
             ItemId = "tray-main",
             Metadata = new Dictionary<string, string>
@@ -358,14 +364,16 @@ public sealed class HostCapabilityBridgeTests
 
         var eventResult = bridge.DispatchSystemIntegrationEvent(new WebViewSystemIntegrationEventRequest
         {
+            Source = "unit-test-host",
+            OccurredAtUtc = DateTimeOffset.UtcNow,
             Kind = WebViewSystemIntegrationEventKind.TrayInteracted,
             ItemId = "tray-budget-edge",
             Metadata = new Dictionary<string, string>
             {
-                ["a"] = new string('x', 255),
-                ["b"] = new string('x', 255),
-                ["c"] = new string('x', 255),
-                ["d"] = new string('x', 255)
+                ["platform.a"] = new string('x', 246),
+                ["platform.b"] = new string('x', 246),
+                ["platform.c"] = new string('x', 246),
+                ["platform.d"] = new string('x', 246)
             }
         }, Guid.NewGuid());
 
@@ -387,14 +395,16 @@ public sealed class HostCapabilityBridgeTests
 
         var eventResult = bridge.DispatchSystemIntegrationEvent(new WebViewSystemIntegrationEventRequest
         {
+            Source = "unit-test-host",
+            OccurredAtUtc = DateTimeOffset.UtcNow,
             Kind = WebViewSystemIntegrationEventKind.TrayInteracted,
             ItemId = "tray-budget-over",
             Metadata = new Dictionary<string, string>
             {
-                ["a"] = new string('x', 256),
-                ["b"] = new string('x', 256),
-                ["c"] = new string('x', 256),
-                ["d"] = new string('x', 256)
+                ["platform.a"] = new string('x', 256),
+                ["platform.b"] = new string('x', 256),
+                ["platform.c"] = new string('x', 256),
+                ["platform.d"] = new string('x', 256)
             }
         }, Guid.NewGuid());
 
@@ -451,18 +461,73 @@ public sealed class HostCapabilityBridgeTests
 
         var eventResult = bridge.DispatchSystemIntegrationEvent(new WebViewSystemIntegrationEventRequest
         {
+            Source = "unit-test-host",
+            OccurredAtUtc = DateTimeOffset.UtcNow,
             Kind = WebViewSystemIntegrationEventKind.TrayInteracted,
+            ItemId = "tray-budget-configured",
             Metadata = new Dictionary<string, string>
             {
-                ["a"] = new string('x', 256),
-                ["b"] = new string('x', 256),
-                ["c"] = new string('x', 256),
-                ["d"] = new string('x', 256)
+                ["platform.a"] = new string('x', 256),
+                ["platform.b"] = new string('x', 256),
+                ["platform.c"] = new string('x', 256),
+                ["platform.d"] = new string('x', 256)
             }
         }, Guid.NewGuid());
 
         Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, eventResult.Outcome);
         Assert.Equal(1, policy.EvaluateCalls);
+    }
+
+    [Fact]
+    public void Non_platform_metadata_key_is_denied_before_policy_and_dispatch()
+    {
+        var provider = new TestHostCapabilityProvider();
+        var policy = new CountingAllowPolicy();
+        var bridge = new WebViewHostCapabilityBridge(provider, policy);
+        var dispatched = 0;
+        bridge.SystemIntegrationEventDispatched += (_, _) => dispatched++;
+
+        var eventResult = bridge.DispatchSystemIntegrationEvent(new WebViewSystemIntegrationEventRequest
+        {
+            Source = "unit-test-host",
+            OccurredAtUtc = DateTimeOffset.UtcNow,
+            Kind = WebViewSystemIntegrationEventKind.TrayInteracted,
+            ItemId = "tray-main",
+            Metadata = new Dictionary<string, string>
+            {
+                ["source"] = "invalid-namespace"
+            }
+        }, Guid.NewGuid());
+
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Deny, eventResult.Outcome);
+        Assert.Equal("system-integration-event-metadata-namespace-invalid", eventResult.DenyReason);
+        Assert.Equal(0, dispatched);
+        Assert.Equal(0, policy.EvaluateCalls);
+    }
+
+    [Fact]
+    public void Missing_core_fields_are_denied_before_policy_and_dispatch()
+    {
+        var provider = new TestHostCapabilityProvider();
+        var policy = new CountingAllowPolicy();
+        var bridge = new WebViewHostCapabilityBridge(provider, policy);
+        var dispatched = 0;
+        bridge.SystemIntegrationEventDispatched += (_, _) => dispatched++;
+
+        var eventResult = bridge.DispatchSystemIntegrationEvent(new WebViewSystemIntegrationEventRequest
+        {
+            Kind = WebViewSystemIntegrationEventKind.TrayInteracted,
+            ItemId = "tray-main",
+            Metadata = new Dictionary<string, string>
+            {
+                ["platform.source"] = "unit-test"
+            }
+        }, Guid.NewGuid());
+
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Deny, eventResult.Outcome);
+        Assert.Equal("system-integration-event-core-field-missing", eventResult.DenyReason);
+        Assert.Equal(0, dispatched);
+        Assert.Equal(0, policy.EvaluateCalls);
     }
 
     private sealed class AllowAllPolicy : IWebViewHostCapabilityPolicy

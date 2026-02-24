@@ -59,6 +59,7 @@
         <button style="margin-top:.5rem" onclick="applyMenuModel()">Apply menu model (typed)</button>
         <button style="margin-left:.5rem" onclick="toggleTray()">Toggle tray state (typed)</button>
         <button style="margin-left:.5rem" onclick="focusMainWindow()">Execute system action (typed)</button>
+        <button style="margin-left:.5rem" onclick="showAbout()">Execute ShowAbout (typed)</button>
         <button style="margin-top:.5rem" onclick="drainSystemIntegrationEvents()">Drain host events (typed)</button>
         <div id="result"></div>
     </div>
@@ -243,12 +244,34 @@
                     const item = evt.itemId ?? 'n/a';
                     const context = evt.context ?? 'n/a';
                     const metadata = readBoundedMetadata(evt.metadata);
-                    const source = metadata.source ?? 'n/a';
-                    const stage = metadata.pruningStage ?? 'n/a';
-                    const profileVersion = metadata.profileVersion ?? 'n/a';
-                    return `${kind}:${item}:${context}:source=${source}:stage=${stage}:profileVersion=${profileVersion}`;
+                    const source = metadata.platformSource ?? 'n/a';
+                    const stage = metadata.platformPruningStage ?? 'n/a';
+                    const profileVersion = metadata.platformProfileVersion ?? 'n/a';
+                    const occurredAtUtc = evt.occurredAtUtc ?? 'n/a';
+                    return `${kind}:${item}:${context}:source=${source}:stage=${stage}:profileVersion=${profileVersion}:occurredAtUtc=${occurredAtUtc}`;
                 });
                 el.textContent = prefix + ': ' + lines.join(' | ');
+            } catch (err) {
+                el.textContent = 'Error: ' + err.message;
+            }
+        }
+
+        async function showAbout() {
+            const el = document.getElementById('result');
+            if (!await waitForBridge()) {
+                el.textContent = 'Bridge not available';
+                return;
+            }
+
+            try {
+                const result = await window.agWebView.rpc.invoke('DesktopHostService.ExecuteSystemAction', { action: 3 });
+                if (result.outcome === 0) {
+                    el.textContent = 'ShowAbout action executed';
+                } else if (result.outcome === 1) {
+                    el.textContent = 'ShowAbout denied: ' + (result.denyReason ?? 'unknown');
+                } else {
+                    el.textContent = 'ShowAbout failure: ' + (result.error ?? 'unknown');
+                }
             } catch (err) {
                 el.textContent = 'Error: ' + err.message;
             }
@@ -260,15 +283,25 @@
             }
 
             // Bounded metadata envelope: only consume explicit keys with capped value size.
-            const allowedKeys = ['source', 'visibility', 'tooltipPresent', 'profileIdentity', 'profileVersion', 'profileHash', 'profilePermissionState', 'pruningStage'];
+            const keyMap = {
+                'platform.source': 'platformSource',
+                'platform.visibility': 'platformVisibility',
+                'platform.tooltipPresent': 'platformTooltipPresent',
+                'platform.profileIdentity': 'platformProfileIdentity',
+                'platform.profileVersion': 'platformProfileVersion',
+                'platform.profileHash': 'platformProfileHash',
+                'platform.profilePermissionState': 'platformProfilePermissionState',
+                'platform.pruningStage': 'platformPruningStage'
+            };
             const bounded = {};
-            for (const key of allowedKeys) {
+            for (const key of Object.keys(keyMap)) {
                 const raw = metadata[key];
                 if (typeof raw !== 'string') {
                     continue;
                 }
 
-                bounded[key] = raw.length > 48 ? raw.slice(0, 48) : raw;
+                const mappedKey = keyMap[key];
+                bounded[mappedKey] = raw.length > 48 ? raw.slice(0, 48) : raw;
             }
 
             return bounded;

@@ -121,6 +121,8 @@ public enum DesktopSystemIntegrationEventKind
 
 public sealed class DesktopSystemIntegrationEvent
 {
+    public string? Source { get; init; }
+    public DateTimeOffset OccurredAtUtc { get; init; }
     public DesktopSystemIntegrationEventKind Kind { get; init; }
     public string? ItemId { get; init; }
     public string? Context { get; init; }

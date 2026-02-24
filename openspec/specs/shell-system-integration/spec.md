@@ -71,6 +71,10 @@ The system SHALL treat `ShowAbout` as a typed system action that executes only w
 - **WHEN** host issues typed `ShowAbout` system action and both allowlist and policy authorize execution
 - **THEN** runtime executes provider path and returns deterministic `allow` outcome with stable diagnostics metadata
 
+#### Scenario: ShowAbout is denied by policy after whitelist pass
+- **WHEN** host issues typed `ShowAbout` system action, allowlist includes `ShowAbout`, and policy denies
+- **THEN** runtime returns deterministic `deny` with stable deny metadata and provider execution remains zero
+
 ### Requirement: Tray inbound event payload SHALL use semantic-first bounded envelope
 The system SHALL represent tray inbound events with canonical semantic fields and an optional bounded platform metadata envelope under explicit schema constraints.
 
@@ -81,6 +85,14 @@ The system SHALL represent tray inbound events with canonical semantic fields an
 #### Scenario: Metadata envelope outside schema constraints is rejected
 - **WHEN** tray inbound event includes metadata keys or values outside declared envelope constraints
 - **THEN** runtime returns deterministic `deny` or `failure` outcome according to policy contract and does not deliver invalid payload
+
+#### Scenario: Missing required v2 core fields are rejected
+- **WHEN** host emits tray event payload without required core fields (source, timestamp, or stable item identity)
+- **THEN** runtime returns deterministic boundary-stage `deny` metadata and does not dispatch event to web
+
+#### Scenario: Disallowed extension namespace is rejected
+- **WHEN** host emits tray event payload with extension keys outside `platform.*` namespace
+- **THEN** runtime returns deterministic boundary-stage `deny` metadata and does not dispatch event to web
 
 ### Requirement: Menu pruning SHALL support deterministic profile federation
 The system SHALL evaluate menu pruning with deterministic federation between session permission profile and shell policy context.
