@@ -62,7 +62,9 @@ public sealed class AutomationLaneGovernanceTests
             "shell-devtools-policy-isolation",
             "shell-shortcut-routing",
             "shell-system-integration-roundtrip",
-            "shell-system-integration-v2-tray-payload"
+            "shell-system-integration-v2-tray-payload",
+            "shell-system-integration-v2-timestamp-normalization",
+            "shell-system-integration-diagnostic-export"
         };
 
         var scenarioIds = scenarios
@@ -316,11 +318,17 @@ public sealed class AutomationLaneGovernanceTests
         Assert.Contains("ApplyMenuModel(", appShellPreset, StringComparison.Ordinal);
         Assert.Contains("UpdateTrayState(", appShellPreset, StringComparison.Ordinal);
         Assert.Contains("ExecuteSystemAction(", appShellPreset, StringComparison.Ordinal);
-        Assert.Contains("var systemActionWhitelist = new HashSet<WebViewSystemAction>", appShellPreset, StringComparison.Ordinal);
-        Assert.Contains("SystemActionWhitelist = systemActionWhitelist", appShellPreset, StringComparison.Ordinal);
+        Assert.Contains("_systemActionWhitelist = new HashSet<WebViewSystemAction>", appShellPreset, StringComparison.Ordinal);
+        Assert.Contains("SystemActionWhitelist = _systemActionWhitelist", appShellPreset, StringComparison.Ordinal);
         Assert.Contains("ShowAbout remains disabled unless explicitly added", appShellPreset, StringComparison.Ordinal);
         Assert.Contains("ShowAbout opt-in snippet marker", appShellPreset, StringComparison.Ordinal);
         Assert.Contains("enableShowAboutAction", appShellPreset, StringComparison.Ordinal);
+        Assert.Contains("IsShowAboutActionEnabledFromEnvironment", appShellPreset, StringComparison.Ordinal);
+        Assert.Contains("AGIBUILD_TEMPLATE_ENABLE_SHOWABOUT", appShellPreset, StringComparison.Ordinal);
+        Assert.Contains("SetShowAboutScenario", appShellPreset, StringComparison.Ordinal);
+        Assert.Contains("GetSystemIntegrationStrategy", appShellPreset, StringComparison.Ordinal);
+        Assert.Contains("template-showabout-policy-deny", appShellPreset, StringComparison.Ordinal);
+        Assert.Contains("ShowAboutScenarioState", appShellPreset, StringComparison.Ordinal);
         Assert.Contains("canonical profile hash format", appShellPreset, StringComparison.Ordinal);
         Assert.Contains("SessionPermissionProfileResolver = new DelegateSessionPermissionProfileResolver", appShellPreset, StringComparison.Ordinal);
         Assert.Contains("WebViewPermissionKind.Other", appShellPreset, StringComparison.Ordinal);
@@ -352,6 +360,13 @@ public sealed class AutomationLaneGovernanceTests
         Assert.Contains("result.isVisible", desktopIndex, StringComparison.Ordinal);
         Assert.Contains("Host events", desktopIndex, StringComparison.Ordinal);
         Assert.Contains("System action denied", desktopIndex, StringComparison.Ordinal);
+        Assert.Contains("window.runTemplateRegressionChecks", desktopIndex, StringComparison.Ordinal);
+        Assert.Contains("setShowAboutScenario", desktopIndex, StringComparison.Ordinal);
+        Assert.Contains("readSystemIntegrationStrategy", desktopIndex, StringComparison.Ordinal);
+        Assert.Contains("mode=", desktopIndex, StringComparison.Ordinal);
+        Assert.Contains("action=", desktopIndex, StringComparison.Ordinal);
+        Assert.Contains("outcome=", desktopIndex, StringComparison.Ordinal);
+        Assert.Contains("reason=", desktopIndex, StringComparison.Ordinal);
 
         // Baseline preset must remain free from app-shell bidirectional wiring.
         var templateJsonPath = Path.Combine(repoRoot, "templates", "agibuild-hybrid", ".template.config", "template.json");
@@ -408,7 +423,9 @@ public sealed class AutomationLaneGovernanceTests
             "shell-devtools-policy-isolation",
             "shell-shortcut-routing",
             "shell-system-integration-roundtrip",
-            "shell-system-integration-v2-tray-payload"
+            "shell-system-integration-v2-tray-payload",
+            "shell-system-integration-v2-timestamp-normalization",
+            "shell-system-integration-diagnostic-export"
         };
 
         foreach (var capabilityId in requiredCapabilityIds)
@@ -531,8 +548,11 @@ public sealed class AutomationLaneGovernanceTests
         Assert.Contains("MaxSystemIntegrationMetadataTotalLength = 4096", bridgeSource, StringComparison.Ordinal);
         Assert.Contains("DefaultSystemIntegrationMetadataTotalLength = 1024", bridgeSource, StringComparison.Ordinal);
         Assert.Contains("SystemIntegrationMetadataAllowedPrefix = \"platform.\"", bridgeSource, StringComparison.Ordinal);
+        Assert.Contains("SystemIntegrationMetadataExtensionPrefix = \"platform.extension.\"", bridgeSource, StringComparison.Ordinal);
+        Assert.Contains("ReservedSystemIntegrationMetadataKeys", bridgeSource, StringComparison.Ordinal);
         Assert.Contains("system-integration-event-core-field-missing", bridgeSource, StringComparison.Ordinal);
         Assert.Contains("system-integration-event-metadata-namespace-invalid", bridgeSource, StringComparison.Ordinal);
+        Assert.Contains("system-integration-event-metadata-key-unregistered", bridgeSource, StringComparison.Ordinal);
         Assert.Contains("system-integration-event-metadata-budget-exceeded", bridgeSource, StringComparison.Ordinal);
 
         // Diagnostic payload must remain machine-checkable.

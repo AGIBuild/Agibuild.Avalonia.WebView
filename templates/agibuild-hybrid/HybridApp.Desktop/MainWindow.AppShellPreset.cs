@@ -13,6 +13,8 @@ public partial class MainWindow
     private EventHandler<KeyEventArgs>? _shortcutHandler;
     private WebViewShellExperience? _shell;
     private DesktopHostService? _desktopHostService;
+    private HashSet<WebViewSystemAction>? _systemActionWhitelist;
+    private ShowAboutScenarioState? _showAboutScenarioState;
 
     partial void InitializeShellPreset()
     {
@@ -22,20 +24,24 @@ public partial class MainWindow
         // App-shell preset: provide common host-side shell governance defaults.
         var capabilityBridge = new WebViewHostCapabilityBridge(
             new TemplateHostCapabilityProvider(),
-            new TemplateHostCapabilityPolicy());
-        var systemActionWhitelist = new HashSet<WebViewSystemAction>
+            new TemplateHostCapabilityPolicy(() => _showAboutScenarioState?.Scenario == DesktopShowAboutScenario.PolicyDenied));
+        _systemActionWhitelist = new HashSet<WebViewSystemAction>
         {
             WebViewSystemAction.FocusMainWindow
         };
-        const bool enableShowAboutAction = false;
-        // ShowAbout opt-in snippet marker: keep default deny unless host explicitly enables this flag.
+        var enableShowAboutAction = IsShowAboutActionEnabledFromEnvironment();
+        _showAboutScenarioState = new ShowAboutScenarioState(
+            enableShowAboutAction
+                ? DesktopShowAboutScenario.ExplicitAllow
+                : DesktopShowAboutScenario.WhitelistDenied);
+        // ShowAbout opt-in snippet marker: keep default deny unless host explicitly enables this runtime toggle.
         if (enableShowAboutAction)
-            systemActionWhitelist.Add(WebViewSystemAction.ShowAbout);
+            _systemActionWhitelist.Add(WebViewSystemAction.ShowAbout);
         _shell = new WebViewShellExperience(WebView, new WebViewShellExperienceOptions
         {
             NewWindowPolicy = new NavigateInPlaceNewWindowPolicy(),
             // Explicit allowlist marker: ShowAbout remains disabled unless explicitly added.
-            SystemActionWhitelist = systemActionWhitelist,
+            SystemActionWhitelist = _systemActionWhitelist,
             MenuPruningPolicy = new DelegateMenuPruningPolicy((_, context) =>
             {
                 // Template policy keeps top-level menu compact and deterministic.
@@ -79,7 +85,10 @@ public partial class MainWindow
             }),
             HostCapabilityBridge = capabilityBridge
         });
-        _desktopHostService = new DesktopHostService(_shell);
+        _desktopHostService = new DesktopHostService(
+            _shell,
+            _systemActionWhitelist,
+            _showAboutScenarioState);
 
         _shortcutHandler = async (_, e) =>
         {
@@ -115,6 +124,8 @@ public partial class MainWindow
 
         _shell?.Dispose();
         _shell = null;
+        _showAboutScenarioState = null;
+        _systemActionWhitelist = null;
     }
 
     private static async Task<bool> TryHandleShellShortcutAsync(WebViewShellExperience shell, KeyEventArgs e)
@@ -145,17 +156,43 @@ public partial class MainWindow
         return false;
     }
 
+    private static bool IsShowAboutActionEnabledFromEnvironment()
+    {
+        var raw = Environment.GetEnvironmentVariable("AGIBUILD_TEMPLATE_ENABLE_SHOWABOUT");
+        if (string.IsNullOrWhiteSpace(raw))
+            return false;
+
+        return raw.Trim() switch
+        {
+            "1" => true,
+            "true" => true,
+            "TRUE" => true,
+            "yes" => true,
+            "YES" => true,
+            "on" => true,
+            "ON" => true,
+            _ => false
+        };
+    }
+
     private sealed class DesktopHostService : IDesktopHostService, IDisposable
     {
         private readonly WebViewShellExperience _shell;
+        private readonly HashSet<WebViewSystemAction> _systemActionWhitelist;
+        private readonly ShowAboutScenarioState _showAboutScenarioState;
         private readonly Queue<DesktopSystemIntegrationEvent> _inboundEvents = new();
         private readonly object _eventsLock = new();
         private readonly object _menuPruningProfileLock = new();
         private MenuPruningProfileSnapshot _menuPruningProfileSnapshot = new(null, null, null, null);
 
-        public DesktopHostService(WebViewShellExperience shell)
+        public DesktopHostService(
+            WebViewShellExperience shell,
+            HashSet<WebViewSystemAction> systemActionWhitelist,
+            ShowAboutScenarioState showAboutScenarioState)
         {
             _shell = shell;
+            _systemActionWhitelist = systemActionWhitelist;
+            _showAboutScenarioState = showAboutScenarioState;
             _shell.SystemIntegrationEventReceived += OnSystemIntegrationEventReceived;
             _shell.SessionPermissionProfileEvaluated += OnSessionPermissionProfileEvaluated;
         }
@@ -275,6 +312,28 @@ public partial class MainWindow
             });
         }
 
+        public Task<DesktopSystemIntegrationStrategyResult> GetSystemIntegrationStrategy()
+            => Task.FromResult(BuildSystemIntegrationStrategyResult());
+
+        public Task<DesktopSystemIntegrationStrategyResult> SetShowAboutScenario(DesktopShowAboutScenario scenario)
+        {
+            _showAboutScenarioState.Scenario = scenario;
+            switch (scenario)
+            {
+                case DesktopShowAboutScenario.WhitelistDenied:
+                    _systemActionWhitelist.Remove(WebViewSystemAction.ShowAbout);
+                    break;
+                case DesktopShowAboutScenario.PolicyDenied:
+                case DesktopShowAboutScenario.ExplicitAllow:
+                    _systemActionWhitelist.Add(WebViewSystemAction.ShowAbout);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(scenario), scenario, "Unsupported ShowAbout scenario.");
+            }
+
+            return Task.FromResult(BuildSystemIntegrationStrategyResult());
+        }
+
         public Task<DesktopSystemIntegrationEventsResult> DrainSystemIntegrationEvents()
         {
             DesktopSystemIntegrationEvent[] snapshot;
@@ -321,6 +380,21 @@ public partial class MainWindow
                 WebViewHostCapabilityCallOutcome.Failure => DesktopCapabilityOutcome.Failure,
                 _ => DesktopCapabilityOutcome.Failure
             };
+
+        private DesktopSystemIntegrationStrategyResult BuildSystemIntegrationStrategyResult()
+        {
+            var scenario = _showAboutScenarioState.Scenario;
+            var allowlisted = _systemActionWhitelist.Contains(WebViewSystemAction.ShowAbout);
+            var policyDenied = scenario == DesktopShowAboutScenario.PolicyDenied;
+            return new DesktopSystemIntegrationStrategyResult
+            {
+                Outcome = DesktopCapabilityOutcome.Allow,
+                ShowAboutScenario = scenario,
+                IsShowAboutAllowlisted = allowlisted,
+                IsShowAboutPolicyDenied = policyDenied,
+                StrategySummary = $"mode={scenario};allowlisted={(allowlisted ? "true" : "false")};policyDenied={(policyDenied ? "true" : "false")}"
+            };
+        }
 
         private MenuPruningProfileSnapshot GetMenuPruningProfileSnapshot()
         {
@@ -392,6 +466,13 @@ public partial class MainWindow
 
     private sealed class TemplateHostCapabilityPolicy : IWebViewHostCapabilityPolicy
     {
+        private readonly Func<bool> _isShowAboutPolicyDenied;
+
+        public TemplateHostCapabilityPolicy(Func<bool> isShowAboutPolicyDenied)
+        {
+            _isShowAboutPolicyDenied = isShowAboutPolicyDenied;
+        }
+
         public WebViewHostCapabilityDecision Evaluate(in WebViewHostCapabilityRequestContext context)
             => context.Operation switch
             {
@@ -399,7 +480,9 @@ public partial class MainWindow
                 WebViewHostCapabilityOperation.ClipboardWriteText => WebViewHostCapabilityDecision.Allow(),
                 WebViewHostCapabilityOperation.MenuApplyModel => WebViewHostCapabilityDecision.Allow(),
                 WebViewHostCapabilityOperation.TrayUpdateState => WebViewHostCapabilityDecision.Allow(),
-                WebViewHostCapabilityOperation.SystemActionExecute => WebViewHostCapabilityDecision.Deny("template-system-action-not-enabled"),
+                WebViewHostCapabilityOperation.SystemActionExecute when _isShowAboutPolicyDenied()
+                    => WebViewHostCapabilityDecision.Deny("template-showabout-policy-deny"),
+                WebViewHostCapabilityOperation.SystemActionExecute => WebViewHostCapabilityDecision.Allow(),
                 WebViewHostCapabilityOperation.TrayInteractionEventDispatch => WebViewHostCapabilityDecision.Allow(),
                 WebViewHostCapabilityOperation.MenuInteractionEventDispatch => WebViewHostCapabilityDecision.Allow(),
                 _ => WebViewHostCapabilityDecision.Deny("template-capability-not-enabled")
@@ -436,8 +519,21 @@ public partial class MainWindow
 
         public void ExecuteSystemAction(WebViewSystemActionRequest request)
         {
-            _ = request;
+            _ = request ?? throw new ArgumentNullException(nameof(request));
+            if (request.Action is WebViewSystemAction.FocusMainWindow or WebViewSystemAction.ShowAbout)
+                return;
+
             throw new NotSupportedException("System action is not enabled in this template preset.");
         }
+    }
+
+    private sealed class ShowAboutScenarioState
+    {
+        public ShowAboutScenarioState(DesktopShowAboutScenario scenario)
+        {
+            Scenario = scenario;
+        }
+
+        public DesktopShowAboutScenario Scenario { get; set; }
     }
 }

@@ -20,7 +20,7 @@
             backdrop-filter: blur(20px);
             border-radius: 16px;
             padding: 2rem;
-            width: min(90vw, 480px);
+            width: min(92vw, 760px);
             text-align: center;
         }
         h1 { font-size: 1.8rem; margin-bottom: 1rem; }
@@ -46,6 +46,18 @@
             border-radius: 8px; min-height: 2rem;
             font-size: 1.1rem;
         }
+        #strategyPanel {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.2);
+            text-align: left;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.9rem;
+            line-height: 1.35;
+            min-height: 3.5rem;
+            white-space: pre-wrap;
+        }
     </style>
 </head>
 <body>
@@ -60,8 +72,13 @@
         <button style="margin-left:.5rem" onclick="toggleTray()">Toggle tray state (typed)</button>
         <button style="margin-left:.5rem" onclick="focusMainWindow()">Execute system action (typed)</button>
         <button style="margin-left:.5rem" onclick="showAbout()">Execute ShowAbout (typed)</button>
+        <button style="margin-top:.5rem" onclick="setShowAboutScenario('whitelistDenied')">Scenario: whitelist deny</button>
+        <button style="margin-left:.5rem" onclick="setShowAboutScenario('policyDenied')">Scenario: policy deny</button>
+        <button style="margin-left:.5rem" onclick="setShowAboutScenario('explicitAllow')">Scenario: explicit allow</button>
         <button style="margin-top:.5rem" onclick="drainSystemIntegrationEvents()">Drain host events (typed)</button>
+        <button style="margin-left:.5rem" onclick="readSystemIntegrationStrategy()">Read strategy mode</button>
         <div id="result"></div>
+        <div id="strategyPanel">mode=unknown;action=init;outcome=unknown;reason=n/a</div>
     </div>
 
     <script>
@@ -70,6 +87,33 @@
             while (!window.agWebView?.rpc && Date.now() - start < ms)
                 await new Promise(r => setTimeout(r, 50));
             return !!window.agWebView?.rpc;
+        }
+
+        const showAboutScenarioMap = {
+            whitelistDenied: 0,
+            policyDenied: 1,
+            explicitAllow: 2
+        };
+
+        const showAboutScenarioNameMap = {
+            0: 'whitelistDenied',
+            1: 'policyDenied',
+            2: 'explicitAllow'
+        };
+
+        function updateStrategyPanel(mode, action, outcome, reason) {
+            const panel = document.getElementById('strategyPanel');
+            panel.textContent = `mode=${mode};action=${action};outcome=${outcome};reason=${reason ?? 'n/a'}`;
+        }
+
+        function readOutcomeLabel(result) {
+            if (result.outcome === 0) {
+                return 'allow';
+            }
+            if (result.outcome === 1) {
+                return 'deny';
+            }
+            return 'failure';
         }
 
         async function greet() {
@@ -265,17 +309,118 @@
 
             try {
                 const result = await window.agWebView.rpc.invoke('DesktopHostService.ExecuteSystemAction', { action: 3 });
+                const modeResult = await window.agWebView.rpc.invoke('DesktopHostService.GetSystemIntegrationStrategy', {});
+                const mode = showAboutScenarioNameMap[modeResult.showAboutScenario] ?? 'unknown';
                 if (result.outcome === 0) {
                     el.textContent = 'ShowAbout action executed';
+                    updateStrategyPanel(mode, 'showAbout', 'allow', 'n/a');
                 } else if (result.outcome === 1) {
                     el.textContent = 'ShowAbout denied: ' + (result.denyReason ?? 'unknown');
+                    updateStrategyPanel(mode, 'showAbout', 'deny', result.denyReason ?? 'unknown');
                 } else {
                     el.textContent = 'ShowAbout failure: ' + (result.error ?? 'unknown');
+                    updateStrategyPanel(mode, 'showAbout', 'failure', result.error ?? 'unknown');
                 }
             } catch (err) {
                 el.textContent = 'Error: ' + err.message;
             }
         }
+
+        async function readSystemIntegrationStrategy() {
+            const el = document.getElementById('result');
+            if (!await waitForBridge()) {
+                el.textContent = 'Bridge not available';
+                return;
+            }
+
+            try {
+                const result = await window.agWebView.rpc.invoke('DesktopHostService.GetSystemIntegrationStrategy', {});
+                if (result.outcome !== 0) {
+                    el.textContent = 'Read strategy failed: ' + (result.error ?? result.denyReason ?? 'unknown');
+                    updateStrategyPanel('unknown', 'readStrategy', readOutcomeLabel(result), result.error ?? result.denyReason ?? 'unknown');
+                    return;
+                }
+
+                const mode = showAboutScenarioNameMap[result.showAboutScenario] ?? 'unknown';
+                el.textContent = 'Strategy: ' + (result.strategySummary ?? 'n/a');
+                updateStrategyPanel(mode, 'readStrategy', 'allow', 'n/a');
+            } catch (err) {
+                el.textContent = 'Error: ' + err.message;
+            }
+        }
+
+        async function setShowAboutScenario(mode) {
+            const el = document.getElementById('result');
+            if (!await waitForBridge()) {
+                el.textContent = 'Bridge not available';
+                return;
+            }
+
+            const scenario = showAboutScenarioMap[mode];
+            if (typeof scenario !== 'number') {
+                el.textContent = 'Invalid scenario: ' + mode;
+                return;
+            }
+
+            try {
+                const result = await window.agWebView.rpc.invoke('DesktopHostService.SetShowAboutScenario', { scenario });
+                if (result.outcome === 0) {
+                    const currentMode = showAboutScenarioNameMap[result.showAboutScenario] ?? mode;
+                    el.textContent = 'ShowAbout scenario switched to: ' + currentMode;
+                    updateStrategyPanel(currentMode, 'setScenario', 'allow', 'n/a');
+                } else if (result.outcome === 1) {
+                    el.textContent = 'Scenario switch denied: ' + (result.denyReason ?? 'unknown');
+                    updateStrategyPanel(mode, 'setScenario', 'deny', result.denyReason ?? 'unknown');
+                } else {
+                    el.textContent = 'Scenario switch failure: ' + (result.error ?? 'unknown');
+                    updateStrategyPanel(mode, 'setScenario', 'failure', result.error ?? 'unknown');
+                }
+            } catch (err) {
+                el.textContent = 'Error: ' + err.message;
+            }
+        }
+
+        // Reusable marker for AI-agent regression checks.
+        window.runTemplateRegressionChecks = async function runTemplateRegressionChecks() {
+            if (!await waitForBridge()) {
+                return {
+                    version: 1,
+                    checks: [
+                        { id: 'bridge-available', passed: false, reason: 'bridge-not-available' }
+                    ]
+                };
+            }
+
+            const checks = [];
+            const runShowAboutCase = async (id, mode, expectedOutcome, expectedReason) => {
+                const scenarioCode = showAboutScenarioMap[mode];
+                const switched = await window.agWebView.rpc.invoke('DesktopHostService.SetShowAboutScenario', { scenario: scenarioCode });
+                const action = await window.agWebView.rpc.invoke('DesktopHostService.ExecuteSystemAction', { action: 3 });
+                const passed =
+                    switched.outcome === 0 &&
+                    action.outcome === expectedOutcome &&
+                    (expectedReason == null ? true : action.denyReason === expectedReason);
+                checks.push({
+                    id,
+                    mode,
+                    switchedOutcome: switched.outcome,
+                    actionOutcome: action.outcome,
+                    denyReason: action.denyReason ?? null,
+                    expectedOutcome,
+                    expectedReason: expectedReason ?? null,
+                    passed
+                });
+            };
+
+            await runShowAboutCase('showabout-whitelist-deny', 'whitelistDenied', 1, 'system-action-not-whitelisted');
+            await runShowAboutCase('showabout-policy-deny', 'policyDenied', 1, 'template-showabout-policy-deny');
+            await runShowAboutCase('showabout-explicit-allow', 'explicitAllow', 0, null);
+
+            return {
+                version: 1,
+                checks
+            };
+        };
 
         function readBoundedMetadata(metadata) {
             if (!metadata || typeof metadata !== 'object') {

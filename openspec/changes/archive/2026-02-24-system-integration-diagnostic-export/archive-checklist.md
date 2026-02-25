@@ -1,0 +1,5 @@
+- [x] Proposal/design/specs/tasks completed.
+- [x] Runtime diagnostic export DTO and mapper implemented.
+- [x] Unit and integration taxonomy/export tests passing.
+- [x] Runtime critical path and shell production matrix include diagnostic export lane evidence.
+- [x] OpenSpec strict validation passed.

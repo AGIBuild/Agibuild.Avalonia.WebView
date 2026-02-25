@@ -129,6 +129,38 @@
           "testMethod": "Tray_payload_v2_roundtrip_with_platform_extensions_is_machine_checkable"
         }
       ]
+    },
+    {
+      "id": "shell-system-integration-v2-timestamp-normalization",
+      "supportLevel": "extended",
+      "coverage": {
+        "windows": ["ct", "it-smoke"],
+        "macos": ["ct"],
+        "linux": ["ct"]
+      },
+      "evidence": [
+        {
+          "lane": "RuntimeAutomation",
+          "file": "tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/HostCapabilityBridgeIntegrationTests.cs",
+          "testMethod": "Tray_payload_v2_roundtrip_with_platform_extensions_is_machine_checkable"
+        }
+      ]
+    },
+    {
+      "id": "shell-system-integration-diagnostic-export",
+      "supportLevel": "extended",
+      "coverage": {
+        "windows": ["ct", "it-smoke"],
+        "macos": ["ct"],
+        "linux": ["ct"]
+      },
+      "evidence": [
+        {
+          "lane": "RuntimeAutomation",
+          "file": "tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/HostCapabilityBridgeIntegrationTests.cs",
+          "testMethod": "System_integration_diagnostic_export_protocol_is_machine_checkable"
+        }
+      ]
     }
   ]
 }

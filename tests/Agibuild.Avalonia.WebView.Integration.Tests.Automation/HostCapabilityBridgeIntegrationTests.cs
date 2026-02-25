@@ -338,10 +338,10 @@ public sealed class HostCapabilityBridgeIntegrationTests
             ItemId = "tray-budget-over",
             Metadata = new Dictionary<string, string>
             {
-                ["platform.a"] = new string('x', 256),
-                ["platform.b"] = new string('x', 256),
-                ["platform.c"] = new string('x', 256),
-                ["platform.d"] = new string('x', 256)
+                ["platform.extension.a"] = new string('x', 256),
+                ["platform.extension.b"] = new string('x', 256),
+                ["platform.extension.c"] = new string('x', 256),
+                ["platform.extension.d"] = new string('x', 256)
             }
         });
 
@@ -399,11 +399,12 @@ public sealed class HostCapabilityBridgeIntegrationTests
             HostCapabilityBridge = bridge
         });
         shell.SystemIntegrationEventReceived += (_, evt) => received.Add(evt);
+        var occurredAt = new DateTimeOffset(2026, 2, 25, 1, 2, 3, TimeSpan.Zero).AddTicks(5432);
 
         var eventResult = shell.PublishSystemIntegrationEvent(new WebViewSystemIntegrationEventRequest
         {
             Source = "integration-host",
-            OccurredAtUtc = DateTimeOffset.UtcNow,
+            OccurredAtUtc = occurredAt,
             Kind = WebViewSystemIntegrationEventKind.TrayInteracted,
             ItemId = "tray-v2",
             Context = "clicked",
@@ -422,9 +423,83 @@ public sealed class HostCapabilityBridgeIntegrationTests
         Assert.Equal("integration-suite", delivered.Metadata["platform.source"]);
         Assert.Equal("visible", delivered.Metadata["platform.visibility"]);
         Assert.Equal("A", delivered.Metadata["platform.extension.alpha"]);
+        var expectedTicks = occurredAt.UtcTicks - (occurredAt.UtcTicks % TimeSpan.TicksPerMillisecond);
+        Assert.Equal(new DateTimeOffset(expectedTicks, TimeSpan.Zero), delivered.OccurredAtUtc);
+        Assert.Equal(0, delivered.OccurredAtUtc.Ticks % TimeSpan.TicksPerMillisecond);
 
         Assert.Contains(diagnostics, x => x.Operation == WebViewHostCapabilityOperation.TrayInteractionEventDispatch
             && x.Outcome == WebViewHostCapabilityCallOutcome.Allow);
+    }
+
+    [AvaloniaFact]
+    public void System_integration_diagnostic_export_protocol_is_machine_checkable()
+    {
+        var dispatcher = new TestDispatcher();
+        var adapter = MockWebViewAdapter.Create();
+        using var core = new WebViewCore(adapter, dispatcher);
+        var provider = new IntegrationHostCapabilityProvider();
+        var bridge = new WebViewHostCapabilityBridge(provider, new IntegrationCapabilityPolicy(allowSystemAction: true));
+        var diagnostics = new List<WebViewHostCapabilityDiagnosticEventArgs>();
+        bridge.CapabilityCallCompleted += (_, e) => diagnostics.Add(e);
+
+        using var shell = new WebViewShellExperience(core, new WebViewShellExperienceOptions
+        {
+            HostCapabilityBridge = bridge,
+            SystemActionWhitelist = new HashSet<WebViewSystemAction>
+            {
+                WebViewSystemAction.FocusMainWindow
+            }
+        });
+
+        var allowedEvent = shell.PublishSystemIntegrationEvent(new WebViewSystemIntegrationEventRequest
+        {
+            Source = "integration-host",
+            OccurredAtUtc = DateTimeOffset.UtcNow,
+            Kind = WebViewSystemIntegrationEventKind.TrayInteracted,
+            ItemId = "tray-diagnostic-allow",
+            Metadata = new Dictionary<string, string>
+            {
+                ["platform.source"] = "integration-test"
+            }
+        });
+        var deniedEvent = shell.PublishSystemIntegrationEvent(new WebViewSystemIntegrationEventRequest
+        {
+            Source = "integration-host",
+            OccurredAtUtc = DateTimeOffset.UtcNow,
+            Kind = WebViewSystemIntegrationEventKind.TrayInteracted,
+            ItemId = "tray-diagnostic-deny",
+            Metadata = new Dictionary<string, string>
+            {
+                [""] = "invalid-key"
+            }
+        });
+        var deniedAction = shell.ExecuteSystemAction(new WebViewSystemActionRequest
+        {
+            Action = WebViewSystemAction.ShowAbout
+        });
+        var failedAction = shell.ExecuteSystemAction(new WebViewSystemActionRequest
+        {
+            Action = WebViewSystemAction.FocusMainWindow
+        });
+
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, allowedEvent.Outcome);
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Deny, deniedEvent.Outcome);
+        Assert.Equal("system-integration-event-metadata-envelope-invalid", deniedEvent.DenyReason);
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Deny, deniedAction.Outcome);
+        Assert.Equal("system-action-not-whitelisted", deniedAction.DenyReason);
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Failure, failedAction.Outcome);
+
+        var records = diagnostics.Select(x => x.ToExportRecord()).ToArray();
+        Assert.NotEmpty(records);
+        Assert.Contains(records, x => x.Operation == "tray-interaction-event-dispatch"
+            && x.Outcome == "allow");
+        Assert.Contains(records, x => x.Operation == "tray-interaction-event-dispatch"
+            && x.Outcome == "deny"
+            && x.DenyReason == "system-integration-event-metadata-envelope-invalid");
+        Assert.Contains(records, x => x.Operation == "system-action-execute"
+            && x.Outcome == "failure"
+            && x.FailureCategory == "adapter-failed");
+        Assert.All(records, x => Assert.Equal(WebViewHostCapabilityDiagnosticEventArgs.CurrentDiagnosticSchemaVersion, x.SchemaVersion));
     }
 
     private sealed class IntegrationCapabilityPolicy : IWebViewHostCapabilityPolicy

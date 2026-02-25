@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Agibuild.Avalonia.WebView.Shell;
 using Agibuild.Avalonia.WebView.Testing;
 using Xunit;
@@ -187,6 +188,49 @@ public sealed class HostCapabilityBridgeTests
     }
 
     [Fact]
+    public void Capability_diagnostic_export_records_are_machine_readable_and_preserve_taxonomy()
+    {
+        var provider = new TestHostCapabilityProvider
+        {
+            ThrowOn = WebViewHostCapabilityOperation.ExternalOpen
+        };
+        var bridge = new WebViewHostCapabilityBridge(provider, new SelectivePolicy());
+        var diagnostics = new List<WebViewHostCapabilityDiagnosticEventArgs>();
+        bridge.CapabilityCallCompleted += (_, e) => diagnostics.Add(e);
+        var root = Guid.NewGuid();
+
+        _ = bridge.ReadClipboardText(root);
+        _ = bridge.ShowNotification(new WebViewNotificationRequest { Title = "T", Message = "M" }, root);
+        _ = bridge.OpenExternal(new Uri("https://example.com"), root);
+
+        var records = diagnostics
+            .Select(x => x.ToExportRecord())
+            .ToArray();
+        Assert.Equal(3, records.Length);
+
+        Assert.Equal(WebViewHostCapabilityDiagnosticEventArgs.CurrentDiagnosticSchemaVersion, records[0].SchemaVersion);
+        Assert.True(Guid.TryParseExact(records[0].CorrelationId, "D", out _));
+        Assert.True(Guid.TryParseExact(records[0].RootWindowId, "D", out _));
+        Assert.Equal("clipboard-read-text", records[0].Operation);
+        Assert.Equal("allow", records[0].Outcome);
+        Assert.True(records[0].WasAuthorized);
+        Assert.Null(records[0].DenyReason);
+        Assert.Null(records[0].FailureCategory);
+
+        Assert.Equal("notification-show", records[1].Operation);
+        Assert.Equal("deny", records[1].Outcome);
+        Assert.False(records[1].WasAuthorized);
+        Assert.Equal("notification-denied", records[1].DenyReason);
+        Assert.Null(records[1].FailureCategory);
+
+        Assert.Equal("external-open", records[2].Operation);
+        Assert.Equal("failure", records[2].Outcome);
+        Assert.True(records[2].WasAuthorized);
+        Assert.Null(records[2].DenyReason);
+        Assert.Equal("adapter-failed", records[2].FailureCategory);
+    }
+
+    [Fact]
     public void Denied_system_integration_operations_skip_provider_execution()
     {
         var provider = new TestHostCapabilityProvider();
@@ -370,10 +414,10 @@ public sealed class HostCapabilityBridgeTests
             ItemId = "tray-budget-edge",
             Metadata = new Dictionary<string, string>
             {
-                ["platform.a"] = new string('x', 246),
-                ["platform.b"] = new string('x', 246),
-                ["platform.c"] = new string('x', 246),
-                ["platform.d"] = new string('x', 246)
+                ["platform.extension.a"] = new string('x', 236),
+                ["platform.extension.b"] = new string('x', 236),
+                ["platform.extension.c"] = new string('x', 236),
+                ["platform.extension.d"] = new string('x', 236)
             }
         }, Guid.NewGuid());
 
@@ -401,10 +445,10 @@ public sealed class HostCapabilityBridgeTests
             ItemId = "tray-budget-over",
             Metadata = new Dictionary<string, string>
             {
-                ["platform.a"] = new string('x', 256),
-                ["platform.b"] = new string('x', 256),
-                ["platform.c"] = new string('x', 256),
-                ["platform.d"] = new string('x', 256)
+                ["platform.extension.a"] = new string('x', 256),
+                ["platform.extension.b"] = new string('x', 256),
+                ["platform.extension.c"] = new string('x', 256),
+                ["platform.extension.d"] = new string('x', 256)
             }
         }, Guid.NewGuid());
 
@@ -467,10 +511,10 @@ public sealed class HostCapabilityBridgeTests
             ItemId = "tray-budget-configured",
             Metadata = new Dictionary<string, string>
             {
-                ["platform.a"] = new string('x', 256),
-                ["platform.b"] = new string('x', 256),
-                ["platform.c"] = new string('x', 256),
-                ["platform.d"] = new string('x', 256)
+                ["platform.extension.a"] = new string('x', 256),
+                ["platform.extension.b"] = new string('x', 256),
+                ["platform.extension.c"] = new string('x', 256),
+                ["platform.extension.d"] = new string('x', 256)
             }
         }, Guid.NewGuid());
 
@@ -503,6 +547,65 @@ public sealed class HostCapabilityBridgeTests
         Assert.Equal("system-integration-event-metadata-namespace-invalid", eventResult.DenyReason);
         Assert.Equal(0, dispatched);
         Assert.Equal(0, policy.EvaluateCalls);
+    }
+
+    [Fact]
+    public void Unregistered_platform_metadata_key_is_denied_before_policy_and_dispatch()
+    {
+        var provider = new TestHostCapabilityProvider();
+        var policy = new CountingAllowPolicy();
+        var bridge = new WebViewHostCapabilityBridge(provider, policy);
+        var dispatched = 0;
+        bridge.SystemIntegrationEventDispatched += (_, _) => dispatched++;
+
+        var eventResult = bridge.DispatchSystemIntegrationEvent(new WebViewSystemIntegrationEventRequest
+        {
+            Source = "unit-test-host",
+            OccurredAtUtc = DateTimeOffset.UtcNow,
+            Kind = WebViewSystemIntegrationEventKind.TrayInteracted,
+            ItemId = "tray-main",
+            Metadata = new Dictionary<string, string>
+            {
+                ["platform.unknown"] = "invalid-reserved-key"
+            }
+        }, Guid.NewGuid());
+
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Deny, eventResult.Outcome);
+        Assert.Equal("system-integration-event-metadata-key-unregistered", eventResult.DenyReason);
+        Assert.Equal(0, dispatched);
+        Assert.Equal(0, policy.EvaluateCalls);
+    }
+
+    [Fact]
+    public void Inbound_event_timestamp_is_normalized_to_utc_millisecond_precision_before_dispatch()
+    {
+        var provider = new TestHostCapabilityProvider();
+        var bridge = new WebViewHostCapabilityBridge(provider, new AllowAllPolicy());
+        var root = Guid.NewGuid();
+        var dispatched = new List<WebViewSystemIntegrationEventRequest>();
+        bridge.SystemIntegrationEventDispatched += (_, e) => dispatched.Add(e);
+        var occurredAt = new DateTimeOffset(2026, 2, 25, 1, 2, 3, TimeSpan.Zero).AddTicks(4321);
+
+        var eventResult = bridge.DispatchSystemIntegrationEvent(new WebViewSystemIntegrationEventRequest
+        {
+            Source = "unit-test-host",
+            OccurredAtUtc = occurredAt,
+            Kind = WebViewSystemIntegrationEventKind.TrayInteracted,
+            ItemId = "tray-main",
+            Metadata = new Dictionary<string, string>
+            {
+                ["platform.source"] = "unit-test"
+            }
+        }, root);
+
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, eventResult.Outcome);
+        var delivered = Assert.Single(dispatched);
+        var expectedTicks = occurredAt.UtcTicks - (occurredAt.UtcTicks % TimeSpan.TicksPerMillisecond);
+        var expected = new DateTimeOffset(expectedTicks, TimeSpan.Zero);
+        Assert.Equal(expected, delivered.OccurredAtUtc);
+        Assert.Equal(expected, eventResult.Value!.OccurredAtUtc);
+        Assert.Equal(TimeSpan.Zero, delivered.OccurredAtUtc.Offset);
+        Assert.Equal(0, delivered.OccurredAtUtc.Ticks % TimeSpan.TicksPerMillisecond);
     }
 
     [Fact]

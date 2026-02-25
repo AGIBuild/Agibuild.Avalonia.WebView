@@ -677,10 +677,10 @@ public sealed class ShellSystemIntegrationCapabilityTests
             ItemId = "tray-budget-over",
             Metadata = new Dictionary<string, string>
             {
-                ["platform.a"] = new string('x', 256),
-                ["platform.b"] = new string('x', 256),
-                ["platform.c"] = new string('x', 256),
-                ["platform.d"] = new string('x', 256)
+                ["platform.extension.a"] = new string('x', 256),
+                ["platform.extension.b"] = new string('x', 256),
+                ["platform.extension.c"] = new string('x', 256),
+                ["platform.extension.d"] = new string('x', 256)
             }
         });
 
@@ -726,6 +726,80 @@ public sealed class ShellSystemIntegrationCapabilityTests
         Assert.Empty(received);
         Assert.Single(policyErrors);
         Assert.Contains("system-integration-event-metadata-namespace-invalid", policyErrors[0].Exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Unregistered_platform_metadata_key_is_denied_before_web_delivery()
+    {
+        var dispatcher = new TestDispatcher();
+        var adapter = MockWebViewAdapter.Create();
+        using var core = new WebViewCore(adapter, dispatcher);
+        var provider = new TrackingProvider();
+        var bridge = new WebViewHostCapabilityBridge(provider, new AllowAllPolicy());
+        var received = new List<WebViewSystemIntegrationEventRequest>();
+        var policyErrors = new List<WebViewShellPolicyErrorEventArgs>();
+
+        using var shell = new WebViewShellExperience(core, new WebViewShellExperienceOptions
+        {
+            HostCapabilityBridge = bridge,
+            PolicyErrorHandler = (_, error) => policyErrors.Add(error)
+        });
+        shell.SystemIntegrationEventReceived += (_, evt) => received.Add(evt);
+
+        var denied = shell.PublishSystemIntegrationEvent(new WebViewSystemIntegrationEventRequest
+        {
+            Source = "unit-test-shell",
+            OccurredAtUtc = DateTimeOffset.UtcNow,
+            Kind = WebViewSystemIntegrationEventKind.TrayInteracted,
+            ItemId = "tray-main",
+            Metadata = new Dictionary<string, string>
+            {
+                ["platform.unknown"] = "invalid-reserved-key"
+            }
+        });
+
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Deny, denied.Outcome);
+        Assert.Equal("system-integration-event-metadata-key-unregistered", denied.DenyReason);
+        Assert.Empty(received);
+        Assert.Single(policyErrors);
+        Assert.Contains("system-integration-event-metadata-key-unregistered", policyErrors[0].Exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Inbound_event_timestamp_is_normalized_before_shell_delivery()
+    {
+        var dispatcher = new TestDispatcher();
+        var adapter = MockWebViewAdapter.Create();
+        using var core = new WebViewCore(adapter, dispatcher);
+        var provider = new TrackingProvider();
+        var bridge = new WebViewHostCapabilityBridge(provider, new AllowAllPolicy());
+        var received = new List<WebViewSystemIntegrationEventRequest>();
+
+        using var shell = new WebViewShellExperience(core, new WebViewShellExperienceOptions
+        {
+            HostCapabilityBridge = bridge
+        });
+        shell.SystemIntegrationEventReceived += (_, evt) => received.Add(evt);
+        var occurredAt = new DateTimeOffset(2026, 2, 25, 1, 2, 3, TimeSpan.Zero).AddTicks(9876);
+
+        var allowed = shell.PublishSystemIntegrationEvent(new WebViewSystemIntegrationEventRequest
+        {
+            Source = "unit-test-shell",
+            OccurredAtUtc = occurredAt,
+            Kind = WebViewSystemIntegrationEventKind.TrayInteracted,
+            ItemId = "tray-main",
+            Metadata = new Dictionary<string, string>
+            {
+                ["platform.source"] = "unit-test"
+            }
+        });
+
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, allowed.Outcome);
+        var delivered = Assert.Single(received);
+        var expectedTicks = occurredAt.UtcTicks - (occurredAt.UtcTicks % TimeSpan.TicksPerMillisecond);
+        var expected = new DateTimeOffset(expectedTicks, TimeSpan.Zero);
+        Assert.Equal(expected, delivered.OccurredAtUtc);
+        Assert.Equal(0, delivered.OccurredAtUtc.Ticks % TimeSpan.TicksPerMillisecond);
     }
 
     [Fact]

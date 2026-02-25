@@ -363,6 +363,102 @@ public sealed class WebViewHostCapabilityDiagnosticEventArgs : EventArgs
     public long DurationMilliseconds { get; }
     /// <summary>Diagnostic payload schema version.</summary>
     public int DiagnosticSchemaVersion { get; }
+
+    /// <summary>
+    /// Converts diagnostic event to a stable export record for machine-readable pipelines.
+    /// </summary>
+    public WebViewHostCapabilityDiagnosticExportRecord ToExportRecord()
+        => new(
+            schemaVersion: DiagnosticSchemaVersion,
+            correlationId: CorrelationId.ToString("D"),
+            rootWindowId: RootWindowId.ToString("D"),
+            parentWindowId: ParentWindowId?.ToString("D"),
+            targetWindowId: TargetWindowId?.ToString("D"),
+            operation: ToKebabCase(Operation.ToString()),
+            requestUri: RequestUri?.AbsoluteUri,
+            outcome: ToKebabCase(Outcome.ToString()),
+            wasAuthorized: WasAuthorized,
+            denyReason: DenyReason,
+            failureCategory: FailureCategory is null ? null : ToKebabCase(FailureCategory.Value.ToString()),
+            durationMilliseconds: DurationMilliseconds);
+
+    private static string ToKebabCase(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return string.Empty;
+
+        var chars = new List<char>(value.Length + 8);
+        for (var i = 0; i < value.Length; i++)
+        {
+            var c = value[i];
+            if (char.IsUpper(c) && i > 0)
+                chars.Add('-');
+
+            chars.Add(char.ToLowerInvariant(c));
+        }
+
+        return new string(chars.ToArray());
+    }
+}
+
+/// <summary>
+/// Stable export payload for host capability diagnostics.
+/// </summary>
+public sealed class WebViewHostCapabilityDiagnosticExportRecord
+{
+    /// <summary>Create export record.</summary>
+    public WebViewHostCapabilityDiagnosticExportRecord(
+        int schemaVersion,
+        string correlationId,
+        string rootWindowId,
+        string? parentWindowId,
+        string? targetWindowId,
+        string operation,
+        string? requestUri,
+        string outcome,
+        bool wasAuthorized,
+        string? denyReason,
+        string? failureCategory,
+        long durationMilliseconds)
+    {
+        SchemaVersion = schemaVersion;
+        CorrelationId = correlationId;
+        RootWindowId = rootWindowId;
+        ParentWindowId = parentWindowId;
+        TargetWindowId = targetWindowId;
+        Operation = operation;
+        RequestUri = requestUri;
+        Outcome = outcome;
+        WasAuthorized = wasAuthorized;
+        DenyReason = denyReason;
+        FailureCategory = failureCategory;
+        DurationMilliseconds = durationMilliseconds;
+    }
+
+    /// <summary>Diagnostic schema version.</summary>
+    public int SchemaVersion { get; }
+    /// <summary>Correlation id as canonical guid string.</summary>
+    public string CorrelationId { get; }
+    /// <summary>Root window id as canonical guid string.</summary>
+    public string RootWindowId { get; }
+    /// <summary>Optional parent window id as canonical guid string.</summary>
+    public string? ParentWindowId { get; }
+    /// <summary>Optional target window id as canonical guid string.</summary>
+    public string? TargetWindowId { get; }
+    /// <summary>Operation token in kebab-case.</summary>
+    public string Operation { get; }
+    /// <summary>Optional request URI.</summary>
+    public string? RequestUri { get; }
+    /// <summary>Outcome token in kebab-case.</summary>
+    public string Outcome { get; }
+    /// <summary>Whether authorization passed.</summary>
+    public bool WasAuthorized { get; }
+    /// <summary>Deny reason when outcome is deny.</summary>
+    public string? DenyReason { get; }
+    /// <summary>Failure category when outcome is failure.</summary>
+    public string? FailureCategory { get; }
+    /// <summary>Elapsed duration in milliseconds.</summary>
+    public long DurationMilliseconds { get; }
 }
 
 /// <summary>
@@ -394,10 +490,23 @@ public sealed class WebViewHostCapabilityBridge
     private const int MaxSystemIntegrationMetadataKeyLength = 64;
     private const int MaxSystemIntegrationMetadataValueLength = 256;
     private const string SystemIntegrationMetadataAllowedPrefix = "platform.";
+    private const string SystemIntegrationMetadataExtensionPrefix = "platform.extension.";
     private const string SystemIntegrationCoreFieldMissing = "system-integration-event-core-field-missing";
     private const string SystemIntegrationMetadataEnvelopeInvalid = "system-integration-event-metadata-envelope-invalid";
     private const string SystemIntegrationMetadataNamespaceInvalid = "system-integration-event-metadata-namespace-invalid";
+    private const string SystemIntegrationMetadataUnregisteredKey = "system-integration-event-metadata-key-unregistered";
     private const string SystemIntegrationMetadataBudgetExceeded = "system-integration-event-metadata-budget-exceeded";
+    private static readonly HashSet<string> ReservedSystemIntegrationMetadataKeys = new(StringComparer.Ordinal)
+    {
+        "platform.source",
+        "platform.visibility",
+        "platform.tooltipPresent",
+        "platform.profileIdentity",
+        "platform.profileVersion",
+        "platform.profileHash",
+        "platform.profilePermissionState",
+        "platform.pruningStage"
+    };
 
     private readonly IWebViewHostCapabilityProvider _provider;
     private readonly IWebViewHostCapabilityPolicy? _policy;
@@ -624,13 +733,14 @@ public sealed class WebViewHostCapabilityBridge
             return DenyWithDiagnostic<WebViewSystemIntegrationEventRequest>(context, coreDenyReason);
         if (!TryValidateMetadataEnvelope(request.Metadata, out var metadataDenyReason))
             return DenyWithDiagnostic<WebViewSystemIntegrationEventRequest>(context, metadataDenyReason);
+        var normalizedRequest = NormalizeSystemIntegrationEventRequest(request);
 
         return Execute(
             context,
             () =>
             {
-                SystemIntegrationEventDispatched?.Invoke(this, request);
-                return request;
+                SystemIntegrationEventDispatched?.Invoke(this, normalizedRequest);
+                return normalizedRequest;
             });
     }
 
@@ -721,6 +831,11 @@ public sealed class WebViewHostCapabilityBridge
                 denyReason = SystemIntegrationMetadataNamespaceInvalid;
                 return false;
             }
+            if (!IsRegisteredSystemIntegrationMetadataKey(pair.Key))
+            {
+                denyReason = SystemIntegrationMetadataUnregisteredKey;
+                return false;
+            }
 
             if (pair.Value is null || pair.Value.Length > MaxSystemIntegrationMetadataValueLength)
             {
@@ -746,7 +861,6 @@ public sealed class WebViewHostCapabilityBridge
     {
         if (string.IsNullOrWhiteSpace(request.Source) ||
             request.OccurredAtUtc == default ||
-            request.OccurredAtUtc.Offset != TimeSpan.Zero ||
             string.IsNullOrWhiteSpace(request.ItemId))
         {
             denyReason = SystemIntegrationCoreFieldMissing;
@@ -755,6 +869,33 @@ public sealed class WebViewHostCapabilityBridge
 
         denyReason = string.Empty;
         return true;
+    }
+
+    private static bool IsRegisteredSystemIntegrationMetadataKey(string key)
+    {
+        if (ReservedSystemIntegrationMetadataKeys.Contains(key))
+            return true;
+        if (!key.StartsWith(SystemIntegrationMetadataExtensionPrefix, StringComparison.Ordinal))
+            return false;
+        return key.Length > SystemIntegrationMetadataExtensionPrefix.Length;
+    }
+
+    private static WebViewSystemIntegrationEventRequest NormalizeSystemIntegrationEventRequest(WebViewSystemIntegrationEventRequest request)
+        => new()
+        {
+            Source = request.Source,
+            OccurredAtUtc = NormalizeOccurredAtUtc(request.OccurredAtUtc),
+            Kind = request.Kind,
+            ItemId = request.ItemId,
+            Context = request.Context,
+            Metadata = request.Metadata
+        };
+
+    private static DateTimeOffset NormalizeOccurredAtUtc(DateTimeOffset occurredAtUtc)
+    {
+        var utc = occurredAtUtc.ToUniversalTime();
+        var normalizedTicks = utc.Ticks - (utc.Ticks % TimeSpan.TicksPerMillisecond);
+        return new DateTimeOffset(normalizedTicks, TimeSpan.Zero);
     }
 
     private static int ValidateSystemIntegrationMetadataTotalLength(int budget)

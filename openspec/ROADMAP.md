@@ -445,9 +445,9 @@ dotnet new agibuild-hybrid -n MyApp --frontend react
 ### Latest Evidence Snapshot
 
 - Release: `v0.1.15-preview` (pre-release)
-- `nuke Test`: Unit `742`, Integration `146`, Total `888` (pass)
-- `nuke Coverage`: Line `96.0%`, Branch `84.8%`, Method `98.2%` (pass)
-- OpenSpec: `shell-system-integration-event-flow` archived and synced to main specs (`2026-02-21-shell-system-integration-event-flow`)
+- `nuke Test`: Unit `764`, Integration `148`, Total `912` (pass)
+- `nuke Coverage`: Line `95.96%` (pass, threshold `90%`)
+- OpenSpec: `system-integration-contract-v2-freeze` validated (`openspec validate --all --strict`)
 
 ### Phase 5 Exit Criteria
 

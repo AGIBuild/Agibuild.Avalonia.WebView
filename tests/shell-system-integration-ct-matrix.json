@@ -104,8 +104,24 @@
           "testMethod": "Non_platform_metadata_key_is_denied_before_policy_and_dispatch"
         },
         {
+          "file": "tests/Agibuild.Avalonia.WebView.UnitTests/HostCapabilityBridgeTests.cs",
+          "testMethod": "Unregistered_platform_metadata_key_is_denied_before_policy_and_dispatch"
+        },
+        {
           "file": "tests/Agibuild.Avalonia.WebView.UnitTests/ShellSystemIntegrationCapabilityTests.cs",
           "testMethod": "Non_platform_metadata_key_is_denied_before_web_delivery"
+        },
+        {
+          "file": "tests/Agibuild.Avalonia.WebView.UnitTests/ShellSystemIntegrationCapabilityTests.cs",
+          "testMethod": "Unregistered_platform_metadata_key_is_denied_before_web_delivery"
+        },
+        {
+          "file": "tests/Agibuild.Avalonia.WebView.UnitTests/HostCapabilityBridgeTests.cs",
+          "testMethod": "Inbound_event_timestamp_is_normalized_to_utc_millisecond_precision_before_dispatch"
+        },
+        {
+          "file": "tests/Agibuild.Avalonia.WebView.UnitTests/ShellSystemIntegrationCapabilityTests.cs",
+          "testMethod": "Inbound_event_timestamp_is_normalized_before_shell_delivery"
         },
         {
           "file": "tests/Agibuild.Avalonia.WebView.UnitTests/ShellSystemIntegrationCapabilityTests.cs",

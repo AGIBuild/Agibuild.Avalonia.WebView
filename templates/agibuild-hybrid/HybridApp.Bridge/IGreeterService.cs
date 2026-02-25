@@ -33,6 +33,8 @@ public interface IDesktopHostService
     Task<DesktopMenuApplyResult> ApplyMenuModel(DesktopMenuModel model);
     Task<DesktopTrayUpdateResult> UpdateTrayState(DesktopTrayState state);
     Task<DesktopSystemActionResult> ExecuteSystemAction(DesktopSystemAction action);
+    Task<DesktopSystemIntegrationStrategyResult> GetSystemIntegrationStrategy();
+    Task<DesktopSystemIntegrationStrategyResult> SetShowAboutScenario(DesktopShowAboutScenario scenario);
     Task<DesktopSystemIntegrationEventsResult> DrainSystemIntegrationEvents();
 }
 
@@ -86,6 +88,13 @@ public enum DesktopSystemAction
     ShowAbout = 3
 }
 
+public enum DesktopShowAboutScenario
+{
+    WhitelistDenied = 0,
+    PolicyDenied = 1,
+    ExplicitAllow = 2
+}
+
 public sealed class DesktopMenuApplyResult
 {
     public DesktopCapabilityOutcome Outcome { get; init; }
@@ -109,6 +118,17 @@ public sealed class DesktopSystemActionResult
 {
     public DesktopCapabilityOutcome Outcome { get; init; }
     public DesktopSystemAction Action { get; init; }
+    public string? DenyReason { get; init; }
+    public string? Error { get; init; }
+}
+
+public sealed class DesktopSystemIntegrationStrategyResult
+{
+    public DesktopCapabilityOutcome Outcome { get; init; }
+    public DesktopShowAboutScenario ShowAboutScenario { get; init; }
+    public bool IsShowAboutAllowlisted { get; init; }
+    public bool IsShowAboutPolicyDenied { get; init; }
+    public string? StrategySummary { get; init; }
     public string? DenyReason { get; init; }
     public string? Error { get; init; }
 }

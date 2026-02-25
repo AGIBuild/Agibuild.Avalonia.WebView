@@ -139,3 +139,31 @@ The host capability bridge SHALL apply configurable aggregate metadata budget va
 - **WHEN** host capability diagnostic events are emitted for allow, deny, or failure outcomes
 - **THEN** each event includes a non-zero `DiagnosticSchemaVersion` matching the runtime contract constant
 
+### Requirement: Bridge SHALL enforce reserved metadata registry before policy evaluation
+The host capability bridge SHALL validate inbound metadata keys against a reserved registry and bounded extension lane before policy evaluation and dispatch callbacks.
+
+#### Scenario: Registry violation skips policy and dispatch
+- **WHEN** inbound metadata contains key outside reserved registry and extension lane
+- **THEN** bridge returns deterministic deny, emits diagnostics, and policy evaluate call count remains zero
+
+### Requirement: Bridge SHALL normalize inbound event timestamp for wire determinism
+The host capability bridge SHALL normalize inbound `OccurredAtUtc` to UTC millisecond precision before dispatching typed events.
+
+#### Scenario: Dispatch payload contains canonical timestamp
+- **WHEN** inbound event passes validation with timestamp containing sub-millisecond precision
+- **THEN** dispatched event payload exposes canonical UTC millisecond timestamp and diagnostics remain stable
+
+### Requirement: Host capability diagnostics SHALL expose deterministic export protocol
+The runtime SHALL provide a structured diagnostic export record with stable field mapping from host capability diagnostic events.
+
+#### Scenario: Diagnostic event maps to export record
+- **WHEN** runtime emits a host capability diagnostic event
+- **THEN** consumer can convert it to an export record with deterministic schema version, operation, outcome, and context fields
+
+### Requirement: Export protocol SHALL preserve deny/failure taxonomy semantics
+Exported diagnostic records SHALL retain deny reason and failure category semantics for machine-readable regression.
+
+#### Scenario: Deny and failure records keep taxonomy fields
+- **WHEN** capability flow produces deny and failure outcomes
+- **THEN** exported records include deny reason and failure category consistent with runtime diagnostics
+
