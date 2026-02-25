@@ -189,3 +189,21 @@ The compatibility matrix SHALL list JS ↔ C# RPC as an Extended capability with
 - **WHEN** the matrix is reviewed for JS ↔ C# RPC
 - **THEN** it shows all platforms as supported with CT acceptance criteria and bridge dependency noted
 
+### Requirement: Compatibility matrix SHALL remain synchronized with executable evidence manifests
+Compatibility matrix capability entries SHALL map to executable evidence present in runtime automation or contract manifests.
+
+#### Scenario: Matrix entry lacks executable evidence mapping
+- **WHEN** governance validation scans matrix capability entries
+- **THEN** validation fails if a capability has no linked executable test evidence
+
+#### Scenario: Manifest references capability missing from matrix
+- **WHEN** runtime-critical manifest contains a governed capability id
+- **THEN** matrix includes the same capability id with platform coverage details
+
+### Requirement: Platform parity claims SHALL be machine-checkable
+Platform coverage claims in matrix rows SHALL include deterministic coverage tokens for each declared platform.
+
+#### Scenario: Declared platform has empty coverage token list
+- **WHEN** matrix governance checks platform coverage payload
+- **THEN** validation fails with capability id and platform name
+

@@ -62,6 +62,7 @@ partial class BuildTask
             var coberturaPath = (string)(File.Exists(mergedCoberturaFile) ? mergedCoberturaFile : coverageFile);
             var doc = XDocument.Load(coberturaPath);
             var lineRateAttr = doc.Root?.Attribute("line-rate")?.Value;
+            var branchRateAttr = doc.Root?.Attribute("branch-rate")?.Value;
 
             if (lineRateAttr is null || !double.TryParse(lineRateAttr, System.Globalization.NumberStyles.Float,
                     System.Globalization.CultureInfo.InvariantCulture, out var lineRate))
@@ -70,8 +71,17 @@ partial class BuildTask
                 return;
             }
 
+            if (branchRateAttr is null || !double.TryParse(branchRateAttr, System.Globalization.NumberStyles.Float,
+                    System.Globalization.CultureInfo.InvariantCulture, out var branchRate))
+            {
+                Assert.Fail("Unable to parse branch-rate from coverage report.");
+                return;
+            }
+
             var lineCoveragePct = lineRate * 100;
+            var branchCoveragePct = branchRate * 100;
             Serilog.Log.Information("Line coverage: {Coverage:F2}% (threshold: {Threshold}%)", lineCoveragePct, CoverageThreshold);
+            Serilog.Log.Information("Branch coverage: {Coverage:F2}% (threshold: {Threshold}%)", branchCoveragePct, BranchCoverageThreshold);
             Serilog.Log.Information("HTML report: {Path}", CoverageReportDirectory / "index.html");
 
             if (lineCoveragePct < CoverageThreshold)
@@ -81,7 +91,16 @@ partial class BuildTask
                     $"Review the report at {CoverageReportDirectory / "index.html"}");
             }
 
-            Serilog.Log.Information("Coverage gate PASSED: {Coverage:F2}% >= {Threshold}%", lineCoveragePct, CoverageThreshold);
+            if (branchCoveragePct < BranchCoverageThreshold)
+            {
+                Assert.Fail(
+                    $"Branch coverage {branchCoveragePct:F2}% is below the required threshold of {BranchCoverageThreshold}%. " +
+                    $"Review the report at {CoverageReportDirectory / "index.html"}");
+            }
+
+            Serilog.Log.Information(
+                "Coverage gate PASSED: line {LineCoverage:F2}% >= {LineThreshold}%, branch {BranchCoverage:F2}% >= {BranchThreshold}%",
+                lineCoveragePct, CoverageThreshold, branchCoveragePct, BranchCoverageThreshold);
 
             var summaryPath = Environment.GetEnvironmentVariable("GITHUB_STEP_SUMMARY");
             if (!string.IsNullOrEmpty(summaryPath))
@@ -89,15 +108,17 @@ partial class BuildTask
                 var textSummaryFile = CoverageReportDirectory / "Summary.txt";
                 var summaryContent = File.Exists(textSummaryFile)
                     ? File.ReadAllText(textSummaryFile)
-                    : $"Line coverage: {lineCoveragePct:F2}%";
+                    : $"Line coverage: {lineCoveragePct:F2}%, Branch coverage: {branchCoveragePct:F2}%";
 
                 var markdown =
                     $"## Code Coverage Report\n\n" +
                     $"| Metric | Value |\n" +
                     $"|--------|-------|\n" +
                     $"| **Line Coverage** | **{lineCoveragePct:F2}%** |\n" +
-                    $"| Threshold | {CoverageThreshold}% |\n" +
-                    $"| Status | {(lineCoveragePct >= CoverageThreshold ? "PASSED" : "FAILED")} |\n\n" +
+                    $"| **Branch Coverage** | **{branchCoveragePct:F2}%** |\n" +
+                    $"| Line Threshold | {CoverageThreshold}% |\n" +
+                    $"| Branch Threshold | {BranchCoverageThreshold}% |\n" +
+                    $"| Status | {(lineCoveragePct >= CoverageThreshold && branchCoveragePct >= BranchCoverageThreshold ? "PASSED" : "FAILED")} |\n\n" +
                     $"<details><summary>Full Summary</summary>\n\n```\n{summaryContent}\n```\n\n</details>\n";
 
                 File.AppendAllText(summaryPath, markdown);

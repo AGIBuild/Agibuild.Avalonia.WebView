@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "allowedRegressionPercent": 10.0,
+  "metrics": [
+    {
+      "id": "typed-bridge-call-dispatch",
+      "baselineMs": 0.80
+    },
+    {
+      "id": "bridge-expose-remove-lifecycle",
+      "baselineMs": 1.20
+    },
+    {
+      "id": "raw-rpc-dispatch",
+      "baselineMs": 0.55
+    }
+  ]
+}

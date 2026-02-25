@@ -23,3 +23,14 @@ Build integration SHALL write `bridge.d.ts` after generation and SHALL support c
 #### Scenario: Configurable output directory is honored
 - **WHEN** `BridgeTypeScriptOutputDir` is configured
 - **THEN** `bridge.d.ts` is written to the configured directory deterministically
+
+### Requirement: Generated bridge declarations SHALL pass deterministic TypeScript compile validation
+Build governance SHALL compile generated `bridge.d.ts` against a TypeScript harness to ensure declaration correctness.
+
+#### Scenario: Declaration compile succeeds
+- **WHEN** governance validation runs declaration compile checks
+- **THEN** `bridge.d.ts` compiles without TypeScript errors
+
+#### Scenario: Declaration shape regression is introduced
+- **WHEN** generated declarations are invalid or missing required symbols
+- **THEN** governance check fails with actionable TypeScript diagnostics

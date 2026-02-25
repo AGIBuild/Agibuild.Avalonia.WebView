@@ -610,9 +610,13 @@ public sealed class AutomationLaneGovernanceTests
         var mainSource = File.ReadAllText(Path.Combine(repoRoot, "build", "Build.cs"));
 
         Assert.Contains("Target OpenSpecStrictGovernance", combinedSource, StringComparison.Ordinal);
+        Assert.Contains("Target DependencyVulnerabilityGovernance", combinedSource, StringComparison.Ordinal);
+        Assert.Contains("Target TypeScriptDeclarationGovernance", combinedSource, StringComparison.Ordinal);
         Assert.Contains("validate --all --strict", combinedSource, StringComparison.Ordinal);
         Assert.Contains("RunProcessCaptureAllChecked(", combinedSource, StringComparison.Ordinal);
         Assert.Contains("OpenSpecStrictGovernanceReportFile", combinedSource, StringComparison.Ordinal);
+        Assert.Contains("dependency-governance-report.json", combinedSource, StringComparison.Ordinal);
+        Assert.Contains("typescript-governance-report.json", combinedSource, StringComparison.Ordinal);
         Assert.Contains("Target PhaseCloseoutSnapshot", combinedSource, StringComparison.Ordinal);
         Assert.Contains("phase5-closeout-snapshot.json", combinedSource, StringComparison.Ordinal);
 
@@ -620,10 +624,22 @@ public sealed class AutomationLaneGovernanceTests
             new Regex(@"Target\s+Ci\s*=>[\s\S]*?\.DependsOn\([\s\S]*OpenSpecStrictGovernance[\s\S]*\);", RegexOptions.Multiline),
             mainSource);
         Assert.Matches(
+            new Regex(@"Target\s+Ci\s*=>[\s\S]*?\.DependsOn\([\s\S]*DependencyVulnerabilityGovernance[\s\S]*\);", RegexOptions.Multiline),
+            mainSource);
+        Assert.Matches(
+            new Regex(@"Target\s+Ci\s*=>[\s\S]*?\.DependsOn\([\s\S]*TypeScriptDeclarationGovernance[\s\S]*\);", RegexOptions.Multiline),
+            mainSource);
+        Assert.Matches(
             new Regex(@"Target\s+Ci\s*=>[\s\S]*?\.DependsOn\([\s\S]*PhaseCloseoutSnapshot[\s\S]*\);", RegexOptions.Multiline),
             mainSource);
         Assert.Matches(
             new Regex(@"Target\s+CiPublish\s*=>[\s\S]*?\.DependsOn\([\s\S]*OpenSpecStrictGovernance[\s\S]*\);", RegexOptions.Multiline),
+            mainSource);
+        Assert.Matches(
+            new Regex(@"Target\s+CiPublish\s*=>[\s\S]*?\.DependsOn\([\s\S]*DependencyVulnerabilityGovernance[\s\S]*\);", RegexOptions.Multiline),
+            mainSource);
+        Assert.Matches(
+            new Regex(@"Target\s+CiPublish\s*=>[\s\S]*?\.DependsOn\([\s\S]*TypeScriptDeclarationGovernance[\s\S]*\);", RegexOptions.Multiline),
             mainSource);
         Assert.Matches(
             new Regex(@"Target\s+CiPublish\s*=>[\s\S]*?\.DependsOn\([\s\S]*PhaseCloseoutSnapshot[\s\S]*\);", RegexOptions.Multiline),
@@ -763,6 +779,108 @@ public sealed class AutomationLaneGovernanceTests
         Assert.Matches(new Regex(@"\|\s*Line coverage\s*\|\s*\*\*\d+\.\d+%\*\*\s*\|"), readme);
 
         Assert.Contains("Phase 5 | Electron Replacement Foundation | ✅ Completed", readme, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Coverage_target_enforces_branch_coverage_threshold()
+    {
+        var repoRoot = FindRepoRoot();
+        var buildSource = ReadCombinedBuildSource(repoRoot);
+
+        Assert.Contains("BranchCoverageThreshold", buildSource, StringComparison.Ordinal);
+        Assert.Contains("branch-rate", buildSource, StringComparison.Ordinal);
+        Assert.Contains("Branch coverage", buildSource, StringComparison.Ordinal);
+        Assert.Contains("branchThreshold", buildSource, StringComparison.Ordinal);
+        Assert.Contains("dependencyGovernanceReportExists", buildSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Shell_matrix_and_runtime_manifest_are_kept_in_sync_for_shell_capabilities()
+    {
+        var repoRoot = FindRepoRoot();
+        var runtimeManifestPath = Path.Combine(repoRoot, "tests", "runtime-critical-path.manifest.json");
+        var matrixPath = Path.Combine(repoRoot, "tests", "shell-production-matrix.json");
+
+        Assert.True(File.Exists(runtimeManifestPath), $"Missing runtime manifest: {runtimeManifestPath}");
+        Assert.True(File.Exists(matrixPath), $"Missing shell production matrix: {matrixPath}");
+
+        using var runtimeDoc = JsonDocument.Parse(File.ReadAllText(runtimeManifestPath));
+        using var matrixDoc = JsonDocument.Parse(File.ReadAllText(matrixPath));
+
+        var runtimeShellIds = runtimeDoc.RootElement.GetProperty("scenarios")
+            .EnumerateArray()
+            .Select(x => x.GetProperty("id").GetString())
+            .Where(id => !string.IsNullOrWhiteSpace(id) && id!.StartsWith("shell-", StringComparison.Ordinal))
+            .Cast<string>()
+            .ToHashSet(StringComparer.Ordinal);
+
+        var matrixCapabilityIds = matrixDoc.RootElement.GetProperty("capabilities")
+            .EnumerateArray()
+            .Select(x => x.GetProperty("id").GetString())
+            .Where(id => !string.IsNullOrWhiteSpace(id))
+            .Cast<string>()
+            .ToHashSet(StringComparer.Ordinal);
+
+        foreach (var shellId in runtimeShellIds)
+        {
+            Assert.Contains(shellId, matrixCapabilityIds);
+        }
+    }
+
+    [Fact]
+    public void Benchmark_baseline_artifact_has_required_metrics_and_tolerance()
+    {
+        var repoRoot = FindRepoRoot();
+        var baselinePath = Path.Combine(repoRoot, "tests", "performance-benchmark-baseline.json");
+        Assert.True(File.Exists(baselinePath), $"Missing benchmark baseline: {baselinePath}");
+
+        using var doc = JsonDocument.Parse(File.ReadAllText(baselinePath));
+        Assert.True(doc.RootElement.TryGetProperty("version", out var versionNode));
+        Assert.True(versionNode.GetInt32() >= 1);
+        Assert.True(doc.RootElement.TryGetProperty("allowedRegressionPercent", out var toleranceNode));
+        Assert.True(toleranceNode.GetDouble() > 0);
+
+        var metrics = doc.RootElement.GetProperty("metrics").EnumerateArray().ToList();
+        Assert.NotEmpty(metrics);
+
+        foreach (var metric in metrics)
+        {
+            var id = metric.GetProperty("id").GetString();
+            Assert.False(string.IsNullOrWhiteSpace(id));
+            var baseline = metric.GetProperty("baselineMs").GetDouble();
+            Assert.True(baseline > 0, $"Metric '{id}' baselineMs must be > 0.");
+        }
+    }
+
+    [Fact]
+    public void Dx_assets_for_bridge_package_and_vue_sample_are_present_and_typed()
+    {
+        var repoRoot = FindRepoRoot();
+        var bridgePackagePath = Path.Combine(repoRoot, "packages", "bridge", "package.json");
+        var bridgeEntryPath = Path.Combine(repoRoot, "packages", "bridge", "src", "index.ts");
+        var vueSampleEntryPath = Path.Combine(repoRoot, "samples", "avalonia-vue", "AvaloniVue.Web", "src", "main.ts");
+        var vueSampleBridgePath = Path.Combine(repoRoot, "samples", "avalonia-vue", "AvaloniVue.Web", "src", "bridge", "services.ts");
+        var vueSampleTsConfigPath = Path.Combine(repoRoot, "samples", "avalonia-vue", "AvaloniVue.Web", "tsconfig.json");
+
+        Assert.True(File.Exists(bridgePackagePath), $"Missing bridge package json: {bridgePackagePath}");
+        Assert.True(File.Exists(bridgeEntryPath), $"Missing bridge package entry: {bridgeEntryPath}");
+        Assert.True(File.Exists(vueSampleEntryPath), $"Missing Vue sample entry: {vueSampleEntryPath}");
+        Assert.True(File.Exists(vueSampleBridgePath), $"Missing Vue bridge services: {vueSampleBridgePath}");
+        Assert.True(File.Exists(vueSampleTsConfigPath), $"Missing Vue sample tsconfig: {vueSampleTsConfigPath}");
+
+        var bridgePackage = File.ReadAllText(bridgePackagePath);
+        var bridgeEntry = File.ReadAllText(bridgeEntryPath);
+        var vueEntry = File.ReadAllText(vueSampleEntryPath);
+        var vueBridge = File.ReadAllText(vueSampleBridgePath);
+        var vueTsConfig = File.ReadAllText(vueSampleTsConfigPath);
+
+        Assert.Contains("\"@agibuild/bridge\"", bridgePackage, StringComparison.Ordinal);
+        Assert.Contains("createBridgeClient", bridgeEntry, StringComparison.Ordinal);
+        Assert.Contains("bridgeClient", bridgeEntry, StringComparison.Ordinal);
+        Assert.Contains("getService", bridgeEntry, StringComparison.Ordinal);
+        Assert.Contains("getAppInfo", vueEntry, StringComparison.Ordinal);
+        Assert.Contains("AppShellService.getAppInfo", vueBridge, StringComparison.Ordinal);
+        Assert.Contains("bridge.d.ts", vueTsConfig, StringComparison.Ordinal);
     }
 
     private static string ReadCombinedBuildSource(string repoRoot)

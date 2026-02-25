@@ -1457,6 +1457,21 @@ public sealed class RuntimeCoverageTests
         Assert.True(adapter.DevToolsClosed);
     }
 
+    [Fact]
+    public async Task WebViewCore_DevTools_open_close_are_idempotent()
+    {
+        var adapter = new MockDevToolsAdapter();
+        using var core = new WebViewCore(adapter, _dispatcher);
+
+        await core.OpenDevToolsAsync();
+        await core.OpenDevToolsAsync();
+        Assert.True(await core.IsDevToolsOpenAsync());
+
+        await core.CloseDevToolsAsync();
+        await core.CloseDevToolsAsync();
+        Assert.False(await core.IsDevToolsOpenAsync());
+    }
+
     // ========================= WebViewCore — SPA WebResourceRequested integration =========================
 
     [Fact]

@@ -44,6 +44,9 @@ partial class BuildTask : NukeBuild
     [Parameter("Minimum line coverage percentage (0-100). Default: 90")]
     readonly int CoverageThreshold = 90;
 
+    [Parameter("Minimum branch coverage percentage (0-100). Default: 84")]
+    readonly int BranchCoverageThreshold = 84;
+
     [Parameter("Android AVD name for emulator. Default: auto-detect first available AVD.")]
     readonly string? AndroidAvd = null;
 
@@ -80,6 +83,8 @@ partial class BuildTask : NukeBuild
     AbsolutePath NugetSmokeTelemetryFile => TestResultsDirectory / "nuget-smoke-retry-telemetry.json";
     AbsolutePath WarningGovernanceReportFile => TestResultsDirectory / "warning-governance-report.json";
     AbsolutePath OpenSpecStrictGovernanceReportFile => TestResultsDirectory / "openspec-strict-governance.log";
+    AbsolutePath DependencyGovernanceReportFile => TestResultsDirectory / "dependency-governance-report.json";
+    AbsolutePath TypeScriptGovernanceReportFile => TestResultsDirectory / "typescript-governance-report.json";
     AbsolutePath PhaseCloseoutSnapshotFile => TestResultsDirectory / "phase5-closeout-snapshot.json";
     AbsolutePath AutomationLaneManifestFile => TestsDirectory / "automation-lanes.json";
     AbsolutePath RuntimeCriticalPathManifestFile => TestsDirectory / "runtime-critical-path.manifest.json";
@@ -187,9 +192,9 @@ partial class BuildTask : NukeBuild
 
     Target Ci => _ => _
         .Description("Full CI pipeline: compile → coverage → lane automation → pack → validate.")
-        .DependsOn(Coverage, AutomationLaneReport, WarningGovernance, OpenSpecStrictGovernance, PhaseCloseoutSnapshot, ValidatePackage);
+        .DependsOn(Coverage, AutomationLaneReport, WarningGovernance, DependencyVulnerabilityGovernance, TypeScriptDeclarationGovernance, OpenSpecStrictGovernance, PhaseCloseoutSnapshot, ValidatePackage);
 
     Target CiPublish => _ => _
         .Description("Full release pipeline: compile → coverage → lane automation → package smoke → publish.")
-        .DependsOn(Coverage, AutomationLaneReport, WarningGovernance, OpenSpecStrictGovernance, PhaseCloseoutSnapshot, NugetPackageTest, PackTemplate, Publish);
+        .DependsOn(Coverage, AutomationLaneReport, WarningGovernance, DependencyVulnerabilityGovernance, TypeScriptDeclarationGovernance, OpenSpecStrictGovernance, PhaseCloseoutSnapshot, NugetPackageTest, PackTemplate, Publish);
 }

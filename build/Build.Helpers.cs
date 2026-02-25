@@ -121,6 +121,24 @@ partial class BuildTask
         return lineRate * 100;
     }
 
+    static double ReadCoberturaBranchCoveragePercent(AbsolutePath coberturaPath)
+    {
+        var doc = XDocument.Load(coberturaPath);
+        var branchRateAttr = doc.Root?.Attribute("branch-rate")?.Value;
+
+        if (branchRateAttr is null || !double.TryParse(
+                branchRateAttr,
+                System.Globalization.NumberStyles.Float,
+                System.Globalization.CultureInfo.InvariantCulture,
+                out var branchRate))
+        {
+            Assert.Fail($"Unable to parse branch-rate from coverage report: {coberturaPath}");
+            return 0;
+        }
+
+        return branchRate * 100;
+    }
+
     static void WaitForAndroidBoot(string adbPath, int timeoutMinutes = 3)
     {
         Serilog.Log.Information("Waiting for emulator to boot...");
