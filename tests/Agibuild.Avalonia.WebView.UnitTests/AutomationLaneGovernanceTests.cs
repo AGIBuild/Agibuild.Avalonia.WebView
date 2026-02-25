@@ -138,30 +138,24 @@ public sealed class AutomationLaneGovernanceTests
     public void Build_pipeline_exposes_lane_targets_and_machine_readable_reports()
     {
         var repoRoot = FindRepoRoot();
-        var buildPath = Path.Combine(repoRoot, "build", "Build.cs");
-        var helpersPath = Path.Combine(repoRoot, "build", "Build.Helpers.cs");
-        var publishingPath = Path.Combine(repoRoot, "build", "Build.Publishing.cs");
-        Assert.True(File.Exists(helpersPath), $"Missing build helper source: {helpersPath}");
-        Assert.True(File.Exists(publishingPath), $"Missing build publishing source: {publishingPath}");
-        var source = File.ReadAllText(buildPath);
-        var helperSource = File.ReadAllText(helpersPath);
-        var publishingSource = File.ReadAllText(publishingPath);
-        var combinedSource = string.Join("\n", source, helperSource, publishingSource);
+        var combinedSource = ReadCombinedBuildSource(repoRoot);
+        var mainSource = File.ReadAllText(Path.Combine(repoRoot, "build", "Build.cs"));
 
-        Assert.Contains("Target ContractAutomation", source, StringComparison.Ordinal);
-        Assert.Contains("Target RuntimeAutomation", source, StringComparison.Ordinal);
-        Assert.Contains("Target AutomationLaneReport", source, StringComparison.Ordinal);
-        Assert.Contains("Target WarningGovernance", source, StringComparison.Ordinal);
-        Assert.Contains("Target WarningGovernanceSyntheticCheck", source, StringComparison.Ordinal);
-        Assert.Contains("automation-lane-report.json", source, StringComparison.Ordinal);
-        Assert.Contains("warning-governance-report.json", source, StringComparison.Ordinal);
-        Assert.Contains("warning-governance.baseline.json", source, StringComparison.Ordinal);
-        Assert.Contains("nuget-smoke-retry-telemetry.json", source, StringComparison.Ordinal);
-        Assert.Contains("phase5-closeout-snapshot.json", source, StringComparison.Ordinal);
-        Assert.Contains("Target PhaseCloseoutSnapshot", source, StringComparison.Ordinal);
-        Assert.Contains("partial class BuildTask", source, StringComparison.Ordinal);
-        Assert.Contains("Execute<BuildTask>(x => x.Build)", source, StringComparison.Ordinal);
-        Assert.Contains("--shellPreset app-shell", source, StringComparison.Ordinal);
+        Assert.Contains("partial class BuildTask", mainSource, StringComparison.Ordinal);
+        Assert.Contains("Execute<BuildTask>(x => x.Build)", mainSource, StringComparison.Ordinal);
+
+        Assert.Contains("Target ContractAutomation", combinedSource, StringComparison.Ordinal);
+        Assert.Contains("Target RuntimeAutomation", combinedSource, StringComparison.Ordinal);
+        Assert.Contains("Target AutomationLaneReport", combinedSource, StringComparison.Ordinal);
+        Assert.Contains("Target WarningGovernance", combinedSource, StringComparison.Ordinal);
+        Assert.Contains("Target WarningGovernanceSyntheticCheck", combinedSource, StringComparison.Ordinal);
+        Assert.Contains("automation-lane-report.json", combinedSource, StringComparison.Ordinal);
+        Assert.Contains("warning-governance-report.json", combinedSource, StringComparison.Ordinal);
+        Assert.Contains("warning-governance.baseline.json", combinedSource, StringComparison.Ordinal);
+        Assert.Contains("nuget-smoke-retry-telemetry.json", combinedSource, StringComparison.Ordinal);
+        Assert.Contains("phase5-closeout-snapshot.json", combinedSource, StringComparison.Ordinal);
+        Assert.Contains("Target PhaseCloseoutSnapshot", combinedSource, StringComparison.Ordinal);
+        Assert.Contains("--shellPreset app-shell", combinedSource, StringComparison.Ordinal);
         Assert.Contains("RunNugetSmokeWithRetry", combinedSource, StringComparison.Ordinal);
         Assert.Contains("ClassifyNugetSmokeFailure", combinedSource, StringComparison.Ordinal);
         Assert.Contains("ResolveNugetPackagesRoot", combinedSource, StringComparison.Ordinal);
@@ -612,32 +606,28 @@ public sealed class AutomationLaneGovernanceTests
     public void Ci_targets_enforce_openspec_strict_governance_gate()
     {
         var repoRoot = FindRepoRoot();
-        var buildPath = Path.Combine(repoRoot, "build", "Build.cs");
-        var helpersPath = Path.Combine(repoRoot, "build", "Build.Helpers.cs");
-        Assert.True(File.Exists(buildPath), $"Missing build source: {buildPath}");
-        Assert.True(File.Exists(helpersPath), $"Missing build helper source: {helpersPath}");
+        var combinedSource = ReadCombinedBuildSource(repoRoot);
+        var mainSource = File.ReadAllText(Path.Combine(repoRoot, "build", "Build.cs"));
 
-        var source = File.ReadAllText(buildPath);
-        var helperSource = File.ReadAllText(helpersPath);
-        Assert.Contains("Target OpenSpecStrictGovernance", source, StringComparison.Ordinal);
-        Assert.Contains("validate --all --strict", source, StringComparison.Ordinal);
-        Assert.Contains("RunProcessCaptureAllChecked(", helperSource, StringComparison.Ordinal);
-        Assert.Contains("OpenSpecStrictGovernanceReportFile", source, StringComparison.Ordinal);
-        Assert.Contains("Target PhaseCloseoutSnapshot", source, StringComparison.Ordinal);
-        Assert.Contains("phase5-closeout-snapshot.json", source, StringComparison.Ordinal);
+        Assert.Contains("Target OpenSpecStrictGovernance", combinedSource, StringComparison.Ordinal);
+        Assert.Contains("validate --all --strict", combinedSource, StringComparison.Ordinal);
+        Assert.Contains("RunProcessCaptureAllChecked(", combinedSource, StringComparison.Ordinal);
+        Assert.Contains("OpenSpecStrictGovernanceReportFile", combinedSource, StringComparison.Ordinal);
+        Assert.Contains("Target PhaseCloseoutSnapshot", combinedSource, StringComparison.Ordinal);
+        Assert.Contains("phase5-closeout-snapshot.json", combinedSource, StringComparison.Ordinal);
 
         Assert.Matches(
             new Regex(@"Target\s+Ci\s*=>[\s\S]*?\.DependsOn\([\s\S]*OpenSpecStrictGovernance[\s\S]*\);", RegexOptions.Multiline),
-            source);
+            mainSource);
         Assert.Matches(
             new Regex(@"Target\s+Ci\s*=>[\s\S]*?\.DependsOn\([\s\S]*PhaseCloseoutSnapshot[\s\S]*\);", RegexOptions.Multiline),
-            source);
+            mainSource);
         Assert.Matches(
             new Regex(@"Target\s+CiPublish\s*=>[\s\S]*?\.DependsOn\([\s\S]*OpenSpecStrictGovernance[\s\S]*\);", RegexOptions.Multiline),
-            source);
+            mainSource);
         Assert.Matches(
             new Regex(@"Target\s+CiPublish\s*=>[\s\S]*?\.DependsOn\([\s\S]*PhaseCloseoutSnapshot[\s\S]*\);", RegexOptions.Multiline),
-            source);
+            mainSource);
     }
 
     [Fact]
@@ -730,6 +720,14 @@ public sealed class AutomationLaneGovernanceTests
             "WindowsBase conflict is governed by approved baseline metadata.",
             source,
             StringComparison.Ordinal);
+    }
+
+    private static string ReadCombinedBuildSource(string repoRoot)
+    {
+        var buildDir = Path.Combine(repoRoot, "build");
+        var buildFiles = Directory.GetFiles(buildDir, "Build*.cs");
+        Assert.True(buildFiles.Length >= 2, $"Expected multiple Build*.cs partial files in {buildDir}, found {buildFiles.Length}.");
+        return string.Join("\n", buildFiles.Select(File.ReadAllText));
     }
 
     private static string FindRepoRoot()

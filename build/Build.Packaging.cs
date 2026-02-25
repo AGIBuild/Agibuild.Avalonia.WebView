@@ -1,0 +1,489 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
+using System.Linq;
+using System.Text.Json;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Xml.Linq;
+using Nuke.Common;
+using Nuke.Common.IO;
+using Nuke.Common.Tools.DotNet;
+using static Nuke.Common.Tools.DotNet.DotNetTasks;
+
+partial class BuildTask
+{
+    // ──────────────────────────── Records ────────────────────────────
+
+    private sealed record NugetSmokeRetryTelemetry(
+        int Attempt,
+        string Classification,
+        string Outcome,
+        string? Message);
+
+    private sealed record NugetPackagesRootResolution(string Path, string Source);
+
+    // ──────────────────────────── Pack / Validate / Publish Targets ────────────────────────────
+
+    Target Pack => _ => _
+        .Description("Creates all NuGet packages: main library and sub-packages (Core, Bridge.Generator, etc.).")
+        .DependsOn(Build)
+        .Produces(PackageOutputDirectory / "*.nupkg")
+        .Executes(() =>
+        {
+            PackageOutputDirectory.CreateOrCleanDirectory();
+
+            // ── Main package (fat bundle: WebView + adapters) ──
+            DotNetPack(s =>
+            {
+                var settings = s
+                    .SetProject(PackProject)
+                    .SetConfiguration(Configuration)
+                    .EnableNoRestore()
+                    .EnableNoBuild()
+                    .SetOutputDirectory(PackageOutputDirectory);
+
+                if (!string.IsNullOrEmpty(PackageVersion))
+                    settings = settings.SetProperty("MinVerVersionOverride", PackageVersion);
+
+                return settings;
+            });
+
+            // ── Sub-packages (Core, Adapters.Abstractions, Runtime, Bridge.Generator, Testing) ──
+            var subPackageProjects = new[]
+            {
+                CoreProject,
+                AdaptersAbstractionsProject,
+                RuntimeProject,
+                BridgeGeneratorProject,
+                TestingProject,
+            };
+
+            foreach (var project in subPackageProjects)
+            {
+                DotNetPack(s =>
+                {
+                    var settings = s
+                        .SetProject(project)
+                        .SetConfiguration(Configuration)
+                        .SetOutputDirectory(PackageOutputDirectory);
+
+                    if (!string.IsNullOrEmpty(PackageVersion))
+                        settings = settings.SetProperty("MinVerVersionOverride", PackageVersion);
+
+                    return settings;
+                });
+            }
+        });
+
+    Target ValidatePackage => _ => _
+        .Description("Validates the NuGet package contains all expected assemblies and files.")
+        .DependsOn(Pack)
+        .Executes(() =>
+        {
+            var nupkgFiles = PackageOutputDirectory.GlobFiles("*.nupkg")
+                .Where(f => !f.Name.EndsWith(".symbols.nupkg"))
+                .ToList();
+
+            Assert.NotEmpty(nupkgFiles, "No .nupkg files found in output directory.");
+
+            var mainPackagePrefix = "Agibuild.Avalonia.WebView.";
+            var nupkgPath = nupkgFiles.FirstOrDefault(f =>
+                    f.Name.StartsWith(mainPackagePrefix, StringComparison.OrdinalIgnoreCase)
+                    && char.IsDigit(f.Name[mainPackagePrefix.Length]))
+                ?? throw new Exception("Main package Agibuild.Avalonia.WebView.*.nupkg not found in output directory.");
+            Serilog.Log.Information("Validating package: {Package}", nupkgPath.Name);
+
+            using var archive = ZipFile.OpenRead(nupkgPath);
+            var entries = archive.Entries
+                .Select(e => e.FullName.Replace('\\', '/'))
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            // ── Required assemblies (always present) ──────────────────────────────
+            var requiredFiles = new Dictionary<string, string>
+            {
+                ["lib/net10.0/Agibuild.Avalonia.WebView.dll"] = "Main assembly",
+                ["lib/net10.0/Agibuild.Avalonia.WebView.Core.dll"] = "Core contracts",
+                ["lib/net10.0/Agibuild.Avalonia.WebView.Adapters.Abstractions.dll"] = "Adapter abstractions",
+                ["lib/net10.0/Agibuild.Avalonia.WebView.Runtime.dll"] = "Runtime host",
+                ["lib/net10.0/Agibuild.Avalonia.WebView.DependencyInjection.dll"] = "DI extensions",
+                ["lib/net10.0/Agibuild.Avalonia.WebView.Adapters.Windows.dll"] = "Windows adapter",
+                ["lib/net10.0/Agibuild.Avalonia.WebView.Adapters.Gtk.dll"] = "Linux GTK adapter",
+                ["buildTransitive/Agibuild.Avalonia.WebView.targets"] = "MSBuild targets",
+                ["README.md"] = "Package readme",
+            };
+
+            // ── Conditionally expected assemblies ─────────────────────────────────
+            var androidAdapterPath = SrcDirectory
+                / "Agibuild.Avalonia.WebView.Adapters.Android" / "bin" / Configuration
+                / "net10.0-android" / "Agibuild.Avalonia.WebView.Adapters.Android.dll";
+
+            var iosAdapterPath = SrcDirectory
+                / "Agibuild.Avalonia.WebView.Adapters.iOS" / "bin" / Configuration
+                / "net10.0-ios" / "Agibuild.Avalonia.WebView.Adapters.iOS.dll";
+
+            var conditionalFiles = new Dictionary<string, (string Description, bool ShouldExist)>
+            {
+                ["lib/net10.0/Agibuild.Avalonia.WebView.Adapters.MacOS.dll"] =
+                    ("macOS adapter", OperatingSystem.IsMacOS()),
+                ["runtimes/osx/native/libAgibuildWebViewWk.dylib"] =
+                    ("macOS native shim", OperatingSystem.IsMacOS()),
+                ["runtimes/android/lib/net10.0-android36.0/Agibuild.Avalonia.WebView.Adapters.Android.dll"] =
+                    ("Android adapter", File.Exists(androidAdapterPath)),
+                ["runtimes/ios/lib/net10.0-ios18.0/Agibuild.Avalonia.WebView.Adapters.iOS.dll"] =
+                    ("iOS adapter", File.Exists(iosAdapterPath)),
+            };
+
+            var errors = new List<string>();
+
+            foreach (var (path, description) in requiredFiles)
+            {
+                if (entries.Contains(path))
+                {
+                    Serilog.Log.Information("  OK: {Path} ({Description})", path, description);
+                }
+                else
+                {
+                    errors.Add($"MISSING (required): {path} — {description}");
+                    Serilog.Log.Error("  MISSING: {Path} ({Description})", path, description);
+                }
+            }
+
+            foreach (var (path, (description, shouldExist)) in conditionalFiles)
+            {
+                if (entries.Contains(path))
+                {
+                    Serilog.Log.Information("  OK: {Path} ({Description})", path, description);
+                }
+                else if (shouldExist)
+                {
+                    errors.Add($"MISSING (expected on this platform): {path} — {description}");
+                    Serilog.Log.Error("  MISSING: {Path} ({Description})", path, description);
+                }
+                else
+                {
+                    Serilog.Log.Information("  SKIP: {Path} ({Description} — not built on this platform)", path, description);
+                }
+            }
+
+            var knownDlls = requiredFiles.Keys
+                .Concat(conditionalFiles.Keys)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            var unexpectedDlls = entries
+                .Where(e => e.EndsWith(".dll", StringComparison.OrdinalIgnoreCase)
+                         && e.Contains("Agibuild.", StringComparison.OrdinalIgnoreCase)
+                         && !knownDlls.Contains(e))
+                .ToList();
+
+            foreach (var dll in unexpectedDlls)
+            {
+                errors.Add($"UNEXPECTED: {dll} — not in the expected manifest");
+                Serilog.Log.Warning("  UNEXPECTED: {Path}", dll);
+            }
+
+            var nuspecEntry = archive.Entries.FirstOrDefault(e =>
+                e.FullName.EndsWith(".nuspec", StringComparison.OrdinalIgnoreCase));
+            if (nuspecEntry is not null)
+            {
+                using var stream = nuspecEntry.Open();
+                var nuspecDoc = XDocument.Load(stream);
+                var ns = nuspecDoc.Root?.GetDefaultNamespace() ?? XNamespace.None;
+                var metadata = nuspecDoc.Root?.Element(ns + "metadata");
+
+                var id = metadata?.Element(ns + "id")?.Value;
+                var version = metadata?.Element(ns + "version")?.Value;
+                var description = metadata?.Element(ns + "description")?.Value;
+
+                if (string.IsNullOrEmpty(id))
+                    errors.Add("NUSPEC: Missing <id>");
+                if (string.IsNullOrEmpty(version) || version == "0.0.0-dev" || version == "1.0.0")
+                    errors.Add($"NUSPEC: Invalid <version>: '{version}' — MinVer may not have run correctly");
+                if (string.IsNullOrEmpty(description))
+                    errors.Add("NUSPEC: Missing <description>");
+
+                Serilog.Log.Information("  Nuspec: id={Id}, version={Version}", id, version);
+            }
+            else
+            {
+                errors.Add("NUSPEC: No .nuspec file found in package");
+            }
+
+            Serilog.Log.Information("Package validation: {Total} entries, {Errors} error(s)",
+                entries.Count, errors.Count);
+
+            if (errors.Count > 0)
+            {
+                Assert.Fail(
+                    "Package validation failed:\n" +
+                    string.Join("\n", errors.Select(e => $"  - {e}")));
+            }
+
+            Serilog.Log.Information("Package validation PASSED.");
+        });
+
+    Target Publish => _ => _
+        .Description("Pushes all NuGet packages (main library, sub-packages, and templates) to the configured source.")
+        .DependsOn(Pack, PackTemplate)
+        .Requires(() => NuGetApiKey)
+        .Executes(() =>
+        {
+            var packages = PackageOutputDirectory.GlobFiles("*.nupkg")
+                .Where(p => !p.Name.EndsWith(".symbols.nupkg"));
+
+            foreach (var package in packages)
+            {
+                DotNetNuGetPush(s => s
+                    .SetTargetPath(package)
+                    .SetSource(NuGetSource)
+                    .SetApiKey(NuGetApiKey)
+                    .EnableSkipDuplicate());
+            }
+        });
+
+    // ──────────────────────────── NuGet Package Smoke Test ────────────────────────────
+
+    Target NugetPackageTest => _ => _
+        .Description("Packs, restores, builds, and runs the NuGet package integration smoke test end-to-end.")
+        .DependsOn(ValidatePackage)
+        .Executes(() =>
+        {
+            var packedVersion = ResolvePackedAgibuildVersion("Agibuild.Avalonia.WebView");
+            Serilog.Log.Information("NuGet package smoke pinned to packed version: {Version}", packedVersion);
+
+            var resolvedRoot = ResolveNugetPackagesRoot();
+            var nugetPackagesRoot = resolvedRoot.Path;
+            Serilog.Log.Information(
+                "NuGet global packages root: {Path} (resolved via {Source})",
+                nugetPackagesRoot,
+                resolvedRoot.Source);
+
+            var agibuildPackageDirs = Directory.Exists(nugetPackagesRoot)
+                ? Directory.GetDirectories(nugetPackagesRoot, "agibuild.avalonia.webview*")
+                : [];
+            foreach (var dir in agibuildPackageDirs)
+            {
+                Serilog.Log.Information("Clearing NuGet cache: {Path}", dir);
+                Directory.Delete(dir, recursive: true);
+            }
+            var afterCleanup = Directory.Exists(nugetPackagesRoot)
+                ? Directory.GetDirectories(nugetPackagesRoot, "agibuild.avalonia.webview*")
+                : [];
+            Assert.True(afterCleanup.Length == 0, "Expected clean NuGet cache for Agibuild packages before restore.");
+
+            var testProjectDir = TestsDirectory / "Agibuild.Avalonia.WebView.Integration.NugetPackageTests";
+            var testBinDir = testProjectDir / "bin";
+            var testObjDir = testProjectDir / "obj";
+            if (Directory.Exists(testBinDir)) testBinDir.DeleteDirectory();
+            if (Directory.Exists(testObjDir)) testObjDir.DeleteDirectory();
+
+            Serilog.Log.Information("Restoring NuGet package test project...");
+            DotNetRestore(s => s
+                .SetProjectFile(NugetPackageTestProject)
+                .SetProperty("AgibuildPackageVersion", packedVersion));
+            var restoredDirs = Directory.Exists(nugetPackagesRoot)
+                ? Directory.GetDirectories(nugetPackagesRoot, "agibuild.avalonia.webview*")
+                : [];
+            Assert.NotEmpty(restoredDirs);
+            Serilog.Log.Information("NuGet restore populated {Count} Agibuild package cache path(s).", restoredDirs.Length);
+
+            DotNetBuild(s => s
+                .SetProjectFile(NugetPackageTestProject)
+                .SetConfiguration(Configuration)
+                .SetProperty("AgibuildPackageVersion", packedVersion)
+                .EnableNoRestore());
+
+            Serilog.Log.Information("Running NuGet package smoke test...");
+            var resultFile = testProjectDir / "bin" / Configuration / "net10.0" / "smoke-test-result.txt";
+            if (File.Exists(resultFile)) File.Delete(resultFile);
+
+            var retryTelemetry = new List<NugetSmokeRetryTelemetry>();
+            try
+            {
+                RunNugetSmokeWithRetry(
+                    project: NugetPackageTestProject,
+                    retryTelemetry: retryTelemetry,
+                    maxAttempts: 3);
+            }
+            finally
+            {
+                TestResultsDirectory.CreateDirectory();
+                var telemetryPayload = new
+                {
+                    generatedAtUtc = DateTime.UtcNow,
+                    nugetPackagesRoot,
+                    resolutionSource = resolvedRoot.Source,
+                    attempts = retryTelemetry
+                };
+                File.WriteAllText(
+                    NugetSmokeTelemetryFile,
+                    JsonSerializer.Serialize(telemetryPayload, new JsonSerializerOptions { WriteIndented = true }));
+                Serilog.Log.Information("NuGet smoke retry telemetry written to {Path}", NugetSmokeTelemetryFile);
+            }
+
+            if (!File.Exists(resultFile))
+            {
+                Assert.Fail($"Smoke test result file not found at {resultFile}.");
+            }
+
+            var result = File.ReadAllText(resultFile).Trim();
+            Serilog.Log.Information("Smoke test result: {Result}", result);
+
+            if (!result.StartsWith("PASSED", StringComparison.OrdinalIgnoreCase))
+            {
+                Assert.Fail($"NuGet package smoke test FAILED: {result}");
+            }
+
+            Serilog.Log.Information("NuGet package integration test PASSED.");
+        });
+
+    string ResolvePackedAgibuildVersion(string packageId)
+    {
+        var versionPattern = new Regex(
+            $"^{Regex.Escape(packageId)}\\.(?<v>\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z\\.]+)?(?:\\+[0-9A-Za-z\\.]+)?)\\.nupkg$",
+            RegexOptions.CultureInvariant | RegexOptions.Compiled);
+
+        var packages = PackageOutputDirectory
+            .GlobFiles("*.nupkg")
+            .Where(p => !p.Name.EndsWith(".symbols.nupkg", StringComparison.OrdinalIgnoreCase))
+            .Select(p => new FileInfo(p))
+            .Select(p => new { File = p, Match = versionPattern.Match(p.Name) })
+            .Where(x => x.Match.Success)
+            .OrderByDescending(x => x.File.LastWriteTimeUtc)
+            .ToList();
+
+        Assert.NotEmpty(packages, $"No packed nupkg found for {packageId} in {PackageOutputDirectory}.");
+
+        var chosen = packages.First();
+        Serilog.Log.Information("Using packed nupkg: {File}", chosen.File.Name);
+        return chosen.Match.Groups["v"].Value;
+    }
+
+    // ──────────────────────────── NuGet Helpers ────────────────────────────
+
+    static NugetPackagesRootResolution ResolveNugetPackagesRoot()
+    {
+        var fromEnv = Environment.GetEnvironmentVariable("NUGET_PACKAGES");
+        if (!string.IsNullOrWhiteSpace(fromEnv))
+        {
+            return new NugetPackagesRootResolution(
+                NormalizePath(fromEnv),
+                "NUGET_PACKAGES");
+        }
+
+        try
+        {
+            var output = RunProcess("dotnet", "nuget locals global-packages --list", timeoutMs: 15_000);
+            const string marker = "global-packages:";
+            var pathFromCli = output
+                .Split('\n')
+                .Select(line => line.Trim())
+                .Where(line => line.StartsWith(marker, StringComparison.OrdinalIgnoreCase))
+                .Select(line => line[(line.IndexOf(':') + 1)..].Trim())
+                .FirstOrDefault();
+
+            if (!string.IsNullOrWhiteSpace(pathFromCli))
+            {
+                return new NugetPackagesRootResolution(
+                    NormalizePath(pathFromCli),
+                    "dotnet-nuget-locals");
+            }
+        }
+        catch (Exception ex)
+        {
+            Serilog.Log.Warning("Failed to resolve NuGet root via dotnet CLI: {Message}", ex.Message);
+        }
+
+        return new NugetPackagesRootResolution(
+            NormalizePath(Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                ".nuget",
+                "packages")),
+            "user-profile-default");
+    }
+
+    static string NormalizePath(string path)
+    {
+        var expanded = Environment.ExpandEnvironmentVariables(path.Trim().Trim('"'));
+        return Path.GetFullPath(expanded);
+    }
+
+    static string ClassifyNugetSmokeFailure(string message)
+    {
+        var transientMarkers = new[]
+        {
+            "XARLP7000",
+            "Xamarin.Tools.Zip.ZipException",
+            "being used by another process",
+            "The process cannot access the file",
+            "An existing connection was forcibly closed",
+            "Unable to load the service index",
+            "The SSL connection could not be established",
+            "timed out"
+        };
+
+        return transientMarkers.Any(marker => message.Contains(marker, StringComparison.OrdinalIgnoreCase))
+            ? "transient"
+            : "deterministic";
+    }
+
+    void RunNugetSmokeWithRetry(AbsolutePath project, IList<NugetSmokeRetryTelemetry> retryTelemetry, int maxAttempts)
+    {
+        for (var attempt = 1; attempt <= maxAttempts; attempt++)
+        {
+            try
+            {
+                var output = RunProcessCaptureAllChecked(
+                    "dotnet",
+                    $"run --project \"{project}\" " +
+                    $"--configuration {Configuration} --no-restore --no-build " +
+                    $"-- --smoke-test",
+                    workingDirectory: RootDirectory,
+                    timeoutMs: 60_000);
+
+                if (output.Contains("Failed to unregister class Chrome_WidgetWin_0", StringComparison.Ordinal) ||
+                    output.Contains("ui\\gfx\\win\\window_impl.cc:124", StringComparison.Ordinal))
+                {
+                    throw new InvalidOperationException(
+                        "NuGet smoke produced a Chromium teardown error: " +
+                        "Failed to unregister class Chrome_WidgetWin_0 (window_impl.cc:124).");
+                }
+
+                retryTelemetry.Add(new NugetSmokeRetryTelemetry(
+                    Attempt: attempt,
+                    Classification: attempt == 1 ? "none" : "transient",
+                    Outcome: "success",
+                    Message: null));
+                return;
+            }
+            catch (Exception ex)
+            {
+                var message = ex.ToString();
+                var classification = ClassifyNugetSmokeFailure(message);
+                var isFinalAttempt = attempt >= maxAttempts || string.Equals(classification, "deterministic", StringComparison.Ordinal);
+                var outcome = isFinalAttempt ? "failed" : "retrying";
+
+                retryTelemetry.Add(new NugetSmokeRetryTelemetry(
+                    Attempt: attempt,
+                    Classification: classification,
+                    Outcome: outcome,
+                    Message: ex.Message));
+
+                if (isFinalAttempt)
+                {
+                    throw;
+                }
+
+                var delayMs = 1000 * attempt;
+                Serilog.Log.Warning(
+                    "NuGet smoke attempt {Attempt}/{MaxAttempts} failed ({Classification}). Retrying after {DelayMs}ms...",
+                    attempt,
+                    maxAttempts,
+                    classification,
+                    delayMs);
+                Thread.Sleep(delayMs);
+            }
+        }
+    }
+}

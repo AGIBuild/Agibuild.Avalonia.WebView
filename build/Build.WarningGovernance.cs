@@ -528,4 +528,22 @@ partial class BuildTask
             : trimmed;
         return relative.Replace('\\', '/');
     }
+
+    // ──────────────────────────── Warning Governance Targets ────────────────────────────
+
+    Target WarningGovernance => _ => _
+        .Description("Classifies governed warnings and enforces warning governance gates.")
+        .DependsOn(Build)
+        .Executes(() =>
+        {
+            EvaluateWarningGovernance(failOnIssues: true);
+        });
+
+    Target WarningGovernanceSyntheticCheck => _ => _
+        .Description("Runs synthetic regression checks for warning governance classifier.")
+        .DependsOn(Build)
+        .Executes(() =>
+        {
+            RunSyntheticWarningGovernanceChecks();
+        });
 }

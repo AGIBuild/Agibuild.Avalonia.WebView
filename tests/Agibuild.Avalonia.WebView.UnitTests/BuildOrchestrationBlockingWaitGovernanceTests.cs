@@ -11,8 +11,10 @@ public sealed class BuildOrchestrationBlockingWaitGovernanceTests
     public void Build_orchestration_blocking_waits_are_whitelisted_with_owner_and_rationale()
     {
         var repoRoot = FindRepoRoot();
-        var buildPath = Path.Combine(repoRoot, "build", "Build.cs");
-        var lines = File.ReadAllLines(buildPath, Encoding.UTF8);
+        var buildDir = Path.Combine(repoRoot, "build");
+        var lines = Directory.GetFiles(buildDir, "Build*.cs")
+            .SelectMany(f => File.ReadAllLines(f, Encoding.UTF8))
+            .ToArray();
 
         var allowed = new[]
         {
