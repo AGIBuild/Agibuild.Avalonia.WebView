@@ -65,7 +65,7 @@ Traditional WebView wrappers often solve rendering, but still leave you to hand-
 | Phase 2 | SPA Hosting | ✅ Core Done |
 | Phase 3 | Polish & GA | ✅ Done |
 | Phase 4 | Application Shell | ✅ Done |
-| Phase 5 | Electron Replacement Foundation | 🟡 Planned / In Progress |
+| Phase 5 | Electron Replacement Foundation | ✅ Completed |
 
 Read more:
 - [Roadmap](openspec/ROADMAP.md)
@@ -258,14 +258,14 @@ dotnet run --project MyApp.Desktop
 
 | Metric | Value |
 |--------|-------|
-| Unit tests | 742 |
-| Integration tests | 146 |
-| Line coverage | **96.0%** |
+| Unit tests | 766 |
+| Integration tests | 149 |
+| Line coverage | **95.87%** |
 | Branch coverage | **84.8%** |
 | Method coverage | **98.2%** |
 
 ```bash
-nuke Test            # Unit + Integration (888 tests)
+nuke Test            # Unit + Integration (915 tests)
 nuke Coverage        # Coverage report + threshold enforcement
 nuke NugetPackageTest  # Pack → install → run smoke test
 nuke TemplateE2E     # Template end-to-end test

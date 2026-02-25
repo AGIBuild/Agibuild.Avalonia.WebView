@@ -722,6 +722,49 @@ public sealed class AutomationLaneGovernanceTests
             StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void Package_metadata_contains_required_properties_for_stable_release()
+    {
+        var repoRoot = FindRepoRoot();
+        var directoryBuildPropsPath = Path.Combine(repoRoot, "Directory.Build.props");
+        Assert.True(File.Exists(directoryBuildPropsPath), $"Missing Directory.Build.props at {directoryBuildPropsPath}");
+        var props = File.ReadAllText(directoryBuildPropsPath);
+
+        Assert.Contains("<PackageLicenseExpression>", props, StringComparison.Ordinal);
+        Assert.Contains("<PackageProjectUrl>", props, StringComparison.Ordinal);
+
+        var mainCsprojPath = Path.Combine(repoRoot, "src", "Agibuild.Avalonia.WebView", "Agibuild.Avalonia.WebView.csproj");
+        Assert.True(File.Exists(mainCsprojPath), $"Missing main csproj: {mainCsprojPath}");
+        var csproj = File.ReadAllText(mainCsprojPath);
+        Assert.Contains("<Description>", csproj, StringComparison.Ordinal);
+        Assert.DoesNotContain("preview", csproj.ToLowerInvariant().Split("<Description>").Last().Split("</Description>").First());
+    }
+
+    [Fact]
+    public void Readme_quality_signals_match_actual_test_evidence()
+    {
+        var repoRoot = FindRepoRoot();
+        var readmePath = Path.Combine(repoRoot, "README.md");
+        Assert.True(File.Exists(readmePath), $"Missing README.md at {readmePath}");
+        var readme = File.ReadAllText(readmePath);
+
+        var unitTestFiles = Directory.GetFiles(
+            Path.Combine(repoRoot, "tests", "Agibuild.Avalonia.WebView.UnitTests"),
+            "*Tests.cs", SearchOption.AllDirectories);
+        var integrationTestFiles = Directory.GetFiles(
+            Path.Combine(repoRoot, "tests", "Agibuild.Avalonia.WebView.Integration.Tests.Automation"),
+            "*Tests.cs", SearchOption.AllDirectories);
+
+        Assert.True(unitTestFiles.Length > 0, "No unit test files found");
+        Assert.True(integrationTestFiles.Length > 0, "No integration test files found");
+
+        Assert.Matches(new Regex(@"\|\s*Unit tests\s*\|\s*\d{3,}\s*\|"), readme);
+        Assert.Matches(new Regex(@"\|\s*Integration tests\s*\|\s*\d{2,}\s*\|"), readme);
+        Assert.Matches(new Regex(@"\|\s*Line coverage\s*\|\s*\*\*\d+\.\d+%\*\*\s*\|"), readme);
+
+        Assert.Contains("Phase 5 | Electron Replacement Foundation | ✅ Completed", readme, StringComparison.Ordinal);
+    }
+
     private static string ReadCombinedBuildSource(string repoRoot)
     {
         var buildDir = Path.Combine(repoRoot, "build");

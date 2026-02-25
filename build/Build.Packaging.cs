@@ -203,7 +203,26 @@ partial class BuildTask
                 if (string.IsNullOrEmpty(description))
                     errors.Add("NUSPEC: Missing <description>");
 
-                Serilog.Log.Information("  Nuspec: id={Id}, version={Version}", id, version);
+                var licenseExpr = metadata?.Element(ns + "license")?.Value;
+                var projectUrl = metadata?.Element(ns + "projectUrl")?.Value;
+
+                var isStableVersion = version is not null
+                    && !version.Contains('-', StringComparison.Ordinal);
+
+                if (isStableVersion)
+                {
+                    if (string.IsNullOrEmpty(licenseExpr))
+                        errors.Add("NUSPEC: Stable package missing <license> expression");
+                    if (string.IsNullOrEmpty(projectUrl))
+                        errors.Add("NUSPEC: Stable package missing <projectUrl>");
+                    if (description is not null
+                        && (description.Contains("preview", StringComparison.OrdinalIgnoreCase)
+                            || description.Contains("pre-release", StringComparison.OrdinalIgnoreCase)))
+                        errors.Add($"NUSPEC: Stable package description contains preview language: '{description}'");
+                }
+
+                Serilog.Log.Information("  Nuspec: id={Id}, version={Version}, license={License}, projectUrl={Url}",
+                    id, version, licenseExpr ?? "(none)", projectUrl ?? "(none)");
             }
             else
             {
