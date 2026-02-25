@@ -46,6 +46,9 @@ public sealed class ShellSystemIntegrationCapabilityTests
         Assert.Equal(WebViewHostCapabilityCallOutcome.Deny, menu.Outcome);
         Assert.Equal(WebViewHostCapabilityCallOutcome.Deny, tray.Outcome);
         Assert.Equal(WebViewHostCapabilityCallOutcome.Deny, action.Outcome);
+        Assert.Equal("host-capability-bridge-not-configured", menu.DenyReason);
+        Assert.Equal("host-capability-bridge-not-configured", tray.DenyReason);
+        Assert.Equal("host-capability-bridge-not-configured", action.DenyReason);
         Assert.False(menu.IsAllowed);
         Assert.False(tray.IsAllowed);
         Assert.False(action.IsAllowed);
@@ -54,7 +57,7 @@ public sealed class ShellSystemIntegrationCapabilityTests
         Assert.All(policyErrors, error =>
         {
             Assert.Equal(WebViewShellPolicyDomain.SystemIntegration, error.Domain);
-            Assert.Contains("Host capability bridge is not configured.", error.Exception.Message, StringComparison.Ordinal);
+            Assert.Contains("host-capability-bridge-not-configured", error.Exception.Message, StringComparison.Ordinal);
             Assert.True(WebViewOperationFailure.TryGetCategory(error.Exception, out var category));
             Assert.Equal(WebViewOperationFailureCategory.AdapterFailed, category);
         });

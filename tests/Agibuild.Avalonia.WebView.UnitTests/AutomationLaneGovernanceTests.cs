@@ -58,8 +58,10 @@ public sealed class AutomationLaneGovernanceTests
             "shell-attach-detach-soak",
             "shell-multi-window-stress",
             "shell-host-capability-stress",
+            "shell-product-experience-closure",
             "windows-webview2-teardown-stress",
             "shell-devtools-policy-isolation",
+            "shell-devtools-lifecycle-cycles",
             "shell-shortcut-routing",
             "shell-system-integration-roundtrip",
             "shell-system-integration-v2-tray-payload",
@@ -395,7 +397,14 @@ public sealed class AutomationLaneGovernanceTests
         using var matrixDoc = JsonDocument.Parse(File.ReadAllText(matrixPath));
         using var lanesDoc = JsonDocument.Parse(File.ReadAllText(lanesPath));
 
-        var requiredPlatforms = new[] { "windows", "macos", "linux" };
+        var requiredPlatforms = new[] { "windows", "macos", "linux", "ios", "android" };
+        var allowedCoverageTokens = new HashSet<string>(StringComparer.Ordinal)
+        {
+            "ct",
+            "it-smoke",
+            "it-soak",
+            "n/a"
+        };
         var laneNames = lanesDoc.RootElement.GetProperty("lanes")
             .EnumerateArray()
             .Select(x => x.GetProperty("name").GetString())
@@ -424,8 +433,10 @@ public sealed class AutomationLaneGovernanceTests
             "shell-attach-detach-soak",
             "shell-multi-window-stress",
             "shell-host-capability-stress",
+            "shell-product-experience-closure",
             "windows-webview2-teardown-stress",
             "shell-devtools-policy-isolation",
+            "shell-devtools-lifecycle-cycles",
             "shell-shortcut-routing",
             "shell-system-integration-roundtrip",
             "shell-system-integration-v2-tray-payload",
@@ -452,7 +463,12 @@ public sealed class AutomationLaneGovernanceTests
                 Assert.True(
                     coverage.TryGetProperty(platform, out var coverageItems),
                     $"Missing platform coverage '{platform}' in capability '{capabilityId}'.");
-                Assert.NotEmpty(coverageItems.EnumerateArray());
+                var coverageTokens = coverageItems.EnumerateArray().Select(x => x.GetString()).Where(x => !string.IsNullOrWhiteSpace(x)).Cast<string>().ToArray();
+                Assert.NotEmpty(coverageTokens);
+                Assert.All(coverageTokens, token => Assert.Contains(token, allowedCoverageTokens));
+
+                if (platform is "ios" or "android")
+                    Assert.All(coverageTokens, token => Assert.Equal("n/a", token));
             }
 
             var evidenceItems = capability.GetProperty("evidence").EnumerateArray().ToList();

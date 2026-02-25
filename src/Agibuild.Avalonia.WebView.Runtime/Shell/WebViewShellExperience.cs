@@ -608,6 +608,7 @@ public sealed class DelegateMenuPruningPolicy : IWebViewShellMenuPruningPolicy
 /// </summary>
 public sealed class WebViewShellExperience : IDisposable
 {
+    private const string HostCapabilityBridgeUnavailableReason = "host-capability-bridge-not-configured";
     private static readonly HashSet<WebViewSystemAction> DefaultSystemActionWhitelist =
     [
         WebViewSystemAction.Quit,
@@ -776,7 +777,7 @@ public sealed class WebViewShellExperience : IDisposable
     public WebViewHostCapabilityCallResult<string?> ReadClipboardText()
     {
         if (_options.HostCapabilityBridge is null)
-            return WebViewHostCapabilityCallResult<string?>.Denied("Host capability bridge is not configured.");
+            return WebViewHostCapabilityCallResult<string?>.Denied(HostCapabilityBridgeUnavailableReason);
         return _options.HostCapabilityBridge.ReadClipboardText(_rootWindowId, parentWindowId: null, targetWindowId: _rootWindowId);
     }
 
@@ -787,7 +788,7 @@ public sealed class WebViewShellExperience : IDisposable
     public WebViewHostCapabilityCallResult<object?> WriteClipboardText(string text)
     {
         if (_options.HostCapabilityBridge is null)
-            return WebViewHostCapabilityCallResult<object?>.Denied("Host capability bridge is not configured.");
+            return WebViewHostCapabilityCallResult<object?>.Denied(HostCapabilityBridgeUnavailableReason);
         return _options.HostCapabilityBridge.WriteClipboardText(text, _rootWindowId, parentWindowId: null, targetWindowId: _rootWindowId);
     }
 
@@ -798,7 +799,7 @@ public sealed class WebViewShellExperience : IDisposable
     public WebViewHostCapabilityCallResult<WebViewFileDialogResult> ShowOpenFileDialog(WebViewOpenFileDialogRequest request)
     {
         if (_options.HostCapabilityBridge is null)
-            return WebViewHostCapabilityCallResult<WebViewFileDialogResult>.Denied("Host capability bridge is not configured.");
+            return WebViewHostCapabilityCallResult<WebViewFileDialogResult>.Denied(HostCapabilityBridgeUnavailableReason);
         return _options.HostCapabilityBridge.ShowOpenFileDialog(request, _rootWindowId, parentWindowId: null, targetWindowId: _rootWindowId);
     }
 
@@ -809,7 +810,7 @@ public sealed class WebViewShellExperience : IDisposable
     public WebViewHostCapabilityCallResult<WebViewFileDialogResult> ShowSaveFileDialog(WebViewSaveFileDialogRequest request)
     {
         if (_options.HostCapabilityBridge is null)
-            return WebViewHostCapabilityCallResult<WebViewFileDialogResult>.Denied("Host capability bridge is not configured.");
+            return WebViewHostCapabilityCallResult<WebViewFileDialogResult>.Denied(HostCapabilityBridgeUnavailableReason);
         return _options.HostCapabilityBridge.ShowSaveFileDialog(request, _rootWindowId, parentWindowId: null, targetWindowId: _rootWindowId);
     }
 
@@ -820,7 +821,7 @@ public sealed class WebViewShellExperience : IDisposable
     public WebViewHostCapabilityCallResult<object?> ShowNotification(WebViewNotificationRequest request)
     {
         if (_options.HostCapabilityBridge is null)
-            return WebViewHostCapabilityCallResult<object?>.Denied("Host capability bridge is not configured.");
+            return WebViewHostCapabilityCallResult<object?>.Denied(HostCapabilityBridgeUnavailableReason);
         return _options.HostCapabilityBridge.ShowNotification(request, _rootWindowId, parentWindowId: null, targetWindowId: _rootWindowId);
     }
 
@@ -840,7 +841,7 @@ public sealed class WebViewShellExperience : IDisposable
 
         if (_options.HostCapabilityBridge is null)
         {
-            var unavailable = WebViewHostCapabilityCallResult<object?>.Denied("Host capability bridge is not configured.");
+            var unavailable = WebViewHostCapabilityCallResult<object?>.Denied(HostCapabilityBridgeUnavailableReason);
             ReportSystemIntegrationOutcome(
                 unavailable,
                 "Menu model operation was denied by host capability policy.");
@@ -868,7 +869,7 @@ public sealed class WebViewShellExperience : IDisposable
     {
         if (_options.HostCapabilityBridge is null)
         {
-            var unavailable = WebViewHostCapabilityCallResult<object?>.Denied("Host capability bridge is not configured.");
+            var unavailable = WebViewHostCapabilityCallResult<object?>.Denied(HostCapabilityBridgeUnavailableReason);
             ReportSystemIntegrationOutcome(
                 unavailable,
                 "Tray state operation was denied by host capability policy.");
@@ -904,7 +905,7 @@ public sealed class WebViewShellExperience : IDisposable
 
         if (_options.HostCapabilityBridge is null)
         {
-            var unavailable = WebViewHostCapabilityCallResult<object?>.Denied("Host capability bridge is not configured.");
+            var unavailable = WebViewHostCapabilityCallResult<object?>.Denied(HostCapabilityBridgeUnavailableReason);
             ReportSystemIntegrationOutcome(
                 unavailable,
                 "System action operation was denied by host capability policy.");
@@ -931,7 +932,7 @@ public sealed class WebViewShellExperience : IDisposable
         ArgumentNullException.ThrowIfNull(request);
         if (_options.HostCapabilityBridge is null)
         {
-            var unavailable = WebViewHostCapabilityCallResult<WebViewSystemIntegrationEventRequest>.Denied("Host capability bridge is not configured.");
+            var unavailable = WebViewHostCapabilityCallResult<WebViewSystemIntegrationEventRequest>.Denied(HostCapabilityBridgeUnavailableReason);
             ReportSystemIntegrationOutcome(
                 unavailable,
                 "System integration event dispatch was denied by host capability policy.");

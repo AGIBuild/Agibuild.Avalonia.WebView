@@ -161,6 +161,72 @@ public sealed class HostCapabilityBridgeIntegrationTests
     }
 
     [AvaloniaFact]
+    public void Shell_product_experience_closure_file_menu_and_permission_recovery_is_deterministic()
+    {
+        var dispatcher = new TestDispatcher();
+        var adapter = new MockWebViewAdapterFull();
+        using var core = new WebViewCore(adapter, dispatcher);
+        var provider = new IntegrationHostCapabilityProvider();
+        var bridge = new WebViewHostCapabilityBridge(provider, new IntegrationCapabilityPolicy());
+
+        using (var deniedShell = new WebViewShellExperience(core, new WebViewShellExperienceOptions
+               {
+                   HostCapabilityBridge = bridge,
+                   PermissionPolicy = new DelegatePermissionPolicy((_, e) => e.State = PermissionState.Deny)
+               }))
+        {
+            var open = deniedShell.ShowOpenFileDialog(new WebViewOpenFileDialogRequest { Title = "Open product-flow file" });
+            var save = deniedShell.ShowSaveFileDialog(new WebViewSaveFileDialogRequest { SuggestedFileName = "product-flow.txt" });
+            var menu = deniedShell.ApplyMenuModel(new WebViewMenuModelRequest
+            {
+                Items =
+                [
+                    new WebViewMenuItemModel
+                    {
+                        Id = "file",
+                        Label = "File"
+                    }
+                ]
+            });
+            var deniedPermission = new PermissionRequestedEventArgs(WebViewPermissionKind.Camera, new Uri("https://example.com/denied"));
+            adapter.RaisePermissionRequested(deniedPermission);
+
+            Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, open.Outcome);
+            Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, save.Outcome);
+            Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, menu.Outcome);
+            Assert.Equal(PermissionState.Deny, deniedPermission.State);
+        }
+
+        using (var recoveredShell = new WebViewShellExperience(core, new WebViewShellExperienceOptions
+               {
+                   HostCapabilityBridge = bridge,
+                   PermissionPolicy = new DelegatePermissionPolicy((_, e) => e.State = PermissionState.Allow)
+               }))
+        {
+            var open = recoveredShell.ShowOpenFileDialog(new WebViewOpenFileDialogRequest { Title = "Open recovered file" });
+            var menu = recoveredShell.ApplyMenuModel(new WebViewMenuModelRequest
+            {
+                Items =
+                [
+                    new WebViewMenuItemModel
+                    {
+                        Id = "help",
+                        Label = "Help"
+                    }
+                ]
+            });
+            var allowedPermission = new PermissionRequestedEventArgs(WebViewPermissionKind.Camera, new Uri("https://example.com/recovered"));
+            adapter.RaisePermissionRequested(allowedPermission);
+
+            Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, open.Outcome);
+            Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, menu.Outcome);
+            Assert.Equal(PermissionState.Allow, allowedPermission.State);
+        }
+
+        Assert.Equal(2, provider.AppliedMenus.Count);
+    }
+
+    [AvaloniaFact]
     public void Host_capability_policy_failure_blocks_provider_and_reports_external_open_domain_error()
     {
         var dispatcher = new TestDispatcher();

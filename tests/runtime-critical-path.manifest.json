@@ -50,6 +50,12 @@
       "testMethod": "Host_capability_bridge_stress_external_open_cycles_remain_deterministic"
     },
     {
+      "id": "shell-product-experience-closure",
+      "lane": "RuntimeAutomation",
+      "file": "tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/HostCapabilityBridgeIntegrationTests.cs",
+      "testMethod": "Shell_product_experience_closure_file_menu_and_permission_recovery_is_deterministic"
+    },
+    {
       "id": "windows-webview2-teardown-stress",
       "lane": "RuntimeAutomation",
       "file": "tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/WebView2TeardownStabilityIntegrationTests.cs",
@@ -60,6 +66,12 @@
       "lane": "RuntimeAutomation",
       "file": "tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/ShellPolicyIntegrationTests.cs",
       "testMethod": "DevTools_policy_deny_is_isolated_and_permission_domain_remains_deterministic"
+    },
+    {
+      "id": "shell-devtools-lifecycle-cycles",
+      "lane": "RuntimeAutomation",
+      "file": "tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/ShellPolicyIntegrationTests.cs",
+      "testMethod": "DevTools_policy_lifecycle_cycles_remain_deterministic_across_shell_recreation"
     },
     {
       "id": "shell-shortcut-routing",

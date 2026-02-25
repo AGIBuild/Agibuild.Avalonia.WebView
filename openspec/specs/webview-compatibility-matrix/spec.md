@@ -1,8 +1,6 @@
 ## Purpose
 Define compatibility-matrix governance contracts and acceptance-criteria traceability.
-
 ## Requirements
-
 ### Requirement: Compatibility matrix exists and is versioned
 The repository SHALL maintain a versioned WebView compatibility matrix that defines:
 - supported platforms (Windows, macOS/iOS, Android, Linux)
@@ -206,4 +204,11 @@ Platform coverage claims in matrix rows SHALL include deterministic coverage tok
 #### Scenario: Declared platform has empty coverage token list
 - **WHEN** matrix governance checks platform coverage payload
 - **THEN** validation fails with capability id and platform name
+
+### Requirement: Compatibility declarations SHALL distinguish unsupported from undeclared
+Platform compatibility declarations SHALL explicitly mark unsupported platform scope with deterministic token (`n/a`) instead of omitting platform keys.
+
+#### Scenario: Unsupported mobile scope is explicitly declared
+- **WHEN** compatibility/governance artifacts are generated for shell capabilities
+- **THEN** iOS/Android scope is explicitly represented as `n/a` where executable evidence is not yet available
 

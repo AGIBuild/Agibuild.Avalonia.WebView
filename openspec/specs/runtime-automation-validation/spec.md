@@ -42,3 +42,17 @@ Governance checks SHALL ensure shared shell closeout IDs remain present across r
 - **WHEN** a shared closeout scenario/capability ID is absent in runtime critical-path manifest or production matrix
 - **THEN** governance validation fails before release-readiness sign-off
 
+### Requirement: Runtime critical path SHALL include product-experience closure scenario
+Runtime critical-path manifest SHALL include a product-level shell scenario that validates file/menu capability behavior across permission deny/recover transitions.
+
+#### Scenario: Product-experience closure scenario is listed with executable evidence
+- **WHEN** governance reads `runtime-critical-path.manifest.json`
+- **THEN** scenario id `shell-product-experience-closure` exists and maps to executable RuntimeAutomation evidence
+
+### Requirement: Runtime critical path SHALL include DevTools lifecycle cycle scenario
+Runtime critical-path manifest SHALL include a dedicated shell scenario for DevTools lifecycle stability across repeated scope recreation.
+
+#### Scenario: DevTools lifecycle cycle scenario is present
+- **WHEN** governance reads runtime critical-path manifest
+- **THEN** scenario id `shell-devtools-lifecycle-cycles` exists and maps to executable RuntimeAutomation evidence
+

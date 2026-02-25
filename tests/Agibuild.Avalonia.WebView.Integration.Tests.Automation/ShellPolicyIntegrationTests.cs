@@ -168,4 +168,61 @@ public sealed class ShellPolicyIntegrationTests
         Assert.NotNull(observedError);
         Assert.Equal(WebViewShellPolicyDomain.Command, observedError!.Domain);
     }
+
+    [AvaloniaFact]
+    public async Task DevTools_policy_lifecycle_cycles_remain_deterministic_across_shell_recreation()
+    {
+        var dispatcher = new TestDispatcher();
+        var adapter = new MockWebViewAdapterFull();
+        using var core = new WebViewCore(adapter, dispatcher);
+        var policyErrors = new List<WebViewShellPolicyErrorEventArgs>();
+
+        const int iterations = 30;
+        var deniedIterations = 0;
+        for (var i = 0; i < iterations; i++)
+        {
+            var denyDevTools = i % 3 == 0;
+            if (denyDevTools)
+                deniedIterations++;
+
+            using var shell = new WebViewShellExperience(core, new WebViewShellExperienceOptions
+            {
+                DevToolsPolicy = new DelegateDevToolsPolicy((_, _) =>
+                    denyDevTools
+                        ? WebViewShellDevToolsDecision.Deny($"devtools-cycle-denied-{i}")
+                        : WebViewShellDevToolsDecision.Allow()),
+                PermissionPolicy = new DelegatePermissionPolicy((_, e) => e.State = PermissionState.Deny),
+                PolicyErrorHandler = (_, error) => policyErrors.Add(error)
+            });
+
+            var openResult = await shell.OpenDevToolsAsync();
+            var closeResult = await shell.CloseDevToolsAsync();
+            var queryResult = await shell.IsDevToolsOpenAsync();
+            var permissionArgs = new PermissionRequestedEventArgs(WebViewPermissionKind.Camera, new Uri("https://example.com"));
+            adapter.RaisePermissionRequested(permissionArgs);
+
+            if (denyDevTools)
+            {
+                Assert.False(openResult);
+                Assert.False(closeResult);
+                Assert.False(queryResult);
+            }
+            else
+            {
+                Assert.True(openResult);
+                Assert.True(closeResult);
+                Assert.False(queryResult);
+            }
+
+            Assert.Equal(PermissionState.Deny, permissionArgs.State);
+        }
+
+        // After all shell scopes are disposed, permission handlers must not leak.
+        var postDisposePermission = new PermissionRequestedEventArgs(WebViewPermissionKind.Camera, new Uri("https://example.com"));
+        adapter.RaisePermissionRequested(postDisposePermission);
+        Assert.Equal(PermissionState.Default, postDisposePermission.State);
+
+        Assert.Equal(deniedIterations * 3, policyErrors.Count);
+        Assert.All(policyErrors, error => Assert.Equal(WebViewShellPolicyDomain.DevTools, error.Domain));
+    }
 }

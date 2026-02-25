@@ -31,6 +31,7 @@
         "Clean",
         "ContractAutomation",
         "Coverage",
+        "DependencyVulnerabilityGovernance",
         "IntegrationTests",
         "NugetPackageTest",
         "OpenSpecStrictGovernance",
@@ -48,6 +49,7 @@
         "StartReactDev",
         "TemplateE2E",
         "Test",
+        "TypeScriptDeclarationGovernance",
         "UnitTests",
         "ValidatePackage",
         "WarningGovernance",
@@ -132,6 +134,11 @@
         "AndroidSdkRoot": {
           "type": "string",
           "description": "Android SDK root path. Default: ~/Library/Android/sdk (macOS) or ANDROID_HOME env var"
+        },
+        "BranchCoverageThreshold": {
+          "type": "integer",
+          "description": "Minimum branch coverage percentage (0-100). Default: 84",
+          "format": "int32"
         },
         "Configuration": {
           "type": "string",

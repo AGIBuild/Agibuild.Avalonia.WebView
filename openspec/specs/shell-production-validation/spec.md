@@ -38,3 +38,31 @@ Shell production closeout governance SHALL assert that diagnostic export and tem
 - **WHEN** diagnostic export marker or template regression entry function marker is removed
 - **THEN** governance tests fail with deterministic signal
 
+### Requirement: Shell production matrix SHALL include product-experience closure capability
+Shell production matrix SHALL include a dedicated capability row for product-experience closure with explicit platform coverage and executable evidence.
+
+#### Scenario: Product-experience closure capability is declared and traceable
+- **WHEN** governance validates `shell-production-matrix.json`
+- **THEN** capability id `shell-product-experience-closure` exists with per-platform coverage and RuntimeAutomation evidence mapping
+
+### Requirement: Shell production matrix SHALL declare five-platform parity envelope
+Shell production matrix SHALL declare explicit platform keys for `windows`, `macos`, `linux`, `ios`, and `android` across every capability coverage entry.
+
+#### Scenario: Every capability contains five-platform coverage keys
+- **WHEN** governance parses shell production matrix
+- **THEN** each capability has non-empty coverage arrays for all five platform keys
+
+### Requirement: Shell production coverage tokens SHALL be governed
+Coverage tokens in shell production matrix SHALL use controlled vocabulary (`ct`, `it-smoke`, `it-soak`, `n/a`).
+
+#### Scenario: Unsupported token fails governance
+- **WHEN** matrix coverage includes a token outside the controlled vocabulary
+- **THEN** governance validation fails with deterministic diagnostics
+
+### Requirement: Shell production matrix SHALL include DevTools lifecycle stability capability
+Shell production matrix SHALL include a dedicated capability for DevTools lifecycle cycle stability with executable RuntimeAutomation evidence.
+
+#### Scenario: DevTools lifecycle capability is declared in production matrix
+- **WHEN** governance validates shell production matrix
+- **THEN** capability id `shell-devtools-lifecycle-cycles` exists with platform coverage and evidence mapping
+

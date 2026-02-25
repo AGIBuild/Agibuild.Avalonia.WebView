@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "platforms": ["windows", "macos", "linux"],
+  "platforms": ["windows", "macos", "linux", "ios", "android"],
   "capabilities": [
     {
       "id": "shell-attach-detach-soak",
@@ -8,7 +8,9 @@
       "coverage": {
         "windows": ["ct", "it-soak"],
         "macos": ["ct", "it-smoke"],
-        "linux": ["ct"]
+        "linux": ["ct"],
+        "ios": ["n/a"],
+        "android": ["n/a"]
       },
       "evidence": [
         {
@@ -24,7 +26,9 @@
       "coverage": {
         "windows": ["ct", "it-soak"],
         "macos": ["ct", "it-smoke"],
-        "linux": ["ct"]
+        "linux": ["ct"],
+        "ios": ["n/a"],
+        "android": ["n/a"]
       },
       "evidence": [
         {
@@ -40,7 +44,9 @@
       "coverage": {
         "windows": ["ct", "it-soak"],
         "macos": ["ct"],
-        "linux": ["ct"]
+        "linux": ["ct"],
+        "ios": ["n/a"],
+        "android": ["n/a"]
       },
       "evidence": [
         {
@@ -51,12 +57,32 @@
       ]
     },
     {
+      "id": "shell-product-experience-closure",
+      "supportLevel": "extended",
+      "coverage": {
+        "windows": ["ct", "it-smoke"],
+        "macos": ["ct", "it-smoke"],
+        "linux": ["ct", "it-smoke"],
+        "ios": ["n/a"],
+        "android": ["n/a"]
+      },
+      "evidence": [
+        {
+          "lane": "RuntimeAutomation",
+          "file": "tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/HostCapabilityBridgeIntegrationTests.cs",
+          "testMethod": "Shell_product_experience_closure_file_menu_and_permission_recovery_is_deterministic"
+        }
+      ]
+    },
+    {
       "id": "windows-webview2-teardown-stress",
       "supportLevel": "extended",
       "coverage": {
         "windows": ["it-soak"],
         "macos": ["n/a"],
-        "linux": ["n/a"]
+        "linux": ["n/a"],
+        "ios": ["n/a"],
+        "android": ["n/a"]
       },
       "evidence": [
         {
@@ -72,7 +98,9 @@
       "coverage": {
         "windows": ["ct", "it-smoke"],
         "macos": ["ct", "it-smoke"],
-        "linux": ["ct", "it-smoke"]
+        "linux": ["ct", "it-smoke"],
+        "ios": ["n/a"],
+        "android": ["n/a"]
       },
       "evidence": [
         {
@@ -83,12 +111,32 @@
       ]
     },
     {
+      "id": "shell-devtools-lifecycle-cycles",
+      "supportLevel": "extended",
+      "coverage": {
+        "windows": ["ct", "it-smoke"],
+        "macos": ["ct", "it-smoke"],
+        "linux": ["ct", "it-smoke"],
+        "ios": ["n/a"],
+        "android": ["n/a"]
+      },
+      "evidence": [
+        {
+          "lane": "RuntimeAutomation",
+          "file": "tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/ShellPolicyIntegrationTests.cs",
+          "testMethod": "DevTools_policy_lifecycle_cycles_remain_deterministic_across_shell_recreation"
+        }
+      ]
+    },
+    {
       "id": "shell-shortcut-routing",
       "supportLevel": "extended",
       "coverage": {
         "windows": ["ct", "it-smoke"],
         "macos": ["ct", "it-smoke"],
-        "linux": ["ct", "it-smoke"]
+        "linux": ["ct", "it-smoke"],
+        "ios": ["n/a"],
+        "android": ["n/a"]
       },
       "evidence": [
         {
@@ -104,7 +152,9 @@
       "coverage": {
         "windows": ["ct", "it-smoke"],
         "macos": ["ct"],
-        "linux": ["ct"]
+        "linux": ["ct"],
+        "ios": ["n/a"],
+        "android": ["n/a"]
       },
       "evidence": [
         {
@@ -120,7 +170,9 @@
       "coverage": {
         "windows": ["ct", "it-smoke"],
         "macos": ["ct"],
-        "linux": ["ct"]
+        "linux": ["ct"],
+        "ios": ["n/a"],
+        "android": ["n/a"]
       },
       "evidence": [
         {
@@ -136,7 +188,9 @@
       "coverage": {
         "windows": ["ct", "it-smoke"],
         "macos": ["ct"],
-        "linux": ["ct"]
+        "linux": ["ct"],
+        "ios": ["n/a"],
+        "android": ["n/a"]
       },
       "evidence": [
         {
@@ -152,7 +206,9 @@
       "coverage": {
         "windows": ["ct", "it-smoke"],
         "macos": ["ct"],
-        "linux": ["ct"]
+        "linux": ["ct"],
+        "ios": ["n/a"],
+        "android": ["n/a"]
       },
       "evidence": [
         {
