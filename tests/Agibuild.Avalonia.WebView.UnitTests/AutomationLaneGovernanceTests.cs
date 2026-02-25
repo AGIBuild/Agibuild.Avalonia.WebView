@@ -139,7 +139,14 @@ public sealed class AutomationLaneGovernanceTests
     {
         var repoRoot = FindRepoRoot();
         var buildPath = Path.Combine(repoRoot, "build", "Build.cs");
+        var helpersPath = Path.Combine(repoRoot, "build", "Build.Helpers.cs");
+        var publishingPath = Path.Combine(repoRoot, "build", "Build.Publishing.cs");
+        Assert.True(File.Exists(helpersPath), $"Missing build helper source: {helpersPath}");
+        Assert.True(File.Exists(publishingPath), $"Missing build publishing source: {publishingPath}");
         var source = File.ReadAllText(buildPath);
+        var helperSource = File.ReadAllText(helpersPath);
+        var publishingSource = File.ReadAllText(publishingPath);
+        var combinedSource = string.Join("\n", source, helperSource, publishingSource);
 
         Assert.Contains("Target ContractAutomation", source, StringComparison.Ordinal);
         Assert.Contains("Target RuntimeAutomation", source, StringComparison.Ordinal);
@@ -152,10 +159,12 @@ public sealed class AutomationLaneGovernanceTests
         Assert.Contains("nuget-smoke-retry-telemetry.json", source, StringComparison.Ordinal);
         Assert.Contains("phase5-closeout-snapshot.json", source, StringComparison.Ordinal);
         Assert.Contains("Target PhaseCloseoutSnapshot", source, StringComparison.Ordinal);
+        Assert.Contains("partial class BuildTask", source, StringComparison.Ordinal);
+        Assert.Contains("Execute<BuildTask>(x => x.Build)", source, StringComparison.Ordinal);
         Assert.Contains("--shellPreset app-shell", source, StringComparison.Ordinal);
-        Assert.Contains("RunNugetSmokeWithRetry", source, StringComparison.Ordinal);
-        Assert.Contains("ClassifyNugetSmokeFailure", source, StringComparison.Ordinal);
-        Assert.Contains("ResolveNugetPackagesRoot", source, StringComparison.Ordinal);
+        Assert.Contains("RunNugetSmokeWithRetry", combinedSource, StringComparison.Ordinal);
+        Assert.Contains("ClassifyNugetSmokeFailure", combinedSource, StringComparison.Ordinal);
+        Assert.Contains("ResolveNugetPackagesRoot", combinedSource, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -604,12 +613,15 @@ public sealed class AutomationLaneGovernanceTests
     {
         var repoRoot = FindRepoRoot();
         var buildPath = Path.Combine(repoRoot, "build", "Build.cs");
+        var helpersPath = Path.Combine(repoRoot, "build", "Build.Helpers.cs");
         Assert.True(File.Exists(buildPath), $"Missing build source: {buildPath}");
+        Assert.True(File.Exists(helpersPath), $"Missing build helper source: {helpersPath}");
 
         var source = File.ReadAllText(buildPath);
+        var helperSource = File.ReadAllText(helpersPath);
         Assert.Contains("Target OpenSpecStrictGovernance", source, StringComparison.Ordinal);
         Assert.Contains("validate --all --strict", source, StringComparison.Ordinal);
-        Assert.Contains("RunProcessCaptureAllChecked(", source, StringComparison.Ordinal);
+        Assert.Contains("RunProcessCaptureAllChecked(", helperSource, StringComparison.Ordinal);
         Assert.Contains("OpenSpecStrictGovernanceReportFile", source, StringComparison.Ordinal);
         Assert.Contains("Target PhaseCloseoutSnapshot", source, StringComparison.Ordinal);
         Assert.Contains("phase5-closeout-snapshot.json", source, StringComparison.Ordinal);
@@ -706,8 +718,9 @@ public sealed class AutomationLaneGovernanceTests
     public void Warning_governance_treats_windowsbase_conflicts_as_regressions()
     {
         var repoRoot = FindRepoRoot();
-        var buildPath = Path.Combine(repoRoot, "build", "Build.cs");
-        var source = File.ReadAllText(buildPath);
+        var warningGovernancePath = Path.Combine(repoRoot, "build", "Build.WarningGovernance.cs");
+        Assert.True(File.Exists(warningGovernancePath), $"Missing warning governance source: {warningGovernancePath}");
+        var source = File.ReadAllText(warningGovernancePath);
 
         Assert.Contains(
             "WindowsBase conflict warning must be eliminated; baseline acceptance is not allowed.",
