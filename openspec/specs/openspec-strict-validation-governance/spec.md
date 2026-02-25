@@ -31,3 +31,10 @@ Repository governance MUST require `openspec validate --all --strict` to pass be
 - **WHEN** the validation command runs on repository specs
 - **THEN** all items pass with zero failures
 
+### Requirement: Governance tests SHALL enforce phase closeout roadmap status markers
+Governance checks SHALL fail when Phase 5 roadmap closeout markers drift from the completed baseline.
+
+#### Scenario: Roadmap closeout marker regression is detected
+- **WHEN** roadmap Phase 5 state or evidence mapping markers are removed or changed unexpectedly
+- **THEN** governance tests fail with deterministic diagnostics
+

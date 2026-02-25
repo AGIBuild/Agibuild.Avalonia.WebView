@@ -54,3 +54,25 @@ The architecture SHALL keep frontend teams in a web-first workflow and minimize 
 - **THEN** they can implement core desktop scenarios via TypeScript + typed bridge contracts
 - **AND** host-specific glue code remains minimal and policy-governed
 
+### Requirement: Phase 5 status SHALL be represented as completed when exit criteria evidence is satisfied
+Roadmap state for Electron Replacement Foundation SHALL move to completed once all declared Phase 5 exit criteria are met with passing automated evidence.
+
+#### Scenario: Completed status aligns with evidence snapshot
+- **WHEN** latest full validation gates pass and archived closeout evidence exists
+- **THEN** roadmap Phase 5 status is set to completed
+- **AND** the snapshot reflects current counts and coverage baseline
+
+### Requirement: Phase 5 closeout SHALL include deterministic evidence source mapping
+Roadmap closeout section SHALL provide explicit mapping from claims to evidence sources to support audit and future phase planning.
+
+#### Scenario: Reviewer traces claims to source artifacts
+- **WHEN** reviewer inspects Phase 5 closeout section
+- **THEN** each key claim has a clear source mapping to archived change evidence or validation command outputs
+
+### Requirement: Phase closeout evidence SHALL be generated from automated pipeline artifacts
+Phase closeout evidence SHALL rely on generated pipeline snapshot artifacts rather than manual aggregation.
+
+#### Scenario: Reviewer validates closeout from generated snapshot
+- **WHEN** reviewer checks latest phase closeout evidence
+- **THEN** evidence fields are sourced from generated snapshot artifact tied to governed CI commands
+

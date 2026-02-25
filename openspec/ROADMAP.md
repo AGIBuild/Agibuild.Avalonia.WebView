@@ -8,7 +8,7 @@
 ## Phase Overview
 
 ```
-Phase 0 (✅ Done)        Phase 1 (✅ Done)       Phase 2 (✅ Core Done)  Phase 3 (✅ Done)      Phase 4 (✅ Done)      Phase 5 (🟡 In Progress)
+Phase 0 (✅ Done)        Phase 1 (✅ Done)       Phase 2 (✅ Core Done)  Phase 3 (✅ Done)      Phase 4 (✅ Done)      Phase 5 (✅ Completed)
 Foundation               Type-Safe Bridge       SPA Hosting            Polish & GA            Application Shell       Electron Replacement Foundation
 ─────────────────────    ────────────────────   ────────────────────   ────────────────────   ────────────────────    ─────────────────────────────────
 • Cross-platform         • Source Generator     • Custom protocol      • Project template      • Shell policy kit      • Typed capability gateway
@@ -415,7 +415,7 @@ dotnet new agibuild-hybrid -n MyApp --frontend react
 
 ---
 
-## Phase 5: Electron Replacement Foundation (🟡 In Progress)
+## Phase 5: Electron Replacement Foundation (✅ Completed)
 
 **Goal**: Make Electron migration-grade developer experience the primary outcome by addressing core pain points with a web-first, AI-agent-friendly architecture.
 
@@ -445,9 +445,19 @@ dotnet new agibuild-hybrid -n MyApp --frontend react
 ### Latest Evidence Snapshot
 
 - Release: `v0.1.15-preview` (pre-release)
-- `nuke Test`: Unit `764`, Integration `148`, Total `912` (pass)
-- `nuke Coverage`: Line `95.96%` (pass, threshold `90%`)
-- OpenSpec: `system-integration-contract-v2-freeze` validated (`openspec validate --all --strict`)
+- `nuke Test`: Unit `766`, Integration `149`, Total `915` (pass)
+- `nuke Coverage`: Line `95.87%` (pass, threshold `90%`)
+- OpenSpec archive evidence:
+  - `2026-02-24-system-integration-contract-v2-freeze`
+  - `2026-02-24-template-webfirst-dx-panel`
+  - `2026-02-24-system-integration-diagnostic-export`
+
+### Evidence Source Mapping
+
+- Typed gateway/policy-first closeout: `openspec/changes/archive/2026-02-24-system-integration-contract-v2-freeze/verification-evidence.md`
+- Web-first template DX closeout: `openspec/changes/archive/2026-02-24-template-webfirst-dx-panel/verification-evidence.md`
+- Agent-friendly diagnostics export closeout: `openspec/changes/archive/2026-02-24-system-integration-diagnostic-export/verification-evidence.md`
+- Validation command baseline: `nuke Test`, `nuke Coverage`, `openspec validate --all --strict`
 
 ### Phase 5 Exit Criteria
 
@@ -461,7 +471,7 @@ dotnet new agibuild-hybrid -n MyApp --frontend react
 ## Dependencies & Prerequisites
 
 ```
-Phase 0 (✅ Done) ──► Phase 1 (✅ Done) ──► Phase 2 (✅ Core Done) ──► Phase 3 (✅ Done) ──► Phase 4 (✅ Done) ──► Phase 5 (🟡 In Progress)
+Phase 0 (✅ Done) ──► Phase 1 (✅ Done) ──► Phase 2 (✅ Core Done) ──► Phase 3 (✅ Done) ──► Phase 4 (✅ Done) ──► Phase 5 (✅ Completed)
      │                      │                       │                         │                         │
      │                      │                       └── 2.4 depends on Phase 1│                         └── Electron-replacement baseline
      │                      └── Builds on F6 (RPC) + F3 (Policy)             └── Shell layer builds on stable GA baseline   builds on shell + bridge + governance

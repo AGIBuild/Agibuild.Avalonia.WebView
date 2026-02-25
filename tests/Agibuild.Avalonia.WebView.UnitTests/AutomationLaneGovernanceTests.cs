@@ -150,6 +150,8 @@ public sealed class AutomationLaneGovernanceTests
         Assert.Contains("warning-governance-report.json", source, StringComparison.Ordinal);
         Assert.Contains("warning-governance.baseline.json", source, StringComparison.Ordinal);
         Assert.Contains("nuget-smoke-retry-telemetry.json", source, StringComparison.Ordinal);
+        Assert.Contains("phase5-closeout-snapshot.json", source, StringComparison.Ordinal);
+        Assert.Contains("Target PhaseCloseoutSnapshot", source, StringComparison.Ordinal);
         Assert.Contains("--shellPreset app-shell", source, StringComparison.Ordinal);
         Assert.Contains("RunNugetSmokeWithRetry", source, StringComparison.Ordinal);
         Assert.Contains("ClassifyNugetSmokeFailure", source, StringComparison.Ordinal);
@@ -609,13 +611,95 @@ public sealed class AutomationLaneGovernanceTests
         Assert.Contains("validate --all --strict", source, StringComparison.Ordinal);
         Assert.Contains("RunProcessCaptureAllChecked(", source, StringComparison.Ordinal);
         Assert.Contains("OpenSpecStrictGovernanceReportFile", source, StringComparison.Ordinal);
+        Assert.Contains("Target PhaseCloseoutSnapshot", source, StringComparison.Ordinal);
+        Assert.Contains("phase5-closeout-snapshot.json", source, StringComparison.Ordinal);
 
         Assert.Matches(
             new Regex(@"Target\s+Ci\s*=>[\s\S]*?\.DependsOn\([\s\S]*OpenSpecStrictGovernance[\s\S]*\);", RegexOptions.Multiline),
             source);
         Assert.Matches(
+            new Regex(@"Target\s+Ci\s*=>[\s\S]*?\.DependsOn\([\s\S]*PhaseCloseoutSnapshot[\s\S]*\);", RegexOptions.Multiline),
+            source);
+        Assert.Matches(
             new Regex(@"Target\s+CiPublish\s*=>[\s\S]*?\.DependsOn\([\s\S]*OpenSpecStrictGovernance[\s\S]*\);", RegexOptions.Multiline),
             source);
+        Assert.Matches(
+            new Regex(@"Target\s+CiPublish\s*=>[\s\S]*?\.DependsOn\([\s\S]*PhaseCloseoutSnapshot[\s\S]*\);", RegexOptions.Multiline),
+            source);
+    }
+
+    [Fact]
+    public void Phase5_closeout_roadmap_and_shell_governance_artifacts_remain_consistent()
+    {
+        var repoRoot = FindRepoRoot();
+        var roadmapPath = Path.Combine(repoRoot, "openspec", "ROADMAP.md");
+        var runtimeManifestPath = Path.Combine(repoRoot, "tests", "runtime-critical-path.manifest.json");
+        var productionMatrixPath = Path.Combine(repoRoot, "tests", "shell-production-matrix.json");
+        var templateIndexPath = Path.Combine(
+            repoRoot,
+            "templates",
+            "agibuild-hybrid",
+            "HybridApp.Desktop",
+            "wwwroot",
+            "index.html");
+        var hostCapabilityBridgePath = Path.Combine(
+            repoRoot,
+            "src",
+            "Agibuild.Avalonia.WebView.Runtime",
+            "Shell",
+            "WebViewHostCapabilityBridge.cs");
+
+        Assert.True(File.Exists(roadmapPath), $"Missing roadmap file: {roadmapPath}");
+        Assert.True(File.Exists(runtimeManifestPath), $"Missing runtime critical-path manifest: {runtimeManifestPath}");
+        Assert.True(File.Exists(productionMatrixPath), $"Missing shell production matrix: {productionMatrixPath}");
+        Assert.True(File.Exists(templateIndexPath), $"Missing template index file: {templateIndexPath}");
+        Assert.True(File.Exists(hostCapabilityBridgePath), $"Missing host capability bridge source: {hostCapabilityBridgePath}");
+
+        var roadmap = File.ReadAllText(roadmapPath);
+        Assert.Contains("## Phase 5: Electron Replacement Foundation (✅ Completed)", roadmap, StringComparison.Ordinal);
+        Assert.Contains("### Evidence Source Mapping", roadmap, StringComparison.Ordinal);
+        Assert.Contains("2026-02-24-system-integration-contract-v2-freeze", roadmap, StringComparison.Ordinal);
+        Assert.Contains("2026-02-24-template-webfirst-dx-panel", roadmap, StringComparison.Ordinal);
+        Assert.Contains("2026-02-24-system-integration-diagnostic-export", roadmap, StringComparison.Ordinal);
+        Assert.Matches(
+            new Regex(@"`nuke Test`: Unit `\d+`, Integration `\d+`, Total `\d+` \(pass\)", RegexOptions.Multiline),
+            roadmap);
+        Assert.Matches(
+            new Regex(@"`nuke Coverage`: Line `\d+(\.\d+)?%` \(pass, threshold `\d+%`\)", RegexOptions.Multiline),
+            roadmap);
+
+        using var runtimeDoc = JsonDocument.Parse(File.ReadAllText(runtimeManifestPath));
+        using var matrixDoc = JsonDocument.Parse(File.ReadAllText(productionMatrixPath));
+        var runtimeScenarioIds = runtimeDoc.RootElement.GetProperty("scenarios")
+            .EnumerateArray()
+            .Select(x => x.GetProperty("id").GetString())
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .ToHashSet(StringComparer.Ordinal);
+        var matrixCapabilityIds = matrixDoc.RootElement.GetProperty("capabilities")
+            .EnumerateArray()
+            .Select(x => x.GetProperty("id").GetString())
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .ToHashSet(StringComparer.Ordinal);
+
+        var sharedPhase5Ids = new[]
+        {
+            "shell-system-integration-roundtrip",
+            "shell-system-integration-v2-tray-payload",
+            "shell-system-integration-v2-timestamp-normalization",
+            "shell-system-integration-diagnostic-export"
+        };
+
+        foreach (var id in sharedPhase5Ids)
+        {
+            Assert.Contains(id, runtimeScenarioIds);
+            Assert.Contains(id, matrixCapabilityIds);
+        }
+
+        var templateIndex = File.ReadAllText(templateIndexPath);
+        var bridgeSource = File.ReadAllText(hostCapabilityBridgePath);
+        Assert.Contains("window.runTemplateRegressionChecks", templateIndex, StringComparison.Ordinal);
+        Assert.Contains("ToExportRecord", bridgeSource, StringComparison.Ordinal);
+        Assert.Contains("WebViewHostCapabilityDiagnosticExportRecord", bridgeSource, StringComparison.Ordinal);
     }
 
     [Fact]
