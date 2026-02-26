@@ -103,6 +103,30 @@ partial class BuildTask
             Skipped: ParseIntOrZero(counters.Attribute("notExecuted")));
     }
 
+    static HashSet<string> ReadPassedTestNamesFromTrx(AbsolutePath trxPath)
+    {
+        var doc = XDocument.Load(trxPath);
+        var ns = XNamespace.Get("http://microsoft.com/schemas/VisualStudio/TeamTest/2010");
+        return doc
+            .Descendants(ns + "UnitTestResult")
+            .Where(result => string.Equals(
+                result.Attribute("outcome")?.Value,
+                "Passed",
+                StringComparison.OrdinalIgnoreCase))
+            .Select(result => result.Attribute("testName")?.Value)
+            .Where(name => !string.IsNullOrWhiteSpace(name))
+            .Cast<string>()
+            .ToHashSet(StringComparer.Ordinal);
+    }
+
+    static bool HasPassedTestMethod(HashSet<string> passedTests, string testMethod)
+    {
+        return passedTests.Any(name =>
+            name.Equals(testMethod, StringComparison.Ordinal)
+            || name.EndsWith("." + testMethod, StringComparison.Ordinal)
+            || name.Contains(testMethod, StringComparison.Ordinal));
+    }
+
     static double ReadCoberturaLineCoveragePercent(AbsolutePath coberturaPath)
     {
         var doc = XDocument.Load(coberturaPath);
@@ -267,6 +291,24 @@ partial class BuildTask
         }
 
         return string.Join('\n', new[] { output, error }.Where(x => !string.IsNullOrWhiteSpace(x)));
+    }
+
+    static string RunNpmCaptureAll(string arguments, string workingDirectory, int timeoutMs = 30_000)
+    {
+        if (OperatingSystem.IsWindows())
+        {
+            return RunProcessCaptureAll(
+                "cmd.exe",
+                $"/d /s /c \"npm {arguments}\"",
+                workingDirectory: workingDirectory,
+                timeoutMs: timeoutMs);
+        }
+
+        return RunProcessCaptureAll(
+            "npm",
+            arguments,
+            workingDirectory: workingDirectory,
+            timeoutMs: timeoutMs);
     }
 
     static string RunProcessCaptureAllChecked(string fileName, string arguments, string? workingDirectory = null, int timeoutMs = 30_000)

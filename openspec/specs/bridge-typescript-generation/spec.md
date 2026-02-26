@@ -1,8 +1,6 @@
 ## Purpose
 Define TypeScript declaration generation contracts for bridge-export/import interfaces.
-
 ## Requirements
-
 ### Requirement: TypeScript emitter maps supported CLR types deterministically
 The generator SHALL map supported CLR types to TypeScript declarations and SHALL emit per-service interfaces with deterministic naming and JSDoc metadata.
 
@@ -34,3 +32,11 @@ Build governance SHALL compile generated `bridge.d.ts` against a TypeScript harn
 #### Scenario: Declaration shape regression is introduced
 - **WHEN** generated declarations are invalid or missing required symbols
 - **THEN** governance check fails with actionable TypeScript diagnostics
+
+### Requirement: Sample bridge service layer SHALL converge on typed bridge client contract
+TypeScript sample service layers SHALL use a consistent typed client contract surface so generated declaration and runtime invocation semantics remain aligned.
+
+#### Scenario: React and Vue samples share typed client usage pattern
+- **WHEN** sample bridge service code is inspected
+- **THEN** both React and Vue service layers import and consume `@agibuild/bridge` typed client entry points
+

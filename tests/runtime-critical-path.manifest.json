@@ -29,7 +29,8 @@
       "id": "package-consumption-smoke",
       "lane": "RuntimeAutomation.PackageSmoke",
       "file": "build/Build.cs",
-      "testMethod": "NugetPackageTest"
+      "testMethod": "NugetPackageTest",
+      "ciContext": "CiPublish"
     },
     {
       "id": "shell-attach-detach-soak",

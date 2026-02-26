@@ -1,19 +1,30 @@
 import { useState, useEffect } from 'react';
+import { bridgeClient } from '@agibuild/bridge';
 
 /** Returns true once the Agibuild WebView Bridge is ready. */
 export function useBridgeReady(): boolean {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const check = () => {
-      const w = window as unknown as { agWebView?: { rpc?: unknown } };
-      if (w.agWebView?.rpc) {
-        setReady(true);
-        return;
+    let cancelled = false;
+
+    const check = async () => {
+      try {
+        await bridgeClient.ready({ timeoutMs: 10_000, pollIntervalMs: 50 });
+        if (!cancelled) {
+          setReady(true);
+        }
+      } catch {
+        if (!cancelled) {
+          setReady(false);
+        }
       }
-      setTimeout(check, 50);
     };
-    check();
+
+    void check();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return ready;

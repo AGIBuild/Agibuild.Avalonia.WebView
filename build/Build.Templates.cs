@@ -119,11 +119,15 @@ partial class BuildTask
                 DotNet($"test \"{testsCsproj}\" --configuration {Configuration} --no-build --verbosity normal",
                     workingDirectory: projectDir);
 
+                // ── Step 8: Validate framework-specific web scaffolds (react + vue) ──
+                ValidateFrameworkWebBuild(tempRoot, framework: "react", appName: "SmokeAppReact", webProjectSuffix: "Web.Vite.React");
+                ValidateFrameworkWebBuild(tempRoot, framework: "vue", appName: "SmokeAppVue", webProjectSuffix: "Web.Vite.Vue");
+
                 Serilog.Log.Information("Template E2E test PASSED.");
             }
             finally
             {
-                // ── Step 8: Cleanup ──
+                // ── Step 9: Cleanup ──
                 Serilog.Log.Information("Cleaning up...");
                 try { DotNet($"new uninstall \"{TemplatePath}\""); }
                 catch (Exception ex) { Serilog.Log.Warning("Template uninstall failed: {Error}", ex.Message); }
@@ -135,6 +139,23 @@ partial class BuildTask
                 }
             }
         });
+
+    static void ValidateFrameworkWebBuild(AbsolutePath tempRoot, string framework, string appName, string webProjectSuffix)
+    {
+        var projectDir = tempRoot / appName;
+        Serilog.Log.Information("Creating {Framework} template project at {Path}...", framework, projectDir);
+        DotNet($"new agibuild-hybrid -n {appName} -o \"{projectDir}\" --framework {framework} --shellPreset app-shell");
+
+        var webProjectDir = projectDir / $"{appName}.{webProjectSuffix}";
+        Assert.DirectoryExists(webProjectDir, $"Expected generated web project not found: {webProjectDir}");
+
+        EnsureNpmAvailable(webProjectDir);
+        Serilog.Log.Information("Running npm install for {Framework} web scaffold...", framework);
+        RunNpmProcess("install", workingDirectory: webProjectDir, timeoutMs: 120_000);
+
+        Serilog.Log.Information("Running npm run build for {Framework} web scaffold...", framework);
+        RunNpmProcess("run build", workingDirectory: webProjectDir, timeoutMs: 180_000);
+    }
 
     static string GenerateE2ETestCode() => """
         using Agibuild.Avalonia.WebView;

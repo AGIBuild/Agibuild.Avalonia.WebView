@@ -1,22 +1,17 @@
+import { bridgeClient, type BridgeServiceMethod } from "@agibuild/bridge";
+
 export interface AppInfo {
   name: string;
   version: string;
   description: string;
 }
 
-type BridgeRpc = {
-  invoke(method: string, params?: Record<string, unknown>): Promise<unknown>;
-};
-
-function getRpc(): BridgeRpc {
-  const root = window as unknown as { agWebView?: { rpc?: BridgeRpc } };
-  if (!root.agWebView?.rpc) {
-    throw new Error("Bridge not available.");
-  }
-
-  return root.agWebView.rpc;
+interface AppShellBridgeService {
+  getAppInfo: BridgeServiceMethod<void, AppInfo>;
 }
 
+const appShellService = bridgeClient.getService<AppShellBridgeService>("AppShellService");
+
 export async function getAppInfo(): Promise<AppInfo> {
-  return (await getRpc().invoke("AppShellService.getAppInfo")) as AppInfo;
+  return appShellService.getAppInfo();
 }

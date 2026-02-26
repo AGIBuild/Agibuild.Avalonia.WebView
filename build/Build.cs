@@ -85,6 +85,7 @@ partial class BuildTask : NukeBuild
     AbsolutePath OpenSpecStrictGovernanceReportFile => TestResultsDirectory / "openspec-strict-governance.log";
     AbsolutePath DependencyGovernanceReportFile => TestResultsDirectory / "dependency-governance-report.json";
     AbsolutePath TypeScriptGovernanceReportFile => TestResultsDirectory / "typescript-governance-report.json";
+    AbsolutePath RuntimeCriticalPathGovernanceReportFile => TestResultsDirectory / "runtime-critical-path-governance-report.json";
     AbsolutePath PhaseCloseoutSnapshotFile => TestResultsDirectory / "phase5-closeout-snapshot.json";
     AbsolutePath AutomationLaneManifestFile => TestsDirectory / "automation-lanes.json";
     AbsolutePath RuntimeCriticalPathManifestFile => TestsDirectory / "runtime-critical-path.manifest.json";
@@ -192,9 +193,9 @@ partial class BuildTask : NukeBuild
 
     Target Ci => _ => _
         .Description("Full CI pipeline: compile → coverage → lane automation → pack → validate.")
-        .DependsOn(Coverage, AutomationLaneReport, WarningGovernance, DependencyVulnerabilityGovernance, TypeScriptDeclarationGovernance, OpenSpecStrictGovernance, PhaseCloseoutSnapshot, ValidatePackage);
+        .DependsOn(Coverage, AutomationLaneReport, RuntimeCriticalPathExecutionGovernanceCi, WarningGovernance, DependencyVulnerabilityGovernance, TypeScriptDeclarationGovernance, OpenSpecStrictGovernance, PhaseCloseoutSnapshot, ValidatePackage);
 
     Target CiPublish => _ => _
         .Description("Full release pipeline: compile → coverage → lane automation → package smoke → publish.")
-        .DependsOn(Coverage, AutomationLaneReport, WarningGovernance, DependencyVulnerabilityGovernance, TypeScriptDeclarationGovernance, OpenSpecStrictGovernance, PhaseCloseoutSnapshot, NugetPackageTest, PackTemplate, Publish);
+        .DependsOn(Coverage, AutomationLaneReport, NugetPackageTest, RuntimeCriticalPathExecutionGovernanceCiPublish, WarningGovernance, DependencyVulnerabilityGovernance, TypeScriptDeclarationGovernance, OpenSpecStrictGovernance, PhaseCloseoutSnapshot, PackTemplate, Publish);
 }

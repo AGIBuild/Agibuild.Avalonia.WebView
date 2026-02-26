@@ -8,10 +8,21 @@ export interface BridgeRpc {
   handle?(method: string, handler: (params: unknown) => unknown | Promise<unknown>): void;
 }
 
+export type BridgeServiceMethod<TParams = void, TResult = unknown> =
+  [TParams] extends [void]
+    ? () => Promise<TResult>
+    : (params: TParams) => Promise<TResult>;
+
+export type BridgeServiceContract<TService extends object> = {
+  [K in keyof TService]: TService[K] extends (...args: any[]) => Promise<any>
+    ? TService[K]
+    : never;
+};
+
 export interface BridgeClient {
   ready(options?: BridgeReadyOptions): Promise<void>;
   invoke<T>(method: string, params?: Record<string, unknown>): Promise<T>;
-  getService<TService extends object>(serviceName: string): TService;
+  getService<TService extends object>(serviceName: string): BridgeServiceContract<TService>;
 }
 
 type BridgeRoot = {
@@ -23,6 +34,18 @@ type BridgeRoot = {
 function getRpcFromWindow(win: Window & typeof globalThis): BridgeRpc | null {
   const root = win as unknown as BridgeRoot;
   return root.agWebView?.rpc ?? null;
+}
+
+function validateServiceParams(params: unknown): Record<string, unknown> | undefined {
+  if (params === undefined) {
+    return undefined;
+  }
+
+  if (params === null || Array.isArray(params) || typeof params !== "object") {
+    throw new Error("Bridge service methods accept only object params.");
+  }
+
+  return params as Record<string, unknown>;
 }
 
 export function createBridgeClient(
@@ -50,7 +73,7 @@ export function createBridgeClient(
     return (await rpc.invoke(method, params)) as T;
   }
 
-  function getService<TService extends object>(serviceName: string): TService {
+  function getService<TService extends object>(serviceName: string): BridgeServiceContract<TService> {
     return new Proxy(
       {},
       {
@@ -59,10 +82,10 @@ export function createBridgeClient(
             return undefined;
           }
 
-          return (params?: Record<string, unknown>) => invoke(`${serviceName}.${prop}`, params);
+          return (params?: unknown) => invoke(`${serviceName}.${prop}`, validateServiceParams(params));
         },
       }
-    ) as TService;
+    ) as BridgeServiceContract<TService>;
   }
 
   return {

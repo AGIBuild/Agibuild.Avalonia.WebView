@@ -3,6 +3,8 @@
  * Each proxy maps to a C# [JsExport] service exposed via the Agibuild WebView Bridge.
  */
 
+import { bridgeClient, type BridgeServiceMethod } from '@agibuild/bridge';
+
 // ─── Types mirroring C# models ──────────────────────────────────────────────
 
 export interface PageDefinition {
@@ -68,48 +70,64 @@ export interface AppSettings {
   sidebarCollapsed: boolean;
 }
 
-// ─── Bridge RPC helper ──────────────────────────────────────────────────────
-
-function getRpc(): { invoke: (method: string, params?: Record<string, unknown>) => Promise<unknown> } {
-  const w = window as unknown as {
-    agWebView?: { rpc?: { invoke: (method: string, params?: Record<string, unknown>) => Promise<unknown> } };
-  };
-  if (w.agWebView?.rpc) return w.agWebView.rpc;
-  throw new Error('Bridge not available');
+interface AppShellBridgeService {
+  getPages: BridgeServiceMethod<void, PageDefinition[]>;
+  getAppInfo: BridgeServiceMethod<void, AppInfo>;
 }
 
-async function invoke<T>(method: string, params?: Record<string, unknown>): Promise<T> {
-  const rpc = getRpc();
-  return (await rpc.invoke(method, params)) as T;
+interface SystemInfoBridgeService {
+  getSystemInfo: BridgeServiceMethod<void, SystemInfo>;
+  getRuntimeMetrics: BridgeServiceMethod<void, RuntimeMetrics>;
 }
+
+interface ChatBridgeService {
+  sendMessage: BridgeServiceMethod<{ request: ChatRequest }, ChatResponse>;
+  getHistory: BridgeServiceMethod<void, ChatMessage[]>;
+  clearHistory: BridgeServiceMethod<void, void>;
+}
+
+interface FileBridgeService {
+  listFiles: BridgeServiceMethod<{ path?: string }, FileEntry[]>;
+  readTextFile: BridgeServiceMethod<{ path: string }, string>;
+  getUserDocumentsPath: BridgeServiceMethod<void, string>;
+}
+
+interface SettingsBridgeService {
+  getSettings: BridgeServiceMethod<void, AppSettings>;
+  updateSettings: BridgeServiceMethod<{ settings: AppSettings }, AppSettings>;
+}
+
+const appShellRpc = bridgeClient.getService<AppShellBridgeService>('AppShellService');
+const systemInfoRpc = bridgeClient.getService<SystemInfoBridgeService>('SystemInfoService');
+const chatRpc = bridgeClient.getService<ChatBridgeService>('ChatService');
+const fileRpc = bridgeClient.getService<FileBridgeService>('FileService');
+const settingsRpc = bridgeClient.getService<SettingsBridgeService>('SettingsService');
 
 // ─── Service proxies ────────────────────────────────────────────────────────
 
 export const appShellService = {
-  getPages: () => invoke<PageDefinition[]>('AppShellService.getPages'),
-  getAppInfo: () => invoke<AppInfo>('AppShellService.getAppInfo'),
+  getPages: () => appShellRpc.getPages(),
+  getAppInfo: () => appShellRpc.getAppInfo(),
 };
 
 export const systemInfoService = {
-  getSystemInfo: () => invoke<SystemInfo>('SystemInfoService.getSystemInfo'),
-  getRuntimeMetrics: () => invoke<RuntimeMetrics>('SystemInfoService.getRuntimeMetrics'),
+  getSystemInfo: () => systemInfoRpc.getSystemInfo(),
+  getRuntimeMetrics: () => systemInfoRpc.getRuntimeMetrics(),
 };
 
 export const chatService = {
-  sendMessage: (request: ChatRequest) =>
-    invoke<ChatResponse>('ChatService.sendMessage', { request }),
-  getHistory: () => invoke<ChatMessage[]>('ChatService.getHistory'),
-  clearHistory: () => invoke<void>('ChatService.clearHistory'),
+  sendMessage: (request: ChatRequest) => chatRpc.sendMessage({ request }),
+  getHistory: () => chatRpc.getHistory(),
+  clearHistory: () => chatRpc.clearHistory(),
 };
 
 export const fileService = {
-  listFiles: (path?: string) => invoke<FileEntry[]>('FileService.listFiles', { path }),
-  readTextFile: (path: string) => invoke<string>('FileService.readTextFile', { path }),
-  getUserDocumentsPath: () => invoke<string>('FileService.getUserDocumentsPath'),
+  listFiles: (path?: string) => fileRpc.listFiles({ path }),
+  readTextFile: (path: string) => fileRpc.readTextFile({ path }),
+  getUserDocumentsPath: () => fileRpc.getUserDocumentsPath(),
 };
 
 export const settingsService = {
-  getSettings: () => invoke<AppSettings>('SettingsService.getSettings'),
-  updateSettings: (settings: AppSettings) =>
-    invoke<AppSettings>('SettingsService.updateSettings', { settings }),
+  getSettings: () => settingsRpc.getSettings(),
+  updateSettings: (settings: AppSettings) => settingsRpc.updateSettings({ settings }),
 };

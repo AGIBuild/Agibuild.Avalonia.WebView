@@ -81,10 +81,16 @@ public sealed class AutomationLaneGovernanceTests
 
         foreach (var scenario in scenarios)
         {
+            var id = scenario.GetProperty("id").GetString();
             var file = scenario.GetProperty("file").GetString();
             var testMethod = scenario.GetProperty("testMethod").GetString();
+            var ciContext = scenario.TryGetProperty("ciContext", out var ciContextNode) ? ciContextNode.GetString() : "Ci";
             Assert.False(string.IsNullOrWhiteSpace(file));
             Assert.False(string.IsNullOrWhiteSpace(testMethod));
+            Assert.Contains(ciContext, new[] { "Ci", "CiPublish" });
+
+            if (string.Equals(id, "package-consumption-smoke", StringComparison.Ordinal))
+                Assert.Equal("CiPublish", ciContext);
 
             var sourcePath = Path.Combine(repoRoot, file!.Replace('/', Path.DirectorySeparatorChar));
             Assert.True(File.Exists(sourcePath), $"Scenario source file does not exist: {sourcePath}");
@@ -378,8 +384,18 @@ public sealed class AutomationLaneGovernanceTests
         // Baseline preset must remain free from app-shell bidirectional wiring.
         var templateJsonPath = Path.Combine(repoRoot, "templates", "agibuild-hybrid", ".template.config", "template.json");
         var templateJson = File.ReadAllText(templateJsonPath);
+        var reactTemplateWebPath = Path.Combine(repoRoot, "templates", "agibuild-hybrid", "HybridApp.Web.Vite.React");
+        var vueTemplateWebPath = Path.Combine(repoRoot, "templates", "agibuild-hybrid", "HybridApp.Web.Vite.Vue");
         Assert.Contains("\"condition\": \"(shellPreset == 'baseline')\"", templateJson, StringComparison.Ordinal);
         Assert.Contains("\"exclude\": [\"HybridApp.Desktop/MainWindow.AppShellPreset.cs\"]", templateJson, StringComparison.Ordinal);
+        Assert.Contains("\"condition\": \"(framework == 'react')\"", templateJson, StringComparison.Ordinal);
+        Assert.Contains("\"condition\": \"(framework == 'vue')\"", templateJson, StringComparison.Ordinal);
+        Assert.Contains("HybridApp.Web.Vite.React/**", templateJson, StringComparison.Ordinal);
+        Assert.Contains("HybridApp.Web.Vite.Vue/**", templateJson, StringComparison.Ordinal);
+        Assert.True(Directory.Exists(reactTemplateWebPath), $"Missing React web template scaffold: {reactTemplateWebPath}");
+        Assert.True(Directory.Exists(vueTemplateWebPath), $"Missing Vue web template scaffold: {vueTemplateWebPath}");
+        Assert.True(File.Exists(Path.Combine(reactTemplateWebPath, "package.json")), $"Missing React web template package.json");
+        Assert.True(File.Exists(Path.Combine(vueTemplateWebPath, "package.json")), $"Missing Vue web template package.json");
         Assert.DoesNotContain("DesktopHostService.DrainSystemIntegrationEvents", desktopMainWindow, StringComparison.Ordinal);
         Assert.DoesNotContain("PublishSystemIntegrationEvent", desktopMainWindow, StringComparison.Ordinal);
     }
@@ -649,6 +665,9 @@ public sealed class AutomationLaneGovernanceTests
             new Regex(@"Target\s+Ci\s*=>[\s\S]*?\.DependsOn\([\s\S]*PhaseCloseoutSnapshot[\s\S]*\);", RegexOptions.Multiline),
             mainSource);
         Assert.Matches(
+            new Regex(@"Target\s+Ci\s*=>[\s\S]*?\.DependsOn\([\s\S]*RuntimeCriticalPathExecutionGovernanceCi[\s\S]*\);", RegexOptions.Multiline),
+            mainSource);
+        Assert.Matches(
             new Regex(@"Target\s+CiPublish\s*=>[\s\S]*?\.DependsOn\([\s\S]*OpenSpecStrictGovernance[\s\S]*\);", RegexOptions.Multiline),
             mainSource);
         Assert.Matches(
@@ -659,6 +678,9 @@ public sealed class AutomationLaneGovernanceTests
             mainSource);
         Assert.Matches(
             new Regex(@"Target\s+CiPublish\s*=>[\s\S]*?\.DependsOn\([\s\S]*PhaseCloseoutSnapshot[\s\S]*\);", RegexOptions.Multiline),
+            mainSource);
+        Assert.Matches(
+            new Regex(@"Target\s+CiPublish\s*=>[\s\S]*?\.DependsOn\([\s\S]*RuntimeCriticalPathExecutionGovernanceCiPublish[\s\S]*\);", RegexOptions.Multiline),
             mainSource);
     }
 
@@ -833,13 +855,18 @@ public sealed class AutomationLaneGovernanceTests
         var matrixCapabilityIds = matrixDoc.RootElement.GetProperty("capabilities")
             .EnumerateArray()
             .Select(x => x.GetProperty("id").GetString())
-            .Where(id => !string.IsNullOrWhiteSpace(id))
+            .Where(id => !string.IsNullOrWhiteSpace(id) && id!.StartsWith("shell-", StringComparison.Ordinal))
             .Cast<string>()
             .ToHashSet(StringComparer.Ordinal);
 
         foreach (var shellId in runtimeShellIds)
         {
             Assert.Contains(shellId, matrixCapabilityIds);
+        }
+
+        foreach (var capabilityId in matrixCapabilityIds)
+        {
+            Assert.Contains(capabilityId, runtimeShellIds);
         }
     }
 
@@ -874,19 +901,31 @@ public sealed class AutomationLaneGovernanceTests
         var repoRoot = FindRepoRoot();
         var bridgePackagePath = Path.Combine(repoRoot, "packages", "bridge", "package.json");
         var bridgeEntryPath = Path.Combine(repoRoot, "packages", "bridge", "src", "index.ts");
+        var reactSamplePackagePath = Path.Combine(repoRoot, "samples", "avalonia-react", "AvaloniReact.Web", "package.json");
+        var reactSampleBridgePath = Path.Combine(repoRoot, "samples", "avalonia-react", "AvaloniReact.Web", "src", "bridge", "services.ts");
+        var reactSampleBridgeHookPath = Path.Combine(repoRoot, "samples", "avalonia-react", "AvaloniReact.Web", "src", "hooks", "useBridge.ts");
         var vueSampleEntryPath = Path.Combine(repoRoot, "samples", "avalonia-vue", "AvaloniVue.Web", "src", "main.ts");
+        var vueSamplePackagePath = Path.Combine(repoRoot, "samples", "avalonia-vue", "AvaloniVue.Web", "package.json");
         var vueSampleBridgePath = Path.Combine(repoRoot, "samples", "avalonia-vue", "AvaloniVue.Web", "src", "bridge", "services.ts");
         var vueSampleTsConfigPath = Path.Combine(repoRoot, "samples", "avalonia-vue", "AvaloniVue.Web", "tsconfig.json");
 
         Assert.True(File.Exists(bridgePackagePath), $"Missing bridge package json: {bridgePackagePath}");
         Assert.True(File.Exists(bridgeEntryPath), $"Missing bridge package entry: {bridgeEntryPath}");
+        Assert.True(File.Exists(reactSamplePackagePath), $"Missing React sample package json: {reactSamplePackagePath}");
+        Assert.True(File.Exists(reactSampleBridgePath), $"Missing React bridge services: {reactSampleBridgePath}");
+        Assert.True(File.Exists(reactSampleBridgeHookPath), $"Missing React bridge hook: {reactSampleBridgeHookPath}");
         Assert.True(File.Exists(vueSampleEntryPath), $"Missing Vue sample entry: {vueSampleEntryPath}");
+        Assert.True(File.Exists(vueSamplePackagePath), $"Missing Vue sample package json: {vueSamplePackagePath}");
         Assert.True(File.Exists(vueSampleBridgePath), $"Missing Vue bridge services: {vueSampleBridgePath}");
         Assert.True(File.Exists(vueSampleTsConfigPath), $"Missing Vue sample tsconfig: {vueSampleTsConfigPath}");
 
         var bridgePackage = File.ReadAllText(bridgePackagePath);
         var bridgeEntry = File.ReadAllText(bridgeEntryPath);
+        var reactPackage = File.ReadAllText(reactSamplePackagePath);
+        var reactBridge = File.ReadAllText(reactSampleBridgePath);
+        var reactBridgeHook = File.ReadAllText(reactSampleBridgeHookPath);
         var vueEntry = File.ReadAllText(vueSampleEntryPath);
+        var vuePackage = File.ReadAllText(vueSamplePackagePath);
         var vueBridge = File.ReadAllText(vueSampleBridgePath);
         var vueTsConfig = File.ReadAllText(vueSampleTsConfigPath);
 
@@ -894,8 +933,12 @@ public sealed class AutomationLaneGovernanceTests
         Assert.Contains("createBridgeClient", bridgeEntry, StringComparison.Ordinal);
         Assert.Contains("bridgeClient", bridgeEntry, StringComparison.Ordinal);
         Assert.Contains("getService", bridgeEntry, StringComparison.Ordinal);
+        Assert.Contains("\"@agibuild/bridge\"", reactPackage, StringComparison.Ordinal);
+        Assert.Contains("bridgeClient.getService", reactBridge, StringComparison.Ordinal);
+        Assert.Contains("bridgeClient.ready", reactBridgeHook, StringComparison.Ordinal);
         Assert.Contains("getAppInfo", vueEntry, StringComparison.Ordinal);
-        Assert.Contains("AppShellService.getAppInfo", vueBridge, StringComparison.Ordinal);
+        Assert.Contains("\"@agibuild/bridge\"", vuePackage, StringComparison.Ordinal);
+        Assert.Contains("bridgeClient.getService", vueBridge, StringComparison.Ordinal);
         Assert.Contains("bridge.d.ts", vueTsConfig, StringComparison.Ordinal);
     }
 

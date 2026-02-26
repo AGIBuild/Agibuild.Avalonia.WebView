@@ -42,6 +42,8 @@
         "PublishTemplate",
         "Restore",
         "RuntimeAutomation",
+        "RuntimeCriticalPathExecutionGovernanceCi",
+        "RuntimeCriticalPathExecutionGovernanceCiPublish",
         "Start",
         "StartAndroid",
         "StartIOS",

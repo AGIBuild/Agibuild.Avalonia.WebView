@@ -38,12 +38,16 @@
     {
       "modifiers": [
         {
-          "condition": "(framework == 'react' || framework == 'vue')",
-          "exclude": ["HybridApp.Web.Vanilla/**"]
+          "condition": "(framework == 'react')",
+          "exclude": ["HybridApp.Web.Vanilla/**", "HybridApp.Web.Vite.Vue/**"]
+        },
+        {
+          "condition": "(framework == 'vue')",
+          "exclude": ["HybridApp.Web.Vanilla/**", "HybridApp.Web.Vite.React/**"]
         },
         {
           "condition": "(framework == 'vanilla')",
-          "exclude": ["HybridApp.Web.Vite/**"]
+          "exclude": ["HybridApp.Web.Vite.React/**", "HybridApp.Web.Vite.Vue/**"]
         },
         {
           "condition": "(shellPreset == 'baseline')",
