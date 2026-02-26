@@ -94,9 +94,8 @@ All naming follows .NET conventions:
 
 ## Public API Inventory (generated)
 
-Regenerate:
+Snapshot source:
 - `dotnet build -c Release`
-- `dotnet run --project tools/ApiSurfaceInventory/ApiSurfaceInventory.csproj -c Release -- --config=Release`
 
 <details><summary>Inventory (Release)</summary>
 
