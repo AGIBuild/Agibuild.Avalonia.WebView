@@ -24,7 +24,7 @@ Current shell diagnostics and metadata boundary governance are deterministic but
 
 - No expansion of capability surface or system actions beyond current typed model.
 - No fallback/dual-path compatibility branch for legacy diagnostic formats.
-- No host framework/platform expansion or Electron API parity work.
+- No host framework/platform expansion or bundled-browser API parity work.
 - No changes to policy-first execution order (`profile -> policy -> mutation`).
 
 ## Impact

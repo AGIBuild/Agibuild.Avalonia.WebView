@@ -1,10 +1,11 @@
-# Agibuild.Avalonia.WebView
+# Fulora
 
-Electron-level web productivity with Avalonia-native performance, control, and security.
+Web-first product velocity with Avalonia-native performance, control, and security.
 
 ## Documentation Hub
 
-This project targets an **Electron replacement foundation**, not a simple WebView wrapper.
+This project targets a **framework-grade C# + web development model** while preserving **standalone WebView control integration flexibility**.
+One runtime core supports both paths.
 
 Use this page as the entry point based on what you want to do next.
 
@@ -26,13 +27,13 @@ Use this page as the entry point based on what you want to do next.
 
 ## Current Product Objective
 
-Current roadmap focus is **Phase 5: Electron Replacement Foundation**:
+Current roadmap focus is **Phase 5: Framework Positioning Foundation**:
 
-- Close real Electron pain points as acceptance criteria (not host-count growth)
+- Turn C# + web into a default-ready product architecture, not just a rendering choice
 - Consolidate host/system operations behind one typed capability gateway
 - Enforce policy-first execution with deterministic `allow/deny/failure` semantics
 - Emit machine-checkable diagnostics for CI and AI-agent automation
-- Provide a web-first template flow with minimal host glue
+- Provide a web-first template flow while retaining control-level integration freedom
 
 ## Roadmap Snapshot
 
@@ -43,4 +44,4 @@ Current roadmap focus is **Phase 5: Electron Replacement Foundation**:
 | Phase 2 | SPA Hosting | ✅ Core Done |
 | Phase 3 | Polish & GA | ✅ Done |
 | Phase 4 | Application Shell | ✅ Done |
-| Phase 5 | Electron Replacement Foundation | 🟡 Planned / In Progress |
+| Phase 5 | Framework Positioning Foundation | ✅ Completed |

@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
-### Requirement: Architecture SHALL target Electron pain-point closure
-The system SHALL prioritize solving Electron development pain points over adding additional UI host framework targets.
+### Requirement: Architecture SHALL target web-first pain-point closure
+The system SHALL prioritize solving bundled-browser development pain points over adding additional UI host framework targets.
 
 #### Scenario: Phase acceptance is driven by pain-point outcomes
 - **WHEN** release-readiness for this change is evaluated

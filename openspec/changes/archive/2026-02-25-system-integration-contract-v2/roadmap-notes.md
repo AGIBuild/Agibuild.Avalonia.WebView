@@ -10,7 +10,7 @@
 
 ### Out of Scope
 
-- Electron full API parity or one-to-one API surface replacement.
+- Bundled-browser full API parity or one-to-one API surface replacement.
 - Multi-host support expansion (WPF/WinForms/MAUI) in this increment.
 - Legacy dual-path compatibility or fallback adapters for old tray payload format.
 

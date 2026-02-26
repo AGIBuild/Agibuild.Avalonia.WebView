@@ -1,4 +1,4 @@
-## P0 (Must Ship): Electron Pain-point Closure Baseline
+## P0 (Must Ship): Web-First Pain-point Closure Baseline
 
 ### 1. Target Lock and KPI Definition
 - [x] 1.1 Freeze the top-5 pain points and assign measurable KPIs: typed IPC safety, capability governance, deterministic diagnostics, automation pass-rate, template DX time-to-first-feature.
@@ -29,7 +29,7 @@
 ## P2 (Could Ship): Production Governance Hardening
 
 ### 6. Governance and Rollout
-- [x] 6.1 Sync `openspec/ROADMAP.md` and release-readiness artifacts with Electron-replacement objective framing.
+- [x] 6.1 Sync `openspec/ROADMAP.md` and release-readiness artifacts with web-first objective framing.
 - [x] 6.2 Add CI governance checks for diagnostic schema stability and capability contract compatibility.
 - [x] 6.3 Produce archive-ready verification evidence mapped to each P0/P1 KPI.
 

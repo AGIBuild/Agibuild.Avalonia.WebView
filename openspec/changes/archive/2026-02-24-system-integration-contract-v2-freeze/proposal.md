@@ -27,10 +27,10 @@ Phase 5 has shipped the system-integration v2 baseline, but three contract harde
 - Affected runtime code: `WebViewHostCapabilityBridge` validation/normalization path.
 - Affected template code: app-shell preset ShowAbout toggle and inbound metadata usage markers.
 - Affected tests: unit/integration/governance matrices and contract branches.
-- Roadmap impact: Phase 5 hardening/evidence quality uplift without expanding Electron parity scope.
+- Roadmap impact: Phase 5 hardening/evidence quality uplift without expanding bundled-browser parity scope.
 
 ## Non-goals
 
-- No Electron full API parity expansion.
+- No bundled-browser full API parity expansion.
 - No dual-path fallback for old payload contracts.
 - No new host capability surface beyond existing v2 contracts.

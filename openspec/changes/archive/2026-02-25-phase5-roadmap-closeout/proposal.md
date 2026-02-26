@@ -16,7 +16,7 @@ Phase 5 technical milestones are complete, but roadmap status and evidence refer
 
 ### Modified Capabilities
 
-- `electron-replacement-foundation`: add explicit closeout-state and evidence mapping requirements for Phase 5 governance.
+- `phase5-foundation`: add explicit closeout-state and evidence mapping requirements for Phase 5 governance.
 
 ## Impact
 

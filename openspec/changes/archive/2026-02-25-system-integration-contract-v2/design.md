@@ -17,7 +17,7 @@
 - 用 CT/IT/治理规则验证“无旁路 + 零执行 deny + 跨平台一致性边界”。
 
 **Non-Goals:**
-- 不扩展 Electron 全量 API 覆盖面。
+- 不扩展打包式桌面栈全量 API 覆盖面。
 - 不引入多宿主兼容目标（WPF/WinForms/MAUI）。
 - 不实现 fallback/dual-path 兼容逻辑。
 - 不在本期接入 menu pruning 与 session profile 的联合决策（保留到下一增量）。

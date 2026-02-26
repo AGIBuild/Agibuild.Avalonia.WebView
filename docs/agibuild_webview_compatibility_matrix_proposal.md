@@ -1,4 +1,4 @@
-# Agibuild.Avalonia.WebView 兼容矩阵提案（Baseline / Extended）
+# Fulora 兼容矩阵提案（Baseline / Extended）
 
 > 本文是“可验证、可测试、可验收”的兼容矩阵提案，用于替代“完全模拟官方 WebView”的不可验证目标。
 > 核心原则：任何“支持/一致”的声明都必须落到矩阵条目 + 明确语义 + 对应测试用例。

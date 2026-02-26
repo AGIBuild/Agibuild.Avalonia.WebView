@@ -1,4 +1,4 @@
-## Electron Replacement Foundation — Verification Evidence
+## Web-First Foundation — Verification Evidence
 
 ## KPI Checklist (Current Snapshot)
 

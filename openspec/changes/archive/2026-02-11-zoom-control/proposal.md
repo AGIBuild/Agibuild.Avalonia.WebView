@@ -1,6 +1,6 @@
 ## Why
 
-Zoom/scale control is a fundamental browser capability. Users expect Ctrl+/- and pinch-to-zoom in embedded browsers. Electron exposes `webContents.setZoomFactor()` / `getZoomFactor()` / `setZoomLevel()`. Our WebView has no zoom API, preventing consumers from implementing accessibility zoom, presentation mode, or user-preference scaling.
+Zoom/scale control is a fundamental browser capability. Users expect Ctrl+/- and pinch-to-zoom in embedded browsers. Bundled-browser stacks expose `webContents.setZoomFactor()` / `getZoomFactor()` / `setZoomLevel()`. Our WebView has no zoom API, preventing consumers from implementing accessibility zoom, presentation mode, or user-preference scaling.
 
 ## What Changes
 

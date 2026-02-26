@@ -532,7 +532,7 @@ public sealed class AutomationLaneGovernanceTests
             AssertFileExists(p, PhaseCloseoutConsistency);
 
         var roadmap = File.ReadAllText(roadmapPath);
-        AssertSourceContains(roadmap, "## Phase 5: Electron Replacement Foundation (✅ Completed)", PhaseCloseoutConsistency, roadmapPath);
+        AssertSourceContains(roadmap, "## Phase 5: Framework Positioning Foundation (✅ Completed)", PhaseCloseoutConsistency, roadmapPath);
         AssertSourceContains(roadmap, "### Evidence Source Mapping", PhaseCloseoutConsistency, roadmapPath);
 
         var requiredChangeIds = new[]
@@ -617,7 +617,7 @@ public sealed class AutomationLaneGovernanceTests
         Assert.Matches(new Regex(@"\|\s*Unit tests\s*\|\s*\d{3,}\s*\|"), readme);
         Assert.Matches(new Regex(@"\|\s*Integration tests\s*\|\s*\d{2,}\s*\|"), readme);
         Assert.Matches(new Regex(@"\|\s*Line coverage\s*\|\s*\*\*\d+\.\d+%\*\*\s*\|"), readme);
-        AssertSourceContains(readme, "Phase 5 | Electron Replacement Foundation | ✅ Completed", ReadmeQualitySignals, readmePath);
+        AssertSourceContains(readme, "Phase 5 | Framework Positioning Foundation | ✅ Completed", ReadmeQualitySignals, readmePath);
     }
 
     [Fact]

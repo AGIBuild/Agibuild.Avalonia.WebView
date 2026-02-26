@@ -25,6 +25,6 @@
 
 ## Impact
 
-- **Roadmap alignment**: 对齐 Phase 4 的“系统集成（快捷键）”目标，补齐 Electron-like shell 体验。
+- **Roadmap alignment**: 对齐 Phase 4 的“系统集成（快捷键）”目标，补齐 desktop-grade shell 体验。
 - **Goal alignment**: 强化 **G3**（显式能力边界）与 **G4**（可测试、可验证行为）。
 - **Affected areas**: `Agibuild.Avalonia.WebView` 公共 API、模板 `MainWindow.AppShellPreset.cs`、自动化测试与治理测试。

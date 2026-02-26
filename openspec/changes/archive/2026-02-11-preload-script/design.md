@@ -1,6 +1,6 @@
 ## Context
 
-The project already injects JS at runtime (RPC stub via `InvokeScriptAsync`). All 5 platform engines support "user scripts" that run at document start, before page JS. This is the same mechanism Electron uses for `preload`.
+The project already injects JS at runtime (RPC stub via `InvokeScriptAsync`). All 5 platform engines support "user scripts" that run at document start, before page JS. This is the same mechanism bundled-browser stacks use for `preload`.
 
 ## Goals / Non-Goals
 
@@ -11,7 +11,7 @@ The project already injects JS at runtime (RPC stub via `InvokeScriptAsync`). Al
 - Support `RemovePreloadScript` to unregister
 
 **Non-Goals:**
-- Sandboxed context isolation (Electron's `contextBridge` pattern — too complex for v1)
+- Sandboxed context isolation (bundled-browser `contextBridge` pattern — too complex for v1)
 - File-path based preload (string JS only for simplicity)
 - Module-style imports in preload scripts
 

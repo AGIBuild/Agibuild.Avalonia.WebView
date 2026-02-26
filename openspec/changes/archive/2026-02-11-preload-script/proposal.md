@@ -1,6 +1,6 @@
 ## Why
 
-Electron's `webPreferences.preload` lets apps inject JS before page scripts run, enabling secure bridge setup, polyfills, and API injection. Our `InvokeScriptAsync` only runs after page load, and the RPC JS stub is auto-injected but not user-configurable. Consumers migrating from Electron need a way to inject custom JS early to set up their own bridge APIs, intercept globals, or establish communication channels before page code executes.
+Bundled-browser stacks' `webPreferences.preload` lets apps inject JS before page scripts run, enabling secure bridge setup, polyfills, and API injection. Our `InvokeScriptAsync` only runs after page load, and the RPC JS stub is auto-injected but not user-configurable. Consumers migrating from bundled-browser stacks need a way to inject custom JS early to set up their own bridge APIs, intercept globals, or establish communication channels before page code executes.
 
 ## What Changes
 

@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: Phase 5 status SHALL be represented as completed when exit criteria evidence is satisfied
-Roadmap state for Electron Replacement Foundation SHALL move to completed once all declared Phase 5 exit criteria are met with passing automated evidence.
+Roadmap state for Phase 5 Foundation SHALL move to completed once all declared Phase 5 exit criteria are met with passing automated evidence.
 
 #### Scenario: Completed status aligns with evidence snapshot
 - **WHEN** latest full validation gates pass and archived closeout evidence exists

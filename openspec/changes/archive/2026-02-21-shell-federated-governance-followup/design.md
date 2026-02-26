@@ -16,7 +16,7 @@ This is a cross-cutting update touching runtime bridge validation, shell diagnos
 - No expansion of system action surface or capability gateway breadth.
 - No fallback/dual-path compatibility logic for legacy payload handling.
 - No changes to existing default deny semantics for ShowAbout.
-- No additional platform adapters or Electron API parity scope.
+- No additional platform adapters or bundled-browser API parity scope.
 
 ## Decisions
 

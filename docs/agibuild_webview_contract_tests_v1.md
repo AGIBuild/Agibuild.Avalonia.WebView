@@ -1,4 +1,4 @@
-# Agibuild.Avalonia.WebView Contract Tests 清单 v1（Baseline 驱动）
+# Fulora Contract Tests 清单 v1（Baseline 驱动）
 
 > 目标：把 `docs/agibuild_webview_compatibility_matrix_proposal.md` 的 **Baseline** 条目，转成可执行、平台无关的 **CT（Contract Tests）** 最小用例集合。  
 > 原则：CT 只验证“契约语义/状态机/事件时序/线程语义”，不验证平台渲染与真实浏览器能力（那是 IT 范畴）。

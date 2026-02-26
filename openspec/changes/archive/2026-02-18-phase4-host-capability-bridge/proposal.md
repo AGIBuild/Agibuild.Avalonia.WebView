@@ -11,7 +11,7 @@ M4.2 solved multi-window lifecycle orchestration, but host capability access is 
 
 ## Non-goals
 
-- Full system shell parity with Electron API surface.
+- Full system shell parity with bundled-browser API surface.
 - OS-specific advanced integrations beyond the initial capability set.
 - Reworking M4.2 lifecycle semantics or replacing existing shell policy contracts.
 

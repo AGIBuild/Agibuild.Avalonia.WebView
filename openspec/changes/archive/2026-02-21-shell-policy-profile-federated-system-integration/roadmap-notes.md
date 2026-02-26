@@ -10,7 +10,7 @@
 
 ### Out of Scope (Explicit Boundary)
 
-- No Electron full API parity expansion (plugin/runtime ecosystem, installer/update pipeline, Chromium API compatibility target).
+- No bundled-browser full API parity expansion (plugin/runtime ecosystem, installer/update pipeline, Chromium API compatibility target).
 - No additional host framework targets (WPF/WinForms/MAUI).
 - No fallback/dual-path compatibility routing.
 - No widening of system action surface beyond explicit typed action + allowlist governance model.

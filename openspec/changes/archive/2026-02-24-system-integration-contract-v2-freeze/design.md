@@ -13,7 +13,7 @@
 **Non-Goals:**
 - No new capability domain beyond existing v2 system integration flow.
 - No backward-compatible dual path for legacy metadata contracts.
-- No expansion toward Electron full API parity.
+- No expansion toward bundled-browser full API parity.
 
 ## Decisions
 

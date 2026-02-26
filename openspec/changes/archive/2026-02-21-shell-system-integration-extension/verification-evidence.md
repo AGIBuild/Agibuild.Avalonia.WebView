@@ -53,7 +53,7 @@ Outcome:
 - Out-of-scope:
   - Auto-update / installer / plugin ecosystem.
   - Non-Avalonia host framework support goals.
-  - Full Electron API parity.
+  - Full bundled-browser API parity.
 
 ## Archive-ready Checklist
 
@@ -69,5 +69,5 @@ Outcome:
 | Risk | Impact | Owner | Mitigation / Next Step |
 |---|---|---|---|
 | Platform-specific menu/tray capability gaps | Behavior drift across OS | Runtime Shell Maintainers | Keep cross-platform contract minimal and extend via optional metadata in follow-up changes |
-| System action surface expansion pressure | Scope creep toward Electron full parity | Product/Architecture | Preserve explicit non-goals and gate additions through OpenSpec review |
+| System action surface expansion pressure | Scope creep toward bundled-browser full parity | Product/Architecture | Preserve explicit non-goals and gate additions through OpenSpec review |
 | Template sample growth | Host glue complexity rises | Template Maintainers | Keep one canonical typed service entry and avoid split capability services |

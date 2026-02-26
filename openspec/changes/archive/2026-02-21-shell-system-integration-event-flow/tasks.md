@@ -31,5 +31,5 @@
 ## 6. Release Evidence and Handoff (Phase 5.5)
 
 - [x] 6.1 Produce verification evidence mapping KPI -> implementation -> test commands for this change (Acceptance: evidence table includes pass/fail outcomes and correlation to goals).
-- [x] 6.2 Update roadmap/change notes with in-scope/out-of-scope boundaries for this increment (Acceptance: boundary note explicitly excludes Electron full API parity).
+- [x] 6.2 Update roadmap/change notes with in-scope/out-of-scope boundaries for this increment (Acceptance: boundary note explicitly excludes bundled-browser full API parity).
 - [x] 6.3 Prepare archive-ready checklist with unresolved questions and owners (Acceptance: open questions tracked with next-step owner and decision gate).

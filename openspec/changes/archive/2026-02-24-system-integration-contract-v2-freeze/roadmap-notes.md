@@ -1,6 +1,6 @@
 ## Phase Alignment
 
-- Phase: **Phase 5 — Electron Replacement Foundation**
+- Phase: **Phase 5 — Web-First Foundation**
 - Deliverables reinforced: **5.3 Agent-friendly Observability**, **5.4 Web-first Template Flow**, **5.5 Production Governance**
 - Goal mapping: **G3 Secure by Default**, **G4 Contract-Driven Testability**
 
@@ -14,5 +14,5 @@
 ## Out of Scope
 
 - New host capability domains.
-- Electron API parity expansion.
+- Bundled-browser API parity expansion.
 - Backward-compatible dual-contract runtime path.

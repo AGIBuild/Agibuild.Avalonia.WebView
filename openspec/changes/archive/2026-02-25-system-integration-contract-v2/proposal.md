@@ -13,7 +13,7 @@
 
 ## Non-goals
 
-- 不扩展 Electron full API parity（插件生态、自动更新全链路等）。
+- 不扩展打包式桌面栈 full API parity（插件生态、自动更新全链路等）。
 - 不引入多宿主适配目标（WPF/WinForms/MAUI）。
 - 不实现 fallback/dual-path 兼容路径。
 

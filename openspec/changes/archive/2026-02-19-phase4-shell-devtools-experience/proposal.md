@@ -1,6 +1,6 @@
 ## Why
 
-Current shell policies cover new-window/download/permission/session, but DevTools runtime behavior is not governed by shell policy contracts. To complete the practical "Electron-like shell experience" path, DevTools open/close/query must be policy-controlled and auditable under the same shell governance model.
+Current shell policies cover new-window/download/permission/session, but DevTools runtime behavior is not governed by shell policy contracts. To complete the practical "desktop-grade shell experience" path, DevTools open/close/query must be policy-controlled and auditable under the same shell governance model.
 
 ## What Changes
 

@@ -1,6 +1,6 @@
 ## Why
 
-Phase 5 delivered Electron-replacement core capabilities, but release confidence is still limited by governance gaps in branch coverage, dependency risk scanning, platform parity evidence freshness, and performance regression visibility.  
+Phase 5 delivered web-first hybrid core capabilities, but release confidence is still limited by governance gaps in branch coverage, dependency risk scanning, platform parity evidence freshness, and performance regression visibility.  
 This change advances ROADMAP Phase 3.3 "Performance & Quality" and reinforces G3/G4 by making quality signals deterministic and machine-enforced in CI.
 
 ## What Changes

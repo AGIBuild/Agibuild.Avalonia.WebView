@@ -28,5 +28,5 @@ Phase 5 has strong runtime contracts, but template onboarding still lacks an int
 ## Non-goals
 
 - No new host capability domain or policy engine redesign.
-- No Electron parity expansion beyond template DX ergonomics.
+- No bundled-browser API parity expansion beyond template DX ergonomics.
 - No production telemetry backend; script is local deterministic validation only.

@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.0] - 2026-02-25
 
-First stable release. Delivers a complete Electron replacement foundation for Avalonia hybrid apps across 5 platforms.
+First stable release. Delivers a complete framework-positioning foundation for Avalonia hybrid apps across 5 platforms.
 
 ### Added
 
@@ -39,7 +39,7 @@ This release represents the culmination of Phases 0-5 of the project roadmap:
 - **Phase 2** — SPA Hosting: custom protocol, embedded resources, HMR proxy
 - **Phase 3** — Polish & GA: project template, API docs, GTK/Linux validation
 - **Phase 4** — Application Shell: shell policies, multi-window, host capabilities
-- **Phase 5** — Electron Replacement Foundation: typed gateway, policy-first execution, agent-friendly diagnostics
+- **Phase 5** — Framework Positioning Foundation: typed gateway, policy-first execution, agent-friendly diagnostics
 
 #### Version Progression
 

@@ -1,6 +1,6 @@
 # Bridge Guide
 
-Typed bridge is the foundation of this project’s Electron-replacement architecture.
+Typed bridge is the foundation of this project's framework-positioning architecture.
 It keeps host/web interaction explicit, testable, and automation-friendly.
 
 ## Why It Matters in Phase 5

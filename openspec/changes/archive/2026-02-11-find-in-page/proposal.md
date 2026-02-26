@@ -1,6 +1,6 @@
 ## Why
 
-Embedded browser scenarios (e.g., documentation viewers, email clients, code preview panels) commonly need in-page text search. Electron exposes `webContents.findInPage()` / `stopFindInPage()` for this. Our WebView currently has no equivalent, forcing consumers to build custom JS overlays that lack native selection highlighting and match counting.
+Embedded browser scenarios (e.g., documentation viewers, email clients, code preview panels) commonly need in-page text search. Bundled-browser stacks expose `webContents.findInPage()` / `stopFindInPage()` for this. Our WebView currently has no equivalent, forcing consumers to build custom JS overlays that lack native selection highlighting and match counting.
 
 ## What Changes
 

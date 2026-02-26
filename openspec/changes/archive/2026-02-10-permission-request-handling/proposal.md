@@ -1,7 +1,7 @@
 # Permission Request Handling
 
 ## Problem
-When web content requests permissions (camera, microphone, geolocation, notifications), the WebView either auto-denies or shows a platform-specific dialog that the host application cannot control. For Electron-replacement apps, the host must be able to intercept, approve, deny, or defer permission requests programmatically.
+When web content requests permissions (camera, microphone, geolocation, notifications), the WebView either auto-denies or shows a platform-specific dialog that the host application cannot control. For web-first hybrid apps, the host must be able to intercept, approve, deny, or defer permission requests programmatically.
 
 ## Proposed Solution
 1. Define `WebViewPermissionKind` enum and `PermissionRequestedEventArgs` in Core

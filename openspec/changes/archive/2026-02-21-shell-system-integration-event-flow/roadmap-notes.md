@@ -9,6 +9,6 @@
 
 ### Out of Scope (Explicit Boundary)
 
-- **不追求 Electron full API parity**（如插件生态、自动更新全链路、安装器生态）。
+- **不追求打包式桌面栈 full API parity**（如插件生态、自动更新全链路、安装器生态）。
 - 不扩展多宿主（WPF/WinForms/MAUI）兼容目标。
 - 不引入 fallback/dual-path 兼容实现。

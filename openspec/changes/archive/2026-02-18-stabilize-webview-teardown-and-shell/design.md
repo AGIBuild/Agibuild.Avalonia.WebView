@@ -11,12 +11,12 @@
   - Detach is safe from any caller thread (no deadlocks, bounded waits).
   - No WebView2/Chromium teardown error strings emitted during normal shutdown.
   - No leaked window subclassing (WndProc restore) or event handlers after teardown.
-- Provide an opt-in “shell experience” layer that helps hosts implement Electron-like behavior without expanding Core contracts:
+- Provide an opt-in “shell experience” layer that helps hosts implement desktop-grade behavior without expanding Core contracts:
   - consistent defaults/policies around `NewWindowRequested`, downloads, permissions, and DevTools toggling.
 - Add tests (CT + IT) that catch lifecycle regressions before packaging.
 
 **Non-Goals:**
-- Bundled browser engine / Node.js runtime / full Electron parity.
+- Bundled browser engine / Node.js runtime / full bundled-browser parity.
 - OS-wide app shell features (tray/global shortcuts/auto-update) inside this repo’s runtime libraries.
 - Breaking changes to Core contracts unless strictly required by specs.
 
@@ -49,9 +49,9 @@
   - `NewWindowRequested`: choose a strategy (navigate-in-place, open external browser, open a `WebDialog`, or delegate to host callback).
   - Downloads/permissions: standardize default behavior and ensure event ordering/threading matches existing semantics.
   - DevTools: surface a predictable UX path (toggle/open/close) without coupling to a specific UI toolkit.
-- **Rationale:** Electron-like behaviors are highly app-specific; the library should provide composable policies and helpers rather than hard-coded UI.
+- **Rationale:** Desktop-grade behaviors are highly app-specific; the library should provide composable policies and helpers rather than hard-coded UI.
 - **Alternatives considered:**
-  - Add more fields to Core event args to emulate Electron’s `window.open` feature set → high surface area and cross-platform inconsistency risk.
+  - Add more fields to Core event args to emulate bundled-browser’s `window.open` feature set → high surface area and cross-platform inconsistency risk.
   - Keep everything “host-only” with no helpers → forces each app to reinvent common patterns and reduces adoption.
 
 ### Testing strategy

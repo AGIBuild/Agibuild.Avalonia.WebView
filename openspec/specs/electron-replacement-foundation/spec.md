@@ -1,15 +1,16 @@
-# electron-replacement-foundation Specification
+# framework-positioning-foundation Specification
 
 ## Purpose
-TBD - created by archiving change 2026-02-21-electron-replacement-foundation. Update Purpose after archive.
-## Requirements
-### Requirement: Architecture SHALL target Electron pain-point closure
-The system SHALL prioritize solving Electron development pain points over adding additional UI host framework targets.
+Define Phase 5 foundation contracts for a framework-grade C# + web development model inspired by proven web-first workflows, while preserving flexible standalone WebView control integration in custom architectures.
 
-#### Scenario: Phase acceptance is driven by pain-point outcomes
-- **WHEN** release-readiness for this change is evaluated
+## Requirements
+### Requirement: Architecture SHALL target framework positioning and dual-path adoption
+The system SHALL prioritize framework-positioning outcomes over UI-host count growth, and SHALL preserve both framework-first and control-first adoption paths on the same runtime core.
+
+#### Scenario: Phase acceptance is driven by framework outcomes
+- **WHEN** release-readiness for this capability is evaluated
 - **THEN** acceptance is based on typed IPC safety, capability governance, deterministic diagnostics, automation coverage, and template DX
-- **AND** WPF/WinForms availability is not required for phase completion
+- **AND** custom host applications can still adopt the standalone WebView control path without shell coupling
 
 ### Requirement: Desktop capability access SHALL be typed and gateway-based
 Desktop capability operations SHALL be exposed through a single typed capability gateway instead of scattered host API calls.
@@ -46,8 +47,8 @@ The runtime SHALL produce machine-checkable diagnostics for critical flows to su
 - **WHEN** attach/navigate/capability-call/teardown scenarios run in automation
 - **THEN** deterministic assertions can validate behavior without manual log interpretation
 
-### Requirement: Developer experience SHALL remain web-first
-The architecture SHALL keep frontend teams in a web-first workflow and minimize required host-side boilerplate.
+### Requirement: Developer experience SHALL remain web-first with integration flexibility
+The architecture SHALL keep frontend teams in a web-first workflow, minimize required host-side boilerplate, and retain composable control-level integration for teams with existing host architecture.
 
 #### Scenario: Template demonstrates minimal host code with typed bridge/capability usage
 - **WHEN** developers create an app from the recommended template path
@@ -55,7 +56,7 @@ The architecture SHALL keep frontend teams in a web-first workflow and minimize 
 - **AND** host-specific glue code remains minimal and policy-governed
 
 ### Requirement: Phase 5 status SHALL be represented as completed when exit criteria evidence is satisfied
-Roadmap state for Electron Replacement Foundation SHALL move to completed once all declared Phase 5 exit criteria are met with passing automated evidence.
+Roadmap state for Framework Positioning Foundation SHALL move to completed once all declared Phase 5 exit criteria are met with passing automated evidence.
 
 #### Scenario: Completed status aligns with evidence snapshot
 - **WHEN** latest full validation gates pass and archived closeout evidence exists

@@ -11,7 +11,7 @@ Phase 5 completed typed bidirectional system-integration flow, but three contrac
 - Preserve machine-checkable diagnostics and CT/IT/governance verifiability.
 
 **Non-Goals:**
-- No expansion to Electron full API parity.
+- No expansion to bundled-browser full API parity.
 - No fallback/dual-path behavior for legacy payload routing.
 - No new host framework target support.
 - No unrelated capability additions beyond the scoped contract gaps.

@@ -1,7 +1,7 @@
 # Web Resource Interception — Cross-Platform
 
 ## Problem
-`WebResourceRequested` event exists in `IWebViewAdapter` and `IWebView` but all 5 adapters stub it (`add {} remove {}`). Windows uses it internally for `NavigateToStringAsync(html, baseUrl)` but never raises it to consumers. Users cannot intercept network requests, register custom URI schemes, or serve local content — essential for Electron-replacement scenarios.
+`WebResourceRequested` event exists in `IWebViewAdapter` and `IWebView` but all 5 adapters stub it (`add {} remove {}`). Windows uses it internally for `NavigateToStringAsync(html, baseUrl)` but never raises it to consumers. Users cannot intercept network requests, register custom URI schemes, or serve local content — essential for web-first hybrid scenarios.
 
 ## Proposed Solution
 1. Add a **custom scheme registration API** to `IWebViewEnvironmentOptions` (schemes must be registered before WebView creation)

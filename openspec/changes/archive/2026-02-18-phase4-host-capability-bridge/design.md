@@ -7,7 +7,7 @@
   - explicit allow/deny policy per capability request,
   - deterministic runtime semantics and mock-first validation.
 - Stakeholders:
-  - host app teams migrating from Electron APIs,
+  - host app teams migrating from bundled-browser APIs,
   - security/governance owners needing auditable capability decisions,
   - framework maintainers ensuring cross-platform consistency.
 
@@ -26,7 +26,7 @@
 
 **Non-Goals:**
 - Implementing platform-specific native UX details for every OS variant in M4.3.
-- Exposing all Electron host APIs.
+- Exposing all bundled-browser host APIs.
 - Coupling capability bridge directly to web JS bridge protocols in this milestone.
 
 ## Decisions

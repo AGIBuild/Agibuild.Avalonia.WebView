@@ -17,7 +17,7 @@ Phase closeout evidence currently depends on manual snapshot updates, which is e
 ### Modified Capabilities
 
 - `build-pipeline-resilience`: add deterministic closeout evidence snapshot generation from command outputs.
-- `electron-replacement-foundation`: define closeout evidence snapshot automation expectation.
+- `phase5-foundation`: define closeout evidence snapshot automation expectation.
 
 ## Impact
 

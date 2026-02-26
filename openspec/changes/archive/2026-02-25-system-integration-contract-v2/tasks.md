@@ -31,5 +31,5 @@
 ## 6. Evidence and Release Readiness (Deliverable 5.5)
 
 - [x] 6.1 Produce verification evidence mapping KPI -> implementation -> tests for v2 increment (Acceptance: evidence table includes pass/fail outcomes).
-- [x] 6.2 Update roadmap/change notes with in-scope and explicit out-of-scope boundaries (Acceptance: notes explicitly exclude Electron full API parity).
+- [x] 6.2 Update roadmap/change notes with in-scope and explicit out-of-scope boundaries (Acceptance: notes explicitly exclude bundled-browser full API parity).
 - [x] 6.3 Prepare archive-ready checklist with unresolved questions/owners/decision gates (Acceptance: open questions list owner + decision gate).

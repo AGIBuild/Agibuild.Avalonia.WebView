@@ -22,7 +22,7 @@ The previous system-integration increment closed the bidirectional typed flow, b
 
 ## Non-goals
 
-- No Electron full API parity expansion.
+- No bundled-browser full API parity expansion.
 - No new host framework targets (WPF/WinForms/MAUI).
 - No fallback/dual-path compatibility routing.
 - No broad capability surface expansion beyond the three scoped decisions.

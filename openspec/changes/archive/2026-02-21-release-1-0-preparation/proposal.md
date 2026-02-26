@@ -1,6 +1,6 @@
 ## Why
 
-All five roadmap phases are complete (Phase 0-5 ✅). The project has 915 tests, 95.87% line coverage, and a comprehensive Electron replacement foundation. However, the version is still `v0.1.15-preview` and all platforms are marked "Preview". The gap between delivered maturity and published version signal undermines adoption confidence. A formal 1.0.0 stable release is the next strategic step to convert technical completeness into ecosystem credibility.
+All five roadmap phases are complete (Phase 0-5 ✅). The project has 915 tests, 95.87% line coverage, and a comprehensive web-first foundation. However, the version is still `v0.1.15-preview` and all platforms are marked "Preview". The gap between delivered maturity and published version signal undermines adoption confidence. A formal 1.0.0 stable release is the next strategic step to convert technical completeness into ecosystem credibility.
 
 This aligns with **E1** (Project Template for real-world use), **G3** (Secure by Default — audited API surface), and the Phase 3 GA Release deliverable (3.5-3.8) which defined release readiness criteria.
 

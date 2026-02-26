@@ -2,8 +2,8 @@
 
 ## Architectural North Star
 
-Architecture is aligned to **Roadmap Phase 5: Electron Replacement Foundation**.
-The goal is not only rendering web content, but delivering a deterministic, policy-governed hybrid app platform.
+Architecture is aligned to **Roadmap Phase 5: Framework Positioning Foundation**.
+The goal is not only rendering web content, but delivering a deterministic, policy-governed hybrid app platform that works for both framework-first delivery and control-level integration.
 
 ## System Topology
 

@@ -11,4 +11,4 @@
 - No expansion of typed capability/system action surface.
 - No compatibility fallback/dual-path behavior.
 - No additional platform/framework targets.
-- No Electron API parity scope.
+- No bundled-browser API parity scope.

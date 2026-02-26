@@ -1,23 +1,23 @@
 ## Context
 
-- 产品北极星是 **替代 Electron 并解决其开发痛点**，而不是追求更多 UI 宿主框架数量。
+- 产品北极星是 **替代打包式桌面栈并解决其开发痛点**，而不是追求更多 UI 宿主框架数量。
 - AI 时代的核心诉求是：让 Agent 能稳定生成、修改、验证桌面应用代码，而非在复杂宿主细节中反复试错。
 - 现有工程已具备 bridge/runtime/adapter 基础，但在“能力建模、策略治理、开发闭环”层面仍可体系化升级。
 
 ## Goals / Non-Goals
 
 **Goals**
-- 建立面向 Electron 痛点的架构主线：`typed bridge + typed capability + policy-first + automation-first`。
+- 建立面向打包式桌面栈痛点的架构主线：`typed bridge + typed capability + policy-first + automation-first`。
 - 提供对 AI Agent 友好的开发边界：强类型契约、可组合能力、确定性错误语义、可验证运行路径。
 - 保持 Avalonia 作为当前桌面壳承载，不在本期引入跨 UI 框架扩展目标。
 - 降低桌面应用开发复杂度，让 Web 技术团队在同一模型下覆盖 Windows/macOS/Linux。
 
 **Non-Goals**
 - 不将 WPF/WinForms 可用性作为阶段验收目标。
-- 不在本期交付 Electron 全生态替代（安装器、自动更新、插件市场）。
+- 不在本期交付打包式桌面栈全生态替代（安装器、自动更新、插件市场）。
 - 不引入缺乏设计的兼容性分支逻辑。
 
-## Pain Points to Solve (Electron-oriented)
+## Pain Points to Solve (bundled-browser-oriented)
 
 1. **Stringly IPC**：频道名/消息体无类型约束，回归风险高。  
 2. **权限边界模糊**：渲染进程可访问能力面过宽，安全治理成本高。  
@@ -70,7 +70,7 @@ Avalonia Desktop Shell Host (current host)
 
 ### 1) 保留 Avalonia 作为当前宿主承载
 - **Decision:** 本阶段不把“支持 WPF/WinForms”作为目标或验收项。
-- **Rationale:** 资源聚焦在 Electron 痛点闭环和开发体验提升。
+- **Rationale:** 资源聚焦在 web-first 痛点闭环和开发体验提升。
 - **Consequence:** “宿主抽象”仅作为内部架构治理手段，而非对外主卖点。
 
 ### 2) 能力网关统一入口（Capability Gateway）
@@ -85,7 +85,7 @@ Avalonia Desktop Shell Host (current host)
 
 ### 4) 以“痛点闭环指标”替代“宿主数量指标”
 - **Decision:** 阶段成功由开发效率、安全治理、自动化验证覆盖衡量。
-- **Rationale:** 直接对应 Electron 迁移价值。
+- **Rationale:** 直接对应打包式桌面栈迁移价值。
 - **Consequence:** roadmap 与任务清单全部改为结果导向指标。
 
 ## Risks / Trade-offs

@@ -1,7 +1,7 @@
 # Download Management
 
 ## Problem
-When a user clicks a download link or the server responds with `Content-Disposition: attachment`, the WebView silently drops the download. There is no way for the host application to intercept, save, or track file downloads — a critical gap for Electron-replacement scenarios.
+When a user clicks a download link or the server responds with `Content-Disposition: attachment`, the WebView silently drops the download. There is no way for the host application to intercept, save, or track file downloads — a critical gap for web-first hybrid scenarios.
 
 ## Proposed Solution
 1. Define `DownloadRequestedEventArgs` in Core with download metadata (URI, filename, content type, content length)

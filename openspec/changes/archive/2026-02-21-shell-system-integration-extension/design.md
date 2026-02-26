@@ -1,7 +1,7 @@
 ## Context
 
 当前 `WebViewHostCapabilityBridge` 已形成 typed + policy-first + deterministic outcome 主干，并在 `WebViewShellExperience` 与模板 `app-shell` 预设中验证了 clipboard/external-open 等路径。  
-下一阶段需要把菜单、托盘、系统动作纳入同一主干，避免出现“模板里直接调平台 API”的旁路实现，保持 Electron 迁移场景下的可治理与可自动化验证。
+下一阶段需要把菜单、托盘、系统动作纳入同一主干，避免出现“模板里直接调平台 API”的旁路实现，保持打包式桌面栈迁移场景下的可治理与可自动化验证。
 
 Roadmap 对齐：
 - 基于 `ROADMAP` Phase 4 既有交付 `4.3`（host capability bridge）与 `4.5`（template shell presets）继续演进。
@@ -17,7 +17,7 @@ Roadmap 对齐：
 - 建立 CT/IT/Automation 测试闭环，覆盖策略拒绝、失败隔离、诊断契约稳定性。
 
 **Non-Goals:**
-- 不追求 Electron 全生态能力（auto-update、installer、插件体系）。
+- 不追求打包式桌面栈全生态能力（auto-update、installer、插件体系）。
 - 不引入新的 UI 宿主框架目标。
 - 不为平台特性差异做大而全公共抽象，仅定义跨平台共性 contract。
 

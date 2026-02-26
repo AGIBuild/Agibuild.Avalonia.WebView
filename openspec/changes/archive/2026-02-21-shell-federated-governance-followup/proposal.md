@@ -1,6 +1,6 @@
 ## Why
 
-Phase 5 closed the core Electron-replacement baseline, but three governance gaps remain from the archived follow-up checklist: global tray metadata budget, federated pruning audit identity, and template-level ShowAbout opt-in snippet clarity. Closing them now strengthens policy-first determinism and machine-checkable diagnostics for AI-agent and CI workflows.
+Phase 5 closed the core web-first baseline, but three governance gaps remain from the archived follow-up checklist: global tray metadata budget, federated pruning audit identity, and template-level ShowAbout opt-in snippet clarity. Closing them now strengthens policy-first determinism and machine-checkable diagnostics for AI-agent and CI workflows.
 
 ## What Changes
 
@@ -24,7 +24,7 @@ Phase 5 closed the core Electron-replacement baseline, but three governance gaps
 
 - No expansion of system action surface beyond existing typed actions.
 - No fallback or dual-path compatibility routing.
-- No Electron full API parity work or new host framework targets.
+- No bundled-browser full API parity work or new host framework targets.
 
 ## Impact
 

@@ -1,8 +1,8 @@
 # Getting Started
 
-Build your first **Electron-replacement-ready** hybrid app with Avalonia + web UI.
+Build your first **framework-ready** hybrid app with Avalonia + web UI.
 
-This guide follows the current product direction (Roadmap Phase 5):
+This guide follows the current product direction (Roadmap Phase 5: Framework Positioning Foundation):
 
 - typed bridge contracts
 - typed capability gateway

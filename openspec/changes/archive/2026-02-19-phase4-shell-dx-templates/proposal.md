@@ -11,7 +11,7 @@ M4.4 completed shell governance primitives, but new adopters still start from a 
 
 ## Non-goals
 
-- Full Electron API parity from template defaults.
+- Full bundled-browser API parity from template defaults.
 - Dynamic runtime preset switching.
 - Introducing new runtime shell contracts (M4.5 consumes existing M4.1–M4.4 capabilities).
 

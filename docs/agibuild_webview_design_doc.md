@@ -1,4 +1,4 @@
-# Agibuild.Avalonia.WebView 设计文档
+# Fulora 设计文档
 
 > **项目愿景与目标**: 参见 [PROJECT.md](../openspec/PROJECT.md)
 > **交付路线图**: 参见 [ROADMAP.md](../openspec/ROADMAP.md)
@@ -9,7 +9,7 @@
 
 ### 🎯 目标
 
-构建一个跨平台混合应用框架（Hybrid App Framework），基于 Avalonia UI，使开发者能够以原生性能和体积，获得 Electron 级别的开发效率：
+构建一个跨平台混合应用框架（Hybrid App Framework），基于 Avalonia UI，使开发者能够以原生性能和体积，获得 Web-first 级别的开发效率：
 
 **核心目标**（详见 [PROJECT.md §3.1](../openspec/PROJECT.md#31-core-goals-must-achieve)）：
 - **G1 — Type-Safe Bidirectional Bridge**: 源码生成器驱动的 C# ↔ JS 类型安全通信
@@ -311,7 +311,7 @@ public void WebView_OnWebMessageReceived_ShouldPassMessage()
 
 **总结**
 
-本项目已从一个"WebView 控件"演进为一个"跨平台 Hybrid App 框架"。Phase 0 建立了契约驱动、可测试、5 平台统一的基础设施；后续 Phase 1-3 将在此基础上构建类型安全桥接、SPA 托管和开发者工具链，最终实现"Electron 的开发效率 + Native 的性能和体积"这一核心价值主张。
+本项目已从一个"WebView 控件"演进为一个"跨平台 Hybrid App 框架"。Phase 0 建立了契约驱动、可测试、5 平台统一的基础设施；后续 Phase 1-3 将在此基础上构建类型安全桥接、SPA 托管和开发者工具链，最终实现"Web-first 的开发效率 + Native 的性能和体积"这一核心价值主张。
 
 详细目标定义参见 [PROJECT.md](../openspec/PROJECT.md)。
 

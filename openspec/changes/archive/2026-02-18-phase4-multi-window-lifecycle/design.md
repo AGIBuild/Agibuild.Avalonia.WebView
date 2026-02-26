@@ -7,7 +7,7 @@
   - adapters provide platform execution,
   - tests validate behavior through MockAdapter + focused platform automation.
 - Stakeholders:
-  - host app developers migrating from Electron-like window workflows,
+  - host app developers migrating from desktop-grade window workflows,
   - framework maintainers responsible for lifecycle stability,
   - enterprise teams requiring auditable policy/session behavior across windows.
 
@@ -33,7 +33,7 @@
 **Non-Goals:**
 - Typed system capability bridge APIs (clipboard/file dialog/notification) for M4.3.
 - Template preset delivery and migration scaffolds for M4.5.
-- Full parity with all Electron BrowserWindow options.
+- Full parity with all bundled-browser BrowserWindow options.
 
 ## Decisions
 

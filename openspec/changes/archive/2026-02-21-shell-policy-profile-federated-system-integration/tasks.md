@@ -31,5 +31,5 @@
 ## 6. Release Evidence and Handoff
 
 - [x] 6.1 Produce verification evidence mapping KPI -> implementation -> commands -> outcomes for this increment (Acceptance: `verification-evidence.md` includes pass/fail outcomes and command references).
-- [x] 6.2 Update roadmap note with scope boundary and non-goals for this increment (Acceptance: boundary note explicitly excludes Electron full API parity and fallback routing).
+- [x] 6.2 Update roadmap note with scope boundary and non-goals for this increment (Acceptance: boundary note explicitly excludes bundled-browser full API parity and fallback routing).
 - [x] 6.3 Prepare archive checklist with remaining open questions and owners (Acceptance: unresolved items list owner and decision gate for next increment).

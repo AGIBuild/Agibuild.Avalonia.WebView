@@ -12,4 +12,4 @@
 ## Residual Risks
 
 - Template source project direct build still reports pre-existing symbol resolution issues in template context; runtime/unit/integration governance remains green.
-- No Electron full API parity work is included in this increment by design.
+- No bundled-browser full API parity work is included in this increment by design.

@@ -5,12 +5,12 @@ NuGet package smoke runs a real WebView2 lifecycle and currently treats Chromium
 ## What Changes
 
 - Make Windows WebView2 teardown deterministic and verifiable in automation (no Chromium teardown errors, no deadlocks, no leaked window subclassing/state).
-- Add a small “shell experience” layer to standardize Electron-like host behaviors around new windows, downloads, permissions, and DevTools without expanding Core contracts unnecessarily.
+- Add a small “shell experience” layer to standardize desktop-grade host behaviors around new windows, downloads, permissions, and DevTools without expanding Core contracts unnecessarily.
 - Expand integration/contract tests so lifecycle regressions are caught before packaging.
 
 ## Non-goals
 
-- Bundling Chromium or Node.js, or pursuing full Electron API parity (per PROJECT.md non-goals).
+- Bundling Chromium or Node.js, or pursuing full bundled-browser API parity (per PROJECT.md non-goals).
 - Implementing OS-wide shell features (tray, global shortcuts, auto-update) inside this library; those belong in app hosts/templates.
 - Redesigning the bridge or SPA hosting stacks (G1/G2 are out of scope unless required to fix teardown determinism).
 
@@ -18,7 +18,7 @@ NuGet package smoke runs a real WebView2 lifecycle and currently treats Chromium
 
 ### New Capabilities
 - `webview2-teardown-stability`: Deterministic WebView2 teardown semantics and acceptance criteria for Windows (automation-friendly, no Chromium teardown errors).
-- `webview-shell-experience`: Optional runtime helpers/policies to handle new-window requests and polish download/permission/DevTools behaviors in a consistent, Electron-like way.
+- `webview-shell-experience`: Optional runtime helpers/policies to handle new-window requests and polish download/permission/DevTools behaviors in a consistent, desktop-grade way.
 
 ### Modified Capabilities
 <!-- None (initially). -->

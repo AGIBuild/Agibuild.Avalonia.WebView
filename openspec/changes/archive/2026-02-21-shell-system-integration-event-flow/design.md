@@ -16,7 +16,7 @@ Roadmap 对齐：
 - 用 CT/IT/Automation/Governance 验证无旁路、可观测、可回归。
 
 **Non-Goals:**
-- 不扩展 Electron 全 API（插件、自动更新、安装器生态）。
+- 不扩展打包式桌面栈全 API（插件、自动更新、安装器生态）。
 - 不做新宿主框架适配目标（WPF/WinForms/MAUI）。
 - 不引入 fallback/dual-path 兼容路径。
 

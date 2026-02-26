@@ -5,24 +5,34 @@
   <img src="https://img.shields.io/badge/License-MIT-yellow?style=flat-square" />
 </p>
 
-<h1 align="center">Agibuild.Avalonia.WebView</h1>
+<h1 align="center">Fulora</h1>
 
 <p align="center">
-  <strong>Electron-level web productivity. Avalonia-native performance, control, and security.</strong>
+  <strong>One runtime core for C# + Web. Build fast, stay native, scale confidently.</strong>
 </p>
 
 ---
 
-> **Product direction update**  
-> This project is now driven by the **Electron Replacement Foundation** goal (Roadmap Phase 5).  
-> We are building a **hybrid application platform**, not just a WebView control.
+> **Product direction**  
+> Build a category-defining C# + Web application framework with a clear promise:  
+> **from first WebView embed to full product platform, without rewriting your foundation**.
+>
+> **Current package ID**: `Agibuild.Avalonia.WebView` (branding is now Fulora).
+
+## Vision
+
+Turn C# + Web into a first-class product-building stack for teams that need both speed and control.
+
+- Build rich experiences in TypeScript and C# as one coherent system
+- Keep platform control, security boundaries, and diagnostics first-class from day one
+- Scale from "embed one WebView" to "deliver a full product platform" without rewriting foundations
 
 ## Why This Exists
 
-Teams migrating from Electron usually want two things at the same time:
+Most teams building cross-platform products with C# + web want two outcomes at the same time:
 
-1. Keep web development speed (React/Vue/Svelte, HMR, fast iteration)
-2. Regain native footprint, stronger security boundaries, and deterministic host behavior
+1. Web iteration speed (React/Vue/Svelte, HMR, fast release loops)
+2. Native-grade control (security boundaries, lifecycle governance, deterministic runtime behavior)
 
 Traditional WebView wrappers often solve rendering, but still leave you to hand-build:
 
@@ -31,9 +41,13 @@ Traditional WebView wrappers often solve rendering, but still leave you to hand-
 - diagnosable runtime behavior for CI and automation
 - scalable app-shell patterns across platforms
 
-`Agibuild.Avalonia.WebView` targets that full gap.
+Fulora is designed to close that gap by default.
 
-## What This Is Now (Not Just a Control)
+## What This Is (Framework + Control)
+
+### 0) Two adoption paths, one runtime core
+- **Control path**: integrate `WebView` into your architecture with minimal coupling
+- **Framework path**: adopt full capabilities (bridge/policy/shell/tooling) for faster product delivery
 
 ### 1) Typed bridge at the center
 - `[JsExport]` / `[JsImport]` contracts
@@ -65,12 +79,11 @@ Traditional WebView wrappers often solve rendering, but still leave you to hand-
 | Phase 2 | SPA Hosting | ✅ Core Done |
 | Phase 3 | Polish & GA | ✅ Done |
 | Phase 4 | Application Shell | ✅ Done |
-| Phase 5 | Electron Replacement Foundation | ✅ Completed |
+| Phase 5 | Framework Positioning Foundation | ✅ Completed |
 
 Read more:
 - [Roadmap](openspec/ROADMAP.md)
 - [Project Vision & Goals](openspec/PROJECT.md)
-- [Electron Replacement Foundation spec](openspec/specs/electron-replacement-foundation/spec.md)
 
 ## Platform Coverage
 

@@ -11,4 +11,4 @@
 - No expansion of typed system action surface.
 - No fallback/dual-path compatibility behavior.
 - No new platform adapter or framework target.
-- No Electron full API parity work.
+- No bundled-browser full API parity work.

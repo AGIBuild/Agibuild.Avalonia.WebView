@@ -1,6 +1,6 @@
 ## Why
 
-Right-click context menus in embedded browsers need customization. Electron provides `context-menu` event with hit-test info (link URL, selected text, image URL, editable state). Our WebView has no context menu interception — the platform default menu always shows. Consumers need to either suppress the default menu, augment it, or replace it entirely with an Avalonia-native menu for consistent UX.
+Right-click context menus in embedded browsers need customization. Bundled-browser stacks provide `context-menu` event with hit-test info (link URL, selected text, image URL, editable state). Our WebView has no context menu interception — the platform default menu always shows. Consumers need to either suppress the default menu, augment it, or replace it entirely with an Avalonia-native menu for consistent UX.
 
 ## What Changes
 

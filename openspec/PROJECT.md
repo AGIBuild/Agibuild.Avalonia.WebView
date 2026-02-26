@@ -1,4 +1,4 @@
-# Agibuild.Avalonia.WebView — Project Vision & Goals
+# Fulora — Project Vision & Goals
 
 > This document defines **what we are building, why, and what success looks like**.
 > All OpenSpec changes, specs, and roadmap items should align with the goals stated here.
@@ -7,31 +7,35 @@
 
 ## 1. Project Identity
 
-**Agibuild.Avalonia.WebView** is a cross-platform hybrid application framework for [Avalonia UI](https://avaloniaui.net/) that enables developers to build desktop and mobile applications combining native C# UI with web-based UI — with type-safe communication, native performance, and security by default.
+**Fulora** is a cross-platform hybrid application framework for [Avalonia UI](https://avaloniaui.net/) that enables developers to build desktop and mobile applications combining native C# UI with web-based UI — with type-safe communication, native performance, and security by default.
 
-**One-liner**: _Electron's developer productivity + native performance and footprint._
+**One-liner**: _Web-first developer speed with native-grade control, performance, and trust._
+
+**Adoption model**: one runtime core, two usage paths — start as a standalone `WebView` control in custom architectures, or adopt the full framework stack for end-to-end hybrid product delivery.
+
+**Strategic promise**: teams should be able to move from "embed a page" to "ship a full cross-platform product" on the same architecture without rewrites.
 
 ---
 
 ## 2. Problem Statement
 
-### 2.1 The Electron Problem
+### 2.1 Lessons from Current Web-First Desktop Approaches
 
-Electron dominates desktop app development because it offers unmatched developer productivity — the entire npm/frontend ecosystem, hot reload, and rapid UI iteration. But it comes with fundamental trade-offs:
+Modern bundled-browser desktop stacks offer unmatched developer productivity — the entire npm/frontend ecosystem, hot reload, and rapid UI iteration. But they come with fundamental trade-offs:
 
 | Pain Point | Impact |
 |---|---|
 | **App size 200MB+** | Every app bundles its own Chromium; users install the same engine hundreds of times |
-| **Memory 150MB+/window** | Each Electron process runs a full browser engine |
+| **Memory 150MB+/window** | Each app process runs a full browser engine |
 | **Cold start 3-5 seconds** | Chromium initialization is inherently slow |
 | **No native look & feel** | Everything is web — menus, dialogs, notifications all feel "off" |
 | **Security complexity** | `nodeIntegration` / `contextIsolation` / `preload` — easy to misconfigure, hard to audit |
 | **Untyped IPC** | `ipcMain` / `ipcRenderer` are string-based, no compile-time safety, major bug source |
 | **No native integration** | Cannot mix native OS controls with web content within the same window |
 
-Developers tolerate these issues because **no alternative offers the same development speed**.
+Teams tolerate these issues because **few alternatives offer the same mix of frontend velocity and ecosystem leverage**.
 
-### 2.2 The Existing WebView Control Problem
+### 2.2 Why Traditional WebView Controls Still Fall Short
 
 Existing Avalonia/WPF WebView controls (community packages, platform-specific wrappers) solve the size/memory problem by using the system WebView, but introduce different pain points:
 
@@ -44,12 +48,12 @@ Existing Avalonia/WPF WebView controls (community packages, platform-specific wr
 | **No security model** | No origin checks, no message policy, no capability gating |
 | **No hybrid app story** | No SPA hosting, no typed bridge, no dev tooling integration |
 
-These controls are "embed a browser rectangle" — not a framework for building hybrid applications.
+These controls solve rendering, but stop short of being a product framework.
 
-### 2.3 The Gap We Fill
+### 2.3 The Position We Build
 
 ```
-Electron               Our Position              Pure Native Avalonia
+Bundled Browser Stack  Our Position              Pure Native Avalonia
 ◄──────────────────────────●──────────────────────────────────►
 
 Full Web UI            Hybrid (Native + Web)     Full Native UI
@@ -104,7 +108,7 @@ These are prerequisites that we have already delivered:
 
 | What | Why |
 |------|-----|
-| Replace Electron entirely | We target apps that benefit from native + web hybrid, not pure web apps |
+| Become a browser-shell clone | We borrow proven workflow ideas, but optimize for .NET hybrid architecture and explicit contracts |
 | Bundled browser engine | We use platform WebViews — this is a feature, not a limitation |
 | Full Chromium API parity | We expose what is useful through our abstraction, not every browser API |
 | Server-side rendering | We are a client-side framework |
@@ -117,7 +121,7 @@ These are prerequisites that we have already delivered:
 | Persona | Need | How We Help |
 |---------|------|-------------|
 | **.NET desktop developers** | Add web-based UI sections (dashboards, rich editors) to native apps | Embed WebView with type-safe bridge, no web expertise needed |
-| **Electron refugees** | Native performance and footprint, keep web UI productivity | SPA hosting + typed bridge = same DX, 1/20th the size |
+| **Web-first .NET product teams** | Keep modern frontend velocity without giving up C# architecture control | SPA hosting + typed bridge + policy/governance yields fast iteration with deterministic host behavior |
 | **Cross-platform app teams** | Single codebase for Windows/macOS/Linux/iOS/Android | Unified API across 5 platforms with consistent behavior |
 | **Enterprise/security-conscious** | Auditable, sandboxed web content integration | Capability-based security, origin allowlisting, no `nodeIntegration` equivalent |
 
@@ -127,8 +131,8 @@ These are prerequisites that we have already delivered:
 
 | Metric | Target |
 |--------|--------|
-| App size (hello-world hybrid) | < 15 MB (vs Electron's 200MB+) |
-| Memory usage (single WebView) | < 50 MB (vs Electron's 150MB+) |
+| App size (hello-world hybrid) | < 15 MB (vs typical bundled-browser desktop stacks at 200MB+) |
+| Memory usage (single WebView) | < 50 MB (vs typical bundled-browser desktop stacks at 150MB+) |
 | Bridge call latency (C# → JS round-trip) | < 5 ms |
 | Time to first render (SPA hosted) | < 1 second |
 | Type-safe bridge coverage | 100% of exposed methods have TS types |
@@ -139,16 +143,16 @@ These are prerequisites that we have already delivered:
 
 ## 7. Competitive Positioning
 
-| Capability | Electron | Tauri | Existing WebView Controls | **Agibuild** |
+| Capability | Bundled-browser desktop stacks | Tauri | Existing WebView Controls | **Agibuild** |
 |---|---|---|---|---|
-| App size | ❌ 200MB+ | ✅ Small | ✅ Small | ✅ Small |
-| Memory | ❌ High | ✅ Low | ✅ Low | ✅ Low |
+| App size | ❌ Usually large | ✅ Small | ✅ Small | ✅ Small |
+| Memory | ❌ Usually high | ✅ Low | ✅ Low | ✅ Low |
 | Native UI mixing | ❌ None | ❌ None | ⚠️ Basic | ✅ Seamless |
 | JS ↔ Host type safety | ❌ None | ⚠️ Partial | ❌ None | ✅ **Full (source-gen)** |
 | SPA hosting | ✅ Built-in | ✅ Built-in | ❌ None | ✅ Built-in |
 | Security model | ⚠️ Complex | ✅ Good | ❌ None | ✅ **Secure by default** |
 | Testability | ❌ Hard | ❌ Hard | ❌ Impossible | ✅ **MockAdapter + typed mocks** |
-| Mobile support | ❌ None | ✅ Partial | ⚠️ Partial | ✅ 5 platforms |
+| Mobile support | ⚠️ Varies | ✅ Partial | ⚠️ Partial | ✅ 5 platforms |
 | .NET ecosystem | ❌ None | ❌ None | ✅ .NET | ✅ **.NET native** |
 
 ---

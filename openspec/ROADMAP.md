@@ -1,4 +1,4 @@
-# Agibuild.Avalonia.WebView — Roadmap
+# Fulora — Roadmap
 
 > Phased delivery plan aligned with [Project Goals](./PROJECT.md).
 > Each phase is independently shippable and builds on the previous one.
@@ -9,7 +9,7 @@
 
 ```
 Phase 0 (✅ Done)        Phase 1 (✅ Done)       Phase 2 (✅ Core Done)  Phase 3 (✅ Done)      Phase 4 (✅ Done)      Phase 5 (✅ Completed)
-Foundation               Type-Safe Bridge       SPA Hosting            Polish & GA            Application Shell       Electron Replacement Foundation
+Foundation               Type-Safe Bridge       SPA Hosting            Polish & GA            Application Shell       Framework Positioning Foundation
 ─────────────────────    ────────────────────   ────────────────────   ────────────────────   ────────────────────    ─────────────────────────────────
 • Cross-platform         • Source Generator     • Custom protocol      • Project template      • Shell policy kit      • Typed capability gateway
   adapters (5 platforms)   for C# → JS proxy      file serving        • API docs site           (new window/download/ • Policy-first execution model
@@ -64,7 +64,7 @@ Foundation               Type-Safe Bridge       SPA Hosting            Polish & 
 
 **Goal**: [G1] — Make C# ↔ JS communication as natural as calling local methods, with compile-time type safety.
 
-**Why this first**: This is the single biggest differentiator vs Electron and all existing WebView solutions. It transforms the project from "a WebView control" into "a hybrid app framework".
+**Why this first**: This is the single biggest differentiator vs existing WebView wrappers. It transforms the project from "a WebView control" into "a hybrid app framework".
 
 ### Design Decisions (confirmed)
 
@@ -380,7 +380,7 @@ dotnet new agibuild-hybrid -n MyApp --frontend react
 
 ## Phase 4: Application Shell Capabilities (✅ Completed)
 
-**Goal**: Extend the framework from "hybrid WebView runtime" to "application shell platform" for Electron-migration scenarios, while preserving **G3 (Secure by Default)** and **G4 (Contract-Driven Testability)**.
+**Goal**: Extend the framework from "hybrid WebView runtime" to "application shell platform" for real product scenarios, while preserving **G3 (Secure by Default)** and **G4 (Contract-Driven Testability)**.
 
 **Why now**: Phase 0-3 established stable runtime, typed bridge, SPA hosting, and GA readiness. The next leverage point is reducing host-app boilerplate for multi-window and system integration so teams can ship full desktop/mobile products, not just embedded web surfaces.
 
@@ -403,7 +403,7 @@ dotnet new agibuild-hybrid -n MyApp --frontend react
 | 4.2 | ✅ Multi-window strategy framework + lifecycle semantics tests | 4.1 | High |
 | 4.3 | ✅ Typed host capability bridge (initial capability set) | 4.1 + G1 | High |
 | 4.4 | ✅ Session/permission profiles and governance rules | 4.1 + G3 | Medium |
-| 4.5 | ✅ Template shell presets + samples (migration-oriented) | 4.1-4.4 + E1 | Medium |
+| 4.5 | ✅ Template shell presets + samples (production-oriented) | 4.1-4.4 + E1 | Medium |
 | 4.6 | ✅ Shell stress/soak lane + release-readiness checklist | 4.1-4.5 + G4 | Medium |
 
 ### Phase 4 Exit Criteria
@@ -411,21 +411,21 @@ dotnet new agibuild-hybrid -n MyApp --frontend react
 - Shell policies are opt-in and do not regress existing baseline behaviors when disabled.
 - Multi-window + host capability flows are testable in contract/integration automation.
 - Windows/macOS/Linux shell scenarios have passing smoke/stress coverage.
-- Template path demonstrates "Electron-like app shell" with minimal host code.
+- Template path demonstrates desktop-grade app shell capability with minimal host code.
 
 ---
 
-## Phase 5: Electron Replacement Foundation (✅ Completed)
+## Phase 5: Framework Positioning Foundation (✅ Completed)
 
-**Goal**: Make Electron migration-grade developer experience the primary outcome by addressing core pain points with a web-first, AI-agent-friendly architecture.
+**Goal**: Establish a framework-grade C# + web development model inspired by proven web-first workflows, while preserving control-level integration flexibility for custom architectures.
 
-**Why now**: Phase 4 established shell capabilities, but replacing Electron in real teams requires a stronger focus on typed capability workflows, policy governance, deterministic diagnostics, and template-driven delivery ergonomics.
+**Why now**: Phase 4 established shell capabilities, but becoming a default framework path for C# + web teams requires stronger typed capability workflows, policy governance, deterministic diagnostics, and template-driven delivery ergonomics.
 
 ### Milestones
 
 | Milestone | Focus | Outcome |
 |---|---|---|
-| **M5.0 Objective Reset** | Lock acceptance criteria around Electron pain-point closure | ✅ Done — roadmap objective pivot locked to Electron pain-point closure |
+| **M5.0 Objective Reset** | Lock acceptance criteria around framework positioning and dual-path adoption | ✅ Done — objective pivot locked to framework positioning outcomes |
 | **M5.1 Typed Capability Gateway** | Unify host capability entry points and result semantics | ✅ Done — typed gateway with deterministic allow/deny/failure outcomes |
 | **M5.2 Policy-first Runtime** | Enforce policy before provider execution | ✅ Done — zero-bypass, explicit deny reason, provider zero-execution deny path |
 | **M5.3 Agent-friendly Observability** | Structured runtime diagnostics for critical flows | ✅ Done — structured diagnostics for outbound + inbound system-integration flows |
@@ -461,10 +461,10 @@ dotnet new agibuild-hybrid -n MyApp --frontend react
 
 ### Phase 5 Exit Criteria
 
-- Electron pain-point KPIs are defined and verified by automated evidence.
+- Framework positioning KPIs are defined and verified by automated evidence.
 - Capability calls are typed, policy-governed, and produce deterministic outcomes.
 - Critical runtime flows emit structured diagnostics consumable by CI and AI agents.
-- Default template demonstrates the recommended Electron-replacement architecture path.
+- Default template demonstrates the recommended web-first framework architecture path.
 
 ---
 
@@ -473,12 +473,12 @@ dotnet new agibuild-hybrid -n MyApp --frontend react
 ```
 Phase 0 (✅ Done) ──► Phase 1 (✅ Done) ──► Phase 2 (✅ Core Done) ──► Phase 3 (✅ Done) ──► Phase 4 (✅ Done) ──► Phase 5 (✅ Completed)
      │                      │                       │                         │                         │
-     │                      │                       └── 2.4 depends on Phase 1│                         └── Electron-replacement baseline
+     │                      │                       └── 2.4 depends on Phase 1│                         └── framework-positioning baseline
      │                      └── Builds on F6 (RPC) + F3 (Policy)             └── Shell layer builds on stable GA baseline   builds on shell + bridge + governance
      └── F4 (WebResource) used by Phase 2                                       and reuses bridge/policy/testability core
 ```
 
-Phase 1 and Phase 2 are mostly independent in implementation but compose together. Phase 4 depends on completed GA-grade stability from Phase 3 and focuses on product-level shell capabilities. Phase 5 pivots from "host count" to "Electron pain-point closure" with web-first developer productivity and AI-agent operability as primary outcomes.
+Phase 1 and Phase 2 are mostly independent in implementation but compose together. Phase 4 depends on completed GA-grade stability from Phase 3 and focuses on product-level shell capabilities. Phase 5 pivots from "host count" to "framework positioning + dual-path adoption" with web-first developer productivity and AI-agent operability as primary outcomes.
 
 ---
 
@@ -489,7 +489,7 @@ Phase 1 and Phase 2 are mostly independent in implementation but compose togethe
 | Source Generator complexity (Roslyn API) | Phase 1 delay | Start with simple cases (no generics, no overloads), iterate |
 | TypeScript generation edge cases | Type mismatch bugs | Use System.Text.Json contract model as single source of truth |
 | Platform WebView JS injection timing | Bridge not ready when page loads | Use preload scripts (F4) to ensure bridge is available at document-start |
-| SPA routing conflicts with custom scheme | 404 on client routes | SPA fallback is proven pattern (Tauri, Electron) — low risk |
+| SPA routing conflicts with custom scheme | 404 on client routes | SPA fallback is a proven industry pattern — low risk |
 | AOT/NativeAOT compatibility | Source generator must not use reflection | Design constraint from day 1 — source gen is inherently AOT-safe |
 | Shell behavior divergence across platforms | Inconsistent user experience | Define shell semantics in contracts first; enforce via CT + platform IT |
 | Host capability overexposure | Security/compliance risk | Keep capabilities opt-in, explicit allowlists, and policy-based authorization |

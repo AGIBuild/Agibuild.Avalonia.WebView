@@ -1,4 +1,4 @@
-# Agibuild.Avalonia.WebView 契约语义规范 v1
+# Fulora 契约语义规范 v1
 
 > 本文用于“把语义写死”，支撑：
 > - `docs/agibuild_webview_compatibility_matrix_proposal.md`（Baseline 可验证）

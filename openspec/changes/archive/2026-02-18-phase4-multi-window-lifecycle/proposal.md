@@ -1,6 +1,6 @@
 ## Why
 
-Phase 4 M4.2 requires first-class multi-window lifecycle semantics on top of the M4.1 shell policy base so host apps can build Electron-like workflows without duplicating fragile window orchestration code. This closes a major gap between "embedded WebView" and "application shell platform" while preserving G3 and G4.
+Phase 4 M4.2 requires first-class multi-window lifecycle semantics on top of the M4.1 shell policy base so host apps can build desktop-grade workflows without duplicating fragile window orchestration code. This closes a major gap between "embedded WebView" and "application shell platform" while preserving G3 and G4.
 
 ## What Changes
 

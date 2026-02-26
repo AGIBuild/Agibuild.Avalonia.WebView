@@ -1,6 +1,6 @@
 # SPA Hosting
 
-SPA hosting is the web-first delivery layer for this project’s Electron-replacement path.
+SPA hosting is the web-first delivery layer for this project's framework-first path.
 The same `app://` URL works in development and production, keeping host glue minimal.
 
 ## Architecture Role
