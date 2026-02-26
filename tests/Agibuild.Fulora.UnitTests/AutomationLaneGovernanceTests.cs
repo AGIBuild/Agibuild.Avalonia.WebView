@@ -742,6 +742,8 @@ public sealed class AutomationLaneGovernanceTests
         AssertSourceContains(combinedSource, "producerTarget = \"BridgeDistributionGovernance\"", BridgeDistributionParity, "build/Build.Governance.cs");
         AssertSourceContains(combinedSource, "SMOKE_PASSED", BridgeDistributionParity, "build/Build.Governance.cs");
         AssertSourceContains(combinedSource, "LTS_IMPORT_OK", BridgeDistributionParity, "build/Build.Governance.cs");
+        AssertSourceContains(combinedSource, "RunProcessCaptureAllChecked(toolName, \"--version\"", BridgeDistributionParity, "build/Build.Governance.cs");
+        AssertSourceContains(combinedSource, "{toolName} --version", BridgeDistributionParity, "build/Build.Governance.cs");
 
         Assert.Matches(
             new Regex(@"Target\s+CiPublish\s*=>[\s\S]*?\.DependsOn\([\s\S]*BridgeDistributionGovernance[\s\S]*\);", RegexOptions.Multiline),

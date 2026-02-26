@@ -489,8 +489,18 @@ partial class BuildTask
     {
         try
         {
-            var fileName = OperatingSystem.IsWindows() ? "where" : "which";
-            RunProcessCaptureAll(fileName, toolName, timeoutMs: 5_000);
+            if (OperatingSystem.IsWindows())
+            {
+                RunProcessCaptureAllChecked(
+                    "cmd.exe",
+                    $"/d /s /c \"{toolName} --version\"",
+                    timeoutMs: 5_000);
+            }
+            else
+            {
+                RunProcessCaptureAllChecked(toolName, "--version", timeoutMs: 5_000);
+            }
+
             return true;
         }
         catch
