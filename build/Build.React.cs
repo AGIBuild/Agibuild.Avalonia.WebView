@@ -84,9 +84,18 @@ partial class BuildTask
         EnsureNpmAvailable(ReactWebDirectory);
 
         var nodeModules = ReactWebDirectory / "node_modules";
+        var bridgeRuntimeEntry = nodeModules / "@agibuild" / "bridge" / "dist" / "index.js";
         if (!Directory.Exists(nodeModules))
         {
             Serilog.Log.Information("node_modules not found, running npm install...");
+            RunNpmProcess("install", workingDirectory: ReactWebDirectory, timeoutMs: 120_000);
+            Serilog.Log.Information("npm install completed.");
+            return;
+        }
+
+        if (!File.Exists(bridgeRuntimeEntry))
+        {
+            Serilog.Log.Information("Bridge runtime entry not found at {Path}, refreshing npm install...", bridgeRuntimeEntry);
             RunNpmProcess("install", workingDirectory: ReactWebDirectory, timeoutMs: 120_000);
             Serilog.Log.Information("npm install completed.");
         }

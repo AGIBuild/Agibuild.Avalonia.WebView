@@ -930,6 +930,7 @@ public sealed class AutomationLaneGovernanceTests
         var vueTsConfig = File.ReadAllText(vueSampleTsConfigPath);
 
         Assert.Contains("\"@agibuild/bridge\"", bridgePackage, StringComparison.Ordinal);
+        Assert.Contains("\"prepare\": \"npm run build\"", bridgePackage, StringComparison.Ordinal);
         Assert.Contains("createBridgeClient", bridgeEntry, StringComparison.Ordinal);
         Assert.Contains("bridgeClient", bridgeEntry, StringComparison.Ordinal);
         Assert.Contains("getService", bridgeEntry, StringComparison.Ordinal);
