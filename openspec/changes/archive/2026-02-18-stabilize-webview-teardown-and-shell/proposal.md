@@ -26,4 +26,4 @@ NuGet package smoke runs a real WebView2 lifecycle and currently treats Chromium
 ## Impact
 
 - **Goals/Roadmap alignment**: Supports Phase 3 “Polish & GA” readiness and resilience (quality gates for runtime automation), aligned with **G4 (Contract-Driven Testability)** and **E2 (Dev Tooling)** by making lifecycle correctness observable and testable.
-- **Affected areas**: `Agibuild.Avalonia.WebView.Adapters.Windows` teardown path (`Detach` / WebView2 controller/environment cleanup, Win32 subclass restore), runtime smoke automation, and any new runtime helper APIs (non-breaking, opt-in).
+- **Affected areas**: `Agibuild.Fulora.Adapters.Windows` teardown path (`Detach` / WebView2 controller/environment cleanup, Win32 subclass restore), runtime smoke automation, and any new runtime helper APIs (non-breaking, opt-in).

@@ -1,4 +1,4 @@
-using Agibuild.Avalonia.WebView;
+using Agibuild.Fulora;
 using HybridApp.Bridge;
 using Xunit;
 

@@ -25,6 +25,6 @@
 
 ## Impact
 
-- Runtime shell implementation: `src/Agibuild.Avalonia.WebView.Runtime/Shell/WebViewShellExperience.cs`
-- Automation tests: `tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/HostCapabilityBridgeIntegrationTests.cs`
-- Governance artifacts: `tests/runtime-critical-path.manifest.json`, `tests/shell-production-matrix.json`, `tests/Agibuild.Avalonia.WebView.UnitTests/AutomationLaneGovernanceTests.cs`
+- Runtime shell implementation: `src/Agibuild.Fulora.Runtime/Shell/WebViewShellExperience.cs`
+- Automation tests: `tests/Agibuild.Fulora.Integration.Tests.Automation/HostCapabilityBridgeIntegrationTests.cs`
+- Governance artifacts: `tests/runtime-critical-path.manifest.json`, `tests/shell-production-matrix.json`, `tests/Agibuild.Fulora.UnitTests/AutomationLaneGovernanceTests.cs`

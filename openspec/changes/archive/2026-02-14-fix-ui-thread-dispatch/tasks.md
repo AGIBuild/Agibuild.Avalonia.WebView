@@ -40,13 +40,13 @@
 ## 6. Final Validation
 
 - [x] 6.1 Run full test matrix (CT/IT/E2E) on Windows/macOS/Linux and record pass/fail with operation diagnostics attached for failures. (Deliverable: D2+D5, AC: No regression in existing suites and no UI-thread contract exceptions.)
-  - [x] Windows CT: `Agibuild.Avalonia.WebView.UnitTests` passed (`643/643`)
-  - [x] Windows IT/E2E automation: `Agibuild.Avalonia.WebView.Integration.Tests.Automation` passed (`112/112`)
-  - [x] Windows solution-level matrix: `dotnet test Agibuild.Avalonia.WebView.sln` passed (Unit `643/643`, Automation `112/112`)
-  - [x] Linux CT: `dotnet test tests/Agibuild.Avalonia.WebView.UnitTests/Agibuild.Avalonia.WebView.UnitTests.csproj --os linux` passed (`643/643`)
-  - [x] Linux IT/E2E automation: `dotnet test tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/Agibuild.Avalonia.WebView.Integration.Tests.Automation.csproj --os linux` passed (`112/112`)
-  - [x] macOS CT: `dotnet test tests/Agibuild.Avalonia.WebView.UnitTests/Agibuild.Avalonia.WebView.UnitTests.csproj --os osx` passed (`643/643`)
-  - [x] macOS IT/E2E automation: `dotnet test tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/Agibuild.Avalonia.WebView.Integration.Tests.Automation.csproj --os osx` passed (`112/112`)
+  - [x] Windows CT: `Agibuild.Fulora.UnitTests` passed (`643/643`)
+  - [x] Windows IT/E2E automation: `Agibuild.Fulora.Integration.Tests.Automation` passed (`112/112`)
+  - [x] Windows solution-level matrix: `dotnet test Agibuild.Fulora.sln` passed (Unit `643/643`, Automation `112/112`)
+  - [x] Linux CT: `dotnet test tests/Agibuild.Fulora.UnitTests/Agibuild.Fulora.UnitTests.csproj --os linux` passed (`643/643`)
+  - [x] Linux IT/E2E automation: `dotnet test tests/Agibuild.Fulora.Integration.Tests.Automation/Agibuild.Fulora.Integration.Tests.Automation.csproj --os linux` passed (`112/112`)
+  - [x] macOS CT: `dotnet test tests/Agibuild.Fulora.UnitTests/Agibuild.Fulora.UnitTests.csproj --os osx` passed (`643/643`)
+  - [x] macOS IT/E2E automation: `dotnet test tests/Agibuild.Fulora.Integration.Tests.Automation/Agibuild.Fulora.Integration.Tests.Automation.csproj --os osx` passed (`112/112`)
   - [x] Failure diagnostics (cross-platform): initial linux/osx matrix exposed two test-level timing/concurrency issues
     - `BridgeIntegrationTests.Bridge_is_thread_safe_for_expose_operations` (linux): concurrent `ScriptCallback` writes caused nondeterministic assertion; fixed by neutralizing callback during parallel expose and restoring callback for assertion phase.
     - `ContractSemanticsV1NavigationTests.Latest_wins_supersedes_active_navigation` (osx): supersede event observation raced with assertion; fixed by adding dispatcher pump wait before asserting `Superseded`.

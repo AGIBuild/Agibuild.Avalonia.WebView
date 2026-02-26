@@ -134,7 +134,7 @@ The generator emits:
 Analyzer package reference:
 
 ```xml
-<PackageReference Include="Agibuild.Avalonia.WebView.Bridge.Generator"
+<PackageReference Include="Agibuild.Fulora.Bridge.Generator"
                   OutputItemType="Analyzer"
                   ReferenceOutputAssembly="false" />
 ```

@@ -1,6 +1,6 @@
 ## Context
 
-- The Windows adapter (`Agibuild.Avalonia.WebView.Adapters.Windows`) initializes WebView2 asynchronously on Attach and performs best-effort teardown on Detach, attempting to marshal COM and Win32 cleanup back onto the captured UI `SynchronizationContext`.
+- The Windows adapter (`Agibuild.Fulora.Adapters.Windows`) initializes WebView2 asynchronously on Attach and performs best-effort teardown on Detach, attempting to marshal COM and Win32 cleanup back onto the captured UI `SynchronizationContext`.
 - The NuGet package smoke lane runs a real Avalonia app and fails the build if Chromium teardown errors appear (notably `Failed to unregister class Chrome_WidgetWin_0` / `window_impl.cc:124`), which is treated as a lifecycle regression.
 - This change targets Phase 3 quality/readiness work (ROADMAP Phase 3.3 “Performance & Quality” and Phase 3.5 “GA Release”), and aligns with **G4 (Contract-Driven Testability)** and **E2 (Dev Tooling)** by making lifecycle correctness observable and enforceable in automation.
 

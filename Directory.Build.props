@@ -10,8 +10,8 @@
     <Authors>Agibuild</Authors>
     <Company>Agibuild</Company>
     <Copyright>Copyright (c) 2026 Agibuild</Copyright>
-    <PackageProjectUrl>https://github.com/AgibuilDev/Agibuild.Avalonia.WebView</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/AgibuilDev/Agibuild.Avalonia.WebView.git</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/AgibuilDev/Agibuild.Fulora</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/AgibuilDev/Agibuild.Fulora.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
 
     <!-- SPDX license expression for all NuGet packages -->

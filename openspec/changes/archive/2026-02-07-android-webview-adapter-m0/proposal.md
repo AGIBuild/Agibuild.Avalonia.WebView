@@ -35,9 +35,9 @@ Because the contract surface is mature (cookie management, error categorization,
 
 ## Impact
 
-- **Affected code**: `Agibuild.Avalonia.WebView.Adapters.Android` — full adapter implementation replacing the current stub
+- **Affected code**: `Agibuild.Fulora.Adapters.Android` — full adapter implementation replacing the current stub
 - **No new NuGet dependencies**: Android WebView APIs are available via .NET for Android platform bindings
 - **csproj change**: Android adapter keeps `net10.0-android` TFM, adds `CA2255` NoWarn for ModuleInitializer
 - **Public API surface**: no changes — contracts are already defined; this change implements them on Android
-- **Integration tests**: existing Android IT project (`Agibuild.Avalonia.WebView.Integration.Tests.Android`) already scaffolded
+- **Integration tests**: existing Android IT project (`Agibuild.Fulora.Integration.Tests.Android`) already scaffolded
 - **No breaking changes**: additive implementation only

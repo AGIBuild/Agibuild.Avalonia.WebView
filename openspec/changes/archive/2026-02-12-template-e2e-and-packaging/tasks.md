@@ -4,7 +4,7 @@
 **Acceptance**: Core, Adapters.Abstractions, Runtime, Bridge.Generator, Testing all have `IsPackable=true` + `PackageId`. `dotnet pack` produces individual .nupkg files.
 
 ## Task 2: Create template pack project
-**Acceptance**: `templates/Agibuild.Avalonia.WebView.Templates.csproj` with `PackageType=Template`. `dotnet pack` produces `Agibuild.Avalonia.WebView.Templates.*.nupkg`.
+**Acceptance**: `templates/Agibuild.Fulora.Templates.csproj` with `PackageType=Template`. `dotnet pack` produces `Agibuild.Fulora.Templates.*.nupkg`.
 
 ## Task 3: Add Nuke PackAll target
 **Acceptance**: `./build.sh PackAll` packs all 5 sub-packages to `artifacts/packages/`.

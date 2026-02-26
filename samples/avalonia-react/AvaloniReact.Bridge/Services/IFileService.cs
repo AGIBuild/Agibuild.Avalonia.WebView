@@ -1,4 +1,4 @@
-using Agibuild.Avalonia.WebView;
+using Agibuild.Fulora;
 using AvaloniReact.Bridge.Models;
 
 namespace AvaloniReact.Bridge.Services;

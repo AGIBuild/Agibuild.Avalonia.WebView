@@ -2,7 +2,7 @@
 
 ### Commands
 
-1. `dotnet test tests/Agibuild.Avalonia.WebView.UnitTests/Agibuild.Avalonia.WebView.UnitTests.csproj`
+1. `dotnet test tests/Agibuild.Fulora.UnitTests/Agibuild.Fulora.UnitTests.csproj`
    - Result: Initial run passed (`719/719`) before template generation validation hardening.
 
 2. Template generation/build validation (round 1):
@@ -25,12 +25,12 @@
    - Re-ran same generation/build/test command set.
    - Result: Passed for both app-shell and baseline (`build + test` success).
 
-5. `dotnet test tests/Agibuild.Avalonia.WebView.UnitTests/Agibuild.Avalonia.WebView.UnitTests.csproj`
+5. `dotnet test tests/Agibuild.Fulora.UnitTests/Agibuild.Fulora.UnitTests.csproj`
    - Result: One flaky dispatcher test timeout on first rerun.
    - Retry round 2: targeted test filter passed (`1/1`).
    - Retry round 3: full unit suite passed (`719/719`).
 
-6. `dotnet test tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/Agibuild.Avalonia.WebView.Integration.Tests.Automation.csproj`
+6. `dotnet test tests/Agibuild.Fulora.Integration.Tests.Automation/Agibuild.Fulora.Integration.Tests.Automation.csproj`
    - Result: Passed (`132/132`).
 
 ## Retry Log

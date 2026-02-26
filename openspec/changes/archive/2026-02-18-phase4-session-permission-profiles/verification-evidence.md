@@ -2,10 +2,10 @@
 
 ### Commands
 
-1. `dotnet test tests/Agibuild.Avalonia.WebView.UnitTests/Agibuild.Avalonia.WebView.UnitTests.csproj`
+1. `dotnet test tests/Agibuild.Fulora.UnitTests/Agibuild.Fulora.UnitTests.csproj`
    - Result: Passed (`717/717`)
 
-2. `dotnet test tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/Agibuild.Avalonia.WebView.Integration.Tests.Automation.csproj`
+2. `dotnet test tests/Agibuild.Fulora.Integration.Tests.Automation/Agibuild.Fulora.Integration.Tests.Automation.csproj`
    - Result: Passed (`132/132`)
    - Note: suite duration increased because `WebView2TeardownStabilityIntegrationTests` now performs explicit build + no-build runtime phases for deterministic teardown validation.
 

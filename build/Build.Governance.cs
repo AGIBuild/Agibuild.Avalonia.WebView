@@ -105,7 +105,7 @@ partial class BuildTask
             var failures = new List<string>();
             var checks = new List<object>();
 
-            var targetsPath = RootDirectory / "src" / "Agibuild.Avalonia.WebView.Bridge.Generator" / "build" / "Agibuild.Avalonia.WebView.Bridge.Generator.targets";
+            var targetsPath = RootDirectory / "src" / "Agibuild.Fulora.Bridge.Generator" / "build" / "Agibuild.Fulora.Bridge.Generator.targets";
             if (!File.Exists(targetsPath))
             {
                 failures.Add($"Missing bridge generator targets file: {targetsPath}");

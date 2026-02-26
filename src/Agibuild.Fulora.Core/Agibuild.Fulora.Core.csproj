@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Agibuild.Fulora</RootNamespace>
+
+    <IsPackable>true</IsPackable>
+    <PackageId>Agibuild.Fulora.Core</PackageId>
+    <Description>Core contract types (IWebView, IBridgeService, [JsExport], [JsImport]) for Agibuild.Fulora.</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.3.11" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- SPI types (IWebViewAdapterHost, NativeNavigationStarting*) are internal. -->
+    <InternalsVisibleTo Include="Agibuild.Fulora.Adapters.Abstractions" />
+    <InternalsVisibleTo Include="Agibuild.Fulora.Runtime" />
+    <InternalsVisibleTo Include="Agibuild.Fulora.Adapters.MacOS" />
+    <InternalsVisibleTo Include="Agibuild.Fulora.Adapters.Windows" />
+    <InternalsVisibleTo Include="Agibuild.Fulora.Adapters.Gtk" />
+    <InternalsVisibleTo Include="Agibuild.Fulora.Adapters.Android" />
+    <InternalsVisibleTo Include="Agibuild.Fulora.Adapters.iOS" />
+    <InternalsVisibleTo Include="Agibuild.Fulora.Testing" />
+    <InternalsVisibleTo Include="Agibuild.Fulora.UnitTests" />
+    <InternalsVisibleTo Include="Agibuild.Fulora.Integration.Tests" />
+    <InternalsVisibleTo Include="Agibuild.Fulora.Integration.Tests.Automation" />
+  </ItemGroup>
+</Project>

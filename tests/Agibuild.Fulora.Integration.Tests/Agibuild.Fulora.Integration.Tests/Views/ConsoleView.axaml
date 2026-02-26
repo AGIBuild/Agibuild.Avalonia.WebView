@@ -1,0 +1,37 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Agibuild.Fulora.Integration.Tests.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="640"
+             x:Class="Agibuild.Fulora.Integration.Tests.Views.ConsoleView"
+             x:DataType="vm:MainViewModel">
+
+  <DockPanel Background="White">
+    <!-- Toolbar -->
+    <Border DockPanel.Dock="Top"
+            BorderThickness="0,0,0,1" BorderBrush="{StaticResource BorderDefaultBrush}"
+            Padding="12,8">
+      <Grid ColumnDefinitions="*,Auto,Auto">
+        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+          <TextBlock Text="&#x2261;" FontSize="16" VerticalAlignment="Center" />
+          <TextBlock Text="Console" FontWeight="SemiBold" FontSize="14"
+                     Foreground="{StaticResource TextPrimaryBrush}"
+                     VerticalAlignment="Center" />
+        </StackPanel>
+        <Button Grid.Column="1" Content="Copy" FontSize="11" Padding="12,5"
+                CornerRadius="6" Margin="0,0,6,0"
+                Click="OnCopyClicked" />
+        <Button Grid.Column="2" Content="Clear" FontSize="11" Padding="12,5"
+                CornerRadius="6" Command="{Binding ClearLogCommand}" />
+      </Grid>
+    </Border>
+
+    <!-- Log output -->
+    <TextBox IsReadOnly="True" AcceptsReturn="True" TextWrapping="NoWrap"
+             FontFamily="Menlo,Consolas,Courier New,monospace" FontSize="11"
+             Text="{Binding SharedLog}"
+             Margin="8" Background="#F8FAFC" CornerRadius="6"
+             CaretIndex="2147483647" />
+  </DockPanel>
+</UserControl>

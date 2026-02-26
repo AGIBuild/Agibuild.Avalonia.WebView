@@ -2,19 +2,19 @@
 
 ### Commands
 
-1. `dotnet test tests/Agibuild.Avalonia.WebView.UnitTests/Agibuild.Avalonia.WebView.UnitTests.csproj`
+1. `dotnet test tests/Agibuild.Fulora.UnitTests/Agibuild.Fulora.UnitTests.csproj`
    - Result: Passed (`704/704`)
 
-2. `dotnet test tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/Agibuild.Avalonia.WebView.Integration.Tests.Automation.csproj`
+2. `dotnet test tests/Agibuild.Fulora.Integration.Tests.Automation/Agibuild.Fulora.Integration.Tests.Automation.csproj`
    - Initial result: Failed (`1` flaky timeout in `WebView2TeardownStabilityIntegrationTests`)
 
-3. `dotnet test tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/Agibuild.Avalonia.WebView.Integration.Tests.Automation.csproj --filter "FullyQualifiedName~WebView2TeardownStabilityIntegrationTests"`
+3. `dotnet test tests/Agibuild.Fulora.Integration.Tests.Automation/Agibuild.Fulora.Integration.Tests.Automation.csproj --filter "FullyQualifiedName~WebView2TeardownStabilityIntegrationTests"`
    - Result: Passed (`1/1`)
 
-4. `dotnet test tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/Agibuild.Avalonia.WebView.Integration.Tests.Automation.csproj`
+4. `dotnet test tests/Agibuild.Fulora.Integration.Tests.Automation/Agibuild.Fulora.Integration.Tests.Automation.csproj`
    - Result: Passed (`128/128`)
 
-5. `dotnet test tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/Agibuild.Avalonia.WebView.Integration.Tests.Automation.csproj`
+5. `dotnet test tests/Agibuild.Fulora.Integration.Tests.Automation/Agibuild.Fulora.Integration.Tests.Automation.csproj`
    - Final confirmation run: Passed (`128/128`)
 
 ## Retry Log (flaky WV2 teardown lane)

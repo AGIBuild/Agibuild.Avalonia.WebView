@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using Agibuild.Avalonia.WebView;
+using Agibuild.Fulora;
 using Avalonia.Controls;
 using AvaloniReact.Bridge.Services;
 

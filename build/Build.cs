@@ -92,59 +92,59 @@ partial class BuildTask : NukeBuild
     AbsolutePath RuntimeCriticalPathManifestFile => TestsDirectory / "runtime-critical-path.manifest.json";
     AbsolutePath WarningGovernanceBaselineFile => TestsDirectory / "warning-governance.baseline.json";
 
-    AbsolutePath SolutionFile => RootDirectory / "Agibuild.Avalonia.WebView.sln";
+    AbsolutePath SolutionFile => RootDirectory / "Agibuild.Fulora.sln";
     AbsolutePath CoverageDirectory => ArtifactsDirectory / "coverage";
     AbsolutePath CoverageReportDirectory => ArtifactsDirectory / "coverage-report";
 
     AbsolutePath PackProject =>
-        SrcDirectory / "Agibuild.Avalonia.WebView" / "Agibuild.Avalonia.WebView.csproj";
+        SrcDirectory / "Agibuild.Fulora" / "Agibuild.Fulora.csproj";
 
     AbsolutePath UnitTestsProject =>
-        TestsDirectory / "Agibuild.Avalonia.WebView.UnitTests" / "Agibuild.Avalonia.WebView.UnitTests.csproj";
+        TestsDirectory / "Agibuild.Fulora.UnitTests" / "Agibuild.Fulora.UnitTests.csproj";
 
     AbsolutePath IntegrationTestsProject =>
-        TestsDirectory / "Agibuild.Avalonia.WebView.Integration.Tests.Automation"
-        / "Agibuild.Avalonia.WebView.Integration.Tests.Automation.csproj";
+        TestsDirectory / "Agibuild.Fulora.Integration.Tests.Automation"
+        / "Agibuild.Fulora.Integration.Tests.Automation.csproj";
 
     AbsolutePath E2EDesktopProject =>
-        TestsDirectory / "Agibuild.Avalonia.WebView.Integration.Tests"
-        / "Agibuild.Avalonia.WebView.Integration.Tests.Desktop"
-        / "Agibuild.Avalonia.WebView.Integration.Tests.Desktop.csproj";
+        TestsDirectory / "Agibuild.Fulora.Integration.Tests"
+        / "Agibuild.Fulora.Integration.Tests.Desktop"
+        / "Agibuild.Fulora.Integration.Tests.Desktop.csproj";
 
     AbsolutePath E2EAndroidProject =>
-        TestsDirectory / "Agibuild.Avalonia.WebView.Integration.Tests"
-        / "Agibuild.Avalonia.WebView.Integration.Tests.Android"
-        / "Agibuild.Avalonia.WebView.Integration.Tests.Android.csproj";
+        TestsDirectory / "Agibuild.Fulora.Integration.Tests"
+        / "Agibuild.Fulora.Integration.Tests.Android"
+        / "Agibuild.Fulora.Integration.Tests.Android.csproj";
 
     AbsolutePath E2EiOSProject =>
-        TestsDirectory / "Agibuild.Avalonia.WebView.Integration.Tests"
-        / "Agibuild.Avalonia.WebView.Integration.Tests.iOS"
-        / "Agibuild.Avalonia.WebView.Integration.Tests.iOS.csproj";
+        TestsDirectory / "Agibuild.Fulora.Integration.Tests"
+        / "Agibuild.Fulora.Integration.Tests.iOS"
+        / "Agibuild.Fulora.Integration.Tests.iOS.csproj";
 
     AbsolutePath NugetPackageTestProject =>
-        TestsDirectory / "Agibuild.Avalonia.WebView.Integration.NugetPackageTests"
-        / "Agibuild.Avalonia.WebView.Integration.NugetPackageTests.csproj";
+        TestsDirectory / "Agibuild.Fulora.Integration.NugetPackageTests"
+        / "Agibuild.Fulora.Integration.NugetPackageTests.csproj";
 
     AbsolutePath CoreProject =>
-        SrcDirectory / "Agibuild.Avalonia.WebView.Core" / "Agibuild.Avalonia.WebView.Core.csproj";
+        SrcDirectory / "Agibuild.Fulora.Core" / "Agibuild.Fulora.Core.csproj";
 
     AbsolutePath BridgeGeneratorProject =>
-        SrcDirectory / "Agibuild.Avalonia.WebView.Bridge.Generator" / "Agibuild.Avalonia.WebView.Bridge.Generator.csproj";
+        SrcDirectory / "Agibuild.Fulora.Bridge.Generator" / "Agibuild.Fulora.Bridge.Generator.csproj";
 
     AbsolutePath AdaptersAbstractionsProject =>
-        SrcDirectory / "Agibuild.Avalonia.WebView.Adapters.Abstractions" / "Agibuild.Avalonia.WebView.Adapters.Abstractions.csproj";
+        SrcDirectory / "Agibuild.Fulora.Adapters.Abstractions" / "Agibuild.Fulora.Adapters.Abstractions.csproj";
 
     AbsolutePath RuntimeProject =>
-        SrcDirectory / "Agibuild.Avalonia.WebView.Runtime" / "Agibuild.Avalonia.WebView.Runtime.csproj";
+        SrcDirectory / "Agibuild.Fulora.Runtime" / "Agibuild.Fulora.Runtime.csproj";
 
     AbsolutePath WindowsAdapterProject =>
-        SrcDirectory / "Agibuild.Avalonia.WebView.Adapters.Windows" / "Agibuild.Avalonia.WebView.Adapters.Windows.csproj";
+        SrcDirectory / "Agibuild.Fulora.Adapters.Windows" / "Agibuild.Fulora.Adapters.Windows.csproj";
 
     AbsolutePath TestingProject =>
-        TestsDirectory / "Agibuild.Avalonia.WebView.Testing" / "Agibuild.Avalonia.WebView.Testing.csproj";
+        TestsDirectory / "Agibuild.Fulora.Testing" / "Agibuild.Fulora.Testing.csproj";
 
     AbsolutePath TemplatePackProject =>
-        RootDirectory / "templates" / "Agibuild.Avalonia.WebView.Templates.csproj";
+        RootDirectory / "templates" / "Agibuild.Fulora.Templates.csproj";
 
     AbsolutePath TemplatePath =>
         RootDirectory / "templates" / "agibuild-hybrid";

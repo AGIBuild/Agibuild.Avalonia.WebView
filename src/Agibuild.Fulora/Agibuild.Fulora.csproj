@@ -1,0 +1,138 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Agibuild.Fulora</RootNamespace>
+
+    <IsPackable>true</IsPackable>
+    <PackageId>Agibuild.Fulora</PackageId>
+    <Description>Cross-platform WebView control for Avalonia UI with native platform adapters (WKWebView on macOS/iOS, WebView2 on Windows, WebKitGTK on Linux, Android WebView). Provides embedded WebView, popup dialog, and OAuth authentication flows.</Description>
+    <PackageTags>avalonia;webview;wkwebview;webview2;android;ios;cross-platform;macos;windows;linux</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+
+    <!-- Build output (Agibuild.Fulora.dll) is included in lib/net10.0/ automatically. -->
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <!-- Build-time references — PrivateAssets=all keeps them out of NuGet dependency metadata. -->
+  <ItemGroup>
+    <ProjectReference Include="..\Agibuild.Fulora.Core\Agibuild.Fulora.Core.csproj" PrivateAssets="all" />
+    <ProjectReference Include="..\Agibuild.Fulora.Adapters.Abstractions\Agibuild.Fulora.Adapters.Abstractions.csproj" PrivateAssets="all" />
+    <ProjectReference Include="..\Agibuild.Fulora.Runtime\Agibuild.Fulora.Runtime.csproj" PrivateAssets="all" />
+    <ProjectReference Include="..\Agibuild.Fulora.DependencyInjection\Agibuild.Fulora.DependencyInjection.csproj" PrivateAssets="all" />
+    <PackageReference Include="Avalonia" Version="11.3.11" />
+    <!-- Transitive dependency from Runtime and DI projects (which use PrivateAssets=all). -->
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.2" />
+    <!-- Keep package dependency metadata for consumers, but do not import WebView2 build targets into this pack project. -->
+    <PackageReference Include="Microsoft.Web.WebView2"
+                      Version="1.0.3719.77"
+                      ExcludeAssets="build;buildTransitive" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Agibuild.Fulora.UnitTests" />
+    <InternalsVisibleTo Include="Agibuild.Fulora.Integration.Tests" />
+    <InternalsVisibleTo Include="Agibuild.Fulora.Integration.Tests.Automation" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Compile-time assets (dependency DLLs manually packed). -->
+    <None Include="..\Agibuild.Fulora.Core\bin\$(Configuration)\net10.0\Agibuild.Fulora.Core.dll"
+          Pack="true"
+          PackagePath="lib/net10.0/" />
+    <None Include="..\Agibuild.Fulora.Adapters.Abstractions\bin\$(Configuration)\net10.0\Agibuild.Fulora.Adapters.Abstractions.dll"
+          Pack="true"
+          PackagePath="lib/net10.0/" />
+    <None Include="..\Agibuild.Fulora.Runtime\bin\$(Configuration)\net10.0\Agibuild.Fulora.Runtime.dll"
+          Pack="true"
+          PackagePath="lib/net10.0/" />
+    <None Include="..\Agibuild.Fulora.DependencyInjection\bin\$(Configuration)\net10.0\Agibuild.Fulora.DependencyInjection.dll"
+          Pack="true"
+          PackagePath="lib/net10.0/" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="buildTransitive/Agibuild.Fulora.targets"
+          Pack="true"
+          PackagePath="buildTransitive/Agibuild.Fulora.targets" />
+    <None Include="..\..\README.md"
+          Pack="true"
+          PackagePath="" />
+  </ItemGroup>
+
+  <!--
+    Platform adapters: ALL managed DLLs go in lib/net10.0/ so the .NET runtime
+    resolves them alongside the core assemblies. Module initializers handle
+    platform detection — adapters on unsupported OSes simply skip registration.
+
+    IMPORTANT: Do NOT put managed DLLs in runtimes/{rid}/lib/ alongside lib/{tfm}/ entries —
+    the .NET host replaces lib/ runtime assets with runtimeTargets when RID matches,
+    which would drop the core assemblies from the TPA list.
+  -->
+  <ItemGroup>
+    <!-- Windows adapter (always built — stub on non-Windows) -->
+    <None Include="..\Agibuild.Fulora.Adapters.Windows\bin\$(Configuration)\net10.0\Agibuild.Fulora.Adapters.Windows.dll"
+          Pack="true"
+          PackagePath="lib/net10.0/" />
+
+    <!-- Linux (GTK) adapter (always built — stub on non-Linux) -->
+    <None Include="..\Agibuild.Fulora.Adapters.Gtk\bin\$(Configuration)\net10.0\Agibuild.Fulora.Adapters.Gtk.dll"
+          Pack="true"
+          PackagePath="lib/net10.0/" />
+
+    <!-- macOS adapter (conditional — requires macOS build or pre-built artifacts) -->
+    <None Include="..\Agibuild.Fulora.Adapters.MacOS\bin\$(Configuration)\net10.0\Agibuild.Fulora.Adapters.MacOS.dll"
+          Pack="true"
+          PackagePath="lib/net10.0/"
+          Condition="Exists('..\Agibuild.Fulora.Adapters.MacOS\bin\$(Configuration)\net10.0\Agibuild.Fulora.Adapters.MacOS.dll')" />
+
+    <!-- Android adapter (different TFM — stays in runtimes/) -->
+    <None Include="..\Agibuild.Fulora.Adapters.Android\bin\$(Configuration)\net10.0-android\Agibuild.Fulora.Adapters.Android.dll"
+          Pack="true"
+          PackagePath="runtimes/android/lib/net10.0-android36.0/"
+          Condition="Exists('..\Agibuild.Fulora.Adapters.Android\bin\$(Configuration)\net10.0-android\Agibuild.Fulora.Adapters.Android.dll')" />
+
+    <!-- iOS adapter (different TFM — stays in runtimes/; requires macOS host + iOS workload) -->
+    <None Include="..\Agibuild.Fulora.Adapters.iOS\bin\$(Configuration)\net10.0-ios\Agibuild.Fulora.Adapters.iOS.dll"
+          Pack="true"
+          PackagePath="runtimes/ios/lib/net10.0-ios18.0/"
+          Condition="Exists('..\Agibuild.Fulora.Adapters.iOS\bin\$(Configuration)\net10.0-ios\Agibuild.Fulora.Adapters.iOS.dll')" />
+  </ItemGroup>
+
+  <!-- Native assets stay in runtimes/ (these are NOT managed DLLs). -->
+  <ItemGroup>
+    <None Include="..\Agibuild.Fulora.Adapters.MacOS\bin\$(Configuration)\net10.0\runtimes\osx\native\libAgibuildWebViewWk.dylib"
+          Pack="true"
+          PackagePath="runtimes/osx/native/"
+          Condition="Exists('..\Agibuild.Fulora.Adapters.MacOS\bin\$(Configuration)\net10.0\runtimes\osx\native\libAgibuildWebViewWk.dylib')" />
+
+    <!-- Linux native WebKitGTK shim -->
+    <None Include="..\Agibuild.Fulora.Adapters.Gtk\bin\$(Configuration)\net10.0\runtimes\linux-x64\native\libAgibuildWebViewGtk.so"
+          Pack="true"
+          PackagePath="runtimes/linux-x64/native/"
+          Condition="Exists('..\Agibuild.Fulora.Adapters.Gtk\bin\$(Configuration)\net10.0\runtimes\linux-x64\native\libAgibuildWebViewGtk.so')" />
+  </ItemGroup>
+
+  <!-- Build adapter dependencies before packing. Uses forward slashes for cross-platform compatibility. -->
+  <Target Name="BuildPackInputs" BeforeTargets="GenerateNuspec">
+    <Exec Command="dotnet build &quot;../Agibuild.Fulora.Core/Agibuild.Fulora.Core.csproj&quot; -c $(Configuration)" />
+    <Exec Command="dotnet build &quot;../Agibuild.Fulora.Adapters.Abstractions/Agibuild.Fulora.Adapters.Abstractions.csproj&quot; -c $(Configuration)" />
+    <Exec Command="dotnet build &quot;../Agibuild.Fulora.Runtime/Agibuild.Fulora.Runtime.csproj&quot; -c $(Configuration)" />
+    <Exec Command="dotnet build &quot;../Agibuild.Fulora.DependencyInjection/Agibuild.Fulora.DependencyInjection.csproj&quot; -c $(Configuration)" />
+    <Exec Command="dotnet build &quot;../Agibuild.Fulora.Adapters.Windows/Agibuild.Fulora.Adapters.Windows.csproj&quot; -c $(Configuration)" />
+    <!-- GTK: native shim might fail to compile if dev libs are missing; IgnoreExitCode to allow pack without it -->
+    <Exec Command="dotnet build &quot;../Agibuild.Fulora.Adapters.Gtk/Agibuild.Fulora.Adapters.Gtk.csproj&quot; -c $(Configuration)"
+          IgnoreExitCode="true" />
+    <!-- macOS: requires macOS host for native shim compilation -->
+    <Exec Command="dotnet build &quot;../Agibuild.Fulora.Adapters.MacOS/Agibuild.Fulora.Adapters.MacOS.csproj&quot; -c $(Configuration)"
+          Condition="$([MSBuild]::IsOSPlatform('osx'))" />
+    <!-- Android: requires Android workload; IgnoreExitCode to allow pack without it -->
+    <Exec Command="dotnet build &quot;../Agibuild.Fulora.Adapters.Android/Agibuild.Fulora.Adapters.Android.csproj&quot; -c $(Configuration)"
+          IgnoreExitCode="true" />
+    <!-- iOS: requires macOS host + iOS workload; IgnoreExitCode to allow pack without it -->
+    <Exec Command="dotnet build &quot;../Agibuild.Fulora.Adapters.iOS/Agibuild.Fulora.Adapters.iOS.csproj&quot; -c $(Configuration)"
+          Condition="$([MSBuild]::IsOSPlatform('osx'))"
+          IgnoreExitCode="true" />
+  </Target>
+</Project>

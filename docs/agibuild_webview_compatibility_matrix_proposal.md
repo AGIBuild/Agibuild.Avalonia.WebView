@@ -67,8 +67,8 @@
 #### 2.1.1 macOS WKWebView（Embedded）M0 验收标准（CT + IT 对齐）
 
 - **目标**：在不要求消费方使用 `net10.0-macos` 的前提下，macOS 上默认启用 WKWebView 适配器；并且满足 v1 契约语义的关键不变量（导航拦截/取消、事件一致性、最小脚本/消息闭环）。
-- **CT（Contract Tests）**：以 `tests/Agibuild.Avalonia.WebView.UnitTests/ContractSemanticsV1*.cs` 为准，覆盖 v1 语义（`NavigationCompleted` exactly-once、supersede/cancel、线程/事件顺序、脚本/消息语义等）。
-- **IT（Integration Smoke - macOS）**：在 `tests/Agibuild.Avalonia.WebView.Integration.Tests` 的 UI 页签 **macOS WK Smoke** 中提供最小冒烟闭环，覆盖：
+- **CT（Contract Tests）**：以 `tests/Agibuild.Fulora.UnitTests/ContractSemanticsV1*.cs` 为准，覆盖 v1 语义（`NavigationCompleted` exactly-once、supersede/cancel、线程/事件顺序、脚本/消息语义等）。
+- **IT（Integration Smoke - macOS）**：在 `tests/Agibuild.Fulora.Integration.Tests` 的 UI 页签 **macOS WK Smoke** 中提供最小冒烟闭环，覆盖：
   - **Link click**：DOM 点击链接触发主框架导航
   - **302 redirect**：重定向链路（若平台回调可见）要求同一链路复用 `CorrelationId`
   - **`window.location`**：脚本触发导航

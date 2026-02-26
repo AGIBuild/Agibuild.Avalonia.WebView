@@ -25,5 +25,5 @@
 ## Impact
 
 - `tests/shell-production-matrix.json`
-- `tests/Agibuild.Avalonia.WebView.UnitTests/AutomationLaneGovernanceTests.cs`
+- `tests/Agibuild.Fulora.UnitTests/AutomationLaneGovernanceTests.cs`
 - OpenSpec spec deltas for parity governance

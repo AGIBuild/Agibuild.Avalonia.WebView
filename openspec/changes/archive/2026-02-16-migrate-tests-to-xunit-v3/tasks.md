@@ -15,8 +15,8 @@
 
 ## Verification evidence (current)
 
-- PASS: `dotnet test tests/Agibuild.Avalonia.WebView.UnitTests/Agibuild.Avalonia.WebView.UnitTests.csproj` -> `Passed: 682`.
-- PASS: `dotnet test tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/Agibuild.Avalonia.WebView.Integration.Tests.Automation.csproj` -> `Passed: 123`.
+- PASS: `dotnet test tests/Agibuild.Fulora.UnitTests/Agibuild.Fulora.UnitTests.csproj` -> `Passed: 682`.
+- PASS: `dotnet test tests/Agibuild.Fulora.Integration.Tests.Automation/Agibuild.Fulora.Integration.Tests.Automation.csproj` -> `Passed: 123`.
 - PASS: `dotnet test samples/avalonia-react/AvaloniReact.Tests/AvaloniReact.Tests.csproj` -> `Passed: 23`.
 - PASS: `dotnet restore templates/agibuild-hybrid/HybridApp.Tests/HybridApp.Tests.csproj` -> restore success.
 - PASS: `dotnet build templates/agibuild-hybrid/HybridApp.Tests/HybridApp.Tests.csproj` -> build success.

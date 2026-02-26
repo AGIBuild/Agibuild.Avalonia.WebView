@@ -88,11 +88,11 @@ partial class BuildTask
 
             Assert.NotEmpty(nupkgFiles, "No .nupkg files found in output directory.");
 
-            var mainPackagePrefix = "Agibuild.Avalonia.WebView.";
+            var mainPackagePrefix = "Agibuild.Fulora.";
             var nupkgPath = nupkgFiles.FirstOrDefault(f =>
                     f.Name.StartsWith(mainPackagePrefix, StringComparison.OrdinalIgnoreCase)
                     && char.IsDigit(f.Name[mainPackagePrefix.Length]))
-                ?? throw new Exception("Main package Agibuild.Avalonia.WebView.*.nupkg not found in output directory.");
+                ?? throw new Exception("Main package Agibuild.Fulora.*.nupkg not found in output directory.");
             Serilog.Log.Information("Validating package: {Package}", nupkgPath.Name);
 
             using var archive = ZipFile.OpenRead(nupkgPath);
@@ -103,35 +103,35 @@ partial class BuildTask
             // ── Required assemblies (always present) ──────────────────────────────
             var requiredFiles = new Dictionary<string, string>
             {
-                ["lib/net10.0/Agibuild.Avalonia.WebView.dll"] = "Main assembly",
-                ["lib/net10.0/Agibuild.Avalonia.WebView.Core.dll"] = "Core contracts",
-                ["lib/net10.0/Agibuild.Avalonia.WebView.Adapters.Abstractions.dll"] = "Adapter abstractions",
-                ["lib/net10.0/Agibuild.Avalonia.WebView.Runtime.dll"] = "Runtime host",
-                ["lib/net10.0/Agibuild.Avalonia.WebView.DependencyInjection.dll"] = "DI extensions",
-                ["lib/net10.0/Agibuild.Avalonia.WebView.Adapters.Windows.dll"] = "Windows adapter",
-                ["lib/net10.0/Agibuild.Avalonia.WebView.Adapters.Gtk.dll"] = "Linux GTK adapter",
-                ["buildTransitive/Agibuild.Avalonia.WebView.targets"] = "MSBuild targets",
+                ["lib/net10.0/Agibuild.Fulora.dll"] = "Main assembly",
+                ["lib/net10.0/Agibuild.Fulora.Core.dll"] = "Core contracts",
+                ["lib/net10.0/Agibuild.Fulora.Adapters.Abstractions.dll"] = "Adapter abstractions",
+                ["lib/net10.0/Agibuild.Fulora.Runtime.dll"] = "Runtime host",
+                ["lib/net10.0/Agibuild.Fulora.DependencyInjection.dll"] = "DI extensions",
+                ["lib/net10.0/Agibuild.Fulora.Adapters.Windows.dll"] = "Windows adapter",
+                ["lib/net10.0/Agibuild.Fulora.Adapters.Gtk.dll"] = "Linux GTK adapter",
+                ["buildTransitive/Agibuild.Fulora.targets"] = "MSBuild targets",
                 ["README.md"] = "Package readme",
             };
 
             // ── Conditionally expected assemblies ─────────────────────────────────
             var androidAdapterPath = SrcDirectory
-                / "Agibuild.Avalonia.WebView.Adapters.Android" / "bin" / Configuration
-                / "net10.0-android" / "Agibuild.Avalonia.WebView.Adapters.Android.dll";
+                / "Agibuild.Fulora.Adapters.Android" / "bin" / Configuration
+                / "net10.0-android" / "Agibuild.Fulora.Adapters.Android.dll";
 
             var iosAdapterPath = SrcDirectory
-                / "Agibuild.Avalonia.WebView.Adapters.iOS" / "bin" / Configuration
-                / "net10.0-ios" / "Agibuild.Avalonia.WebView.Adapters.iOS.dll";
+                / "Agibuild.Fulora.Adapters.iOS" / "bin" / Configuration
+                / "net10.0-ios" / "Agibuild.Fulora.Adapters.iOS.dll";
 
             var conditionalFiles = new Dictionary<string, (string Description, bool ShouldExist)>
             {
-                ["lib/net10.0/Agibuild.Avalonia.WebView.Adapters.MacOS.dll"] =
+                ["lib/net10.0/Agibuild.Fulora.Adapters.MacOS.dll"] =
                     ("macOS adapter", OperatingSystem.IsMacOS()),
                 ["runtimes/osx/native/libAgibuildWebViewWk.dylib"] =
                     ("macOS native shim", OperatingSystem.IsMacOS()),
-                ["runtimes/android/lib/net10.0-android36.0/Agibuild.Avalonia.WebView.Adapters.Android.dll"] =
+                ["runtimes/android/lib/net10.0-android36.0/Agibuild.Fulora.Adapters.Android.dll"] =
                     ("Android adapter", File.Exists(androidAdapterPath)),
-                ["runtimes/ios/lib/net10.0-ios18.0/Agibuild.Avalonia.WebView.Adapters.iOS.dll"] =
+                ["runtimes/ios/lib/net10.0-ios18.0/Agibuild.Fulora.Adapters.iOS.dll"] =
                     ("iOS adapter", File.Exists(iosAdapterPath)),
             };
 
@@ -268,7 +268,7 @@ partial class BuildTask
         .DependsOn(ValidatePackage)
         .Executes(() =>
         {
-            var packedVersion = ResolvePackedAgibuildVersion("Agibuild.Avalonia.WebView");
+            var packedVersion = ResolvePackedAgibuildVersion("Agibuild.Fulora");
             Serilog.Log.Information("NuGet package smoke pinned to packed version: {Version}", packedVersion);
 
             var resolvedRoot = ResolveNugetPackagesRoot();
@@ -279,7 +279,7 @@ partial class BuildTask
                 resolvedRoot.Source);
 
             var agibuildPackageDirs = Directory.Exists(nugetPackagesRoot)
-                ? Directory.GetDirectories(nugetPackagesRoot, "agibuild.avalonia.webview*")
+                ? Directory.GetDirectories(nugetPackagesRoot, "agibuild.fulora*")
                 : [];
             foreach (var dir in agibuildPackageDirs)
             {
@@ -287,11 +287,11 @@ partial class BuildTask
                 Directory.Delete(dir, recursive: true);
             }
             var afterCleanup = Directory.Exists(nugetPackagesRoot)
-                ? Directory.GetDirectories(nugetPackagesRoot, "agibuild.avalonia.webview*")
+                ? Directory.GetDirectories(nugetPackagesRoot, "agibuild.fulora*")
                 : [];
             Assert.True(afterCleanup.Length == 0, "Expected clean NuGet cache for Agibuild packages before restore.");
 
-            var testProjectDir = TestsDirectory / "Agibuild.Avalonia.WebView.Integration.NugetPackageTests";
+            var testProjectDir = TestsDirectory / "Agibuild.Fulora.Integration.NugetPackageTests";
             var testBinDir = testProjectDir / "bin";
             var testObjDir = testProjectDir / "obj";
             if (Directory.Exists(testBinDir)) testBinDir.DeleteDirectory();
@@ -302,7 +302,7 @@ partial class BuildTask
                 .SetProjectFile(NugetPackageTestProject)
                 .SetProperty("AgibuildPackageVersion", packedVersion));
             var restoredDirs = Directory.Exists(nugetPackagesRoot)
-                ? Directory.GetDirectories(nugetPackagesRoot, "agibuild.avalonia.webview*")
+                ? Directory.GetDirectories(nugetPackagesRoot, "agibuild.fulora*")
                 : [];
             Assert.NotEmpty(restoredDirs);
             Serilog.Log.Information("NuGet restore populated {Count} Agibuild package cache path(s).", restoredDirs.Length);

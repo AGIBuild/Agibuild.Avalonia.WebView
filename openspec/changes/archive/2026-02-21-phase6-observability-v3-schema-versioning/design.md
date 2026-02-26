@@ -29,7 +29,7 @@ Phase 5 delivered structured diagnostics (M5.3) and governance evidence (M5.5), 
    - Alternatives considered:
      - One global runtime constant: rejected; over-couples unrelated diagnostic types.
 
-3. **Decision: Centralize lane assertions in `Agibuild.Avalonia.WebView.Testing`**
+3. **Decision: Centralize lane assertions in `Agibuild.Fulora.Testing`**
    - Choice: add a shared helper for schema assertions and migrate CT/IT tests to use it; governance tests assert the contract constant exists and is consumed.
    - Why: prevents assertion drift and enforces one source of schema invariants.
    - Alternatives considered:

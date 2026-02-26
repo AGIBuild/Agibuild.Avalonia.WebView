@@ -32,7 +32,7 @@ partial class BuildTask
         .Requires(() => NuGetApiKey)
         .Executes(() =>
         {
-            var templatePackages = PackageOutputDirectory.GlobFiles("Agibuild.Avalonia.WebView.Templates.*.nupkg")
+            var templatePackages = PackageOutputDirectory.GlobFiles("Agibuild.Fulora.Templates.*.nupkg")
                 .Where(p => !p.Name.EndsWith(".symbols.nupkg"));
 
             foreach (var package in templatePackages)
@@ -94,7 +94,7 @@ partial class BuildTask
                 foreach (var csproj in Directory.GetFiles(projectDir, "*.csproj", SearchOption.AllDirectories))
                 {
                     var content = File.ReadAllText(csproj);
-                    if (content.Contains("Agibuild.Avalonia.WebView"))
+                    if (content.Contains("Agibuild.Fulora"))
                     {
                         content = content.Replace("Version=\"*\"", "Version=\"*-*\"");
                         File.WriteAllText(csproj, content);
@@ -158,7 +158,7 @@ partial class BuildTask
     }
 
     static string GenerateE2ETestCode() => """
-        using Agibuild.Avalonia.WebView;
+        using Agibuild.Fulora;
         using SmokeApp.Bridge;
         using Xunit;
 

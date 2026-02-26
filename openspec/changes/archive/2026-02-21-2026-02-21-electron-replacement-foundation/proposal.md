@@ -34,8 +34,8 @@
 - **Architecture**: 形成 `Web-first app model -> typed bridge -> capability gateway -> policy engine -> platform adapters` 的清晰分层。
 - **Product direction**: 将“替代打包式桌面栈的开发体验”设为唯一主航道。
 - **Affected areas**:
-  - `src/Agibuild.Avalonia.WebView.Core`
-  - `src/Agibuild.Avalonia.WebView.Runtime`
-  - `src/Agibuild.Avalonia.WebView.Adapters.Abstractions`
-  - `src/Agibuild.Avalonia.WebView`（桌面壳承载与开发体验收敛）
+  - `src/Agibuild.Fulora.Core`
+  - `src/Agibuild.Fulora.Runtime`
+  - `src/Agibuild.Fulora.Adapters.Abstractions`
+  - `src/Agibuild.Fulora`（桌面壳承载与开发体验收敛）
   - integration / unit / automation tests（痛点闭环验证）

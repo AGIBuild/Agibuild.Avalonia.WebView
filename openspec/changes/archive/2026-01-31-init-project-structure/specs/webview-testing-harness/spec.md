@@ -1,8 +1,8 @@
 ## ADDED Requirements
 
 ### Requirement: Test project scaffold
-The solution SHALL include a test project named `Agibuild.Avalonia.WebView.UnitTests` targeting `net10.0`.
-The test project SHALL reference `Agibuild.Avalonia.WebView.Core` and `Agibuild.Avalonia.WebView.Adapters.Abstractions`.
+The solution SHALL include a test project named `Agibuild.Fulora.UnitTests` targeting `net10.0`.
+The test project SHALL reference `Agibuild.Fulora.Core` and `Agibuild.Fulora.Adapters.Abstractions`.
 
 #### Scenario: Tests build without platform dependencies
 - **WHEN** the test project is built

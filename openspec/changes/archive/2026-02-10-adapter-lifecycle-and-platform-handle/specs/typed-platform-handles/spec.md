@@ -54,9 +54,9 @@ The Core assembly SHALL define `IAndroidWebViewPlatformHandle` extending `IPlatf
 - **AND** `AndroidWebViewHandle` is non-zero
 
 ### Requirement: Typed handle interfaces are platform-agnostic in Core
-All typed platform handle interfaces SHALL be defined in `Agibuild.Avalonia.WebView.Core` without any platform-specific dependencies.
+All typed platform handle interfaces SHALL be defined in `Agibuild.Fulora.Core` without any platform-specific dependencies.
 They SHALL use only `nint` for native pointers, avoiding any platform SDK types.
 
 #### Scenario: Core compiles without platform dependencies
-- **WHEN** a project references `Agibuild.Avalonia.WebView.Core` on any platform
+- **WHEN** a project references `Agibuild.Fulora.Core` on any platform
 - **THEN** all typed handle interfaces are resolvable without platform-specific NuGet packages or TFM restrictions

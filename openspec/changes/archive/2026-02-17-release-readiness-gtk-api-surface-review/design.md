@@ -5,7 +5,7 @@ This change targets Phase 3 (Polish & GA) release readiness items from the roadm
 - **Deliverable 3.8**: API surface review + breaking change audit
 
 Current gaps:
-- The GTK adapter (`Agibuild.Avalonia.WebView.Adapters.Gtk`) is explicitly not production-ready and contains TODOs for wiring native DevTools integration.
+- The GTK adapter (`Agibuild.Fulora.Adapters.Gtk`) is explicitly not production-ready and contains TODOs for wiring native DevTools integration.
 - Repository test projects have **xUnit v3 version drift** (repo tests, template tests, and sample tests use different `xunit.v3` versions), increasing CI and maintenance risk.
 - The **API surface review** capability exists as a spec, but the change needs a repeatable way to produce and store the review outputs with traceability to executable evidence (G4).
 - Several OpenSpec specs still contain **TBD Purpose** placeholders (documentation-only hygiene).

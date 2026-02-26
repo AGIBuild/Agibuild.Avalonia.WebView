@@ -55,7 +55,7 @@ partial class BuildTask
                 $"\"-reports:{coverageFile}\" " +
                 $"\"-targetdir:{CoverageReportDirectory}\" " +
                 $"\"-reporttypes:Html;Cobertura;TextSummary\" " +
-                $"\"-assemblyfilters:+Agibuild.Avalonia.WebView.*;-Agibuild.Avalonia.WebView.Testing;-Agibuild.Avalonia.WebView.UnitTests\"",
+                $"\"-assemblyfilters:+Agibuild.Fulora.*;-Agibuild.Fulora.Testing;-Agibuild.Fulora.UnitTests\"",
                 workingDirectory: RootDirectory);
 
             var mergedCoberturaFile = CoverageReportDirectory / "Cobertura.xml";

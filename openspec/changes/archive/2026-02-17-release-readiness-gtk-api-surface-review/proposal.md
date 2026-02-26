@@ -32,7 +32,7 @@ This change advances Phase 3 readiness and improves developer experience goals (
 
 ## Impact
 
-- GTK adapter code: `src/Agibuild.Avalonia.WebView.Adapters.Gtk`
+- GTK adapter code: `src/Agibuild.Fulora.Adapters.Gtk`
 - Linux CI and automation lanes in Nuke `Ci` pipeline
 - Test project dependencies (xUnit v3 packages and runner)
 - Specs: purpose cleanup in `openspec/specs/` (documentation-only) and new/updated delta specs under this change

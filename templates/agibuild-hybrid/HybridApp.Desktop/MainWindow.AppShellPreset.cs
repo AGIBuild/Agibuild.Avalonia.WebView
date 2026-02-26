@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Agibuild.Avalonia.WebView;
-using Agibuild.Avalonia.WebView.Shell;
+using Agibuild.Fulora;
+using Agibuild.Fulora.Shell;
 using Avalonia.Input;
 using HybridApp.Bridge;
 

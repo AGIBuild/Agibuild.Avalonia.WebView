@@ -1,7 +1,7 @@
 {
   "name": "@agibuild/bridge",
   "version": "0.1.0",
-  "description": "Typed bridge client runtime for Agibuild.Avalonia.WebView",
+  "description": "Typed bridge client runtime for Agibuild.Fulora",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

@@ -1,6 +1,6 @@
 ## Context
 
-This change implements the first native macOS adapter using WKWebView (`Agibuild.Avalonia.WebView.Adapters.MacOS`) to validate the existing v1 contract semantics against a real platform WebView.
+This change implements the first native macOS adapter using WKWebView (`Agibuild.Fulora.Adapters.MacOS`) to validate the existing v1 contract semantics against a real platform WebView.
 
 The key behavioral constraint is “full-control” native navigation handling:
 - WKWebView navigations initiated by web content (link click, `window.location`, redirects) MUST be intercepted before proceeding.
@@ -14,7 +14,7 @@ link-click, 302 redirect, script-driven navigation, cancellation, and minimal sc
 Constraints / assumptions:
 - This is an M0 adapter: prioritize correctness of correlation/cancellation and basic feature closure over completeness.
 - Existing contract surfaces in Core + Adapter Abstractions are treated as the source of truth; this work should be implement-only unless a contract gap is discovered during implementation.
-- The macOS adapter should remain modular and replaceable (adapter-as-plugin): no macOS-specific behavior leaks into `Agibuild.Avalonia.WebView.Core`.
+- The macOS adapter should remain modular and replaceable (adapter-as-plugin): no macOS-specific behavior leaks into `Agibuild.Fulora.Core`.
 
 ## Goals / Non-Goals
 

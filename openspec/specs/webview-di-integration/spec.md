@@ -4,8 +4,8 @@ Define dependency-injection integration contracts for WebView adapter factory re
 ## Requirements
 
 ### Requirement: Dependency injection project
-The solution SHALL include a project named `Agibuild.Avalonia.WebView.DependencyInjection` targeting `net10.0`.
-The project SHALL reference `Agibuild.Avalonia.WebView.Core` and `Agibuild.Avalonia.WebView.Adapters.Abstractions`.
+The solution SHALL include a project named `Agibuild.Fulora.DependencyInjection` targeting `net10.0`.
+The project SHALL reference `Agibuild.Fulora.Core` and `Agibuild.Fulora.Adapters.Abstractions`.
 The project SHALL depend only on `Microsoft.Extensions.DependencyInjection.Abstractions` for DI APIs and SHALL NOT reference any platform adapter projects.
 
 #### Scenario: DI project is platform-agnostic

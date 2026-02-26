@@ -25,7 +25,7 @@ Use this path for most teams. It matches the recommended architecture with minim
 
 ```bash
 # Install template (once)
-dotnet new install Agibuild.Avalonia.WebView.Templates
+dotnet new install Agibuild.Fulora.Templates
 
 # Create app
 dotnet new agibuild-hybrid -n MyApp
@@ -56,14 +56,14 @@ cd MyApp
 ### 2) Add package
 
 ```bash
-dotnet add package Agibuild.Avalonia.WebView
+dotnet add package Agibuild.Fulora
 ```
 
 ### 3) Add WebView control
 
 ```xml
 <!-- MainWindow.axaml -->
-<Window xmlns:wv="clr-namespace:Agibuild.Avalonia.WebView;assembly=Agibuild.Avalonia.WebView">
+<Window xmlns:wv="clr-namespace:Agibuild.Fulora;assembly=Agibuild.Fulora">
     <wv:WebView x:Name="WebView" />
 </Window>
 ```

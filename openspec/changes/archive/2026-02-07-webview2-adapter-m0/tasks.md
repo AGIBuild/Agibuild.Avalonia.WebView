@@ -1,6 +1,6 @@
 ## 1. Project setup
 
-- [x] 1.1 Update `Agibuild.Avalonia.WebView.Adapters.Windows.csproj`: add `Microsoft.Web.WebView2` NuGet package reference (kept TFM as `net10.0` for cross-platform buildability, consistent with macOS adapter)
+- [x] 1.1 Update `Agibuild.Fulora.Adapters.Windows.csproj`: add `Microsoft.Web.WebView2` NuGet package reference (kept TFM as `net10.0` for cross-platform buildability, consistent with macOS adapter)
 - [x] 1.2 Add `WindowsAdapterModule` with `[ModuleInitializer]` registering `WindowsWebViewAdapter` in `WebViewAdapterRegistry` (guard `OperatingSystem.IsWindows()`)
 
 ## 2. Adapter lifecycle (Initialize / Attach / Detach)

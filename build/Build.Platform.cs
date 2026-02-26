@@ -88,7 +88,7 @@ partial class BuildTask
             RunProcess("dotnet", $"build \"{E2EAndroidProject}\" --configuration {Configuration} -t:Install");
 
             // 6. Launch the app (with retry to handle activity manager startup delay)
-            const string packageName = "com.CompanyName.Agibuild.Avalonia.WebView.Integration.Tests";
+            const string packageName = "com.CompanyName.Agibuild.Fulora.Integration.Tests";
             Serilog.Log.Information("Launching {Package}...", packageName);
             LaunchAndroidApp(adbPath, packageName);
 
@@ -255,7 +255,7 @@ partial class BuildTask
             RunProcess("xcrun", $"simctl install {deviceUdid} \"{appBundle}\"", timeoutMs: 120_000);
 
             // 6. Launch the app
-            const string bundleId = "companyName.Agibuild.Avalonia.WebView.Integration.Tests";
+            const string bundleId = "companyName.Agibuild.Fulora.Integration.Tests";
             Serilog.Log.Information("Launching {BundleId}...", bundleId);
             var launchProcess = new Process
             {

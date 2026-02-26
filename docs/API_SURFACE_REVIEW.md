@@ -1,4 +1,4 @@
-# API Surface Review — Agibuild.Avalonia.WebView
+# API Surface Review — Agibuild.Fulora
 
 **Date**: 2026-02-17  
 **Status**: Pre-1.0 Audit  
@@ -84,11 +84,11 @@ All naming follows .NET conventions:
 
 ## Evidence Pointers (API → Executable)
 
-- **Navigation cancel semantics**: `tests/Agibuild.Avalonia.WebView.UnitTests/ContractSemanticsV1NavigationTests.cs`
-- **Native navigation cancel**: `tests/Agibuild.Avalonia.WebView.UnitTests/ContractSemanticsV1NativeNavigationTests.cs`
-- **WebMessage bridge policy/drop**: `tests/Agibuild.Avalonia.WebView.UnitTests/WebViewCoreHotspotCoverageTests.cs`
-- **DevTools toggle (core)**: `tests/Agibuild.Avalonia.WebView.UnitTests/RuntimeCoverageTests.cs`
-- **DevTools toggle (GTK smoke)**: `tests/Agibuild.Avalonia.WebView.Integration.Tests/Agibuild.Avalonia.WebView.Integration.Tests/ViewModels/GtkWebViewSmokeViewModel.cs`
+- **Navigation cancel semantics**: `tests/Agibuild.Fulora.UnitTests/ContractSemanticsV1NavigationTests.cs`
+- **Native navigation cancel**: `tests/Agibuild.Fulora.UnitTests/ContractSemanticsV1NativeNavigationTests.cs`
+- **WebMessage bridge policy/drop**: `tests/Agibuild.Fulora.UnitTests/WebViewCoreHotspotCoverageTests.cs`
+- **DevTools toggle (core)**: `tests/Agibuild.Fulora.UnitTests/RuntimeCoverageTests.cs`
+- **DevTools toggle (GTK smoke)**: `tests/Agibuild.Fulora.Integration.Tests/Agibuild.Fulora.Integration.Tests/ViewModels/GtkWebViewSmokeViewModel.cs`
 
 ---
 

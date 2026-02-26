@@ -14,7 +14,7 @@
 
 ### 1) Unit coverage — capability bridge and shell system integration branches
 Command:
-`dotnet test "tests/Agibuild.Avalonia.WebView.UnitTests/Agibuild.Avalonia.WebView.UnitTests.csproj" --filter "HostCapabilityBridgeTests|ShellSystemIntegrationCapabilityTests|BridgeIntegrationTests|MultiWindowLifecycleTests|AutomationLaneGovernanceTests"`
+`dotnet test "tests/Agibuild.Fulora.UnitTests/Agibuild.Fulora.UnitTests.csproj" --filter "HostCapabilityBridgeTests|ShellSystemIntegrationCapabilityTests|BridgeIntegrationTests|MultiWindowLifecycleTests|AutomationLaneGovernanceTests"`
 
 Outcome:
 - Passed: 40
@@ -22,7 +22,7 @@ Outcome:
 
 ### 2) Focused branch coverage — new system integration deny/failure matrices
 Command:
-`dotnet test "tests/Agibuild.Avalonia.WebView.UnitTests/Agibuild.Avalonia.WebView.UnitTests.csproj" --filter "HostCapabilityBridgeTests|ShellSystemIntegrationCapabilityTests"`
+`dotnet test "tests/Agibuild.Fulora.UnitTests/Agibuild.Fulora.UnitTests.csproj" --filter "HostCapabilityBridgeTests|ShellSystemIntegrationCapabilityTests"`
 
 Outcome:
 - Passed: 11
@@ -30,7 +30,7 @@ Outcome:
 
 ### 3) Automation integration coverage — representative runtime flows
 Command:
-`dotnet test "tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/Agibuild.Avalonia.WebView.Integration.Tests.Automation.csproj" --filter "HostCapabilityBridgeIntegrationTests|ShellProductionValidationIntegrationTests"`
+`dotnet test "tests/Agibuild.Fulora.Integration.Tests.Automation/Agibuild.Fulora.Integration.Tests.Automation.csproj" --filter "HostCapabilityBridgeIntegrationTests|ShellProductionValidationIntegrationTests"`
 
 Outcome:
 - Passed: 4

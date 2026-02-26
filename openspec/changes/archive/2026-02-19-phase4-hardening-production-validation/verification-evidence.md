@@ -2,16 +2,16 @@
 
 ### Commands
 
-1. `dotnet test tests/Agibuild.Avalonia.WebView.UnitTests/Agibuild.Avalonia.WebView.UnitTests.csproj --filter "FullyQualifiedName~AutomationLaneGovernanceTests"`
+1. `dotnet test tests/Agibuild.Fulora.UnitTests/Agibuild.Fulora.UnitTests.csproj --filter "FullyQualifiedName~AutomationLaneGovernanceTests"`
    - Result: Passed (`10/10`)
 
-2. `dotnet test tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/Agibuild.Avalonia.WebView.Integration.Tests.Automation.csproj --filter "FullyQualifiedName~ShellProductionValidationIntegrationTests"`
+2. `dotnet test tests/Agibuild.Fulora.Integration.Tests.Automation/Agibuild.Fulora.Integration.Tests.Automation.csproj --filter "FullyQualifiedName~ShellProductionValidationIntegrationTests"`
    - Result: Passed (`1/1`)
 
-3. `dotnet test tests/Agibuild.Avalonia.WebView.UnitTests/Agibuild.Avalonia.WebView.UnitTests.csproj`
+3. `dotnet test tests/Agibuild.Fulora.UnitTests/Agibuild.Fulora.UnitTests.csproj`
    - Result: Passed (`720/720`)
 
-4. `dotnet test tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/Agibuild.Avalonia.WebView.Integration.Tests.Automation.csproj`
+4. `dotnet test tests/Agibuild.Fulora.Integration.Tests.Automation/Agibuild.Fulora.Integration.Tests.Automation.csproj`
    - Result: Passed (`133/133`)
 
 ### Retry Log
@@ -24,16 +24,16 @@
 
 - **Repeated shell-scope attach/detach soak validation**
   - `Shell_scope_attach_detach_soak_keeps_event_wiring_and_cleanup_deterministic`  
-    (`tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/ShellProductionValidationIntegrationTests.cs`)
+    (`tests/Agibuild.Fulora.Integration.Tests.Automation/ShellProductionValidationIntegrationTests.cs`)
 
 - **Machine-readable production matrix with platform/evidence metadata**
   - `Shell_production_matrix_declares_platform_coverage_and_executable_evidence`  
-    (`tests/Agibuild.Avalonia.WebView.UnitTests/AutomationLaneGovernanceTests.cs`)
+    (`tests/Agibuild.Fulora.UnitTests/AutomationLaneGovernanceTests.cs`)
   - Matrix artifact: `tests/shell-production-matrix.json`
 
 - **Runtime critical-path tracking for shell soak**
   - `Runtime_critical_path_manifest_maps_to_existing_tests_or_targets`  
-    (`tests/Agibuild.Avalonia.WebView.UnitTests/AutomationLaneGovernanceTests.cs`)
+    (`tests/Agibuild.Fulora.UnitTests/AutomationLaneGovernanceTests.cs`)
   - Manifest artifact: `tests/runtime-critical-path.manifest.json`
 
 ### Governance extension evidence

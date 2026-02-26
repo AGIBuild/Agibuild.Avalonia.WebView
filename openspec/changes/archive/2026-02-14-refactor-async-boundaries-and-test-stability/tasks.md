@@ -13,7 +13,7 @@
 
 ## 3. Test Harness Determinism Upgrade (D4)
 
-- [x] 3.1 Extract shared testing helpers for off-thread execution and dispatcher pumping into `Agibuild.Avalonia.WebView.Testing` (Deliverable: D4, AC: duplicated helper code in ContractSemantics suites is removed).
+- [x] 3.1 Extract shared testing helpers for off-thread execution and dispatcher pumping into `Agibuild.Fulora.Testing` (Deliverable: D4, AC: duplicated helper code in ContractSemantics suites is removed).
 - [x] 3.2 Replace `Thread.Sleep` waits in prioritized unit files (`RuntimeCoverageTests`, `CoverageGapTests`, `RpcIntegrationTests`) with `DispatcherTestPump.WaitUntil` or `TaskCompletionSource`-driven waits (Deliverable: D4, AC: no remaining `Thread.Sleep` in migrated scopes).
 - [x] 3.3 Replace `Thread.Sleep` waits in automation integration tests with condition-driven waits and preserve existing assertions (Deliverable: D4, AC: automation tests complete without timing-flaky failures).
 

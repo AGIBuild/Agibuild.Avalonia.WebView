@@ -32,6 +32,6 @@ This change advances ROADMAP Phase 3.3 "Performance & Quality" and reinforces G3
 
 ## Impact
 
-- Build orchestration (`build/Build*.cs`) and governance tests (`tests/Agibuild.Avalonia.WebView.UnitTests/*Governance*`).
+- Build orchestration (`build/Build*.cs`) and governance tests (`tests/Agibuild.Fulora.UnitTests/*Governance*`).
 - CI evidence artifacts under `artifacts/test-results`.
 - Compatibility/benchmark governance metadata and documentation contracts.

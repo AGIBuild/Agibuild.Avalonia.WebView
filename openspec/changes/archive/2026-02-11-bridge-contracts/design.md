@@ -49,7 +49,7 @@ This change adds the Bridge contract surface to Core and a manual-registration r
 ### 1. Attribute Definitions (Core)
 
 ```csharp
-namespace Agibuild.Avalonia.WebView;
+namespace Agibuild.Fulora;
 
 [AttributeUsage(AttributeTargets.Interface, AllowMultiple = false)]
 public sealed class JsExportAttribute : Attribute
@@ -171,11 +171,11 @@ On `WebViewCore.Dispose()`:
 
 | File | Change |
 |------|--------|
-| `src/Agibuild.Avalonia.WebView.Core/JsExportAttribute.cs` | NEW |
-| `src/Agibuild.Avalonia.WebView.Core/JsImportAttribute.cs` | NEW |
-| `src/Agibuild.Avalonia.WebView.Core/IBridgeService.cs` | NEW |
-| `src/Agibuild.Avalonia.WebView.Runtime/RuntimeBridgeService.cs` | NEW |
-| `src/Agibuild.Avalonia.WebView.Runtime/WebViewCore.cs` | MODIFIED — add `Bridge` property |
-| `src/Agibuild.Avalonia.WebView/WebView.cs` | MODIFIED — expose `Bridge` |
-| `tests/Agibuild.Avalonia.WebView.UnitTests/BridgeContractTests.cs` | NEW |
-| `tests/Agibuild.Avalonia.WebView.Testing/MockWebViewAdapter.cs` | MODIFIED if needed |
+| `src/Agibuild.Fulora.Core/JsExportAttribute.cs` | NEW |
+| `src/Agibuild.Fulora.Core/JsImportAttribute.cs` | NEW |
+| `src/Agibuild.Fulora.Core/IBridgeService.cs` | NEW |
+| `src/Agibuild.Fulora.Runtime/RuntimeBridgeService.cs` | NEW |
+| `src/Agibuild.Fulora.Runtime/WebViewCore.cs` | MODIFIED — add `Bridge` property |
+| `src/Agibuild.Fulora/WebView.cs` | MODIFIED — expose `Bridge` |
+| `tests/Agibuild.Fulora.UnitTests/BridgeContractTests.cs` | NEW |
+| `tests/Agibuild.Fulora.Testing/MockWebViewAdapter.cs` | MODIFIED if needed |

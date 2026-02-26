@@ -1,0 +1,99 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Agibuild.Fulora.Integration.Tests.ViewModels"
+             xmlns:controls="using:Agibuild.Fulora.Integration.Tests.Controls"
+             xmlns:local="using:Agibuild.Fulora.Integration.Tests"
+             mc:Ignorable="d"
+             x:Class="Agibuild.Fulora.Integration.Tests.Views.WkWebViewSmokeView"
+             x:DataType="vm:WkWebViewSmokeViewModel"
+             Background="{StaticResource SurfaceBgBrush}">
+
+  <DockPanel>
+
+    <!-- ════════════ Toolbar ════════════ -->
+    <Border DockPanel.Dock="Top" Background="White"
+            BorderThickness="0,0,0,1" BorderBrush="{StaticResource BorderDefaultBrush}"
+            Padding="6,4">
+      <Grid ColumnDefinitions="Auto,*,Auto">
+        <ToggleButton x:Name="ToolsToggle" Grid.Column="0"
+                      IsChecked="False"
+                      Content="&#x2630;" ToolTip.Tip="Controls"
+                      FontSize="14" Padding="8,5"
+                      Background="Transparent" BorderThickness="0"
+                      CornerRadius="6" VerticalAlignment="Center" />
+        <TextBlock Grid.Column="1" Text="WKWebView Smoke"
+                   FontWeight="SemiBold" FontSize="13"
+                   Foreground="{StaticResource TextPrimaryBrush}"
+                   VerticalAlignment="Center" Margin="8,0" />
+        <Border Grid.Column="2" CornerRadius="6" Padding="8,3"
+                Background="#F0F9FF" VerticalAlignment="Center">
+          <TextBlock Text="{Binding Status}" FontSize="11" Foreground="#1E40AF" />
+        </Border>
+      </Grid>
+    </Border>
+
+    <!-- ════════════ Tip bar (hidden on mobile) ════════════ -->
+    <Border DockPanel.Dock="Bottom" Background="White"
+            BorderThickness="0,1,0,0" BorderBrush="{StaticResource BorderDefaultBrush}"
+            Padding="8,3"
+            IsVisible="{x:Static local:PlatformHelper.IsDesktop}">
+      <TextBlock Text="Tip: build &amp; run as net10.0-macos to enable WK."
+                 Classes="caption" />
+    </Border>
+
+    <!-- ════════════ Content: Left Panel + NativeHost ════════════ -->
+    <Grid ColumnDefinitions="Auto,*">
+
+      <!-- Left controls panel (inline, collapsible) -->
+      <Border Grid.Column="0" Width="240"
+              IsVisible="{Binding #ToolsToggle.IsChecked}"
+              Background="White"
+              BorderThickness="0,0,1,0" BorderBrush="{StaticResource BorderDefaultBrush}">
+        <ScrollViewer Margin="10,8">
+          <StackPanel Spacing="10">
+
+            <!-- Quick Actions -->
+            <Border Classes="card" BorderBrush="{StaticResource BrandPrimaryBrush}">
+              <StackPanel Spacing="6">
+                <TextBlock Text="Quick Actions" Classes="subheading" />
+                <Button Content="Initialize" Classes="primary"
+                        Command="{Binding InitializeCommand}"
+                        HorizontalAlignment="Stretch" FontSize="11" Padding="8,6" />
+                <Button Content="Run All"
+                        Command="{Binding RunAllCommand}"
+                        HorizontalAlignment="Stretch"
+                        CornerRadius="6" Padding="8,6" FontSize="11" />
+              </StackPanel>
+            </Border>
+
+            <!-- Individual Tests -->
+            <Border Classes="card" BorderBrush="{StaticResource BrandAccentBrush}">
+              <StackPanel Spacing="4">
+                <TextBlock Text="Individual Tests" Classes="subheading" Margin="0,0,0,4" />
+                <Button Content="Link Click" Command="{Binding RunLinkClickCommand}"
+                        HorizontalAlignment="Stretch" CornerRadius="6" Padding="8,5" FontSize="11" />
+                <Button Content="302 Redirect" Command="{Binding RunRedirect302Command}"
+                        HorizontalAlignment="Stretch" CornerRadius="6" Padding="8,5" FontSize="11" />
+                <Button Content="window.location" Command="{Binding RunWindowLocationCommand}"
+                        HorizontalAlignment="Stretch" CornerRadius="6" Padding="8,5" FontSize="11" />
+                <Button Content="Cancel Nav" Command="{Binding RunCancelCommand}"
+                        HorizontalAlignment="Stretch" CornerRadius="6" Padding="8,5" FontSize="11" />
+                <Button Content="Script" Command="{Binding RunScriptCommand}"
+                        HorizontalAlignment="Stretch" CornerRadius="6" Padding="8,5" FontSize="11" />
+                <Button Content="Message" Command="{Binding RunMessageCommand}"
+                        HorizontalAlignment="Stretch" CornerRadius="6" Padding="8,5" FontSize="11" />
+              </StackPanel>
+            </Border>
+
+          </StackPanel>
+        </ScrollViewer>
+      </Border>
+
+      <!-- NativeControlHost (fills remaining space) -->
+      <controls:AdapterNativeControlHost Grid.Column="1" x:Name="NativeHost" />
+
+    </Grid>
+  </DockPanel>
+</UserControl>

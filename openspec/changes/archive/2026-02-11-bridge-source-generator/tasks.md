@@ -5,7 +5,7 @@
 **Acceptance**: Core compiles; no platform deps; attributes are assembly-level.
 
 ## Task 2: Create Generator project with scaffolding
-**Files**: New `Agibuild.Avalonia.WebView.Bridge.Generator` project (netstandard2.0)
+**Files**: New `Agibuild.Fulora.Bridge.Generator` project (netstandard2.0)
 **Acceptance**: Project builds; referenced as analyzer by UnitTests project; empty generator runs without error.
 
 ## Task 3: Implement BridgeHostEmitter ([JsExport])

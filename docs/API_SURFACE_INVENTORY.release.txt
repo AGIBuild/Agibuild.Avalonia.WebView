@@ -1,504 +1,504 @@
 GeneratedAtUtc: 2026-02-16T19:13:56.8943879Z
 Configuration: Release
 
-Assembly: Agibuild.Avalonia.WebView.Adapters.Abstractions
-Path: <repo>\src\Agibuild.Avalonia.WebView.Adapters.Abstractions\bin\Release\net10.0\Agibuild.Avalonia.WebView.Adapters.Abstractions.dll
+Assembly: Agibuild.Fulora.Adapters.Abstractions
+Path: <repo>\src\Agibuild.Fulora.Adapters.Abstractions\bin\Release\net10.0\Agibuild.Fulora.Adapters.Abstractions.dll
 PublicTypes: 0
 
 --------------------------------------------------------------------------------
 
-Assembly: Agibuild.Avalonia.WebView.Bridge.Generator
-Path: <repo>\src\Agibuild.Avalonia.WebView.Bridge.Generator\bin\Release\netstandard2.0\Agibuild.Avalonia.WebView.Bridge.Generator.dll
+Assembly: Agibuild.Fulora.Bridge.Generator
+Path: <repo>\src\Agibuild.Fulora.Bridge.Generator\bin\Release\netstandard2.0\Agibuild.Fulora.Bridge.Generator.dll
 PublicTypes: 1
 
-type Agibuild.Avalonia.WebView.Bridge.Generator.WebViewBridgeGenerator
-  - method System.Void Agibuild.Avalonia.WebView.Bridge.Generator.WebViewBridgeGenerator::.ctor()
-  - method System.Void Agibuild.Avalonia.WebView.Bridge.Generator.WebViewBridgeGenerator::Initialize(Microsoft.CodeAnalysis.IncrementalGeneratorInitializationContext)
+type Agibuild.Fulora.Bridge.Generator.WebViewBridgeGenerator
+  - method System.Void Agibuild.Fulora.Bridge.Generator.WebViewBridgeGenerator::.ctor()
+  - method System.Void Agibuild.Fulora.Bridge.Generator.WebViewBridgeGenerator::Initialize(Microsoft.CodeAnalysis.IncrementalGeneratorInitializationContext)
 
 --------------------------------------------------------------------------------
 
-Assembly: Agibuild.Avalonia.WebView.Core
-Path: <repo>\src\Agibuild.Avalonia.WebView.Core\bin\Release\net10.0\Agibuild.Avalonia.WebView.Core.dll
+Assembly: Agibuild.Fulora.Core
+Path: <repo>\src\Agibuild.Fulora.Core\bin\Release\net10.0\Agibuild.Fulora.Core.dll
 PublicTypes: 66
 
-type Agibuild.Avalonia.WebView.AdapterCreatedEventArgs
-  - property Avalonia.Platform.IPlatformHandle Agibuild.Avalonia.WebView.AdapterCreatedEventArgs::PlatformHandle
-  - method System.Void Agibuild.Avalonia.WebView.AdapterCreatedEventArgs::.ctor(Avalonia.Platform.IPlatformHandle)
-
-type Agibuild.Avalonia.WebView.AuthOptions
-  - property System.Uri Agibuild.Avalonia.WebView.AuthOptions::AuthorizeUri
-  - property System.Uri Agibuild.Avalonia.WebView.AuthOptions::CallbackUri
-  - property System.Nullable`1<System.TimeSpan> Agibuild.Avalonia.WebView.AuthOptions::Timeout
-  - property System.Boolean Agibuild.Avalonia.WebView.AuthOptions::UseEphemeralSession
-  - method System.Void Agibuild.Avalonia.WebView.AuthOptions::.ctor()
-
-type Agibuild.Avalonia.WebView.BridgeOptions
-  - property System.Collections.Generic.IReadOnlySet`1<System.String> Agibuild.Avalonia.WebView.BridgeOptions::AllowedOrigins
-  - property Agibuild.Avalonia.WebView.RateLimit Agibuild.Avalonia.WebView.BridgeOptions::RateLimit
-  - method System.Void Agibuild.Avalonia.WebView.BridgeOptions::.ctor()
-
-type Agibuild.Avalonia.WebView.BridgeProxyAttribute
-  - property System.Type Agibuild.Avalonia.WebView.BridgeProxyAttribute::InterfaceType
-  - property System.Type Agibuild.Avalonia.WebView.BridgeProxyAttribute::ProxyType
-  - method System.Void Agibuild.Avalonia.WebView.BridgeProxyAttribute::.ctor(System.Type,System.Type)
-
-type Agibuild.Avalonia.WebView.BridgeRegistrationAttribute
-  - property System.Type Agibuild.Avalonia.WebView.BridgeRegistrationAttribute::InterfaceType
-  - property System.Type Agibuild.Avalonia.WebView.BridgeRegistrationAttribute::RegistrationType
-  - method System.Void Agibuild.Avalonia.WebView.BridgeRegistrationAttribute::.ctor(System.Type,System.Type)
-
-type Agibuild.Avalonia.WebView.ContextMenuMediaType
-  - field Agibuild.Avalonia.WebView.ContextMenuMediaType Agibuild.Avalonia.WebView.ContextMenuMediaType::Audio
-  - field Agibuild.Avalonia.WebView.ContextMenuMediaType Agibuild.Avalonia.WebView.ContextMenuMediaType::Image
-  - field Agibuild.Avalonia.WebView.ContextMenuMediaType Agibuild.Avalonia.WebView.ContextMenuMediaType::None
-  - field Agibuild.Avalonia.WebView.ContextMenuMediaType Agibuild.Avalonia.WebView.ContextMenuMediaType::Video
-  - field System.Int32 Agibuild.Avalonia.WebView.ContextMenuMediaType::value__
-
-type Agibuild.Avalonia.WebView.ContextMenuRequestedEventArgs
-  - property System.Boolean Agibuild.Avalonia.WebView.ContextMenuRequestedEventArgs::Handled
-  - property System.Boolean Agibuild.Avalonia.WebView.ContextMenuRequestedEventArgs::IsEditable
-  - property System.Uri Agibuild.Avalonia.WebView.ContextMenuRequestedEventArgs::LinkUri
-  - property System.Uri Agibuild.Avalonia.WebView.ContextMenuRequestedEventArgs::MediaSourceUri
-  - property Agibuild.Avalonia.WebView.ContextMenuMediaType Agibuild.Avalonia.WebView.ContextMenuRequestedEventArgs::MediaType
-  - property System.String Agibuild.Avalonia.WebView.ContextMenuRequestedEventArgs::SelectionText
-  - property System.Double Agibuild.Avalonia.WebView.ContextMenuRequestedEventArgs::X
-  - property System.Double Agibuild.Avalonia.WebView.ContextMenuRequestedEventArgs::Y
-  - method System.Void Agibuild.Avalonia.WebView.ContextMenuRequestedEventArgs::.ctor()
-
-type Agibuild.Avalonia.WebView.CustomSchemeRegistration
-  - property System.Boolean Agibuild.Avalonia.WebView.CustomSchemeRegistration::HasAuthorityComponent
-  - property System.String Agibuild.Avalonia.WebView.CustomSchemeRegistration::SchemeName
-  - property System.Boolean Agibuild.Avalonia.WebView.CustomSchemeRegistration::TreatAsSecure
-  - method System.Void Agibuild.Avalonia.WebView.CustomSchemeRegistration::.ctor()
-
-type Agibuild.Avalonia.WebView.DownloadRequestedEventArgs
-  - property System.Boolean Agibuild.Avalonia.WebView.DownloadRequestedEventArgs::Cancel
-  - property System.Nullable`1<System.Int64> Agibuild.Avalonia.WebView.DownloadRequestedEventArgs::ContentLength
-  - property System.String Agibuild.Avalonia.WebView.DownloadRequestedEventArgs::ContentType
-  - property System.String Agibuild.Avalonia.WebView.DownloadRequestedEventArgs::DownloadPath
-  - property System.Uri Agibuild.Avalonia.WebView.DownloadRequestedEventArgs::DownloadUri
-  - property System.Boolean Agibuild.Avalonia.WebView.DownloadRequestedEventArgs::Handled
-  - property System.String Agibuild.Avalonia.WebView.DownloadRequestedEventArgs::SuggestedFileName
-  - method System.Void Agibuild.Avalonia.WebView.DownloadRequestedEventArgs::.ctor(System.Uri,System.String,System.String,System.Nullable`1<System.Int64>)
-
-type Agibuild.Avalonia.WebView.EnvironmentRequestedEventArgs
-  - method System.Void Agibuild.Avalonia.WebView.EnvironmentRequestedEventArgs::.ctor()
-
-type Agibuild.Avalonia.WebView.FindInPageOptions
-  - property System.Boolean Agibuild.Avalonia.WebView.FindInPageOptions::CaseSensitive
-  - property System.Boolean Agibuild.Avalonia.WebView.FindInPageOptions::Forward
-  - method System.Void Agibuild.Avalonia.WebView.FindInPageOptions::.ctor()
-
-type Agibuild.Avalonia.WebView.FindInPageResult
-  - property System.Int32 Agibuild.Avalonia.WebView.FindInPageResult::ActiveMatchIndex
-  - property System.Int32 Agibuild.Avalonia.WebView.FindInPageResult::TotalMatches
-  - method System.Void Agibuild.Avalonia.WebView.FindInPageResult::.ctor()
-
-type Agibuild.Avalonia.WebView.IAndroidWebViewPlatformHandle
-  - property System.IntPtr Agibuild.Avalonia.WebView.IAndroidWebViewPlatformHandle::AndroidWebViewHandle
-
-type Agibuild.Avalonia.WebView.IAppleWKWebViewPlatformHandle
-  - property System.IntPtr Agibuild.Avalonia.WebView.IAppleWKWebViewPlatformHandle::WKWebViewHandle
-
-type Agibuild.Avalonia.WebView.IBridgeService
-  - method System.Void Agibuild.Avalonia.WebView.IBridgeService::Expose(T,Agibuild.Avalonia.WebView.BridgeOptions)
-  - method T Agibuild.Avalonia.WebView.IBridgeService::GetProxy()
-  - method System.Void Agibuild.Avalonia.WebView.IBridgeService::Remove()
-
-type Agibuild.Avalonia.WebView.IBridgeServiceRegistration`1
-  - property System.Collections.Generic.IReadOnlyList`1<System.String> Agibuild.Avalonia.WebView.IBridgeServiceRegistration`1::MethodNames
-  - property System.String Agibuild.Avalonia.WebView.IBridgeServiceRegistration`1::ServiceName
-  - method System.String Agibuild.Avalonia.WebView.IBridgeServiceRegistration`1::GetJsStub()
-  - method System.Void Agibuild.Avalonia.WebView.IBridgeServiceRegistration`1::RegisterHandlers(Agibuild.Avalonia.WebView.IWebViewRpcService,T)
-  - method System.Void Agibuild.Avalonia.WebView.IBridgeServiceRegistration`1::UnregisterHandlers(Agibuild.Avalonia.WebView.IWebViewRpcService)
-
-type Agibuild.Avalonia.WebView.IBridgeTracer
-  - method System.Void Agibuild.Avalonia.WebView.IBridgeTracer::OnExportCallEnd(System.String,System.String,System.Int64,System.String)
-  - method System.Void Agibuild.Avalonia.WebView.IBridgeTracer::OnExportCallError(System.String,System.String,System.Int64,System.Exception)
-  - method System.Void Agibuild.Avalonia.WebView.IBridgeTracer::OnExportCallStart(System.String,System.String,System.String)
-  - method System.Void Agibuild.Avalonia.WebView.IBridgeTracer::OnImportCallEnd(System.String,System.String,System.Int64)
-  - method System.Void Agibuild.Avalonia.WebView.IBridgeTracer::OnImportCallStart(System.String,System.String,System.String)
-  - method System.Void Agibuild.Avalonia.WebView.IBridgeTracer::OnServiceExposed(System.String,System.Int32,System.Boolean)
-  - method System.Void Agibuild.Avalonia.WebView.IBridgeTracer::OnServiceRemoved(System.String)
-
-type Agibuild.Avalonia.WebView.ICommandManager
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.ICommandManager::CopyAsync()
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.ICommandManager::CutAsync()
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.ICommandManager::PasteAsync()
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.ICommandManager::RedoAsync()
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.ICommandManager::SelectAllAsync()
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.ICommandManager::UndoAsync()
-
-type Agibuild.Avalonia.WebView.ICookieManager
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.ICookieManager::ClearAllCookiesAsync()
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.ICookieManager::DeleteCookieAsync(Agibuild.Avalonia.WebView.WebViewCookie)
-  - method System.Threading.Tasks.Task`1<System.Collections.Generic.IReadOnlyList`1<Agibuild.Avalonia.WebView.WebViewCookie>> Agibuild.Avalonia.WebView.ICookieManager::GetCookiesAsync(System.Uri)
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.ICookieManager::SetCookieAsync(Agibuild.Avalonia.WebView.WebViewCookie)
-
-type Agibuild.Avalonia.WebView.IGtkWebViewPlatformHandle
-  - property System.IntPtr Agibuild.Avalonia.WebView.IGtkWebViewPlatformHandle::WebKitWebViewHandle
-
-type Agibuild.Avalonia.WebView.INativeWebViewHandleProvider
-  - method Avalonia.Platform.IPlatformHandle Agibuild.Avalonia.WebView.INativeWebViewHandleProvider::TryGetWebViewHandle()
-
-type Agibuild.Avalonia.WebView.ITopLevelWindow
-  - property Avalonia.Platform.IPlatformHandle Agibuild.Avalonia.WebView.ITopLevelWindow::PlatformHandle
-
-type Agibuild.Avalonia.WebView.IWebAuthBroker
-  - method System.Threading.Tasks.Task`1<Agibuild.Avalonia.WebView.WebAuthResult> Agibuild.Avalonia.WebView.IWebAuthBroker::AuthenticateAsync(Agibuild.Avalonia.WebView.ITopLevelWindow,Agibuild.Avalonia.WebView.AuthOptions)
-
-type Agibuild.Avalonia.WebView.IWebDialog
-  - property System.Boolean Agibuild.Avalonia.WebView.IWebDialog::CanUserResize
-  - property System.String Agibuild.Avalonia.WebView.IWebDialog::Title
-  - event System.EventHandler Agibuild.Avalonia.WebView.IWebDialog::Closing
-  - method System.Void Agibuild.Avalonia.WebView.IWebDialog::Close()
-  - method System.Boolean Agibuild.Avalonia.WebView.IWebDialog::Move(System.Int32,System.Int32)
-  - method System.Boolean Agibuild.Avalonia.WebView.IWebDialog::Resize(System.Int32,System.Int32)
-  - method System.Void Agibuild.Avalonia.WebView.IWebDialog::Show()
-  - method System.Boolean Agibuild.Avalonia.WebView.IWebDialog::Show(Avalonia.Platform.IPlatformHandle)
-
-type Agibuild.Avalonia.WebView.IWebDialogFactory
-  - method Agibuild.Avalonia.WebView.IWebDialog Agibuild.Avalonia.WebView.IWebDialogFactory::Create(Agibuild.Avalonia.WebView.IWebViewEnvironmentOptions)
-
-type Agibuild.Avalonia.WebView.IWebMessageDropDiagnosticsSink
-  - method System.Void Agibuild.Avalonia.WebView.IWebMessageDropDiagnosticsSink::OnMessageDropped(Agibuild.Avalonia.WebView.WebMessageDropDiagnostic& modreq(System.Runtime.InteropServices.InAttribute))
-
-type Agibuild.Avalonia.WebView.IWebMessagePolicy
-  - method Agibuild.Avalonia.WebView.WebMessagePolicyDecision Agibuild.Avalonia.WebView.IWebMessagePolicy::Evaluate(Agibuild.Avalonia.WebView.WebMessageEnvelope& modreq(System.Runtime.InteropServices.InAttribute))
-
-type Agibuild.Avalonia.WebView.IWebView
-  - property Agibuild.Avalonia.WebView.IBridgeService Agibuild.Avalonia.WebView.IWebView::Bridge
-  - property System.Boolean Agibuild.Avalonia.WebView.IWebView::CanGoBack
-  - property System.Boolean Agibuild.Avalonia.WebView.IWebView::CanGoForward
-  - property System.Guid Agibuild.Avalonia.WebView.IWebView::ChannelId
-  - property System.Boolean Agibuild.Avalonia.WebView.IWebView::IsLoading
-  - property Agibuild.Avalonia.WebView.IWebViewRpcService Agibuild.Avalonia.WebView.IWebView::Rpc
-  - property System.Uri Agibuild.Avalonia.WebView.IWebView::Source
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.AdapterCreatedEventArgs> Agibuild.Avalonia.WebView.IWebView::AdapterCreated
-  - event System.EventHandler Agibuild.Avalonia.WebView.IWebView::AdapterDestroyed
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.ContextMenuRequestedEventArgs> Agibuild.Avalonia.WebView.IWebView::ContextMenuRequested
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.DownloadRequestedEventArgs> Agibuild.Avalonia.WebView.IWebView::DownloadRequested
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.EnvironmentRequestedEventArgs> Agibuild.Avalonia.WebView.IWebView::EnvironmentRequested
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.NavigationCompletedEventArgs> Agibuild.Avalonia.WebView.IWebView::NavigationCompleted
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.NavigationStartingEventArgs> Agibuild.Avalonia.WebView.IWebView::NavigationStarted
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.NewWindowRequestedEventArgs> Agibuild.Avalonia.WebView.IWebView::NewWindowRequested
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.PermissionRequestedEventArgs> Agibuild.Avalonia.WebView.IWebView::PermissionRequested
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.WebMessageReceivedEventArgs> Agibuild.Avalonia.WebView.IWebView::WebMessageReceived
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.WebResourceRequestedEventArgs> Agibuild.Avalonia.WebView.IWebView::WebResourceRequested
-  - method System.Threading.Tasks.Task`1<System.String> Agibuild.Avalonia.WebView.IWebView::AddPreloadScriptAsync(System.String)
-  - method System.Threading.Tasks.Task`1<System.Byte[]> Agibuild.Avalonia.WebView.IWebView::CaptureScreenshotAsync()
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.IWebView::CloseDevToolsAsync()
-  - method System.Threading.Tasks.Task`1<Agibuild.Avalonia.WebView.FindInPageResult> Agibuild.Avalonia.WebView.IWebView::FindInPageAsync(System.String,Agibuild.Avalonia.WebView.FindInPageOptions)
-  - method System.Threading.Tasks.Task`1<System.Double> Agibuild.Avalonia.WebView.IWebView::GetZoomFactorAsync()
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Avalonia.WebView.IWebView::GoBackAsync()
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Avalonia.WebView.IWebView::GoForwardAsync()
-  - method System.Threading.Tasks.Task`1<System.String> Agibuild.Avalonia.WebView.IWebView::InvokeScriptAsync(System.String)
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Avalonia.WebView.IWebView::IsDevToolsOpenAsync()
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.IWebView::NavigateAsync(System.Uri)
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.IWebView::NavigateToStringAsync(System.String)
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.IWebView::NavigateToStringAsync(System.String,System.Uri)
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.IWebView::OpenDevToolsAsync()
-  - method System.Threading.Tasks.Task`1<System.Byte[]> Agibuild.Avalonia.WebView.IWebView::PrintToPdfAsync(Agibuild.Avalonia.WebView.PdfPrintOptions)
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Avalonia.WebView.IWebView::RefreshAsync()
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.IWebView::RemovePreloadScriptAsync(System.String)
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.IWebView::SetZoomFactorAsync(System.Double)
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Avalonia.WebView.IWebView::StopAsync()
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.IWebView::StopFindInPageAsync(System.Boolean)
-  - method Agibuild.Avalonia.WebView.ICommandManager Agibuild.Avalonia.WebView.IWebView::TryGetCommandManager()
-  - method Agibuild.Avalonia.WebView.ICookieManager Agibuild.Avalonia.WebView.IWebView::TryGetCookieManager()
-  - method System.Threading.Tasks.Task`1<Avalonia.Platform.IPlatformHandle> Agibuild.Avalonia.WebView.IWebView::TryGetWebViewHandleAsync()
-
-type Agibuild.Avalonia.WebView.IWebViewDispatcher
-  - method System.Boolean Agibuild.Avalonia.WebView.IWebViewDispatcher::CheckAccess()
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.IWebViewDispatcher::InvokeAsync(System.Action)
-  - method System.Threading.Tasks.Task`1<T> Agibuild.Avalonia.WebView.IWebViewDispatcher::InvokeAsync(System.Func`1<T>)
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.IWebViewDispatcher::InvokeAsync(System.Func`1<System.Threading.Tasks.Task>)
-  - method System.Threading.Tasks.Task`1<T> Agibuild.Avalonia.WebView.IWebViewDispatcher::InvokeAsync(System.Func`1<System.Threading.Tasks.Task`1<T>>)
-
-type Agibuild.Avalonia.WebView.IWebViewEnvironmentOptions
-  - property System.Collections.Generic.IReadOnlyList`1<Agibuild.Avalonia.WebView.CustomSchemeRegistration> Agibuild.Avalonia.WebView.IWebViewEnvironmentOptions::CustomSchemes
-  - property System.String Agibuild.Avalonia.WebView.IWebViewEnvironmentOptions::CustomUserAgent
-  - property System.Boolean Agibuild.Avalonia.WebView.IWebViewEnvironmentOptions::EnableDevTools
-  - property System.Collections.Generic.IReadOnlyList`1<System.String> Agibuild.Avalonia.WebView.IWebViewEnvironmentOptions::PreloadScripts
-  - property System.Boolean Agibuild.Avalonia.WebView.IWebViewEnvironmentOptions::UseEphemeralSession
-
-type Agibuild.Avalonia.WebView.IWebViewRpcService
-  - method System.Void Agibuild.Avalonia.WebView.IWebViewRpcService::Handle(System.String,System.Func`2<System.Nullable`1<System.Text.Json.JsonElement>,System.Threading.Tasks.Task`1<System.Object>>)
-  - method System.Void Agibuild.Avalonia.WebView.IWebViewRpcService::Handle(System.String,System.Func`2<System.Nullable`1<System.Text.Json.JsonElement>,System.Object>)
-  - method System.Threading.Tasks.Task`1<System.Text.Json.JsonElement> Agibuild.Avalonia.WebView.IWebViewRpcService::InvokeAsync(System.String,System.Object)
-  - method System.Threading.Tasks.Task`1<T> Agibuild.Avalonia.WebView.IWebViewRpcService::InvokeAsync(System.String,System.Object)
-  - method System.Void Agibuild.Avalonia.WebView.IWebViewRpcService::RemoveHandler(System.String)
-
-type Agibuild.Avalonia.WebView.IWindowsWebView2PlatformHandle
-  - property System.IntPtr Agibuild.Avalonia.WebView.IWindowsWebView2PlatformHandle::CoreWebView2ControllerHandle
-  - property System.IntPtr Agibuild.Avalonia.WebView.IWindowsWebView2PlatformHandle::CoreWebView2Handle
-
-type Agibuild.Avalonia.WebView.JsExportAttribute
-  - property System.String Agibuild.Avalonia.WebView.JsExportAttribute::Name
-  - method System.Void Agibuild.Avalonia.WebView.JsExportAttribute::.ctor()
-
-type Agibuild.Avalonia.WebView.JsImportAttribute
-  - property System.String Agibuild.Avalonia.WebView.JsImportAttribute::Name
-  - method System.Void Agibuild.Avalonia.WebView.JsImportAttribute::.ctor()
-
-type Agibuild.Avalonia.WebView.MockBridgeService
-  - property System.Int32 Agibuild.Avalonia.WebView.MockBridgeService::ExposedCount
-  - method System.Void Agibuild.Avalonia.WebView.MockBridgeService::.ctor()
-  - method System.Void Agibuild.Avalonia.WebView.MockBridgeService::Dispose()
-  - method System.Void Agibuild.Avalonia.WebView.MockBridgeService::Expose(T,Agibuild.Avalonia.WebView.BridgeOptions)
-  - method T Agibuild.Avalonia.WebView.MockBridgeService::GetExposedImplementation()
-  - method T Agibuild.Avalonia.WebView.MockBridgeService::GetProxy()
-  - method System.Void Agibuild.Avalonia.WebView.MockBridgeService::Remove()
-  - method System.Void Agibuild.Avalonia.WebView.MockBridgeService::Reset()
-  - method System.Void Agibuild.Avalonia.WebView.MockBridgeService::SetupProxy(T)
-  - method System.Boolean Agibuild.Avalonia.WebView.MockBridgeService::WasExposed()
-
-type Agibuild.Avalonia.WebView.NavigationCompletedEventArgs
-  - property System.Exception Agibuild.Avalonia.WebView.NavigationCompletedEventArgs::Error
-  - property System.Guid Agibuild.Avalonia.WebView.NavigationCompletedEventArgs::NavigationId
-  - property System.Uri Agibuild.Avalonia.WebView.NavigationCompletedEventArgs::RequestUri
-  - property Agibuild.Avalonia.WebView.NavigationCompletedStatus Agibuild.Avalonia.WebView.NavigationCompletedEventArgs::Status
-  - method System.Void Agibuild.Avalonia.WebView.NavigationCompletedEventArgs::.ctor()
-  - method System.Void Agibuild.Avalonia.WebView.NavigationCompletedEventArgs::.ctor(System.Guid,System.Uri,Agibuild.Avalonia.WebView.NavigationCompletedStatus,System.Exception)
-
-type Agibuild.Avalonia.WebView.NavigationCompletedStatus
-  - field Agibuild.Avalonia.WebView.NavigationCompletedStatus Agibuild.Avalonia.WebView.NavigationCompletedStatus::Canceled
-  - field Agibuild.Avalonia.WebView.NavigationCompletedStatus Agibuild.Avalonia.WebView.NavigationCompletedStatus::Failure
-  - field Agibuild.Avalonia.WebView.NavigationCompletedStatus Agibuild.Avalonia.WebView.NavigationCompletedStatus::Success
-  - field Agibuild.Avalonia.WebView.NavigationCompletedStatus Agibuild.Avalonia.WebView.NavigationCompletedStatus::Superseded
-  - field System.Int32 Agibuild.Avalonia.WebView.NavigationCompletedStatus::value__
-
-type Agibuild.Avalonia.WebView.NavigationStartingEventArgs
-  - property System.Boolean Agibuild.Avalonia.WebView.NavigationStartingEventArgs::Cancel
-  - property System.Guid Agibuild.Avalonia.WebView.NavigationStartingEventArgs::NavigationId
-  - property System.Uri Agibuild.Avalonia.WebView.NavigationStartingEventArgs::RequestUri
-  - method System.Void Agibuild.Avalonia.WebView.NavigationStartingEventArgs::.ctor(System.Uri)
-  - method System.Void Agibuild.Avalonia.WebView.NavigationStartingEventArgs::.ctor(System.Guid,System.Uri)
-
-type Agibuild.Avalonia.WebView.NewWindowRequestedEventArgs
-  - property System.Boolean Agibuild.Avalonia.WebView.NewWindowRequestedEventArgs::Handled
-  - property System.Uri Agibuild.Avalonia.WebView.NewWindowRequestedEventArgs::Uri
-  - method System.Void Agibuild.Avalonia.WebView.NewWindowRequestedEventArgs::.ctor(System.Uri)
-
-type Agibuild.Avalonia.WebView.NullBridgeTracer
-  - field Agibuild.Avalonia.WebView.NullBridgeTracer Agibuild.Avalonia.WebView.NullBridgeTracer::Instance
-  - method System.Void Agibuild.Avalonia.WebView.NullBridgeTracer::.ctor()
-  - method System.Void Agibuild.Avalonia.WebView.NullBridgeTracer::OnExportCallEnd(System.String,System.String,System.Int64,System.String)
-  - method System.Void Agibuild.Avalonia.WebView.NullBridgeTracer::OnExportCallError(System.String,System.String,System.Int64,System.Exception)
-  - method System.Void Agibuild.Avalonia.WebView.NullBridgeTracer::OnExportCallStart(System.String,System.String,System.String)
-  - method System.Void Agibuild.Avalonia.WebView.NullBridgeTracer::OnImportCallEnd(System.String,System.String,System.Int64)
-  - method System.Void Agibuild.Avalonia.WebView.NullBridgeTracer::OnImportCallStart(System.String,System.String,System.String)
-  - method System.Void Agibuild.Avalonia.WebView.NullBridgeTracer::OnServiceExposed(System.String,System.Int32,System.Boolean)
-  - method System.Void Agibuild.Avalonia.WebView.NullBridgeTracer::OnServiceRemoved(System.String)
-
-type Agibuild.Avalonia.WebView.PdfPrintOptions
-  - property System.Boolean Agibuild.Avalonia.WebView.PdfPrintOptions::Landscape
-  - property System.Double Agibuild.Avalonia.WebView.PdfPrintOptions::MarginBottom
-  - property System.Double Agibuild.Avalonia.WebView.PdfPrintOptions::MarginLeft
-  - property System.Double Agibuild.Avalonia.WebView.PdfPrintOptions::MarginRight
-  - property System.Double Agibuild.Avalonia.WebView.PdfPrintOptions::MarginTop
-  - property System.Double Agibuild.Avalonia.WebView.PdfPrintOptions::PageHeight
-  - property System.Double Agibuild.Avalonia.WebView.PdfPrintOptions::PageWidth
-  - property System.Boolean Agibuild.Avalonia.WebView.PdfPrintOptions::PrintBackground
-  - property System.Double Agibuild.Avalonia.WebView.PdfPrintOptions::Scale
-  - method System.Void Agibuild.Avalonia.WebView.PdfPrintOptions::.ctor()
-
-type Agibuild.Avalonia.WebView.PermissionRequestedEventArgs
-  - property System.Uri Agibuild.Avalonia.WebView.PermissionRequestedEventArgs::Origin
-  - property Agibuild.Avalonia.WebView.WebViewPermissionKind Agibuild.Avalonia.WebView.PermissionRequestedEventArgs::PermissionKind
-  - property Agibuild.Avalonia.WebView.PermissionState Agibuild.Avalonia.WebView.PermissionRequestedEventArgs::State
-  - method System.Void Agibuild.Avalonia.WebView.PermissionRequestedEventArgs::.ctor(Agibuild.Avalonia.WebView.WebViewPermissionKind,System.Uri)
-
-type Agibuild.Avalonia.WebView.PermissionState
-  - field Agibuild.Avalonia.WebView.PermissionState Agibuild.Avalonia.WebView.PermissionState::Allow
-  - field Agibuild.Avalonia.WebView.PermissionState Agibuild.Avalonia.WebView.PermissionState::Default
-  - field Agibuild.Avalonia.WebView.PermissionState Agibuild.Avalonia.WebView.PermissionState::Deny
-  - field System.Int32 Agibuild.Avalonia.WebView.PermissionState::value__
-
-type Agibuild.Avalonia.WebView.RateLimit
-  - property System.Int32 Agibuild.Avalonia.WebView.RateLimit::MaxCalls
-  - property System.TimeSpan Agibuild.Avalonia.WebView.RateLimit::Window
-  - method System.Void Agibuild.Avalonia.WebView.RateLimit::.ctor(System.Int32,System.TimeSpan)
-
-type Agibuild.Avalonia.WebView.ScriptResultHelper
-  - method System.String Agibuild.Avalonia.WebView.ScriptResultHelper::NormalizeJsonResult(System.String)
-
-type Agibuild.Avalonia.WebView.SpaHostingOptions
-  - property System.Boolean Agibuild.Avalonia.WebView.SpaHostingOptions::AutoInjectBridgeScript
-  - property System.Collections.Generic.IDictionary`2<System.String,System.String> Agibuild.Avalonia.WebView.SpaHostingOptions::DefaultHeaders
-  - property System.String Agibuild.Avalonia.WebView.SpaHostingOptions::DevServerUrl
-  - property System.String Agibuild.Avalonia.WebView.SpaHostingOptions::EmbeddedResourcePrefix
-  - property System.Uri Agibuild.Avalonia.WebView.SpaHostingOptions::EntryPointUri
-  - property System.String Agibuild.Avalonia.WebView.SpaHostingOptions::FallbackDocument
-  - property System.String Agibuild.Avalonia.WebView.SpaHostingOptions::Host
-  - property System.Reflection.Assembly Agibuild.Avalonia.WebView.SpaHostingOptions::ResourceAssembly
-  - property System.String Agibuild.Avalonia.WebView.SpaHostingOptions::Scheme
-  - method System.Void Agibuild.Avalonia.WebView.SpaHostingOptions::.ctor()
-
-type Agibuild.Avalonia.WebView.WebAuthCallbackMatcher
-  - method System.Boolean Agibuild.Avalonia.WebView.WebAuthCallbackMatcher::IsStrictMatch(System.Uri,System.Uri)
-
-type Agibuild.Avalonia.WebView.WebAuthResult
-  - property System.Uri Agibuild.Avalonia.WebView.WebAuthResult::CallbackUri
-  - property System.String Agibuild.Avalonia.WebView.WebAuthResult::Error
-  - property Agibuild.Avalonia.WebView.WebAuthStatus Agibuild.Avalonia.WebView.WebAuthResult::Status
-  - method System.Void Agibuild.Avalonia.WebView.WebAuthResult::.ctor()
-
-type Agibuild.Avalonia.WebView.WebAuthStatus
-  - field Agibuild.Avalonia.WebView.WebAuthStatus Agibuild.Avalonia.WebView.WebAuthStatus::Error
-  - field Agibuild.Avalonia.WebView.WebAuthStatus Agibuild.Avalonia.WebView.WebAuthStatus::Success
-  - field Agibuild.Avalonia.WebView.WebAuthStatus Agibuild.Avalonia.WebView.WebAuthStatus::Timeout
-  - field Agibuild.Avalonia.WebView.WebAuthStatus Agibuild.Avalonia.WebView.WebAuthStatus::UserCancel
-  - field System.Int32 Agibuild.Avalonia.WebView.WebAuthStatus::value__
-
-type Agibuild.Avalonia.WebView.WebMessageDropDiagnostic
-  - property System.Guid Agibuild.Avalonia.WebView.WebMessageDropDiagnostic::ChannelId
-  - property System.String Agibuild.Avalonia.WebView.WebMessageDropDiagnostic::Origin
-  - property Agibuild.Avalonia.WebView.WebMessageDropReason Agibuild.Avalonia.WebView.WebMessageDropDiagnostic::Reason
-  - method System.Void Agibuild.Avalonia.WebView.WebMessageDropDiagnostic::.ctor(Agibuild.Avalonia.WebView.WebMessageDropReason,System.String,System.Guid)
-  - method System.Void Agibuild.Avalonia.WebView.WebMessageDropDiagnostic::Deconstruct(Agibuild.Avalonia.WebView.WebMessageDropReason&,System.String&,System.Guid&)
-  - method System.Boolean Agibuild.Avalonia.WebView.WebMessageDropDiagnostic::Equals(System.Object)
-  - method System.Boolean Agibuild.Avalonia.WebView.WebMessageDropDiagnostic::Equals(Agibuild.Avalonia.WebView.WebMessageDropDiagnostic)
-  - method System.Int32 Agibuild.Avalonia.WebView.WebMessageDropDiagnostic::GetHashCode()
-  - method System.String Agibuild.Avalonia.WebView.WebMessageDropDiagnostic::ToString()
-  - method System.Boolean Agibuild.Avalonia.WebView.WebMessageDropDiagnostic::op_Equality(Agibuild.Avalonia.WebView.WebMessageDropDiagnostic,Agibuild.Avalonia.WebView.WebMessageDropDiagnostic)
-  - method System.Boolean Agibuild.Avalonia.WebView.WebMessageDropDiagnostic::op_Inequality(Agibuild.Avalonia.WebView.WebMessageDropDiagnostic,Agibuild.Avalonia.WebView.WebMessageDropDiagnostic)
-
-type Agibuild.Avalonia.WebView.WebMessageDropReason
-  - field Agibuild.Avalonia.WebView.WebMessageDropReason Agibuild.Avalonia.WebView.WebMessageDropReason::ChannelMismatch
-  - field Agibuild.Avalonia.WebView.WebMessageDropReason Agibuild.Avalonia.WebView.WebMessageDropReason::OriginNotAllowed
-  - field Agibuild.Avalonia.WebView.WebMessageDropReason Agibuild.Avalonia.WebView.WebMessageDropReason::ProtocolMismatch
-  - field System.Int32 Agibuild.Avalonia.WebView.WebMessageDropReason::value__
-
-type Agibuild.Avalonia.WebView.WebMessageEnvelope
-  - property System.String Agibuild.Avalonia.WebView.WebMessageEnvelope::Body
-  - property System.Guid Agibuild.Avalonia.WebView.WebMessageEnvelope::ChannelId
-  - property System.String Agibuild.Avalonia.WebView.WebMessageEnvelope::Origin
-  - property System.Int32 Agibuild.Avalonia.WebView.WebMessageEnvelope::ProtocolVersion
-  - method System.Void Agibuild.Avalonia.WebView.WebMessageEnvelope::.ctor(System.String,System.String,System.Guid,System.Int32)
-  - method System.Void Agibuild.Avalonia.WebView.WebMessageEnvelope::Deconstruct(System.String&,System.String&,System.Guid&,System.Int32&)
-  - method System.Boolean Agibuild.Avalonia.WebView.WebMessageEnvelope::Equals(System.Object)
-  - method System.Boolean Agibuild.Avalonia.WebView.WebMessageEnvelope::Equals(Agibuild.Avalonia.WebView.WebMessageEnvelope)
-  - method System.Int32 Agibuild.Avalonia.WebView.WebMessageEnvelope::GetHashCode()
-  - method System.String Agibuild.Avalonia.WebView.WebMessageEnvelope::ToString()
-  - method System.Boolean Agibuild.Avalonia.WebView.WebMessageEnvelope::op_Equality(Agibuild.Avalonia.WebView.WebMessageEnvelope,Agibuild.Avalonia.WebView.WebMessageEnvelope)
-  - method System.Boolean Agibuild.Avalonia.WebView.WebMessageEnvelope::op_Inequality(Agibuild.Avalonia.WebView.WebMessageEnvelope,Agibuild.Avalonia.WebView.WebMessageEnvelope)
-
-type Agibuild.Avalonia.WebView.WebMessagePolicyDecision
-  - property System.Nullable`1<Agibuild.Avalonia.WebView.WebMessageDropReason> Agibuild.Avalonia.WebView.WebMessagePolicyDecision::DropReason
-  - property System.Boolean Agibuild.Avalonia.WebView.WebMessagePolicyDecision::IsAllowed
-  - method System.Void Agibuild.Avalonia.WebView.WebMessagePolicyDecision::.ctor(System.Boolean,System.Nullable`1<Agibuild.Avalonia.WebView.WebMessageDropReason>)
-  - method Agibuild.Avalonia.WebView.WebMessagePolicyDecision Agibuild.Avalonia.WebView.WebMessagePolicyDecision::Allow()
-  - method System.Void Agibuild.Avalonia.WebView.WebMessagePolicyDecision::Deconstruct(System.Boolean&,System.Nullable`1<Agibuild.Avalonia.WebView.WebMessageDropReason>&)
-  - method Agibuild.Avalonia.WebView.WebMessagePolicyDecision Agibuild.Avalonia.WebView.WebMessagePolicyDecision::Deny(Agibuild.Avalonia.WebView.WebMessageDropReason)
-  - method System.Boolean Agibuild.Avalonia.WebView.WebMessagePolicyDecision::Equals(System.Object)
-  - method System.Boolean Agibuild.Avalonia.WebView.WebMessagePolicyDecision::Equals(Agibuild.Avalonia.WebView.WebMessagePolicyDecision)
-  - method System.Int32 Agibuild.Avalonia.WebView.WebMessagePolicyDecision::GetHashCode()
-  - method System.String Agibuild.Avalonia.WebView.WebMessagePolicyDecision::ToString()
-  - method System.Boolean Agibuild.Avalonia.WebView.WebMessagePolicyDecision::op_Equality(Agibuild.Avalonia.WebView.WebMessagePolicyDecision,Agibuild.Avalonia.WebView.WebMessagePolicyDecision)
-  - method System.Boolean Agibuild.Avalonia.WebView.WebMessagePolicyDecision::op_Inequality(Agibuild.Avalonia.WebView.WebMessagePolicyDecision,Agibuild.Avalonia.WebView.WebMessagePolicyDecision)
-
-type Agibuild.Avalonia.WebView.WebMessageReceivedEventArgs
-  - property System.String Agibuild.Avalonia.WebView.WebMessageReceivedEventArgs::Body
-  - property System.Guid Agibuild.Avalonia.WebView.WebMessageReceivedEventArgs::ChannelId
-  - property System.String Agibuild.Avalonia.WebView.WebMessageReceivedEventArgs::Origin
-  - property System.Int32 Agibuild.Avalonia.WebView.WebMessageReceivedEventArgs::ProtocolVersion
-  - method System.Void Agibuild.Avalonia.WebView.WebMessageReceivedEventArgs::.ctor()
-  - method System.Void Agibuild.Avalonia.WebView.WebMessageReceivedEventArgs::.ctor(System.String,System.String,System.Guid)
-  - method System.Void Agibuild.Avalonia.WebView.WebMessageReceivedEventArgs::.ctor(System.String,System.String,System.Guid,System.Int32)
-
-type Agibuild.Avalonia.WebView.WebResourceRequestedEventArgs
-  - property System.Boolean Agibuild.Avalonia.WebView.WebResourceRequestedEventArgs::Handled
-  - property System.String Agibuild.Avalonia.WebView.WebResourceRequestedEventArgs::Method
-  - property System.Collections.Generic.IReadOnlyDictionary`2<System.String,System.String> Agibuild.Avalonia.WebView.WebResourceRequestedEventArgs::RequestHeaders
-  - property System.Uri Agibuild.Avalonia.WebView.WebResourceRequestedEventArgs::RequestUri
-  - property System.IO.Stream Agibuild.Avalonia.WebView.WebResourceRequestedEventArgs::ResponseBody
-  - property System.String Agibuild.Avalonia.WebView.WebResourceRequestedEventArgs::ResponseContentType
-  - property System.Collections.Generic.IDictionary`2<System.String,System.String> Agibuild.Avalonia.WebView.WebResourceRequestedEventArgs::ResponseHeaders
-  - property System.Int32 Agibuild.Avalonia.WebView.WebResourceRequestedEventArgs::ResponseStatusCode
-  - method System.Void Agibuild.Avalonia.WebView.WebResourceRequestedEventArgs::.ctor()
-  - method System.Void Agibuild.Avalonia.WebView.WebResourceRequestedEventArgs::.ctor(System.Uri,System.String,System.Collections.Generic.IReadOnlyDictionary`2<System.String,System.String>)
-
-type Agibuild.Avalonia.WebView.WebViewCommand
-  - field Agibuild.Avalonia.WebView.WebViewCommand Agibuild.Avalonia.WebView.WebViewCommand::Copy
-  - field Agibuild.Avalonia.WebView.WebViewCommand Agibuild.Avalonia.WebView.WebViewCommand::Cut
-  - field Agibuild.Avalonia.WebView.WebViewCommand Agibuild.Avalonia.WebView.WebViewCommand::Paste
-  - field Agibuild.Avalonia.WebView.WebViewCommand Agibuild.Avalonia.WebView.WebViewCommand::Redo
-  - field Agibuild.Avalonia.WebView.WebViewCommand Agibuild.Avalonia.WebView.WebViewCommand::SelectAll
-  - field Agibuild.Avalonia.WebView.WebViewCommand Agibuild.Avalonia.WebView.WebViewCommand::Undo
-  - field System.Int32 Agibuild.Avalonia.WebView.WebViewCommand::value__
-
-type Agibuild.Avalonia.WebView.WebViewCookie
-  - property System.String Agibuild.Avalonia.WebView.WebViewCookie::Domain
-  - property System.Nullable`1<System.DateTimeOffset> Agibuild.Avalonia.WebView.WebViewCookie::Expires
-  - property System.Boolean Agibuild.Avalonia.WebView.WebViewCookie::IsHttpOnly
-  - property System.Boolean Agibuild.Avalonia.WebView.WebViewCookie::IsSecure
-  - property System.String Agibuild.Avalonia.WebView.WebViewCookie::Name
-  - property System.String Agibuild.Avalonia.WebView.WebViewCookie::Path
-  - property System.String Agibuild.Avalonia.WebView.WebViewCookie::Value
-  - method System.Void Agibuild.Avalonia.WebView.WebViewCookie::.ctor(System.String,System.String,System.String,System.String,System.Nullable`1<System.DateTimeOffset>,System.Boolean,System.Boolean)
-  - method Agibuild.Avalonia.WebView.WebViewCookie Agibuild.Avalonia.WebView.WebViewCookie::<Clone>$()
-  - method System.Void Agibuild.Avalonia.WebView.WebViewCookie::Deconstruct(System.String&,System.String&,System.String&,System.String&,System.Nullable`1<System.DateTimeOffset>&,System.Boolean&,System.Boolean&)
-  - method System.Boolean Agibuild.Avalonia.WebView.WebViewCookie::Equals(System.Object)
-  - method System.Boolean Agibuild.Avalonia.WebView.WebViewCookie::Equals(Agibuild.Avalonia.WebView.WebViewCookie)
-  - method System.Int32 Agibuild.Avalonia.WebView.WebViewCookie::GetHashCode()
-  - method System.String Agibuild.Avalonia.WebView.WebViewCookie::ToString()
-  - method System.Boolean Agibuild.Avalonia.WebView.WebViewCookie::op_Equality(Agibuild.Avalonia.WebView.WebViewCookie,Agibuild.Avalonia.WebView.WebViewCookie)
-  - method System.Boolean Agibuild.Avalonia.WebView.WebViewCookie::op_Inequality(Agibuild.Avalonia.WebView.WebViewCookie,Agibuild.Avalonia.WebView.WebViewCookie)
-
-type Agibuild.Avalonia.WebView.WebViewNavigationException
-  - property System.Guid Agibuild.Avalonia.WebView.WebViewNavigationException::NavigationId
-  - property System.Uri Agibuild.Avalonia.WebView.WebViewNavigationException::RequestUri
-  - method System.Void Agibuild.Avalonia.WebView.WebViewNavigationException::.ctor(System.String,System.Guid,System.Uri,System.Exception)
-
-type Agibuild.Avalonia.WebView.WebViewNetworkException
-  - method System.Void Agibuild.Avalonia.WebView.WebViewNetworkException::.ctor(System.String,System.Guid,System.Uri,System.Exception)
-
-type Agibuild.Avalonia.WebView.WebViewOperationFailure
-  - method System.Void Agibuild.Avalonia.WebView.WebViewOperationFailure::SetCategory(System.Exception,Agibuild.Avalonia.WebView.WebViewOperationFailureCategory)
-  - method System.Boolean Agibuild.Avalonia.WebView.WebViewOperationFailure::TryGetCategory(System.Exception,Agibuild.Avalonia.WebView.WebViewOperationFailureCategory&)
-
-type Agibuild.Avalonia.WebView.WebViewOperationFailureCategory
-  - field Agibuild.Avalonia.WebView.WebViewOperationFailureCategory Agibuild.Avalonia.WebView.WebViewOperationFailureCategory::AdapterFailed
-  - field Agibuild.Avalonia.WebView.WebViewOperationFailureCategory Agibuild.Avalonia.WebView.WebViewOperationFailureCategory::DispatchFailed
-  - field Agibuild.Avalonia.WebView.WebViewOperationFailureCategory Agibuild.Avalonia.WebView.WebViewOperationFailureCategory::Disposed
-  - field Agibuild.Avalonia.WebView.WebViewOperationFailureCategory Agibuild.Avalonia.WebView.WebViewOperationFailureCategory::NotReady
-  - field System.Int32 Agibuild.Avalonia.WebView.WebViewOperationFailureCategory::value__
-
-type Agibuild.Avalonia.WebView.WebViewPermissionKind
-  - field Agibuild.Avalonia.WebView.WebViewPermissionKind Agibuild.Avalonia.WebView.WebViewPermissionKind::Camera
-  - field Agibuild.Avalonia.WebView.WebViewPermissionKind Agibuild.Avalonia.WebView.WebViewPermissionKind::ClipboardRead
-  - field Agibuild.Avalonia.WebView.WebViewPermissionKind Agibuild.Avalonia.WebView.WebViewPermissionKind::ClipboardWrite
-  - field Agibuild.Avalonia.WebView.WebViewPermissionKind Agibuild.Avalonia.WebView.WebViewPermissionKind::Geolocation
-  - field Agibuild.Avalonia.WebView.WebViewPermissionKind Agibuild.Avalonia.WebView.WebViewPermissionKind::Microphone
-  - field Agibuild.Avalonia.WebView.WebViewPermissionKind Agibuild.Avalonia.WebView.WebViewPermissionKind::Midi
-  - field Agibuild.Avalonia.WebView.WebViewPermissionKind Agibuild.Avalonia.WebView.WebViewPermissionKind::Notifications
-  - field Agibuild.Avalonia.WebView.WebViewPermissionKind Agibuild.Avalonia.WebView.WebViewPermissionKind::Other
-  - field Agibuild.Avalonia.WebView.WebViewPermissionKind Agibuild.Avalonia.WebView.WebViewPermissionKind::Sensors
-  - field Agibuild.Avalonia.WebView.WebViewPermissionKind Agibuild.Avalonia.WebView.WebViewPermissionKind::Unknown
-  - field System.Int32 Agibuild.Avalonia.WebView.WebViewPermissionKind::value__
-
-type Agibuild.Avalonia.WebView.WebViewRpcException
-  - property System.Int32 Agibuild.Avalonia.WebView.WebViewRpcException::Code
-  - method System.Void Agibuild.Avalonia.WebView.WebViewRpcException::.ctor(System.Int32,System.String)
-
-type Agibuild.Avalonia.WebView.WebViewScriptException
-  - method System.Void Agibuild.Avalonia.WebView.WebViewScriptException::.ctor(System.String,System.Exception)
-
-type Agibuild.Avalonia.WebView.WebViewSslException
-  - method System.Void Agibuild.Avalonia.WebView.WebViewSslException::.ctor(System.String,System.Guid,System.Uri,System.Exception)
-
-type Agibuild.Avalonia.WebView.WebViewTimeoutException
-  - method System.Void Agibuild.Avalonia.WebView.WebViewTimeoutException::.ctor(System.String,System.Guid,System.Uri,System.Exception)
+type Agibuild.Fulora.AdapterCreatedEventArgs
+  - property Avalonia.Platform.IPlatformHandle Agibuild.Fulora.AdapterCreatedEventArgs::PlatformHandle
+  - method System.Void Agibuild.Fulora.AdapterCreatedEventArgs::.ctor(Avalonia.Platform.IPlatformHandle)
+
+type Agibuild.Fulora.AuthOptions
+  - property System.Uri Agibuild.Fulora.AuthOptions::AuthorizeUri
+  - property System.Uri Agibuild.Fulora.AuthOptions::CallbackUri
+  - property System.Nullable`1<System.TimeSpan> Agibuild.Fulora.AuthOptions::Timeout
+  - property System.Boolean Agibuild.Fulora.AuthOptions::UseEphemeralSession
+  - method System.Void Agibuild.Fulora.AuthOptions::.ctor()
+
+type Agibuild.Fulora.BridgeOptions
+  - property System.Collections.Generic.IReadOnlySet`1<System.String> Agibuild.Fulora.BridgeOptions::AllowedOrigins
+  - property Agibuild.Fulora.RateLimit Agibuild.Fulora.BridgeOptions::RateLimit
+  - method System.Void Agibuild.Fulora.BridgeOptions::.ctor()
+
+type Agibuild.Fulora.BridgeProxyAttribute
+  - property System.Type Agibuild.Fulora.BridgeProxyAttribute::InterfaceType
+  - property System.Type Agibuild.Fulora.BridgeProxyAttribute::ProxyType
+  - method System.Void Agibuild.Fulora.BridgeProxyAttribute::.ctor(System.Type,System.Type)
+
+type Agibuild.Fulora.BridgeRegistrationAttribute
+  - property System.Type Agibuild.Fulora.BridgeRegistrationAttribute::InterfaceType
+  - property System.Type Agibuild.Fulora.BridgeRegistrationAttribute::RegistrationType
+  - method System.Void Agibuild.Fulora.BridgeRegistrationAttribute::.ctor(System.Type,System.Type)
+
+type Agibuild.Fulora.ContextMenuMediaType
+  - field Agibuild.Fulora.ContextMenuMediaType Agibuild.Fulora.ContextMenuMediaType::Audio
+  - field Agibuild.Fulora.ContextMenuMediaType Agibuild.Fulora.ContextMenuMediaType::Image
+  - field Agibuild.Fulora.ContextMenuMediaType Agibuild.Fulora.ContextMenuMediaType::None
+  - field Agibuild.Fulora.ContextMenuMediaType Agibuild.Fulora.ContextMenuMediaType::Video
+  - field System.Int32 Agibuild.Fulora.ContextMenuMediaType::value__
+
+type Agibuild.Fulora.ContextMenuRequestedEventArgs
+  - property System.Boolean Agibuild.Fulora.ContextMenuRequestedEventArgs::Handled
+  - property System.Boolean Agibuild.Fulora.ContextMenuRequestedEventArgs::IsEditable
+  - property System.Uri Agibuild.Fulora.ContextMenuRequestedEventArgs::LinkUri
+  - property System.Uri Agibuild.Fulora.ContextMenuRequestedEventArgs::MediaSourceUri
+  - property Agibuild.Fulora.ContextMenuMediaType Agibuild.Fulora.ContextMenuRequestedEventArgs::MediaType
+  - property System.String Agibuild.Fulora.ContextMenuRequestedEventArgs::SelectionText
+  - property System.Double Agibuild.Fulora.ContextMenuRequestedEventArgs::X
+  - property System.Double Agibuild.Fulora.ContextMenuRequestedEventArgs::Y
+  - method System.Void Agibuild.Fulora.ContextMenuRequestedEventArgs::.ctor()
+
+type Agibuild.Fulora.CustomSchemeRegistration
+  - property System.Boolean Agibuild.Fulora.CustomSchemeRegistration::HasAuthorityComponent
+  - property System.String Agibuild.Fulora.CustomSchemeRegistration::SchemeName
+  - property System.Boolean Agibuild.Fulora.CustomSchemeRegistration::TreatAsSecure
+  - method System.Void Agibuild.Fulora.CustomSchemeRegistration::.ctor()
+
+type Agibuild.Fulora.DownloadRequestedEventArgs
+  - property System.Boolean Agibuild.Fulora.DownloadRequestedEventArgs::Cancel
+  - property System.Nullable`1<System.Int64> Agibuild.Fulora.DownloadRequestedEventArgs::ContentLength
+  - property System.String Agibuild.Fulora.DownloadRequestedEventArgs::ContentType
+  - property System.String Agibuild.Fulora.DownloadRequestedEventArgs::DownloadPath
+  - property System.Uri Agibuild.Fulora.DownloadRequestedEventArgs::DownloadUri
+  - property System.Boolean Agibuild.Fulora.DownloadRequestedEventArgs::Handled
+  - property System.String Agibuild.Fulora.DownloadRequestedEventArgs::SuggestedFileName
+  - method System.Void Agibuild.Fulora.DownloadRequestedEventArgs::.ctor(System.Uri,System.String,System.String,System.Nullable`1<System.Int64>)
+
+type Agibuild.Fulora.EnvironmentRequestedEventArgs
+  - method System.Void Agibuild.Fulora.EnvironmentRequestedEventArgs::.ctor()
+
+type Agibuild.Fulora.FindInPageOptions
+  - property System.Boolean Agibuild.Fulora.FindInPageOptions::CaseSensitive
+  - property System.Boolean Agibuild.Fulora.FindInPageOptions::Forward
+  - method System.Void Agibuild.Fulora.FindInPageOptions::.ctor()
+
+type Agibuild.Fulora.FindInPageResult
+  - property System.Int32 Agibuild.Fulora.FindInPageResult::ActiveMatchIndex
+  - property System.Int32 Agibuild.Fulora.FindInPageResult::TotalMatches
+  - method System.Void Agibuild.Fulora.FindInPageResult::.ctor()
+
+type Agibuild.Fulora.IAndroidWebViewPlatformHandle
+  - property System.IntPtr Agibuild.Fulora.IAndroidWebViewPlatformHandle::AndroidWebViewHandle
+
+type Agibuild.Fulora.IAppleWKWebViewPlatformHandle
+  - property System.IntPtr Agibuild.Fulora.IAppleWKWebViewPlatformHandle::WKWebViewHandle
+
+type Agibuild.Fulora.IBridgeService
+  - method System.Void Agibuild.Fulora.IBridgeService::Expose(T,Agibuild.Fulora.BridgeOptions)
+  - method T Agibuild.Fulora.IBridgeService::GetProxy()
+  - method System.Void Agibuild.Fulora.IBridgeService::Remove()
+
+type Agibuild.Fulora.IBridgeServiceRegistration`1
+  - property System.Collections.Generic.IReadOnlyList`1<System.String> Agibuild.Fulora.IBridgeServiceRegistration`1::MethodNames
+  - property System.String Agibuild.Fulora.IBridgeServiceRegistration`1::ServiceName
+  - method System.String Agibuild.Fulora.IBridgeServiceRegistration`1::GetJsStub()
+  - method System.Void Agibuild.Fulora.IBridgeServiceRegistration`1::RegisterHandlers(Agibuild.Fulora.IWebViewRpcService,T)
+  - method System.Void Agibuild.Fulora.IBridgeServiceRegistration`1::UnregisterHandlers(Agibuild.Fulora.IWebViewRpcService)
+
+type Agibuild.Fulora.IBridgeTracer
+  - method System.Void Agibuild.Fulora.IBridgeTracer::OnExportCallEnd(System.String,System.String,System.Int64,System.String)
+  - method System.Void Agibuild.Fulora.IBridgeTracer::OnExportCallError(System.String,System.String,System.Int64,System.Exception)
+  - method System.Void Agibuild.Fulora.IBridgeTracer::OnExportCallStart(System.String,System.String,System.String)
+  - method System.Void Agibuild.Fulora.IBridgeTracer::OnImportCallEnd(System.String,System.String,System.Int64)
+  - method System.Void Agibuild.Fulora.IBridgeTracer::OnImportCallStart(System.String,System.String,System.String)
+  - method System.Void Agibuild.Fulora.IBridgeTracer::OnServiceExposed(System.String,System.Int32,System.Boolean)
+  - method System.Void Agibuild.Fulora.IBridgeTracer::OnServiceRemoved(System.String)
+
+type Agibuild.Fulora.ICommandManager
+  - method System.Threading.Tasks.Task Agibuild.Fulora.ICommandManager::CopyAsync()
+  - method System.Threading.Tasks.Task Agibuild.Fulora.ICommandManager::CutAsync()
+  - method System.Threading.Tasks.Task Agibuild.Fulora.ICommandManager::PasteAsync()
+  - method System.Threading.Tasks.Task Agibuild.Fulora.ICommandManager::RedoAsync()
+  - method System.Threading.Tasks.Task Agibuild.Fulora.ICommandManager::SelectAllAsync()
+  - method System.Threading.Tasks.Task Agibuild.Fulora.ICommandManager::UndoAsync()
+
+type Agibuild.Fulora.ICookieManager
+  - method System.Threading.Tasks.Task Agibuild.Fulora.ICookieManager::ClearAllCookiesAsync()
+  - method System.Threading.Tasks.Task Agibuild.Fulora.ICookieManager::DeleteCookieAsync(Agibuild.Fulora.WebViewCookie)
+  - method System.Threading.Tasks.Task`1<System.Collections.Generic.IReadOnlyList`1<Agibuild.Fulora.WebViewCookie>> Agibuild.Fulora.ICookieManager::GetCookiesAsync(System.Uri)
+  - method System.Threading.Tasks.Task Agibuild.Fulora.ICookieManager::SetCookieAsync(Agibuild.Fulora.WebViewCookie)
+
+type Agibuild.Fulora.IGtkWebViewPlatformHandle
+  - property System.IntPtr Agibuild.Fulora.IGtkWebViewPlatformHandle::WebKitWebViewHandle
+
+type Agibuild.Fulora.INativeWebViewHandleProvider
+  - method Avalonia.Platform.IPlatformHandle Agibuild.Fulora.INativeWebViewHandleProvider::TryGetWebViewHandle()
+
+type Agibuild.Fulora.ITopLevelWindow
+  - property Avalonia.Platform.IPlatformHandle Agibuild.Fulora.ITopLevelWindow::PlatformHandle
+
+type Agibuild.Fulora.IWebAuthBroker
+  - method System.Threading.Tasks.Task`1<Agibuild.Fulora.WebAuthResult> Agibuild.Fulora.IWebAuthBroker::AuthenticateAsync(Agibuild.Fulora.ITopLevelWindow,Agibuild.Fulora.AuthOptions)
+
+type Agibuild.Fulora.IWebDialog
+  - property System.Boolean Agibuild.Fulora.IWebDialog::CanUserResize
+  - property System.String Agibuild.Fulora.IWebDialog::Title
+  - event System.EventHandler Agibuild.Fulora.IWebDialog::Closing
+  - method System.Void Agibuild.Fulora.IWebDialog::Close()
+  - method System.Boolean Agibuild.Fulora.IWebDialog::Move(System.Int32,System.Int32)
+  - method System.Boolean Agibuild.Fulora.IWebDialog::Resize(System.Int32,System.Int32)
+  - method System.Void Agibuild.Fulora.IWebDialog::Show()
+  - method System.Boolean Agibuild.Fulora.IWebDialog::Show(Avalonia.Platform.IPlatformHandle)
+
+type Agibuild.Fulora.IWebDialogFactory
+  - method Agibuild.Fulora.IWebDialog Agibuild.Fulora.IWebDialogFactory::Create(Agibuild.Fulora.IWebViewEnvironmentOptions)
+
+type Agibuild.Fulora.IWebMessageDropDiagnosticsSink
+  - method System.Void Agibuild.Fulora.IWebMessageDropDiagnosticsSink::OnMessageDropped(Agibuild.Fulora.WebMessageDropDiagnostic& modreq(System.Runtime.InteropServices.InAttribute))
+
+type Agibuild.Fulora.IWebMessagePolicy
+  - method Agibuild.Fulora.WebMessagePolicyDecision Agibuild.Fulora.IWebMessagePolicy::Evaluate(Agibuild.Fulora.WebMessageEnvelope& modreq(System.Runtime.InteropServices.InAttribute))
+
+type Agibuild.Fulora.IWebView
+  - property Agibuild.Fulora.IBridgeService Agibuild.Fulora.IWebView::Bridge
+  - property System.Boolean Agibuild.Fulora.IWebView::CanGoBack
+  - property System.Boolean Agibuild.Fulora.IWebView::CanGoForward
+  - property System.Guid Agibuild.Fulora.IWebView::ChannelId
+  - property System.Boolean Agibuild.Fulora.IWebView::IsLoading
+  - property Agibuild.Fulora.IWebViewRpcService Agibuild.Fulora.IWebView::Rpc
+  - property System.Uri Agibuild.Fulora.IWebView::Source
+  - event System.EventHandler`1<Agibuild.Fulora.AdapterCreatedEventArgs> Agibuild.Fulora.IWebView::AdapterCreated
+  - event System.EventHandler Agibuild.Fulora.IWebView::AdapterDestroyed
+  - event System.EventHandler`1<Agibuild.Fulora.ContextMenuRequestedEventArgs> Agibuild.Fulora.IWebView::ContextMenuRequested
+  - event System.EventHandler`1<Agibuild.Fulora.DownloadRequestedEventArgs> Agibuild.Fulora.IWebView::DownloadRequested
+  - event System.EventHandler`1<Agibuild.Fulora.EnvironmentRequestedEventArgs> Agibuild.Fulora.IWebView::EnvironmentRequested
+  - event System.EventHandler`1<Agibuild.Fulora.NavigationCompletedEventArgs> Agibuild.Fulora.IWebView::NavigationCompleted
+  - event System.EventHandler`1<Agibuild.Fulora.NavigationStartingEventArgs> Agibuild.Fulora.IWebView::NavigationStarted
+  - event System.EventHandler`1<Agibuild.Fulora.NewWindowRequestedEventArgs> Agibuild.Fulora.IWebView::NewWindowRequested
+  - event System.EventHandler`1<Agibuild.Fulora.PermissionRequestedEventArgs> Agibuild.Fulora.IWebView::PermissionRequested
+  - event System.EventHandler`1<Agibuild.Fulora.WebMessageReceivedEventArgs> Agibuild.Fulora.IWebView::WebMessageReceived
+  - event System.EventHandler`1<Agibuild.Fulora.WebResourceRequestedEventArgs> Agibuild.Fulora.IWebView::WebResourceRequested
+  - method System.Threading.Tasks.Task`1<System.String> Agibuild.Fulora.IWebView::AddPreloadScriptAsync(System.String)
+  - method System.Threading.Tasks.Task`1<System.Byte[]> Agibuild.Fulora.IWebView::CaptureScreenshotAsync()
+  - method System.Threading.Tasks.Task Agibuild.Fulora.IWebView::CloseDevToolsAsync()
+  - method System.Threading.Tasks.Task`1<Agibuild.Fulora.FindInPageResult> Agibuild.Fulora.IWebView::FindInPageAsync(System.String,Agibuild.Fulora.FindInPageOptions)
+  - method System.Threading.Tasks.Task`1<System.Double> Agibuild.Fulora.IWebView::GetZoomFactorAsync()
+  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.IWebView::GoBackAsync()
+  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.IWebView::GoForwardAsync()
+  - method System.Threading.Tasks.Task`1<System.String> Agibuild.Fulora.IWebView::InvokeScriptAsync(System.String)
+  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.IWebView::IsDevToolsOpenAsync()
+  - method System.Threading.Tasks.Task Agibuild.Fulora.IWebView::NavigateAsync(System.Uri)
+  - method System.Threading.Tasks.Task Agibuild.Fulora.IWebView::NavigateToStringAsync(System.String)
+  - method System.Threading.Tasks.Task Agibuild.Fulora.IWebView::NavigateToStringAsync(System.String,System.Uri)
+  - method System.Threading.Tasks.Task Agibuild.Fulora.IWebView::OpenDevToolsAsync()
+  - method System.Threading.Tasks.Task`1<System.Byte[]> Agibuild.Fulora.IWebView::PrintToPdfAsync(Agibuild.Fulora.PdfPrintOptions)
+  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.IWebView::RefreshAsync()
+  - method System.Threading.Tasks.Task Agibuild.Fulora.IWebView::RemovePreloadScriptAsync(System.String)
+  - method System.Threading.Tasks.Task Agibuild.Fulora.IWebView::SetZoomFactorAsync(System.Double)
+  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.IWebView::StopAsync()
+  - method System.Threading.Tasks.Task Agibuild.Fulora.IWebView::StopFindInPageAsync(System.Boolean)
+  - method Agibuild.Fulora.ICommandManager Agibuild.Fulora.IWebView::TryGetCommandManager()
+  - method Agibuild.Fulora.ICookieManager Agibuild.Fulora.IWebView::TryGetCookieManager()
+  - method System.Threading.Tasks.Task`1<Avalonia.Platform.IPlatformHandle> Agibuild.Fulora.IWebView::TryGetWebViewHandleAsync()
+
+type Agibuild.Fulora.IWebViewDispatcher
+  - method System.Boolean Agibuild.Fulora.IWebViewDispatcher::CheckAccess()
+  - method System.Threading.Tasks.Task Agibuild.Fulora.IWebViewDispatcher::InvokeAsync(System.Action)
+  - method System.Threading.Tasks.Task`1<T> Agibuild.Fulora.IWebViewDispatcher::InvokeAsync(System.Func`1<T>)
+  - method System.Threading.Tasks.Task Agibuild.Fulora.IWebViewDispatcher::InvokeAsync(System.Func`1<System.Threading.Tasks.Task>)
+  - method System.Threading.Tasks.Task`1<T> Agibuild.Fulora.IWebViewDispatcher::InvokeAsync(System.Func`1<System.Threading.Tasks.Task`1<T>>)
+
+type Agibuild.Fulora.IWebViewEnvironmentOptions
+  - property System.Collections.Generic.IReadOnlyList`1<Agibuild.Fulora.CustomSchemeRegistration> Agibuild.Fulora.IWebViewEnvironmentOptions::CustomSchemes
+  - property System.String Agibuild.Fulora.IWebViewEnvironmentOptions::CustomUserAgent
+  - property System.Boolean Agibuild.Fulora.IWebViewEnvironmentOptions::EnableDevTools
+  - property System.Collections.Generic.IReadOnlyList`1<System.String> Agibuild.Fulora.IWebViewEnvironmentOptions::PreloadScripts
+  - property System.Boolean Agibuild.Fulora.IWebViewEnvironmentOptions::UseEphemeralSession
+
+type Agibuild.Fulora.IWebViewRpcService
+  - method System.Void Agibuild.Fulora.IWebViewRpcService::Handle(System.String,System.Func`2<System.Nullable`1<System.Text.Json.JsonElement>,System.Threading.Tasks.Task`1<System.Object>>)
+  - method System.Void Agibuild.Fulora.IWebViewRpcService::Handle(System.String,System.Func`2<System.Nullable`1<System.Text.Json.JsonElement>,System.Object>)
+  - method System.Threading.Tasks.Task`1<System.Text.Json.JsonElement> Agibuild.Fulora.IWebViewRpcService::InvokeAsync(System.String,System.Object)
+  - method System.Threading.Tasks.Task`1<T> Agibuild.Fulora.IWebViewRpcService::InvokeAsync(System.String,System.Object)
+  - method System.Void Agibuild.Fulora.IWebViewRpcService::RemoveHandler(System.String)
+
+type Agibuild.Fulora.IWindowsWebView2PlatformHandle
+  - property System.IntPtr Agibuild.Fulora.IWindowsWebView2PlatformHandle::CoreWebView2ControllerHandle
+  - property System.IntPtr Agibuild.Fulora.IWindowsWebView2PlatformHandle::CoreWebView2Handle
+
+type Agibuild.Fulora.JsExportAttribute
+  - property System.String Agibuild.Fulora.JsExportAttribute::Name
+  - method System.Void Agibuild.Fulora.JsExportAttribute::.ctor()
+
+type Agibuild.Fulora.JsImportAttribute
+  - property System.String Agibuild.Fulora.JsImportAttribute::Name
+  - method System.Void Agibuild.Fulora.JsImportAttribute::.ctor()
+
+type Agibuild.Fulora.MockBridgeService
+  - property System.Int32 Agibuild.Fulora.MockBridgeService::ExposedCount
+  - method System.Void Agibuild.Fulora.MockBridgeService::.ctor()
+  - method System.Void Agibuild.Fulora.MockBridgeService::Dispose()
+  - method System.Void Agibuild.Fulora.MockBridgeService::Expose(T,Agibuild.Fulora.BridgeOptions)
+  - method T Agibuild.Fulora.MockBridgeService::GetExposedImplementation()
+  - method T Agibuild.Fulora.MockBridgeService::GetProxy()
+  - method System.Void Agibuild.Fulora.MockBridgeService::Remove()
+  - method System.Void Agibuild.Fulora.MockBridgeService::Reset()
+  - method System.Void Agibuild.Fulora.MockBridgeService::SetupProxy(T)
+  - method System.Boolean Agibuild.Fulora.MockBridgeService::WasExposed()
+
+type Agibuild.Fulora.NavigationCompletedEventArgs
+  - property System.Exception Agibuild.Fulora.NavigationCompletedEventArgs::Error
+  - property System.Guid Agibuild.Fulora.NavigationCompletedEventArgs::NavigationId
+  - property System.Uri Agibuild.Fulora.NavigationCompletedEventArgs::RequestUri
+  - property Agibuild.Fulora.NavigationCompletedStatus Agibuild.Fulora.NavigationCompletedEventArgs::Status
+  - method System.Void Agibuild.Fulora.NavigationCompletedEventArgs::.ctor()
+  - method System.Void Agibuild.Fulora.NavigationCompletedEventArgs::.ctor(System.Guid,System.Uri,Agibuild.Fulora.NavigationCompletedStatus,System.Exception)
+
+type Agibuild.Fulora.NavigationCompletedStatus
+  - field Agibuild.Fulora.NavigationCompletedStatus Agibuild.Fulora.NavigationCompletedStatus::Canceled
+  - field Agibuild.Fulora.NavigationCompletedStatus Agibuild.Fulora.NavigationCompletedStatus::Failure
+  - field Agibuild.Fulora.NavigationCompletedStatus Agibuild.Fulora.NavigationCompletedStatus::Success
+  - field Agibuild.Fulora.NavigationCompletedStatus Agibuild.Fulora.NavigationCompletedStatus::Superseded
+  - field System.Int32 Agibuild.Fulora.NavigationCompletedStatus::value__
+
+type Agibuild.Fulora.NavigationStartingEventArgs
+  - property System.Boolean Agibuild.Fulora.NavigationStartingEventArgs::Cancel
+  - property System.Guid Agibuild.Fulora.NavigationStartingEventArgs::NavigationId
+  - property System.Uri Agibuild.Fulora.NavigationStartingEventArgs::RequestUri
+  - method System.Void Agibuild.Fulora.NavigationStartingEventArgs::.ctor(System.Uri)
+  - method System.Void Agibuild.Fulora.NavigationStartingEventArgs::.ctor(System.Guid,System.Uri)
+
+type Agibuild.Fulora.NewWindowRequestedEventArgs
+  - property System.Boolean Agibuild.Fulora.NewWindowRequestedEventArgs::Handled
+  - property System.Uri Agibuild.Fulora.NewWindowRequestedEventArgs::Uri
+  - method System.Void Agibuild.Fulora.NewWindowRequestedEventArgs::.ctor(System.Uri)
+
+type Agibuild.Fulora.NullBridgeTracer
+  - field Agibuild.Fulora.NullBridgeTracer Agibuild.Fulora.NullBridgeTracer::Instance
+  - method System.Void Agibuild.Fulora.NullBridgeTracer::.ctor()
+  - method System.Void Agibuild.Fulora.NullBridgeTracer::OnExportCallEnd(System.String,System.String,System.Int64,System.String)
+  - method System.Void Agibuild.Fulora.NullBridgeTracer::OnExportCallError(System.String,System.String,System.Int64,System.Exception)
+  - method System.Void Agibuild.Fulora.NullBridgeTracer::OnExportCallStart(System.String,System.String,System.String)
+  - method System.Void Agibuild.Fulora.NullBridgeTracer::OnImportCallEnd(System.String,System.String,System.Int64)
+  - method System.Void Agibuild.Fulora.NullBridgeTracer::OnImportCallStart(System.String,System.String,System.String)
+  - method System.Void Agibuild.Fulora.NullBridgeTracer::OnServiceExposed(System.String,System.Int32,System.Boolean)
+  - method System.Void Agibuild.Fulora.NullBridgeTracer::OnServiceRemoved(System.String)
+
+type Agibuild.Fulora.PdfPrintOptions
+  - property System.Boolean Agibuild.Fulora.PdfPrintOptions::Landscape
+  - property System.Double Agibuild.Fulora.PdfPrintOptions::MarginBottom
+  - property System.Double Agibuild.Fulora.PdfPrintOptions::MarginLeft
+  - property System.Double Agibuild.Fulora.PdfPrintOptions::MarginRight
+  - property System.Double Agibuild.Fulora.PdfPrintOptions::MarginTop
+  - property System.Double Agibuild.Fulora.PdfPrintOptions::PageHeight
+  - property System.Double Agibuild.Fulora.PdfPrintOptions::PageWidth
+  - property System.Boolean Agibuild.Fulora.PdfPrintOptions::PrintBackground
+  - property System.Double Agibuild.Fulora.PdfPrintOptions::Scale
+  - method System.Void Agibuild.Fulora.PdfPrintOptions::.ctor()
+
+type Agibuild.Fulora.PermissionRequestedEventArgs
+  - property System.Uri Agibuild.Fulora.PermissionRequestedEventArgs::Origin
+  - property Agibuild.Fulora.WebViewPermissionKind Agibuild.Fulora.PermissionRequestedEventArgs::PermissionKind
+  - property Agibuild.Fulora.PermissionState Agibuild.Fulora.PermissionRequestedEventArgs::State
+  - method System.Void Agibuild.Fulora.PermissionRequestedEventArgs::.ctor(Agibuild.Fulora.WebViewPermissionKind,System.Uri)
+
+type Agibuild.Fulora.PermissionState
+  - field Agibuild.Fulora.PermissionState Agibuild.Fulora.PermissionState::Allow
+  - field Agibuild.Fulora.PermissionState Agibuild.Fulora.PermissionState::Default
+  - field Agibuild.Fulora.PermissionState Agibuild.Fulora.PermissionState::Deny
+  - field System.Int32 Agibuild.Fulora.PermissionState::value__
+
+type Agibuild.Fulora.RateLimit
+  - property System.Int32 Agibuild.Fulora.RateLimit::MaxCalls
+  - property System.TimeSpan Agibuild.Fulora.RateLimit::Window
+  - method System.Void Agibuild.Fulora.RateLimit::.ctor(System.Int32,System.TimeSpan)
+
+type Agibuild.Fulora.ScriptResultHelper
+  - method System.String Agibuild.Fulora.ScriptResultHelper::NormalizeJsonResult(System.String)
+
+type Agibuild.Fulora.SpaHostingOptions
+  - property System.Boolean Agibuild.Fulora.SpaHostingOptions::AutoInjectBridgeScript
+  - property System.Collections.Generic.IDictionary`2<System.String,System.String> Agibuild.Fulora.SpaHostingOptions::DefaultHeaders
+  - property System.String Agibuild.Fulora.SpaHostingOptions::DevServerUrl
+  - property System.String Agibuild.Fulora.SpaHostingOptions::EmbeddedResourcePrefix
+  - property System.Uri Agibuild.Fulora.SpaHostingOptions::EntryPointUri
+  - property System.String Agibuild.Fulora.SpaHostingOptions::FallbackDocument
+  - property System.String Agibuild.Fulora.SpaHostingOptions::Host
+  - property System.Reflection.Assembly Agibuild.Fulora.SpaHostingOptions::ResourceAssembly
+  - property System.String Agibuild.Fulora.SpaHostingOptions::Scheme
+  - method System.Void Agibuild.Fulora.SpaHostingOptions::.ctor()
+
+type Agibuild.Fulora.WebAuthCallbackMatcher
+  - method System.Boolean Agibuild.Fulora.WebAuthCallbackMatcher::IsStrictMatch(System.Uri,System.Uri)
+
+type Agibuild.Fulora.WebAuthResult
+  - property System.Uri Agibuild.Fulora.WebAuthResult::CallbackUri
+  - property System.String Agibuild.Fulora.WebAuthResult::Error
+  - property Agibuild.Fulora.WebAuthStatus Agibuild.Fulora.WebAuthResult::Status
+  - method System.Void Agibuild.Fulora.WebAuthResult::.ctor()
+
+type Agibuild.Fulora.WebAuthStatus
+  - field Agibuild.Fulora.WebAuthStatus Agibuild.Fulora.WebAuthStatus::Error
+  - field Agibuild.Fulora.WebAuthStatus Agibuild.Fulora.WebAuthStatus::Success
+  - field Agibuild.Fulora.WebAuthStatus Agibuild.Fulora.WebAuthStatus::Timeout
+  - field Agibuild.Fulora.WebAuthStatus Agibuild.Fulora.WebAuthStatus::UserCancel
+  - field System.Int32 Agibuild.Fulora.WebAuthStatus::value__
+
+type Agibuild.Fulora.WebMessageDropDiagnostic
+  - property System.Guid Agibuild.Fulora.WebMessageDropDiagnostic::ChannelId
+  - property System.String Agibuild.Fulora.WebMessageDropDiagnostic::Origin
+  - property Agibuild.Fulora.WebMessageDropReason Agibuild.Fulora.WebMessageDropDiagnostic::Reason
+  - method System.Void Agibuild.Fulora.WebMessageDropDiagnostic::.ctor(Agibuild.Fulora.WebMessageDropReason,System.String,System.Guid)
+  - method System.Void Agibuild.Fulora.WebMessageDropDiagnostic::Deconstruct(Agibuild.Fulora.WebMessageDropReason&,System.String&,System.Guid&)
+  - method System.Boolean Agibuild.Fulora.WebMessageDropDiagnostic::Equals(System.Object)
+  - method System.Boolean Agibuild.Fulora.WebMessageDropDiagnostic::Equals(Agibuild.Fulora.WebMessageDropDiagnostic)
+  - method System.Int32 Agibuild.Fulora.WebMessageDropDiagnostic::GetHashCode()
+  - method System.String Agibuild.Fulora.WebMessageDropDiagnostic::ToString()
+  - method System.Boolean Agibuild.Fulora.WebMessageDropDiagnostic::op_Equality(Agibuild.Fulora.WebMessageDropDiagnostic,Agibuild.Fulora.WebMessageDropDiagnostic)
+  - method System.Boolean Agibuild.Fulora.WebMessageDropDiagnostic::op_Inequality(Agibuild.Fulora.WebMessageDropDiagnostic,Agibuild.Fulora.WebMessageDropDiagnostic)
+
+type Agibuild.Fulora.WebMessageDropReason
+  - field Agibuild.Fulora.WebMessageDropReason Agibuild.Fulora.WebMessageDropReason::ChannelMismatch
+  - field Agibuild.Fulora.WebMessageDropReason Agibuild.Fulora.WebMessageDropReason::OriginNotAllowed
+  - field Agibuild.Fulora.WebMessageDropReason Agibuild.Fulora.WebMessageDropReason::ProtocolMismatch
+  - field System.Int32 Agibuild.Fulora.WebMessageDropReason::value__
+
+type Agibuild.Fulora.WebMessageEnvelope
+  - property System.String Agibuild.Fulora.WebMessageEnvelope::Body
+  - property System.Guid Agibuild.Fulora.WebMessageEnvelope::ChannelId
+  - property System.String Agibuild.Fulora.WebMessageEnvelope::Origin
+  - property System.Int32 Agibuild.Fulora.WebMessageEnvelope::ProtocolVersion
+  - method System.Void Agibuild.Fulora.WebMessageEnvelope::.ctor(System.String,System.String,System.Guid,System.Int32)
+  - method System.Void Agibuild.Fulora.WebMessageEnvelope::Deconstruct(System.String&,System.String&,System.Guid&,System.Int32&)
+  - method System.Boolean Agibuild.Fulora.WebMessageEnvelope::Equals(System.Object)
+  - method System.Boolean Agibuild.Fulora.WebMessageEnvelope::Equals(Agibuild.Fulora.WebMessageEnvelope)
+  - method System.Int32 Agibuild.Fulora.WebMessageEnvelope::GetHashCode()
+  - method System.String Agibuild.Fulora.WebMessageEnvelope::ToString()
+  - method System.Boolean Agibuild.Fulora.WebMessageEnvelope::op_Equality(Agibuild.Fulora.WebMessageEnvelope,Agibuild.Fulora.WebMessageEnvelope)
+  - method System.Boolean Agibuild.Fulora.WebMessageEnvelope::op_Inequality(Agibuild.Fulora.WebMessageEnvelope,Agibuild.Fulora.WebMessageEnvelope)
+
+type Agibuild.Fulora.WebMessagePolicyDecision
+  - property System.Nullable`1<Agibuild.Fulora.WebMessageDropReason> Agibuild.Fulora.WebMessagePolicyDecision::DropReason
+  - property System.Boolean Agibuild.Fulora.WebMessagePolicyDecision::IsAllowed
+  - method System.Void Agibuild.Fulora.WebMessagePolicyDecision::.ctor(System.Boolean,System.Nullable`1<Agibuild.Fulora.WebMessageDropReason>)
+  - method Agibuild.Fulora.WebMessagePolicyDecision Agibuild.Fulora.WebMessagePolicyDecision::Allow()
+  - method System.Void Agibuild.Fulora.WebMessagePolicyDecision::Deconstruct(System.Boolean&,System.Nullable`1<Agibuild.Fulora.WebMessageDropReason>&)
+  - method Agibuild.Fulora.WebMessagePolicyDecision Agibuild.Fulora.WebMessagePolicyDecision::Deny(Agibuild.Fulora.WebMessageDropReason)
+  - method System.Boolean Agibuild.Fulora.WebMessagePolicyDecision::Equals(System.Object)
+  - method System.Boolean Agibuild.Fulora.WebMessagePolicyDecision::Equals(Agibuild.Fulora.WebMessagePolicyDecision)
+  - method System.Int32 Agibuild.Fulora.WebMessagePolicyDecision::GetHashCode()
+  - method System.String Agibuild.Fulora.WebMessagePolicyDecision::ToString()
+  - method System.Boolean Agibuild.Fulora.WebMessagePolicyDecision::op_Equality(Agibuild.Fulora.WebMessagePolicyDecision,Agibuild.Fulora.WebMessagePolicyDecision)
+  - method System.Boolean Agibuild.Fulora.WebMessagePolicyDecision::op_Inequality(Agibuild.Fulora.WebMessagePolicyDecision,Agibuild.Fulora.WebMessagePolicyDecision)
+
+type Agibuild.Fulora.WebMessageReceivedEventArgs
+  - property System.String Agibuild.Fulora.WebMessageReceivedEventArgs::Body
+  - property System.Guid Agibuild.Fulora.WebMessageReceivedEventArgs::ChannelId
+  - property System.String Agibuild.Fulora.WebMessageReceivedEventArgs::Origin
+  - property System.Int32 Agibuild.Fulora.WebMessageReceivedEventArgs::ProtocolVersion
+  - method System.Void Agibuild.Fulora.WebMessageReceivedEventArgs::.ctor()
+  - method System.Void Agibuild.Fulora.WebMessageReceivedEventArgs::.ctor(System.String,System.String,System.Guid)
+  - method System.Void Agibuild.Fulora.WebMessageReceivedEventArgs::.ctor(System.String,System.String,System.Guid,System.Int32)
+
+type Agibuild.Fulora.WebResourceRequestedEventArgs
+  - property System.Boolean Agibuild.Fulora.WebResourceRequestedEventArgs::Handled
+  - property System.String Agibuild.Fulora.WebResourceRequestedEventArgs::Method
+  - property System.Collections.Generic.IReadOnlyDictionary`2<System.String,System.String> Agibuild.Fulora.WebResourceRequestedEventArgs::RequestHeaders
+  - property System.Uri Agibuild.Fulora.WebResourceRequestedEventArgs::RequestUri
+  - property System.IO.Stream Agibuild.Fulora.WebResourceRequestedEventArgs::ResponseBody
+  - property System.String Agibuild.Fulora.WebResourceRequestedEventArgs::ResponseContentType
+  - property System.Collections.Generic.IDictionary`2<System.String,System.String> Agibuild.Fulora.WebResourceRequestedEventArgs::ResponseHeaders
+  - property System.Int32 Agibuild.Fulora.WebResourceRequestedEventArgs::ResponseStatusCode
+  - method System.Void Agibuild.Fulora.WebResourceRequestedEventArgs::.ctor()
+  - method System.Void Agibuild.Fulora.WebResourceRequestedEventArgs::.ctor(System.Uri,System.String,System.Collections.Generic.IReadOnlyDictionary`2<System.String,System.String>)
+
+type Agibuild.Fulora.WebViewCommand
+  - field Agibuild.Fulora.WebViewCommand Agibuild.Fulora.WebViewCommand::Copy
+  - field Agibuild.Fulora.WebViewCommand Agibuild.Fulora.WebViewCommand::Cut
+  - field Agibuild.Fulora.WebViewCommand Agibuild.Fulora.WebViewCommand::Paste
+  - field Agibuild.Fulora.WebViewCommand Agibuild.Fulora.WebViewCommand::Redo
+  - field Agibuild.Fulora.WebViewCommand Agibuild.Fulora.WebViewCommand::SelectAll
+  - field Agibuild.Fulora.WebViewCommand Agibuild.Fulora.WebViewCommand::Undo
+  - field System.Int32 Agibuild.Fulora.WebViewCommand::value__
+
+type Agibuild.Fulora.WebViewCookie
+  - property System.String Agibuild.Fulora.WebViewCookie::Domain
+  - property System.Nullable`1<System.DateTimeOffset> Agibuild.Fulora.WebViewCookie::Expires
+  - property System.Boolean Agibuild.Fulora.WebViewCookie::IsHttpOnly
+  - property System.Boolean Agibuild.Fulora.WebViewCookie::IsSecure
+  - property System.String Agibuild.Fulora.WebViewCookie::Name
+  - property System.String Agibuild.Fulora.WebViewCookie::Path
+  - property System.String Agibuild.Fulora.WebViewCookie::Value
+  - method System.Void Agibuild.Fulora.WebViewCookie::.ctor(System.String,System.String,System.String,System.String,System.Nullable`1<System.DateTimeOffset>,System.Boolean,System.Boolean)
+  - method Agibuild.Fulora.WebViewCookie Agibuild.Fulora.WebViewCookie::<Clone>$()
+  - method System.Void Agibuild.Fulora.WebViewCookie::Deconstruct(System.String&,System.String&,System.String&,System.String&,System.Nullable`1<System.DateTimeOffset>&,System.Boolean&,System.Boolean&)
+  - method System.Boolean Agibuild.Fulora.WebViewCookie::Equals(System.Object)
+  - method System.Boolean Agibuild.Fulora.WebViewCookie::Equals(Agibuild.Fulora.WebViewCookie)
+  - method System.Int32 Agibuild.Fulora.WebViewCookie::GetHashCode()
+  - method System.String Agibuild.Fulora.WebViewCookie::ToString()
+  - method System.Boolean Agibuild.Fulora.WebViewCookie::op_Equality(Agibuild.Fulora.WebViewCookie,Agibuild.Fulora.WebViewCookie)
+  - method System.Boolean Agibuild.Fulora.WebViewCookie::op_Inequality(Agibuild.Fulora.WebViewCookie,Agibuild.Fulora.WebViewCookie)
+
+type Agibuild.Fulora.WebViewNavigationException
+  - property System.Guid Agibuild.Fulora.WebViewNavigationException::NavigationId
+  - property System.Uri Agibuild.Fulora.WebViewNavigationException::RequestUri
+  - method System.Void Agibuild.Fulora.WebViewNavigationException::.ctor(System.String,System.Guid,System.Uri,System.Exception)
+
+type Agibuild.Fulora.WebViewNetworkException
+  - method System.Void Agibuild.Fulora.WebViewNetworkException::.ctor(System.String,System.Guid,System.Uri,System.Exception)
+
+type Agibuild.Fulora.WebViewOperationFailure
+  - method System.Void Agibuild.Fulora.WebViewOperationFailure::SetCategory(System.Exception,Agibuild.Fulora.WebViewOperationFailureCategory)
+  - method System.Boolean Agibuild.Fulora.WebViewOperationFailure::TryGetCategory(System.Exception,Agibuild.Fulora.WebViewOperationFailureCategory&)
+
+type Agibuild.Fulora.WebViewOperationFailureCategory
+  - field Agibuild.Fulora.WebViewOperationFailureCategory Agibuild.Fulora.WebViewOperationFailureCategory::AdapterFailed
+  - field Agibuild.Fulora.WebViewOperationFailureCategory Agibuild.Fulora.WebViewOperationFailureCategory::DispatchFailed
+  - field Agibuild.Fulora.WebViewOperationFailureCategory Agibuild.Fulora.WebViewOperationFailureCategory::Disposed
+  - field Agibuild.Fulora.WebViewOperationFailureCategory Agibuild.Fulora.WebViewOperationFailureCategory::NotReady
+  - field System.Int32 Agibuild.Fulora.WebViewOperationFailureCategory::value__
+
+type Agibuild.Fulora.WebViewPermissionKind
+  - field Agibuild.Fulora.WebViewPermissionKind Agibuild.Fulora.WebViewPermissionKind::Camera
+  - field Agibuild.Fulora.WebViewPermissionKind Agibuild.Fulora.WebViewPermissionKind::ClipboardRead
+  - field Agibuild.Fulora.WebViewPermissionKind Agibuild.Fulora.WebViewPermissionKind::ClipboardWrite
+  - field Agibuild.Fulora.WebViewPermissionKind Agibuild.Fulora.WebViewPermissionKind::Geolocation
+  - field Agibuild.Fulora.WebViewPermissionKind Agibuild.Fulora.WebViewPermissionKind::Microphone
+  - field Agibuild.Fulora.WebViewPermissionKind Agibuild.Fulora.WebViewPermissionKind::Midi
+  - field Agibuild.Fulora.WebViewPermissionKind Agibuild.Fulora.WebViewPermissionKind::Notifications
+  - field Agibuild.Fulora.WebViewPermissionKind Agibuild.Fulora.WebViewPermissionKind::Other
+  - field Agibuild.Fulora.WebViewPermissionKind Agibuild.Fulora.WebViewPermissionKind::Sensors
+  - field Agibuild.Fulora.WebViewPermissionKind Agibuild.Fulora.WebViewPermissionKind::Unknown
+  - field System.Int32 Agibuild.Fulora.WebViewPermissionKind::value__
+
+type Agibuild.Fulora.WebViewRpcException
+  - property System.Int32 Agibuild.Fulora.WebViewRpcException::Code
+  - method System.Void Agibuild.Fulora.WebViewRpcException::.ctor(System.Int32,System.String)
+
+type Agibuild.Fulora.WebViewScriptException
+  - method System.Void Agibuild.Fulora.WebViewScriptException::.ctor(System.String,System.Exception)
+
+type Agibuild.Fulora.WebViewSslException
+  - method System.Void Agibuild.Fulora.WebViewSslException::.ctor(System.String,System.Guid,System.Uri,System.Exception)
+
+type Agibuild.Fulora.WebViewTimeoutException
+  - method System.Void Agibuild.Fulora.WebViewTimeoutException::.ctor(System.String,System.Guid,System.Uri,System.Exception)
 
 --------------------------------------------------------------------------------
 
-Assembly: Agibuild.Avalonia.WebView.DependencyInjection
-Path: <repo>\src\Agibuild.Avalonia.WebView.DependencyInjection\bin\Release\net10.0\Agibuild.Avalonia.WebView.DependencyInjection.dll
+Assembly: Agibuild.Fulora.DependencyInjection
+Path: <repo>\src\Agibuild.Fulora.DependencyInjection\bin\Release\net10.0\Agibuild.Fulora.DependencyInjection.dll
 PublicTypes: 2
 
-type Agibuild.Avalonia.WebView.DependencyInjection.ServiceCollectionExtensions
-  - method Microsoft.Extensions.DependencyInjection.IServiceCollection Agibuild.Avalonia.WebView.DependencyInjection.ServiceCollectionExtensions::AddWebView(Microsoft.Extensions.DependencyInjection.IServiceCollection)
+type Agibuild.Fulora.DependencyInjection.ServiceCollectionExtensions
+  - method Microsoft.Extensions.DependencyInjection.IServiceCollection Agibuild.Fulora.DependencyInjection.ServiceCollectionExtensions::AddWebView(Microsoft.Extensions.DependencyInjection.IServiceCollection)
 
 type Microsoft.Extensions.DependencyInjection.WebViewServiceCollectionExtensions
   - method Microsoft.Extensions.DependencyInjection.IServiceCollection Microsoft.Extensions.DependencyInjection.WebViewServiceCollectionExtensions::AddWebView(Microsoft.Extensions.DependencyInjection.IServiceCollection)
@@ -506,294 +506,294 @@ type Microsoft.Extensions.DependencyInjection.WebViewServiceCollectionExtensions
 
 --------------------------------------------------------------------------------
 
-Assembly: Agibuild.Avalonia.WebView.Runtime
-Path: <repo>\src\Agibuild.Avalonia.WebView.Runtime\bin\Release\net10.0\Agibuild.Avalonia.WebView.Runtime.dll
+Assembly: Agibuild.Fulora.Runtime
+Path: <repo>\src\Agibuild.Fulora.Runtime\bin\Release\net10.0\Agibuild.Fulora.Runtime.dll
 PublicTypes: 11
 
-type Agibuild.Avalonia.WebView.BridgeImportProxy
-  - method System.Void Agibuild.Avalonia.WebView.BridgeImportProxy::.ctor()
+type Agibuild.Fulora.BridgeImportProxy
+  - method System.Void Agibuild.Fulora.BridgeImportProxy::.ctor()
 
-type Agibuild.Avalonia.WebView.IDialogHost
-  - property System.Boolean Agibuild.Avalonia.WebView.IDialogHost::CanUserResize
-  - property System.String Agibuild.Avalonia.WebView.IDialogHost::Title
-  - event System.EventHandler Agibuild.Avalonia.WebView.IDialogHost::HostClosing
-  - method System.Void Agibuild.Avalonia.WebView.IDialogHost::Close()
-  - method System.Boolean Agibuild.Avalonia.WebView.IDialogHost::Move(System.Int32,System.Int32)
-  - method System.Boolean Agibuild.Avalonia.WebView.IDialogHost::Resize(System.Int32,System.Int32)
-  - method System.Void Agibuild.Avalonia.WebView.IDialogHost::Show()
-  - method System.Boolean Agibuild.Avalonia.WebView.IDialogHost::ShowWithOwner(Avalonia.Platform.IPlatformHandle)
+type Agibuild.Fulora.IDialogHost
+  - property System.Boolean Agibuild.Fulora.IDialogHost::CanUserResize
+  - property System.String Agibuild.Fulora.IDialogHost::Title
+  - event System.EventHandler Agibuild.Fulora.IDialogHost::HostClosing
+  - method System.Void Agibuild.Fulora.IDialogHost::Close()
+  - method System.Boolean Agibuild.Fulora.IDialogHost::Move(System.Int32,System.Int32)
+  - method System.Boolean Agibuild.Fulora.IDialogHost::Resize(System.Int32,System.Int32)
+  - method System.Void Agibuild.Fulora.IDialogHost::Show()
+  - method System.Boolean Agibuild.Fulora.IDialogHost::ShowWithOwner(Avalonia.Platform.IPlatformHandle)
 
-type Agibuild.Avalonia.WebView.LoggingBridgeTracer
-  - method System.Void Agibuild.Avalonia.WebView.LoggingBridgeTracer::.ctor(Microsoft.Extensions.Logging.ILogger)
-  - method System.Void Agibuild.Avalonia.WebView.LoggingBridgeTracer::OnExportCallEnd(System.String,System.String,System.Int64,System.String)
-  - method System.Void Agibuild.Avalonia.WebView.LoggingBridgeTracer::OnExportCallError(System.String,System.String,System.Int64,System.Exception)
-  - method System.Void Agibuild.Avalonia.WebView.LoggingBridgeTracer::OnExportCallStart(System.String,System.String,System.String)
-  - method System.Void Agibuild.Avalonia.WebView.LoggingBridgeTracer::OnImportCallEnd(System.String,System.String,System.Int64)
-  - method System.Void Agibuild.Avalonia.WebView.LoggingBridgeTracer::OnImportCallStart(System.String,System.String,System.String)
-  - method System.Void Agibuild.Avalonia.WebView.LoggingBridgeTracer::OnServiceExposed(System.String,System.Int32,System.Boolean)
-  - method System.Void Agibuild.Avalonia.WebView.LoggingBridgeTracer::OnServiceRemoved(System.String)
+type Agibuild.Fulora.LoggingBridgeTracer
+  - method System.Void Agibuild.Fulora.LoggingBridgeTracer::.ctor(Microsoft.Extensions.Logging.ILogger)
+  - method System.Void Agibuild.Fulora.LoggingBridgeTracer::OnExportCallEnd(System.String,System.String,System.Int64,System.String)
+  - method System.Void Agibuild.Fulora.LoggingBridgeTracer::OnExportCallError(System.String,System.String,System.Int64,System.Exception)
+  - method System.Void Agibuild.Fulora.LoggingBridgeTracer::OnExportCallStart(System.String,System.String,System.String)
+  - method System.Void Agibuild.Fulora.LoggingBridgeTracer::OnImportCallEnd(System.String,System.String,System.Int64)
+  - method System.Void Agibuild.Fulora.LoggingBridgeTracer::OnImportCallStart(System.String,System.String,System.String)
+  - method System.Void Agibuild.Fulora.LoggingBridgeTracer::OnServiceExposed(System.String,System.Int32,System.Boolean)
+  - method System.Void Agibuild.Fulora.LoggingBridgeTracer::OnServiceRemoved(System.String)
 
-type Agibuild.Avalonia.WebView.SpaHostingExtensions
-  - method Agibuild.Avalonia.WebView.WebViewEnvironmentOptions Agibuild.Avalonia.WebView.SpaHostingExtensions::AddDevServerProxy(Agibuild.Avalonia.WebView.WebViewEnvironmentOptions,System.String,System.String)
-  - method Agibuild.Avalonia.WebView.WebViewEnvironmentOptions Agibuild.Avalonia.WebView.SpaHostingExtensions::AddEmbeddedFileProvider(Agibuild.Avalonia.WebView.WebViewEnvironmentOptions,System.String,System.Reflection.Assembly,System.String)
+type Agibuild.Fulora.SpaHostingExtensions
+  - method Agibuild.Fulora.WebViewEnvironmentOptions Agibuild.Fulora.SpaHostingExtensions::AddDevServerProxy(Agibuild.Fulora.WebViewEnvironmentOptions,System.String,System.String)
+  - method Agibuild.Fulora.WebViewEnvironmentOptions Agibuild.Fulora.SpaHostingExtensions::AddEmbeddedFileProvider(Agibuild.Fulora.WebViewEnvironmentOptions,System.String,System.Reflection.Assembly,System.String)
 
-type Agibuild.Avalonia.WebView.WebAuthBroker
-  - method System.Void Agibuild.Avalonia.WebView.WebAuthBroker::.ctor(Agibuild.Avalonia.WebView.IWebDialogFactory)
-  - method System.Threading.Tasks.Task`1<Agibuild.Avalonia.WebView.WebAuthResult> Agibuild.Avalonia.WebView.WebAuthBroker::AuthenticateAsync(Agibuild.Avalonia.WebView.ITopLevelWindow,Agibuild.Avalonia.WebView.AuthOptions)
+type Agibuild.Fulora.WebAuthBroker
+  - method System.Void Agibuild.Fulora.WebAuthBroker::.ctor(Agibuild.Fulora.IWebDialogFactory)
+  - method System.Threading.Tasks.Task`1<Agibuild.Fulora.WebAuthResult> Agibuild.Fulora.WebAuthBroker::AuthenticateAsync(Agibuild.Fulora.ITopLevelWindow,Agibuild.Fulora.AuthOptions)
 
-type Agibuild.Avalonia.WebView.WebAuthBrokerWithSemantics
-  - method System.Void Agibuild.Avalonia.WebView.WebAuthBrokerWithSemantics::.ctor(Agibuild.Avalonia.WebView.IWebAuthBroker)
-  - method System.Threading.Tasks.Task`1<Agibuild.Avalonia.WebView.WebAuthResult> Agibuild.Avalonia.WebView.WebAuthBrokerWithSemantics::AuthenticateAsync(Agibuild.Avalonia.WebView.ITopLevelWindow,Agibuild.Avalonia.WebView.AuthOptions)
+type Agibuild.Fulora.WebAuthBrokerWithSemantics
+  - method System.Void Agibuild.Fulora.WebAuthBrokerWithSemantics::.ctor(Agibuild.Fulora.IWebAuthBroker)
+  - method System.Threading.Tasks.Task`1<Agibuild.Fulora.WebAuthResult> Agibuild.Fulora.WebAuthBrokerWithSemantics::AuthenticateAsync(Agibuild.Fulora.ITopLevelWindow,Agibuild.Fulora.AuthOptions)
 
-type Agibuild.Avalonia.WebView.WebDialog
-  - property Agibuild.Avalonia.WebView.IBridgeService Agibuild.Avalonia.WebView.WebDialog::Bridge
-  - property System.Boolean Agibuild.Avalonia.WebView.WebDialog::CanGoBack
-  - property System.Boolean Agibuild.Avalonia.WebView.WebDialog::CanGoForward
-  - property System.Boolean Agibuild.Avalonia.WebView.WebDialog::CanUserResize
-  - property System.Guid Agibuild.Avalonia.WebView.WebDialog::ChannelId
-  - property System.Boolean Agibuild.Avalonia.WebView.WebDialog::IsLoading
-  - property Agibuild.Avalonia.WebView.IWebViewRpcService Agibuild.Avalonia.WebView.WebDialog::Rpc
-  - property System.Uri Agibuild.Avalonia.WebView.WebDialog::Source
-  - property System.String Agibuild.Avalonia.WebView.WebDialog::Title
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.AdapterCreatedEventArgs> Agibuild.Avalonia.WebView.WebDialog::AdapterCreated
-  - event System.EventHandler Agibuild.Avalonia.WebView.WebDialog::AdapterDestroyed
-  - event System.EventHandler Agibuild.Avalonia.WebView.WebDialog::Closing
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.ContextMenuRequestedEventArgs> Agibuild.Avalonia.WebView.WebDialog::ContextMenuRequested
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.DownloadRequestedEventArgs> Agibuild.Avalonia.WebView.WebDialog::DownloadRequested
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.EnvironmentRequestedEventArgs> Agibuild.Avalonia.WebView.WebDialog::EnvironmentRequested
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.NavigationCompletedEventArgs> Agibuild.Avalonia.WebView.WebDialog::NavigationCompleted
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.NavigationStartingEventArgs> Agibuild.Avalonia.WebView.WebDialog::NavigationStarted
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.NewWindowRequestedEventArgs> Agibuild.Avalonia.WebView.WebDialog::NewWindowRequested
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.PermissionRequestedEventArgs> Agibuild.Avalonia.WebView.WebDialog::PermissionRequested
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.WebMessageReceivedEventArgs> Agibuild.Avalonia.WebView.WebDialog::WebMessageReceived
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.WebResourceRequestedEventArgs> Agibuild.Avalonia.WebView.WebDialog::WebResourceRequested
-  - method System.Threading.Tasks.Task`1<System.String> Agibuild.Avalonia.WebView.WebDialog::AddPreloadScriptAsync(System.String)
-  - method System.Threading.Tasks.Task`1<System.Byte[]> Agibuild.Avalonia.WebView.WebDialog::CaptureScreenshotAsync()
-  - method System.Void Agibuild.Avalonia.WebView.WebDialog::Close()
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.WebDialog::CloseDevToolsAsync()
-  - method System.Void Agibuild.Avalonia.WebView.WebDialog::Dispose()
-  - method System.Threading.Tasks.Task`1<Agibuild.Avalonia.WebView.FindInPageResult> Agibuild.Avalonia.WebView.WebDialog::FindInPageAsync(System.String,Agibuild.Avalonia.WebView.FindInPageOptions)
-  - method System.Threading.Tasks.Task`1<System.Double> Agibuild.Avalonia.WebView.WebDialog::GetZoomFactorAsync()
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Avalonia.WebView.WebDialog::GoBackAsync()
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Avalonia.WebView.WebDialog::GoForwardAsync()
-  - method System.Threading.Tasks.Task`1<System.String> Agibuild.Avalonia.WebView.WebDialog::InvokeScriptAsync(System.String)
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Avalonia.WebView.WebDialog::IsDevToolsOpenAsync()
-  - method System.Boolean Agibuild.Avalonia.WebView.WebDialog::Move(System.Int32,System.Int32)
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.WebDialog::NavigateAsync(System.Uri)
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.WebDialog::NavigateToStringAsync(System.String)
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.WebDialog::NavigateToStringAsync(System.String,System.Uri)
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.WebDialog::OpenDevToolsAsync()
-  - method System.Threading.Tasks.Task`1<System.Byte[]> Agibuild.Avalonia.WebView.WebDialog::PrintToPdfAsync(Agibuild.Avalonia.WebView.PdfPrintOptions)
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Avalonia.WebView.WebDialog::RefreshAsync()
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.WebDialog::RemovePreloadScriptAsync(System.String)
-  - method System.Boolean Agibuild.Avalonia.WebView.WebDialog::Resize(System.Int32,System.Int32)
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.WebDialog::SetZoomFactorAsync(System.Double)
-  - method System.Void Agibuild.Avalonia.WebView.WebDialog::Show()
-  - method System.Boolean Agibuild.Avalonia.WebView.WebDialog::Show(Avalonia.Platform.IPlatformHandle)
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Avalonia.WebView.WebDialog::StopAsync()
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.WebDialog::StopFindInPageAsync(System.Boolean)
-  - method Agibuild.Avalonia.WebView.ICommandManager Agibuild.Avalonia.WebView.WebDialog::TryGetCommandManager()
-  - method Agibuild.Avalonia.WebView.ICookieManager Agibuild.Avalonia.WebView.WebDialog::TryGetCookieManager()
-  - method System.Threading.Tasks.Task`1<Avalonia.Platform.IPlatformHandle> Agibuild.Avalonia.WebView.WebDialog::TryGetWebViewHandleAsync()
+type Agibuild.Fulora.WebDialog
+  - property Agibuild.Fulora.IBridgeService Agibuild.Fulora.WebDialog::Bridge
+  - property System.Boolean Agibuild.Fulora.WebDialog::CanGoBack
+  - property System.Boolean Agibuild.Fulora.WebDialog::CanGoForward
+  - property System.Boolean Agibuild.Fulora.WebDialog::CanUserResize
+  - property System.Guid Agibuild.Fulora.WebDialog::ChannelId
+  - property System.Boolean Agibuild.Fulora.WebDialog::IsLoading
+  - property Agibuild.Fulora.IWebViewRpcService Agibuild.Fulora.WebDialog::Rpc
+  - property System.Uri Agibuild.Fulora.WebDialog::Source
+  - property System.String Agibuild.Fulora.WebDialog::Title
+  - event System.EventHandler`1<Agibuild.Fulora.AdapterCreatedEventArgs> Agibuild.Fulora.WebDialog::AdapterCreated
+  - event System.EventHandler Agibuild.Fulora.WebDialog::AdapterDestroyed
+  - event System.EventHandler Agibuild.Fulora.WebDialog::Closing
+  - event System.EventHandler`1<Agibuild.Fulora.ContextMenuRequestedEventArgs> Agibuild.Fulora.WebDialog::ContextMenuRequested
+  - event System.EventHandler`1<Agibuild.Fulora.DownloadRequestedEventArgs> Agibuild.Fulora.WebDialog::DownloadRequested
+  - event System.EventHandler`1<Agibuild.Fulora.EnvironmentRequestedEventArgs> Agibuild.Fulora.WebDialog::EnvironmentRequested
+  - event System.EventHandler`1<Agibuild.Fulora.NavigationCompletedEventArgs> Agibuild.Fulora.WebDialog::NavigationCompleted
+  - event System.EventHandler`1<Agibuild.Fulora.NavigationStartingEventArgs> Agibuild.Fulora.WebDialog::NavigationStarted
+  - event System.EventHandler`1<Agibuild.Fulora.NewWindowRequestedEventArgs> Agibuild.Fulora.WebDialog::NewWindowRequested
+  - event System.EventHandler`1<Agibuild.Fulora.PermissionRequestedEventArgs> Agibuild.Fulora.WebDialog::PermissionRequested
+  - event System.EventHandler`1<Agibuild.Fulora.WebMessageReceivedEventArgs> Agibuild.Fulora.WebDialog::WebMessageReceived
+  - event System.EventHandler`1<Agibuild.Fulora.WebResourceRequestedEventArgs> Agibuild.Fulora.WebDialog::WebResourceRequested
+  - method System.Threading.Tasks.Task`1<System.String> Agibuild.Fulora.WebDialog::AddPreloadScriptAsync(System.String)
+  - method System.Threading.Tasks.Task`1<System.Byte[]> Agibuild.Fulora.WebDialog::CaptureScreenshotAsync()
+  - method System.Void Agibuild.Fulora.WebDialog::Close()
+  - method System.Threading.Tasks.Task Agibuild.Fulora.WebDialog::CloseDevToolsAsync()
+  - method System.Void Agibuild.Fulora.WebDialog::Dispose()
+  - method System.Threading.Tasks.Task`1<Agibuild.Fulora.FindInPageResult> Agibuild.Fulora.WebDialog::FindInPageAsync(System.String,Agibuild.Fulora.FindInPageOptions)
+  - method System.Threading.Tasks.Task`1<System.Double> Agibuild.Fulora.WebDialog::GetZoomFactorAsync()
+  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.WebDialog::GoBackAsync()
+  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.WebDialog::GoForwardAsync()
+  - method System.Threading.Tasks.Task`1<System.String> Agibuild.Fulora.WebDialog::InvokeScriptAsync(System.String)
+  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.WebDialog::IsDevToolsOpenAsync()
+  - method System.Boolean Agibuild.Fulora.WebDialog::Move(System.Int32,System.Int32)
+  - method System.Threading.Tasks.Task Agibuild.Fulora.WebDialog::NavigateAsync(System.Uri)
+  - method System.Threading.Tasks.Task Agibuild.Fulora.WebDialog::NavigateToStringAsync(System.String)
+  - method System.Threading.Tasks.Task Agibuild.Fulora.WebDialog::NavigateToStringAsync(System.String,System.Uri)
+  - method System.Threading.Tasks.Task Agibuild.Fulora.WebDialog::OpenDevToolsAsync()
+  - method System.Threading.Tasks.Task`1<System.Byte[]> Agibuild.Fulora.WebDialog::PrintToPdfAsync(Agibuild.Fulora.PdfPrintOptions)
+  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.WebDialog::RefreshAsync()
+  - method System.Threading.Tasks.Task Agibuild.Fulora.WebDialog::RemovePreloadScriptAsync(System.String)
+  - method System.Boolean Agibuild.Fulora.WebDialog::Resize(System.Int32,System.Int32)
+  - method System.Threading.Tasks.Task Agibuild.Fulora.WebDialog::SetZoomFactorAsync(System.Double)
+  - method System.Void Agibuild.Fulora.WebDialog::Show()
+  - method System.Boolean Agibuild.Fulora.WebDialog::Show(Avalonia.Platform.IPlatformHandle)
+  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.WebDialog::StopAsync()
+  - method System.Threading.Tasks.Task Agibuild.Fulora.WebDialog::StopFindInPageAsync(System.Boolean)
+  - method Agibuild.Fulora.ICommandManager Agibuild.Fulora.WebDialog::TryGetCommandManager()
+  - method Agibuild.Fulora.ICookieManager Agibuild.Fulora.WebDialog::TryGetCookieManager()
+  - method System.Threading.Tasks.Task`1<Avalonia.Platform.IPlatformHandle> Agibuild.Fulora.WebDialog::TryGetWebViewHandleAsync()
 
-type Agibuild.Avalonia.WebView.WebMessageBridgeOptions
-  - property System.Collections.Generic.IReadOnlySet`1<System.String> Agibuild.Avalonia.WebView.WebMessageBridgeOptions::AllowedOrigins
-  - property Agibuild.Avalonia.WebView.IWebMessageDropDiagnosticsSink Agibuild.Avalonia.WebView.WebMessageBridgeOptions::DropDiagnosticsSink
-  - property System.Int32 Agibuild.Avalonia.WebView.WebMessageBridgeOptions::ProtocolVersion
-  - method System.Void Agibuild.Avalonia.WebView.WebMessageBridgeOptions::.ctor()
+type Agibuild.Fulora.WebMessageBridgeOptions
+  - property System.Collections.Generic.IReadOnlySet`1<System.String> Agibuild.Fulora.WebMessageBridgeOptions::AllowedOrigins
+  - property Agibuild.Fulora.IWebMessageDropDiagnosticsSink Agibuild.Fulora.WebMessageBridgeOptions::DropDiagnosticsSink
+  - property System.Int32 Agibuild.Fulora.WebMessageBridgeOptions::ProtocolVersion
+  - method System.Void Agibuild.Fulora.WebMessageBridgeOptions::.ctor()
 
-type Agibuild.Avalonia.WebView.WebViewCore
-  - property Agibuild.Avalonia.WebView.IBridgeService Agibuild.Avalonia.WebView.WebViewCore::Bridge
-  - property System.Boolean Agibuild.Avalonia.WebView.WebViewCore::CanGoBack
-  - property System.Boolean Agibuild.Avalonia.WebView.WebViewCore::CanGoForward
-  - property System.Guid Agibuild.Avalonia.WebView.WebViewCore::ChannelId
-  - property System.Boolean Agibuild.Avalonia.WebView.WebViewCore::IsLoading
-  - property Agibuild.Avalonia.WebView.IWebViewRpcService Agibuild.Avalonia.WebView.WebViewCore::Rpc
-  - property System.Uri Agibuild.Avalonia.WebView.WebViewCore::Source
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.AdapterCreatedEventArgs> Agibuild.Avalonia.WebView.WebViewCore::AdapterCreated
-  - event System.EventHandler Agibuild.Avalonia.WebView.WebViewCore::AdapterDestroyed
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.ContextMenuRequestedEventArgs> Agibuild.Avalonia.WebView.WebViewCore::ContextMenuRequested
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.DownloadRequestedEventArgs> Agibuild.Avalonia.WebView.WebViewCore::DownloadRequested
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.EnvironmentRequestedEventArgs> Agibuild.Avalonia.WebView.WebViewCore::EnvironmentRequested
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.NavigationCompletedEventArgs> Agibuild.Avalonia.WebView.WebViewCore::NavigationCompleted
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.NavigationStartingEventArgs> Agibuild.Avalonia.WebView.WebViewCore::NavigationStarted
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.NewWindowRequestedEventArgs> Agibuild.Avalonia.WebView.WebViewCore::NewWindowRequested
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.PermissionRequestedEventArgs> Agibuild.Avalonia.WebView.WebViewCore::PermissionRequested
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.WebMessageReceivedEventArgs> Agibuild.Avalonia.WebView.WebViewCore::WebMessageReceived
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.WebResourceRequestedEventArgs> Agibuild.Avalonia.WebView.WebViewCore::WebResourceRequested
-  - event System.EventHandler`1<System.Double> Agibuild.Avalonia.WebView.WebViewCore::ZoomFactorChanged
-  - method System.Threading.Tasks.Task`1<System.String> Agibuild.Avalonia.WebView.WebViewCore::AddPreloadScriptAsync(System.String)
-  - method System.Threading.Tasks.Task`1<System.Byte[]> Agibuild.Avalonia.WebView.WebViewCore::CaptureScreenshotAsync()
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.WebViewCore::CloseDevToolsAsync()
-  - method Agibuild.Avalonia.WebView.IWebView Agibuild.Avalonia.WebView.WebViewCore::CreateDefault(Agibuild.Avalonia.WebView.IWebViewDispatcher)
-  - method Agibuild.Avalonia.WebView.IWebView Agibuild.Avalonia.WebView.WebViewCore::CreateDefault(Agibuild.Avalonia.WebView.IWebViewDispatcher,Microsoft.Extensions.Logging.ILogger`1<Agibuild.Avalonia.WebView.WebViewCore>)
-  - method System.Void Agibuild.Avalonia.WebView.WebViewCore::DisableWebMessageBridge()
-  - method System.Void Agibuild.Avalonia.WebView.WebViewCore::Dispose()
-  - method System.Void Agibuild.Avalonia.WebView.WebViewCore::EnableSpaHosting(Agibuild.Avalonia.WebView.SpaHostingOptions)
-  - method System.Void Agibuild.Avalonia.WebView.WebViewCore::EnableWebMessageBridge(Agibuild.Avalonia.WebView.WebMessageBridgeOptions)
-  - method System.Threading.Tasks.Task`1<Agibuild.Avalonia.WebView.FindInPageResult> Agibuild.Avalonia.WebView.WebViewCore::FindInPageAsync(System.String,Agibuild.Avalonia.WebView.FindInPageOptions)
-  - method System.Threading.Tasks.Task`1<System.Double> Agibuild.Avalonia.WebView.WebViewCore::GetZoomFactorAsync()
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Avalonia.WebView.WebViewCore::GoBackAsync()
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Avalonia.WebView.WebViewCore::GoForwardAsync()
-  - method System.Threading.Tasks.Task`1<System.String> Agibuild.Avalonia.WebView.WebViewCore::InvokeScriptAsync(System.String)
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Avalonia.WebView.WebViewCore::IsDevToolsOpenAsync()
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.WebViewCore::NavigateAsync(System.Uri)
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.WebViewCore::NavigateToStringAsync(System.String)
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.WebViewCore::NavigateToStringAsync(System.String,System.Uri)
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.WebViewCore::OpenDevToolsAsync()
-  - method System.Threading.Tasks.Task`1<System.Byte[]> Agibuild.Avalonia.WebView.WebViewCore::PrintToPdfAsync(Agibuild.Avalonia.WebView.PdfPrintOptions)
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Avalonia.WebView.WebViewCore::RefreshAsync()
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.WebViewCore::RemovePreloadScriptAsync(System.String)
-  - method System.Void Agibuild.Avalonia.WebView.WebViewCore::SetCustomUserAgent(System.String)
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.WebViewCore::SetZoomFactorAsync(System.Double)
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Avalonia.WebView.WebViewCore::StopAsync()
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.WebViewCore::StopFindInPageAsync(System.Boolean)
-  - method Agibuild.Avalonia.WebView.ICommandManager Agibuild.Avalonia.WebView.WebViewCore::TryGetCommandManager()
-  - method Agibuild.Avalonia.WebView.ICookieManager Agibuild.Avalonia.WebView.WebViewCore::TryGetCookieManager()
-  - method Avalonia.Platform.IPlatformHandle Agibuild.Avalonia.WebView.WebViewCore::TryGetWebViewHandle()
-  - method System.Threading.Tasks.Task`1<Avalonia.Platform.IPlatformHandle> Agibuild.Avalonia.WebView.WebViewCore::TryGetWebViewHandleAsync()
+type Agibuild.Fulora.WebViewCore
+  - property Agibuild.Fulora.IBridgeService Agibuild.Fulora.WebViewCore::Bridge
+  - property System.Boolean Agibuild.Fulora.WebViewCore::CanGoBack
+  - property System.Boolean Agibuild.Fulora.WebViewCore::CanGoForward
+  - property System.Guid Agibuild.Fulora.WebViewCore::ChannelId
+  - property System.Boolean Agibuild.Fulora.WebViewCore::IsLoading
+  - property Agibuild.Fulora.IWebViewRpcService Agibuild.Fulora.WebViewCore::Rpc
+  - property System.Uri Agibuild.Fulora.WebViewCore::Source
+  - event System.EventHandler`1<Agibuild.Fulora.AdapterCreatedEventArgs> Agibuild.Fulora.WebViewCore::AdapterCreated
+  - event System.EventHandler Agibuild.Fulora.WebViewCore::AdapterDestroyed
+  - event System.EventHandler`1<Agibuild.Fulora.ContextMenuRequestedEventArgs> Agibuild.Fulora.WebViewCore::ContextMenuRequested
+  - event System.EventHandler`1<Agibuild.Fulora.DownloadRequestedEventArgs> Agibuild.Fulora.WebViewCore::DownloadRequested
+  - event System.EventHandler`1<Agibuild.Fulora.EnvironmentRequestedEventArgs> Agibuild.Fulora.WebViewCore::EnvironmentRequested
+  - event System.EventHandler`1<Agibuild.Fulora.NavigationCompletedEventArgs> Agibuild.Fulora.WebViewCore::NavigationCompleted
+  - event System.EventHandler`1<Agibuild.Fulora.NavigationStartingEventArgs> Agibuild.Fulora.WebViewCore::NavigationStarted
+  - event System.EventHandler`1<Agibuild.Fulora.NewWindowRequestedEventArgs> Agibuild.Fulora.WebViewCore::NewWindowRequested
+  - event System.EventHandler`1<Agibuild.Fulora.PermissionRequestedEventArgs> Agibuild.Fulora.WebViewCore::PermissionRequested
+  - event System.EventHandler`1<Agibuild.Fulora.WebMessageReceivedEventArgs> Agibuild.Fulora.WebViewCore::WebMessageReceived
+  - event System.EventHandler`1<Agibuild.Fulora.WebResourceRequestedEventArgs> Agibuild.Fulora.WebViewCore::WebResourceRequested
+  - event System.EventHandler`1<System.Double> Agibuild.Fulora.WebViewCore::ZoomFactorChanged
+  - method System.Threading.Tasks.Task`1<System.String> Agibuild.Fulora.WebViewCore::AddPreloadScriptAsync(System.String)
+  - method System.Threading.Tasks.Task`1<System.Byte[]> Agibuild.Fulora.WebViewCore::CaptureScreenshotAsync()
+  - method System.Threading.Tasks.Task Agibuild.Fulora.WebViewCore::CloseDevToolsAsync()
+  - method Agibuild.Fulora.IWebView Agibuild.Fulora.WebViewCore::CreateDefault(Agibuild.Fulora.IWebViewDispatcher)
+  - method Agibuild.Fulora.IWebView Agibuild.Fulora.WebViewCore::CreateDefault(Agibuild.Fulora.IWebViewDispatcher,Microsoft.Extensions.Logging.ILogger`1<Agibuild.Fulora.WebViewCore>)
+  - method System.Void Agibuild.Fulora.WebViewCore::DisableWebMessageBridge()
+  - method System.Void Agibuild.Fulora.WebViewCore::Dispose()
+  - method System.Void Agibuild.Fulora.WebViewCore::EnableSpaHosting(Agibuild.Fulora.SpaHostingOptions)
+  - method System.Void Agibuild.Fulora.WebViewCore::EnableWebMessageBridge(Agibuild.Fulora.WebMessageBridgeOptions)
+  - method System.Threading.Tasks.Task`1<Agibuild.Fulora.FindInPageResult> Agibuild.Fulora.WebViewCore::FindInPageAsync(System.String,Agibuild.Fulora.FindInPageOptions)
+  - method System.Threading.Tasks.Task`1<System.Double> Agibuild.Fulora.WebViewCore::GetZoomFactorAsync()
+  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.WebViewCore::GoBackAsync()
+  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.WebViewCore::GoForwardAsync()
+  - method System.Threading.Tasks.Task`1<System.String> Agibuild.Fulora.WebViewCore::InvokeScriptAsync(System.String)
+  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.WebViewCore::IsDevToolsOpenAsync()
+  - method System.Threading.Tasks.Task Agibuild.Fulora.WebViewCore::NavigateAsync(System.Uri)
+  - method System.Threading.Tasks.Task Agibuild.Fulora.WebViewCore::NavigateToStringAsync(System.String)
+  - method System.Threading.Tasks.Task Agibuild.Fulora.WebViewCore::NavigateToStringAsync(System.String,System.Uri)
+  - method System.Threading.Tasks.Task Agibuild.Fulora.WebViewCore::OpenDevToolsAsync()
+  - method System.Threading.Tasks.Task`1<System.Byte[]> Agibuild.Fulora.WebViewCore::PrintToPdfAsync(Agibuild.Fulora.PdfPrintOptions)
+  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.WebViewCore::RefreshAsync()
+  - method System.Threading.Tasks.Task Agibuild.Fulora.WebViewCore::RemovePreloadScriptAsync(System.String)
+  - method System.Void Agibuild.Fulora.WebViewCore::SetCustomUserAgent(System.String)
+  - method System.Threading.Tasks.Task Agibuild.Fulora.WebViewCore::SetZoomFactorAsync(System.Double)
+  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.WebViewCore::StopAsync()
+  - method System.Threading.Tasks.Task Agibuild.Fulora.WebViewCore::StopFindInPageAsync(System.Boolean)
+  - method Agibuild.Fulora.ICommandManager Agibuild.Fulora.WebViewCore::TryGetCommandManager()
+  - method Agibuild.Fulora.ICookieManager Agibuild.Fulora.WebViewCore::TryGetCookieManager()
+  - method Avalonia.Platform.IPlatformHandle Agibuild.Fulora.WebViewCore::TryGetWebViewHandle()
+  - method System.Threading.Tasks.Task`1<Avalonia.Platform.IPlatformHandle> Agibuild.Fulora.WebViewCore::TryGetWebViewHandleAsync()
 
-type Agibuild.Avalonia.WebView.WebViewEnvironment
-  - property Microsoft.Extensions.Logging.ILoggerFactory Agibuild.Avalonia.WebView.WebViewEnvironment::LoggerFactory
-  - property Agibuild.Avalonia.WebView.IWebViewEnvironmentOptions Agibuild.Avalonia.WebView.WebViewEnvironment::Options
-  - method System.Void Agibuild.Avalonia.WebView.WebViewEnvironment::Initialize(Microsoft.Extensions.Logging.ILoggerFactory)
-  - method System.Void Agibuild.Avalonia.WebView.WebViewEnvironment::Initialize(Microsoft.Extensions.Logging.ILoggerFactory,Agibuild.Avalonia.WebView.IWebViewEnvironmentOptions)
+type Agibuild.Fulora.WebViewEnvironment
+  - property Microsoft.Extensions.Logging.ILoggerFactory Agibuild.Fulora.WebViewEnvironment::LoggerFactory
+  - property Agibuild.Fulora.IWebViewEnvironmentOptions Agibuild.Fulora.WebViewEnvironment::Options
+  - method System.Void Agibuild.Fulora.WebViewEnvironment::Initialize(Microsoft.Extensions.Logging.ILoggerFactory)
+  - method System.Void Agibuild.Fulora.WebViewEnvironment::Initialize(Microsoft.Extensions.Logging.ILoggerFactory,Agibuild.Fulora.IWebViewEnvironmentOptions)
 
-type Agibuild.Avalonia.WebView.WebViewEnvironmentOptions
-  - property System.Collections.Generic.IReadOnlyList`1<Agibuild.Avalonia.WebView.CustomSchemeRegistration> Agibuild.Avalonia.WebView.WebViewEnvironmentOptions::CustomSchemes
-  - property System.String Agibuild.Avalonia.WebView.WebViewEnvironmentOptions::CustomUserAgent
-  - property System.Boolean Agibuild.Avalonia.WebView.WebViewEnvironmentOptions::EnableDevTools
-  - property System.Collections.Generic.IReadOnlyList`1<System.String> Agibuild.Avalonia.WebView.WebViewEnvironmentOptions::PreloadScripts
-  - property System.Boolean Agibuild.Avalonia.WebView.WebViewEnvironmentOptions::UseEphemeralSession
-  - method System.Void Agibuild.Avalonia.WebView.WebViewEnvironmentOptions::.ctor()
+type Agibuild.Fulora.WebViewEnvironmentOptions
+  - property System.Collections.Generic.IReadOnlyList`1<Agibuild.Fulora.CustomSchemeRegistration> Agibuild.Fulora.WebViewEnvironmentOptions::CustomSchemes
+  - property System.String Agibuild.Fulora.WebViewEnvironmentOptions::CustomUserAgent
+  - property System.Boolean Agibuild.Fulora.WebViewEnvironmentOptions::EnableDevTools
+  - property System.Collections.Generic.IReadOnlyList`1<System.String> Agibuild.Fulora.WebViewEnvironmentOptions::PreloadScripts
+  - property System.Boolean Agibuild.Fulora.WebViewEnvironmentOptions::UseEphemeralSession
+  - method System.Void Agibuild.Fulora.WebViewEnvironmentOptions::.ctor()
 
 --------------------------------------------------------------------------------
 
-Assembly: Agibuild.Avalonia.WebView
-Path: <repo>\src\Agibuild.Avalonia.WebView\bin\Release\net10.0\Agibuild.Avalonia.WebView.dll
+Assembly: Agibuild.Fulora
+Path: <repo>\src\Agibuild.Fulora\bin\Release\net10.0\Agibuild.Fulora.dll
 PublicTypes: 5
 
-type Agibuild.Avalonia.WebView.AppBuilderExtensions
-  - method Avalonia.AppBuilder Agibuild.Avalonia.WebView.AppBuilderExtensions::UseAgibuildWebView(Avalonia.AppBuilder)
-  - method Avalonia.AppBuilder Agibuild.Avalonia.WebView.AppBuilderExtensions::UseAgibuildWebView(Avalonia.AppBuilder,Microsoft.Extensions.Logging.ILoggerFactory)
+type Agibuild.Fulora.AppBuilderExtensions
+  - method Avalonia.AppBuilder Agibuild.Fulora.AppBuilderExtensions::UseAgibuildWebView(Avalonia.AppBuilder)
+  - method Avalonia.AppBuilder Agibuild.Fulora.AppBuilderExtensions::UseAgibuildWebView(Avalonia.AppBuilder,Microsoft.Extensions.Logging.ILoggerFactory)
 
-type Agibuild.Avalonia.WebView.AvaloniaWebDialog
-  - property Agibuild.Avalonia.WebView.IBridgeService Agibuild.Avalonia.WebView.AvaloniaWebDialog::Bridge
-  - property System.Boolean Agibuild.Avalonia.WebView.AvaloniaWebDialog::CanGoBack
-  - property System.Boolean Agibuild.Avalonia.WebView.AvaloniaWebDialog::CanGoForward
-  - property System.Boolean Agibuild.Avalonia.WebView.AvaloniaWebDialog::CanUserResize
-  - property System.Guid Agibuild.Avalonia.WebView.AvaloniaWebDialog::ChannelId
-  - property System.Boolean Agibuild.Avalonia.WebView.AvaloniaWebDialog::IsLoading
-  - property Agibuild.Avalonia.WebView.IWebViewRpcService Agibuild.Avalonia.WebView.AvaloniaWebDialog::Rpc
-  - property System.Uri Agibuild.Avalonia.WebView.AvaloniaWebDialog::Source
-  - property System.String Agibuild.Avalonia.WebView.AvaloniaWebDialog::Title
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.AdapterCreatedEventArgs> Agibuild.Avalonia.WebView.AvaloniaWebDialog::AdapterCreated
-  - event System.EventHandler Agibuild.Avalonia.WebView.AvaloniaWebDialog::AdapterDestroyed
-  - event System.EventHandler Agibuild.Avalonia.WebView.AvaloniaWebDialog::Closing
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.ContextMenuRequestedEventArgs> Agibuild.Avalonia.WebView.AvaloniaWebDialog::ContextMenuRequested
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.DownloadRequestedEventArgs> Agibuild.Avalonia.WebView.AvaloniaWebDialog::DownloadRequested
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.EnvironmentRequestedEventArgs> Agibuild.Avalonia.WebView.AvaloniaWebDialog::EnvironmentRequested
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.NavigationCompletedEventArgs> Agibuild.Avalonia.WebView.AvaloniaWebDialog::NavigationCompleted
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.NavigationStartingEventArgs> Agibuild.Avalonia.WebView.AvaloniaWebDialog::NavigationStarted
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.NewWindowRequestedEventArgs> Agibuild.Avalonia.WebView.AvaloniaWebDialog::NewWindowRequested
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.PermissionRequestedEventArgs> Agibuild.Avalonia.WebView.AvaloniaWebDialog::PermissionRequested
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.WebMessageReceivedEventArgs> Agibuild.Avalonia.WebView.AvaloniaWebDialog::WebMessageReceived
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.WebResourceRequestedEventArgs> Agibuild.Avalonia.WebView.AvaloniaWebDialog::WebResourceRequested
-  - method System.Void Agibuild.Avalonia.WebView.AvaloniaWebDialog::.ctor(Agibuild.Avalonia.WebView.IWebViewEnvironmentOptions)
-  - method System.Threading.Tasks.Task`1<System.String> Agibuild.Avalonia.WebView.AvaloniaWebDialog::AddPreloadScriptAsync(System.String)
-  - method System.Threading.Tasks.Task`1<System.Byte[]> Agibuild.Avalonia.WebView.AvaloniaWebDialog::CaptureScreenshotAsync()
-  - method System.Void Agibuild.Avalonia.WebView.AvaloniaWebDialog::Close()
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.AvaloniaWebDialog::CloseDevToolsAsync()
-  - method System.Void Agibuild.Avalonia.WebView.AvaloniaWebDialog::Dispose()
-  - method System.Threading.Tasks.Task`1<Agibuild.Avalonia.WebView.FindInPageResult> Agibuild.Avalonia.WebView.AvaloniaWebDialog::FindInPageAsync(System.String,Agibuild.Avalonia.WebView.FindInPageOptions)
-  - method System.Threading.Tasks.Task`1<System.Double> Agibuild.Avalonia.WebView.AvaloniaWebDialog::GetZoomFactorAsync()
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Avalonia.WebView.AvaloniaWebDialog::GoBackAsync()
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Avalonia.WebView.AvaloniaWebDialog::GoForwardAsync()
-  - method System.Threading.Tasks.Task`1<System.String> Agibuild.Avalonia.WebView.AvaloniaWebDialog::InvokeScriptAsync(System.String)
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Avalonia.WebView.AvaloniaWebDialog::IsDevToolsOpenAsync()
-  - method System.Boolean Agibuild.Avalonia.WebView.AvaloniaWebDialog::Move(System.Int32,System.Int32)
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.AvaloniaWebDialog::NavigateAsync(System.Uri)
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.AvaloniaWebDialog::NavigateToStringAsync(System.String)
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.AvaloniaWebDialog::NavigateToStringAsync(System.String,System.Uri)
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.AvaloniaWebDialog::OpenDevToolsAsync()
-  - method System.Threading.Tasks.Task`1<System.Byte[]> Agibuild.Avalonia.WebView.AvaloniaWebDialog::PrintToPdfAsync(Agibuild.Avalonia.WebView.PdfPrintOptions)
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Avalonia.WebView.AvaloniaWebDialog::RefreshAsync()
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.AvaloniaWebDialog::RemovePreloadScriptAsync(System.String)
-  - method System.Boolean Agibuild.Avalonia.WebView.AvaloniaWebDialog::Resize(System.Int32,System.Int32)
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.AvaloniaWebDialog::SetZoomFactorAsync(System.Double)
-  - method System.Void Agibuild.Avalonia.WebView.AvaloniaWebDialog::Show()
-  - method System.Boolean Agibuild.Avalonia.WebView.AvaloniaWebDialog::Show(Avalonia.Platform.IPlatformHandle)
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Avalonia.WebView.AvaloniaWebDialog::StopAsync()
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.AvaloniaWebDialog::StopFindInPageAsync(System.Boolean)
-  - method Agibuild.Avalonia.WebView.ICommandManager Agibuild.Avalonia.WebView.AvaloniaWebDialog::TryGetCommandManager()
-  - method Agibuild.Avalonia.WebView.ICookieManager Agibuild.Avalonia.WebView.AvaloniaWebDialog::TryGetCookieManager()
-  - method System.Threading.Tasks.Task`1<Avalonia.Platform.IPlatformHandle> Agibuild.Avalonia.WebView.AvaloniaWebDialog::TryGetWebViewHandleAsync()
+type Agibuild.Fulora.AvaloniaWebDialog
+  - property Agibuild.Fulora.IBridgeService Agibuild.Fulora.AvaloniaWebDialog::Bridge
+  - property System.Boolean Agibuild.Fulora.AvaloniaWebDialog::CanGoBack
+  - property System.Boolean Agibuild.Fulora.AvaloniaWebDialog::CanGoForward
+  - property System.Boolean Agibuild.Fulora.AvaloniaWebDialog::CanUserResize
+  - property System.Guid Agibuild.Fulora.AvaloniaWebDialog::ChannelId
+  - property System.Boolean Agibuild.Fulora.AvaloniaWebDialog::IsLoading
+  - property Agibuild.Fulora.IWebViewRpcService Agibuild.Fulora.AvaloniaWebDialog::Rpc
+  - property System.Uri Agibuild.Fulora.AvaloniaWebDialog::Source
+  - property System.String Agibuild.Fulora.AvaloniaWebDialog::Title
+  - event System.EventHandler`1<Agibuild.Fulora.AdapterCreatedEventArgs> Agibuild.Fulora.AvaloniaWebDialog::AdapterCreated
+  - event System.EventHandler Agibuild.Fulora.AvaloniaWebDialog::AdapterDestroyed
+  - event System.EventHandler Agibuild.Fulora.AvaloniaWebDialog::Closing
+  - event System.EventHandler`1<Agibuild.Fulora.ContextMenuRequestedEventArgs> Agibuild.Fulora.AvaloniaWebDialog::ContextMenuRequested
+  - event System.EventHandler`1<Agibuild.Fulora.DownloadRequestedEventArgs> Agibuild.Fulora.AvaloniaWebDialog::DownloadRequested
+  - event System.EventHandler`1<Agibuild.Fulora.EnvironmentRequestedEventArgs> Agibuild.Fulora.AvaloniaWebDialog::EnvironmentRequested
+  - event System.EventHandler`1<Agibuild.Fulora.NavigationCompletedEventArgs> Agibuild.Fulora.AvaloniaWebDialog::NavigationCompleted
+  - event System.EventHandler`1<Agibuild.Fulora.NavigationStartingEventArgs> Agibuild.Fulora.AvaloniaWebDialog::NavigationStarted
+  - event System.EventHandler`1<Agibuild.Fulora.NewWindowRequestedEventArgs> Agibuild.Fulora.AvaloniaWebDialog::NewWindowRequested
+  - event System.EventHandler`1<Agibuild.Fulora.PermissionRequestedEventArgs> Agibuild.Fulora.AvaloniaWebDialog::PermissionRequested
+  - event System.EventHandler`1<Agibuild.Fulora.WebMessageReceivedEventArgs> Agibuild.Fulora.AvaloniaWebDialog::WebMessageReceived
+  - event System.EventHandler`1<Agibuild.Fulora.WebResourceRequestedEventArgs> Agibuild.Fulora.AvaloniaWebDialog::WebResourceRequested
+  - method System.Void Agibuild.Fulora.AvaloniaWebDialog::.ctor(Agibuild.Fulora.IWebViewEnvironmentOptions)
+  - method System.Threading.Tasks.Task`1<System.String> Agibuild.Fulora.AvaloniaWebDialog::AddPreloadScriptAsync(System.String)
+  - method System.Threading.Tasks.Task`1<System.Byte[]> Agibuild.Fulora.AvaloniaWebDialog::CaptureScreenshotAsync()
+  - method System.Void Agibuild.Fulora.AvaloniaWebDialog::Close()
+  - method System.Threading.Tasks.Task Agibuild.Fulora.AvaloniaWebDialog::CloseDevToolsAsync()
+  - method System.Void Agibuild.Fulora.AvaloniaWebDialog::Dispose()
+  - method System.Threading.Tasks.Task`1<Agibuild.Fulora.FindInPageResult> Agibuild.Fulora.AvaloniaWebDialog::FindInPageAsync(System.String,Agibuild.Fulora.FindInPageOptions)
+  - method System.Threading.Tasks.Task`1<System.Double> Agibuild.Fulora.AvaloniaWebDialog::GetZoomFactorAsync()
+  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.AvaloniaWebDialog::GoBackAsync()
+  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.AvaloniaWebDialog::GoForwardAsync()
+  - method System.Threading.Tasks.Task`1<System.String> Agibuild.Fulora.AvaloniaWebDialog::InvokeScriptAsync(System.String)
+  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.AvaloniaWebDialog::IsDevToolsOpenAsync()
+  - method System.Boolean Agibuild.Fulora.AvaloniaWebDialog::Move(System.Int32,System.Int32)
+  - method System.Threading.Tasks.Task Agibuild.Fulora.AvaloniaWebDialog::NavigateAsync(System.Uri)
+  - method System.Threading.Tasks.Task Agibuild.Fulora.AvaloniaWebDialog::NavigateToStringAsync(System.String)
+  - method System.Threading.Tasks.Task Agibuild.Fulora.AvaloniaWebDialog::NavigateToStringAsync(System.String,System.Uri)
+  - method System.Threading.Tasks.Task Agibuild.Fulora.AvaloniaWebDialog::OpenDevToolsAsync()
+  - method System.Threading.Tasks.Task`1<System.Byte[]> Agibuild.Fulora.AvaloniaWebDialog::PrintToPdfAsync(Agibuild.Fulora.PdfPrintOptions)
+  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.AvaloniaWebDialog::RefreshAsync()
+  - method System.Threading.Tasks.Task Agibuild.Fulora.AvaloniaWebDialog::RemovePreloadScriptAsync(System.String)
+  - method System.Boolean Agibuild.Fulora.AvaloniaWebDialog::Resize(System.Int32,System.Int32)
+  - method System.Threading.Tasks.Task Agibuild.Fulora.AvaloniaWebDialog::SetZoomFactorAsync(System.Double)
+  - method System.Void Agibuild.Fulora.AvaloniaWebDialog::Show()
+  - method System.Boolean Agibuild.Fulora.AvaloniaWebDialog::Show(Avalonia.Platform.IPlatformHandle)
+  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.AvaloniaWebDialog::StopAsync()
+  - method System.Threading.Tasks.Task Agibuild.Fulora.AvaloniaWebDialog::StopFindInPageAsync(System.Boolean)
+  - method Agibuild.Fulora.ICommandManager Agibuild.Fulora.AvaloniaWebDialog::TryGetCommandManager()
+  - method Agibuild.Fulora.ICookieManager Agibuild.Fulora.AvaloniaWebDialog::TryGetCookieManager()
+  - method System.Threading.Tasks.Task`1<Avalonia.Platform.IPlatformHandle> Agibuild.Fulora.AvaloniaWebDialog::TryGetWebViewHandleAsync()
 
-type Agibuild.Avalonia.WebView.AvaloniaWebDialogFactory
-  - method System.Void Agibuild.Avalonia.WebView.AvaloniaWebDialogFactory::.ctor()
-  - method Agibuild.Avalonia.WebView.IWebDialog Agibuild.Avalonia.WebView.AvaloniaWebDialogFactory::Create(Agibuild.Avalonia.WebView.IWebViewEnvironmentOptions)
+type Agibuild.Fulora.AvaloniaWebDialogFactory
+  - method System.Void Agibuild.Fulora.AvaloniaWebDialogFactory::.ctor()
+  - method Agibuild.Fulora.IWebDialog Agibuild.Fulora.AvaloniaWebDialogFactory::Create(Agibuild.Fulora.IWebViewEnvironmentOptions)
 
-type Agibuild.Avalonia.WebView.WebView
-  - field Avalonia.DirectProperty`2<Agibuild.Avalonia.WebView.WebView,System.Boolean> Agibuild.Avalonia.WebView.WebView::CanGoBackProperty
-  - field Avalonia.DirectProperty`2<Agibuild.Avalonia.WebView.WebView,System.Boolean> Agibuild.Avalonia.WebView.WebView::CanGoForwardProperty
-  - field Avalonia.DirectProperty`2<Agibuild.Avalonia.WebView.WebView,System.Boolean> Agibuild.Avalonia.WebView.WebView::IsLoadingProperty
-  - field Avalonia.StyledProperty`1<System.Uri> Agibuild.Avalonia.WebView.WebView::SourceProperty
-  - field Avalonia.StyledProperty`1<System.Double> Agibuild.Avalonia.WebView.WebView::ZoomFactorProperty
-  - property Agibuild.Avalonia.WebView.IBridgeService Agibuild.Avalonia.WebView.WebView::Bridge
-  - property System.Boolean Agibuild.Avalonia.WebView.WebView::CanGoBack
-  - property System.Boolean Agibuild.Avalonia.WebView.WebView::CanGoForward
-  - property System.Guid Agibuild.Avalonia.WebView.WebView::ChannelId
-  - property Agibuild.Avalonia.WebView.IWebViewEnvironmentOptions Agibuild.Avalonia.WebView.WebView::EnvironmentOptions
-  - property System.Boolean Agibuild.Avalonia.WebView.WebView::IsAvailable
-  - property System.Boolean Agibuild.Avalonia.WebView.WebView::IsLoading
-  - property Microsoft.Extensions.Logging.ILoggerFactory Agibuild.Avalonia.WebView.WebView::LoggerFactory
-  - property Agibuild.Avalonia.WebView.IWebViewRpcService Agibuild.Avalonia.WebView.WebView::Rpc
-  - property System.Uri Agibuild.Avalonia.WebView.WebView::Source
-  - property System.Double Agibuild.Avalonia.WebView.WebView::ZoomFactor
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.AdapterCreatedEventArgs> Agibuild.Avalonia.WebView.WebView::AdapterCreated
-  - event System.EventHandler Agibuild.Avalonia.WebView.WebView::AdapterDestroyed
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.ContextMenuRequestedEventArgs> Agibuild.Avalonia.WebView.WebView::ContextMenuRequested
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.DownloadRequestedEventArgs> Agibuild.Avalonia.WebView.WebView::DownloadRequested
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.EnvironmentRequestedEventArgs> Agibuild.Avalonia.WebView.WebView::EnvironmentRequested
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.NavigationCompletedEventArgs> Agibuild.Avalonia.WebView.WebView::NavigationCompleted
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.NavigationStartingEventArgs> Agibuild.Avalonia.WebView.WebView::NavigationStarted
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.NewWindowRequestedEventArgs> Agibuild.Avalonia.WebView.WebView::NewWindowRequested
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.PermissionRequestedEventArgs> Agibuild.Avalonia.WebView.WebView::PermissionRequested
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.WebMessageReceivedEventArgs> Agibuild.Avalonia.WebView.WebView::WebMessageReceived
-  - event System.EventHandler`1<Agibuild.Avalonia.WebView.WebResourceRequestedEventArgs> Agibuild.Avalonia.WebView.WebView::WebResourceRequested
-  - event System.EventHandler`1<System.Double> Agibuild.Avalonia.WebView.WebView::ZoomFactorChanged
-  - method System.Void Agibuild.Avalonia.WebView.WebView::.ctor()
-  - method System.Threading.Tasks.Task`1<System.String> Agibuild.Avalonia.WebView.WebView::AddPreloadScriptAsync(System.String)
-  - method System.Threading.Tasks.Task`1<System.Byte[]> Agibuild.Avalonia.WebView.WebView::CaptureScreenshotAsync()
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.WebView::CloseDevToolsAsync()
-  - method System.Void Agibuild.Avalonia.WebView.WebView::DisableWebMessageBridge()
-  - method System.Void Agibuild.Avalonia.WebView.WebView::Dispose()
-  - method System.Void Agibuild.Avalonia.WebView.WebView::EnableSpaHosting(Agibuild.Avalonia.WebView.SpaHostingOptions)
-  - method System.Void Agibuild.Avalonia.WebView.WebView::EnableWebMessageBridge(Agibuild.Avalonia.WebView.WebMessageBridgeOptions)
-  - method System.Threading.Tasks.Task`1<Agibuild.Avalonia.WebView.FindInPageResult> Agibuild.Avalonia.WebView.WebView::FindInPageAsync(System.String,Agibuild.Avalonia.WebView.FindInPageOptions)
-  - method System.Threading.Tasks.Task`1<System.Double> Agibuild.Avalonia.WebView.WebView::GetZoomFactorAsync()
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Avalonia.WebView.WebView::GoBackAsync()
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Avalonia.WebView.WebView::GoForwardAsync()
-  - method System.Threading.Tasks.Task`1<System.String> Agibuild.Avalonia.WebView.WebView::InvokeScriptAsync(System.String)
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Avalonia.WebView.WebView::IsDevToolsOpenAsync()
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.WebView::NavigateAsync(System.Uri)
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.WebView::NavigateToStringAsync(System.String)
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.WebView::NavigateToStringAsync(System.String,System.Uri)
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.WebView::OpenDevToolsAsync()
-  - method System.Threading.Tasks.Task`1<System.Byte[]> Agibuild.Avalonia.WebView.WebView::PrintToPdfAsync(Agibuild.Avalonia.WebView.PdfPrintOptions)
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Avalonia.WebView.WebView::RefreshAsync()
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.WebView::RemovePreloadScriptAsync(System.String)
-  - method System.Void Agibuild.Avalonia.WebView.WebView::SetCustomUserAgent(System.String)
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.WebView::SetZoomFactorAsync(System.Double)
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Avalonia.WebView.WebView::StopAsync()
-  - method System.Threading.Tasks.Task Agibuild.Avalonia.WebView.WebView::StopFindInPageAsync(System.Boolean)
-  - method Agibuild.Avalonia.WebView.ICommandManager Agibuild.Avalonia.WebView.WebView::TryGetCommandManager()
-  - method Agibuild.Avalonia.WebView.ICookieManager Agibuild.Avalonia.WebView.WebView::TryGetCookieManager()
-  - method Avalonia.Platform.IPlatformHandle Agibuild.Avalonia.WebView.WebView::TryGetWebViewHandle()
-  - method System.Threading.Tasks.Task`1<Avalonia.Platform.IPlatformHandle> Agibuild.Avalonia.WebView.WebView::TryGetWebViewHandleAsync()
+type Agibuild.Fulora.WebView
+  - field Avalonia.DirectProperty`2<Agibuild.Fulora.WebView,System.Boolean> Agibuild.Fulora.WebView::CanGoBackProperty
+  - field Avalonia.DirectProperty`2<Agibuild.Fulora.WebView,System.Boolean> Agibuild.Fulora.WebView::CanGoForwardProperty
+  - field Avalonia.DirectProperty`2<Agibuild.Fulora.WebView,System.Boolean> Agibuild.Fulora.WebView::IsLoadingProperty
+  - field Avalonia.StyledProperty`1<System.Uri> Agibuild.Fulora.WebView::SourceProperty
+  - field Avalonia.StyledProperty`1<System.Double> Agibuild.Fulora.WebView::ZoomFactorProperty
+  - property Agibuild.Fulora.IBridgeService Agibuild.Fulora.WebView::Bridge
+  - property System.Boolean Agibuild.Fulora.WebView::CanGoBack
+  - property System.Boolean Agibuild.Fulora.WebView::CanGoForward
+  - property System.Guid Agibuild.Fulora.WebView::ChannelId
+  - property Agibuild.Fulora.IWebViewEnvironmentOptions Agibuild.Fulora.WebView::EnvironmentOptions
+  - property System.Boolean Agibuild.Fulora.WebView::IsAvailable
+  - property System.Boolean Agibuild.Fulora.WebView::IsLoading
+  - property Microsoft.Extensions.Logging.ILoggerFactory Agibuild.Fulora.WebView::LoggerFactory
+  - property Agibuild.Fulora.IWebViewRpcService Agibuild.Fulora.WebView::Rpc
+  - property System.Uri Agibuild.Fulora.WebView::Source
+  - property System.Double Agibuild.Fulora.WebView::ZoomFactor
+  - event System.EventHandler`1<Agibuild.Fulora.AdapterCreatedEventArgs> Agibuild.Fulora.WebView::AdapterCreated
+  - event System.EventHandler Agibuild.Fulora.WebView::AdapterDestroyed
+  - event System.EventHandler`1<Agibuild.Fulora.ContextMenuRequestedEventArgs> Agibuild.Fulora.WebView::ContextMenuRequested
+  - event System.EventHandler`1<Agibuild.Fulora.DownloadRequestedEventArgs> Agibuild.Fulora.WebView::DownloadRequested
+  - event System.EventHandler`1<Agibuild.Fulora.EnvironmentRequestedEventArgs> Agibuild.Fulora.WebView::EnvironmentRequested
+  - event System.EventHandler`1<Agibuild.Fulora.NavigationCompletedEventArgs> Agibuild.Fulora.WebView::NavigationCompleted
+  - event System.EventHandler`1<Agibuild.Fulora.NavigationStartingEventArgs> Agibuild.Fulora.WebView::NavigationStarted
+  - event System.EventHandler`1<Agibuild.Fulora.NewWindowRequestedEventArgs> Agibuild.Fulora.WebView::NewWindowRequested
+  - event System.EventHandler`1<Agibuild.Fulora.PermissionRequestedEventArgs> Agibuild.Fulora.WebView::PermissionRequested
+  - event System.EventHandler`1<Agibuild.Fulora.WebMessageReceivedEventArgs> Agibuild.Fulora.WebView::WebMessageReceived
+  - event System.EventHandler`1<Agibuild.Fulora.WebResourceRequestedEventArgs> Agibuild.Fulora.WebView::WebResourceRequested
+  - event System.EventHandler`1<System.Double> Agibuild.Fulora.WebView::ZoomFactorChanged
+  - method System.Void Agibuild.Fulora.WebView::.ctor()
+  - method System.Threading.Tasks.Task`1<System.String> Agibuild.Fulora.WebView::AddPreloadScriptAsync(System.String)
+  - method System.Threading.Tasks.Task`1<System.Byte[]> Agibuild.Fulora.WebView::CaptureScreenshotAsync()
+  - method System.Threading.Tasks.Task Agibuild.Fulora.WebView::CloseDevToolsAsync()
+  - method System.Void Agibuild.Fulora.WebView::DisableWebMessageBridge()
+  - method System.Void Agibuild.Fulora.WebView::Dispose()
+  - method System.Void Agibuild.Fulora.WebView::EnableSpaHosting(Agibuild.Fulora.SpaHostingOptions)
+  - method System.Void Agibuild.Fulora.WebView::EnableWebMessageBridge(Agibuild.Fulora.WebMessageBridgeOptions)
+  - method System.Threading.Tasks.Task`1<Agibuild.Fulora.FindInPageResult> Agibuild.Fulora.WebView::FindInPageAsync(System.String,Agibuild.Fulora.FindInPageOptions)
+  - method System.Threading.Tasks.Task`1<System.Double> Agibuild.Fulora.WebView::GetZoomFactorAsync()
+  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.WebView::GoBackAsync()
+  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.WebView::GoForwardAsync()
+  - method System.Threading.Tasks.Task`1<System.String> Agibuild.Fulora.WebView::InvokeScriptAsync(System.String)
+  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.WebView::IsDevToolsOpenAsync()
+  - method System.Threading.Tasks.Task Agibuild.Fulora.WebView::NavigateAsync(System.Uri)
+  - method System.Threading.Tasks.Task Agibuild.Fulora.WebView::NavigateToStringAsync(System.String)
+  - method System.Threading.Tasks.Task Agibuild.Fulora.WebView::NavigateToStringAsync(System.String,System.Uri)
+  - method System.Threading.Tasks.Task Agibuild.Fulora.WebView::OpenDevToolsAsync()
+  - method System.Threading.Tasks.Task`1<System.Byte[]> Agibuild.Fulora.WebView::PrintToPdfAsync(Agibuild.Fulora.PdfPrintOptions)
+  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.WebView::RefreshAsync()
+  - method System.Threading.Tasks.Task Agibuild.Fulora.WebView::RemovePreloadScriptAsync(System.String)
+  - method System.Void Agibuild.Fulora.WebView::SetCustomUserAgent(System.String)
+  - method System.Threading.Tasks.Task Agibuild.Fulora.WebView::SetZoomFactorAsync(System.Double)
+  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.WebView::StopAsync()
+  - method System.Threading.Tasks.Task Agibuild.Fulora.WebView::StopFindInPageAsync(System.Boolean)
+  - method Agibuild.Fulora.ICommandManager Agibuild.Fulora.WebView::TryGetCommandManager()
+  - method Agibuild.Fulora.ICookieManager Agibuild.Fulora.WebView::TryGetCookieManager()
+  - method Avalonia.Platform.IPlatformHandle Agibuild.Fulora.WebView::TryGetWebViewHandle()
+  - method System.Threading.Tasks.Task`1<Avalonia.Platform.IPlatformHandle> Agibuild.Fulora.WebView::TryGetWebViewHandleAsync()
 
-type Agibuild.Avalonia.WebView.WebViewServiceCollectionExtensions
-  - method Microsoft.Extensions.DependencyInjection.IServiceCollection Agibuild.Avalonia.WebView.WebViewServiceCollectionExtensions::AddWebViewDialogServices(Microsoft.Extensions.DependencyInjection.IServiceCollection)
+type Agibuild.Fulora.WebViewServiceCollectionExtensions
+  - method Microsoft.Extensions.DependencyInjection.IServiceCollection Agibuild.Fulora.WebViewServiceCollectionExtensions::AddWebViewDialogServices(Microsoft.Extensions.DependencyInjection.IServiceCollection)
 
 --------------------------------------------------------------------------------
 

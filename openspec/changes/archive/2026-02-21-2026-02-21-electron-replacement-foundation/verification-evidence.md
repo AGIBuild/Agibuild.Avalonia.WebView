@@ -14,7 +14,7 @@
 
 ### 1) Governance + bridge + capability + lifecycle unit coverage
 Command:
-`dotnet test "tests/Agibuild.Avalonia.WebView.UnitTests/Agibuild.Avalonia.WebView.UnitTests.csproj" --filter "FullyQualifiedName~AutomationLaneGovernanceTests|FullyQualifiedName~BridgeIntegrationTests|FullyQualifiedName~HostCapabilityBridgeTests|FullyQualifiedName~MultiWindowLifecycleTests"`
+`dotnet test "tests/Agibuild.Fulora.UnitTests/Agibuild.Fulora.UnitTests.csproj" --filter "FullyQualifiedName~AutomationLaneGovernanceTests|FullyQualifiedName~BridgeIntegrationTests|FullyQualifiedName~HostCapabilityBridgeTests|FullyQualifiedName~MultiWindowLifecycleTests"`
 
 Outcome:
 - Passed: 36
@@ -22,7 +22,7 @@ Outcome:
 
 ### 2) Host capability automation integration coverage
 Command:
-`dotnet test "tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/Agibuild.Avalonia.WebView.Integration.Tests.Automation.csproj" --filter "FullyQualifiedName~HostCapabilityBridgeIntegrationTests|FullyQualifiedName~ShellProductionValidationIntegrationTests"`
+`dotnet test "tests/Agibuild.Fulora.Integration.Tests.Automation/Agibuild.Fulora.Integration.Tests.Automation.csproj" --filter "FullyQualifiedName~HostCapabilityBridgeIntegrationTests|FullyQualifiedName~ShellProductionValidationIntegrationTests"`
 
 Outcome:
 - Passed: 4

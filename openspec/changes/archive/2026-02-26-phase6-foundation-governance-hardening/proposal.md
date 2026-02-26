@@ -30,7 +30,7 @@ Phase 5 delivery is complete, but governance confidence still depends heavily on
 
 ## Impact
 
-- Governance tests: `tests/Agibuild.Avalonia.WebView.UnitTests/AutomationLaneGovernanceTests.cs` and shared testing helpers.
+- Governance tests: `tests/Agibuild.Fulora.UnitTests/AutomationLaneGovernanceTests.cs` and shared testing helpers.
 - Build orchestration and reports: `build/Build*.cs` governance targets and emitted `CiPublish` artifacts.
 - Evidence artifacts in `tests/*.json` that serve as machine-checkable release inputs.
 - Bridge package validation flow and release-lane matrix coverage for `packages/bridge`.

@@ -1,7 +1,7 @@
 # Design: Performance Benchmarks
 
 ## Architecture
-- benchmarks/Agibuild.Avalonia.WebView.Benchmarks/ project
+- benchmarks/Agibuild.Fulora.Benchmarks/ project
 - BenchmarkDotNet with MemoryDiagnoser
 - Two benchmark classes: BridgeBenchmarks, RpcBenchmarks
 - MockWebViewAdapter + TestDispatcher for isolated measurement

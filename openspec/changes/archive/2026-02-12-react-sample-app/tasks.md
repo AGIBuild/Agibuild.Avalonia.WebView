@@ -1,9 +1,9 @@
 ## 1. Project Scaffolding
 
 - [x] 1.1 Create `samples/avalonia-react/` directory structure with `AvaloniReact.sln`, four project directories (Desktop, Bridge, Web, Tests)
-- [x] 1.2 Create `AvaloniReact.Bridge.csproj` — references `Agibuild.Avalonia.WebView.Core` + `Bridge.Generator` (analyzer); define all shared models in `Models/`
-- [x] 1.3 Create `AvaloniReact.Desktop.csproj` — Avalonia Desktop app with `Agibuild.Avalonia.WebView` reference, `Program.cs`, `App.axaml`, `MainWindow.axaml`
-- [x] 1.4 Create `AvaloniReact.Tests.csproj` — xUnit test project referencing `AvaloniReact.Bridge` + `Agibuild.Avalonia.WebView.Testing`
+- [x] 1.2 Create `AvaloniReact.Bridge.csproj` — references `Agibuild.Fulora.Core` + `Bridge.Generator` (analyzer); define all shared models in `Models/`
+- [x] 1.3 Create `AvaloniReact.Desktop.csproj` — Avalonia Desktop app with `Agibuild.Fulora` reference, `Program.cs`, `App.axaml`, `MainWindow.axaml`
+- [x] 1.4 Create `AvaloniReact.Tests.csproj` — xUnit test project referencing `AvaloniReact.Bridge` + `Agibuild.Fulora.Testing`
 - [x] 1.5 Create `AvaloniReact.Web/` — `npm init`, install React 19 + Vite 6 + TypeScript 5 + Tailwind CSS 4 + React Router 7, configure `vite.config.ts` and `tsconfig.json`
 
 ## 2. Bridge Interfaces & Models

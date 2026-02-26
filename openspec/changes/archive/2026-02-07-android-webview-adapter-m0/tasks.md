@@ -1,6 +1,6 @@
 ## 1. Project setup
 
-- [x] 1.1 Update `Agibuild.Avalonia.WebView.Adapters.Android.csproj`: add `CA2255` NoWarn for ModuleInitializer
+- [x] 1.1 Update `Agibuild.Fulora.Adapters.Android.csproj`: add `CA2255` NoWarn for ModuleInitializer
 - [x] 1.2 Add `AndroidAdapterModule` with `[ModuleInitializer]` registering `AndroidWebViewAdapter` in `WebViewAdapterRegistry` (guard `OperatingSystem.IsAndroid()`)
 
 ## 2. Adapter lifecycle (Initialize / Attach / Detach)

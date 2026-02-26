@@ -116,7 +116,7 @@ This design is a Phase 3 hardening continuation of **ROADMAP 3.8 (API surface re
   - verify no regressions in WebDialog and Feature/Consumer automation flows.
 
 - **MockBridge / Testing Harness:**
-  - centralize and reuse threading helpers (`RunOffThread`, `PumpUntil`) in `Agibuild.Avalonia.WebView.Testing`.
+  - centralize and reuse threading helpers (`RunOffThread`, `PumpUntil`) in `Agibuild.Fulora.Testing`.
   - ensure helper behavior remains deterministic and timeout-bounded.
 
 ## Open Questions

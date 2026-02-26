@@ -1,6 +1,6 @@
 # Avalonia + React Hybrid Sample
 
-Production-grade sample demonstrating **Agibuild.Avalonia.WebView** with a React frontend — type-safe C# ↔ JS Bridge, SPA hosting, and Vite HMR development workflow.
+Production-grade sample demonstrating **Agibuild.Fulora** with a React frontend — type-safe C# ↔ JS Bridge, SPA hosting, and Vite HMR development workflow.
 
 ## Prerequisites
 
@@ -154,7 +154,7 @@ avalonia-react/
 | Layer | Technology |
 |-------|-----------|
 | Desktop host | Avalonia 11, .NET 10 |
-| WebView | Agibuild.Avalonia.WebView (WKWebView / WebView2 / WebKitGTK) |
+| WebView | Agibuild.Fulora (WKWebView / WebView2 / WebKitGTK) |
 | Bridge | JSON-RPC 2.0 over WebMessage, Roslyn source generator |
 | Frontend | React 19, TypeScript 5, Vite 6, Tailwind CSS 4 |
 | Icons | Lucide React |

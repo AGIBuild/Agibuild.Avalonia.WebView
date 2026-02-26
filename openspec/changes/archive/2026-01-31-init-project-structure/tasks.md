@@ -1,6 +1,6 @@
 ## 1. Solution scaffolding (.NET 10, naming, references)
 
-- [x] 1.1 Create solution file and projects using `Agibuild.Avalonia.WebView.*` naming
+- [x] 1.1 Create solution file and projects using `Agibuild.Fulora.*` naming
 - [x] 1.2 Set TFMs: Core/Abstractions/DependencyInjection/Tests => `net10.0`; Windows => `net10.0-windows`; macOS => `net10.0-macos`; Android => `net10.0-android`; Gtk => `net10.0`
 - [x] 1.3 Add project references to enforce dependency direction (Core -> Abstractions -> Adapters; Tests reference Core+Abstractions; DI references Core+Abstractions)
 - [x] 1.4 Add minimal public types and namespaces to each project so all assemblies compile

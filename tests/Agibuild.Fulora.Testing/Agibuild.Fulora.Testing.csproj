@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+
+    <IsPackable>true</IsPackable>
+    <PackageId>Agibuild.Fulora.Testing</PackageId>
+    <Description>Test utilities (MockBridgeService, MockWebViewAdapter, TestDispatcher) for Agibuild.Fulora.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Agibuild.Fulora.Core\Agibuild.Fulora.Core.csproj" />
+    <ProjectReference Include="..\..\src\Agibuild.Fulora.Adapters.Abstractions\Agibuild.Fulora.Adapters.Abstractions.csproj" />
+    <ProjectReference Include="..\..\src\Agibuild.Fulora.Runtime\Agibuild.Fulora.Runtime.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Agibuild.Fulora.UnitTests" />
+    <InternalsVisibleTo Include="Agibuild.Fulora.Integration.Tests" />
+    <InternalsVisibleTo Include="Agibuild.Fulora.Integration.Tests.Automation" />
+    <InternalsVisibleTo Include="Agibuild.Fulora.Benchmarks" />
+  </ItemGroup>
+</Project>

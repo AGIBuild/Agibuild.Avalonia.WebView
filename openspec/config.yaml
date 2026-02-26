@@ -1,7 +1,7 @@
 schema: spec-driven
 
 context: |
-  Project: Agibuild.Avalonia.WebView — Cross-platform hybrid app framework for Avalonia UI.
+  Project: Agibuild.Fulora — Cross-platform hybrid app framework for Avalonia UI.
   Vision: "Electron's developer productivity + native performance and footprint."
   See openspec/PROJECT.md for full goals; openspec/ROADMAP.md for phased delivery plan.
 

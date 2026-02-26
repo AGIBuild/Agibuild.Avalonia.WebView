@@ -2,12 +2,12 @@
 
 ### Requirement: Platform adapter project skeletons
 The solution SHALL include the following platform adapter projects with the specified target frameworks:
-- `Agibuild.Avalonia.WebView.Adapters.Windows` targeting `net10.0-windows`
-- `Agibuild.Avalonia.WebView.Adapters.MacOS` targeting `net10.0-macos`
-- `Agibuild.Avalonia.WebView.Adapters.Android` targeting `net10.0-android`
-- `Agibuild.Avalonia.WebView.Adapters.Gtk` targeting `net10.0`
+- `Agibuild.Fulora.Adapters.Windows` targeting `net10.0-windows`
+- `Agibuild.Fulora.Adapters.MacOS` targeting `net10.0-macos`
+- `Agibuild.Fulora.Adapters.Android` targeting `net10.0-android`
+- `Agibuild.Fulora.Adapters.Gtk` targeting `net10.0`
 
-Each project SHALL reference `Agibuild.Avalonia.WebView.Core` and `Agibuild.Avalonia.WebView.Adapters.Abstractions`.
+Each project SHALL reference `Agibuild.Fulora.Core` and `Agibuild.Fulora.Adapters.Abstractions`.
 
 #### Scenario: Platform adapter projects exist and compile
 - **WHEN** the solution is built with default settings

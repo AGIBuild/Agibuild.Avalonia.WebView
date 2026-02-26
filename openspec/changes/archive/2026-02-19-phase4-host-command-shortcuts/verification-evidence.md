@@ -2,13 +2,13 @@
 
 ### Executed Commands
 
-1. `dotnet test tests/Agibuild.Avalonia.WebView.UnitTests/Agibuild.Avalonia.WebView.UnitTests.csproj --filter FullyQualifiedName~ShellExperienceTests`
+1. `dotnet test tests/Agibuild.Fulora.UnitTests/Agibuild.Fulora.UnitTests.csproj --filter FullyQualifiedName~ShellExperienceTests`
    - Result: **Passed** (`23 passed, 0 failed`)
-2. `dotnet test tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/Agibuild.Avalonia.WebView.Integration.Tests.Automation.csproj --filter FullyQualifiedName~ShellPolicyIntegrationTests`
+2. `dotnet test tests/Agibuild.Fulora.Integration.Tests.Automation/Agibuild.Fulora.Integration.Tests.Automation.csproj --filter FullyQualifiedName~ShellPolicyIntegrationTests`
    - Result: **Passed** (`4 passed, 0 failed`)
-3. `dotnet test tests/Agibuild.Avalonia.WebView.UnitTests/Agibuild.Avalonia.WebView.UnitTests.csproj`
+3. `dotnet test tests/Agibuild.Fulora.UnitTests/Agibuild.Fulora.UnitTests.csproj`
    - Result: **Passed** (`725 passed, 0 failed`)
-4. `dotnet test tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/Agibuild.Avalonia.WebView.Integration.Tests.Automation.csproj`
+4. `dotnet test tests/Agibuild.Fulora.Integration.Tests.Automation/Agibuild.Fulora.Integration.Tests.Automation.csproj`
    - Result: **Passed** (`135 passed, 0 failed`)
 
 ### Requirement Traceability

@@ -31,7 +31,7 @@
 - **Goal alignment**: 直接推进 `PROJECT.md` 的 `G1`（typed contract）、`G3`（secure by default）、`G4`（contract-driven testability），并增强 `E1/E2` 模板与 DX 价值。
 - **Roadmap alignment**: 承接 `ROADMAP` Phase 5（web-first foundation）成果并进入其 Next-phase Outlook 的“应用壳能力扩展（菜单/托盘/系统集成）”。
 - **Affected areas**:
-  - `src/Agibuild.Avalonia.WebView.Runtime/Shell`
+  - `src/Agibuild.Fulora.Runtime/Shell`
   - `templates/agibuild-hybrid/*`
-  - `tests/Agibuild.Avalonia.WebView.UnitTests`
-  - `tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation`
+  - `tests/Agibuild.Fulora.UnitTests`
+  - `tests/Agibuild.Fulora.Integration.Tests.Automation`

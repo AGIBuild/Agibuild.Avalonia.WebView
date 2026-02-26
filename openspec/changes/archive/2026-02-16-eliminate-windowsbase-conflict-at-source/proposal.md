@@ -20,7 +20,7 @@
 
 ## Impact
 
-- Affected code: `src/Agibuild.Avalonia.WebView*.csproj`, `src/Agibuild.Avalonia.WebView.Adapters.Windows/*.csproj`, `build/Build.cs`, warning-governance tests and baseline files.
+- Affected code: `src/Agibuild.Fulora*.csproj`, `src/Agibuild.Fulora.Adapters.Windows/*.csproj`, `build/Build.cs`, warning-governance tests and baseline files.
 - CI/pipeline impact: stricter warning gate; fewer non-actionable warnings on all hosts.
 - Dependency impact: WebView2 package consumption model changes from implicit target-injected references to explicit compile reference boundaries.
 - Product requirement impact: preserves "build/pack all-platform artifacts from any host" constraint.

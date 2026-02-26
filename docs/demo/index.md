@@ -1,8 +1,8 @@
 # Demo: Avalonia + React Hybrid App
 
-This sample application demonstrates the full capabilities of **Agibuild.Avalonia.WebView** — a cross-platform hybrid framework that combines Avalonia's native desktop shell with a modern React frontend, communicating through a type-safe C# ↔ JavaScript bridge.
+This sample application demonstrates the full capabilities of **Agibuild.Fulora** — a cross-platform hybrid framework that combines Avalonia's native desktop shell with a modern React frontend, communicating through a type-safe C# ↔ JavaScript bridge.
 
-> **Source code**: [`samples/avalonia-react/`](https://github.com/AgibuilTech/Agibuild.Avalonia.WebView/tree/main/samples/avalonia-react)
+> **Source code**: [`samples/avalonia-react/`](https://github.com/AgibuilTech/Agibuild.Fulora/tree/main/samples/avalonia-react)
 
 ## Architecture Overview
 

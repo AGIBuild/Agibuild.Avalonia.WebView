@@ -25,7 +25,7 @@
 
 ## Impact
 
-- `tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/ShellPolicyIntegrationTests.cs`
+- `tests/Agibuild.Fulora.Integration.Tests.Automation/ShellPolicyIntegrationTests.cs`
 - `tests/runtime-critical-path.manifest.json`
 - `tests/shell-production-matrix.json`
-- `tests/Agibuild.Avalonia.WebView.UnitTests/AutomationLaneGovernanceTests.cs`
+- `tests/Agibuild.Fulora.UnitTests/AutomationLaneGovernanceTests.cs`

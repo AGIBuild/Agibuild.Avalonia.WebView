@@ -35,7 +35,7 @@ Because the contract surface is now mature (cookie management, error categorizat
 
 ## Impact
 
-- **Affected code**: `Agibuild.Avalonia.WebView.Adapters.Windows` — full adapter implementation replacing the current stub
+- **Affected code**: `Agibuild.Fulora.Adapters.Windows` — full adapter implementation replacing the current stub
 - **New dependency**: `Microsoft.Web.WebView2` NuGet package (MIT license)
 - **csproj change**: Windows adapter targets `net10.0-windows10.0.17763.0` (or newer) to access WinRT WebView2 APIs
 - **Public API surface**: no changes — contracts are already defined; this change implements them on Windows

@@ -30,6 +30,6 @@ This change delivers a first “M0” implementation focused on correct navigati
 
 ## Impact
 
-- Affected code: `Agibuild.Avalonia.WebView.Adapters.MacOS` (WKWebView adapter), integration test projects and test app harness for macOS.
+- Affected code: `Agibuild.Fulora.Adapters.MacOS` (WKWebView adapter), integration test projects and test app harness for macOS.
 - Public API surface: no intended breaking changes (contracts are already defined; this change implements them on macOS).
 - Dependencies: macOS WebKit/WKWebView bindings as required by `net10.0-macos` build.

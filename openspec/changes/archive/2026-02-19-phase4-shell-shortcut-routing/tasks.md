@@ -1,6 +1,6 @@
 ## 1. Shortcut Routing Public API
 
-- [x] 1.1 Add `WebViewShortcutRouter` and shortcut binding/action contracts in `Agibuild.Avalonia.WebView` (Acceptance: default bindings cover shell editing commands and DevTools).
+- [x] 1.1 Add `WebViewShortcutRouter` and shortcut binding/action contracts in `Agibuild.Fulora` (Acceptance: default bindings cover shell editing commands and DevTools).
 - [x] 1.2 Implement deterministic routing execution (`TryExecuteAsync`) with explicit non-handled semantics for unmapped or unsupported actions (Acceptance: no implicit fallback path).
 
 ## 2. Template App-Shell Wiring

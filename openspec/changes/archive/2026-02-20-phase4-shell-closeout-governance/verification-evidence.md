@@ -2,11 +2,11 @@
 
 ### Executed Commands
 
-1. `dotnet test tests/Agibuild.Avalonia.WebView.UnitTests/Agibuild.Avalonia.WebView.UnitTests.csproj --filter FullyQualifiedName~AutomationLaneGovernanceTests`
+1. `dotnet test tests/Agibuild.Fulora.UnitTests/Agibuild.Fulora.UnitTests.csproj --filter FullyQualifiedName~AutomationLaneGovernanceTests`
    - Result: **Passed** (`10 passed, 0 failed`)
-2. `dotnet test tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/Agibuild.Avalonia.WebView.Integration.Tests.Automation.csproj --filter FullyQualifiedName~ShellPolicyIntegrationTests`
+2. `dotnet test tests/Agibuild.Fulora.Integration.Tests.Automation/Agibuild.Fulora.Integration.Tests.Automation.csproj --filter FullyQualifiedName~ShellPolicyIntegrationTests`
    - Result: **Passed** (`4 passed, 0 failed`)
-3. `dotnet test tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/Agibuild.Avalonia.WebView.Integration.Tests.Automation.csproj --filter FullyQualifiedName~WebViewShortcutRouterTests`
+3. `dotnet test tests/Agibuild.Fulora.Integration.Tests.Automation/Agibuild.Fulora.Integration.Tests.Automation.csproj --filter FullyQualifiedName~WebViewShortcutRouterTests`
    - Result: **Passed** (`5 passed, 0 failed`)
 
 ### Requirement Traceability

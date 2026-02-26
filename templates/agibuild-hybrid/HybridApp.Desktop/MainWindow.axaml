@@ -1,6 +1,6 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:wv="clr-namespace:Agibuild.Avalonia.WebView;assembly=Agibuild.Avalonia.WebView"
+        xmlns:wv="clr-namespace:Agibuild.Fulora;assembly=Agibuild.Fulora"
         x:Class="HybridApp.Desktop.MainWindow"
         Title="HybridApp" Width="1200" Height="800">
 

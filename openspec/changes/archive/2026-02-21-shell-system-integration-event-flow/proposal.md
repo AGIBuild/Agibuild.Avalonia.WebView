@@ -33,7 +33,7 @@
 - **Goal IDs**: 强化 `G1`（typed contracts）、`G3`（policy-first security）、`G4`（contract-driven testability），并提升 `E1/E2`。
 - **Roadmap**: 对齐 Phase 5 deliverables `5.2`（policy-first）、`5.3`（observability）、`5.4`（template flow）、`5.5`（governance）。
 - **Affected Areas**:
-  - `src/Agibuild.Avalonia.WebView.Runtime/Shell`
+  - `src/Agibuild.Fulora.Runtime/Shell`
   - `templates/agibuild-hybrid/*`
-  - `tests/Agibuild.Avalonia.WebView.UnitTests`
-  - `tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation`
+  - `tests/Agibuild.Fulora.UnitTests`
+  - `tests/Agibuild.Fulora.Integration.Tests.Automation`

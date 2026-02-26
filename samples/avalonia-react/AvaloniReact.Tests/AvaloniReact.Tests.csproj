@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Agibuild.Avalonia.WebView.Core" Version="0.1.17-preview" />
+    <PackageReference Include="Agibuild.Fulora.Core" Version="0.1.17-preview" />
   </ItemGroup>
 
   <ItemGroup>

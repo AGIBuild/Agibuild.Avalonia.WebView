@@ -8,7 +8,7 @@ Template at `templates/agibuild-hybrid/`.
 
 ## template.json
 
-- Identity: `Agibuild.Avalonia.WebView.HybridTemplate`
+- Identity: `Agibuild.Fulora.HybridTemplate`
 - Short name: `agibuild-hybrid`
 - Symbol `framework`: choice parameter (vanilla, react, vue)
 - Conditional sources: vanilla excludes HybridApp.Web.Vite; react/vue exclude HybridApp.Web.Vanilla (when present)

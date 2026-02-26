@@ -2,7 +2,7 @@
   "$schema": "http://json.schemastore.org/template",
   "author": "Agibuild",
   "classifications": ["Desktop", "Mobile", "Hybrid", "Avalonia", "WebView"],
-  "identity": "Agibuild.Avalonia.WebView.HybridTemplate",
+  "identity": "Agibuild.Fulora.HybridTemplate",
   "name": "Agibuild Hybrid App",
   "shortName": "agibuild-hybrid",
   "tags": {

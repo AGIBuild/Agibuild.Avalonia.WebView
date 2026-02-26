@@ -35,5 +35,5 @@ public class AppShellService : IAppShellService
     ];
 
     private static AppInfo DefaultAppInfo() =>
-        new("Avalonia + React Demo", "1.0.0", "Production-grade hybrid app sample powered by Agibuild.Avalonia.WebView");
+        new("Avalonia + React Demo", "1.0.0", "Production-grade hybrid app sample powered by Agibuild.Fulora");
 }

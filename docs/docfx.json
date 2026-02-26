@@ -4,9 +4,9 @@
       "src": [
         {
           "files": [
-            "src/Agibuild.Avalonia.WebView.Core/Agibuild.Avalonia.WebView.Core.csproj",
-            "src/Agibuild.Avalonia.WebView.Runtime/Agibuild.Avalonia.WebView.Runtime.csproj",
-            "src/Agibuild.Avalonia.WebView/Agibuild.Avalonia.WebView.csproj"
+            "src/Agibuild.Fulora.Core/Agibuild.Fulora.Core.csproj",
+            "src/Agibuild.Fulora.Runtime/Agibuild.Fulora.Runtime.csproj",
+            "src/Agibuild.Fulora/Agibuild.Fulora.csproj"
           ],
           "src": ".."
         }
@@ -48,9 +48,9 @@
     "output": "_site",
     "template": ["default", "modern"],
     "globalMetadata": {
-      "_appTitle": "Agibuild.Avalonia.WebView",
-      "_appName": "Agibuild.Avalonia.WebView",
-      "_appFooter": "Agibuild.Avalonia.WebView — Cross-platform Hybrid App Framework",
+      "_appTitle": "Agibuild.Fulora",
+      "_appName": "Agibuild.Fulora",
+      "_appFooter": "Agibuild.Fulora — Cross-platform Hybrid App Framework",
       "_enableSearch": true,
       "_enableNewTab": true
     }

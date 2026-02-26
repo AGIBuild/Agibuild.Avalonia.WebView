@@ -70,7 +70,7 @@ Foundation               Type-Safe Bridge       SPA Hosting            Polish & 
 
 | Decision | Choice | Rationale |
 |----------|--------|-----------|
-| Attribute naming | `[JsExport]` / `[JsImport]` | Concise, symmetric, clear direction (Export = C#→JS, Import = JS→C#). Namespace `Agibuild.Avalonia.WebView` avoids collision with .NET WASM `JSExport`. |
+| Attribute naming | `[JsExport]` / `[JsImport]` | Concise, symmetric, clear direction (Export = C#→JS, Import = JS→C#). Namespace `Agibuild.Fulora` avoids collision with .NET WASM `JSExport`. |
 | Bridge vs EnableWebMessageBridge | Bridge is independent; auto-enables bridge if needed | Backward compatible; `Bridge.Expose<T>()` works standalone |
 | JS method naming | `ServiceName.methodName` (camelCase) | Avoids collision; JS-natural naming |
 | Parameter format | JSON-RPC 2.0 named params (object) | Supports optional params; readable |
@@ -201,7 +201,7 @@ Deliverable 1.1 is split into sub-changes for manageable delivery:
 | Change | Scope | Complexity |
 |--------|-------|------------|
 | **bridge-contracts** | `[JsExport]`/`[JsImport]` attrs, `IBridgeService`, `BridgeOptions`, `RuntimeBridgeService` (manual registration), `WebViewCore.Bridge` property, CT coverage | Medium |
-| **bridge-source-generator** | New `Agibuild.Avalonia.WebView.Bridge.Generator` project, Roslyn incremental generator, BridgeHost/BridgeProxy/JsStub emitters, CT for generated code | High |
+| **bridge-source-generator** | New `Agibuild.Fulora.Bridge.Generator` project, Roslyn incremental generator, BridgeHost/BridgeProxy/JsStub emitters, CT for generated code | High |
 | **bridge-integration** | Wire into WebView control, E2E test in Integration Test App, migration from raw RPC | Medium |
 
 ### Deliverables
@@ -222,20 +222,20 @@ Deliverable 1.1 is split into sub-changes for manageable delivery:
 
 ```
 src/
-├── Agibuild.Avalonia.WebView.Core/
+├── Agibuild.Fulora.Core/
 │   ├── JsExportAttribute.cs                  ← NEW
 │   ├── JsImportAttribute.cs                  ← NEW
 │   └── IBridgeService.cs                     ← NEW
-├── Agibuild.Avalonia.WebView.Runtime/
+├── Agibuild.Fulora.Runtime/
 │   ├── RuntimeBridgeService.cs               ← NEW
 │   └── WebViewCore.cs                        ← MODIFIED (Bridge property)
-├── Agibuild.Avalonia.WebView.Bridge.Generator/  ← NEW PROJECT (netstandard2.0)
+├── Agibuild.Fulora.Bridge.Generator/  ← NEW PROJECT (netstandard2.0)
 │   ├── WebViewBridgeGenerator.cs
 │   ├── BridgeHostEmitter.cs
 │   ├── BridgeProxyEmitter.cs
 │   ├── JsStubEmitter.cs
 │   └── TypeMapper.cs
-└── Agibuild.Avalonia.WebView/
+└── Agibuild.Fulora/
     └── WebView.cs                            ← MODIFIED (Bridge API)
 ```
 

@@ -3,17 +3,17 @@
   "lanes": [
     {
       "name": "ContractAutomation",
-      "project": "tests/Agibuild.Avalonia.WebView.UnitTests/Agibuild.Avalonia.WebView.UnitTests.csproj",
+      "project": "tests/Agibuild.Fulora.UnitTests/Agibuild.Fulora.UnitTests.csproj",
       "description": "Mock-driven contract and semantic invariants."
     },
     {
       "name": "RuntimeAutomation",
-      "project": "tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/Agibuild.Avalonia.WebView.Integration.Tests.Automation.csproj",
+      "project": "tests/Agibuild.Fulora.Integration.Tests.Automation/Agibuild.Fulora.Integration.Tests.Automation.csproj",
       "description": "Real runtime/adapter integration and UI-thread boundary validation."
     },
     {
       "name": "RuntimeAutomation.PackageSmoke",
-      "project": "tests/Agibuild.Avalonia.WebView.Integration.NugetPackageTests/Agibuild.Avalonia.WebView.Integration.NugetPackageTests.csproj",
+      "project": "tests/Agibuild.Fulora.Integration.NugetPackageTests/Agibuild.Fulora.Integration.NugetPackageTests.csproj",
       "description": "Package-consumption smoke validation for published artifacts."
     }
   ]

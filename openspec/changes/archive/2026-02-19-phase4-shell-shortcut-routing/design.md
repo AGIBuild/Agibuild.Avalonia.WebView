@@ -7,7 +7,7 @@
 ## Goals / Non-Goals
 
 **Goals:**
-- 在 `Agibuild.Avalonia.WebView` 中新增可复用快捷键路由组件。
+- 在 `Agibuild.Fulora` 中新增可复用快捷键路由组件。
 - 提供跨平台默认 shell 快捷键集合（主键随平台切换）。
 - 将模板 `app-shell` preset 接入该组件并确保可释放、可治理。
 - 提供自动化测试覆盖主路径、未命中路径、能力缺失路径。
@@ -19,7 +19,7 @@
 
 ## Decisions
 
-### 1) 组件放在 public `Agibuild.Avalonia.WebView` 而非 runtime shell
+### 1) 组件放在 public `Agibuild.Fulora` 而非 runtime shell
 - **Decision:** 新增 `WebViewShortcutRouter` 于公共包，直接基于 `IWebView`、`ICommandManager`、`OpenDevToolsAsync`。
 - **Rationale:** 模板只引用主包即可使用，避免再次引入 runtime 内部耦合。
 - **Alternative A:** 仅在模板内手写快捷键处理（拒绝，重复实现、不可复用）。

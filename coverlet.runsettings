@@ -6,19 +6,19 @@
         <Configuration>
           <Format>cobertura</Format>
           <Include>
-            [Agibuild.Avalonia.WebView.Core]*,
-            [Agibuild.Avalonia.WebView.Adapters.Abstractions]*,
-            [Agibuild.Avalonia.WebView.Runtime]*,
-            [Agibuild.Avalonia.WebView.DependencyInjection]*
+            [Agibuild.Fulora.Core]*,
+            [Agibuild.Fulora.Adapters.Abstractions]*,
+            [Agibuild.Fulora.Runtime]*,
+            [Agibuild.Fulora.DependencyInjection]*
           </Include>
           <Exclude>
-            [Agibuild.Avalonia.WebView.Testing]*,
-            [Agibuild.Avalonia.WebView.UnitTests]*,
-            [Agibuild.Avalonia.WebView.Adapters.MacOS]*,
-            [Agibuild.Avalonia.WebView.Adapters.Windows]*,
-            [Agibuild.Avalonia.WebView.Adapters.Android]*,
-            [Agibuild.Avalonia.WebView.Adapters.Gtk]*,
-            [Agibuild.Avalonia.WebView]*
+            [Agibuild.Fulora.Testing]*,
+            [Agibuild.Fulora.UnitTests]*,
+            [Agibuild.Fulora.Adapters.MacOS]*,
+            [Agibuild.Fulora.Adapters.Windows]*,
+            [Agibuild.Fulora.Adapters.Android]*,
+            [Agibuild.Fulora.Adapters.Gtk]*,
+            [Agibuild.Fulora]*
           </Exclude>
           <ExcludeByAttribute>
             Obsolete,

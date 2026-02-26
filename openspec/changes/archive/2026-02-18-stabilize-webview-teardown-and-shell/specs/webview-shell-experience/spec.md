@@ -4,7 +4,7 @@
 The system SHALL provide an opt-in “shell experience” component that improves common host behaviors without changing baseline WebView contract semantics when not enabled.
 
 #### Scenario: Default runtime behavior is unchanged when shell experience is not enabled
-- **WHEN** an app uses `Agibuild.Avalonia.WebView` without enabling shell experience
+- **WHEN** an app uses `Agibuild.Fulora` without enabling shell experience
 - **THEN** the baseline behaviors defined by existing specs remain unchanged
 
 ### Requirement: New window policy strategies are configurable

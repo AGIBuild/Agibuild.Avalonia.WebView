@@ -56,7 +56,7 @@ The build system MUST allow any supported host OS to build and pack all platform
 - **THEN** `build` and `buildTransitive` target injection is disabled for those projects
 
 #### Scenario: Windows adapter compile still succeeds with explicit core reference
-- **WHEN** `Agibuild.Avalonia.WebView.Adapters.Windows` is built on any host
+- **WHEN** `Agibuild.Fulora.Adapters.Windows` is built on any host
 - **THEN** compile-time WebView2 API binding resolves through explicit `Microsoft.Web.WebView2.Core` reference without requiring WPF/WinForms assemblies
 
 ### Requirement: CI warning signals are machine-classified

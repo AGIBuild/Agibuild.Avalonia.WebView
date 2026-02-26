@@ -4,14 +4,14 @@
 
 ### Sub-package Packaging
 Five projects made independently packable:
-- `Agibuild.Avalonia.WebView.Core` — contract types ([JsExport], [JsImport], IWebView, IBridgeService)
-- `Agibuild.Avalonia.WebView.Adapters.Abstractions` — adapter SPI layer
-- `Agibuild.Avalonia.WebView.Runtime` — WebViewCore, RuntimeBridgeService, RPC
-- `Agibuild.Avalonia.WebView.Bridge.Generator` — Roslyn source generator (analyzer)
-- `Agibuild.Avalonia.WebView.Testing` — MockBridgeService, MockWebViewAdapter, TestDispatcher
+- `Agibuild.Fulora.Core` — contract types ([JsExport], [JsImport], IWebView, IBridgeService)
+- `Agibuild.Fulora.Adapters.Abstractions` — adapter SPI layer
+- `Agibuild.Fulora.Runtime` — WebViewCore, RuntimeBridgeService, RPC
+- `Agibuild.Fulora.Bridge.Generator` — Roslyn source generator (analyzer)
+- `Agibuild.Fulora.Testing` — MockBridgeService, MockWebViewAdapter, TestDispatcher
 
 ### Template Pack Project
-`templates/Agibuild.Avalonia.WebView.Templates.csproj` uses `<PackageType>Template</PackageType>` with `<ContentTargetFolders>content</ContentTargetFolders>` to package the `agibuild-hybrid` template folder into a NuGet package. Users install via `dotnet new install Agibuild.Avalonia.WebView.Templates`.
+`templates/Agibuild.Fulora.Templates.csproj` uses `<PackageType>Template</PackageType>` with `<ContentTargetFolders>content</ContentTargetFolders>` to package the `agibuild-hybrid` template folder into a NuGet package. Users install via `dotnet new install Agibuild.Fulora.Templates`.
 
 ### Nuke Build Targets
 

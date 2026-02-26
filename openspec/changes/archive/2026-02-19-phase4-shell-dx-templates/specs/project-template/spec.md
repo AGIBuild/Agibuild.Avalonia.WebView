@@ -5,7 +5,7 @@ The template SHALL define stable identity and classification metadata in `templa
 
 #### Scenario: Template identity and short name are present
 - **WHEN** template metadata is inspected
-- **THEN** identity is `Agibuild.Avalonia.WebView.HybridTemplate` and short name is `agibuild-hybrid`
+- **THEN** identity is `Agibuild.Fulora.HybridTemplate` and short name is `agibuild-hybrid`
 
 #### Scenario: Template classifications and directory preference are configured
 - **WHEN** template metadata is inspected

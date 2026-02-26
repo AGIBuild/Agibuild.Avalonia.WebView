@@ -28,4 +28,4 @@ Integration tests use `MockWebViewAdapter` + `WebViewCore` (no real browser) but
 
 ## Generator Reference
 
-Integration Tests project references `Agibuild.Avalonia.WebView.Bridge.Generator` as analyzer so `[JsExport]`/`[JsImport]` interfaces get generated registration/proxy code for E2E.
+Integration Tests project references `Agibuild.Fulora.Bridge.Generator` as analyzer so `[JsExport]`/`[JsImport]` interfaces get generated registration/proxy code for E2E.

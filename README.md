@@ -1,7 +1,7 @@
 <p align="center">
-  <img src="https://img.shields.io/nuget/v/Agibuild.Avalonia.WebView?logo=nuget&label=NuGet&color=004880&style=flat-square" />
-  <img src="https://img.shields.io/nuget/dt/Agibuild.Avalonia.WebView?logo=nuget&label=Downloads&color=00a86b&style=flat-square" />
-  <a href="https://github.com/AGIBuild/Agibuild.Avalonia.WebView/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/AGIBuild/Agibuild.Avalonia.WebView/ci.yml?label=CI&logo=github&style=flat-square" /></a>
+  <img src="https://img.shields.io/nuget/v/Agibuild.Fulora?logo=nuget&label=NuGet&color=004880&style=flat-square" />
+  <img src="https://img.shields.io/nuget/dt/Agibuild.Fulora?logo=nuget&label=Downloads&color=00a86b&style=flat-square" />
+  <a href="https://github.com/AGIBuild/Agibuild.Fulora/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/AGIBuild/Agibuild.Fulora/ci.yml?label=CI&logo=github&style=flat-square" /></a>
   <img src="https://img.shields.io/badge/License-MIT-yellow?style=flat-square" />
 </p>
 
@@ -17,7 +17,7 @@
 > Build a category-defining C# + Web application framework with a clear promise:  
 > **from first WebView embed to full product platform, without rewriting your foundation**.
 >
-> **Current package ID**: `Agibuild.Avalonia.WebView` (branding is now Fulora).
+> **Current package ID**: `Agibuild.Fulora` (branding is now Fulora).
 
 ## Vision
 
@@ -105,7 +105,7 @@ Read more:
 Install package:
 
 ```bash
-dotnet add package Agibuild.Avalonia.WebView
+dotnet add package Agibuild.Fulora
 ```
 
 Enable in `Program.cs`:
@@ -120,7 +120,7 @@ AppBuilder.Configure<App>()
 Add control in XAML:
 
 ```xml
-<Window xmlns:wv="using:Agibuild.Avalonia.WebView">
+<Window xmlns:wv="using:Agibuild.Fulora">
     <wv:WebView x:Name="WebView" Source="https://example.com" />
 </Window>
 ```
@@ -259,7 +259,7 @@ For detailed API usage, see:
 ## Template Workflow
 
 ```bash
-dotnet new install Agibuild.Avalonia.WebView.Templates
+dotnet new install Agibuild.Fulora.Templates
 dotnet new agibuild-hybrid -n MyApp
 cd MyApp
 dotnet run --project MyApp.Desktop

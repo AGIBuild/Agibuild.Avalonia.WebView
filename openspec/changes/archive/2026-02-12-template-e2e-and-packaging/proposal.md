@@ -5,7 +5,7 @@ The `agibuild-hybrid` project template references three separate NuGet packages 
 
 ## Solution
 1. Make Core, Adapters.Abstractions, Runtime, Bridge.Generator, and Testing independently packable with proper `IsPackable` + `PackageId` configuration.
-2. Create a template pack project (`Agibuild.Avalonia.WebView.Templates.csproj`) for `dotnet new install` via NuGet.
+2. Create a template pack project (`Agibuild.Fulora.Templates.csproj`) for `dotnet new install` via NuGet.
 3. Add four Nuke build targets:
    - `PackAll`: Packs sub-packages (Core, Abstractions, Runtime, Generator, Testing)
    - `PackTemplate`: Packs the template as a NuGet package

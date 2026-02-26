@@ -9,7 +9,7 @@ Core, Adapters.Abstractions, Runtime, Bridge.Generator, and Testing packages SHA
 - **THEN** individual `.nupkg` artifacts are generated for each sub-package
 
 ### Requirement: Template package is distributable via dotnet new
-The template package SHALL produce `Agibuild.Avalonia.WebView.Templates.nupkg` and SHALL be installable through `dotnet new install`.
+The template package SHALL produce `Agibuild.Fulora.Templates.nupkg` and SHALL be installable through `dotnet new install`.
 
 #### Scenario: Template package installs successfully
 - **WHEN** the generated template package is installed with `dotnet new install`

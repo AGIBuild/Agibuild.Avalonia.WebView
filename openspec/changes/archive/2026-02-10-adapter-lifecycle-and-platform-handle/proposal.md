@@ -27,9 +27,9 @@ Avalonia's official `NativeWebView` exposes `AdapterCreated` / `AdapterDestroyed
 
 ## Impact
 
-- **Core contracts** (`Agibuild.Avalonia.WebView.Core`): New event args, typed handle interfaces, `IWebView` gains two events.
-- **Runtime** (`Agibuild.Avalonia.WebView.Runtime`): `WebViewCore` raises lifecycle events during `Attach`/`Detach`/`Dispose`.
-- **Control** (`Agibuild.Avalonia.WebView`): `WebView` subscribes and bubbles lifecycle events.
+- **Core contracts** (`Agibuild.Fulora.Core`): New event args, typed handle interfaces, `IWebView` gains two events.
+- **Runtime** (`Agibuild.Fulora.Runtime`): `WebViewCore` raises lifecycle events during `Attach`/`Detach`/`Dispose`.
+- **Control** (`Agibuild.Fulora`): `WebView` subscribes and bubbles lifecycle events.
 - **All adapters** (Windows, macOS, iOS, Android, Gtk): Return typed handle from `TryGetWebViewHandle()`.
 - **Tests**: New contract tests for lifecycle event ordering guarantees and typed handle resolution.
 - **No breaking changes**: `INativeWebViewHandleProvider.TryGetWebViewHandle()` return type stays `IPlatformHandle?`; new typed interfaces are additive.

@@ -25,7 +25,7 @@ This change advances **G4 (Contract-Driven Testability)** and Phase 3 deliverabl
 
 ## Impact
 
-- Affected tests: `tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation`, `tests/Agibuild.Avalonia.WebView.Integration.NugetPackageTests`, `tests/Agibuild.Avalonia.WebView.Testing`, and selected `UnitTests` governance checks.
+- Affected tests: `tests/Agibuild.Fulora.Integration.Tests.Automation`, `tests/Agibuild.Fulora.Integration.NugetPackageTests`, `tests/Agibuild.Fulora.Testing`, and selected `UnitTests` governance checks.
 - Affected build flow: `build/Build.cs` target behavior for package smoke and retry classification.
 - Affected runtime boundaries: option propagation and async/sync boundary audit points in runtime/control layers.
 - CI/reporting impact: test result taxonomy and confidence reporting become explicit artifacts.

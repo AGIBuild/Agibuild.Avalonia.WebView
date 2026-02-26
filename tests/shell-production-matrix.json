@@ -15,7 +15,7 @@
       "evidence": [
         {
           "lane": "RuntimeAutomation",
-          "file": "tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/ShellProductionValidationIntegrationTests.cs",
+          "file": "tests/Agibuild.Fulora.Integration.Tests.Automation/ShellProductionValidationIntegrationTests.cs",
           "testMethod": "Shell_scope_attach_detach_soak_keeps_event_wiring_and_cleanup_deterministic"
         }
       ]
@@ -33,7 +33,7 @@
       "evidence": [
         {
           "lane": "RuntimeAutomation",
-          "file": "tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/MultiWindowLifecycleIntegrationTests.cs",
+          "file": "tests/Agibuild.Fulora.Integration.Tests.Automation/MultiWindowLifecycleIntegrationTests.cs",
           "testMethod": "Managed_window_stress_open_close_cycles_leave_no_active_windows"
         }
       ]
@@ -51,7 +51,7 @@
       "evidence": [
         {
           "lane": "RuntimeAutomation",
-          "file": "tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/HostCapabilityBridgeIntegrationTests.cs",
+          "file": "tests/Agibuild.Fulora.Integration.Tests.Automation/HostCapabilityBridgeIntegrationTests.cs",
           "testMethod": "Host_capability_bridge_stress_external_open_cycles_remain_deterministic"
         }
       ]
@@ -69,7 +69,7 @@
       "evidence": [
         {
           "lane": "RuntimeAutomation",
-          "file": "tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/HostCapabilityBridgeIntegrationTests.cs",
+          "file": "tests/Agibuild.Fulora.Integration.Tests.Automation/HostCapabilityBridgeIntegrationTests.cs",
           "testMethod": "Shell_product_experience_closure_file_menu_and_permission_recovery_is_deterministic"
         }
       ]
@@ -87,7 +87,7 @@
       "evidence": [
         {
           "lane": "RuntimeAutomation",
-          "file": "tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/WebView2TeardownStabilityIntegrationTests.cs",
+          "file": "tests/Agibuild.Fulora.Integration.Tests.Automation/WebView2TeardownStabilityIntegrationTests.cs",
           "testMethod": "WebView2_teardown_stress_does_not_emit_chromium_teardown_markers"
         }
       ]
@@ -105,7 +105,7 @@
       "evidence": [
         {
           "lane": "RuntimeAutomation",
-          "file": "tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/ShellPolicyIntegrationTests.cs",
+          "file": "tests/Agibuild.Fulora.Integration.Tests.Automation/ShellPolicyIntegrationTests.cs",
           "testMethod": "DevTools_policy_deny_is_isolated_and_permission_domain_remains_deterministic"
         }
       ]
@@ -123,7 +123,7 @@
       "evidence": [
         {
           "lane": "RuntimeAutomation",
-          "file": "tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/ShellPolicyIntegrationTests.cs",
+          "file": "tests/Agibuild.Fulora.Integration.Tests.Automation/ShellPolicyIntegrationTests.cs",
           "testMethod": "DevTools_policy_lifecycle_cycles_remain_deterministic_across_shell_recreation"
         }
       ]
@@ -141,7 +141,7 @@
       "evidence": [
         {
           "lane": "RuntimeAutomation",
-          "file": "tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/WebViewShortcutRouterTests.cs",
+          "file": "tests/Agibuild.Fulora.Integration.Tests.Automation/WebViewShortcutRouterTests.cs",
           "testMethod": "Default_shell_bindings_include_expected_command_and_devtools_actions"
         }
       ]
@@ -159,7 +159,7 @@
       "evidence": [
         {
           "lane": "RuntimeAutomation",
-          "file": "tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/HostCapabilityBridgeIntegrationTests.cs",
+          "file": "tests/Agibuild.Fulora.Integration.Tests.Automation/HostCapabilityBridgeIntegrationTests.cs",
           "testMethod": "Host_system_integration_event_roundtrip_and_menu_pruning_are_deterministic"
         }
       ]
@@ -177,7 +177,7 @@
       "evidence": [
         {
           "lane": "RuntimeAutomation",
-          "file": "tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/HostCapabilityBridgeIntegrationTests.cs",
+          "file": "tests/Agibuild.Fulora.Integration.Tests.Automation/HostCapabilityBridgeIntegrationTests.cs",
           "testMethod": "Tray_payload_v2_roundtrip_with_platform_extensions_is_machine_checkable"
         }
       ]
@@ -195,7 +195,7 @@
       "evidence": [
         {
           "lane": "RuntimeAutomation",
-          "file": "tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/HostCapabilityBridgeIntegrationTests.cs",
+          "file": "tests/Agibuild.Fulora.Integration.Tests.Automation/HostCapabilityBridgeIntegrationTests.cs",
           "testMethod": "Tray_payload_v2_roundtrip_with_platform_extensions_is_machine_checkable"
         }
       ]
@@ -213,7 +213,7 @@
       "evidence": [
         {
           "lane": "RuntimeAutomation",
-          "file": "tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/HostCapabilityBridgeIntegrationTests.cs",
+          "file": "tests/Agibuild.Fulora.Integration.Tests.Automation/HostCapabilityBridgeIntegrationTests.cs",
           "testMethod": "System_integration_diagnostic_export_protocol_is_machine_checkable"
         }
       ]

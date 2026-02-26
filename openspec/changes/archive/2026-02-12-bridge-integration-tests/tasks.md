@@ -7,4 +7,4 @@
 **Acceptance**: `IE2EGreeter` [JsExport] + `IE2ENotifier` [JsImport]; `RunBridgeAsync` exposes, invokes via script, validates result, removes; `ResultBridge` indicator; scenario runs in "Run All" flow.
 
 ## Task 3: Add Generator reference to Integration Tests project
-**Acceptance**: Integration Tests project references `Agibuild.Avalonia.WebView.Bridge.Generator` as analyzer (OutputItemType="Analyzer", ReferenceOutputAssembly="false") for generated Bridge types.
+**Acceptance**: Integration Tests project references `Agibuild.Fulora.Bridge.Generator` as analyzer (OutputItemType="Analyzer", ReferenceOutputAssembly="false") for generated Bridge types.

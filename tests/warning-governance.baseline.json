@@ -3,7 +3,7 @@
   "windowsBaseConflicts": [],
   "xunitSuppressions": [
     {
-      "path": "tests/Agibuild.Avalonia.WebView.UnitTests/Agibuild.Avalonia.WebView.UnitTests.csproj",
+      "path": "tests/Agibuild.Fulora.UnitTests/Agibuild.Fulora.UnitTests.csproj",
       "warningId": "xUnit1031",
       "owner": "webview-test-infra",
       "rationale": "Thread-affinity contract tests intentionally use bounded blocking waits in deterministic harness boundaries.",

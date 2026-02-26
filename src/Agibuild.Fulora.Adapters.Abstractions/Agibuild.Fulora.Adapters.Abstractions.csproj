@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+
+    <IsPackable>true</IsPackable>
+    <PackageId>Agibuild.Fulora.Adapters.Abstractions</PackageId>
+    <Description>Adapter abstraction layer for Agibuild.Fulora platform adapters.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Agibuild.Fulora.Core\Agibuild.Fulora.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.3.11" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- IWebViewAdapter + WebViewAdapterRegistry are internal SPI. -->
+    <InternalsVisibleTo Include="Agibuild.Fulora.Runtime" />
+    <InternalsVisibleTo Include="Agibuild.Fulora.DependencyInjection" />
+    <InternalsVisibleTo Include="Agibuild.Fulora.Adapters.MacOS" />
+    <InternalsVisibleTo Include="Agibuild.Fulora.Adapters.Windows" />
+    <InternalsVisibleTo Include="Agibuild.Fulora.Adapters.Gtk" />
+    <InternalsVisibleTo Include="Agibuild.Fulora.Adapters.Android" />
+    <InternalsVisibleTo Include="Agibuild.Fulora.Adapters.iOS" />
+    <InternalsVisibleTo Include="Agibuild.Fulora.Testing" />
+    <InternalsVisibleTo Include="Agibuild.Fulora.UnitTests" />
+    <InternalsVisibleTo Include="Agibuild.Fulora.Integration.Tests" />
+    <InternalsVisibleTo Include="Agibuild.Fulora.Integration.Tests.Automation" />
+  </ItemGroup>
+</Project>

@@ -349,25 +349,25 @@ partial class BuildTask
     IEnumerable<AbsolutePath> GetProjectsToBuild()
     {
         // Core libs (always built)
-        yield return SrcDirectory / "Agibuild.Avalonia.WebView.Core" / "Agibuild.Avalonia.WebView.Core.csproj";
-        yield return SrcDirectory / "Agibuild.Avalonia.WebView.Adapters.Abstractions" / "Agibuild.Avalonia.WebView.Adapters.Abstractions.csproj";
-        yield return SrcDirectory / "Agibuild.Avalonia.WebView.Runtime" / "Agibuild.Avalonia.WebView.Runtime.csproj";
-        yield return SrcDirectory / "Agibuild.Avalonia.WebView.DependencyInjection" / "Agibuild.Avalonia.WebView.DependencyInjection.csproj";
+        yield return SrcDirectory / "Agibuild.Fulora.Core" / "Agibuild.Fulora.Core.csproj";
+        yield return SrcDirectory / "Agibuild.Fulora.Adapters.Abstractions" / "Agibuild.Fulora.Adapters.Abstractions.csproj";
+        yield return SrcDirectory / "Agibuild.Fulora.Runtime" / "Agibuild.Fulora.Runtime.csproj";
+        yield return SrcDirectory / "Agibuild.Fulora.DependencyInjection" / "Agibuild.Fulora.DependencyInjection.csproj";
 
         // Platform adapters (always built — stub adapters compile on all platforms)
-        yield return SrcDirectory / "Agibuild.Avalonia.WebView.Adapters.Windows" / "Agibuild.Avalonia.WebView.Adapters.Windows.csproj";
-        yield return SrcDirectory / "Agibuild.Avalonia.WebView.Adapters.Gtk" / "Agibuild.Avalonia.WebView.Adapters.Gtk.csproj";
+        yield return SrcDirectory / "Agibuild.Fulora.Adapters.Windows" / "Agibuild.Fulora.Adapters.Windows.csproj";
+        yield return SrcDirectory / "Agibuild.Fulora.Adapters.Gtk" / "Agibuild.Fulora.Adapters.Gtk.csproj";
 
         // macOS adapter (native shim requires macOS host)
         if (OperatingSystem.IsMacOS())
         {
-            yield return SrcDirectory / "Agibuild.Avalonia.WebView.Adapters.MacOS" / "Agibuild.Avalonia.WebView.Adapters.MacOS.csproj";
+            yield return SrcDirectory / "Agibuild.Fulora.Adapters.MacOS" / "Agibuild.Fulora.Adapters.MacOS.csproj";
         }
 
         // Android adapter (requires Android workload)
         if (HasDotNetWorkload("android"))
         {
-            yield return SrcDirectory / "Agibuild.Avalonia.WebView.Adapters.Android" / "Agibuild.Avalonia.WebView.Adapters.Android.csproj";
+            yield return SrcDirectory / "Agibuild.Fulora.Adapters.Android" / "Agibuild.Fulora.Adapters.Android.csproj";
         }
         else
         {
@@ -377,7 +377,7 @@ partial class BuildTask
         // iOS adapter (requires macOS host + iOS workload)
         if (OperatingSystem.IsMacOS() && HasDotNetWorkload("ios"))
         {
-            yield return SrcDirectory / "Agibuild.Avalonia.WebView.Adapters.iOS" / "Agibuild.Avalonia.WebView.Adapters.iOS.csproj";
+            yield return SrcDirectory / "Agibuild.Fulora.Adapters.iOS" / "Agibuild.Fulora.Adapters.iOS.csproj";
         }
         else if (OperatingSystem.IsMacOS())
         {
@@ -385,11 +385,11 @@ partial class BuildTask
         }
 
         // Main packable project
-        yield return SrcDirectory / "Agibuild.Avalonia.WebView" / "Agibuild.Avalonia.WebView.csproj";
+        yield return SrcDirectory / "Agibuild.Fulora" / "Agibuild.Fulora.csproj";
 
         // Test projects
-        yield return TestsDirectory / "Agibuild.Avalonia.WebView.Testing" / "Agibuild.Avalonia.WebView.Testing.csproj";
-        yield return TestsDirectory / "Agibuild.Avalonia.WebView.UnitTests" / "Agibuild.Avalonia.WebView.UnitTests.csproj";
+        yield return TestsDirectory / "Agibuild.Fulora.Testing" / "Agibuild.Fulora.Testing.csproj";
+        yield return TestsDirectory / "Agibuild.Fulora.UnitTests" / "Agibuild.Fulora.UnitTests.csproj";
         yield return IntegrationTestsProject;
     }
 

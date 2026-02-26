@@ -8,10 +8,10 @@
 
 ## Commands and Outcomes
 
-1. `dotnet test tests/Agibuild.Avalonia.WebView.UnitTests/Agibuild.Avalonia.WebView.UnitTests.csproj --filter "FullyQualifiedName~ShellSystemIntegrationCapabilityTests|FullyQualifiedName~HostCapabilityBridgeTests|FullyQualifiedName~AutomationLaneGovernanceTests" | Out-String`  
+1. `dotnet test tests/Agibuild.Fulora.UnitTests/Agibuild.Fulora.UnitTests.csproj --filter "FullyQualifiedName~ShellSystemIntegrationCapabilityTests|FullyQualifiedName~HostCapabilityBridgeTests|FullyQualifiedName~AutomationLaneGovernanceTests" | Out-String`  
    - Outcome: **Passed** (`40 passed, 0 failed`)
 
-2. `dotnet test tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/Agibuild.Avalonia.WebView.Integration.Tests.Automation.csproj --filter "FullyQualifiedName~HostCapabilityBridgeIntegrationTests" | Out-String`  
+2. `dotnet test tests/Agibuild.Fulora.Integration.Tests.Automation/Agibuild.Fulora.Integration.Tests.Automation.csproj --filter "FullyQualifiedName~HostCapabilityBridgeIntegrationTests" | Out-String`  
    - Outcome: **Passed** (`5 passed, 0 failed`)
 
 3. `openspec validate shell-governance-contract-v2 --strict | Out-String`  

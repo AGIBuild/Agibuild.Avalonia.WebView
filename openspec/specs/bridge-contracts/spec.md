@@ -10,7 +10,7 @@ The default service name SHALL be the interface name with the leading `I` remove
 
 #### Scenario: JsExport attribute is resolvable
 - **WHEN** a consumer applies `[JsExport]` to an interface
-- **THEN** it compiles without errors in the `Agibuild.Avalonia.WebView` namespace
+- **THEN** it compiles without errors in the `Agibuild.Fulora` namespace
 
 #### Scenario: JsExport with custom name
 - **WHEN** `[JsExport(Name = "app")]` is applied to an interface
@@ -22,7 +22,7 @@ The attribute SHALL accept an optional `Name` property (string) to override the 
 
 #### Scenario: JsImport attribute is resolvable
 - **WHEN** a consumer applies `[JsImport]` to an interface
-- **THEN** it compiles without errors in the `Agibuild.Avalonia.WebView` namespace
+- **THEN** it compiles without errors in the `Agibuild.Fulora` namespace
 
 ### Requirement: IBridgeService contract exists in Core assembly
 The Core assembly SHALL define an `IBridgeService` interface with:

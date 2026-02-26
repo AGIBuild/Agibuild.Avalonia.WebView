@@ -7,7 +7,7 @@
       "branchIntent": "Disposed guard on UI-thread native navigation denies request immediately.",
       "owner": "webview-runtime",
       "lane": "ContractAutomation",
-      "testFile": "tests/Agibuild.Avalonia.WebView.UnitTests/WebViewCoreHotspotCoverageTests.cs",
+      "testFile": "tests/Agibuild.Fulora.UnitTests/WebViewCoreHotspotCoverageTests.cs",
       "testMethod": "OnNativeNavigationStartingOnUiThread_disposed_denies_navigation"
     },
     {
@@ -16,7 +16,7 @@
       "branchIntent": "Disposed guard returns categorized failure before dispatcher invocation.",
       "owner": "webview-runtime",
       "lane": "ContractAutomation",
-      "testFile": "tests/Agibuild.Avalonia.WebView.UnitTests/WebViewCoreHotspotCoverageTests.cs",
+      "testFile": "tests/Agibuild.Fulora.UnitTests/WebViewCoreHotspotCoverageTests.cs",
       "testMethod": "InvokeAsyncOnUiThread_non_generic_disposed_returns_disposed_error"
     },
     {
@@ -25,7 +25,7 @@
       "branchIntent": "Generic dispatcher path enforces disposed guard deterministically.",
       "owner": "webview-runtime",
       "lane": "ContractAutomation",
-      "testFile": "tests/Agibuild.Avalonia.WebView.UnitTests/WebViewCoreHotspotCoverageTests.cs",
+      "testFile": "tests/Agibuild.Fulora.UnitTests/WebViewCoreHotspotCoverageTests.cs",
       "testMethod": "InvokeAsyncOnUiThread_generic_disposed_returns_disposed_error"
     },
     {
@@ -34,7 +34,7 @@
       "branchIntent": "Two-parameter wrapper overload executes and awaits completion path.",
       "owner": "webview-runtime",
       "lane": "ContractAutomation",
-      "testFile": "tests/Agibuild.Avalonia.WebView.UnitTests/WebViewCoreHotspotCoverageTests.cs",
+      "testFile": "tests/Agibuild.Fulora.UnitTests/WebViewCoreHotspotCoverageTests.cs",
       "testMethod": "StartNavigationCoreAsync_wrapper_overload_completes_when_adapter_finishes"
     },
     {
@@ -43,7 +43,7 @@
       "branchIntent": "Custom scheme adapter registration branch executes when adapter supports it.",
       "owner": "webview-runtime",
       "lane": "ContractAutomation",
-      "testFile": "tests/Agibuild.Avalonia.WebView.UnitTests/WebViewCoreHotspotCoverageTests.cs",
+      "testFile": "tests/Agibuild.Fulora.UnitTests/WebViewCoreHotspotCoverageTests.cs",
       "testMethod": "EnableSpaHosting_registers_custom_scheme_when_adapter_supports_it"
     },
     {
@@ -52,7 +52,7 @@
       "branchIntent": "Event short-circuits when adapter is marked destroyed.",
       "owner": "webview-runtime",
       "lane": "ContractAutomation",
-      "testFile": "tests/Agibuild.Avalonia.WebView.UnitTests/WebViewCoreHotspotCoverageTests.cs",
+      "testFile": "tests/Agibuild.Fulora.UnitTests/WebViewCoreHotspotCoverageTests.cs",
       "testMethod": "NavigationCompleted_is_ignored_when_adapter_is_destroyed"
     },
     {
@@ -61,7 +61,7 @@
       "branchIntent": "NewWindowRequested short-circuits when adapter is marked destroyed.",
       "owner": "webview-runtime",
       "lane": "ContractAutomation",
-      "testFile": "tests/Agibuild.Avalonia.WebView.UnitTests/WebViewCoreHotspotCoverageTests.cs",
+      "testFile": "tests/Agibuild.Fulora.UnitTests/WebViewCoreHotspotCoverageTests.cs",
       "testMethod": "NewWindowRequested_is_ignored_when_adapter_is_destroyed"
     },
     {
@@ -70,7 +70,7 @@
       "branchIntent": "WebMessage short-circuits when adapter is marked destroyed.",
       "owner": "webview-runtime",
       "lane": "ContractAutomation",
-      "testFile": "tests/Agibuild.Avalonia.WebView.UnitTests/WebViewCoreHotspotCoverageTests.cs",
+      "testFile": "tests/Agibuild.Fulora.UnitTests/WebViewCoreHotspotCoverageTests.cs",
       "testMethod": "WebMessageReceived_is_ignored_when_adapter_is_destroyed"
     },
     {
@@ -79,7 +79,7 @@
       "branchIntent": "WebResourceRequested short-circuits when adapter is marked destroyed.",
       "owner": "webview-runtime",
       "lane": "ContractAutomation",
-      "testFile": "tests/Agibuild.Avalonia.WebView.UnitTests/WebViewCoreHotspotCoverageTests.cs",
+      "testFile": "tests/Agibuild.Fulora.UnitTests/WebViewCoreHotspotCoverageTests.cs",
       "testMethod": "WebResourceRequested_is_ignored_when_adapter_is_destroyed"
     },
     {
@@ -88,7 +88,7 @@
       "branchIntent": "EnvironmentRequested short-circuits when adapter is marked destroyed.",
       "owner": "webview-runtime",
       "lane": "ContractAutomation",
-      "testFile": "tests/Agibuild.Avalonia.WebView.UnitTests/WebViewCoreHotspotCoverageTests.cs",
+      "testFile": "tests/Agibuild.Fulora.UnitTests/WebViewCoreHotspotCoverageTests.cs",
       "testMethod": "EnvironmentRequested_is_ignored_when_adapter_is_destroyed"
     },
     {
@@ -97,7 +97,7 @@
       "branchIntent": "Message is dropped when bridge policy is null.",
       "owner": "webview-runtime",
       "lane": "ContractAutomation",
-      "testFile": "tests/Agibuild.Avalonia.WebView.UnitTests/WebViewCoreHotspotCoverageTests.cs",
+      "testFile": "tests/Agibuild.Fulora.UnitTests/WebViewCoreHotspotCoverageTests.cs",
       "testMethod": "WebMessageReceived_drops_message_when_policy_is_null"
     },
     {
@@ -106,7 +106,7 @@
       "branchIntent": "Null-safe handler path does not throw when SPA hosting service is absent.",
       "owner": "webview-runtime",
       "lane": "ContractAutomation",
-      "testFile": "tests/Agibuild.Avalonia.WebView.UnitTests/WebViewCoreHotspotCoverageTests.cs",
+      "testFile": "tests/Agibuild.Fulora.UnitTests/WebViewCoreHotspotCoverageTests.cs",
       "testMethod": "OnSpaWebResourceRequested_without_service_is_noop"
     }
   ]

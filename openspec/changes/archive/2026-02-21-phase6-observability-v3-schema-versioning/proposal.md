@@ -27,5 +27,5 @@ Current shell diagnostics are structured but lack an explicit schema version in 
 ## Impact
 
 - Runtime: `WebViewHostCapabilityDiagnosticEventArgs` and `WebViewSessionPermissionProfileDiagnosticEventArgs`.
-- Tests: shared helper in `Agibuild.Avalonia.WebView.Testing`, plus CT/IT/governance test updates.
+- Tests: shared helper in `Agibuild.Fulora.Testing`, plus CT/IT/governance test updates.
 - Governance: stronger machine-checkable observability baseline aligned with G4 and Phase 5 M5.3/M5.5 evidence quality.

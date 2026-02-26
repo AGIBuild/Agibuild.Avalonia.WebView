@@ -39,7 +39,7 @@ Avalonia's official WebView provides `AdapterCreated`/`AdapterDestroyed` events 
 
 ### 3) Typed handle interfaces live in Core, implementations in adapters
 
-**Decision:** Define marker interfaces in `Agibuild.Avalonia.WebView.Core`:
+**Decision:** Define marker interfaces in `Agibuild.Fulora.Core`:
 - `IWindowsWebView2PlatformHandle : IPlatformHandle` — `nint CoreWebView2Handle`, `nint CoreWebView2ControllerHandle`
 - `IAppleWKWebViewPlatformHandle : IPlatformHandle` — `nint WKWebViewHandle`
 - `IGtkWebViewPlatformHandle : IPlatformHandle` — `nint WebKitWebViewHandle`

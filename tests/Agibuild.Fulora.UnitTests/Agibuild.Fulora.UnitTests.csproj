@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsTestProject>true</IsTestProject>
+    <AutomationLane>ContractAutomation</AutomationLane>
+    <!-- xUnit1031: Intentional blocking in threading/dispatcher tests — GetAwaiter().GetResult() is needed
+         to test cross-thread marshaling behavior with RunOffThread pattern. -->
+    <NoWarn>$(NoWarn);xUnit1031</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Agibuild.Fulora.Core\Agibuild.Fulora.Core.csproj" />
+    <ProjectReference Include="..\..\src\Agibuild.Fulora.Adapters.Abstractions\Agibuild.Fulora.Adapters.Abstractions.csproj" />
+    <ProjectReference Include="..\..\src\Agibuild.Fulora.Runtime\Agibuild.Fulora.Runtime.csproj" />
+    <ProjectReference Include="..\..\src\Agibuild.Fulora.DependencyInjection\Agibuild.Fulora.DependencyInjection.csproj" />
+    <ProjectReference Include="..\Agibuild.Fulora.Testing\Agibuild.Fulora.Testing.csproj" />
+    <ProjectReference Include="..\..\src\Agibuild.Fulora.Bridge.Generator\Agibuild.Fulora.Bridge.Generator.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="TestResources\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.2" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
+    <PackageReference Include="xunit.v3" Version="3.2.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="coverlet.collector" Version="6.0.4">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+</Project>

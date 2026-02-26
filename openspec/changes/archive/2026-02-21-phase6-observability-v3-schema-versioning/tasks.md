@@ -5,7 +5,7 @@
 
 ## 2. Cross-Lane Assertion Unification
 
-- [x] 2.1 Add shared diagnostic schema assertion helper in `Agibuild.Avalonia.WebView.Testing`.
+- [x] 2.1 Add shared diagnostic schema assertion helper in `Agibuild.Fulora.Testing`.
 - [x] 2.2 Migrate diagnostics-focused CT/IT tests to use the shared helper and assert schema-version stability.
 - [x] 2.3 Update governance tests to validate schema contract continuity with the shared expectation source.
 

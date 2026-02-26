@@ -20,11 +20,11 @@ Platform implementations are intentionally deferred; only adapter skeletons and 
 ## Decisions
 
 - Project layout is split into dedicated assemblies:
-  - `Agibuild.Avalonia.WebView.Core` for public contracts, event args, and shared types only.
-  - `Agibuild.Avalonia.WebView.Adapters.Abstractions` for adapter interfaces and adapter lifecycle contracts.
-  - `Agibuild.Avalonia.WebView.Adapters.Windows`, `Agibuild.Avalonia.WebView.Adapters.MacOS`, `Agibuild.Avalonia.WebView.Adapters.Android`, `Agibuild.Avalonia.WebView.Adapters.Gtk` as empty platform skeletons.
-  - `Agibuild.Avalonia.WebView.DependencyInjection` for DI integration and registrations.
-  - `Agibuild.Avalonia.WebView.UnitTests` for contract tests and mocks.
+  - `Agibuild.Fulora.Core` for public contracts, event args, and shared types only.
+  - `Agibuild.Fulora.Adapters.Abstractions` for adapter interfaces and adapter lifecycle contracts.
+  - `Agibuild.Fulora.Adapters.Windows`, `Agibuild.Fulora.Adapters.MacOS`, `Agibuild.Fulora.Adapters.Android`, `Agibuild.Fulora.Adapters.Gtk` as empty platform skeletons.
+  - `Agibuild.Fulora.DependencyInjection` for DI integration and registrations.
+  - `Agibuild.Fulora.UnitTests` for contract tests and mocks.
   - Alternative considered: single library with conditional compilation. Rejected to avoid platform coupling and to keep tests platform-free.
 
 - Dependency direction is enforced as one-way:
@@ -42,7 +42,7 @@ Platform implementations are intentionally deferred; only adapter skeletons and 
   - Alternative considered: hard dependency on a DI library in Core. Rejected to keep Core minimal and portable.
 
 - Target frameworks are platform-first and aligned to .NET 10:
-  - `Agibuild.Avalonia.WebView.Core`, `...Adapters.Abstractions`, `...DependencyInjection` target `net10.0`.
+  - `Agibuild.Fulora.Core`, `...Adapters.Abstractions`, `...DependencyInjection` target `net10.0`.
   - `...Adapters.Windows` targets `net10.0-windows`.
   - `...Adapters.MacOS` targets `net10.0-macos`.
   - `...Adapters.Android` targets `net10.0-android`.

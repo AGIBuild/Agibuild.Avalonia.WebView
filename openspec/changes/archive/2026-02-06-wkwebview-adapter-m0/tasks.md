@@ -1,6 +1,6 @@
 ## 1. macOS adapter structure & lifecycle
 
-- [x] 1.1 Ensure `Agibuild.Avalonia.WebView.Adapters.MacOS` builds on macOS and references Core + Abstractions only
+- [x] 1.1 Ensure `Agibuild.Fulora.Adapters.MacOS` builds on macOS and references Core + Abstractions only
 - [x] 1.2 Implement `MacOSWebViewAdapter.Initialize(IWebViewAdapterHost host)` and store host/channel context
 - [x] 1.3 Implement `Attach(IPlatformHandle parentHandle)` to create/attach WKWebView to the parent native view
 - [x] 1.4 Implement `Detach()` to tear down WK delegates/handlers and prevent further event emission

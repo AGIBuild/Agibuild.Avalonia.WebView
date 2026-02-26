@@ -5,7 +5,7 @@ Define opt-in, UI-agnostic runtime policies that improve common “shell-like”
 The system SHALL provide an opt-in shell policy foundation that improves common host behaviors (new-window, downloads, permissions), supports optional host capability bridge integration, and supports optional system integration governance (menu/tray/system actions) without changing baseline WebView contract semantics when not enabled.
 
 #### Scenario: Default runtime behavior is unchanged when shell experience is not enabled
-- **WHEN** an app uses `Agibuild.Avalonia.WebView` without enabling shell experience
+- **WHEN** an app uses `Agibuild.Fulora` without enabling shell experience
 - **THEN** the baseline behaviors defined by existing specs remain unchanged
 
 #### Scenario: Host capability bridge is optional in shell experience

@@ -31,10 +31,10 @@
 ## Impact
 
 - Affected code:
-  - `src/Agibuild.Avalonia.WebView.Runtime/Shell/*`
+  - `src/Agibuild.Fulora.Runtime/Shell/*`
   - `templates/agibuild-hybrid/*`
-  - `tests/Agibuild.Avalonia.WebView.UnitTests/*`
-  - `tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/*`
+  - `tests/Agibuild.Fulora.UnitTests/*`
+  - `tests/Agibuild.Fulora.Integration.Tests.Automation/*`
 - API/contract impact:
   - 系统动作白名单契约版本提升（v2）
   - tray 事件 payload 模型补充扩展字段约束

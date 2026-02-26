@@ -6,7 +6,7 @@ static string FindRepoRoot()
     var dir = new DirectoryInfo(AppContext.BaseDirectory);
     while (dir is not null)
     {
-        if (File.Exists(Path.Combine(dir.FullName, "Agibuild.Avalonia.WebView.sln")))
+        if (File.Exists(Path.Combine(dir.FullName, "Agibuild.Fulora.sln")))
             return dir.FullName;
         dir = dir.Parent;
     }
@@ -62,12 +62,12 @@ var outPathArg = args.FirstOrDefault(x => x.StartsWith("--out=", StringCompariso
 
 var assemblyPaths = new[]
 {
-    Path.Combine(repoRoot, "src", "Agibuild.Avalonia.WebView.Core", "bin", configuration, "net10.0", "Agibuild.Avalonia.WebView.Core.dll"),
-    Path.Combine(repoRoot, "src", "Agibuild.Avalonia.WebView.Adapters.Abstractions", "bin", configuration, "net10.0", "Agibuild.Avalonia.WebView.Adapters.Abstractions.dll"),
-    Path.Combine(repoRoot, "src", "Agibuild.Avalonia.WebView.Runtime", "bin", configuration, "net10.0", "Agibuild.Avalonia.WebView.Runtime.dll"),
-    Path.Combine(repoRoot, "src", "Agibuild.Avalonia.WebView.DependencyInjection", "bin", configuration, "net10.0", "Agibuild.Avalonia.WebView.DependencyInjection.dll"),
-    Path.Combine(repoRoot, "src", "Agibuild.Avalonia.WebView", "bin", configuration, "net10.0", "Agibuild.Avalonia.WebView.dll"),
-    Path.Combine(repoRoot, "src", "Agibuild.Avalonia.WebView.Bridge.Generator", "bin", configuration, "netstandard2.0", "Agibuild.Avalonia.WebView.Bridge.Generator.dll"),
+    Path.Combine(repoRoot, "src", "Agibuild.Fulora.Core", "bin", configuration, "net10.0", "Agibuild.Fulora.Core.dll"),
+    Path.Combine(repoRoot, "src", "Agibuild.Fulora.Adapters.Abstractions", "bin", configuration, "net10.0", "Agibuild.Fulora.Adapters.Abstractions.dll"),
+    Path.Combine(repoRoot, "src", "Agibuild.Fulora.Runtime", "bin", configuration, "net10.0", "Agibuild.Fulora.Runtime.dll"),
+    Path.Combine(repoRoot, "src", "Agibuild.Fulora.DependencyInjection", "bin", configuration, "net10.0", "Agibuild.Fulora.DependencyInjection.dll"),
+    Path.Combine(repoRoot, "src", "Agibuild.Fulora", "bin", configuration, "net10.0", "Agibuild.Fulora.dll"),
+    Path.Combine(repoRoot, "src", "Agibuild.Fulora.Bridge.Generator", "bin", configuration, "netstandard2.0", "Agibuild.Fulora.Bridge.Generator.dll"),
 };
 
 var missing = assemblyPaths.Where(p => !File.Exists(p)).ToList();

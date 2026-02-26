@@ -2,13 +2,13 @@
 
 ### Executed Commands
 
-1. `dotnet test tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/Agibuild.Avalonia.WebView.Integration.Tests.Automation.csproj --filter FullyQualifiedName~WebViewShortcutRouterTests`
+1. `dotnet test tests/Agibuild.Fulora.Integration.Tests.Automation/Agibuild.Fulora.Integration.Tests.Automation.csproj --filter FullyQualifiedName~WebViewShortcutRouterTests`
    - Result: **Passed** (`5 passed, 0 failed`)
-2. `dotnet test tests/Agibuild.Avalonia.WebView.UnitTests/Agibuild.Avalonia.WebView.UnitTests.csproj --filter FullyQualifiedName~AutomationLaneGovernanceTests.Hybrid_template_source_contains_shell_preset_wiring_markers`
+2. `dotnet test tests/Agibuild.Fulora.UnitTests/Agibuild.Fulora.UnitTests.csproj --filter FullyQualifiedName~AutomationLaneGovernanceTests.Hybrid_template_source_contains_shell_preset_wiring_markers`
    - Result: **Passed** (`1 passed, 0 failed`)
-3. `dotnet test tests/Agibuild.Avalonia.WebView.UnitTests/Agibuild.Avalonia.WebView.UnitTests.csproj`
+3. `dotnet test tests/Agibuild.Fulora.UnitTests/Agibuild.Fulora.UnitTests.csproj`
    - Result: **Passed** (`725 passed, 0 failed`)
-4. `dotnet test tests/Agibuild.Avalonia.WebView.Integration.Tests.Automation/Agibuild.Avalonia.WebView.Integration.Tests.Automation.csproj`
+4. `dotnet test tests/Agibuild.Fulora.Integration.Tests.Automation/Agibuild.Fulora.Integration.Tests.Automation.csproj`
    - Result: **Passed** (`140 passed, 0 failed`)
 
 ### Requirement Traceability
