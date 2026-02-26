@@ -2,6 +2,8 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using Agibuild.Avalonia.WebView.Testing;
 using Xunit;
+using static Agibuild.Avalonia.WebView.Testing.GovernanceAssertionHelper;
+using static Agibuild.Avalonia.WebView.Testing.GovernanceInvariantIds;
 
 namespace Agibuild.Avalonia.WebView.UnitTests;
 
@@ -12,28 +14,19 @@ public sealed class AutomationLaneGovernanceTests
     {
         var repoRoot = FindRepoRoot();
         var manifestPath = Path.Combine(repoRoot, "tests", "automation-lanes.json");
-        Assert.True(File.Exists(manifestPath), $"Missing automation lane manifest: {manifestPath}");
 
-        using var doc = JsonDocument.Parse(File.ReadAllText(manifestPath));
-        var lanes = doc.RootElement.GetProperty("lanes").EnumerateArray().ToList();
-        Assert.NotEmpty(lanes);
+        using var doc = LoadJsonArtifact(manifestPath, AutomationLaneManifestSchema);
+        var lanes = RequireProperty(doc.RootElement, "lanes", AutomationLaneManifestSchema, manifestPath);
 
-        var laneNames = lanes
-            .Select(x => x.GetProperty("name").GetString())
-            .Where(x => !string.IsNullOrWhiteSpace(x))
-            .ToHashSet(StringComparer.Ordinal);
+        var laneNames = ExtractStringIds(lanes, "name");
+        AssertContainsAll(laneNames, ["ContractAutomation", "RuntimeAutomation", "RuntimeAutomation.PackageSmoke"],
+            AutomationLaneManifestSchema, manifestPath);
 
-        Assert.Contains("ContractAutomation", laneNames);
-        Assert.Contains("RuntimeAutomation", laneNames);
-        Assert.Contains("RuntimeAutomation.PackageSmoke", laneNames);
-
-        foreach (var lane in lanes)
+        foreach (var lane in lanes.EnumerateArray())
         {
-            var project = lane.GetProperty("project").GetString();
-            Assert.False(string.IsNullOrWhiteSpace(project));
-
-            var projectPath = Path.Combine(repoRoot, project!.Replace('/', Path.DirectorySeparatorChar));
-            Assert.True(File.Exists(projectPath), $"Lane project does not exist: {projectPath}");
+            var project = lane.GetProperty("project").GetString()!;
+            var projectPath = Path.Combine(repoRoot, project.Replace('/', Path.DirectorySeparatorChar));
+            AssertFileExists(projectPath, AutomationLaneManifestSchema);
         }
     }
 
@@ -42,11 +35,9 @@ public sealed class AutomationLaneGovernanceTests
     {
         var repoRoot = FindRepoRoot();
         var manifestPath = Path.Combine(repoRoot, "tests", "runtime-critical-path.manifest.json");
-        Assert.True(File.Exists(manifestPath), $"Missing critical-path manifest: {manifestPath}");
 
-        using var doc = JsonDocument.Parse(File.ReadAllText(manifestPath));
-        var scenarios = doc.RootElement.GetProperty("scenarios").EnumerateArray().ToList();
-        Assert.NotEmpty(scenarios);
+        using var doc = LoadJsonArtifact(manifestPath, RuntimeCriticalPathScenarioPresence);
+        var scenarios = RequireProperty(doc.RootElement, "scenarios", RuntimeCriticalPathScenarioPresence, manifestPath);
 
         var requiredScenarioIds = new[]
         {
@@ -69,34 +60,24 @@ public sealed class AutomationLaneGovernanceTests
             "shell-system-integration-diagnostic-export"
         };
 
-        var scenarioIds = scenarios
-            .Select(x => x.GetProperty("id").GetString())
-            .Where(x => !string.IsNullOrWhiteSpace(x))
-            .ToHashSet(StringComparer.Ordinal);
+        var scenarioIds = ExtractStringIds(scenarios, "id");
+        AssertContainsAll(scenarioIds, requiredScenarioIds, RuntimeCriticalPathScenarioPresence, manifestPath);
 
-        foreach (var requiredId in requiredScenarioIds)
-        {
-            Assert.Contains(requiredId, scenarioIds);
-        }
+        var validCiContexts = new HashSet<string>(StringComparer.Ordinal) { "Ci", "CiPublish" };
 
-        foreach (var scenario in scenarios)
+        foreach (var scenario in scenarios.EnumerateArray())
         {
-            var id = scenario.GetProperty("id").GetString();
-            var file = scenario.GetProperty("file").GetString();
-            var testMethod = scenario.GetProperty("testMethod").GetString();
-            var ciContext = scenario.TryGetProperty("ciContext", out var ciContextNode) ? ciContextNode.GetString() : "Ci";
-            Assert.False(string.IsNullOrWhiteSpace(file));
-            Assert.False(string.IsNullOrWhiteSpace(testMethod));
-            Assert.Contains(ciContext, new[] { "Ci", "CiPublish" });
+            var id = scenario.GetProperty("id").GetString()!;
+            var file = scenario.GetProperty("file").GetString()!;
+            var testMethod = scenario.GetProperty("testMethod").GetString()!;
+            var ciContext = scenario.TryGetProperty("ciContext", out var ciContextNode) ? ciContextNode.GetString()! : "Ci";
+
+            AssertControlledVocabulary([ciContext], validCiContexts, RuntimeCriticalPathScenarioPresence, $"scenario '{id}' ciContext");
 
             if (string.Equals(id, "package-consumption-smoke", StringComparison.Ordinal))
                 Assert.Equal("CiPublish", ciContext);
 
-            var sourcePath = Path.Combine(repoRoot, file!.Replace('/', Path.DirectorySeparatorChar));
-            Assert.True(File.Exists(sourcePath), $"Scenario source file does not exist: {sourcePath}");
-
-            var source = File.ReadAllText(sourcePath);
-            Assert.Contains(testMethod!, source, StringComparison.Ordinal);
+            AssertEvidenceLinkage(repoRoot, file, testMethod, RuntimeCriticalPathEvidenceLinkage);
         }
     }
 
@@ -105,40 +86,21 @@ public sealed class AutomationLaneGovernanceTests
     {
         var repoRoot = FindRepoRoot();
         var matrixPath = Path.Combine(repoRoot, "tests", "shell-system-integration-ct-matrix.json");
-        Assert.True(File.Exists(matrixPath), $"Missing system integration CT matrix: {matrixPath}");
 
-        using var doc = JsonDocument.Parse(File.ReadAllText(matrixPath));
-        var rows = doc.RootElement.GetProperty("rows").EnumerateArray().ToList();
-        Assert.NotEmpty(rows);
+        using var doc = LoadJsonArtifact(matrixPath, SystemIntegrationCtMatrixSchema);
+        var rows = RequireProperty(doc.RootElement, "rows", SystemIntegrationCtMatrixSchema, matrixPath);
 
-        var rowIds = rows
-            .Select(x => x.GetProperty("id").GetString())
-            .Where(x => !string.IsNullOrWhiteSpace(x))
-            .ToHashSet(StringComparer.Ordinal);
-        Assert.Contains("tray-event-inbound", rowIds);
-        Assert.Contains("menu-pruning", rowIds);
-        Assert.Contains("system-action-whitelist", rowIds);
-        Assert.Contains("tray-payload-v2-schema", rowIds);
+        var rowIds = ExtractStringIds(rows, "id");
+        AssertContainsAll(rowIds,
+            ["tray-event-inbound", "menu-pruning", "system-action-whitelist", "tray-payload-v2-schema"],
+            SystemIntegrationCtMatrixSchema, matrixPath);
 
-        foreach (var row in rows)
+        foreach (var row in rows.EnumerateArray())
         {
             var coverage = row.GetProperty("coverage").EnumerateArray().Select(x => x.GetString()).ToList();
             Assert.NotEmpty(coverage);
 
-            var evidenceItems = row.GetProperty("evidence").EnumerateArray().ToList();
-            Assert.NotEmpty(evidenceItems);
-            foreach (var evidence in evidenceItems)
-            {
-                var file = evidence.GetProperty("file").GetString();
-                var testMethod = evidence.GetProperty("testMethod").GetString();
-                Assert.False(string.IsNullOrWhiteSpace(file));
-                Assert.False(string.IsNullOrWhiteSpace(testMethod));
-
-                var sourcePath = Path.Combine(repoRoot, file!.Replace('/', Path.DirectorySeparatorChar));
-                Assert.True(File.Exists(sourcePath), $"CT matrix evidence file does not exist: {sourcePath}");
-                var source = File.ReadAllText(sourcePath);
-                Assert.Contains(testMethod!, source, StringComparison.Ordinal);
-            }
+            AssertEvidenceItems(row.GetProperty("evidence"), repoRoot, SystemIntegrationCtMatrixSchema);
         }
     }
 
@@ -149,24 +111,30 @@ public sealed class AutomationLaneGovernanceTests
         var combinedSource = ReadCombinedBuildSource(repoRoot);
         var mainSource = File.ReadAllText(Path.Combine(repoRoot, "build", "Build.cs"));
 
-        Assert.Contains("partial class BuildTask", mainSource, StringComparison.Ordinal);
-        Assert.Contains("Execute<BuildTask>(x => x.Build)", mainSource, StringComparison.Ordinal);
+        var requiredTargets = new[]
+        {
+            "Target ContractAutomation", "Target RuntimeAutomation", "Target AutomationLaneReport",
+            "Target WarningGovernance", "Target WarningGovernanceSyntheticCheck", "Target PhaseCloseoutSnapshot"
+        };
+        foreach (var target in requiredTargets)
+            AssertSourceContains(combinedSource, target, BuildPipelineTargetGraph, "build/Build*.cs");
 
-        Assert.Contains("Target ContractAutomation", combinedSource, StringComparison.Ordinal);
-        Assert.Contains("Target RuntimeAutomation", combinedSource, StringComparison.Ordinal);
-        Assert.Contains("Target AutomationLaneReport", combinedSource, StringComparison.Ordinal);
-        Assert.Contains("Target WarningGovernance", combinedSource, StringComparison.Ordinal);
-        Assert.Contains("Target WarningGovernanceSyntheticCheck", combinedSource, StringComparison.Ordinal);
-        Assert.Contains("automation-lane-report.json", combinedSource, StringComparison.Ordinal);
-        Assert.Contains("warning-governance-report.json", combinedSource, StringComparison.Ordinal);
-        Assert.Contains("warning-governance.baseline.json", combinedSource, StringComparison.Ordinal);
-        Assert.Contains("nuget-smoke-retry-telemetry.json", combinedSource, StringComparison.Ordinal);
-        Assert.Contains("phase5-closeout-snapshot.json", combinedSource, StringComparison.Ordinal);
-        Assert.Contains("Target PhaseCloseoutSnapshot", combinedSource, StringComparison.Ordinal);
-        Assert.Contains("--shellPreset app-shell", combinedSource, StringComparison.Ordinal);
-        Assert.Contains("RunNugetSmokeWithRetry", combinedSource, StringComparison.Ordinal);
-        Assert.Contains("ClassifyNugetSmokeFailure", combinedSource, StringComparison.Ordinal);
-        Assert.Contains("ResolveNugetPackagesRoot", combinedSource, StringComparison.Ordinal);
+        var requiredArtifacts = new[]
+        {
+            "automation-lane-report.json", "warning-governance-report.json",
+            "warning-governance.baseline.json", "nuget-smoke-retry-telemetry.json",
+            "ci-evidence-snapshot.json"
+        };
+        foreach (var artifact in requiredArtifacts)
+            AssertSourceContains(combinedSource, artifact, BuildPipelineTargetGraph, "build/Build*.cs");
+
+        var requiredMethods = new[] { "RunNugetSmokeWithRetry", "ClassifyNugetSmokeFailure", "ResolveNugetPackagesRoot" };
+        foreach (var method in requiredMethods)
+            AssertSourceContains(combinedSource, method, BuildPipelineTargetGraph, "build/Build*.cs");
+
+        AssertSourceContains(mainSource, "partial class BuildTask", BuildPipelineTargetGraph, "build/Build.cs");
+        AssertSourceContains(mainSource, "Execute<BuildTask>(x => x.Build)", BuildPipelineTargetGraph, "build/Build.cs");
+        AssertSourceContains(combinedSource, "--shellPreset app-shell", BuildPipelineTargetGraph, "build/Build*.cs");
     }
 
     [Fact]
@@ -174,35 +142,29 @@ public sealed class AutomationLaneGovernanceTests
     {
         var repoRoot = FindRepoRoot();
         var baselinePath = Path.Combine(repoRoot, "tests", "warning-governance.baseline.json");
-        Assert.True(File.Exists(baselinePath), $"Missing warning governance baseline: {baselinePath}");
 
-        using var doc = JsonDocument.Parse(File.ReadAllText(baselinePath));
-        var windowsBaseConflicts = doc.RootElement.GetProperty("windowsBaseConflicts").EnumerateArray().ToList();
-        Assert.Empty(windowsBaseConflicts);
+        using var doc = LoadJsonArtifact(baselinePath, WarningGovernanceBaseline);
+        var conflicts = RequireProperty(doc.RootElement, "windowsBaseConflicts", WarningGovernanceBaseline, baselinePath);
+        Assert.Empty(conflicts.EnumerateArray().ToList());
     }
 
     [Fact]
     public void Webview2_reference_model_is_host_agnostic()
     {
         var repoRoot = FindRepoRoot();
-        var adapterProjectPath = Path.Combine(
-            repoRoot,
-            "src",
-            "Agibuild.Avalonia.WebView.Adapters.Windows",
-            "Agibuild.Avalonia.WebView.Adapters.Windows.csproj");
-        var packProjectPath = Path.Combine(
-            repoRoot,
-            "src",
-            "Agibuild.Avalonia.WebView",
-            "Agibuild.Avalonia.WebView.csproj");
+        var adapterProjectPath = Path.Combine(repoRoot, "src", "Agibuild.Avalonia.WebView.Adapters.Windows", "Agibuild.Avalonia.WebView.Adapters.Windows.csproj");
+        var packProjectPath = Path.Combine(repoRoot, "src", "Agibuild.Avalonia.WebView", "Agibuild.Avalonia.WebView.csproj");
+
+        AssertFileExists(adapterProjectPath, WebView2ReferenceModel);
+        AssertFileExists(packProjectPath, WebView2ReferenceModel);
 
         var adapterSource = File.ReadAllText(adapterProjectPath);
         var packSource = File.ReadAllText(packProjectPath);
 
-        Assert.Contains("ExcludeAssets=\"compile;build;buildTransitive\"", adapterSource, StringComparison.Ordinal);
-        Assert.Contains("<Reference Include=\"Microsoft.Web.WebView2.Core\">", adapterSource, StringComparison.Ordinal);
+        AssertSourceContains(adapterSource, "ExcludeAssets=\"compile;build;buildTransitive\"", WebView2ReferenceModel, adapterProjectPath);
+        AssertSourceContains(adapterSource, "<Reference Include=\"Microsoft.Web.WebView2.Core\">", WebView2ReferenceModel, adapterProjectPath);
         Assert.DoesNotContain("MSB3277", adapterSource, StringComparison.Ordinal);
-        Assert.Contains("ExcludeAssets=\"build;buildTransitive\"", packSource, StringComparison.Ordinal);
+        AssertSourceContains(packSource, "ExcludeAssets=\"build;buildTransitive\"", WebView2ReferenceModel, packProjectPath);
     }
 
     [Fact]
@@ -224,15 +186,15 @@ public sealed class AutomationLaneGovernanceTests
         foreach (var relative in projects)
         {
             var path = Path.Combine(repoRoot, relative.Replace('/', Path.DirectorySeparatorChar));
-            Assert.True(File.Exists(path), $"Expected project file does not exist: {path}");
+            AssertFileExists(path, XunitVersionAlignment);
             var xml = File.ReadAllText(path);
 
             var xunitV3 = ExtractPackageVersion(xml, "xunit.v3");
-            Assert.False(string.IsNullOrWhiteSpace(xunitV3), $"Missing PackageReference Include=\"xunit.v3\" in {relative}");
+            Assert.False(string.IsNullOrWhiteSpace(xunitV3), $"[{XunitVersionAlignment}] Missing xunit.v3 in {relative}");
             xunitV3Versions[relative] = xunitV3!;
 
             var runner = ExtractPackageVersion(xml, "xunit.runner.visualstudio");
-            Assert.False(string.IsNullOrWhiteSpace(runner), $"Missing PackageReference Include=\"xunit.runner.visualstudio\" in {relative}");
+            Assert.False(string.IsNullOrWhiteSpace(runner), $"[{XunitVersionAlignment}] Missing xunit.runner.visualstudio in {relative}");
             runnerVersions[relative] = runner!;
         }
 
@@ -244,72 +206,33 @@ public sealed class AutomationLaneGovernanceTests
     public void Hybrid_template_metadata_exposes_shell_preset_choices()
     {
         var repoRoot = FindRepoRoot();
-        var templatePath = Path.Combine(
-            repoRoot,
-            "templates",
-            "agibuild-hybrid",
-            ".template.config",
-            "template.json");
-        Assert.True(File.Exists(templatePath), $"Missing template metadata file: {templatePath}");
+        var templatePath = Path.Combine(repoRoot, "templates", "agibuild-hybrid", ".template.config", "template.json");
 
-        using var doc = JsonDocument.Parse(File.ReadAllText(templatePath));
-        var symbols = doc.RootElement.GetProperty("symbols");
-        var shellPreset = symbols.GetProperty("shellPreset");
+        using var doc = LoadJsonArtifact(templatePath, TemplateMetadataSchema);
+        var symbols = RequireProperty(doc.RootElement, "symbols", TemplateMetadataSchema, templatePath);
+        var shellPreset = RequireProperty(symbols, "shellPreset", TemplateMetadataSchema, templatePath);
 
         Assert.Equal("choice", shellPreset.GetProperty("datatype").GetString());
         Assert.Equal("app-shell", shellPreset.GetProperty("defaultValue").GetString());
 
-        var choices = shellPreset.GetProperty("choices")
-            .EnumerateArray()
-            .Select(c => c.GetProperty("choice").GetString())
-            .Where(x => !string.IsNullOrWhiteSpace(x))
-            .ToHashSet(StringComparer.Ordinal);
-
-        Assert.Contains("baseline", choices);
-        Assert.Contains("app-shell", choices);
+        var choices = ExtractStringIds(shellPreset.GetProperty("choices"), "choice");
+        AssertContainsAll(choices, ["baseline", "app-shell"], TemplateMetadataSchema, templatePath);
     }
 
     [Fact]
     public void Hybrid_template_source_contains_shell_preset_wiring_markers()
     {
         var repoRoot = FindRepoRoot();
-        var desktopMainWindowPath = Path.Combine(
-            repoRoot,
-            "templates",
-            "agibuild-hybrid",
-            "HybridApp.Desktop",
-            "MainWindow.axaml.cs");
-        var appShellPresetPath = Path.Combine(
-            repoRoot,
-            "templates",
-            "agibuild-hybrid",
-            "HybridApp.Desktop",
-            "MainWindow.AppShellPreset.cs");
-        var desktopProjectPath = Path.Combine(
-            repoRoot,
-            "templates",
-            "agibuild-hybrid",
-            "HybridApp.Desktop",
-            "HybridApp.Desktop.csproj");
-        var desktopProgramPath = Path.Combine(
-            repoRoot,
-            "templates",
-            "agibuild-hybrid",
-            "HybridApp.Desktop",
-            "Program.cs");
-        var desktopIndexPath = Path.Combine(
-            repoRoot,
-            "templates",
-            "agibuild-hybrid",
-            "HybridApp.Desktop",
-            "wwwroot",
-            "index.html");
+        var basePath = Path.Combine(repoRoot, "templates", "agibuild-hybrid", "HybridApp.Desktop");
 
-        Assert.True(File.Exists(desktopMainWindowPath), $"Missing template source file: {desktopMainWindowPath}");
-        Assert.True(File.Exists(appShellPresetPath), $"Missing app-shell preset source file: {appShellPresetPath}");
-        Assert.True(File.Exists(desktopProjectPath), $"Missing desktop template project file: {desktopProjectPath}");
-        Assert.True(File.Exists(desktopProgramPath), $"Missing desktop template program file: {desktopProgramPath}");
-        Assert.True(File.Exists(desktopIndexPath), $"Missing desktop template index file: {desktopIndexPath}");
+        var desktopMainWindowPath = Path.Combine(basePath, "MainWindow.axaml.cs");
+        var appShellPresetPath = Path.Combine(basePath, "MainWindow.AppShellPreset.cs");
+        var desktopProjectPath = Path.Combine(basePath, "HybridApp.Desktop.csproj");
+        var desktopProgramPath = Path.Combine(basePath, "Program.cs");
+        var desktopIndexPath = Path.Combine(basePath, "wwwroot", "index.html");
+
+        foreach (var p in new[] { desktopMainWindowPath, appShellPresetPath, desktopProjectPath, desktopProgramPath, desktopIndexPath })
+            AssertFileExists(p, TemplateMetadataSchema);
 
         var desktopMainWindow = File.ReadAllText(desktopMainWindowPath);
         var appShellPreset = File.ReadAllText(appShellPresetPath);
@@ -317,85 +240,76 @@ public sealed class AutomationLaneGovernanceTests
         var desktopProgram = File.ReadAllText(desktopProgramPath);
         var desktopIndex = File.ReadAllText(desktopIndexPath);
 
-        Assert.Contains("InitializeShellPreset();", desktopMainWindow, StringComparison.Ordinal);
-        Assert.Contains("DisposeShellPreset();", desktopMainWindow, StringComparison.Ordinal);
-        Assert.Contains("RegisterShellPresetBridgeServices();", desktopMainWindow, StringComparison.Ordinal);
-        Assert.Contains("partial void InitializeShellPreset();", desktopMainWindow, StringComparison.Ordinal);
-        Assert.Contains("partial void DisposeShellPreset();", desktopMainWindow, StringComparison.Ordinal);
-        Assert.Contains("partial void RegisterShellPresetBridgeServices();", desktopMainWindow, StringComparison.Ordinal);
+        var mainWindowMarkers = new[]
+        {
+            "InitializeShellPreset();", "DisposeShellPreset();", "RegisterShellPresetBridgeServices();",
+            "partial void InitializeShellPreset();", "partial void DisposeShellPreset();",
+            "partial void RegisterShellPresetBridgeServices();"
+        };
+        foreach (var marker in mainWindowMarkers)
+            AssertSourceContains(desktopMainWindow, marker, TemplateMetadataSchema, desktopMainWindowPath);
 
-        Assert.Contains("new WebViewShellExperience(", appShellPreset, StringComparison.Ordinal);
-        Assert.Contains("new WebViewHostCapabilityBridge(", appShellPreset, StringComparison.Ordinal);
-        Assert.Contains("WebView.Bridge.Expose<IDesktopHostService>", appShellPreset, StringComparison.Ordinal);
-        Assert.Contains("TryHandleShellShortcutAsync", appShellPreset, StringComparison.Ordinal);
-        Assert.Contains("ApplyMenuModel(", appShellPreset, StringComparison.Ordinal);
-        Assert.Contains("UpdateTrayState(", appShellPreset, StringComparison.Ordinal);
-        Assert.Contains("ExecuteSystemAction(", appShellPreset, StringComparison.Ordinal);
-        Assert.Contains("_systemActionWhitelist = new HashSet<WebViewSystemAction>", appShellPreset, StringComparison.Ordinal);
-        Assert.Contains("SystemActionWhitelist = _systemActionWhitelist", appShellPreset, StringComparison.Ordinal);
-        Assert.Contains("ShowAbout remains disabled unless explicitly added", appShellPreset, StringComparison.Ordinal);
-        Assert.Contains("ShowAbout opt-in snippet marker", appShellPreset, StringComparison.Ordinal);
-        Assert.Contains("enableShowAboutAction", appShellPreset, StringComparison.Ordinal);
-        Assert.Contains("IsShowAboutActionEnabledFromEnvironment", appShellPreset, StringComparison.Ordinal);
-        Assert.Contains("AGIBUILD_TEMPLATE_ENABLE_SHOWABOUT", appShellPreset, StringComparison.Ordinal);
-        Assert.Contains("SetShowAboutScenario", appShellPreset, StringComparison.Ordinal);
-        Assert.Contains("GetSystemIntegrationStrategy", appShellPreset, StringComparison.Ordinal);
-        Assert.Contains("template-showabout-policy-deny", appShellPreset, StringComparison.Ordinal);
-        Assert.Contains("ShowAboutScenarioState", appShellPreset, StringComparison.Ordinal);
-        Assert.Contains("canonical profile hash format", appShellPreset, StringComparison.Ordinal);
-        Assert.Contains("SessionPermissionProfileResolver = new DelegateSessionPermissionProfileResolver", appShellPreset, StringComparison.Ordinal);
-        Assert.Contains("WebViewPermissionKind.Other", appShellPreset, StringComparison.Ordinal);
-        Assert.Contains("ResolveMenuPruningStage", appShellPreset, StringComparison.Ordinal);
-        Assert.Contains("DrainSystemIntegrationEvents(", appShellPreset, StringComparison.Ordinal);
-        Assert.Contains("PublishSystemIntegrationEvent(", appShellPreset, StringComparison.Ordinal);
-        Assert.Contains("platform.source", appShellPreset, StringComparison.Ordinal);
-        Assert.Contains("platform.pruningStage", appShellPreset, StringComparison.Ordinal);
+        var appShellPresetMarkers = new[]
+        {
+            "new WebViewShellExperience(", "new WebViewHostCapabilityBridge(",
+            "WebView.Bridge.Expose<IDesktopHostService>", "TryHandleShellShortcutAsync",
+            "ApplyMenuModel(", "UpdateTrayState(", "ExecuteSystemAction(",
+            "_systemActionWhitelist = new HashSet<WebViewSystemAction>",
+            "SystemActionWhitelist = _systemActionWhitelist",
+            "ShowAbout remains disabled unless explicitly added",
+            "ShowAbout opt-in snippet marker", "enableShowAboutAction",
+            "IsShowAboutActionEnabledFromEnvironment", "AGIBUILD_TEMPLATE_ENABLE_SHOWABOUT",
+            "SetShowAboutScenario", "GetSystemIntegrationStrategy",
+            "template-showabout-policy-deny", "ShowAboutScenarioState",
+            "canonical profile hash format",
+            "SessionPermissionProfileResolver = new DelegateSessionPermissionProfileResolver",
+            "WebViewPermissionKind.Other", "ResolveMenuPruningStage",
+            "DrainSystemIntegrationEvents(", "PublishSystemIntegrationEvent(",
+            "platform.source", "platform.pruningStage",
+            "KeyDown +=", "KeyDown -=", "WebViewHostCapabilityCallOutcome"
+        };
+        foreach (var marker in appShellPresetMarkers)
+            AssertSourceContains(appShellPreset, marker, TemplateMetadataSchema, appShellPresetPath);
+
         Assert.DoesNotContain("ExternalOpenHandler", appShellPreset, StringComparison.Ordinal);
-        Assert.Contains("KeyDown +=", appShellPreset, StringComparison.Ordinal);
-        Assert.Contains("KeyDown -=", appShellPreset, StringComparison.Ordinal);
-        Assert.Contains("WebViewHostCapabilityCallOutcome", appShellPreset, StringComparison.Ordinal);
-        Assert.Contains("Agibuild.Avalonia.WebView", desktopProject, StringComparison.Ordinal);
-        Assert.DoesNotContain(".WithInterFont()", desktopProgram, StringComparison.Ordinal);
-        Assert.Contains("DesktopHostService.ReadClipboardText", desktopIndex, StringComparison.Ordinal);
-        Assert.Contains("DesktopHostService.WriteClipboardText", desktopIndex, StringComparison.Ordinal);
-        Assert.Contains("DesktopHostService.ApplyMenuModel", desktopIndex, StringComparison.Ordinal);
-        Assert.Contains("DesktopHostService.UpdateTrayState", desktopIndex, StringComparison.Ordinal);
-        Assert.Contains("DesktopHostService.ExecuteSystemAction", desktopIndex, StringComparison.Ordinal);
-        Assert.Contains("DesktopHostService.DrainSystemIntegrationEvents", desktopIndex, StringComparison.Ordinal);
-        Assert.Contains("result.appliedTopLevelItems", desktopIndex, StringComparison.Ordinal);
-        Assert.Contains("result.pruningStage", desktopIndex, StringComparison.Ordinal);
-        Assert.Contains("readBoundedMetadata(", desktopIndex, StringComparison.Ordinal);
-        Assert.Contains("platform.source", desktopIndex, StringComparison.Ordinal);
-        Assert.Contains("platform.pruningStage", desktopIndex, StringComparison.Ordinal);
-        Assert.Contains("source=", desktopIndex, StringComparison.Ordinal);
-        Assert.Contains("profileVersion=", desktopIndex, StringComparison.Ordinal);
-        Assert.Contains("platform.profileHash", desktopIndex, StringComparison.Ordinal);
-        Assert.Contains("result.isVisible", desktopIndex, StringComparison.Ordinal);
-        Assert.Contains("Host events", desktopIndex, StringComparison.Ordinal);
-        Assert.Contains("System action denied", desktopIndex, StringComparison.Ordinal);
-        Assert.Contains("window.runTemplateRegressionChecks", desktopIndex, StringComparison.Ordinal);
-        Assert.Contains("setShowAboutScenario", desktopIndex, StringComparison.Ordinal);
-        Assert.Contains("readSystemIntegrationStrategy", desktopIndex, StringComparison.Ordinal);
-        Assert.Contains("mode=", desktopIndex, StringComparison.Ordinal);
-        Assert.Contains("action=", desktopIndex, StringComparison.Ordinal);
-        Assert.Contains("outcome=", desktopIndex, StringComparison.Ordinal);
-        Assert.Contains("reason=", desktopIndex, StringComparison.Ordinal);
 
-        // Baseline preset must remain free from app-shell bidirectional wiring.
+        AssertSourceContains(desktopProject, "Agibuild.Avalonia.WebView", TemplateMetadataSchema, desktopProjectPath);
+        Assert.DoesNotContain(".WithInterFont()", desktopProgram, StringComparison.Ordinal);
+
+        var indexMarkers = new[]
+        {
+            "DesktopHostService.ReadClipboardText", "DesktopHostService.WriteClipboardText",
+            "DesktopHostService.ApplyMenuModel", "DesktopHostService.UpdateTrayState",
+            "DesktopHostService.ExecuteSystemAction", "DesktopHostService.DrainSystemIntegrationEvents",
+            "result.appliedTopLevelItems", "result.pruningStage", "readBoundedMetadata(",
+            "platform.source", "platform.pruningStage", "source=", "profileVersion=",
+            "platform.profileHash", "result.isVisible", "Host events", "System action denied",
+            "window.runTemplateRegressionChecks", "setShowAboutScenario",
+            "readSystemIntegrationStrategy", "mode=", "action=", "outcome=", "reason="
+        };
+        foreach (var marker in indexMarkers)
+            AssertSourceContains(desktopIndex, marker, TemplateMetadataSchema, desktopIndexPath);
+
         var templateJsonPath = Path.Combine(repoRoot, "templates", "agibuild-hybrid", ".template.config", "template.json");
         var templateJson = File.ReadAllText(templateJsonPath);
         var reactTemplateWebPath = Path.Combine(repoRoot, "templates", "agibuild-hybrid", "HybridApp.Web.Vite.React");
         var vueTemplateWebPath = Path.Combine(repoRoot, "templates", "agibuild-hybrid", "HybridApp.Web.Vite.Vue");
-        Assert.Contains("\"condition\": \"(shellPreset == 'baseline')\"", templateJson, StringComparison.Ordinal);
-        Assert.Contains("\"exclude\": [\"HybridApp.Desktop/MainWindow.AppShellPreset.cs\"]", templateJson, StringComparison.Ordinal);
-        Assert.Contains("\"condition\": \"(framework == 'react')\"", templateJson, StringComparison.Ordinal);
-        Assert.Contains("\"condition\": \"(framework == 'vue')\"", templateJson, StringComparison.Ordinal);
-        Assert.Contains("HybridApp.Web.Vite.React/**", templateJson, StringComparison.Ordinal);
-        Assert.Contains("HybridApp.Web.Vite.Vue/**", templateJson, StringComparison.Ordinal);
-        Assert.True(Directory.Exists(reactTemplateWebPath), $"Missing React web template scaffold: {reactTemplateWebPath}");
-        Assert.True(Directory.Exists(vueTemplateWebPath), $"Missing Vue web template scaffold: {vueTemplateWebPath}");
-        Assert.True(File.Exists(Path.Combine(reactTemplateWebPath, "package.json")), $"Missing React web template package.json");
-        Assert.True(File.Exists(Path.Combine(vueTemplateWebPath, "package.json")), $"Missing Vue web template package.json");
+
+        var templateJsonMarkers = new[]
+        {
+            "\"condition\": \"(shellPreset == 'baseline')\"",
+            "\"exclude\": [\"HybridApp.Desktop/MainWindow.AppShellPreset.cs\"]",
+            "\"condition\": \"(framework == 'react')\"",
+            "\"condition\": \"(framework == 'vue')\"",
+            "HybridApp.Web.Vite.React/**", "HybridApp.Web.Vite.Vue/**"
+        };
+        foreach (var marker in templateJsonMarkers)
+            AssertSourceContains(templateJson, marker, TemplateMetadataSchema, templateJsonPath);
+
+        Assert.True(Directory.Exists(reactTemplateWebPath), $"[{TemplateMetadataSchema}] Missing: {reactTemplateWebPath}");
+        Assert.True(Directory.Exists(vueTemplateWebPath), $"[{TemplateMetadataSchema}] Missing: {vueTemplateWebPath}");
+        AssertFileExists(Path.Combine(reactTemplateWebPath, "package.json"), TemplateMetadataSchema);
+        AssertFileExists(Path.Combine(vueTemplateWebPath, "package.json"), TemplateMetadataSchema);
         Assert.DoesNotContain("DesktopHostService.DrainSystemIntegrationEvents", desktopMainWindow, StringComparison.Ordinal);
         Assert.DoesNotContain("PublishSystemIntegrationEvent", desktopMainWindow, StringComparison.Ordinal);
     }
@@ -407,84 +321,54 @@ public sealed class AutomationLaneGovernanceTests
         var matrixPath = Path.Combine(repoRoot, "tests", "shell-production-matrix.json");
         var lanesPath = Path.Combine(repoRoot, "tests", "automation-lanes.json");
 
-        Assert.True(File.Exists(matrixPath), $"Missing shell production matrix: {matrixPath}");
-        Assert.True(File.Exists(lanesPath), $"Missing automation lanes manifest: {lanesPath}");
-
-        using var matrixDoc = JsonDocument.Parse(File.ReadAllText(matrixPath));
-        using var lanesDoc = JsonDocument.Parse(File.ReadAllText(lanesPath));
+        using var matrixDoc = LoadJsonArtifact(matrixPath, ShellProductionMatrixSchema);
+        using var lanesDoc = LoadJsonArtifact(lanesPath, ShellProductionMatrixSchema);
 
         var requiredPlatforms = new[] { "windows", "macos", "linux", "ios", "android" };
-        var allowedCoverageTokens = new HashSet<string>(StringComparer.Ordinal)
-        {
-            "ct",
-            "it-smoke",
-            "it-soak",
-            "n/a"
-        };
-        var laneNames = lanesDoc.RootElement.GetProperty("lanes")
-            .EnumerateArray()
-            .Select(x => x.GetProperty("name").GetString())
-            .Where(x => !string.IsNullOrWhiteSpace(x))
+        var allowedCoverageTokens = new HashSet<string>(StringComparer.Ordinal) { "ct", "it-smoke", "it-soak", "n/a" };
+
+        var laneNames = ExtractStringIds(lanesDoc.RootElement.GetProperty("lanes"), "name");
+        var platforms = matrixDoc.RootElement.GetProperty("platforms").EnumerateArray()
+            .Select(x => x.GetString()).Where(x => !string.IsNullOrWhiteSpace(x)).Cast<string>()
             .ToHashSet(StringComparer.Ordinal);
 
-        var platforms = matrixDoc.RootElement.GetProperty("platforms")
-            .EnumerateArray()
-            .Select(x => x.GetString())
-            .Where(x => !string.IsNullOrWhiteSpace(x))
-            .ToHashSet(StringComparer.Ordinal);
-        foreach (var platform in requiredPlatforms)
-        {
-            Assert.Contains(platform, platforms);
-        }
+        AssertContainsAll(platforms, requiredPlatforms, ShellProductionMatrixSchema, matrixPath);
 
         var capabilities = matrixDoc.RootElement.GetProperty("capabilities").EnumerateArray().ToList();
         Assert.NotEmpty(capabilities);
-        var capabilityIds = capabilities
-            .Select(x => x.GetProperty("id").GetString())
-            .Where(x => !string.IsNullOrWhiteSpace(x))
+
+        var capabilityIds = capabilities.Select(x => x.GetProperty("id").GetString()!)
             .ToHashSet(StringComparer.Ordinal);
 
         var requiredCapabilityIds = new[]
         {
-            "shell-attach-detach-soak",
-            "shell-multi-window-stress",
-            "shell-host-capability-stress",
-            "shell-product-experience-closure",
-            "windows-webview2-teardown-stress",
-            "shell-devtools-policy-isolation",
-            "shell-devtools-lifecycle-cycles",
-            "shell-shortcut-routing",
-            "shell-system-integration-roundtrip",
-            "shell-system-integration-v2-tray-payload",
-            "shell-system-integration-v2-timestamp-normalization",
+            "shell-attach-detach-soak", "shell-multi-window-stress", "shell-host-capability-stress",
+            "shell-product-experience-closure", "windows-webview2-teardown-stress",
+            "shell-devtools-policy-isolation", "shell-devtools-lifecycle-cycles",
+            "shell-shortcut-routing", "shell-system-integration-roundtrip",
+            "shell-system-integration-v2-tray-payload", "shell-system-integration-v2-timestamp-normalization",
             "shell-system-integration-diagnostic-export"
         };
-
-        foreach (var capabilityId in requiredCapabilityIds)
-        {
-            Assert.Contains(capabilityId, capabilityIds);
-        }
+        AssertContainsAll(capabilityIds, requiredCapabilityIds, ShellProductionMatrixSchema, matrixPath);
 
         foreach (var capability in capabilities)
         {
-            var capabilityId = capability.GetProperty("id").GetString();
-            Assert.False(string.IsNullOrWhiteSpace(capabilityId));
-
-            var supportLevel = capability.GetProperty("supportLevel").GetString();
-            Assert.False(string.IsNullOrWhiteSpace(supportLevel));
+            var capabilityId = capability.GetProperty("id").GetString()!;
+            Assert.False(string.IsNullOrWhiteSpace(capability.GetProperty("supportLevel").GetString()));
 
             var coverage = capability.GetProperty("coverage");
             foreach (var platform in requiredPlatforms)
             {
-                Assert.True(
-                    coverage.TryGetProperty(platform, out var coverageItems),
-                    $"Missing platform coverage '{platform}' in capability '{capabilityId}'.");
-                var coverageTokens = coverageItems.EnumerateArray().Select(x => x.GetString()).Where(x => !string.IsNullOrWhiteSpace(x)).Cast<string>().ToArray();
-                Assert.NotEmpty(coverageTokens);
-                Assert.All(coverageTokens, token => Assert.Contains(token, allowedCoverageTokens));
+                Assert.True(coverage.TryGetProperty(platform, out var coverageItems),
+                    $"[{ShellProductionMatrixSchema}] Missing platform coverage '{platform}' in capability '{capabilityId}'.");
+
+                var tokens = coverageItems.EnumerateArray().Select(x => x.GetString()!)
+                    .Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
+                Assert.NotEmpty(tokens);
+                AssertControlledVocabulary(tokens, allowedCoverageTokens, ShellProductionMatrixSchema, $"capability '{capabilityId}' platform '{platform}'");
 
                 if (platform is "ios" or "android")
-                    Assert.All(coverageTokens, token => Assert.Equal("n/a", token));
+                    Assert.All(tokens, token => Assert.Equal("n/a", token));
             }
 
             var evidenceItems = capability.GetProperty("evidence").EnumerateArray().ToList();
@@ -492,20 +376,10 @@ public sealed class AutomationLaneGovernanceTests
 
             foreach (var evidence in evidenceItems)
             {
-                var lane = evidence.GetProperty("lane").GetString();
-                var file = evidence.GetProperty("file").GetString();
-                var testMethod = evidence.GetProperty("testMethod").GetString();
-
-                Assert.False(string.IsNullOrWhiteSpace(lane));
-                Assert.False(string.IsNullOrWhiteSpace(file));
-                Assert.False(string.IsNullOrWhiteSpace(testMethod));
-                Assert.Contains(lane!, laneNames);
-
-                var sourcePath = Path.Combine(repoRoot, file!.Replace('/', Path.DirectorySeparatorChar));
-                Assert.True(File.Exists(sourcePath), $"Matrix evidence source file does not exist: {sourcePath}");
-
-                var source = File.ReadAllText(sourcePath);
-                Assert.Contains(testMethod!, source, StringComparison.Ordinal);
+                var lane = evidence.GetProperty("lane").GetString()!;
+                Assert.Contains(lane, laneNames);
+                AssertEvidenceLinkage(repoRoot, evidence.GetProperty("file").GetString()!,
+                    evidence.GetProperty("testMethod").GetString()!, ShellProductionMatrixSchema);
             }
         }
     }
@@ -514,52 +388,16 @@ public sealed class AutomationLaneGovernanceTests
     public void Host_capability_diagnostic_contract_and_external_open_path_remain_schema_stable()
     {
         var repoRoot = FindRepoRoot();
-        var bridgePath = Path.Combine(
-            repoRoot,
-            "src",
-            "Agibuild.Avalonia.WebView.Runtime",
-            "Shell",
-            "WebViewHostCapabilityBridge.cs");
-        var shellPath = Path.Combine(
-            repoRoot,
-            "src",
-            "Agibuild.Avalonia.WebView.Runtime",
-            "Shell",
-            "WebViewShellExperience.cs");
-        var profilePath = Path.Combine(
-            repoRoot,
-            "src",
-            "Agibuild.Avalonia.WebView.Runtime",
-            "Shell",
-            "WebViewSessionPermissionProfiles.cs");
-        var helperPath = Path.Combine(
-            repoRoot,
-            "tests",
-            "Agibuild.Avalonia.WebView.Testing",
-            "DiagnosticSchemaAssertionHelper.cs");
-        var hostCapabilityUnitTestPath = Path.Combine(
-            repoRoot,
-            "tests",
-            "Agibuild.Avalonia.WebView.UnitTests",
-            "HostCapabilityBridgeTests.cs");
-        var hostCapabilityIntegrationTestPath = Path.Combine(
-            repoRoot,
-            "tests",
-            "Agibuild.Avalonia.WebView.Integration.Tests.Automation",
-            "HostCapabilityBridgeIntegrationTests.cs");
-        var profileIntegrationTestPath = Path.Combine(
-            repoRoot,
-            "tests",
-            "Agibuild.Avalonia.WebView.Integration.Tests.Automation",
-            "MultiWindowLifecycleIntegrationTests.cs");
+        var bridgePath = Path.Combine(repoRoot, "src", "Agibuild.Avalonia.WebView.Runtime", "Shell", "WebViewHostCapabilityBridge.cs");
+        var shellPath = Path.Combine(repoRoot, "src", "Agibuild.Avalonia.WebView.Runtime", "Shell", "WebViewShellExperience.cs");
+        var profilePath = Path.Combine(repoRoot, "src", "Agibuild.Avalonia.WebView.Runtime", "Shell", "WebViewSessionPermissionProfiles.cs");
+        var helperPath = Path.Combine(repoRoot, "tests", "Agibuild.Avalonia.WebView.Testing", "DiagnosticSchemaAssertionHelper.cs");
+        var hostCapabilityUnitTestPath = Path.Combine(repoRoot, "tests", "Agibuild.Avalonia.WebView.UnitTests", "HostCapabilityBridgeTests.cs");
+        var hostCapabilityIntegrationTestPath = Path.Combine(repoRoot, "tests", "Agibuild.Avalonia.WebView.Integration.Tests.Automation", "HostCapabilityBridgeIntegrationTests.cs");
+        var profileIntegrationTestPath = Path.Combine(repoRoot, "tests", "Agibuild.Avalonia.WebView.Integration.Tests.Automation", "MultiWindowLifecycleIntegrationTests.cs");
 
-        Assert.True(File.Exists(bridgePath), $"Missing host capability bridge source: {bridgePath}");
-        Assert.True(File.Exists(shellPath), $"Missing shell experience source: {shellPath}");
-        Assert.True(File.Exists(profilePath), $"Missing session permission profile source: {profilePath}");
-        Assert.True(File.Exists(helperPath), $"Missing diagnostic schema helper source: {helperPath}");
-        Assert.True(File.Exists(hostCapabilityUnitTestPath), $"Missing host capability unit test source: {hostCapabilityUnitTestPath}");
-        Assert.True(File.Exists(hostCapabilityIntegrationTestPath), $"Missing host capability integration test source: {hostCapabilityIntegrationTestPath}");
-        Assert.True(File.Exists(profileIntegrationTestPath), $"Missing profile integration test source: {profileIntegrationTestPath}");
+        foreach (var p in new[] { bridgePath, shellPath, profilePath, helperPath, hostCapabilityUnitTestPath, hostCapabilityIntegrationTestPath, profileIntegrationTestPath })
+            AssertFileExists(p, PhaseCloseoutConsistency);
 
         var bridgeSource = File.ReadAllText(bridgePath);
         var shellSource = File.ReadAllText(shellPath);
@@ -569,69 +407,67 @@ public sealed class AutomationLaneGovernanceTests
         var hostCapabilityIntegrationTestSource = File.ReadAllText(hostCapabilityIntegrationTestPath);
         var profileIntegrationTestSource = File.ReadAllText(profileIntegrationTestPath);
 
-        // Outcome schema must keep deterministic allow/deny/failure model.
-        Assert.Contains("public enum WebViewHostCapabilityCallOutcome", bridgeSource, StringComparison.Ordinal);
-        Assert.Contains("Allow = 0", bridgeSource, StringComparison.Ordinal);
-        Assert.Contains("Deny = 1", bridgeSource, StringComparison.Ordinal);
-        Assert.Contains("Failure = 2", bridgeSource, StringComparison.Ordinal);
-        Assert.Contains("MenuApplyModel = 6", bridgeSource, StringComparison.Ordinal);
-        Assert.Contains("TrayUpdateState = 7", bridgeSource, StringComparison.Ordinal);
-        Assert.Contains("SystemActionExecute = 8", bridgeSource, StringComparison.Ordinal);
-        Assert.Contains("TrayInteractionEventDispatch = 9", bridgeSource, StringComparison.Ordinal);
-        Assert.Contains("MenuInteractionEventDispatch = 10", bridgeSource, StringComparison.Ordinal);
-        Assert.Contains("ShowAbout = 3", bridgeSource, StringComparison.Ordinal);
-        Assert.Contains("public sealed class WebViewHostCapabilityBridgeOptions", bridgeSource, StringComparison.Ordinal);
-        Assert.Contains("MinSystemIntegrationMetadataTotalLength = 256", bridgeSource, StringComparison.Ordinal);
-        Assert.Contains("MaxSystemIntegrationMetadataTotalLength = 4096", bridgeSource, StringComparison.Ordinal);
-        Assert.Contains("DefaultSystemIntegrationMetadataTotalLength = 1024", bridgeSource, StringComparison.Ordinal);
-        Assert.Contains("SystemIntegrationMetadataAllowedPrefix = \"platform.\"", bridgeSource, StringComparison.Ordinal);
-        Assert.Contains("SystemIntegrationMetadataExtensionPrefix = \"platform.extension.\"", bridgeSource, StringComparison.Ordinal);
-        Assert.Contains("ReservedSystemIntegrationMetadataKeys", bridgeSource, StringComparison.Ordinal);
-        Assert.Contains("system-integration-event-core-field-missing", bridgeSource, StringComparison.Ordinal);
-        Assert.Contains("system-integration-event-metadata-namespace-invalid", bridgeSource, StringComparison.Ordinal);
-        Assert.Contains("system-integration-event-metadata-key-unregistered", bridgeSource, StringComparison.Ordinal);
-        Assert.Contains("system-integration-event-metadata-budget-exceeded", bridgeSource, StringComparison.Ordinal);
-
-        // Diagnostic payload must remain machine-checkable.
-        Assert.Contains("public sealed class WebViewHostCapabilityDiagnosticEventArgs", bridgeSource, StringComparison.Ordinal);
-        Assert.Contains(
+        var bridgeSchemaMarkers = new[]
+        {
+            "public enum WebViewHostCapabilityCallOutcome",
+            "Allow = 0", "Deny = 1", "Failure = 2",
+            "MenuApplyModel = 6", "TrayUpdateState = 7", "SystemActionExecute = 8",
+            "TrayInteractionEventDispatch = 9", "MenuInteractionEventDispatch = 10", "ShowAbout = 3",
+            "public sealed class WebViewHostCapabilityBridgeOptions",
+            "MinSystemIntegrationMetadataTotalLength = 256",
+            "MaxSystemIntegrationMetadataTotalLength = 4096",
+            "DefaultSystemIntegrationMetadataTotalLength = 1024",
+            "SystemIntegrationMetadataAllowedPrefix = \"platform.\"",
+            "SystemIntegrationMetadataExtensionPrefix = \"platform.extension.\"",
+            "ReservedSystemIntegrationMetadataKeys",
+            "system-integration-event-core-field-missing",
+            "system-integration-event-metadata-namespace-invalid",
+            "system-integration-event-metadata-key-unregistered",
+            "system-integration-event-metadata-budget-exceeded",
+            "public sealed class WebViewHostCapabilityDiagnosticEventArgs",
             $"CurrentDiagnosticSchemaVersion = {DiagnosticSchemaAssertionHelper.HostCapabilitySchemaVersion}",
-            bridgeSource,
-            StringComparison.Ordinal);
-        Assert.Contains("public int DiagnosticSchemaVersion { get; }", bridgeSource, StringComparison.Ordinal);
-        Assert.Contains("public Guid CorrelationId { get; }", bridgeSource, StringComparison.Ordinal);
-        Assert.Contains("public WebViewHostCapabilityCallOutcome Outcome { get; }", bridgeSource, StringComparison.Ordinal);
-        Assert.Contains("public WebViewOperationFailureCategory? FailureCategory { get; }", bridgeSource, StringComparison.Ordinal);
-        Assert.Contains("CapabilityCallCompleted", bridgeSource, StringComparison.Ordinal);
-        Assert.Contains("public static class DiagnosticSchemaAssertionHelper", helperSource, StringComparison.Ordinal);
-        Assert.Contains("AssertHostCapabilityDiagnostic", helperSource, StringComparison.Ordinal);
-        Assert.Contains("AssertSessionProfileDiagnostic", helperSource, StringComparison.Ordinal);
-        Assert.Contains("DiagnosticSchemaAssertionHelper.AssertHostCapabilityDiagnostic", hostCapabilityUnitTestSource, StringComparison.Ordinal);
-        Assert.Contains("DiagnosticSchemaAssertionHelper.AssertHostCapabilityDiagnostic", hostCapabilityIntegrationTestSource, StringComparison.Ordinal);
-        Assert.Contains("DiagnosticSchemaAssertionHelper.AssertSessionProfileDiagnostic", profileIntegrationTestSource, StringComparison.Ordinal);
+            "public int DiagnosticSchemaVersion { get; }",
+            "public Guid CorrelationId { get; }",
+            "public WebViewHostCapabilityCallOutcome Outcome { get; }",
+            "public WebViewOperationFailureCategory? FailureCategory { get; }",
+            "CapabilityCallCompleted"
+        };
+        foreach (var marker in bridgeSchemaMarkers)
+            AssertSourceContains(bridgeSource, marker, PhaseCloseoutConsistency, bridgePath);
 
-        // External open must route through typed capability bridge without legacy fallback handler path.
-        Assert.Contains("Host capability bridge is required for ExternalBrowser strategy.", shellSource, StringComparison.Ordinal);
+        AssertSourceContains(helperSource, "public static class DiagnosticSchemaAssertionHelper", PhaseCloseoutConsistency, helperPath);
+        AssertSourceContains(helperSource, "AssertHostCapabilityDiagnostic", PhaseCloseoutConsistency, helperPath);
+        AssertSourceContains(helperSource, "AssertSessionProfileDiagnostic", PhaseCloseoutConsistency, helperPath);
+        AssertSourceContains(hostCapabilityUnitTestSource, "DiagnosticSchemaAssertionHelper.AssertHostCapabilityDiagnostic", PhaseCloseoutConsistency, hostCapabilityUnitTestPath);
+        AssertSourceContains(hostCapabilityIntegrationTestSource, "DiagnosticSchemaAssertionHelper.AssertHostCapabilityDiagnostic", PhaseCloseoutConsistency, hostCapabilityIntegrationTestPath);
+        AssertSourceContains(profileIntegrationTestSource, "DiagnosticSchemaAssertionHelper.AssertSessionProfileDiagnostic", PhaseCloseoutConsistency, profileIntegrationTestPath);
+
+        var shellMarkers = new[]
+        {
+            "Host capability bridge is required for ExternalBrowser strategy.",
+            "SystemIntegration = 8",
+            "_options.HostCapabilityBridge.ApplyMenuModel(",
+            "_options.HostCapabilityBridge.UpdateTrayState(",
+            "_options.HostCapabilityBridge.ExecuteSystemAction(",
+            "_options.HostCapabilityBridge.DispatchSystemIntegrationEvent(",
+            "SystemIntegrationEventReceived",
+            "profile.ProfileVersion", "profile.ProfileHash"
+        };
+        foreach (var marker in shellMarkers)
+            AssertSourceContains(shellSource, marker, PhaseCloseoutConsistency, shellPath);
+
         Assert.DoesNotContain("ExternalOpenHandler", shellSource, StringComparison.Ordinal);
-        Assert.Contains("SystemIntegration = 8", shellSource, StringComparison.Ordinal);
-        Assert.Contains("_options.HostCapabilityBridge.ApplyMenuModel(", shellSource, StringComparison.Ordinal);
-        Assert.Contains("_options.HostCapabilityBridge.UpdateTrayState(", shellSource, StringComparison.Ordinal);
-        Assert.Contains("_options.HostCapabilityBridge.ExecuteSystemAction(", shellSource, StringComparison.Ordinal);
-        Assert.Contains("_options.HostCapabilityBridge.DispatchSystemIntegrationEvent(", shellSource, StringComparison.Ordinal);
-        Assert.Contains("SystemIntegrationEventReceived", shellSource, StringComparison.Ordinal);
-        Assert.Contains("profile.ProfileVersion", shellSource, StringComparison.Ordinal);
-        Assert.Contains("profile.ProfileHash", shellSource, StringComparison.Ordinal);
-        Assert.Contains("public string? ProfileVersion { get; init; }", profileSource, StringComparison.Ordinal);
-        Assert.Contains("public string? ProfileHash { get; init; }", profileSource, StringComparison.Ordinal);
-        Assert.Contains("public string? ProfileVersion { get; }", profileSource, StringComparison.Ordinal);
-        Assert.Contains("public string? ProfileHash { get; }", profileSource, StringComparison.Ordinal);
-        Assert.Contains(
+
+        var profileMarkers = new[]
+        {
+            "public string? ProfileVersion { get; init; }", "public string? ProfileHash { get; init; }",
+            "public string? ProfileVersion { get; }", "public string? ProfileHash { get; }",
             $"CurrentDiagnosticSchemaVersion = {DiagnosticSchemaAssertionHelper.SessionProfileSchemaVersion}",
-            profileSource,
-            StringComparison.Ordinal);
-        Assert.Contains("public int DiagnosticSchemaVersion { get; }", profileSource, StringComparison.Ordinal);
-        Assert.Contains("NormalizeProfileVersion", profileSource, StringComparison.Ordinal);
-        Assert.Contains("NormalizeProfileHash", profileSource, StringComparison.Ordinal);
+            "public int DiagnosticSchemaVersion { get; }",
+            "NormalizeProfileVersion", "NormalizeProfileHash"
+        };
+        foreach (var marker in profileMarkers)
+            AssertSourceContains(profileSource, marker, PhaseCloseoutConsistency, profilePath);
     }
 
     [Fact]
@@ -641,47 +477,45 @@ public sealed class AutomationLaneGovernanceTests
         var combinedSource = ReadCombinedBuildSource(repoRoot);
         var mainSource = File.ReadAllText(Path.Combine(repoRoot, "build", "Build.cs"));
 
-        Assert.Contains("Target OpenSpecStrictGovernance", combinedSource, StringComparison.Ordinal);
-        Assert.Contains("Target DependencyVulnerabilityGovernance", combinedSource, StringComparison.Ordinal);
-        Assert.Contains("Target TypeScriptDeclarationGovernance", combinedSource, StringComparison.Ordinal);
-        Assert.Contains("validate --all --strict", combinedSource, StringComparison.Ordinal);
-        Assert.Contains("RunProcessCaptureAllChecked(", combinedSource, StringComparison.Ordinal);
-        Assert.Contains("OpenSpecStrictGovernanceReportFile", combinedSource, StringComparison.Ordinal);
-        Assert.Contains("dependency-governance-report.json", combinedSource, StringComparison.Ordinal);
-        Assert.Contains("typescript-governance-report.json", combinedSource, StringComparison.Ordinal);
-        Assert.Contains("Target PhaseCloseoutSnapshot", combinedSource, StringComparison.Ordinal);
-        Assert.Contains("phase5-closeout-snapshot.json", combinedSource, StringComparison.Ordinal);
+        var requiredTargets = new[]
+        {
+            "Target OpenSpecStrictGovernance", "Target DependencyVulnerabilityGovernance",
+            "Target TypeScriptDeclarationGovernance", "Target PhaseCloseoutSnapshot"
+        };
+        foreach (var target in requiredTargets)
+            AssertSourceContains(combinedSource, target, CiTargetOpenSpecGate, "build/Build*.cs");
 
-        Assert.Matches(
-            new Regex(@"Target\s+Ci\s*=>[\s\S]*?\.DependsOn\([\s\S]*OpenSpecStrictGovernance[\s\S]*\);", RegexOptions.Multiline),
-            mainSource);
-        Assert.Matches(
-            new Regex(@"Target\s+Ci\s*=>[\s\S]*?\.DependsOn\([\s\S]*DependencyVulnerabilityGovernance[\s\S]*\);", RegexOptions.Multiline),
-            mainSource);
-        Assert.Matches(
-            new Regex(@"Target\s+Ci\s*=>[\s\S]*?\.DependsOn\([\s\S]*TypeScriptDeclarationGovernance[\s\S]*\);", RegexOptions.Multiline),
-            mainSource);
-        Assert.Matches(
-            new Regex(@"Target\s+Ci\s*=>[\s\S]*?\.DependsOn\([\s\S]*PhaseCloseoutSnapshot[\s\S]*\);", RegexOptions.Multiline),
-            mainSource);
-        Assert.Matches(
-            new Regex(@"Target\s+Ci\s*=>[\s\S]*?\.DependsOn\([\s\S]*RuntimeCriticalPathExecutionGovernanceCi[\s\S]*\);", RegexOptions.Multiline),
-            mainSource);
-        Assert.Matches(
-            new Regex(@"Target\s+CiPublish\s*=>[\s\S]*?\.DependsOn\([\s\S]*OpenSpecStrictGovernance[\s\S]*\);", RegexOptions.Multiline),
-            mainSource);
-        Assert.Matches(
-            new Regex(@"Target\s+CiPublish\s*=>[\s\S]*?\.DependsOn\([\s\S]*DependencyVulnerabilityGovernance[\s\S]*\);", RegexOptions.Multiline),
-            mainSource);
-        Assert.Matches(
-            new Regex(@"Target\s+CiPublish\s*=>[\s\S]*?\.DependsOn\([\s\S]*TypeScriptDeclarationGovernance[\s\S]*\);", RegexOptions.Multiline),
-            mainSource);
-        Assert.Matches(
-            new Regex(@"Target\s+CiPublish\s*=>[\s\S]*?\.DependsOn\([\s\S]*PhaseCloseoutSnapshot[\s\S]*\);", RegexOptions.Multiline),
-            mainSource);
-        Assert.Matches(
-            new Regex(@"Target\s+CiPublish\s*=>[\s\S]*?\.DependsOn\([\s\S]*RuntimeCriticalPathExecutionGovernanceCiPublish[\s\S]*\);", RegexOptions.Multiline),
-            mainSource);
+        AssertSourceContains(combinedSource, "validate --all --strict", CiTargetOpenSpecGate, "build/Build*.cs");
+        AssertSourceContains(combinedSource, "RunProcessCaptureAllChecked(", CiTargetOpenSpecGate, "build/Build*.cs");
+        AssertSourceContains(combinedSource, "dependency-governance-report.json", CiTargetOpenSpecGate, "build/Build*.cs");
+        AssertSourceContains(combinedSource, "typescript-governance-report.json", CiTargetOpenSpecGate, "build/Build*.cs");
+        AssertSourceContains(combinedSource, "ci-evidence-snapshot.json", CiTargetOpenSpecGate, "build/Build*.cs");
+
+        var ciDependencies = new[]
+        {
+            "OpenSpecStrictGovernance", "DependencyVulnerabilityGovernance",
+            "TypeScriptDeclarationGovernance", "PhaseCloseoutSnapshot",
+            "RuntimeCriticalPathExecutionGovernanceCi"
+        };
+        foreach (var dep in ciDependencies)
+        {
+            Assert.Matches(
+                new Regex($@"Target\s+Ci\s*=>[\s\S]*?\.DependsOn\([\s\S]*{Regex.Escape(dep)}[\s\S]*\);", RegexOptions.Multiline),
+                mainSource);
+        }
+
+        var ciPublishDependencies = new[]
+        {
+            "OpenSpecStrictGovernance", "DependencyVulnerabilityGovernance",
+            "TypeScriptDeclarationGovernance", "PhaseCloseoutSnapshot",
+            "RuntimeCriticalPathExecutionGovernanceCiPublish"
+        };
+        foreach (var dep in ciPublishDependencies)
+        {
+            Assert.Matches(
+                new Regex($@"Target\s+CiPublish\s*=>[\s\S]*?\.DependsOn\([\s\S]*{Regex.Escape(dep)}[\s\S]*\);", RegexOptions.Multiline),
+                mainSource);
+        }
     }
 
     [Fact]
@@ -691,71 +525,46 @@ public sealed class AutomationLaneGovernanceTests
         var roadmapPath = Path.Combine(repoRoot, "openspec", "ROADMAP.md");
         var runtimeManifestPath = Path.Combine(repoRoot, "tests", "runtime-critical-path.manifest.json");
         var productionMatrixPath = Path.Combine(repoRoot, "tests", "shell-production-matrix.json");
-        var templateIndexPath = Path.Combine(
-            repoRoot,
-            "templates",
-            "agibuild-hybrid",
-            "HybridApp.Desktop",
-            "wwwroot",
-            "index.html");
-        var hostCapabilityBridgePath = Path.Combine(
-            repoRoot,
-            "src",
-            "Agibuild.Avalonia.WebView.Runtime",
-            "Shell",
-            "WebViewHostCapabilityBridge.cs");
+        var templateIndexPath = Path.Combine(repoRoot, "templates", "agibuild-hybrid", "HybridApp.Desktop", "wwwroot", "index.html");
+        var hostCapabilityBridgePath = Path.Combine(repoRoot, "src", "Agibuild.Avalonia.WebView.Runtime", "Shell", "WebViewHostCapabilityBridge.cs");
 
-        Assert.True(File.Exists(roadmapPath), $"Missing roadmap file: {roadmapPath}");
-        Assert.True(File.Exists(runtimeManifestPath), $"Missing runtime critical-path manifest: {runtimeManifestPath}");
-        Assert.True(File.Exists(productionMatrixPath), $"Missing shell production matrix: {productionMatrixPath}");
-        Assert.True(File.Exists(templateIndexPath), $"Missing template index file: {templateIndexPath}");
-        Assert.True(File.Exists(hostCapabilityBridgePath), $"Missing host capability bridge source: {hostCapabilityBridgePath}");
+        foreach (var p in new[] { roadmapPath, runtimeManifestPath, productionMatrixPath, templateIndexPath, hostCapabilityBridgePath })
+            AssertFileExists(p, PhaseCloseoutConsistency);
 
         var roadmap = File.ReadAllText(roadmapPath);
-        Assert.Contains("## Phase 5: Electron Replacement Foundation (✅ Completed)", roadmap, StringComparison.Ordinal);
-        Assert.Contains("### Evidence Source Mapping", roadmap, StringComparison.Ordinal);
-        Assert.Contains("2026-02-24-system-integration-contract-v2-freeze", roadmap, StringComparison.Ordinal);
-        Assert.Contains("2026-02-24-template-webfirst-dx-panel", roadmap, StringComparison.Ordinal);
-        Assert.Contains("2026-02-24-system-integration-diagnostic-export", roadmap, StringComparison.Ordinal);
-        Assert.Matches(
-            new Regex(@"`nuke Test`: Unit `\d+`, Integration `\d+`, Total `\d+` \(pass\)", RegexOptions.Multiline),
-            roadmap);
-        Assert.Matches(
-            new Regex(@"`nuke Coverage`: Line `\d+(\.\d+)?%` \(pass, threshold `\d+%`\)", RegexOptions.Multiline),
-            roadmap);
+        AssertSourceContains(roadmap, "## Phase 5: Electron Replacement Foundation (✅ Completed)", PhaseCloseoutConsistency, roadmapPath);
+        AssertSourceContains(roadmap, "### Evidence Source Mapping", PhaseCloseoutConsistency, roadmapPath);
 
-        using var runtimeDoc = JsonDocument.Parse(File.ReadAllText(runtimeManifestPath));
-        using var matrixDoc = JsonDocument.Parse(File.ReadAllText(productionMatrixPath));
-        var runtimeScenarioIds = runtimeDoc.RootElement.GetProperty("scenarios")
-            .EnumerateArray()
-            .Select(x => x.GetProperty("id").GetString())
-            .Where(x => !string.IsNullOrWhiteSpace(x))
-            .ToHashSet(StringComparer.Ordinal);
-        var matrixCapabilityIds = matrixDoc.RootElement.GetProperty("capabilities")
-            .EnumerateArray()
-            .Select(x => x.GetProperty("id").GetString())
-            .Where(x => !string.IsNullOrWhiteSpace(x))
-            .ToHashSet(StringComparer.Ordinal);
+        var requiredChangeIds = new[]
+        {
+            "2026-02-24-system-integration-contract-v2-freeze",
+            "2026-02-24-template-webfirst-dx-panel",
+            "2026-02-24-system-integration-diagnostic-export"
+        };
+        foreach (var changeId in requiredChangeIds)
+            AssertSourceContains(roadmap, changeId, PhaseCloseoutConsistency, roadmapPath);
+
+        Assert.Matches(new Regex(@"`nuke Test`: Unit `\d+`, Integration `\d+`, Total `\d+` \(pass\)", RegexOptions.Multiline), roadmap);
+        Assert.Matches(new Regex(@"`nuke Coverage`: Line `\d+(\.\d+)?%` \(pass, threshold `\d+%`\)", RegexOptions.Multiline), roadmap);
+
+        using var runtimeDoc = LoadJsonArtifact(runtimeManifestPath, PhaseCloseoutConsistency);
+        using var matrixDoc = LoadJsonArtifact(productionMatrixPath, PhaseCloseoutConsistency);
+
+        var runtimeScenarioIds = ExtractStringIds(runtimeDoc.RootElement.GetProperty("scenarios"), "id");
+        var matrixCapabilityIds = ExtractStringIds(matrixDoc.RootElement.GetProperty("capabilities"), "id");
 
         var sharedPhase5Ids = new[]
         {
-            "shell-system-integration-roundtrip",
-            "shell-system-integration-v2-tray-payload",
-            "shell-system-integration-v2-timestamp-normalization",
-            "shell-system-integration-diagnostic-export"
+            "shell-system-integration-roundtrip", "shell-system-integration-v2-tray-payload",
+            "shell-system-integration-v2-timestamp-normalization", "shell-system-integration-diagnostic-export"
         };
+        AssertContainsAll(runtimeScenarioIds, sharedPhase5Ids, PhaseCloseoutConsistency, runtimeManifestPath);
+        AssertContainsAll(matrixCapabilityIds, sharedPhase5Ids, PhaseCloseoutConsistency, productionMatrixPath);
 
-        foreach (var id in sharedPhase5Ids)
-        {
-            Assert.Contains(id, runtimeScenarioIds);
-            Assert.Contains(id, matrixCapabilityIds);
-        }
-
-        var templateIndex = File.ReadAllText(templateIndexPath);
+        AssertSourceContains(File.ReadAllText(templateIndexPath), "window.runTemplateRegressionChecks", PhaseCloseoutConsistency, templateIndexPath);
         var bridgeSource = File.ReadAllText(hostCapabilityBridgePath);
-        Assert.Contains("window.runTemplateRegressionChecks", templateIndex, StringComparison.Ordinal);
-        Assert.Contains("ToExportRecord", bridgeSource, StringComparison.Ordinal);
-        Assert.Contains("WebViewHostCapabilityDiagnosticExportRecord", bridgeSource, StringComparison.Ordinal);
+        AssertSourceContains(bridgeSource, "ToExportRecord", PhaseCloseoutConsistency, hostCapabilityBridgePath);
+        AssertSourceContains(bridgeSource, "WebViewHostCapabilityDiagnosticExportRecord", PhaseCloseoutConsistency, hostCapabilityBridgePath);
     }
 
     [Fact]
@@ -763,17 +572,11 @@ public sealed class AutomationLaneGovernanceTests
     {
         var repoRoot = FindRepoRoot();
         var warningGovernancePath = Path.Combine(repoRoot, "build", "Build.WarningGovernance.cs");
-        Assert.True(File.Exists(warningGovernancePath), $"Missing warning governance source: {warningGovernancePath}");
-        var source = File.ReadAllText(warningGovernancePath);
+        AssertFileExists(warningGovernancePath, WindowsBaseConflictGovernance);
 
-        Assert.Contains(
-            "WindowsBase conflict warning must be eliminated; baseline acceptance is not allowed.",
-            source,
-            StringComparison.Ordinal);
-        Assert.DoesNotContain(
-            "WindowsBase conflict is governed by approved baseline metadata.",
-            source,
-            StringComparison.Ordinal);
+        var source = File.ReadAllText(warningGovernancePath);
+        AssertSourceContains(source, "WindowsBase conflict warning must be eliminated; baseline acceptance is not allowed.", WindowsBaseConflictGovernance, warningGovernancePath);
+        Assert.DoesNotContain("WindowsBase conflict is governed by approved baseline metadata.", source, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -781,16 +584,17 @@ public sealed class AutomationLaneGovernanceTests
     {
         var repoRoot = FindRepoRoot();
         var directoryBuildPropsPath = Path.Combine(repoRoot, "Directory.Build.props");
-        Assert.True(File.Exists(directoryBuildPropsPath), $"Missing Directory.Build.props at {directoryBuildPropsPath}");
-        var props = File.ReadAllText(directoryBuildPropsPath);
+        AssertFileExists(directoryBuildPropsPath, PackageMetadata);
 
-        Assert.Contains("<PackageLicenseExpression>", props, StringComparison.Ordinal);
-        Assert.Contains("<PackageProjectUrl>", props, StringComparison.Ordinal);
+        var props = File.ReadAllText(directoryBuildPropsPath);
+        AssertSourceContains(props, "<PackageLicenseExpression>", PackageMetadata, directoryBuildPropsPath);
+        AssertSourceContains(props, "<PackageProjectUrl>", PackageMetadata, directoryBuildPropsPath);
 
         var mainCsprojPath = Path.Combine(repoRoot, "src", "Agibuild.Avalonia.WebView", "Agibuild.Avalonia.WebView.csproj");
-        Assert.True(File.Exists(mainCsprojPath), $"Missing main csproj: {mainCsprojPath}");
+        AssertFileExists(mainCsprojPath, PackageMetadata);
+
         var csproj = File.ReadAllText(mainCsprojPath);
-        Assert.Contains("<Description>", csproj, StringComparison.Ordinal);
+        AssertSourceContains(csproj, "<Description>", PackageMetadata, mainCsprojPath);
         Assert.DoesNotContain("preview", csproj.ToLowerInvariant().Split("<Description>").Last().Split("</Description>").First());
     }
 
@@ -799,24 +603,21 @@ public sealed class AutomationLaneGovernanceTests
     {
         var repoRoot = FindRepoRoot();
         var readmePath = Path.Combine(repoRoot, "README.md");
-        Assert.True(File.Exists(readmePath), $"Missing README.md at {readmePath}");
+        AssertFileExists(readmePath, ReadmeQualitySignals);
+
         var readme = File.ReadAllText(readmePath);
 
-        var unitTestFiles = Directory.GetFiles(
-            Path.Combine(repoRoot, "tests", "Agibuild.Avalonia.WebView.UnitTests"),
-            "*Tests.cs", SearchOption.AllDirectories);
-        var integrationTestFiles = Directory.GetFiles(
-            Path.Combine(repoRoot, "tests", "Agibuild.Avalonia.WebView.Integration.Tests.Automation"),
-            "*Tests.cs", SearchOption.AllDirectories);
-
-        Assert.True(unitTestFiles.Length > 0, "No unit test files found");
-        Assert.True(integrationTestFiles.Length > 0, "No integration test files found");
+        Assert.True(
+            Directory.GetFiles(Path.Combine(repoRoot, "tests", "Agibuild.Avalonia.WebView.UnitTests"), "*Tests.cs", SearchOption.AllDirectories).Length > 0,
+            $"[{ReadmeQualitySignals}] No unit test files found");
+        Assert.True(
+            Directory.GetFiles(Path.Combine(repoRoot, "tests", "Agibuild.Avalonia.WebView.Integration.Tests.Automation"), "*Tests.cs", SearchOption.AllDirectories).Length > 0,
+            $"[{ReadmeQualitySignals}] No integration test files found");
 
         Assert.Matches(new Regex(@"\|\s*Unit tests\s*\|\s*\d{3,}\s*\|"), readme);
         Assert.Matches(new Regex(@"\|\s*Integration tests\s*\|\s*\d{2,}\s*\|"), readme);
         Assert.Matches(new Regex(@"\|\s*Line coverage\s*\|\s*\*\*\d+\.\d+%\*\*\s*\|"), readme);
-
-        Assert.Contains("Phase 5 | Electron Replacement Foundation | ✅ Completed", readme, StringComparison.Ordinal);
+        AssertSourceContains(readme, "Phase 5 | Electron Replacement Foundation | ✅ Completed", ReadmeQualitySignals, readmePath);
     }
 
     [Fact]
@@ -825,11 +626,9 @@ public sealed class AutomationLaneGovernanceTests
         var repoRoot = FindRepoRoot();
         var buildSource = ReadCombinedBuildSource(repoRoot);
 
-        Assert.Contains("BranchCoverageThreshold", buildSource, StringComparison.Ordinal);
-        Assert.Contains("branch-rate", buildSource, StringComparison.Ordinal);
-        Assert.Contains("Branch coverage", buildSource, StringComparison.Ordinal);
-        Assert.Contains("branchThreshold", buildSource, StringComparison.Ordinal);
-        Assert.Contains("dependencyGovernanceReportExists", buildSource, StringComparison.Ordinal);
+        var markers = new[] { "BranchCoverageThreshold", "branch-rate", "Branch coverage", "branchThreshold", "dependencyGovernanceReportExists" };
+        foreach (var marker in markers)
+            AssertSourceContains(buildSource, marker, CoverageThreshold, "build/Build*.cs");
     }
 
     [Fact]
@@ -839,35 +638,17 @@ public sealed class AutomationLaneGovernanceTests
         var runtimeManifestPath = Path.Combine(repoRoot, "tests", "runtime-critical-path.manifest.json");
         var matrixPath = Path.Combine(repoRoot, "tests", "shell-production-matrix.json");
 
-        Assert.True(File.Exists(runtimeManifestPath), $"Missing runtime manifest: {runtimeManifestPath}");
-        Assert.True(File.Exists(matrixPath), $"Missing shell production matrix: {matrixPath}");
+        using var runtimeDoc = LoadJsonArtifact(runtimeManifestPath, ShellManifestMatrixSync);
+        using var matrixDoc = LoadJsonArtifact(matrixPath, ShellManifestMatrixSync);
 
-        using var runtimeDoc = JsonDocument.Parse(File.ReadAllText(runtimeManifestPath));
-        using var matrixDoc = JsonDocument.Parse(File.ReadAllText(matrixPath));
+        var runtimeShellIds = ExtractStringIds(runtimeDoc.RootElement.GetProperty("scenarios"), "id");
+        var matrixCapabilityIds = ExtractStringIds(matrixDoc.RootElement.GetProperty("capabilities"), "id");
 
-        var runtimeShellIds = runtimeDoc.RootElement.GetProperty("scenarios")
-            .EnumerateArray()
-            .Select(x => x.GetProperty("id").GetString())
-            .Where(id => !string.IsNullOrWhiteSpace(id) && id!.StartsWith("shell-", StringComparison.Ordinal))
-            .Cast<string>()
-            .ToHashSet(StringComparer.Ordinal);
-
-        var matrixCapabilityIds = matrixDoc.RootElement.GetProperty("capabilities")
-            .EnumerateArray()
-            .Select(x => x.GetProperty("id").GetString())
-            .Where(id => !string.IsNullOrWhiteSpace(id) && id!.StartsWith("shell-", StringComparison.Ordinal))
-            .Cast<string>()
-            .ToHashSet(StringComparer.Ordinal);
-
-        foreach (var shellId in runtimeShellIds)
-        {
-            Assert.Contains(shellId, matrixCapabilityIds);
-        }
-
-        foreach (var capabilityId in matrixCapabilityIds)
-        {
-            Assert.Contains(capabilityId, runtimeShellIds);
-        }
+        AssertBidirectionalSync(
+            runtimeShellIds, "runtime-critical-path",
+            matrixCapabilityIds, "shell-production-matrix",
+            ShellManifestMatrixSync,
+            id => id.StartsWith("shell-", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -875,23 +656,22 @@ public sealed class AutomationLaneGovernanceTests
     {
         var repoRoot = FindRepoRoot();
         var baselinePath = Path.Combine(repoRoot, "tests", "performance-benchmark-baseline.json");
-        Assert.True(File.Exists(baselinePath), $"Missing benchmark baseline: {baselinePath}");
 
-        using var doc = JsonDocument.Parse(File.ReadAllText(baselinePath));
-        Assert.True(doc.RootElement.TryGetProperty("version", out var versionNode));
-        Assert.True(versionNode.GetInt32() >= 1);
-        Assert.True(doc.RootElement.TryGetProperty("allowedRegressionPercent", out var toleranceNode));
-        Assert.True(toleranceNode.GetDouble() > 0);
+        using var doc = LoadJsonArtifact(baselinePath, BenchmarkBaselineSchema);
+        RequireVersionField(doc.RootElement, BenchmarkBaselineSchema, baselinePath, minimumVersion: 1);
 
-        var metrics = doc.RootElement.GetProperty("metrics").EnumerateArray().ToList();
-        Assert.NotEmpty(metrics);
+        var toleranceElement = RequireProperty(doc.RootElement, "allowedRegressionPercent", BenchmarkBaselineSchema, baselinePath);
+        Assert.True(toleranceElement.GetDouble() > 0, $"[{BenchmarkBaselineSchema}] allowedRegressionPercent must be > 0.");
 
-        foreach (var metric in metrics)
+        var metrics = RequireProperty(doc.RootElement, "metrics", BenchmarkBaselineSchema, baselinePath);
+        var metricsList = metrics.EnumerateArray().ToList();
+        Assert.NotEmpty(metricsList);
+
+        foreach (var metric in metricsList)
         {
             var id = metric.GetProperty("id").GetString();
-            Assert.False(string.IsNullOrWhiteSpace(id));
-            var baseline = metric.GetProperty("baselineMs").GetDouble();
-            Assert.True(baseline > 0, $"Metric '{id}' baselineMs must be > 0.");
+            Assert.False(string.IsNullOrWhiteSpace(id), $"[{BenchmarkBaselineSchema}] Metric id must not be empty.");
+            Assert.True(metric.GetProperty("baselineMs").GetDouble() > 0, $"[{BenchmarkBaselineSchema}] Metric '{id}' baselineMs must be > 0.");
         }
     }
 
@@ -899,48 +679,73 @@ public sealed class AutomationLaneGovernanceTests
     public void Dx_assets_for_bridge_package_and_vue_sample_are_present_and_typed()
     {
         var repoRoot = FindRepoRoot();
-        var bridgePackagePath = Path.Combine(repoRoot, "packages", "bridge", "package.json");
-        var bridgeEntryPath = Path.Combine(repoRoot, "packages", "bridge", "src", "index.ts");
-        var reactSamplePackagePath = Path.Combine(repoRoot, "samples", "avalonia-react", "AvaloniReact.Web", "package.json");
-        var reactSampleBridgePath = Path.Combine(repoRoot, "samples", "avalonia-react", "AvaloniReact.Web", "src", "bridge", "services.ts");
-        var reactSampleBridgeHookPath = Path.Combine(repoRoot, "samples", "avalonia-react", "AvaloniReact.Web", "src", "hooks", "useBridge.ts");
-        var vueSampleEntryPath = Path.Combine(repoRoot, "samples", "avalonia-vue", "AvaloniVue.Web", "src", "main.ts");
-        var vueSamplePackagePath = Path.Combine(repoRoot, "samples", "avalonia-vue", "AvaloniVue.Web", "package.json");
-        var vueSampleBridgePath = Path.Combine(repoRoot, "samples", "avalonia-vue", "AvaloniVue.Web", "src", "bridge", "services.ts");
-        var vueSampleTsConfigPath = Path.Combine(repoRoot, "samples", "avalonia-vue", "AvaloniVue.Web", "tsconfig.json");
 
-        Assert.True(File.Exists(bridgePackagePath), $"Missing bridge package json: {bridgePackagePath}");
-        Assert.True(File.Exists(bridgeEntryPath), $"Missing bridge package entry: {bridgeEntryPath}");
-        Assert.True(File.Exists(reactSamplePackagePath), $"Missing React sample package json: {reactSamplePackagePath}");
-        Assert.True(File.Exists(reactSampleBridgePath), $"Missing React bridge services: {reactSampleBridgePath}");
-        Assert.True(File.Exists(reactSampleBridgeHookPath), $"Missing React bridge hook: {reactSampleBridgeHookPath}");
-        Assert.True(File.Exists(vueSampleEntryPath), $"Missing Vue sample entry: {vueSampleEntryPath}");
-        Assert.True(File.Exists(vueSamplePackagePath), $"Missing Vue sample package json: {vueSamplePackagePath}");
-        Assert.True(File.Exists(vueSampleBridgePath), $"Missing Vue bridge services: {vueSampleBridgePath}");
-        Assert.True(File.Exists(vueSampleTsConfigPath), $"Missing Vue sample tsconfig: {vueSampleTsConfigPath}");
+        var requiredFiles = new[]
+        {
+            "packages/bridge/package.json", "packages/bridge/src/index.ts",
+            "samples/avalonia-react/AvaloniReact.Web/package.json",
+            "samples/avalonia-react/AvaloniReact.Web/src/bridge/services.ts",
+            "samples/avalonia-react/AvaloniReact.Web/src/hooks/useBridge.ts",
+            "samples/avalonia-vue/AvaloniVue.Web/src/main.ts",
+            "samples/avalonia-vue/AvaloniVue.Web/package.json",
+            "samples/avalonia-vue/AvaloniVue.Web/src/bridge/services.ts",
+            "samples/avalonia-vue/AvaloniVue.Web/tsconfig.json"
+        };
+        foreach (var relPath in requiredFiles)
+            AssertFileExists(Path.Combine(repoRoot, relPath.Replace('/', Path.DirectorySeparatorChar)), BridgeDxAssets);
 
-        var bridgePackage = File.ReadAllText(bridgePackagePath);
-        var bridgeEntry = File.ReadAllText(bridgeEntryPath);
-        var reactPackage = File.ReadAllText(reactSamplePackagePath);
-        var reactBridge = File.ReadAllText(reactSampleBridgePath);
-        var reactBridgeHook = File.ReadAllText(reactSampleBridgeHookPath);
-        var vueEntry = File.ReadAllText(vueSampleEntryPath);
-        var vuePackage = File.ReadAllText(vueSamplePackagePath);
-        var vueBridge = File.ReadAllText(vueSampleBridgePath);
-        var vueTsConfig = File.ReadAllText(vueSampleTsConfigPath);
+        var bridgePackage = File.ReadAllText(Path.Combine(repoRoot, "packages", "bridge", "package.json"));
+        var bridgeEntry = File.ReadAllText(Path.Combine(repoRoot, "packages", "bridge", "src", "index.ts"));
+        var reactPackage = File.ReadAllText(Path.Combine(repoRoot, "samples", "avalonia-react", "AvaloniReact.Web", "package.json"));
+        var reactBridge = File.ReadAllText(Path.Combine(repoRoot, "samples", "avalonia-react", "AvaloniReact.Web", "src", "bridge", "services.ts"));
+        var reactBridgeHook = File.ReadAllText(Path.Combine(repoRoot, "samples", "avalonia-react", "AvaloniReact.Web", "src", "hooks", "useBridge.ts"));
+        var vueEntry = File.ReadAllText(Path.Combine(repoRoot, "samples", "avalonia-vue", "AvaloniVue.Web", "src", "main.ts"));
+        var vuePackage = File.ReadAllText(Path.Combine(repoRoot, "samples", "avalonia-vue", "AvaloniVue.Web", "package.json"));
+        var vueBridge = File.ReadAllText(Path.Combine(repoRoot, "samples", "avalonia-vue", "AvaloniVue.Web", "src", "bridge", "services.ts"));
+        var vueTsConfig = File.ReadAllText(Path.Combine(repoRoot, "samples", "avalonia-vue", "AvaloniVue.Web", "tsconfig.json"));
 
-        Assert.Contains("\"@agibuild/bridge\"", bridgePackage, StringComparison.Ordinal);
-        Assert.Contains("\"prepare\": \"npm run build\"", bridgePackage, StringComparison.Ordinal);
-        Assert.Contains("createBridgeClient", bridgeEntry, StringComparison.Ordinal);
-        Assert.Contains("bridgeClient", bridgeEntry, StringComparison.Ordinal);
-        Assert.Contains("getService", bridgeEntry, StringComparison.Ordinal);
-        Assert.Contains("\"@agibuild/bridge\"", reactPackage, StringComparison.Ordinal);
-        Assert.Contains("bridgeClient.getService", reactBridge, StringComparison.Ordinal);
-        Assert.Contains("bridgeClient.ready", reactBridgeHook, StringComparison.Ordinal);
-        Assert.Contains("getAppInfo", vueEntry, StringComparison.Ordinal);
-        Assert.Contains("\"@agibuild/bridge\"", vuePackage, StringComparison.Ordinal);
-        Assert.Contains("bridgeClient.getService", vueBridge, StringComparison.Ordinal);
-        Assert.Contains("bridge.d.ts", vueTsConfig, StringComparison.Ordinal);
+        AssertSourceContains(bridgePackage, "\"@agibuild/bridge\"", BridgeDxAssets, "packages/bridge/package.json");
+        AssertSourceContains(bridgePackage, "\"prepare\": \"npm run build\"", BridgeDxAssets, "packages/bridge/package.json");
+        AssertSourceContains(bridgeEntry, "createBridgeClient", BridgeDxAssets, "packages/bridge/src/index.ts");
+        AssertSourceContains(bridgeEntry, "bridgeClient", BridgeDxAssets, "packages/bridge/src/index.ts");
+        AssertSourceContains(bridgeEntry, "getService", BridgeDxAssets, "packages/bridge/src/index.ts");
+        AssertSourceContains(reactPackage, "\"@agibuild/bridge\"", BridgeDxAssets, "samples/avalonia-react/.../package.json");
+        AssertSourceContains(reactBridge, "bridgeClient.getService", BridgeDxAssets, "samples/avalonia-react/.../services.ts");
+        AssertSourceContains(reactBridgeHook, "bridgeClient.ready", BridgeDxAssets, "samples/avalonia-react/.../useBridge.ts");
+        AssertSourceContains(vueEntry, "getAppInfo", BridgeDxAssets, "samples/avalonia-vue/.../main.ts");
+        AssertSourceContains(vuePackage, "\"@agibuild/bridge\"", BridgeDxAssets, "samples/avalonia-vue/.../package.json");
+        AssertSourceContains(vueBridge, "bridgeClient.getService", BridgeDxAssets, "samples/avalonia-vue/.../services.ts");
+        AssertSourceContains(vueTsConfig, "bridge.d.ts", BridgeDxAssets, "samples/avalonia-vue/.../tsconfig.json");
+    }
+
+    [Fact]
+    public void Ci_evidence_snapshot_build_target_emits_v2_schema_with_provenance()
+    {
+        var repoRoot = FindRepoRoot();
+        var combinedSource = ReadCombinedBuildSource(repoRoot);
+
+        AssertSourceContains(combinedSource, "schemaVersion = 2", EvidenceContractV2Schema, "build/Build.Governance.cs");
+        AssertSourceContains(combinedSource, "laneContext = \"CiPublish\"", EvidenceContractV2Schema, "build/Build.Governance.cs");
+        AssertSourceContains(combinedSource, "producerTarget = \"PhaseCloseoutSnapshot\"", EvidenceContractV2Schema, "build/Build.Governance.cs");
+        AssertSourceContains(combinedSource, "ci-evidence-snapshot.json", EvidenceContractV2Schema, "build/Build.cs");
+    }
+
+    [Fact]
+    public void Bridge_distribution_governance_target_exists_in_cipublish_with_v2_provenance()
+    {
+        var repoRoot = FindRepoRoot();
+        var combinedSource = ReadCombinedBuildSource(repoRoot);
+        var mainSource = File.ReadAllText(Path.Combine(repoRoot, "build", "Build.cs"));
+
+        AssertSourceContains(combinedSource, "Target BridgeDistributionGovernance", BridgeDistributionParity, "build/Build.Governance.cs");
+        AssertSourceContains(combinedSource, "bridge-distribution-governance-report.json", BridgeDistributionParity, "build/Build*.cs");
+        AssertSourceContains(combinedSource, "producerTarget = \"BridgeDistributionGovernance\"", BridgeDistributionParity, "build/Build.Governance.cs");
+        AssertSourceContains(combinedSource, "SMOKE_PASSED", BridgeDistributionParity, "build/Build.Governance.cs");
+        AssertSourceContains(combinedSource, "LTS_IMPORT_OK", BridgeDistributionParity, "build/Build.Governance.cs");
+
+        Assert.Matches(
+            new Regex(@"Target\s+CiPublish\s*=>[\s\S]*?\.DependsOn\([\s\S]*BridgeDistributionGovernance[\s\S]*\);", RegexOptions.Multiline),
+            mainSource);
     }
 
     private static string ReadCombinedBuildSource(string repoRoot)
@@ -957,10 +762,7 @@ public sealed class AutomationLaneGovernanceTests
         while (dir is not null)
         {
             if (File.Exists(Path.Combine(dir.FullName, "Agibuild.Avalonia.WebView.sln")))
-            {
                 return dir.FullName;
-            }
-
             dir = dir.Parent;
         }
 
@@ -969,10 +771,6 @@ public sealed class AutomationLaneGovernanceTests
 
     private static string? ExtractPackageVersion(string csprojXml, string packageId)
     {
-        // Supports:
-        //   <PackageReference Include="xunit.v3" Version="3.2.2" />
-        //   <PackageReference Include="xunit.runner.visualstudio"><Version>3.1.5</Version></PackageReference>
-
         var attrPattern = new Regex(
             $@"<PackageReference\s+[^>]*Include=""{Regex.Escape(packageId)}""[^>]*\s+Version=""(?<v>[^""]+)""",
             RegexOptions.Compiled | RegexOptions.CultureInvariant);
@@ -1005,6 +803,6 @@ public sealed class AutomationLaneGovernanceTests
             versionsByProject.OrderBy(x => x.Key, StringComparer.Ordinal)
                 .Select(kvp => $"{kvp.Key}: {kvp.Value}"));
 
-        Assert.Fail($"Package version drift detected for '{packageId}'.\n{details}");
+        Assert.Fail($"[{XunitVersionAlignment}] Package version drift detected for '{packageId}'.\n{details}");
     }
 }

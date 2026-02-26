@@ -86,7 +86,8 @@ partial class BuildTask : NukeBuild
     AbsolutePath DependencyGovernanceReportFile => TestResultsDirectory / "dependency-governance-report.json";
     AbsolutePath TypeScriptGovernanceReportFile => TestResultsDirectory / "typescript-governance-report.json";
     AbsolutePath RuntimeCriticalPathGovernanceReportFile => TestResultsDirectory / "runtime-critical-path-governance-report.json";
-    AbsolutePath PhaseCloseoutSnapshotFile => TestResultsDirectory / "phase5-closeout-snapshot.json";
+    AbsolutePath CiEvidenceSnapshotFile => TestResultsDirectory / "ci-evidence-snapshot.json";
+    AbsolutePath BridgeDistributionGovernanceReportFile => TestResultsDirectory / "bridge-distribution-governance-report.json";
     AbsolutePath AutomationLaneManifestFile => TestsDirectory / "automation-lanes.json";
     AbsolutePath RuntimeCriticalPathManifestFile => TestsDirectory / "runtime-critical-path.manifest.json";
     AbsolutePath WarningGovernanceBaselineFile => TestsDirectory / "warning-governance.baseline.json";
@@ -197,5 +198,5 @@ partial class BuildTask : NukeBuild
 
     Target CiPublish => _ => _
         .Description("Full release pipeline: compile → coverage → lane automation → package smoke → publish.")
-        .DependsOn(Coverage, AutomationLaneReport, NugetPackageTest, RuntimeCriticalPathExecutionGovernanceCiPublish, WarningGovernance, DependencyVulnerabilityGovernance, TypeScriptDeclarationGovernance, OpenSpecStrictGovernance, PhaseCloseoutSnapshot, PackTemplate, Publish);
+        .DependsOn(Coverage, AutomationLaneReport, NugetPackageTest, RuntimeCriticalPathExecutionGovernanceCiPublish, WarningGovernance, DependencyVulnerabilityGovernance, TypeScriptDeclarationGovernance, OpenSpecStrictGovernance, PhaseCloseoutSnapshot, BridgeDistributionGovernance, PackTemplate, Publish);
 }

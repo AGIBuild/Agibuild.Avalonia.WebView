@@ -322,7 +322,15 @@ partial class BuildTask
 
         var reportPayload = new
         {
-            generatedAtUtc = DateTime.UtcNow,
+            schemaVersion = 2,
+            provenance = new
+            {
+                laneContext = includeCiPublishContext ? "CiPublish" : "Ci",
+                producerTarget = includeCiPublishContext
+                    ? "RuntimeCriticalPathExecutionGovernanceCiPublish"
+                    : "RuntimeCriticalPathExecutionGovernanceCi",
+                timestamp = DateTime.UtcNow.ToString("o")
+            },
             includeCiPublishContext,
             manifestPath = RuntimeCriticalPathManifestFile.ToString(),
             runtimeTrxPath = runtimeTrxPath?.ToString(),
@@ -341,8 +349,172 @@ partial class BuildTask
             Assert.Fail("Runtime critical-path execution governance failed:\n" + string.Join('\n', failures));
     }
 
+    Target BridgeDistributionGovernance => _ => _
+        .Description("Validates @agibuild/bridge npm package builds and imports across package managers and Node LTS.")
+        .Executes(() =>
+        {
+            TestResultsDirectory.CreateDirectory();
+
+            var bridgeDir = RootDirectory / "packages" / "bridge";
+            var distIndex = bridgeDir / "dist" / "index.js";
+            var checks = new List<object>();
+            var failures = new List<string>();
+
+            var nodeVersion = RunProcessCaptureAll("node", "--version", workingDirectory: RootDirectory, timeoutMs: 10_000).Trim();
+
+            // 1. Build bridge package with npm (canonical path)
+            try
+            {
+                RunNpmCaptureAll("install", workingDirectory: bridgeDir, timeoutMs: 120_000);
+                RunNpmCaptureAll("run build", workingDirectory: bridgeDir, timeoutMs: 60_000);
+                checks.Add(new { manager = "npm", phase = "install+build", passed = true });
+            }
+            catch (Exception ex)
+            {
+                failures.Add($"npm install+build failed: {ex.Message}");
+                checks.Add(new { manager = "npm", phase = "install+build", passed = false, error = ex.Message });
+            }
+
+            // 2. Package-manager parity: pnpm and yarn consume smoke
+            foreach (var pm in new[] { "pnpm", "yarn" })
+            {
+                var available = IsToolAvailable(pm);
+                if (!available)
+                {
+                    checks.Add(new { manager = pm, phase = "consume-smoke", passed = true, skipped = true, reason = $"{pm} not installed" });
+                    Serilog.Log.Warning("Skipping {Pm} parity check — tool not found on PATH.", pm);
+                    continue;
+                }
+
+                AbsolutePath? tempDir = null;
+                try
+                {
+                    tempDir = (AbsolutePath)Path.GetFullPath(Path.Combine(Path.GetTempPath(), $"bridge-{pm}-smoke-{Guid.NewGuid():N}"));
+                    Directory.CreateDirectory(tempDir);
+
+                    var packageJson = $$"""
+                        {
+                          "name": "bridge-{{pm}}-smoke",
+                          "version": "1.0.0",
+                          "private": true,
+                          "type": "module",
+                          "dependencies": {
+                            "@agibuild/bridge": "file:{{bridgeDir.ToString().Replace("\\", "/")}}"
+                          }
+                        }
+                        """;
+                    File.WriteAllText(tempDir / "package.json", packageJson);
+
+                    var consumerScript = """
+                        import { createBridgeClient } from '@agibuild/bridge';
+                        if (typeof createBridgeClient !== 'function') process.exit(1);
+                        console.log('SMOKE_PASSED');
+                        """;
+                    File.WriteAllText(tempDir / "consumer.mjs", consumerScript);
+
+                    RunPmInstall(pm, tempDir);
+                    var output = RunProcessCaptureAll("node", "consumer.mjs", workingDirectory: tempDir, timeoutMs: 30_000);
+                    var passed = output.Contains("SMOKE_PASSED", StringComparison.Ordinal);
+                    checks.Add(new { manager = pm, phase = "consume-smoke", passed });
+                    if (!passed)
+                        failures.Add($"{pm} consume smoke did not produce SMOKE_PASSED.");
+                }
+                catch (Exception ex)
+                {
+                    failures.Add($"{pm} consume smoke failed: {ex.Message}");
+                    checks.Add(new { manager = pm, phase = "consume-smoke", passed = false, error = ex.Message });
+                }
+                finally
+                {
+                    if (tempDir is not null && Directory.Exists(tempDir))
+                    {
+                        try { Directory.Delete(tempDir, recursive: true); }
+                        catch { /* best-effort cleanup */ }
+                    }
+                }
+            }
+
+            // 3. Node LTS import smoke
+            if (File.Exists(distIndex))
+            {
+                try
+                {
+                    var importCheck = RunProcessCaptureAll(
+                        "node",
+                        $"-e \"const b = require('{distIndex.ToString().Replace("\\", "/")}'); if (typeof b.createBridgeClient !== 'function') process.exit(1); console.log('LTS_IMPORT_OK');\"",
+                        workingDirectory: RootDirectory,
+                        timeoutMs: 10_000);
+                    var passed = importCheck.Contains("LTS_IMPORT_OK", StringComparison.Ordinal);
+                    checks.Add(new { phase = "node-lts-import", nodeVersion, passed });
+                    if (!passed)
+                        failures.Add($"Node LTS import check failed on {nodeVersion}.");
+                }
+                catch (Exception ex)
+                {
+                    failures.Add($"Node LTS import check failed: {ex.Message}");
+                    checks.Add(new { phase = "node-lts-import", nodeVersion, passed = false, error = ex.Message });
+                }
+            }
+            else
+            {
+                failures.Add($"Bridge dist/index.js not found at {distIndex}. Build may have failed.");
+                checks.Add(new { phase = "node-lts-import", nodeVersion, passed = false, error = "dist/index.js not found" });
+            }
+
+            var reportPayload = new
+            {
+                schemaVersion = 2,
+                provenance = new
+                {
+                    laneContext = "CiPublish",
+                    producerTarget = "BridgeDistributionGovernance",
+                    timestamp = DateTime.UtcNow.ToString("o")
+                },
+                nodeVersion,
+                checks,
+                failureCount = failures.Count,
+                failures
+            };
+
+            File.WriteAllText(
+                BridgeDistributionGovernanceReportFile,
+                JsonSerializer.Serialize(reportPayload, new JsonSerializerOptions { WriteIndented = true }));
+            Serilog.Log.Information("Bridge distribution governance report written to {Path}", BridgeDistributionGovernanceReportFile);
+
+            if (failures.Count > 0)
+                Assert.Fail("Bridge distribution governance failed:\n" + string.Join('\n', failures));
+        });
+
+    static bool IsToolAvailable(string toolName)
+    {
+        try
+        {
+            var fileName = OperatingSystem.IsWindows() ? "where" : "which";
+            RunProcessCaptureAll(fileName, toolName, timeoutMs: 5_000);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    static void RunPmInstall(string pm, string workingDirectory)
+    {
+        if (OperatingSystem.IsWindows())
+        {
+            RunProcessCaptureAllChecked("cmd.exe", $"/d /s /c \"{pm} install\"",
+                workingDirectory: workingDirectory, timeoutMs: 120_000);
+        }
+        else
+        {
+            RunProcessCaptureAllChecked(pm, "install",
+                workingDirectory: workingDirectory, timeoutMs: 120_000);
+        }
+    }
+
     Target PhaseCloseoutSnapshot => _ => _
-        .Description("Generates machine-readable Phase 5 closeout evidence snapshot from test/coverage artifacts.")
+        .Description("Generates machine-readable CI evidence snapshot (v2) from test/coverage artifacts.")
         .DependsOn(Coverage, AutomationLaneReport, OpenSpecStrictGovernance)
         .Executes(() =>
         {
@@ -359,11 +531,11 @@ partial class BuildTask
                 CoverageDirectory.GlobFiles("**/coverage.cobertura.xml").FirstOrDefault());
 
             if (unitTrxPath is null)
-                Assert.Fail("Phase closeout snapshot requires unit test TRX file (unit-tests.trx).");
+                Assert.Fail("CI evidence snapshot requires unit test TRX file (unit-tests.trx).");
             if (integrationTrxPath is null)
-                Assert.Fail("Phase closeout snapshot requires integration/runtime automation TRX file.");
+                Assert.Fail("CI evidence snapshot requires integration/runtime automation TRX file.");
             if (coberturaPath is null)
-                Assert.Fail("Phase closeout snapshot requires Cobertura coverage report.");
+                Assert.Fail("CI evidence snapshot requires Cobertura coverage report.");
 
             var unitCounters = ReadTrxCounters(unitTrxPath!);
             var integrationCounters = ReadTrxCounters(integrationTrxPath!);
@@ -389,7 +561,13 @@ partial class BuildTask
 
             var snapshotPayload = new
             {
-                generatedAtUtc = DateTime.UtcNow,
+                schemaVersion = 2,
+                provenance = new
+                {
+                    laneContext = "CiPublish",
+                    producerTarget = "PhaseCloseoutSnapshot",
+                    timestamp = DateTime.UtcNow.ToString("o")
+                },
                 sourcePaths = new
                 {
                     unitTrx = unitTrxPath!.ToString(),
@@ -440,8 +618,8 @@ partial class BuildTask
             };
 
             File.WriteAllText(
-                PhaseCloseoutSnapshotFile,
+                CiEvidenceSnapshotFile,
                 JsonSerializer.Serialize(snapshotPayload, new JsonSerializerOptions { WriteIndented = true }));
-            Serilog.Log.Information("Phase closeout snapshot written to {Path}", PhaseCloseoutSnapshotFile);
+            Serilog.Log.Information("CI evidence snapshot (v2) written to {Path}", CiEvidenceSnapshotFile);
         });
 }

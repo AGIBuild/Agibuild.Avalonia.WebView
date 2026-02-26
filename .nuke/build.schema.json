@@ -25,6 +25,7 @@
       "type": "string",
       "enum": [
         "AutomationLaneReport",
+        "BridgeDistributionGovernance",
         "Build",
         "Ci",
         "CiPublish",

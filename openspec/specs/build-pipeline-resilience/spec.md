@@ -93,12 +93,16 @@ Build governance SHALL provide a dedicated target that executes `openspec valida
 - **WHEN** all repository specs satisfy strict OpenSpec rules
 - **THEN** the governance target succeeds and CI/release pipelines continue to downstream quality gates
 
-### Requirement: CI pipeline SHALL emit deterministic phase closeout evidence snapshot
-The build pipeline SHALL produce a machine-readable closeout snapshot artifact derived from latest test and coverage outputs.
+### Requirement: Release pipeline SHALL emit deterministic phase closeout evidence snapshot
+The `CiPublish` pipeline SHALL produce a machine-readable closeout snapshot artifact derived from latest test and coverage outputs, and the snapshot MUST conform to CI evidence contract v2 with explicit schema version and provenance metadata.
 
-#### Scenario: CI run writes snapshot JSON
-- **WHEN** CI or release pipeline completes governed validation targets
-- **THEN** `phase5-closeout-snapshot.json` is written with deterministic fields for tests, coverage, and source paths
+#### Scenario: CiPublish run writes v2 snapshot JSON
+- **WHEN** `CiPublish` pipeline completes governed validation targets
+- **THEN** `phase5-closeout-snapshot.json` is written with deterministic v2 fields for tests, coverage, lane context, and source lineage
+
+#### Scenario: Snapshot schema mismatch fails gate
+- **WHEN** snapshot schema version or required v2 fields are missing or invalid
+- **THEN** governance fails with actionable schema diagnostics before downstream publish actions
 
 ### Requirement: Snapshot generation SHALL fail fast on missing prerequisite artifacts
 Snapshot target SHALL fail with clear error when required test or coverage artifacts are unavailable.
@@ -163,10 +167,10 @@ A CI governance test SHALL assert that README.md test counts and coverage percen
 - **WHEN** governed dependency scan reports actionable vulnerabilities
 - **THEN** `Ci` and `CiPublish` fail before downstream publish/release actions
 
-### Requirement: CI governance SHALL enforce runtime critical-path execution evidence
-Build pipeline governance SHALL include a deterministic gate that validates runtime critical-path execution evidence from TRX artifacts.
+### Requirement: Release governance SHALL enforce runtime critical-path execution evidence
+Release build governance in `CiPublish` SHALL include a deterministic gate that validates runtime critical-path execution evidence from TRX artifacts and verifies evidence-contract v2 provenance continuity for mapped scenarios.
 
-#### Scenario: CI fails when critical-path execution evidence is incomplete
-- **WHEN** CI executes governance targets and required critical-path evidence is missing or failed
+#### Scenario: CiPublish fails when critical-path execution evidence is incomplete
+- **WHEN** `CiPublish` executes governance targets and required critical-path evidence is missing, failed, or lacks required v2 provenance fields
 - **THEN** pipeline fails with machine-readable failure reasons
 
