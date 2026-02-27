@@ -523,11 +523,15 @@ partial class BuildTask
         }
     }
 
-    Target PhaseCloseoutSnapshot => _ => _
+    Target ReleaseCloseoutSnapshot => _ => _
         .Description("Generates machine-readable CI evidence snapshot (v2) from test/coverage artifacts.")
         .DependsOn(Coverage, AutomationLaneReport, OpenSpecStrictGovernance)
         .Executes(() =>
         {
+            const string completedPhase = "phase5-framework-positioning-foundation";
+            const string activePhase = "phase6-governance-productization";
+            const string transitionInvariantId = "GOV-022";
+
             TestResultsDirectory.CreateDirectory();
 
             var unitTrxPath = ResolveFirstExistingPath(
@@ -553,14 +557,14 @@ partial class BuildTask
             var branchCoveragePct = ReadCoberturaBranchCoveragePercent(coberturaPath!);
 
             var archiveDirectory = RootDirectory / "openspec" / "changes" / "archive";
-            var requiredCloseoutChangeIds = new[]
+            var completedPhaseCloseoutChangeIds = new[]
             {
                 "system-integration-contract-v2-freeze",
                 "template-webfirst-dx-panel",
                 "system-integration-diagnostic-export"
             };
             var closeoutArchives = Directory.Exists(archiveDirectory)
-                ? requiredCloseoutChangeIds
+                ? completedPhaseCloseoutChangeIds
                     .Select(changeId => Directory.GetDirectories(archiveDirectory)
                         .Select(Path.GetFileName)
                         .FirstOrDefault(name => name is not null && name.EndsWith(changeId, StringComparison.Ordinal)))
@@ -575,8 +579,14 @@ partial class BuildTask
                 provenance = new
                 {
                     laneContext = "CiPublish",
-                    producerTarget = "PhaseCloseoutSnapshot",
+                    producerTarget = "ReleaseCloseoutSnapshot",
                     timestamp = DateTime.UtcNow.ToString("o")
+                },
+                transition = new
+                {
+                    invariantId = transitionInvariantId,
+                    completedPhase,
+                    activePhase
                 },
                 sourcePaths = new
                 {
@@ -624,12 +634,12 @@ partial class BuildTask
                     typeScriptGovernanceReportExists = File.Exists(TypeScriptGovernanceReportFile),
                     runtimeCriticalPathGovernanceReportExists = File.Exists(RuntimeCriticalPathGovernanceReportFile)
                 },
-                phase5Archives = closeoutArchives
+                closeoutArchives
             };
 
             File.WriteAllText(
-                CiEvidenceSnapshotFile,
+                CloseoutSnapshotFile,
                 JsonSerializer.Serialize(snapshotPayload, new JsonSerializerOptions { WriteIndented = true }));
-            Serilog.Log.Information("CI evidence snapshot (v2) written to {Path}", CiEvidenceSnapshotFile);
+            Serilog.Log.Information("CI evidence snapshot (v2) written to {Path}", CloseoutSnapshotFile);
         });
 }

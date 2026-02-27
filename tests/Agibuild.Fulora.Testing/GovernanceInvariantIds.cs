@@ -27,4 +27,5 @@ public static class GovernanceInvariantIds
     public const string PhaseCloseoutConsistency = "GOV-019";
     public const string EvidenceContractV2Schema = "GOV-020";
     public const string BridgeDistributionParity = "GOV-021";
+    public const string PhaseTransitionConsistency = "GOV-022";
 }

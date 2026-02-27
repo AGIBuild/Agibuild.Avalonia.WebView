@@ -466,6 +466,31 @@ dotnet new agibuild-hybrid -n MyApp --frontend react
 - Critical runtime flows emit structured diagnostics consumable by CI and AI agents.
 - Default template demonstrates the recommended web-first framework architecture path.
 
+### Phase Transition Status (Machine-checkable)
+
+- Completed phase id: `phase5-framework-positioning-foundation`
+- Active phase id: `phase6-governance-productization`
+- Closeout snapshot artifact: `artifacts/test-results/closeout-snapshot.json`
+
+## Phase 6: Governance Productization (🚧 Active)
+
+**Goal**: Productize phase transition governance so release evidence and CI gates remain phase-neutral, semantic, and deterministic across future roadmap increments.
+
+### Milestones
+
+| Milestone | Focus | Outcome |
+|---|---|---|
+| **M6.1 Closeout Contract Neutralization** | Remove phase-number-coupled target/payload naming in CI evidence generation | `ReleaseCloseoutSnapshot` and `closeout-snapshot.json` become canonical closeout contract |
+| **M6.2 Semantic Transition Invariants** | Govern roadmap/evidence transitions by invariant IDs instead of hardcoded phase literals | Machine-checkable transition diagnostics with stable invariant IDs |
+| **M6.3 Continuous Transition Gate** | Keep `Ci`/`CiPublish` gate continuity while roadmap moves to next active phase | Deterministic enforcement of completed-phase + active-phase transition metadata |
+
+### Initial Evidence Mapping
+
+- Build closeout contract source: `build/Build.Governance.cs` (`ReleaseCloseoutSnapshot`)
+- CI target dependency source: `build/Build.cs` (`Ci`, `CiPublish`)
+- Transition invariant governance source: `tests/Agibuild.Fulora.UnitTests/AutomationLaneGovernanceTests.cs`
+- Validation baseline: `nuke Test`, `nuke Coverage`, `openspec validate --all --strict`
+
 ---
 
 ## Dependencies & Prerequisites

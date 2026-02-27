@@ -114,7 +114,7 @@ public sealed class AutomationLaneGovernanceTests
         var requiredTargets = new[]
         {
             "Target ContractAutomation", "Target RuntimeAutomation", "Target AutomationLaneReport",
-            "Target WarningGovernance", "Target WarningGovernanceSyntheticCheck", "Target PhaseCloseoutSnapshot"
+            "Target WarningGovernance", "Target WarningGovernanceSyntheticCheck", "Target ReleaseCloseoutSnapshot"
         };
         foreach (var target in requiredTargets)
             AssertSourceContains(combinedSource, target, BuildPipelineTargetGraph, "build/Build*.cs");
@@ -123,7 +123,7 @@ public sealed class AutomationLaneGovernanceTests
         {
             "automation-lane-report.json", "warning-governance-report.json",
             "warning-governance.baseline.json", "nuget-smoke-retry-telemetry.json",
-            "ci-evidence-snapshot.json"
+            "closeout-snapshot.json"
         };
         foreach (var artifact in requiredArtifacts)
             AssertSourceContains(combinedSource, artifact, BuildPipelineTargetGraph, "build/Build*.cs");
@@ -480,7 +480,7 @@ public sealed class AutomationLaneGovernanceTests
         var requiredTargets = new[]
         {
             "Target OpenSpecStrictGovernance", "Target DependencyVulnerabilityGovernance",
-            "Target TypeScriptDeclarationGovernance", "Target PhaseCloseoutSnapshot"
+            "Target TypeScriptDeclarationGovernance", "Target ReleaseCloseoutSnapshot"
         };
         foreach (var target in requiredTargets)
             AssertSourceContains(combinedSource, target, CiTargetOpenSpecGate, "build/Build*.cs");
@@ -489,12 +489,12 @@ public sealed class AutomationLaneGovernanceTests
         AssertSourceContains(combinedSource, "RunProcessCaptureAllChecked(", CiTargetOpenSpecGate, "build/Build*.cs");
         AssertSourceContains(combinedSource, "dependency-governance-report.json", CiTargetOpenSpecGate, "build/Build*.cs");
         AssertSourceContains(combinedSource, "typescript-governance-report.json", CiTargetOpenSpecGate, "build/Build*.cs");
-        AssertSourceContains(combinedSource, "ci-evidence-snapshot.json", CiTargetOpenSpecGate, "build/Build*.cs");
+        AssertSourceContains(combinedSource, "closeout-snapshot.json", CiTargetOpenSpecGate, "build/Build*.cs");
 
         var ciDependencies = new[]
         {
             "OpenSpecStrictGovernance", "DependencyVulnerabilityGovernance",
-            "TypeScriptDeclarationGovernance", "PhaseCloseoutSnapshot",
+            "TypeScriptDeclarationGovernance", "ReleaseCloseoutSnapshot",
             "RuntimeCriticalPathExecutionGovernanceCi"
         };
         foreach (var dep in ciDependencies)
@@ -507,7 +507,7 @@ public sealed class AutomationLaneGovernanceTests
         var ciPublishDependencies = new[]
         {
             "OpenSpecStrictGovernance", "DependencyVulnerabilityGovernance",
-            "TypeScriptDeclarationGovernance", "PhaseCloseoutSnapshot",
+            "TypeScriptDeclarationGovernance", "ReleaseCloseoutSnapshot",
             "RuntimeCriticalPathExecutionGovernanceCiPublish"
         };
         foreach (var dep in ciPublishDependencies)
@@ -519,7 +519,7 @@ public sealed class AutomationLaneGovernanceTests
     }
 
     [Fact]
-    public void Phase5_closeout_roadmap_and_shell_governance_artifacts_remain_consistent()
+    public void Phase_transition_roadmap_and_shell_governance_artifacts_remain_consistent()
     {
         var repoRoot = FindRepoRoot();
         var roadmapPath = Path.Combine(repoRoot, "openspec", "ROADMAP.md");
@@ -529,42 +529,46 @@ public sealed class AutomationLaneGovernanceTests
         var hostCapabilityBridgePath = Path.Combine(repoRoot, "src", "Agibuild.Fulora.Runtime", "Shell", "WebViewHostCapabilityBridge.cs");
 
         foreach (var p in new[] { roadmapPath, runtimeManifestPath, productionMatrixPath, templateIndexPath, hostCapabilityBridgePath })
-            AssertFileExists(p, PhaseCloseoutConsistency);
+            AssertFileExists(p, PhaseTransitionConsistency);
 
         var roadmap = File.ReadAllText(roadmapPath);
-        AssertSourceContains(roadmap, "## Phase 5: Framework Positioning Foundation (✅ Completed)", PhaseCloseoutConsistency, roadmapPath);
-        AssertSourceContains(roadmap, "### Evidence Source Mapping", PhaseCloseoutConsistency, roadmapPath);
+        Assert.Matches(new Regex(@"## Phase \d+: .+\(✅ Completed\)", RegexOptions.Multiline), roadmap);
+        Assert.Matches(new Regex(@"## Phase \d+: .+\(🚧 Active\)", RegexOptions.Multiline), roadmap);
+        AssertSourceContains(roadmap, "Completed phase id: `phase5-framework-positioning-foundation`", PhaseTransitionConsistency, roadmapPath);
+        AssertSourceContains(roadmap, "Active phase id: `phase6-governance-productization`", PhaseTransitionConsistency, roadmapPath);
+        AssertSourceContains(roadmap, "Closeout snapshot artifact: `artifacts/test-results/closeout-snapshot.json`", PhaseTransitionConsistency, roadmapPath);
+        AssertSourceContains(roadmap, "### Evidence Source Mapping", PhaseTransitionConsistency, roadmapPath);
 
-        var requiredChangeIds = new[]
+        var completedPhaseCloseoutChangeIds = new[]
         {
             "2026-02-24-system-integration-contract-v2-freeze",
             "2026-02-24-template-webfirst-dx-panel",
             "2026-02-24-system-integration-diagnostic-export"
         };
-        foreach (var changeId in requiredChangeIds)
-            AssertSourceContains(roadmap, changeId, PhaseCloseoutConsistency, roadmapPath);
+        foreach (var changeId in completedPhaseCloseoutChangeIds)
+            AssertSourceContains(roadmap, changeId, PhaseTransitionConsistency, roadmapPath);
 
         Assert.Matches(new Regex(@"`nuke Test`: Unit `\d+`, Integration `\d+`, Total `\d+` \(pass\)", RegexOptions.Multiline), roadmap);
         Assert.Matches(new Regex(@"`nuke Coverage`: Line `\d+(\.\d+)?%` \(pass, threshold `\d+%`\)", RegexOptions.Multiline), roadmap);
 
-        using var runtimeDoc = LoadJsonArtifact(runtimeManifestPath, PhaseCloseoutConsistency);
-        using var matrixDoc = LoadJsonArtifact(productionMatrixPath, PhaseCloseoutConsistency);
+        using var runtimeDoc = LoadJsonArtifact(runtimeManifestPath, PhaseTransitionConsistency);
+        using var matrixDoc = LoadJsonArtifact(productionMatrixPath, PhaseTransitionConsistency);
 
         var runtimeScenarioIds = ExtractStringIds(runtimeDoc.RootElement.GetProperty("scenarios"), "id");
         var matrixCapabilityIds = ExtractStringIds(matrixDoc.RootElement.GetProperty("capabilities"), "id");
 
-        var sharedPhase5Ids = new[]
+        var sharedTransitionCapabilityIds = new[]
         {
             "shell-system-integration-roundtrip", "shell-system-integration-v2-tray-payload",
             "shell-system-integration-v2-timestamp-normalization", "shell-system-integration-diagnostic-export"
         };
-        AssertContainsAll(runtimeScenarioIds, sharedPhase5Ids, PhaseCloseoutConsistency, runtimeManifestPath);
-        AssertContainsAll(matrixCapabilityIds, sharedPhase5Ids, PhaseCloseoutConsistency, productionMatrixPath);
+        AssertContainsAll(runtimeScenarioIds, sharedTransitionCapabilityIds, PhaseTransitionConsistency, runtimeManifestPath);
+        AssertContainsAll(matrixCapabilityIds, sharedTransitionCapabilityIds, PhaseTransitionConsistency, productionMatrixPath);
 
-        AssertSourceContains(File.ReadAllText(templateIndexPath), "window.runTemplateRegressionChecks", PhaseCloseoutConsistency, templateIndexPath);
+        AssertSourceContains(File.ReadAllText(templateIndexPath), "window.runTemplateRegressionChecks", PhaseTransitionConsistency, templateIndexPath);
         var bridgeSource = File.ReadAllText(hostCapabilityBridgePath);
-        AssertSourceContains(bridgeSource, "ToExportRecord", PhaseCloseoutConsistency, hostCapabilityBridgePath);
-        AssertSourceContains(bridgeSource, "WebViewHostCapabilityDiagnosticExportRecord", PhaseCloseoutConsistency, hostCapabilityBridgePath);
+        AssertSourceContains(bridgeSource, "ToExportRecord", PhaseTransitionConsistency, hostCapabilityBridgePath);
+        AssertSourceContains(bridgeSource, "WebViewHostCapabilityDiagnosticExportRecord", PhaseTransitionConsistency, hostCapabilityBridgePath);
     }
 
     [Fact]
@@ -726,8 +730,12 @@ public sealed class AutomationLaneGovernanceTests
 
         AssertSourceContains(combinedSource, "schemaVersion = 2", EvidenceContractV2Schema, "build/Build.Governance.cs");
         AssertSourceContains(combinedSource, "laneContext = \"CiPublish\"", EvidenceContractV2Schema, "build/Build.Governance.cs");
-        AssertSourceContains(combinedSource, "producerTarget = \"PhaseCloseoutSnapshot\"", EvidenceContractV2Schema, "build/Build.Governance.cs");
-        AssertSourceContains(combinedSource, "ci-evidence-snapshot.json", EvidenceContractV2Schema, "build/Build.cs");
+        AssertSourceContains(combinedSource, "producerTarget = \"ReleaseCloseoutSnapshot\"", EvidenceContractV2Schema, "build/Build.Governance.cs");
+        AssertSourceContains(combinedSource, "transition = new", EvidenceContractV2Schema, "build/Build.Governance.cs");
+        AssertSourceContains(combinedSource, "completedPhase", EvidenceContractV2Schema, "build/Build.Governance.cs");
+        AssertSourceContains(combinedSource, "activePhase", EvidenceContractV2Schema, "build/Build.Governance.cs");
+        AssertSourceContains(combinedSource, "closeoutArchives", EvidenceContractV2Schema, "build/Build.Governance.cs");
+        AssertSourceContains(combinedSource, "closeout-snapshot.json", EvidenceContractV2Schema, "build/Build.cs");
     }
 
     [Fact]

@@ -56,19 +56,20 @@ The architecture SHALL keep frontend teams in a web-first workflow, minimize req
 - **AND** host-specific glue code remains minimal and policy-governed
 
 ### Requirement: Phase 5 status SHALL be represented as completed when exit criteria evidence is satisfied
-Roadmap state for Framework Positioning Foundation SHALL move to completed once all declared Phase 5 exit criteria are met with passing automated evidence.
+Roadmap state for Framework Positioning Foundation SHALL remain represented as completed once all declared Phase 5 exit criteria are met with passing automated evidence, and roadmap governance SHALL additionally declare the currently active next phase for continuous delivery planning.
 
-#### Scenario: Completed status aligns with evidence snapshot
-- **WHEN** latest full validation gates pass and archived closeout evidence exists
-- **THEN** roadmap Phase 5 status is set to completed
-- **AND** the snapshot reflects current counts and coverage baseline
+#### Scenario: Completed status aligns with transition-aware evidence snapshot
+- **WHEN** latest full validation gates pass, archived closeout evidence exists, and transition metadata declares the active next phase
+- **THEN** roadmap Phase 5 status remains completed
+- **AND** closeout evidence reflects current counts and coverage baseline with transition scope metadata
 
 ### Requirement: Phase 5 closeout SHALL include deterministic evidence source mapping
-Roadmap closeout section SHALL provide explicit mapping from claims to evidence sources to support audit and future phase planning.
+Roadmap closeout section SHALL provide explicit mapping from claims to evidence sources, and SHALL include transition mapping that links completed-phase claims to active-phase governance entry points.
 
-#### Scenario: Reviewer traces claims to source artifacts
-- **WHEN** reviewer inspects Phase 5 closeout section
+#### Scenario: Reviewer traces closeout and transition claims to source artifacts
+- **WHEN** reviewer inspects roadmap closeout and transition sections
 - **THEN** each key claim has a clear source mapping to archived change evidence or validation command outputs
+- **AND** transition entry points are traceable to governed CI/evidence artifacts
 
 ### Requirement: Phase closeout evidence SHALL be generated from automated pipeline artifacts
 Phase closeout evidence SHALL rely on generated pipeline snapshot artifacts rather than manual aggregation.
