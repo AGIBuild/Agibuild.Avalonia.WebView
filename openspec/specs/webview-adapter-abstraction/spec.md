@@ -13,7 +13,7 @@ This assembly SHALL reference `Agibuild.Fulora.Core` and SHALL NOT reference any
 
 ### Requirement: IWebViewAdapter contract surface
 The `IWebViewAdapter` interface SHALL define:
-- lifecycle: `void Initialize(IWebViewAdapterHost host)`, `void Attach(IPlatformHandle parentHandle)`, `void Detach()`
+- lifecycle: `void Initialize(IWebViewAdapterHost host)`, `void Attach(INativeHandle parentHandle)`, `void Detach()`
 - navigation: `Task NavigateAsync(Guid navigationId, Uri uri)`, `Task NavigateToStringAsync(Guid navigationId, string html)`, `Task NavigateToStringAsync(Guid navigationId, string html, Uri? baseUrl)`
 - scripting: `Task<string?> InvokeScriptAsync(string script)`
 - commands: `bool GoBack(Guid navigationId)`, `bool GoForward(Guid navigationId)`, `bool Refresh(Guid navigationId)`, `bool Stop()`
@@ -142,8 +142,8 @@ The runtime SHALL detect `IPermissionAdapter` support via type check and subscri
 
 ### Requirement: INativeWebViewHandleProvider is implementable by adapters
 Platform adapters SHALL expose the underlying native WebView handle through `INativeWebViewHandleProvider` when native-handle access is supported.
-The `HandleDescriptor` property of the returned `IPlatformHandle` SHALL identify the native type (e.g., `"WKWebView"`, `"WebView2"`).
-The returned `IPlatformHandle` SHALL also implement the appropriate typed platform handle interface from Core:
+The `HandleDescriptor` property of the returned `INativeHandle` SHALL identify the native type (e.g., `"WKWebView"`, `"WebView2"`).
+The returned `INativeHandle` SHALL also implement the appropriate typed platform handle interface from Core:
 - Windows adapters: `IWindowsWebView2PlatformHandle`
 - macOS/iOS adapters: `IAppleWKWebViewPlatformHandle`
 - GTK adapters: `IGtkWebViewPlatformHandle`

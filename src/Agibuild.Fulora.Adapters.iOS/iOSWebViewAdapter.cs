@@ -1,7 +1,6 @@
 using System.Collections.Concurrent;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
-using Avalonia.Platform;
 using Agibuild.Fulora;
 using Agibuild.Fulora.Adapters.Abstractions;
 using ObjCRuntime;
@@ -133,7 +132,7 @@ internal sealed class iOSWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
         }
     }
 
-    public void Attach(IPlatformHandle parentHandle)
+    public void Attach(INativeHandle parentHandle)
     {
         ArgumentNullException.ThrowIfNull(parentHandle);
         ThrowIfNotInitialized();
@@ -272,7 +271,7 @@ internal sealed class iOSWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
         return true;
     }
 
-    public IPlatformHandle? TryGetWebViewHandle()
+    public INativeHandle? TryGetWebViewHandle()
     {
         if (!_attached || _detached) return null;
 

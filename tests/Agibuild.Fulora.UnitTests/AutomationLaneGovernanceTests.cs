@@ -168,6 +168,75 @@ public sealed class AutomationLaneGovernanceTests
     }
 
     [Fact]
+    public void Core_runtime_and_adapter_abstractions_remain_host_neutral_without_avalonia_dependencies()
+    {
+        var repoRoot = FindRepoRoot();
+        var governedProjects = new[]
+        {
+            ("src/Agibuild.Fulora.Core/Agibuild.Fulora.Core.csproj", "src/Agibuild.Fulora.Core"),
+            ("src/Agibuild.Fulora.Runtime/Agibuild.Fulora.Runtime.csproj", "src/Agibuild.Fulora.Runtime"),
+            ("src/Agibuild.Fulora.Adapters.Abstractions/Agibuild.Fulora.Adapters.Abstractions.csproj", "src/Agibuild.Fulora.Adapters.Abstractions")
+        };
+
+        foreach (var (projectRelPath, sourceRelPath) in governedProjects)
+        {
+            var projectPath = Path.Combine(repoRoot, projectRelPath.Replace('/', Path.DirectorySeparatorChar));
+            AssertFileExists(projectPath, HostNeutralDependencyBoundary);
+            var projectSource = File.ReadAllText(projectPath);
+            Assert.DoesNotContain("PackageReference Include=\"Avalonia\"", projectSource, StringComparison.Ordinal);
+
+            var sourceDir = Path.Combine(repoRoot, sourceRelPath.Replace('/', Path.DirectorySeparatorChar));
+            Assert.True(Directory.Exists(sourceDir), $"[{HostNeutralDependencyBoundary}] Missing source directory: {sourceDir}");
+
+            foreach (var sourceFile in Directory.GetFiles(sourceDir, "*.cs", SearchOption.AllDirectories))
+            {
+                var source = File.ReadAllText(sourceFile);
+                Assert.DoesNotContain("global::Avalonia.", source, StringComparison.Ordinal);
+                Assert.DoesNotContain("using Avalonia.", source, StringComparison.Ordinal);
+            }
+        }
+    }
+
+    [Fact]
+    public void Avalonia_host_bindings_are_isolated_to_host_layer_and_template_desktop_wiring_is_explicit()
+    {
+        var repoRoot = FindRepoRoot();
+
+        var hostLayerSourceFiles = new[]
+        {
+            Path.Combine(repoRoot, "src", "Agibuild.Fulora", "WebView.cs"),
+            Path.Combine(repoRoot, "src", "Agibuild.Fulora", "AvaloniaWebDialog.cs"),
+            Path.Combine(repoRoot, "src", "Agibuild.Fulora", "AppBuilderExtensions.cs")
+        };
+        foreach (var sourceFile in hostLayerSourceFiles)
+            AssertFileExists(sourceFile, HostNeutralDependencyBoundary);
+
+        var nonHostProjects = new[]
+        {
+            Path.Combine(repoRoot, "src", "Agibuild.Fulora.Core", "Agibuild.Fulora.Core.csproj"),
+            Path.Combine(repoRoot, "src", "Agibuild.Fulora.Runtime", "Agibuild.Fulora.Runtime.csproj"),
+            Path.Combine(repoRoot, "src", "Agibuild.Fulora.Adapters.Abstractions", "Agibuild.Fulora.Adapters.Abstractions.csproj")
+        };
+        foreach (var csproj in nonHostProjects)
+        {
+            AssertFileExists(csproj, HostNeutralDependencyBoundary);
+            var source = File.ReadAllText(csproj);
+            Assert.DoesNotContain("Avalonia", source, StringComparison.Ordinal);
+        }
+
+        var desktopProjectPath = Path.Combine(repoRoot, "templates", "agibuild-hybrid", "HybridApp.Desktop", "HybridApp.Desktop.csproj");
+        AssertFileExists(desktopProjectPath, TemplateMetadataSchema);
+        var desktopProject = File.ReadAllText(desktopProjectPath);
+
+        AssertSourceContains(desktopProject, "<PackageReference Include=\"Agibuild.Fulora\"", TemplateMetadataSchema, desktopProjectPath);
+        AssertSourceContains(desktopProject, "<PackageReference Include=\"Avalonia\"", TemplateMetadataSchema, desktopProjectPath);
+        AssertSourceContains(desktopProject, "<PackageReference Include=\"Avalonia.Desktop\"", TemplateMetadataSchema, desktopProjectPath);
+        Assert.DoesNotContain("Agibuild.Fulora.Core", desktopProject, StringComparison.Ordinal);
+        Assert.DoesNotContain("Agibuild.Fulora.Runtime", desktopProject, StringComparison.Ordinal);
+        Assert.DoesNotContain("Agibuild.Fulora.Adapters.Abstractions", desktopProject, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Xunit_v3_package_versions_are_aligned_across_repo_tests_templates_and_samples()
     {
         var repoRoot = FindRepoRoot();

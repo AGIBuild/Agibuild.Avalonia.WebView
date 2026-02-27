@@ -1556,7 +1556,7 @@ public sealed class RuntimeCoverageTests
         public event EventHandler<EnvironmentRequestedEventArgs>? EnvironmentRequested;
 
         public void Initialize(IWebViewAdapterHost host) { }
-        public void Attach(global::Avalonia.Platform.IPlatformHandle parentHandle) { }
+        public void Attach(INativeHandle parentHandle) { }
         public void Detach() { }
         public Task NavigateAsync(Guid navigationId, Uri uri) => Task.CompletedTask;
         public Task NavigateToStringAsync(Guid navigationId, string html) => Task.CompletedTask;

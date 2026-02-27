@@ -46,7 +46,7 @@ public sealed class WebDialog : IWebDialog
     public void Show() => _host.Show();
 
     /// <inheritdoc />
-    public bool Show(global::Avalonia.Platform.IPlatformHandle owner) => _host.ShowWithOwner(owner);
+    public bool Show(INativeHandle owner) => _host.ShowWithOwner(owner);
 
     /// <inheritdoc />
     public void Close()
@@ -104,7 +104,7 @@ public sealed class WebDialog : IWebDialog
     /// <inheritdoc />
     public ICommandManager? TryGetCommandManager() => _core.TryGetCommandManager();
     /// <inheritdoc />
-    public Task<global::Avalonia.Platform.IPlatformHandle?> TryGetWebViewHandleAsync() => _core.TryGetWebViewHandleAsync();
+    public Task<INativeHandle?> TryGetWebViewHandleAsync() => _core.TryGetWebViewHandleAsync();
     /// <inheritdoc />
     public IWebViewRpcService? Rpc => _core.Rpc;
     /// <inheritdoc />
@@ -231,7 +231,7 @@ public sealed class WebDialog : IWebDialog
 
 /// <summary>
 /// Abstraction for the dialog window host (platform window management).
-/// Decoupled from Avalonia to enable unit testing with mocks.
+/// Kept host-framework-neutral to enable unit testing with mocks.
 /// </summary>
 public interface IDialogHost
 {
@@ -243,7 +243,7 @@ public interface IDialogHost
     /// <summary>Shows the host window.</summary>
     void Show();
     /// <summary>Shows the host window with an owner handle.</summary>
-    bool ShowWithOwner(global::Avalonia.Platform.IPlatformHandle owner);
+    bool ShowWithOwner(INativeHandle owner);
     /// <summary>Closes the host window.</summary>
     void Close();
     /// <summary>Resizes the host window.</summary>

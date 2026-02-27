@@ -5,7 +5,6 @@ using Android.Runtime;
 using Android.Views;
 using Android.Webkit;
 using AndroidX.Activity;
-using Avalonia.Platform;
 using Agibuild.Fulora;
 using Agibuild.Fulora.Adapters.Abstractions;
 using Java.Interop;
@@ -107,7 +106,7 @@ internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHan
         _host = host;
     }
 
-    public void Attach(IPlatformHandle parentHandle)
+    public void Attach(INativeHandle parentHandle)
     {
         ArgumentNullException.ThrowIfNull(parentHandle);
         ThrowIfNotInitialized();
@@ -546,7 +545,7 @@ internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHan
 
     // ==================== INativeWebViewHandleProvider ====================
 
-    public IPlatformHandle? TryGetWebViewHandle()
+    public INativeHandle? TryGetWebViewHandle()
     {
         if (!_attached || _detached || _webView is null) return null;
 
@@ -992,7 +991,7 @@ internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHan
         };
     }
 
-    private static ViewGroup ResolveParentView(IPlatformHandle parentHandle)
+    private static ViewGroup ResolveParentView(INativeHandle parentHandle)
     {
         if (parentHandle.Handle == IntPtr.Zero)
         {

@@ -1,7 +1,6 @@
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Threading;
-using Avalonia.Platform;
 using Agibuild.Fulora;
 using Agibuild.Fulora.Adapters.Abstractions;
 using Microsoft.Web.WebView2.Core;
@@ -131,7 +130,7 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
         _host = host;
     }
 
-    public void Attach(IPlatformHandle parentHandle)
+    public void Attach(INativeHandle parentHandle)
     {
         ArgumentNullException.ThrowIfNull(parentHandle);
         ThrowIfNotInitialized();
@@ -1198,7 +1197,7 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
 
     // ==================== INativeWebViewHandleProvider ====================
 
-    public IPlatformHandle? TryGetWebViewHandle()
+    public INativeHandle? TryGetWebViewHandle()
     {
         if (!_attached || _detached || _controller is null || _webView is null) return null;
 
@@ -1211,7 +1210,7 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
             // Marshal.GetIUnknownForObject returns a ref-counted COM pointer.
             var coreWebView2Ptr = Marshal.GetIUnknownForObject(_webView);
             var controllerPtr = Marshal.GetIUnknownForObject(_controller);
-            return (IPlatformHandle?)new WindowsWebView2PlatformHandle(hwnd, coreWebView2Ptr, controllerPtr);
+            return (INativeHandle?)new WindowsWebView2PlatformHandle(hwnd, coreWebView2Ptr, controllerPtr);
         });
     }
 

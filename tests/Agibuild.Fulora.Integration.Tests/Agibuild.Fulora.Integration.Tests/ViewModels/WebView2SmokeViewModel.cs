@@ -26,7 +26,7 @@ public partial class WebView2SmokeViewModel : ViewModelBase, IWebViewAdapterHost
     private readonly ConcurrentDictionary<Guid, Guid> _navigationIdByCorrelation = new();
     private readonly ConcurrentQueue<NativeNavigationStartingInfo> _nativeStarts = new();
 
-    private IPlatformHandle? _hostHandle;
+    private INativeHandle? _hostHandle;
     private IWebViewAdapter? _adapter;
     private LoopbackHttpServer? _server;
 
@@ -592,7 +592,7 @@ public partial class WebView2SmokeViewModel : ViewModelBase, IWebViewAdapterHost
 
     public void SetHostHandle(IPlatformHandle handle)
     {
-        _hostHandle = handle;
+        _hostHandle = new AvaloniaNativeHandleAdapter(handle);
         LogLine($"Native host handle created: {handle.HandleDescriptor} 0x{handle.Handle.ToString("x")}");
 
         if (AutoRun && Interlocked.Exchange(ref _autoRunStarted, 1) == 0)
@@ -741,6 +741,19 @@ public partial class WebView2SmokeViewModel : ViewModelBase, IWebViewAdapterHost
         {
             Console.WriteLine(line);
         }
+    }
+
+    private sealed class AvaloniaNativeHandleAdapter : INativeHandle
+    {
+        private readonly IPlatformHandle _inner;
+
+        public AvaloniaNativeHandleAdapter(IPlatformHandle inner)
+        {
+            _inner = inner;
+        }
+
+        public nint Handle => _inner.Handle;
+        public string HandleDescriptor => _inner.HandleDescriptor;
     }
 
     // ==================== Embedded loopback HTTP server ====================

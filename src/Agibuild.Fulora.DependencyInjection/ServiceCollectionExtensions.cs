@@ -29,8 +29,8 @@ public static class ServiceCollectionExtensions
     {
         ArgumentNullException.ThrowIfNull(services);
 
-        // Register the Avalonia UI-thread dispatcher as IWebViewDispatcher (transient — one per resolve).
-        services.AddTransient<IWebViewDispatcher>(_ => new AvaloniaWebViewDispatcher());
+        // Register a synchronization-context dispatcher as IWebViewDispatcher (transient — one per resolve).
+        services.AddTransient<IWebViewDispatcher>(_ => new SynchronizationContextWebViewDispatcher());
 
         services.AddSingleton<Func<IWebViewDispatcher, IWebView>>(sp =>
         {

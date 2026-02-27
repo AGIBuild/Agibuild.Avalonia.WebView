@@ -586,5 +586,5 @@ public partial class AdvancedFeaturesE2EViewModel : ViewModelBase
 /// </summary>
 internal sealed class E2ETopLevelWindow : ITopLevelWindow
 {
-    public global::Avalonia.Platform.IPlatformHandle? PlatformHandle => null;
+    public INativeHandle? PlatformHandle => null;
 }

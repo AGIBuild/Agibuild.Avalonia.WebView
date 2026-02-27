@@ -13,9 +13,6 @@
     <ProjectReference Include="..\Agibuild.Fulora.Core\Agibuild.Fulora.Core.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Avalonia" Version="11.3.11" />
-  </ItemGroup>
 
   <ItemGroup>
     <!-- IWebViewAdapter + WebViewAdapterRegistry are internal SPI. -->

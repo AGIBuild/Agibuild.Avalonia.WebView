@@ -1,6 +1,5 @@
 using Agibuild.Fulora;
 using Agibuild.Fulora.Testing;
-using Avalonia.Platform;
 using Xunit;
 
 namespace Agibuild.Fulora.UnitTests;
@@ -380,7 +379,7 @@ public sealed class WebDialogTests
         Assert.NotSame(dialog1, dialog2);
     }
 
-    private sealed class TestPlatformHandle : IPlatformHandle
+    private sealed class TestPlatformHandle : INativeHandle
     {
         public nint Handle => nint.Zero;
         public string HandleDescriptor => "Test";

@@ -1,4 +1,3 @@
-using Avalonia.Platform;
 using Agibuild.Fulora;
 using Agibuild.Fulora.Adapters.Abstractions;
 
@@ -56,7 +55,7 @@ internal class MockWebViewAdapter : IWebViewAdapter
         _initialized = true;
     }
 
-    public void Attach(IPlatformHandle parentHandle)
+    public void Attach(INativeHandle parentHandle)
     {
         if (!_initialized)
         {
@@ -372,10 +371,10 @@ internal sealed class MockWebViewAdapterWithOptions : MockWebViewAdapter, IWebVi
 /// <summary>Mock adapter that also implements <see cref="INativeWebViewHandleProvider"/>.</summary>
 internal sealed class MockWebViewAdapterWithHandle : MockWebViewAdapter, INativeWebViewHandleProvider
 {
-    public IPlatformHandle? HandleToReturn { get; set; }
+    public INativeHandle? HandleToReturn { get; set; }
     public int TryGetHandleCallCount { get; private set; }
 
-    public IPlatformHandle? TryGetWebViewHandle()
+    public INativeHandle? TryGetWebViewHandle()
     {
         TryGetHandleCallCount++;
         return HandleToReturn;

@@ -1,4 +1,3 @@
-using Avalonia.Platform;
 using Agibuild.Fulora;
 
 namespace Agibuild.Fulora.Testing;
@@ -27,7 +26,7 @@ internal sealed class MockDialogHost : IDialogHost
         IsShown = true;
     }
 
-    public bool ShowWithOwner(IPlatformHandle owner)
+    public bool ShowWithOwner(INativeHandle owner)
     {
         ShowCallCount++;
         IsShown = true;

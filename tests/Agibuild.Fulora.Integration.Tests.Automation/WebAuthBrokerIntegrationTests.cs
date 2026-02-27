@@ -1,7 +1,6 @@
 using Agibuild.Fulora;
 using Agibuild.Fulora.Testing;
 using Avalonia.Headless.XUnit;
-using Avalonia.Platform;
 using Xunit;
 
 namespace Agibuild.Fulora.Integration.Tests.Automation;
@@ -239,6 +238,6 @@ public sealed class WebAuthBrokerIntegrationTests
 
     private sealed class TestTopLevelWindow : ITopLevelWindow
     {
-        public IPlatformHandle? PlatformHandle => null;
+        public INativeHandle? PlatformHandle => null;
     }
 }

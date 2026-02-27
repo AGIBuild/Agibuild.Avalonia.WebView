@@ -1,7 +1,6 @@
 using System.Collections.Concurrent;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using Avalonia.Platform;
 using Agibuild.Fulora;
 using Agibuild.Fulora.Adapters.Abstractions;
 
@@ -173,7 +172,7 @@ internal sealed class GtkWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
         }
     }
 
-    public void Attach(IPlatformHandle parentHandle)
+    public void Attach(INativeHandle parentHandle)
     {
         ArgumentNullException.ThrowIfNull(parentHandle);
         ThrowIfNotInitialized();
@@ -310,7 +309,7 @@ internal sealed class GtkWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
         return true;
     }
 
-    public IPlatformHandle? TryGetWebViewHandle()
+    public INativeHandle? TryGetWebViewHandle()
     {
         if (!_attached || _detached) return null;
 

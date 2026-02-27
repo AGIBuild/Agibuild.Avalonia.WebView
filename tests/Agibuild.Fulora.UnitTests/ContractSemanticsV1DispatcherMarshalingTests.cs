@@ -1,7 +1,6 @@
 using Agibuild.Fulora;
 using Agibuild.Fulora.Testing;
 using Xunit;
-using IPlatformHandle = global::Avalonia.Platform.IPlatformHandle;
 
 namespace Agibuild.Fulora.UnitTests;
 
@@ -64,7 +63,7 @@ public sealed class ContractSemanticsV1DispatcherMarshalingTests
         adapter.HandleToReturn = new TestPlatformHandle(new IntPtr(0x42), "TestHandle");
         using var core = new WebViewCore(adapter, dispatcher);
 
-        IPlatformHandle? result = null;
+        INativeHandle? result = null;
         Exception? thrown = null;
 
         // Call from a background thread — the dispatcher queues work.
@@ -102,7 +101,7 @@ public sealed class ContractSemanticsV1DispatcherMarshalingTests
         adapter.HandleToReturn = new TestPlatformHandle(new IntPtr(0x55), "AsyncHandle");
         using var core = new WebViewCore(adapter, dispatcher);
 
-        Task<IPlatformHandle?>? handleTask = null;
+        Task<INativeHandle?>? handleTask = null;
 
         var thread = new Thread(() =>
         {

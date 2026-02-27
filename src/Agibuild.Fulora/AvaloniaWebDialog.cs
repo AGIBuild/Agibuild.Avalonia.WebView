@@ -1,6 +1,5 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Platform;
 using Avalonia.Threading;
 
 namespace Agibuild.Fulora;
@@ -122,7 +121,7 @@ public sealed class AvaloniaWebDialog : IWebDialog
     }
 
     /// <inheritdoc />
-    public bool Show(IPlatformHandle owner)
+    public bool Show(INativeHandle owner)
     {
         _shown = true;
         RunOnUIThread(() => _window.Show());
@@ -224,7 +223,7 @@ public sealed class AvaloniaWebDialog : IWebDialog
     /// <inheritdoc />
     public ICommandManager? TryGetCommandManager() => _webView.TryGetCommandManager();
     /// <inheritdoc />
-    public Task<IPlatformHandle?> TryGetWebViewHandleAsync() => _webView.TryGetWebViewHandleAsync();
+    public Task<INativeHandle?> TryGetWebViewHandleAsync() => _webView.TryGetWebViewHandleAsync();
     /// <inheritdoc />
     public IWebViewRpcService? Rpc => _webView.Rpc;
     /// <inheritdoc />

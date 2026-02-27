@@ -1,7 +1,6 @@
 using Agibuild.Fulora;
 using Agibuild.Fulora.Testing;
 using Avalonia.Headless.XUnit;
-using Avalonia.Platform;
 using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
@@ -33,7 +32,7 @@ public sealed class AsyncBoundaryAndEnvironmentIntegrationTests
             using var core = new WebViewCore(adapter, dispatcher, NullLogger<WebViewCore>.Instance);
             var webView = new WebView();
 
-            core.Attach(new PlatformHandle(nint.Zero, "test-parent"));
+            core.Attach(new TestPlatformHandle(IntPtr.Zero, "test-parent"));
             webView.TestOnlyAttachCore(core);
             webView.TestOnlySubscribeCoreEvents();
 
@@ -171,10 +170,10 @@ public sealed class AsyncBoundaryAndEnvironmentIntegrationTests
 
     private sealed class ThreadAwareHandleAdapter : MockWebViewAdapter, INativeWebViewHandleProvider
     {
-        public IPlatformHandle? HandleToReturn { get; set; }
+        public INativeHandle? HandleToReturn { get; set; }
         public int? LastTryGetHandleThreadId { get; private set; }
 
-        public IPlatformHandle? TryGetWebViewHandle()
+        public INativeHandle? TryGetWebViewHandle()
         {
             LastTryGetHandleThreadId = Environment.CurrentManagedThreadId;
             return HandleToReturn;

@@ -1,4 +1,3 @@
-using Avalonia.Platform;
 using Agibuild.Fulora;
 
 namespace Agibuild.Fulora.Adapters.Abstractions;
@@ -156,7 +155,7 @@ internal interface IPrintAdapter
 internal interface IWebViewAdapter
 {
     void Initialize(IWebViewAdapterHost host);
-    void Attach(IPlatformHandle parentHandle);
+    void Attach(INativeHandle parentHandle);
     void Detach();
 
     Task NavigateAsync(Guid navigationId, Uri uri);

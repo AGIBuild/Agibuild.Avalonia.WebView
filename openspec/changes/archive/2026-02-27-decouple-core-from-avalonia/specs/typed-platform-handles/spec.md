@@ -1,7 +1,4 @@
-## Purpose
-Define typed platform-handle contracts for cross-platform native handle access.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Typed Windows WebView2 platform handle interface
 The Core assembly SHALL define `IWindowsWebView2PlatformHandle` extending `INativeHandle` with:

@@ -51,7 +51,7 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
     }
 
     [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-    internal void Attach(global::Avalonia.Platform.IPlatformHandle parentHandle)
+    internal void Attach(INativeHandle parentHandle)
     {
         _lifecycleState = WebViewLifecycleState.Attaching;
         _logger.LogDebug("Attach: parentHandle.HandleDescriptor={Descriptor}", parentHandle.HandleDescriptor);
@@ -830,16 +830,16 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
     /// Asynchronously retrieves the native platform WebView handle.
     /// This is the primary any-thread API surface and always marshals adapter access to the UI thread.
     /// </summary>
-    public Task<global::Avalonia.Platform.IPlatformHandle?> TryGetWebViewHandleAsync()
+    public Task<INativeHandle?> TryGetWebViewHandleAsync()
     {
         if (_adapterDestroyed)
         {
-            return Task.FromResult<global::Avalonia.Platform.IPlatformHandle?>(null);
+            return Task.FromResult<INativeHandle?>(null);
         }
 
         if (_adapter is not INativeWebViewHandleProvider provider)
         {
-            return Task.FromResult<global::Avalonia.Platform.IPlatformHandle?>(null);
+            return Task.FromResult<INativeHandle?>(null);
         }
 
         if (_dispatcher.CheckAccess())
@@ -854,7 +854,7 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
     /// Compatibility wrapper around <see cref="TryGetWebViewHandleAsync"/> for synchronous call sites.
     /// Prefer using <see cref="TryGetWebViewHandleAsync"/> to avoid blocking.
     /// </summary>
-    public global::Avalonia.Platform.IPlatformHandle? TryGetWebViewHandle()
+    public INativeHandle? TryGetWebViewHandle()
     {
         return TryGetWebViewHandleAsync().GetAwaiter().GetResult();
     }

@@ -34,7 +34,7 @@ public sealed class TestWebViewHost : IWebView
 
     public ICookieManager? TryGetCookieManager() => null;
     public ICommandManager? TryGetCommandManager() => null;
-    public Task<global::Avalonia.Platform.IPlatformHandle?> TryGetWebViewHandleAsync() => Task.FromResult<global::Avalonia.Platform.IPlatformHandle?>(null);
+    public Task<INativeHandle?> TryGetWebViewHandleAsync() => Task.FromResult<INativeHandle?>(null);
     public IWebViewRpcService? Rpc => null;
     public IBridgeService Bridge => throw new NotSupportedException("TestWebViewHost does not support Bridge. Use WebViewCore with MockWebViewAdapter instead.");
     public Task OpenDevToolsAsync() => Task.CompletedTask;

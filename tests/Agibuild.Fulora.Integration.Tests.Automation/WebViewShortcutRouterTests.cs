@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Agibuild.Fulora;
 using Avalonia.Input;
-using Avalonia.Platform;
 using Xunit;
 
 namespace Agibuild.Fulora.Integration.Tests.Automation;
@@ -112,7 +111,7 @@ public sealed class WebViewShortcutRouterTests
         public Task<bool> StopAsync() => Task.FromResult(false);
         public ICookieManager? TryGetCookieManager() => null;
         public ICommandManager? TryGetCommandManager() => CommandManager;
-        public Task<IPlatformHandle?> TryGetWebViewHandleAsync() => Task.FromResult<IPlatformHandle?>(null);
+        public Task<INativeHandle?> TryGetWebViewHandleAsync() => Task.FromResult<INativeHandle?>(null);
         public IWebViewRpcService? Rpc => null;
         public IBridgeService Bridge => throw new NotSupportedException();
         public Task<byte[]> CaptureScreenshotAsync() => Task.FromException<byte[]>(new NotSupportedException());

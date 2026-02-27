@@ -26,7 +26,7 @@ The `IWebView` interface SHALL define:
 ### Requirement: IWebDialog contract surface
 The `IWebDialog` interface SHALL inherit from `IWebView` and define:
 - properties: `string? Title { get; set; }`, `bool CanUserResize { get; set; }`
-- methods: `void Show()`, `bool Show(IPlatformHandle owner)`, `void Close()`, `bool Resize(int width, int height)`, `bool Move(int x, int y)`
+- methods: `void Show()`, `bool Show(INativeHandle owner)`, `void Close()`, `bool Resize(int width, int height)`, `bool Move(int x, int y)`
 - events: `Closing`
 
 #### Scenario: IWebDialog members are available
@@ -44,11 +44,12 @@ The `IWebAuthBroker` interface SHALL define:
 ### Requirement: Environment options and native handles
 The Core assembly SHALL define:
 - `IWebViewEnvironmentOptions` with `bool EnableDevTools { get; set; }`, `IReadOnlyList<CustomSchemeRegistration>? CustomSchemes { get; set; }`
-- `INativeWebViewHandleProvider` with `IPlatformHandle? TryGetWebViewHandle()`
-- `IWindowsWebView2PlatformHandle` extending `IPlatformHandle` with `nint CoreWebView2Handle` and `nint CoreWebView2ControllerHandle`
-- `IAppleWKWebViewPlatformHandle` extending `IPlatformHandle` with `nint WKWebViewHandle`
-- `IGtkWebViewPlatformHandle` extending `IPlatformHandle` with `nint WebKitWebViewHandle`
-- `IAndroidWebViewPlatformHandle` extending `IPlatformHandle` with `nint AndroidWebViewHandle`
+- `INativeHandle` with `nint Handle` and `string HandleDescriptor`
+- `INativeWebViewHandleProvider` with `INativeHandle? TryGetWebViewHandle()`
+- `IWindowsWebView2PlatformHandle` extending `INativeHandle` with `nint CoreWebView2Handle` and `nint CoreWebView2ControllerHandle`
+- `IAppleWKWebViewPlatformHandle` extending `INativeHandle` with `nint WKWebViewHandle`
+- `IGtkWebViewPlatformHandle` extending `INativeHandle` with `nint WebKitWebViewHandle`
+- `IAndroidWebViewPlatformHandle` extending `INativeHandle` with `nint AndroidWebViewHandle`
 
 #### Scenario: Environment and handle types are resolvable
 - **WHEN** a project references these types
@@ -64,7 +65,7 @@ The Core assembly SHALL define event args types:
 - `DownloadRequestedEventArgs` with `Uri DownloadUri { get; }`, `string? SuggestedFileName { get; }`, `string? ContentType { get; }`, `long? ContentLength { get; }`, `string? DownloadPath { get; set; }`, `bool Cancel { get; set; }`, `bool Handled { get; set; }`
 - `PermissionRequestedEventArgs` with `WebViewPermissionKind PermissionKind { get; }`, `Uri? Origin { get; }`, `PermissionState State { get; set; }`
 - `EnvironmentRequestedEventArgs`
-- `AdapterCreatedEventArgs` with `IPlatformHandle? PlatformHandle { get; }`
+- `AdapterCreatedEventArgs` with `INativeHandle? PlatformHandle { get; }`
 
 #### Scenario: Event args are available
 - **WHEN** a consumer references the event args types

@@ -28,4 +28,5 @@ public static class GovernanceInvariantIds
     public const string EvidenceContractV2Schema = "GOV-020";
     public const string BridgeDistributionParity = "GOV-021";
     public const string PhaseTransitionConsistency = "GOV-022";
+    public const string HostNeutralDependencyBoundary = "GOV-023";
 }

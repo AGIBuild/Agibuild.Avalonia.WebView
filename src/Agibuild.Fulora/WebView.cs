@@ -346,7 +346,7 @@ public class WebView : NativeControlHost, IWebView
     /// <summary>
     /// Returns the underlying platform WebView handle, or <c>null</c> if not available.
     /// </summary>
-    public IPlatformHandle? TryGetWebViewHandle()
+    public INativeHandle? TryGetWebViewHandle()
     {
         return _core?.TryGetWebViewHandle();
     }
@@ -354,11 +354,11 @@ public class WebView : NativeControlHost, IWebView
     /// <summary>
     /// Returns the underlying platform WebView handle asynchronously, or <c>null</c> if not available.
     /// </summary>
-    public Task<IPlatformHandle?> TryGetWebViewHandleAsync()
+    public Task<INativeHandle?> TryGetWebViewHandleAsync()
     {
         if (_core is null)
         {
-            return Task.FromResult<IPlatformHandle?>(null);
+            return Task.FromResult<INativeHandle?>(null);
         }
 
         return _core.TryGetWebViewHandleAsync();
@@ -496,7 +496,7 @@ public class WebView : NativeControlHost, IWebView
 
         try
         {
-            var dispatcher = new AvaloniaWebViewDispatcher();
+            var dispatcher = new SynchronizationContextWebViewDispatcher();
             var effectiveLoggerFactory = _loggerFactory ?? WebViewEnvironment.LoggerFactory;
             var logger = effectiveLoggerFactory?.CreateLogger<WebViewCore>()
                          ?? (ILogger<WebViewCore>)NullLogger<WebViewCore>.Instance;
@@ -506,7 +506,7 @@ public class WebView : NativeControlHost, IWebView
             // Subscribe before Attach so we receive AdapterCreated raised during Attach().
             SubscribeCoreEvents();
 
-            _core.Attach(handle);
+            _core.Attach(new AvaloniaNativeHandleAdapter(handle));
             _coreAttached = true;
             HookHostWindowClosing();
 
@@ -786,5 +786,19 @@ public class WebView : NativeControlHost, IWebView
 
         _hostWindow = null;
         _hostWindowClosingHandler = null;
+    }
+
+    private sealed class AvaloniaNativeHandleAdapter : INativeHandle
+    {
+        private readonly IPlatformHandle _inner;
+
+        public AvaloniaNativeHandleAdapter(IPlatformHandle inner)
+        {
+            _inner = inner ?? throw new ArgumentNullException(nameof(inner));
+        }
+
+        public nint Handle => _inner.Handle;
+
+        public string HandleDescriptor => _inner.HandleDescriptor;
     }
 }

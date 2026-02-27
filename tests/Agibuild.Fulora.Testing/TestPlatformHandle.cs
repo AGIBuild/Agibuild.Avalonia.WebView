@@ -1,8 +1,8 @@
-using Avalonia.Platform;
+using Agibuild.Fulora;
 
 namespace Agibuild.Fulora.Testing;
 
-public sealed class TestPlatformHandle : IPlatformHandle
+public sealed class TestPlatformHandle : INativeHandle
 {
     public TestPlatformHandle(IntPtr handle, string handleDescriptor)
     {
@@ -10,6 +10,6 @@ public sealed class TestPlatformHandle : IPlatformHandle
         HandleDescriptor = handleDescriptor;
     }
 
-    public IntPtr Handle { get; }
+    public nint Handle { get; }
     public string HandleDescriptor { get; }
 }

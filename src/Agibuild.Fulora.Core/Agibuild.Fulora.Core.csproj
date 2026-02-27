@@ -10,9 +10,6 @@
     <Description>Core contract types (IWebView, IBridgeService, [JsExport], [JsImport]) for Agibuild.Fulora.</Description>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Avalonia" Version="11.3.11" />
-  </ItemGroup>
-  <ItemGroup>
     <!-- SPI types (IWebViewAdapterHost, NativeNavigationStarting*) are internal. -->
     <InternalsVisibleTo Include="Agibuild.Fulora.Adapters.Abstractions" />
     <InternalsVisibleTo Include="Agibuild.Fulora.Runtime" />

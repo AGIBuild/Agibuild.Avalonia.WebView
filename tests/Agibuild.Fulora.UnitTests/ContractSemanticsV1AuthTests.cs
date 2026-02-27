@@ -104,7 +104,7 @@ public sealed class ContractSemanticsV1AuthTests
 
     private sealed class DummyWindow : ITopLevelWindow
     {
-        public global::Avalonia.Platform.IPlatformHandle? PlatformHandle => null;
+        public INativeHandle? PlatformHandle => null;
     }
 
     private sealed class FakeAuthBroker : IWebAuthBroker

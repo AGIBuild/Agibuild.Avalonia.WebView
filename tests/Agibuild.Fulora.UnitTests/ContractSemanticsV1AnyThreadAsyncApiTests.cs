@@ -1,6 +1,5 @@
 using Agibuild.Fulora.Adapters.Abstractions;
 using Agibuild.Fulora.Testing;
-using Avalonia.Platform;
 using Xunit;
 
 namespace Agibuild.Fulora.UnitTests;
@@ -235,7 +234,7 @@ public sealed class ContractSemanticsV1AnyThreadAsyncApiTests
             _initialized = true;
         }
 
-        public void Attach(IPlatformHandle parentHandle)
+        public void Attach(INativeHandle parentHandle)
         {
             if (!_initialized)
             {

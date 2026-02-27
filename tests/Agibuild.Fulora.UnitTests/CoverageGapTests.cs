@@ -1318,7 +1318,7 @@ public sealed class CoverageGapTests
         public event EventHandler<EnvironmentRequestedEventArgs>? EnvironmentRequested;
 
         public void Initialize(IWebViewAdapterHost host) { }
-        public void Attach(global::Avalonia.Platform.IPlatformHandle parentHandle) { }
+        public void Attach(INativeHandle parentHandle) { }
         public void Detach() { }
 
         public Task NavigateAsync(Guid navigationId, Uri uri)
@@ -1345,10 +1345,10 @@ public sealed class CoverageGapTests
     /// <summary>Window with non-null PlatformHandle for WebAuthBroker test.</summary>
     private sealed class NonNullHandleWindow : ITopLevelWindow
     {
-        public global::Avalonia.Platform.IPlatformHandle? PlatformHandle => new TestPlatformHandle();
+        public INativeHandle? PlatformHandle => new TestPlatformHandle();
     }
 
-    private sealed class TestPlatformHandle : global::Avalonia.Platform.IPlatformHandle
+    private sealed class TestPlatformHandle : INativeHandle
     {
         public nint Handle => nint.Zero;
         public string HandleDescriptor => "Test";

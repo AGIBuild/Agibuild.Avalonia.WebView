@@ -1,6 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
-using Avalonia.Platform;
 
 namespace Agibuild.Fulora;
 
@@ -149,7 +148,7 @@ public interface IWebView : IDisposable
     /// <summary>Gets the command manager if supported by the adapter; otherwise null.</summary>
     ICommandManager? TryGetCommandManager();
     /// <summary>Gets the typed native WebView handle if supported; otherwise null.</summary>
-    Task<IPlatformHandle?> TryGetWebViewHandleAsync();
+    Task<INativeHandle?> TryGetWebViewHandleAsync();
 
     /// <summary>
     /// Gets the RPC service for bidirectional JS ↔ C# method calls.
@@ -281,7 +280,7 @@ public interface IWebDialog : IWebView
     void Show();
     /// <summary>Shows the dialog with the specified owner.</summary>
     /// <param name="owner">Owner platform handle.</param>
-    bool Show(IPlatformHandle owner);
+    bool Show(INativeHandle owner);
     /// <summary>Closes the dialog.</summary>
     void Close();
     /// <summary>Resizes the dialog.</summary>
@@ -439,14 +438,26 @@ public sealed class CustomSchemeRegistration
 /// <summary>
 /// Provides access to the native WebView handle for adapter-specific interop scenarios.
 /// </summary>
+public interface INativeHandle
+{
+    /// <summary>Native pointer handle.</summary>
+    nint Handle { get; }
+
+    /// <summary>Human-readable native handle descriptor (for example, WebView2 or WKWebView).</summary>
+    string HandleDescriptor { get; }
+}
+
+/// <summary>
+/// Provides access to the native WebView handle for adapter-specific interop scenarios.
+/// </summary>
 public interface INativeWebViewHandleProvider
 {
     /// <summary>Returns the platform handle when available; otherwise null.</summary>
-    IPlatformHandle? TryGetWebViewHandle();
+    INativeHandle? TryGetWebViewHandle();
 }
 
-/// <summary>Typed platform handle for Windows WebView2. Cast from <see cref="IPlatformHandle"/> returned by <see cref="INativeWebViewHandleProvider"/>.</summary>
-public interface IWindowsWebView2PlatformHandle : IPlatformHandle
+/// <summary>Typed platform handle for Windows WebView2. Cast from <see cref="INativeHandle"/> returned by <see cref="INativeWebViewHandleProvider"/>.</summary>
+public interface IWindowsWebView2PlatformHandle : INativeHandle
 {
     /// <summary>Pointer to the <c>ICoreWebView2</c> COM object.</summary>
     nint CoreWebView2Handle { get; }
@@ -456,21 +467,21 @@ public interface IWindowsWebView2PlatformHandle : IPlatformHandle
 }
 
 /// <summary>Typed platform handle for Apple WKWebView (macOS and iOS).</summary>
-public interface IAppleWKWebViewPlatformHandle : IPlatformHandle
+public interface IAppleWKWebViewPlatformHandle : INativeHandle
 {
     /// <summary>Objective-C pointer to the <c>WKWebView</c> instance.</summary>
     nint WKWebViewHandle { get; }
 }
 
 /// <summary>Typed platform handle for GTK WebKitWebView (Linux).</summary>
-public interface IGtkWebViewPlatformHandle : IPlatformHandle
+public interface IGtkWebViewPlatformHandle : INativeHandle
 {
     /// <summary>Pointer to the <c>WebKitWebView</c> GObject instance.</summary>
     nint WebKitWebViewHandle { get; }
 }
 
 /// <summary>Typed platform handle for Android WebView.</summary>
-public interface IAndroidWebViewPlatformHandle : IPlatformHandle
+public interface IAndroidWebViewPlatformHandle : INativeHandle
 {
     /// <summary>JNI handle to the Android <c>WebView</c> instance.</summary>
     nint AndroidWebViewHandle { get; }
@@ -606,7 +617,7 @@ public interface ICommandManager
 public interface ITopLevelWindow
 {
     /// <summary>The underlying platform handle for the window.</summary>
-    IPlatformHandle? PlatformHandle { get; }
+    INativeHandle? PlatformHandle { get; }
 }
 
 /// <summary>Factory for creating <see cref="IWebDialog"/> instances.</summary>
@@ -945,7 +956,7 @@ public sealed class AdapterCreatedEventArgs : EventArgs
 {
     /// <summary>Creates a new instance.</summary>
     /// <param name="platformHandle">The typed native platform handle, when available.</param>
-    public AdapterCreatedEventArgs(IPlatformHandle? platformHandle)
+    public AdapterCreatedEventArgs(INativeHandle? platformHandle)
     {
         PlatformHandle = platformHandle;
     }
@@ -954,7 +965,7 @@ public sealed class AdapterCreatedEventArgs : EventArgs
     /// The typed native WebView handle, or <c>null</c> if the adapter does not support handle exposure.
     /// Cast to a platform-specific interface (e.g. <see cref="IWindowsWebView2PlatformHandle"/>) for typed access.
     /// </summary>
-    public IPlatformHandle? PlatformHandle { get; }
+    public INativeHandle? PlatformHandle { get; }
 }
 
 /// <summary>Base exception for navigation failures with correlation metadata.</summary>
