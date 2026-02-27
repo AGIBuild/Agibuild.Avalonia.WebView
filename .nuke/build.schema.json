@@ -30,6 +30,7 @@
         "Ci",
         "CiPublish",
         "Clean",
+        "ContinuousTransitionGateGovernance",
         "ContractAutomation",
         "Coverage",
         "DependencyVulnerabilityGovernance",

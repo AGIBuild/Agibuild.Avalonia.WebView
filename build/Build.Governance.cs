@@ -3,11 +3,38 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using Nuke.Common;
 using Nuke.Common.IO;
 
 partial class BuildTask
 {
+    const string TransitionGateParityInvariantId = "GOV-024";
+    const string TransitionLaneProvenanceInvariantId = "GOV-025";
+    const string TransitionGateDiagnosticSchemaInvariantId = "GOV-026";
+
+    private sealed record TransitionGateParityRule(string Group, string CiDependency, string CiPublishDependency);
+
+    private sealed record TransitionGateDiagnosticEntry(
+        string InvariantId,
+        string Lane,
+        string ArtifactPath,
+        string Expected,
+        string Actual,
+        string Group);
+
+    static readonly TransitionGateParityRule[] CloseoutCriticalTransitionGateParityRules =
+    [
+        new("coverage", "Coverage", "Coverage"),
+        new("automation-lane-report", "AutomationLaneReport", "AutomationLaneReport"),
+        new("warning-governance", "WarningGovernance", "WarningGovernance"),
+        new("dependency-vulnerability-governance", "DependencyVulnerabilityGovernance", "DependencyVulnerabilityGovernance"),
+        new("typescript-declaration-governance", "TypeScriptDeclarationGovernance", "TypeScriptDeclarationGovernance"),
+        new("openspec-strict-governance", "OpenSpecStrictGovernance", "OpenSpecStrictGovernance"),
+        new("release-closeout-snapshot", "ReleaseCloseoutSnapshot", "ReleaseCloseoutSnapshot"),
+        new("runtime-critical-path-governance", "RuntimeCriticalPathExecutionGovernanceCi", "RuntimeCriticalPathExecutionGovernanceCiPublish")
+    ];
+
     Target DependencyVulnerabilityGovernance => _ => _
         .Description("Runs dependency vulnerability scans (NuGet + npm) as a hard governance gate.")
         .Executes(() =>
@@ -523,6 +550,231 @@ partial class BuildTask
         }
     }
 
+    Target ContinuousTransitionGateGovernance => _ => _
+        .Description("Validates closeout transition-gate parity across Ci/CiPublish with lane-aware diagnostics.")
+        .DependsOn(ReleaseCloseoutSnapshot)
+        .Executes(() =>
+        {
+            TestResultsDirectory.CreateDirectory();
+
+            var diagnostics = new List<TransitionGateDiagnosticEntry>();
+            var failures = new List<string>();
+            const string buildArtifactPath = "build/Build.cs";
+
+            var buildSource = File.ReadAllText(RootDirectory / "build" / "Build.cs");
+            var ciDependsOnBlock = ExtractDependsOnBlock(buildSource, "Ci");
+            var ciPublishDependsOnBlock = ExtractDependsOnBlock(buildSource, "CiPublish");
+
+            foreach (var rule in CloseoutCriticalTransitionGateParityRules)
+            {
+                if (!ciDependsOnBlock.Contains(rule.CiDependency, StringComparison.Ordinal))
+                {
+                    diagnostics.Add(new TransitionGateDiagnosticEntry(
+                        TransitionGateParityInvariantId,
+                        Lane: "Ci",
+                        ArtifactPath: buildArtifactPath,
+                        Expected: rule.CiDependency,
+                        Actual: "missing",
+                        Group: rule.Group));
+                    failures.Add($"[{TransitionGateParityInvariantId}] Missing Ci dependency '{rule.CiDependency}' for group '{rule.Group}'.");
+                }
+
+                if (!ciPublishDependsOnBlock.Contains(rule.CiPublishDependency, StringComparison.Ordinal))
+                {
+                    diagnostics.Add(new TransitionGateDiagnosticEntry(
+                        TransitionGateParityInvariantId,
+                        Lane: "CiPublish",
+                        ArtifactPath: buildArtifactPath,
+                        Expected: rule.CiPublishDependency,
+                        Actual: "missing",
+                        Group: rule.Group));
+                    failures.Add($"[{TransitionGateParityInvariantId}] Missing CiPublish dependency '{rule.CiPublishDependency}' for group '{rule.Group}'.");
+                }
+            }
+
+            var roadmapPath = RootDirectory / "openspec" / "ROADMAP.md";
+            var (roadmapCompletedPhase, roadmapActivePhase) = ReadRoadmapTransitionState(File.ReadAllText(roadmapPath));
+            const string closeoutArtifactPath = "artifacts/test-results/closeout-snapshot.json";
+
+            if (!File.Exists(CloseoutSnapshotFile))
+            {
+                diagnostics.Add(new TransitionGateDiagnosticEntry(
+                    TransitionLaneProvenanceInvariantId,
+                    Lane: "CiPublish",
+                    ArtifactPath: closeoutArtifactPath,
+                    Expected: "closeout snapshot exists",
+                    Actual: "file missing",
+                    Group: "transition-continuity"));
+                failures.Add($"[{TransitionLaneProvenanceInvariantId}] Closeout snapshot file missing at '{CloseoutSnapshotFile}'.");
+            }
+            else
+            {
+                using var closeoutDoc = JsonDocument.Parse(File.ReadAllText(CloseoutSnapshotFile));
+                var root = closeoutDoc.RootElement;
+                var provenance = root.GetProperty("provenance");
+                var transition = root.GetProperty("transition");
+                var continuity = root.GetProperty("transitionContinuity");
+
+                ValidateTransitionField(
+                    diagnostics,
+                    failures,
+                    lane: "CiPublish",
+                    artifactPath: closeoutArtifactPath,
+                    expected: "CiPublish",
+                    actual: provenance.GetProperty("laneContext").GetString(),
+                    group: "transition-continuity",
+                    fieldName: "provenance.laneContext");
+
+                ValidateTransitionField(
+                    diagnostics,
+                    failures,
+                    lane: "CiPublish",
+                    artifactPath: closeoutArtifactPath,
+                    expected: "ReleaseCloseoutSnapshot",
+                    actual: provenance.GetProperty("producerTarget").GetString(),
+                    group: "transition-continuity",
+                    fieldName: "provenance.producerTarget");
+
+                ValidateTransitionField(
+                    diagnostics,
+                    failures,
+                    lane: "CiPublish",
+                    artifactPath: closeoutArtifactPath,
+                    expected: roadmapCompletedPhase,
+                    actual: transition.GetProperty("completedPhase").GetString(),
+                    group: "transition-continuity",
+                    fieldName: "transition.completedPhase");
+
+                ValidateTransitionField(
+                    diagnostics,
+                    failures,
+                    lane: "CiPublish",
+                    artifactPath: closeoutArtifactPath,
+                    expected: roadmapActivePhase,
+                    actual: transition.GetProperty("activePhase").GetString(),
+                    group: "transition-continuity",
+                    fieldName: "transition.activePhase");
+
+                ValidateTransitionField(
+                    diagnostics,
+                    failures,
+                    lane: "CiPublish",
+                    artifactPath: closeoutArtifactPath,
+                    expected: "CiPublish",
+                    actual: continuity.GetProperty("laneContext").GetString(),
+                    group: "transition-continuity",
+                    fieldName: "transitionContinuity.laneContext");
+
+                ValidateTransitionField(
+                    diagnostics,
+                    failures,
+                    lane: "CiPublish",
+                    artifactPath: closeoutArtifactPath,
+                    expected: "ReleaseCloseoutSnapshot",
+                    actual: continuity.GetProperty("producerTarget").GetString(),
+                    group: "transition-continuity",
+                    fieldName: "transitionContinuity.producerTarget");
+
+                ValidateTransitionField(
+                    diagnostics,
+                    failures,
+                    lane: "CiPublish",
+                    artifactPath: closeoutArtifactPath,
+                    expected: roadmapCompletedPhase,
+                    actual: continuity.GetProperty("completedPhase").GetString(),
+                    group: "transition-continuity",
+                    fieldName: "transitionContinuity.completedPhase");
+
+                ValidateTransitionField(
+                    diagnostics,
+                    failures,
+                    lane: "CiPublish",
+                    artifactPath: closeoutArtifactPath,
+                    expected: roadmapActivePhase,
+                    actual: continuity.GetProperty("activePhase").GetString(),
+                    group: "transition-continuity",
+                    fieldName: "transitionContinuity.activePhase");
+            }
+
+            var reportPayload = new
+            {
+                schemaVersion = 1,
+                generatedAtUtc = DateTime.UtcNow,
+                parityRules = CloseoutCriticalTransitionGateParityRules.Select(rule => new
+                {
+                    group = rule.Group,
+                    ciDependency = rule.CiDependency,
+                    ciPublishDependency = rule.CiPublishDependency
+                }),
+                diagnostics = diagnostics.Select(x => new
+                {
+                    invariantId = x.InvariantId,
+                    lane = x.Lane,
+                    artifactPath = x.ArtifactPath,
+                    expected = x.Expected,
+                    actual = x.Actual,
+                    group = x.Group
+                }),
+                failureCount = failures.Count,
+                failures
+            };
+
+            File.WriteAllText(
+                TransitionGateGovernanceReportFile,
+                JsonSerializer.Serialize(reportPayload, new JsonSerializerOptions { WriteIndented = true }));
+            Serilog.Log.Information("Transition gate governance report written to {Path}", TransitionGateGovernanceReportFile);
+
+            if (failures.Count > 0)
+                Assert.Fail("Continuous transition gate governance failed:\n" + string.Join('\n', failures));
+        });
+
+    static string ExtractDependsOnBlock(string buildSource, string targetName)
+    {
+        var match = Regex.Match(
+            buildSource,
+            $@"Target\s+{Regex.Escape(targetName)}\s*=>[\s\S]*?\.DependsOn\((?<deps>[\s\S]*?)\);",
+            RegexOptions.Multiline);
+        if (!match.Success)
+            Assert.Fail($"Unable to locate DependsOn block for target '{targetName}' in build/Build.cs.");
+
+        return match.Groups["deps"].Value;
+    }
+
+    static (string CompletedPhase, string ActivePhase) ReadRoadmapTransitionState(string roadmap)
+    {
+        var completedMatch = Regex.Match(roadmap, @"Completed phase id:\s*`(?<id>[^`]+)`", RegexOptions.Multiline);
+        var activeMatch = Regex.Match(roadmap, @"Active phase id:\s*`(?<id>[^`]+)`", RegexOptions.Multiline);
+        if (!completedMatch.Success || !activeMatch.Success)
+            Assert.Fail("ROADMAP transition markers are missing machine-checkable phase ids.");
+
+        return (
+            completedMatch.Groups["id"].Value.Trim(),
+            activeMatch.Groups["id"].Value.Trim());
+    }
+
+    static void ValidateTransitionField(
+        IList<TransitionGateDiagnosticEntry> diagnostics,
+        IList<string> failures,
+        string lane,
+        string artifactPath,
+        string expected,
+        string? actual,
+        string group,
+        string fieldName)
+    {
+        if (string.Equals(expected, actual, StringComparison.Ordinal))
+            return;
+
+        diagnostics.Add(new TransitionGateDiagnosticEntry(
+            TransitionLaneProvenanceInvariantId,
+            lane,
+            artifactPath,
+            Expected: $"{fieldName} = {expected}",
+            Actual: $"{fieldName} = {actual ?? "<null>"}",
+            Group: group));
+        failures.Add($"[{TransitionLaneProvenanceInvariantId}] Transition continuity mismatch for {fieldName}. Expected '{expected}', actual '{actual ?? "<null>"}'.");
+    }
+
     Target ReleaseCloseoutSnapshot => _ => _
         .Description("Generates machine-readable CI evidence snapshot (v2) from test/coverage artifacts.")
         .DependsOn(Coverage, AutomationLaneReport, OpenSpecStrictGovernance)
@@ -531,6 +783,15 @@ partial class BuildTask
             const string completedPhase = "phase5-framework-positioning-foundation";
             const string activePhase = "phase6-governance-productization";
             const string transitionInvariantId = "GOV-022";
+            var roadmapPath = RootDirectory / "openspec" / "ROADMAP.md";
+            var (roadmapCompletedPhase, roadmapActivePhase) = ReadRoadmapTransitionState(File.ReadAllText(roadmapPath));
+            if (!string.Equals(roadmapCompletedPhase, completedPhase, StringComparison.Ordinal)
+                || !string.Equals(roadmapActivePhase, activePhase, StringComparison.Ordinal))
+            {
+                Assert.Fail(
+                    $"[{TransitionLaneProvenanceInvariantId}] Closeout snapshot transition constants drifted from ROADMAP markers. " +
+                    $"Expected ({roadmapCompletedPhase}, {roadmapActivePhase}), actual ({completedPhase}, {activePhase}).");
+            }
 
             TestResultsDirectory.CreateDirectory();
 
@@ -585,6 +846,14 @@ partial class BuildTask
                 transition = new
                 {
                     invariantId = transitionInvariantId,
+                    completedPhase,
+                    activePhase
+                },
+                transitionContinuity = new
+                {
+                    invariantId = TransitionLaneProvenanceInvariantId,
+                    laneContext = "CiPublish",
+                    producerTarget = "ReleaseCloseoutSnapshot",
                     completedPhase,
                     activePhase
                 },

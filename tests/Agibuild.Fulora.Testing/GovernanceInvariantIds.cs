@@ -29,4 +29,7 @@ public static class GovernanceInvariantIds
     public const string BridgeDistributionParity = "GOV-021";
     public const string PhaseTransitionConsistency = "GOV-022";
     public const string HostNeutralDependencyBoundary = "GOV-023";
+    public const string TransitionGateParityConsistency = "GOV-024";
+    public const string TransitionLaneProvenanceConsistency = "GOV-025";
+    public const string TransitionGateDiagnosticSchema = "GOV-026";
 }

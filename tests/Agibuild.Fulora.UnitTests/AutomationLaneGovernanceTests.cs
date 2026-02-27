@@ -549,7 +549,8 @@ public sealed class AutomationLaneGovernanceTests
         var requiredTargets = new[]
         {
             "Target OpenSpecStrictGovernance", "Target DependencyVulnerabilityGovernance",
-            "Target TypeScriptDeclarationGovernance", "Target ReleaseCloseoutSnapshot"
+            "Target TypeScriptDeclarationGovernance", "Target ReleaseCloseoutSnapshot",
+            "Target ContinuousTransitionGateGovernance"
         };
         foreach (var target in requiredTargets)
             AssertSourceContains(combinedSource, target, CiTargetOpenSpecGate, "build/Build*.cs");
@@ -559,12 +560,13 @@ public sealed class AutomationLaneGovernanceTests
         AssertSourceContains(combinedSource, "dependency-governance-report.json", CiTargetOpenSpecGate, "build/Build*.cs");
         AssertSourceContains(combinedSource, "typescript-governance-report.json", CiTargetOpenSpecGate, "build/Build*.cs");
         AssertSourceContains(combinedSource, "closeout-snapshot.json", CiTargetOpenSpecGate, "build/Build*.cs");
+        AssertSourceContains(combinedSource, "transition-gate-governance-report.json", CiTargetOpenSpecGate, "build/Build*.cs");
 
         var ciDependencies = new[]
         {
             "OpenSpecStrictGovernance", "DependencyVulnerabilityGovernance",
             "TypeScriptDeclarationGovernance", "ReleaseCloseoutSnapshot",
-            "RuntimeCriticalPathExecutionGovernanceCi"
+            "RuntimeCriticalPathExecutionGovernanceCi", "ContinuousTransitionGateGovernance"
         };
         foreach (var dep in ciDependencies)
         {
@@ -577,7 +579,7 @@ public sealed class AutomationLaneGovernanceTests
         {
             "OpenSpecStrictGovernance", "DependencyVulnerabilityGovernance",
             "TypeScriptDeclarationGovernance", "ReleaseCloseoutSnapshot",
-            "RuntimeCriticalPathExecutionGovernanceCiPublish"
+            "RuntimeCriticalPathExecutionGovernanceCiPublish", "ContinuousTransitionGateGovernance"
         };
         foreach (var dep in ciPublishDependencies)
         {
@@ -585,6 +587,77 @@ public sealed class AutomationLaneGovernanceTests
                 new Regex($@"Target\s+CiPublish\s*=>[\s\S]*?\.DependsOn\([\s\S]*{Regex.Escape(dep)}[\s\S]*\);", RegexOptions.Multiline),
                 mainSource);
         }
+    }
+
+    [Fact]
+    public void Continuous_transition_gate_enforces_lane_parity_for_closeout_critical_groups()
+    {
+        var repoRoot = FindRepoRoot();
+        var mainSource = File.ReadAllText(Path.Combine(repoRoot, "build", "Build.cs"));
+        var ciDependsOn = ExtractDependsOnBlock(mainSource, "Ci");
+        var ciPublishDependsOn = ExtractDependsOnBlock(mainSource, "CiPublish");
+
+        var parityRules = new (string Group, string CiDependency, string CiPublishDependency)[]
+        {
+            ("coverage", "Coverage", "Coverage"),
+            ("automation-lane-report", "AutomationLaneReport", "AutomationLaneReport"),
+            ("warning-governance", "WarningGovernance", "WarningGovernance"),
+            ("dependency-vulnerability-governance", "DependencyVulnerabilityGovernance", "DependencyVulnerabilityGovernance"),
+            ("typescript-declaration-governance", "TypeScriptDeclarationGovernance", "TypeScriptDeclarationGovernance"),
+            ("openspec-strict-governance", "OpenSpecStrictGovernance", "OpenSpecStrictGovernance"),
+            ("release-closeout-snapshot", "ReleaseCloseoutSnapshot", "ReleaseCloseoutSnapshot"),
+            ("runtime-critical-path-governance", "RuntimeCriticalPathExecutionGovernanceCi", "RuntimeCriticalPathExecutionGovernanceCiPublish"),
+            ("continuous-transition-gate", "ContinuousTransitionGateGovernance", "ContinuousTransitionGateGovernance")
+        };
+
+        foreach (var rule in parityRules)
+        {
+            Assert.True(
+                ciDependsOn.Contains(rule.CiDependency, StringComparison.Ordinal),
+                $"[{TransitionGateParityConsistency}] Missing Ci dependency '{rule.CiDependency}' for group '{rule.Group}'.");
+            Assert.True(
+                ciPublishDependsOn.Contains(rule.CiPublishDependency, StringComparison.Ordinal),
+                $"[{TransitionGateParityConsistency}] Missing CiPublish dependency '{rule.CiPublishDependency}' for group '{rule.Group}'.");
+        }
+    }
+
+    [Fact]
+    public void Transition_gate_diagnostics_require_lane_and_expected_actual_fields()
+    {
+        const string artifactPath = "artifacts/test-results/transition-gate-governance-report.json";
+        using var reportDoc = JsonDocument.Parse(
+            """
+            {
+              "schemaVersion": 1,
+              "diagnostics": [
+                {
+                  "invariantId": "GOV-024",
+                  "lane": "CiPublish",
+                  "artifactPath": "build/Build.cs",
+                  "expected": "ReleaseCloseoutSnapshot",
+                  "actual": "missing",
+                  "group": "release-closeout-snapshot"
+                }
+              ]
+            }
+            """);
+
+        var diagnostics = RequireTransitionGateDiagnostics(reportDoc.RootElement, TransitionGateDiagnosticSchema, artifactPath);
+        Assert.Single(diagnostics.EnumerateArray());
+        AssertTransitionGateDiagnostic(diagnostics.EnumerateArray().First(), TransitionGateDiagnosticSchema, artifactPath);
+
+        using var invalidDiagnosticDoc = JsonDocument.Parse(
+            """
+            {
+              "invariantId": "GOV-024",
+              "artifactPath": "build/Build.cs",
+              "expected": "Coverage",
+              "actual": "missing"
+            }
+            """);
+
+        Assert.Throws<GovernanceInvariantViolationException>(() =>
+            AssertTransitionGateDiagnostic(invalidDiagnosticDoc.RootElement, TransitionGateDiagnosticSchema, artifactPath));
     }
 
     [Fact]
@@ -801,8 +874,10 @@ public sealed class AutomationLaneGovernanceTests
         AssertSourceContains(combinedSource, "laneContext = \"CiPublish\"", EvidenceContractV2Schema, "build/Build.Governance.cs");
         AssertSourceContains(combinedSource, "producerTarget = \"ReleaseCloseoutSnapshot\"", EvidenceContractV2Schema, "build/Build.Governance.cs");
         AssertSourceContains(combinedSource, "transition = new", EvidenceContractV2Schema, "build/Build.Governance.cs");
+        AssertSourceContains(combinedSource, "transitionContinuity = new", EvidenceContractV2Schema, "build/Build.Governance.cs");
         AssertSourceContains(combinedSource, "completedPhase", EvidenceContractV2Schema, "build/Build.Governance.cs");
         AssertSourceContains(combinedSource, "activePhase", EvidenceContractV2Schema, "build/Build.Governance.cs");
+        AssertSourceContains(combinedSource, "TransitionLaneProvenanceInvariantId", EvidenceContractV2Schema, "build/Build.Governance.cs");
         AssertSourceContains(combinedSource, "closeoutArchives", EvidenceContractV2Schema, "build/Build.Governance.cs");
         AssertSourceContains(combinedSource, "closeout-snapshot.json", EvidenceContractV2Schema, "build/Build.cs");
     }
@@ -883,6 +958,16 @@ public sealed class AutomationLaneGovernanceTests
                 .Select(kvp => $"{kvp.Key}: {kvp.Value}"));
 
         Assert.Fail($"[{XunitVersionAlignment}] Package version drift detected for '{packageId}'.\n{details}");
+    }
+
+    private static string ExtractDependsOnBlock(string source, string targetName)
+    {
+        var match = Regex.Match(
+            source,
+            $@"Target\s+{Regex.Escape(targetName)}\s*=>[\s\S]*?\.DependsOn\((?<deps>[\s\S]*?)\);",
+            RegexOptions.Multiline);
+        Assert.True(match.Success, $"[{TransitionGateParityConsistency}] Missing target '{targetName}' DependsOn block.");
+        return match.Groups["deps"].Value;
     }
 
 }

@@ -186,6 +186,54 @@ public static class GovernanceAssertionHelper
                 "file not found");
         }
     }
+
+    public static JsonElement RequireTransitionGateDiagnostics(JsonElement root, string invariantId, string artifactPath)
+    {
+        var diagnostics = RequireProperty(root, "diagnostics", invariantId, artifactPath);
+        if (diagnostics.ValueKind != JsonValueKind.Array || diagnostics.GetArrayLength() == 0)
+        {
+            throw new GovernanceInvariantViolationException(
+                invariantId,
+                artifactPath,
+                "non-empty diagnostics array",
+                diagnostics.ValueKind == JsonValueKind.Array ? "empty array" : diagnostics.ValueKind.ToString());
+        }
+
+        return diagnostics;
+    }
+
+    public static void AssertTransitionGateDiagnostic(JsonElement diagnostic, string invariantId, string artifactPath)
+    {
+        static string ReadRequiredString(JsonElement node, string propertyName, string invariantIdValue, string artifactPathValue)
+        {
+            if (!node.TryGetProperty(propertyName, out var property) || property.ValueKind != JsonValueKind.String)
+            {
+                throw new GovernanceInvariantViolationException(
+                    invariantIdValue,
+                    artifactPathValue,
+                    $"property '{propertyName}' as non-empty string",
+                    "property missing or not string");
+            }
+
+            var value = property.GetString();
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                throw new GovernanceInvariantViolationException(
+                    invariantIdValue,
+                    artifactPathValue,
+                    $"property '{propertyName}' as non-empty string",
+                    "value empty");
+            }
+
+            return value!;
+        }
+
+        _ = ReadRequiredString(diagnostic, "invariantId", invariantId, artifactPath);
+        _ = ReadRequiredString(diagnostic, "lane", invariantId, artifactPath);
+        _ = ReadRequiredString(diagnostic, "artifactPath", invariantId, artifactPath);
+        _ = ReadRequiredString(diagnostic, "expected", invariantId, artifactPath);
+        _ = ReadRequiredString(diagnostic, "actual", invariantId, artifactPath);
+    }
 }
 
 /// <summary>
