@@ -19,7 +19,8 @@ internal static class ModelExtractor
 
         var serviceName = GetServiceName(attribute, interfaceSymbol);
         var methods = ExtractMethods(interfaceSymbol, serviceName);
-        var diagnostics = ValidateInterface(interfaceSymbol, methods);
+        var events = ExtractEvents(interfaceSymbol);
+        var diagnostics = ValidateInterface(interfaceSymbol, methods, events, direction);
 
         return new BridgeInterfaceModel
         {
@@ -31,13 +32,16 @@ internal static class ModelExtractor
             ServiceName = serviceName,
             Direction = direction,
             Methods = methods,
+            Events = events,
             ValidationErrors = diagnostics,
         };
     }
 
     private static ImmutableArray<BridgeDiagnosticInfo> ValidateInterface(
         INamedTypeSymbol interfaceSymbol,
-        ImmutableArray<BridgeMethodModel> methods)
+        ImmutableArray<BridgeMethodModel> methods,
+        ImmutableArray<BridgeEventModel> events,
+        BridgeDirection direction)
     {
         var builder = ImmutableArray.CreateBuilder<BridgeDiagnosticInfo>();
         var interfaceName = interfaceSymbol.Name;
@@ -87,6 +91,14 @@ internal static class ModelExtractor
             // IAsyncEnumerable is now supported — no diagnostic needed
         }
 
+        if (direction == BridgeDirection.Import && events.Length > 0)
+        {
+            foreach (var evt in events)
+            {
+                builder.Add(new BridgeDiagnosticInfo("AGBR007", interfaceSymbol.Name, evt.PropertyName));
+            }
+        }
+
         return builder.ToImmutable();
     }
 
@@ -118,6 +130,38 @@ internal static class ModelExtractor
         if (ifaceName.Length > 1 && ifaceName[0] == 'I' && char.IsUpper(ifaceName[1]))
             return ifaceName.Substring(1);
         return ifaceName;
+    }
+
+    private static bool IsBridgeEventType(ITypeSymbol type)
+    {
+        if (type is INamedTypeSymbol named && named.IsGenericType)
+        {
+            return named.OriginalDefinition.Name == "IBridgeEvent" &&
+                   named.OriginalDefinition.ContainingNamespace?.ToDisplayString() == "Agibuild.Fulora";
+        }
+        return false;
+    }
+
+    private static ImmutableArray<BridgeEventModel> ExtractEvents(INamedTypeSymbol interfaceSymbol)
+    {
+        var builder = ImmutableArray.CreateBuilder<BridgeEventModel>();
+
+        foreach (var member in interfaceSymbol.GetMembers())
+        {
+            if (member is not IPropertySymbol prop) continue;
+            if (!IsBridgeEventType(prop.Type)) continue;
+
+            var payloadType = ((INamedTypeSymbol)prop.Type).TypeArguments[0].ToDisplayString();
+
+            builder.Add(new BridgeEventModel
+            {
+                PropertyName = prop.Name,
+                CamelCaseName = ToCamelCase(prop.Name),
+                PayloadTypeFullName = payloadType,
+            });
+        }
+
+        return builder.ToImmutable();
     }
 
     private static ImmutableArray<BridgeMethodModel> ExtractMethods(INamedTypeSymbol interfaceSymbol, string serviceName)

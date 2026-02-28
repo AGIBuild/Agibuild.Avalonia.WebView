@@ -66,6 +66,17 @@ internal static class TypeScriptEmitter
         foreach (var model in imports)
             allTs.AppendLine(GenerateTsInterface(model, isExport: false));
 
+        // BridgeEvent<T> utility type
+        var hasEvents = exports.Any(m => m.Events.Length > 0);
+        if (hasEvents)
+        {
+            allTs.AppendLine("export interface BridgeEvent<T> {");
+            allTs.AppendLine("  on(handler: (payload: T) => void): () => void;");
+            allTs.AppendLine("  off(handler: (payload: T) => void): void;");
+            allTs.AppendLine("}");
+            allTs.AppendLine();
+        }
+
         // Bridge global declaration
         allTs.AppendLine("declare global {");
         allTs.AppendLine("  interface Window {");
@@ -79,6 +90,7 @@ internal static class TypeScriptEmitter
         allTs.AppendLine("      rpc: {");
         allTs.AppendLine("        invoke(method: string, params?: unknown): Promise<unknown>;");
         allTs.AppendLine("        handle(method: string, handler: (params: unknown) => unknown | Promise<unknown>): void;");
+        allTs.AppendLine("        batch(calls: Array<{ method: string; params?: unknown }>): Promise<unknown[]>;");
         allTs.AppendLine("      };");
         allTs.AppendLine("    };");
         allTs.AppendLine("  }");
@@ -108,6 +120,12 @@ internal static class TypeScriptEmitter
         foreach (var method in model.Methods)
         {
             sb.AppendLine($"  {EmitTsMethodSignature(method)}");
+        }
+
+        foreach (var evt in model.Events)
+        {
+            var tsPayload = CSharpTypeToTypeScript(evt.PayloadTypeFullName);
+            sb.AppendLine($"  {evt.CamelCaseName}: BridgeEvent<{tsPayload}>;");
         }
 
         sb.AppendLine("}");
@@ -164,6 +182,13 @@ internal static class TypeScriptEmitter
         if (type is "System.DateTime" or "System.DateTimeOffset") return "string"; // ISO 8601
         if (type is "System.Guid") return "string";
         if (type is "byte[]" or "System.Byte[]") return "string"; // base64
+
+        // IBridgeEvent
+        if (type.StartsWith("Agibuild.Fulora.IBridgeEvent<"))
+        {
+            var inner = ExtractGenericArg(type);
+            return $"BridgeEvent<{CSharpTypeToTypeScript(inner)}>";
+        }
 
         // IAsyncEnumerable
         if (type.StartsWith("System.Collections.Generic.IAsyncEnumerable<"))

@@ -71,10 +71,10 @@ internal sealed class RuntimeBridgeService : IBridgeService, IDisposable
             var generated = FindGeneratedRegistration<T>();
             if (generated is not null)
             {
-                if (options?.RateLimit is not null)
+                var pipeline = BuildMiddlewarePipeline(options);
+                if (pipeline is not null)
                 {
-                    // Pass a rate-limiting RPC wrapper so every Handle() call is intercepted.
-                    var wrapper = new RateLimitingRpcWrapper(_rpc, options.RateLimit);
+                    var wrapper = new MiddlewareRpcWrapper(_rpc, pipeline, generated.ServiceName);
                     generated.RegisterHandlers(wrapper, implementation);
                 }
                 else
@@ -86,7 +86,8 @@ internal sealed class RuntimeBridgeService : IBridgeService, IDisposable
                 _exportedServices[interfaceType] = new ExposedService(
                     generated.ServiceName,
                     generated.MethodNames.ToList(),
-                    generated.UnregisterHandlers);
+                    generated.UnregisterHandlers,
+                    () => generated.DisconnectEvents(implementation));
 
                 _tracer.OnServiceExposed(generated.ServiceName, generated.MethodNames.Count, isSourceGenerated: true);
                 _logger.LogDebug("Bridge: exposed {Service} with {Count} methods (source-generated)",
@@ -95,7 +96,7 @@ internal sealed class RuntimeBridgeService : IBridgeService, IDisposable
             }
 
             // Fallback: reflection-based registration.
-            ExposeViaReflection(implementation, interfaceType, options?.RateLimit);
+            ExposeViaReflection(implementation, interfaceType, options);
         }
         catch
         {
@@ -106,10 +107,11 @@ internal sealed class RuntimeBridgeService : IBridgeService, IDisposable
 
     [UnconditionalSuppressMessage("Trimming", "IL2070",
         Justification = "Reflection-based fallback path; source-generated path is preferred for AOT/trim scenarios.")]
-    private void ExposeViaReflection<T>(T implementation, Type interfaceType, RateLimit? rateLimit = null) where T : class
+    private void ExposeViaReflection<T>(T implementation, Type interfaceType, BridgeOptions? options = null) where T : class
     {
         var serviceName = GetServiceName<JsExportAttribute>(interfaceType);
         var registeredMethods = new List<string>();
+        var pipeline = BuildMiddlewarePipeline(options);
 
         try
         {
@@ -117,8 +119,11 @@ internal sealed class RuntimeBridgeService : IBridgeService, IDisposable
             {
                 var rpcMethodName = $"{serviceName}.{ToCamelCase(method.Name)}";
                 var handler = CreateHandler(method, implementation);
-                if (rateLimit is not null)
-                    handler = WrapWithRateLimit(handler, rateLimit);
+                if (pipeline is not null)
+                {
+                    var methodName = ToCamelCase(method.Name);
+                    handler = WrapWithMiddleware(handler, pipeline, serviceName, methodName);
+                }
                 _rpc.Handle(rpcMethodName, handler);
                 registeredMethods.Add(rpcMethodName);
             }
@@ -181,6 +186,8 @@ internal sealed class RuntimeBridgeService : IBridgeService, IDisposable
                 foreach (var method in service.RegisteredMethods)
                     _rpc.RemoveHandler(method);
             }
+
+            service.GeneratedDisconnectEvents?.Invoke();
 
             CleanupJsStub(service.ServiceName);
 
@@ -492,75 +499,136 @@ internal sealed class RuntimeBridgeService : IBridgeService, IDisposable
             throw new ObjectDisposedException(nameof(RuntimeBridgeService));
     }
 
-    // ==================== Rate limiter ====================
+    // ==================== Middleware ====================
 
-    /// <summary>
-    /// Wraps an RPC handler with sliding-window rate limiting.
-    /// Returns JSON-RPC error -32029 ("Rate limit exceeded") when throttled.
-    /// </summary>
-    private static Func<JsonElement?, Task<object?>> WrapWithRateLimit(
-        Func<JsonElement?, Task<object?>> inner, RateLimit limit)
+    private static IReadOnlyList<IBridgeMiddleware>? BuildMiddlewarePipeline(BridgeOptions? options)
     {
-        var timestamps = new Queue<long>();
-        var windowTicks = limit.Window.Ticks;
+        var middlewares = new List<IBridgeMiddleware>();
 
+        if (options?.RateLimit is not null)
+            middlewares.Add(new RateLimitMiddleware(options.RateLimit));
+
+        if (options?.Middleware is { Count: > 0 } custom)
+            middlewares.AddRange(custom);
+
+        return middlewares.Count > 0 ? middlewares : null;
+    }
+
+    private static Func<JsonElement?, Task<object?>> WrapWithMiddleware(
+        Func<JsonElement?, Task<object?>> handler,
+        IReadOnlyList<IBridgeMiddleware> middlewares,
+        string serviceName,
+        string methodName)
+    {
         return args =>
         {
-            var now = Environment.TickCount64;
-
-            lock (timestamps)
+            var context = new BridgeCallContext
             {
-                // Evict expired entries.
-                while (timestamps.Count > 0 && now - timestamps.Peek() > windowTicks / TimeSpan.TicksPerMillisecond)
-                    timestamps.Dequeue();
+                ServiceName = serviceName,
+                MethodName = methodName,
+                Arguments = args,
+                CancellationToken = CancellationToken.None,
+            };
 
-                if (timestamps.Count >= limit.MaxCalls)
-                    throw new WebViewRpcException(-32029, "Rate limit exceeded");
+            BridgeCallDelegate terminal = ctx => handler(ctx.Arguments);
 
-                timestamps.Enqueue(now);
+            var pipeline = terminal;
+            for (int i = middlewares.Count - 1; i >= 0; i--)
+            {
+                var mw = middlewares[i];
+                var next = pipeline;
+                pipeline = ctx => mw.InvokeAsync(ctx, next);
             }
 
-            return inner(args);
+            return pipeline(context);
         };
     }
 
     // ==================== Inner types ====================
 
-    private sealed record ExposedService(string ServiceName, List<string> RegisteredMethods, Action<IWebViewRpcService>? GeneratedUnregister = null);
+    private sealed record ExposedService(string ServiceName, List<string> RegisteredMethods, Action<IWebViewRpcService>? GeneratedUnregister = null, Action? GeneratedDisconnectEvents = null);
 
     /// <summary>
-    /// Wraps an <see cref="IWebViewRpcService"/> to apply rate limiting to every handler registered through it.
-    /// Passes all other operations (RemoveHandler, Invoke) directly through to the inner service.
+    /// Built-in middleware that enforces sliding-window rate limiting.
     /// </summary>
-    private sealed class RateLimitingRpcWrapper : IWebViewRpcService
+    internal sealed class RateLimitMiddleware : IBridgeMiddleware
     {
-        private readonly IWebViewRpcService _inner;
         private readonly RateLimit _limit;
+        private readonly Queue<long> _timestamps = new();
 
-        public RateLimitingRpcWrapper(IWebViewRpcService inner, RateLimit limit)
+        public RateLimitMiddleware(RateLimit limit)
         {
-            _inner = inner;
             _limit = limit;
         }
 
+        public Task<object?> InvokeAsync(BridgeCallContext context, BridgeCallDelegate next)
+        {
+            var now = Environment.TickCount64;
+            var windowMs = _limit.Window.Ticks / TimeSpan.TicksPerMillisecond;
+
+            lock (_timestamps)
+            {
+                while (_timestamps.Count > 0 && now - _timestamps.Peek() > windowMs)
+                    _timestamps.Dequeue();
+
+                if (_timestamps.Count >= _limit.MaxCalls)
+                    throw new WebViewRpcException(-32029, "Rate limit exceeded");
+
+                _timestamps.Enqueue(now);
+            }
+
+            return next(context);
+        }
+    }
+
+    /// <summary>
+    /// Wraps an <see cref="IWebViewRpcService"/> to apply a middleware pipeline to every handler registered through it.
+    /// </summary>
+    private sealed class MiddlewareRpcWrapper : IWebViewRpcService
+    {
+        private readonly IWebViewRpcService _inner;
+        private readonly IReadOnlyList<IBridgeMiddleware> _middlewares;
+        private readonly string _serviceName;
+
+        public MiddlewareRpcWrapper(IWebViewRpcService inner, IReadOnlyList<IBridgeMiddleware> middlewares, string serviceName)
+        {
+            _inner = inner;
+            _middlewares = middlewares;
+            _serviceName = serviceName;
+        }
+
         public void Handle(string method, Func<JsonElement?, Task<object?>> handler)
-            => _inner.Handle(method, WrapWithRateLimit(handler, _limit));
+        {
+            var methodName = ExtractMethodName(method);
+            _inner.Handle(method, WrapWithMiddleware(handler, _middlewares, _serviceName, methodName));
+        }
 
         public void Handle(string method, Func<JsonElement?, object?> handler)
         {
             Func<JsonElement?, Task<object?>> asyncHandler = args => Task.FromResult(handler(args));
-            _inner.Handle(method, WrapWithRateLimit(asyncHandler, _limit));
+            var methodName = ExtractMethodName(method);
+            _inner.Handle(method, WrapWithMiddleware(asyncHandler, _middlewares, _serviceName, methodName));
         }
 
         public void Handle(string method, Func<JsonElement?, CancellationToken, Task<object?>> handler)
         {
             Func<JsonElement?, Task<object?>> asyncHandler = args => handler(args, CancellationToken.None);
-            _inner.Handle(method, WrapWithRateLimit(asyncHandler, _limit));
+            var methodName = ExtractMethodName(method);
+            _inner.Handle(method, WrapWithMiddleware(asyncHandler, _middlewares, _serviceName, methodName));
         }
 
         public void RemoveHandler(string method) => _inner.RemoveHandler(method);
         public Task<JsonElement> InvokeAsync(string method, object? args = null) => _inner.InvokeAsync(method, args);
         public Task<T?> InvokeAsync<T>(string method, object? args = null) => _inner.InvokeAsync<T>(method, args);
+        public Task<JsonElement> InvokeAsync(string method, object? args, CancellationToken ct) => _inner.InvokeAsync(method, args, ct);
+        public Task<T?> InvokeAsync<T>(string method, object? args, CancellationToken ct) => _inner.InvokeAsync<T>(method, args, ct);
+        public Task NotifyAsync(string method, object? args = null) => _inner.NotifyAsync(method, args);
+
+        private static string ExtractMethodName(string rpcMethod)
+        {
+            var dot = rpcMethod.LastIndexOf('.');
+            return dot >= 0 ? rpcMethod[(dot + 1)..] : rpcMethod;
+        }
     }
 }
 

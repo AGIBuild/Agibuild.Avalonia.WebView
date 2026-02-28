@@ -1,6 +1,56 @@
 namespace Agibuild.Fulora;
 
 /// <summary>
+/// Marker interface for typed event channels on <see cref="JsExportAttribute"/> interfaces.
+/// Properties of this type on a [JsExport] interface are automatically wired as push event channels
+/// from C# to JavaScript by the source generator.
+/// </summary>
+/// <typeparam name="T">The event payload type.</typeparam>
+public interface IBridgeEvent<T> { }
+
+/// <summary>
+/// Runtime implementation of <see cref="IBridgeEvent{T}"/> that allows C# code to push events to JavaScript.
+/// <para>
+/// Declare properties as <see cref="IBridgeEvent{T}"/> on the interface, and use <see cref="BridgeEvent{T}"/>
+/// in the implementation to emit events:
+/// <code>
+/// private readonly BridgeEvent&lt;Notification&gt; _onNew = new();
+/// public IBridgeEvent&lt;Notification&gt; OnNew => _onNew;
+/// // Push: _onNew.Emit(new Notification(...));
+/// </code>
+/// </para>
+/// </summary>
+/// <typeparam name="T">The event payload type.</typeparam>
+public sealed class BridgeEvent<T> : IBridgeEvent<T>
+{
+    private Action<T>? _emitHandler;
+    private readonly object _lock = new();
+
+    /// <summary>
+    /// Pushes an event payload to all active JavaScript subscribers.
+    /// No-op if no subscribers are connected or the service has not been exposed.
+    /// </summary>
+    public void Emit(T payload)
+    {
+        Action<T>? handler;
+        lock (_lock) { handler = _emitHandler; }
+        handler?.Invoke(payload);
+    }
+
+    /// <summary>Connects the RPC push delegate. Called by generated registration code.</summary>
+    internal void Connect(Action<T> handler)
+    {
+        lock (_lock) { _emitHandler = handler; }
+    }
+
+    /// <summary>Disconnects the RPC push delegate. Called on Remove.</summary>
+    internal void Disconnect()
+    {
+        lock (_lock) { _emitHandler = null; }
+    }
+}
+
+/// <summary>
 /// Type-safe bridge service for exposing C# services to JavaScript and importing JS services into C#.
 /// <para>
 /// Use <see cref="Expose{T}"/> with <see cref="JsExportAttribute"/> interfaces to register
@@ -63,6 +113,49 @@ public sealed class BridgeOptions
     /// Rate limit for this service. When <c>null</c>, no rate limiting is applied.
     /// </summary>
     public RateLimit? RateLimit { get; init; }
+
+    /// <summary>
+    /// Middleware pipeline applied to every RPC handler for this service, in order.
+    /// </summary>
+    public IReadOnlyList<IBridgeMiddleware>? Middleware { get; init; }
+}
+
+/// <summary>
+/// Delegate representing the next step in the middleware pipeline (or the terminal handler).
+/// </summary>
+public delegate Task<object?> BridgeCallDelegate(BridgeCallContext context);
+
+/// <summary>
+/// ASP.NET Core–style middleware for intercepting bridge RPC calls (logging, auth, error transform, etc.).
+/// </summary>
+public interface IBridgeMiddleware
+{
+    /// <summary>
+    /// Processes a bridge call. Call <paramref name="next"/> to continue the pipeline,
+    /// or short-circuit by returning without calling it.
+    /// </summary>
+    Task<object?> InvokeAsync(BridgeCallContext context, BridgeCallDelegate next);
+}
+
+/// <summary>
+/// Context object passed through the bridge middleware pipeline.
+/// </summary>
+public sealed class BridgeCallContext
+{
+    /// <summary>The RPC service name (e.g. "AppService").</summary>
+    public required string ServiceName { get; init; }
+
+    /// <summary>The RPC method name (e.g. "getCurrentUser").</summary>
+    public required string MethodName { get; init; }
+
+    /// <summary>The deserialized JSON arguments, or <c>null</c> when no arguments were sent.</summary>
+    public System.Text.Json.JsonElement? Arguments { get; init; }
+
+    /// <summary>Cancellation token for the call (cancelled on <c>$/cancelRequest</c>).</summary>
+    public System.Threading.CancellationToken CancellationToken { get; init; }
+
+    /// <summary>Arbitrary properties bag for middleware to share data along the pipeline.</summary>
+    public IDictionary<string, object?> Properties { get; } = new Dictionary<string, object?>();
 }
 
 /// <summary>

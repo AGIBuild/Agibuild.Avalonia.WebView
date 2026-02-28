@@ -56,4 +56,12 @@ internal static class BridgeDiagnostics
         category: Category,
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true);
+
+    public static readonly DiagnosticDescriptor BridgeEventOnImportNotSupported = new(
+        id: "AGBR007",
+        title: "IBridgeEvent properties are not supported on [JsImport] interfaces",
+        messageFormat: "Bridge interface '{0}' has IBridgeEvent property '{1}'. Event channels can only push from C# to JS and are only supported on [JsExport] interfaces.",
+        category: Category,
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
 }

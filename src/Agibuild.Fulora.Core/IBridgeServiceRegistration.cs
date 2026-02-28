@@ -22,6 +22,9 @@ public interface IBridgeServiceRegistration<in T> where T : class
     /// <summary>Removes all RPC handlers registered by <see cref="RegisterHandlers"/>.</summary>
     void UnregisterHandlers(IWebViewRpcService rpc);
 
+    /// <summary>Disconnects all event channels. Called by Remove.</summary>
+    void DisconnectEvents(T implementation) { }
+
     /// <summary>Returns the JavaScript client stub code for this service.</summary>
     string GetJsStub();
 }

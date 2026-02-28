@@ -15,6 +15,7 @@ internal sealed record BridgeInterfaceModel
     public string ServiceName { get; init; } = "";
     public BridgeDirection Direction { get; init; }
     public ImmutableArray<BridgeMethodModel> Methods { get; init; } = ImmutableArray<BridgeMethodModel>.Empty;
+    public ImmutableArray<BridgeEventModel> Events { get; init; } = ImmutableArray<BridgeEventModel>.Empty;
     public ImmutableArray<BridgeDiagnosticInfo> ValidationErrors { get; init; } = ImmutableArray<BridgeDiagnosticInfo>.Empty;
     public bool IsValid => ValidationErrors.IsDefaultOrEmpty;
 }
@@ -45,6 +46,13 @@ internal sealed record BridgeMethodModel
     public string? AsyncEnumerableInnerType { get; init; }
     public int VisibleParameterCount => Parameters.Count(p => !p.IsCancellationToken);
     public bool IsOverload { get; init; }
+}
+
+internal sealed record BridgeEventModel
+{
+    public string PropertyName { get; init; } = "";
+    public string CamelCaseName { get; init; } = "";
+    public string PayloadTypeFullName { get; init; } = "";
 }
 
 internal sealed record BridgeParameterModel

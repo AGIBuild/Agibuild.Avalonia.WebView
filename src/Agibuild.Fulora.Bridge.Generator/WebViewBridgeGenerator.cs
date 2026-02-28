@@ -102,6 +102,7 @@ public sealed class WebViewBridgeGenerator : IIncrementalGenerator
                 "AGBR004" => BridgeDiagnostics.CancellationTokenNotSupported,
                 "AGBR005" => BridgeDiagnostics.AsyncEnumerableNotSupported,
                 "AGBR006" => BridgeDiagnostics.OpenGenericInterfaceNotSupported,
+                "AGBR007" => BridgeDiagnostics.BridgeEventOnImportNotSupported,
                 _ => null,
             };
 

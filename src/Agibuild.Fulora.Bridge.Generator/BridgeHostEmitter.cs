@@ -57,6 +57,19 @@ internal static class BridgeHostEmitter
         sb.AppendLine(" };");
         sb.AppendLine();
 
+        // EventNames
+        if (model.Events.Length > 0)
+        {
+            sb.Append($"{indent}    public IReadOnlyList<string> EventNames => new string[] {{ ");
+            for (int i = 0; i < model.Events.Length; i++)
+            {
+                if (i > 0) sb.Append(", ");
+                sb.Append($"\"{model.Events[i].CamelCaseName}\"");
+            }
+            sb.AppendLine(" };");
+            sb.AppendLine();
+        }
+
         // RegisterHandlers
         EmitRegisterHandlers(sb, model, indent);
         sb.AppendLine();
@@ -64,6 +77,13 @@ internal static class BridgeHostEmitter
         // UnregisterHandlers
         EmitUnregisterHandlers(sb, model, indent);
         sb.AppendLine();
+
+        // DisconnectEvents
+        if (model.Events.Length > 0)
+        {
+            EmitDisconnectEvents(sb, model, indent);
+            sb.AppendLine();
+        }
 
         // GetJsStub
         EmitGetJsStub(sb, model, indent);
@@ -97,6 +117,11 @@ internal static class BridgeHostEmitter
             {
                 EmitStandardHandler(sb, method, indent);
             }
+        }
+
+        foreach (var evt in model.Events)
+        {
+            EmitEventHandlers(sb, model.ServiceName, evt, indent);
         }
 
         sb.AppendLine($"{indent}    }}");
@@ -170,6 +195,38 @@ internal static class BridgeHostEmitter
         sb.AppendLine($"{indent}        }});");
     }
 
+    private static void EmitEventHandlers(StringBuilder sb, string serviceName, BridgeEventModel evt, string indent)
+    {
+        var subscribeName = $"{serviceName}.$subscribe.{evt.CamelCaseName}";
+        var unsubscribeName = $"{serviceName}.$unsubscribe.{evt.CamelCaseName}";
+        var eventMethodName = $"{serviceName}.$event.{evt.CamelCaseName}";
+
+        sb.AppendLine();
+        sb.AppendLine($"{indent}        // Event: {evt.PropertyName}");
+        sb.AppendLine($"{indent}        var __{evt.CamelCaseName}Subscribed = false;");
+        sb.AppendLine($"{indent}        var __{evt.CamelCaseName}Event = impl.{evt.PropertyName} as global::Agibuild.Fulora.BridgeEvent<{evt.PayloadTypeFullName}>;");
+        sb.AppendLine($"{indent}        if (__{evt.CamelCaseName}Event != null)");
+        sb.AppendLine($"{indent}        {{");
+        sb.AppendLine($"{indent}            __{evt.CamelCaseName}Event.Connect(payload =>");
+        sb.AppendLine($"{indent}            {{");
+        sb.AppendLine($"{indent}                if (__{evt.CamelCaseName}Subscribed)");
+        sb.AppendLine($"{indent}                    _ = rpc.NotifyAsync(\"{eventMethodName}\", payload);");
+        sb.AppendLine($"{indent}            }});");
+        sb.AppendLine($"{indent}        }}");
+
+        sb.AppendLine($"{indent}        rpc.Handle(\"{subscribeName}\", (global::System.Text.Json.JsonElement? __args) =>");
+        sb.AppendLine($"{indent}        {{");
+        sb.AppendLine($"{indent}            __{evt.CamelCaseName}Subscribed = true;");
+        sb.AppendLine($"{indent}            return (object?)true;");
+        sb.AppendLine($"{indent}        }});");
+
+        sb.AppendLine($"{indent}        rpc.Handle(\"{unsubscribeName}\", (global::System.Text.Json.JsonElement? __args) =>");
+        sb.AppendLine($"{indent}        {{");
+        sb.AppendLine($"{indent}            __{evt.CamelCaseName}Subscribed = false;");
+        sb.AppendLine($"{indent}            return (object?)true;");
+        sb.AppendLine($"{indent}        }});");
+    }
+
     private static void EmitParameterDeserialization(StringBuilder sb, BridgeMethodModel method, string indent)
     {
         foreach (var param in method.Parameters)
@@ -232,6 +289,25 @@ internal static class BridgeHostEmitter
             sb.AppendLine($"{indent}        rpc.RemoveHandler(\"{method.RpcMethodName}\");");
         }
 
+        foreach (var evt in model.Events)
+        {
+            sb.AppendLine($"{indent}        rpc.RemoveHandler(\"{model.ServiceName}.$subscribe.{evt.CamelCaseName}\");");
+            sb.AppendLine($"{indent}        rpc.RemoveHandler(\"{model.ServiceName}.$unsubscribe.{evt.CamelCaseName}\");");
+        }
+
+        sb.AppendLine($"{indent}    }}");
+    }
+
+    private static void EmitDisconnectEvents(StringBuilder sb, BridgeInterfaceModel model, string indent)
+    {
+        sb.AppendLine($"{indent}    public void DisconnectEvents({model.InterfaceFullName} impl)");
+        sb.AppendLine($"{indent}    {{");
+
+        foreach (var evt in model.Events)
+        {
+            sb.AppendLine($"{indent}        (impl.{evt.PropertyName} as global::Agibuild.Fulora.BridgeEvent<{evt.PayloadTypeFullName}>)?.Disconnect();");
+        }
+
         sb.AppendLine($"{indent}    }}");
     }
 
@@ -260,6 +336,24 @@ internal static class BridgeHostEmitter
             }
         }
         sb.Append(string.Join(", ", jsMethodParts));
+
+        // Event properties
+        foreach (var evt in model.Events)
+        {
+            sb.Append($", {evt.CamelCaseName}: (function() {{ ");
+            sb.Append("var hs = []; ");
+            sb.Append($"window.agWebView.rpc.handle('{model.ServiceName}.$event.{evt.CamelCaseName}', function(p) {{ ");
+            sb.Append("for (var i = 0; i < hs.length; i++) hs[i](p); ");
+            sb.Append("}); ");
+            sb.Append("return { on: function(h) { hs.push(h); ");
+            sb.Append($"if (hs.length === 1) window.agWebView.rpc.invoke('{model.ServiceName}.$subscribe.{evt.CamelCaseName}'); ");
+            sb.Append("return function() { hs = hs.filter(function(x) { return x !== h; }); ");
+            sb.Append($"if (hs.length === 0) window.agWebView.rpc.invoke('{model.ServiceName}.$unsubscribe.{evt.CamelCaseName}'); ");
+            sb.Append("}; }, ");
+            sb.Append("off: function(h) { hs = hs.filter(function(x) { return x !== h; }); ");
+            sb.Append($"if (hs.length === 0) window.agWebView.rpc.invoke('{model.ServiceName}.$unsubscribe.{evt.CamelCaseName}'); ");
+            sb.Append("} }; })()");
+        }
 
         sb.AppendLine(" };");
         sb.AppendLine($"{indent}}})();\";");

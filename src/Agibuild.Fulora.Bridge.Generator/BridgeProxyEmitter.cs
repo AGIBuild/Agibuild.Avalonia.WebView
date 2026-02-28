@@ -67,6 +67,12 @@ internal static class BridgeProxyEmitter
 
     private static void EmitMethod(StringBuilder sb, BridgeMethodModel method, string indent)
     {
+        if (method.IsAsyncEnumerable)
+        {
+            EmitAsyncEnumerableMethod(sb, method, indent);
+            return;
+        }
+
         // Method signature
         var paramSignature = string.Join(", ", method.Parameters.Select(p =>
         {
@@ -79,11 +85,12 @@ internal static class BridgeProxyEmitter
         sb.AppendLine($"{indent}    public async {method.ReturnTypeFullName} {method.Name}({paramSignature})");
         sb.AppendLine($"{indent}    {{");
 
-        // Build named params object
-        if (method.Parameters.Length > 0)
+        // Build named params object (exclude CancellationToken)
+        var rpcParams = method.Parameters.Where(p => !p.IsCancellationToken).ToList();
+        if (rpcParams.Count > 0)
         {
             sb.Append($"{indent}        var __params = new {{ ");
-            sb.Append(string.Join(", ", method.Parameters.Select(p => p.Name)));
+            sb.Append(string.Join(", ", rpcParams.Select(p => p.Name)));
             sb.AppendLine(" };");
         }
         else
@@ -91,18 +98,89 @@ internal static class BridgeProxyEmitter
             sb.AppendLine($"{indent}        object? __params = null;");
         }
 
-        // Invoke RPC
-        if (method.HasReturnValue)
+        // Invoke RPC with or without CancellationToken
+        var ctParam = method.Parameters.FirstOrDefault(p => p.IsCancellationToken);
+        var ctArg = ctParam is not null ? ctParam.Name : "";
+
+        if (method.HasReturnValue && ctParam is not null)
         {
-            // InvokeAsync<T> returns T? — for value types we need explicit cast, for reference types use ?? default!
+            sb.AppendLine($"{indent}        var __result = await _rpc.InvokeAsync<{method.InnerReturnTypeFullName}>(\"{method.RpcMethodName}\", __params, {ctArg}).ConfigureAwait(false);");
+            sb.AppendLine($"{indent}        return __result!;");
+        }
+        else if (method.HasReturnValue)
+        {
             sb.AppendLine($"{indent}        var __result = await _rpc.InvokeAsync<{method.InnerReturnTypeFullName}>(\"{method.RpcMethodName}\", __params).ConfigureAwait(false);");
             sb.AppendLine($"{indent}        return __result!;");
+        }
+        else if (ctParam is not null)
+        {
+            sb.AppendLine($"{indent}        await _rpc.InvokeAsync(\"{method.RpcMethodName}\", __params, {ctArg}).ConfigureAwait(false);");
         }
         else
         {
             sb.AppendLine($"{indent}        await _rpc.InvokeAsync(\"{method.RpcMethodName}\", __params).ConfigureAwait(false);");
         }
 
+        sb.AppendLine($"{indent}    }}");
+    }
+
+    private static void EmitAsyncEnumerableMethod(StringBuilder sb, BridgeMethodModel method, string indent)
+    {
+        var paramSignature = string.Join(", ", method.Parameters.Select(p =>
+        {
+            var sig = $"{p.TypeFullName} {p.Name}";
+            if (p.HasDefaultValue)
+                sig += $" = {p.DefaultValueLiteral ?? "default"}";
+            return sig;
+        }));
+
+        var innerType = method.AsyncEnumerableInnerType ?? "object";
+        var ctParam = method.Parameters.FirstOrDefault(p => p.IsCancellationToken);
+
+        sb.AppendLine($"{indent}    public async {method.ReturnTypeFullName} {method.Name}({paramSignature})");
+        sb.AppendLine($"{indent}    {{");
+
+        var rpcParams = method.Parameters.Where(p => !p.IsCancellationToken).ToList();
+        if (rpcParams.Count > 0)
+        {
+            sb.Append($"{indent}        var __params = new {{ ");
+            sb.Append(string.Join(", ", rpcParams.Select(p => p.Name)));
+            sb.AppendLine(" };");
+        }
+        else
+        {
+            sb.AppendLine($"{indent}        object? __params = null;");
+        }
+
+        var ctArg = ctParam is not null ? $", {ctParam.Name}" : "";
+
+        sb.AppendLine($"{indent}        var __initResult = await _rpc.InvokeAsync<global::System.Text.Json.JsonElement>(\"{method.RpcMethodName}\", __params{ctArg}).ConfigureAwait(false);");
+        sb.AppendLine($"{indent}        var __token = __initResult.GetProperty(\"token\").GetString()!;");
+        sb.AppendLine($"{indent}        var __finished = __initResult.TryGetProperty(\"finished\", out var __fin) && __fin.GetBoolean();");
+        sb.AppendLine();
+        sb.AppendLine($"{indent}        if (__initResult.TryGetProperty(\"values\", out var __prefetch))");
+        sb.AppendLine($"{indent}        {{");
+        sb.AppendLine($"{indent}            foreach (var __v in __prefetch.EnumerateArray())");
+        sb.AppendLine($"{indent}            {{");
+        sb.AppendLine($"{indent}                yield return __v.Deserialize<{innerType}>()!;");
+        sb.AppendLine($"{indent}            }}");
+        sb.AppendLine($"{indent}        }}");
+        sb.AppendLine();
+        sb.AppendLine($"{indent}        if (__finished) yield break;");
+        sb.AppendLine();
+        sb.AppendLine($"{indent}        while (true)");
+        sb.AppendLine($"{indent}        {{");
+        sb.AppendLine($"{indent}            var __next = await _rpc.InvokeAsync<global::System.Text.Json.JsonElement>(\"$/enumerator/next/\" + __token{ctArg}).ConfigureAwait(false);");
+        sb.AppendLine($"{indent}            var __done = __next.TryGetProperty(\"finished\", out var __f) && __f.GetBoolean();");
+        sb.AppendLine($"{indent}            if (__next.TryGetProperty(\"values\", out var __vals))");
+        sb.AppendLine($"{indent}            {{");
+        sb.AppendLine($"{indent}                foreach (var __v in __vals.EnumerateArray())");
+        sb.AppendLine($"{indent}                {{");
+        sb.AppendLine($"{indent}                    yield return __v.Deserialize<{innerType}>()!;");
+        sb.AppendLine($"{indent}                }}");
+        sb.AppendLine($"{indent}            }}");
+        sb.AppendLine($"{indent}            if (__done) yield break;");
+        sb.AppendLine($"{indent}        }}");
         sb.AppendLine($"{indent}    }}");
     }
 

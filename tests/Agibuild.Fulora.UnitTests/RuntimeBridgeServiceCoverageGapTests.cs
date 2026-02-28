@@ -123,19 +123,20 @@ public sealed class RuntimeBridgeServiceCoverageGapTests
     }
 
     [Fact]
-    public async Task RateLimitingRpcWrapper_sync_handle_and_forwarding_paths_are_covered()
+    public async Task MiddlewareRpcWrapper_sync_handle_and_forwarding_paths_are_covered()
     {
         var rpc = new RecordingRpcService();
         var wrapperType = typeof(RuntimeBridgeService).GetNestedType(
-            "RateLimitingRpcWrapper",
+            "MiddlewareRpcWrapper",
             BindingFlags.NonPublic);
         Assert.NotNull(wrapperType);
 
+        var middlewares = new List<IBridgeMiddleware>();
         var wrapper = Activator.CreateInstance(
             wrapperType!,
             BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
             binder: null,
-            args: [rpc, new RateLimit(10, TimeSpan.FromSeconds(5))],
+            args: [rpc, (IReadOnlyList<IBridgeMiddleware>)middlewares, "TestService"],
             culture: null);
         var proxy = Assert.IsAssignableFrom<IWebViewRpcService>(wrapper);
 

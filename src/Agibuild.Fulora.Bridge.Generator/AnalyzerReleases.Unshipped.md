@@ -8,3 +8,4 @@ AGBR003 | Agibuild.Fulora.Bridge | Error | ref/out/in parameters are not support
 AGBR004 | Agibuild.Fulora.Bridge | Error | CancellationToken is not yet supported in bridge interfaces
 AGBR005 | Agibuild.Fulora.Bridge | Error | IAsyncEnumerable is not yet supported in bridge interfaces
 AGBR006 | Agibuild.Fulora.Bridge | Error | Open generic interfaces are not supported in bridge
+AGBR007 | Agibuild.Fulora.Bridge | Error | IBridgeEvent properties are not supported on [JsImport] interfaces

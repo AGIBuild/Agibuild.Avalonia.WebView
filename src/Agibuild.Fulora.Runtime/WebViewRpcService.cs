@@ -166,6 +166,93 @@ internal sealed class WebViewRpcService : IWebViewRpcService
         return result.Deserialize<T>(BridgeJsonOptions);
     }
 
+    [UnconditionalSuppressMessage("Trimming", "IL2026",
+        Justification = "RPC args serialization uses runtime types.")]
+    public async Task<JsonElement> InvokeAsync(string method, object? args, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(method);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var id = Guid.NewGuid().ToString("N");
+        var tcs = new TaskCompletionSource<JsonElement>(TaskCreationOptions.RunContinuationsAsynchronously);
+        _pendingCalls[id] = tcs;
+
+        CancellationTokenRegistration? ctReg = null;
+        try
+        {
+            if (cancellationToken.CanBeCanceled)
+            {
+                ctReg = cancellationToken.Register(() =>
+                {
+                    tcs.TrySetCanceled(cancellationToken);
+                    _ = SendCancelRequestAsync(id);
+                });
+            }
+
+            var request = new RpcRequest
+            {
+                Id = id,
+                Method = method,
+                Params = args is null ? null : JsonSerializer.SerializeToElement(args, BridgeJsonOptions)
+            };
+
+            var json = JsonSerializer.Serialize(request, RpcJsonContext.Default.RpcRequest);
+            var script = $"window.agWebView && window.agWebView.rpc && window.agWebView.rpc._dispatch({JsonSerializer.Serialize(json, RpcJsonContext.Default.String)})";
+            await _invokeScript(script);
+
+            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            timeoutCts.Token.Register(() => tcs.TrySetException(
+                new WebViewRpcException(-32000, $"RPC call '{method}' timed out.")));
+
+            return await tcs.Task;
+        }
+        finally
+        {
+            ctReg?.Dispose();
+            _pendingCalls.TryRemove(id, out _);
+        }
+    }
+
+    [UnconditionalSuppressMessage("Trimming", "IL2026",
+        Justification = "Generic RPC deserialization.")]
+    public async Task<T?> InvokeAsync<T>(string method, object? args, CancellationToken cancellationToken)
+    {
+        var result = await InvokeAsync(method, args, cancellationToken);
+        if (result.ValueKind == JsonValueKind.Null || result.ValueKind == JsonValueKind.Undefined)
+            return default;
+        return result.Deserialize<T>(BridgeJsonOptions);
+    }
+
+    private async Task SendCancelRequestAsync(string requestId)
+    {
+        try
+        {
+            await NotifyAsync("$/cancelRequest", new { id = requestId });
+        }
+        catch
+        {
+            // Best-effort cancel notification
+        }
+    }
+
+    [UnconditionalSuppressMessage("Trimming", "IL2026",
+        Justification = "RPC notification args serialization uses runtime types.")]
+    public async Task NotifyAsync(string method, object? args = null)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(method);
+
+        var notification = new RpcRequest
+        {
+            Id = null,
+            Method = method,
+            Params = args is null ? null : JsonSerializer.SerializeToElement(args, BridgeJsonOptions)
+        };
+
+        var json = JsonSerializer.Serialize(notification, RpcJsonContext.Default.RpcRequest);
+        var script = $"window.agWebView && window.agWebView.rpc && window.agWebView.rpc._dispatch({JsonSerializer.Serialize(json, RpcJsonContext.Default.String)})";
+        await _invokeScript(script);
+    }
+
     // ==================== JS → C# dispatch ====================
 
     /// <summary>
@@ -181,67 +268,26 @@ internal sealed class WebViewRpcService : IWebViewRpcService
             using var doc = JsonDocument.Parse(body);
             var root = doc.RootElement;
 
+            if (root.ValueKind == JsonValueKind.Array)
+            {
+                _ = ProcessBatchAsync(root.Clone());
+                return true;
+            }
+
             if (!root.TryGetProperty("jsonrpc", out var ver) || ver.GetString() != "2.0")
                 return false;
 
-            // Handle notifications (no id field at all) — $/cancelRequest and $/enumerator/abort
             if (!root.TryGetProperty("id", out var idProp))
-            {
-                if (root.TryGetProperty("method", out var notifMethod))
-                {
-                    var methodName = notifMethod.GetString();
-                    if (methodName == "$/cancelRequest" && root.TryGetProperty("params", out var cancelParams))
-                    {
-                        if (cancelParams.TryGetProperty("id", out var cancelId))
-                        {
-                            var targetId = cancelId.GetString();
-                            if (targetId is not null && _activeCancellations.TryGetValue(targetId, out var cts))
-                            {
-                                cts.Cancel();
-                            }
-                        }
-                        return true;
-                    }
+                return HandleNotification(root);
 
-                    if (methodName == "$/enumerator/abort" && root.TryGetProperty("params", out var abortParams))
-                    {
-                        if (abortParams.TryGetProperty("token", out var tokenProp))
-                        {
-                            var token = tokenProp.GetString();
-                            if (token is not null)
-                            {
-                                _ = DisposeEnumerator(token);
-                            }
-                        }
-                        return true;
-                    }
-                }
-                return false;
-            }
-
-            // Is it a response to a pending C#→JS call?
             {
                 var id = idProp.GetString();
                 if (id is not null && _pendingCalls.TryRemove(id, out var tcs))
                 {
-                    if (root.TryGetProperty("error", out var errorProp))
-                    {
-                        var code = errorProp.TryGetProperty("code", out var c) ? c.GetInt32() : -32603;
-                        var msg = errorProp.TryGetProperty("message", out var m) ? m.GetString() ?? "RPC error" : "RPC error";
-                        tcs.TrySetException(new WebViewRpcException(code, msg));
-                    }
-                    else if (root.TryGetProperty("result", out var resultProp))
-                    {
-                        tcs.TrySetResult(resultProp.Clone());
-                    }
-                    else
-                    {
-                        tcs.TrySetResult(default);
-                    }
+                    ResolvePendingCall(root, tcs);
                     return true;
                 }
 
-                // It's a JS→C# request
                 if (root.TryGetProperty("method", out var methodProp))
                 {
                     var method = methodProp.GetString();
@@ -263,6 +309,12 @@ internal sealed class WebViewRpcService : IWebViewRpcService
 
     private async Task DispatchRequestAsync(string id, string method, JsonElement root)
     {
+        var responseJson = await DispatchRequestCoreAsync(id, method, root);
+        await SendResponseAsync(responseJson);
+    }
+
+    private async Task<string> DispatchRequestCoreAsync(string id, string method, JsonElement root)
+    {
         JsonElement? paramsProp = root.TryGetProperty("params", out var p) ? p.Clone() : null;
 
         try
@@ -274,65 +326,166 @@ internal sealed class WebViewRpcService : IWebViewRpcService
                 try
                 {
                     var result = await cancellableHandler(paramsProp, cts.Token);
-                    await SendSuccessResponseAsync(id, result);
+                    return BuildSuccessResponseJson(id, result);
                 }
                 finally
                 {
                     UnregisterCancellation(id);
                 }
-                return;
             }
 
             if (!_handlers.TryGetValue(method, out var handler))
             {
-                await SendErrorResponseAsync(id, -32601, $"Method not found: {method}");
-                return;
+                return BuildErrorResponseJson(id, -32601, $"Method not found: {method}");
             }
 
             var handlerResult = await handler(paramsProp);
-            await SendSuccessResponseAsync(id, handlerResult);
+            return BuildSuccessResponseJson(id, handlerResult);
         }
         catch (OperationCanceledException)
         {
             _logger.LogDebug("RPC: handler for '{Method}' was cancelled", method);
-            await SendErrorResponseAsync(id, -32800, "Request cancelled");
+            return BuildErrorResponseJson(id, -32800, "Request cancelled");
         }
         catch (WebViewRpcException rpcEx)
         {
             _logger.LogDebug(rpcEx, "RPC: handler for '{Method}' threw RPC error {Code}", method, rpcEx.Code);
-            await SendErrorResponseAsync(id, rpcEx.Code, rpcEx.Message);
+            return BuildErrorResponseJson(id, rpcEx.Code, rpcEx.Message);
         }
         catch (Exception ex)
         {
             _logger.LogDebug(ex, "RPC: handler for '{Method}' threw", method);
-            await SendErrorResponseAsync(id, -32603, ex.Message);
+            return BuildErrorResponseJson(id, -32603, ex.Message);
         }
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2026",
         Justification = "RPC result serialization uses runtime types; the handler is responsible for type safety.")]
-    private async Task SendSuccessResponseAsync(string id, object? result)
+    private string BuildSuccessResponseJson(string id, object? result)
     {
         var response = new RpcResponse
         {
             Id = id,
             Result = result is null ? null : JsonSerializer.SerializeToElement(result, BridgeJsonOptions)
         };
-        var json = JsonSerializer.Serialize(response, RpcJsonContext.Default.RpcResponse);
-        var script = $"window.agWebView && window.agWebView.rpc && window.agWebView.rpc._onResponse({JsonSerializer.Serialize(json, RpcJsonContext.Default.String)})";
-        await _invokeScript(script);
+        return JsonSerializer.Serialize(response, RpcJsonContext.Default.RpcResponse);
     }
 
-    private async Task SendErrorResponseAsync(string id, int code, string message)
+    private string BuildErrorResponseJson(string? id, int code, string message)
     {
         var response = new RpcErrorResponse
         {
             Id = id,
             Error = new RpcError { Code = code, Message = message }
         };
-        var json = JsonSerializer.Serialize(response, RpcJsonContext.Default.RpcErrorResponse);
+        return JsonSerializer.Serialize(response, RpcJsonContext.Default.RpcErrorResponse);
+    }
+
+    private async Task SendResponseAsync(string json)
+    {
         var script = $"window.agWebView && window.agWebView.rpc && window.agWebView.rpc._onResponse({JsonSerializer.Serialize(json, RpcJsonContext.Default.String)})";
         await _invokeScript(script);
+    }
+
+    // ==================== Batch RPC ====================
+
+    private async Task ProcessBatchAsync(JsonElement batchArray)
+    {
+        var tasks = new List<Task<string?>>();
+        foreach (var element in batchArray.EnumerateArray())
+        {
+            tasks.Add(ProcessBatchElementAsync(element));
+        }
+
+        var responses = await Task.WhenAll(tasks);
+        var nonNull = responses.Where(r => r is not null).ToArray();
+        if (nonNull.Length == 0) return;
+
+        var batchJson = "[" + string.Join(",", nonNull) + "]";
+        await SendResponseAsync(batchJson);
+    }
+
+    private async Task<string?> ProcessBatchElementAsync(JsonElement root)
+    {
+        var elementId = root.TryGetProperty("id", out var rawId) ? rawId.GetString() : null;
+
+        if (!root.TryGetProperty("jsonrpc", out var ver) || ver.GetString() != "2.0")
+            return BuildErrorResponseJson(elementId, -32600, "Invalid Request");
+
+        if (elementId is null && !root.TryGetProperty("id", out _))
+        {
+            HandleNotification(root);
+            return null;
+        }
+
+        var id = elementId;
+
+        if (id is not null && _pendingCalls.TryRemove(id, out var tcs))
+        {
+            ResolvePendingCall(root, tcs);
+            return null;
+        }
+
+        if (root.TryGetProperty("method", out var methodProp))
+        {
+            var method = methodProp.GetString();
+            if (method is not null && id is not null)
+            {
+                return await DispatchRequestCoreAsync(id, method, root);
+            }
+        }
+
+        return BuildErrorResponseJson(id, -32600, "Invalid Request");
+    }
+
+    private bool HandleNotification(JsonElement root)
+    {
+        if (!root.TryGetProperty("method", out var notifMethod))
+            return false;
+
+        var methodName = notifMethod.GetString();
+
+        if (methodName == "$/cancelRequest" && root.TryGetProperty("params", out var cancelParams))
+        {
+            if (cancelParams.TryGetProperty("id", out var cancelId))
+            {
+                var targetId = cancelId.GetString();
+                if (targetId is not null && _activeCancellations.TryGetValue(targetId, out var cts))
+                    cts.Cancel();
+            }
+            return true;
+        }
+
+        if (methodName == "$/enumerator/abort" && root.TryGetProperty("params", out var abortParams))
+        {
+            if (abortParams.TryGetProperty("token", out var tokenProp))
+            {
+                var token = tokenProp.GetString();
+                if (token is not null)
+                    _ = DisposeEnumerator(token);
+            }
+            return true;
+        }
+
+        return false;
+    }
+
+    private void ResolvePendingCall(JsonElement root, TaskCompletionSource<JsonElement> tcs)
+    {
+        if (root.TryGetProperty("error", out var errorProp))
+        {
+            var code = errorProp.TryGetProperty("code", out var c) ? c.GetInt32() : -32603;
+            var msg = errorProp.TryGetProperty("message", out var m) ? m.GetString() ?? "RPC error" : "RPC error";
+            tcs.TrySetException(new WebViewRpcException(code, msg));
+        }
+        else if (root.TryGetProperty("result", out var resultProp))
+        {
+            tcs.TrySetResult(resultProp.Clone());
+        }
+        else
+        {
+            tcs.TrySetResult(default);
+        }
     }
 
     // ==================== JS stub injection ====================
@@ -377,6 +530,7 @@ internal sealed class WebViewRpcService : IWebViewRpcService
                     if (msg.method && handlers[msg.method]) {
                         try {
                             var result = handlers[msg.method](msg.params);
+                            if (msg.id == null) return;
                             if (result && typeof result.then === 'function') {
                                 result.then(function(r) {
                                     post(JSON.stringify({ jsonrpc: '2.0', id: msg.id, result: r }));
@@ -387,20 +541,43 @@ internal sealed class WebViewRpcService : IWebViewRpcService
                                 post(JSON.stringify({ jsonrpc: '2.0', id: msg.id, result: result }));
                             }
                         } catch(e) {
-                            post(JSON.stringify({ jsonrpc: '2.0', id: msg.id, error: { code: -32603, message: e.message || 'Error' } }));
+                            if (msg.id != null) post(JSON.stringify({ jsonrpc: '2.0', id: msg.id, error: { code: -32603, message: e.message || 'Error' } }));
                         }
                     }
                 },
+                batch: function(calls) {
+                    var requests = [];
+                    var ids = [];
+                    for (var i = 0; i < calls.length; i++) {
+                        var id = '__js_' + (nextId++);
+                        ids.push(id);
+                        requests.push({ jsonrpc: '2.0', id: id, method: calls[i].method, params: calls[i].params });
+                    }
+                    var resultPromises = ids.map(function(id) {
+                        return new Promise(function(resolve, reject) {
+                            pending[id] = { resolve: resolve, reject: reject };
+                        });
+                    });
+                    post(JSON.stringify(requests));
+                    return Promise.all(resultPromises);
+                },
                 _onResponse: function(jsonStr) {
                     var msg = JSON.parse(jsonStr);
-                    var p = pending[msg.id];
-                    if (p) {
-                        delete pending[msg.id];
-                        if (msg.error) {
-                            p.reject(new Error(msg.error.message || 'RPC error'));
-                        } else {
-                            p.resolve(msg.result);
+                    function resolveItem(item) {
+                        var p = pending[item.id];
+                        if (p) {
+                            delete pending[item.id];
+                            if (item.error) {
+                                p.reject(new Error(item.error.message || 'RPC error'));
+                            } else {
+                                p.resolve(item.result);
+                            }
                         }
+                    }
+                    if (Array.isArray(msg)) {
+                        for (var i = 0; i < msg.length; i++) resolveItem(msg[i]);
+                    } else {
+                        resolveItem(msg);
                     }
                 },
                 _createAsyncIterable: function(method, params) {
@@ -450,6 +627,7 @@ internal sealed class WebViewRpcService : IWebViewRpcService
         public string JsonRpc { get; set; } = "2.0";
 
         [JsonPropertyName("id")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? Id { get; set; }
 
         [JsonPropertyName("method")]

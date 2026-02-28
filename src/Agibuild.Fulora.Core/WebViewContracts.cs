@@ -1076,6 +1076,23 @@ public interface IWebViewRpcService
 
     /// <summary>Calls a JS-side handler and deserializes the result.</summary>
     Task<T?> InvokeAsync<T>(string method, object? args = null);
+
+    /// <summary>Calls a JS-side handler with cancellation support. Sends $/cancelRequest on cancellation.</summary>
+    Task<JsonElement> InvokeAsync(string method, object? args, CancellationToken cancellationToken)
+        => InvokeAsync(method, args);
+
+    /// <summary>Calls a JS-side handler with cancellation support. Sends $/cancelRequest on cancellation.</summary>
+    Task<T?> InvokeAsync<T>(string method, object? args, CancellationToken cancellationToken)
+        => InvokeAsync<T>(method, args);
+
+    /// <summary>
+    /// Sends a JSON-RPC notification to JavaScript (fire-and-forget, no response expected).
+    /// Used internally by bridge event channels.
+    /// </summary>
+    Task NotifyAsync(string method, object? args = null)
+    {
+        return Task.CompletedTask;
+    }
 }
 
 /// <summary>Exception thrown when an RPC call fails.</summary>
