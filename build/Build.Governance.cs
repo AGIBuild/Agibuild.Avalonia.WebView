@@ -1210,8 +1210,8 @@ partial class BuildTask
         .DependsOn(Coverage, AutomationLaneReport, OpenSpecStrictGovernance)
         .Executes(() =>
         {
-            const string completedPhase = "phase6-governance-productization";
-            const string activePhase = "phase7-release-orchestration";
+            const string completedPhase = "phase7-release-orchestration";
+            const string activePhase = "phase8-bridge-v2-parity";
             const string transitionInvariantId = "GOV-022";
             var roadmapPath = RootDirectory / "openspec" / "ROADMAP.md";
             var (roadmapCompletedPhase, roadmapActivePhase) = ReadRoadmapTransitionState(File.ReadAllText(roadmapPath));
@@ -1250,9 +1250,9 @@ partial class BuildTask
             var archiveDirectory = RootDirectory / "openspec" / "changes" / "archive";
             var completedPhaseCloseoutChangeIds = new[]
             {
-                "phase6-foundation-governance-hardening",
-                "phase6-governance-productization",
-                "phase6-continuous-transition-gate"
+                "phase7-release-orchestration-foundation",
+                "phase7-packaging-distribution-determinism",
+                "phase7-adoption-readiness-signals"
             };
             var closeoutArchives = Directory.Exists(archiveDirectory)
                 ? completedPhaseCloseoutChangeIds

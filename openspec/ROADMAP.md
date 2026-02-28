@@ -8,9 +8,9 @@
 ## Phase Overview
 
 ```
-Phase 0 (✅ Done)        Phase 1 (✅ Done)       Phase 2 (✅ Core Done)  Phase 3 (✅ Done)      Phase 4 (✅ Done)      Phase 5 (✅ Completed)        Phase 6 (✅ Completed)         Phase 7 (🚧 Active)
-Foundation               Type-Safe Bridge       SPA Hosting            Polish & GA            Application Shell       Framework Positioning Foundation Governance Productization        Release Orchestration
-─────────────────────    ────────────────────   ────────────────────   ────────────────────   ────────────────────    ───────────────────────────────── ─────────────────────────────── ─────────────────────────
+Phase 0 (✅ Done)        Phase 1 (✅ Done)       Phase 2 (✅ Core Done)  Phase 3 (✅ Done)      Phase 4 (✅ Done)      Phase 5 (✅ Completed)        Phase 6 (✅ Completed)         Phase 7 (✅ Completed)       Phase 8 (🚧 Active)
+Foundation               Type-Safe Bridge       SPA Hosting            Polish & GA            Application Shell       Framework Positioning Foundation Governance Productization        Release Orchestration      Bridge V2 & Platform Parity
+─────────────────────    ────────────────────   ────────────────────   ────────────────────   ────────────────────    ───────────────────────────────── ─────────────────────────────── ─────────────────────────   ─────────────────────────────
 • Cross-platform         • Source Generator     • Custom protocol      • Project template      • Shell policy kit      • Typed capability gateway
   adapters (5 platforms)   for C# → JS proxy      file serving        • API docs site           (new window/download/ • Policy-first execution model
 • Full-control           • Source Generator     • Embedded resource    • Performance             permission/session)   • Agent-friendly diagnostics
@@ -23,6 +23,10 @@ Foundation               Type-Safe Bridge       SPA Hosting            Polish & 
   Preload, ContextMenu     unit testing           + React app            smoke validation
 • 391 CT + 80 IT         • Migration path       • Sample: Avalonia
 • WebDialog, Auth          from raw RPC           + Vue app
+                                                                                                                           • Bridge diagnostics safety net
+                                                                                                                           • Cancellation + streaming parity
+                                                                                                                           • Overloads and generic boundaries
+                                                                                                                           • Platform feature parity closure
 ```
 
 ---
@@ -468,8 +472,8 @@ dotnet new agibuild-hybrid -n MyApp --frontend react
 
 ### Phase Transition Status (Machine-checkable)
 
-- Completed phase id: `phase6-governance-productization`
-- Active phase id: `phase7-release-orchestration`
+- Completed phase id: `phase7-release-orchestration`
+- Active phase id: `phase8-bridge-v2-parity`
 - Closeout snapshot artifact: `artifacts/test-results/closeout-snapshot.json`
 
 ## Phase 6: Governance Productization (✅ Completed)
@@ -507,31 +511,57 @@ dotnet new agibuild-hybrid -n MyApp --frontend react
 - Roadmap transition markers are machine-checkable and aligned with governance assertions.
 - Deterministic transition diagnostics are emitted for parity and continuity failures.
 
-## Phase 7: Release Orchestration (🚧 Active)
+## Phase 7: Release Orchestration (✅ Completed)
 
 **Goal**: Convert governance-complete framework foundations into release-orchestrated product readiness with deterministic publication quality gates and adoption-oriented evidence.
+
+### Milestones
+
+| Milestone | Focus | Outcome |
+|---|---|---|
+| **M7.1 Release Evidence Consolidation** | Unify release-readiness evidence into one deterministic contract for CI and package validation | ✅ Done — machine-checkable release decision baseline established |
+| **M7.2 Packaging and Distribution Determinism** | Ensure NuGet/package metadata, compatibility, and changelog expectations are policy-governed | ✅ Done — deterministic release artifact quality gate enforced |
+| **M7.3 Adoption Readiness Signals** | Align docs/templates/runtime evidence with framework adoption KPIs | ✅ Done — adoption readiness section and policy-tier findings integrated |
+
+### OpenSpec archive evidence
+
+- `2026-02-28-phase7-release-orchestration-foundation`
+- `2026-02-28-phase7-packaging-distribution-determinism`
+- `2026-02-28-phase7-adoption-readiness-signals`
+
+### Phase 7 Exit Criteria
+
+- Release decision state is machine-checkable from unified CI evidence contract v2 payload.
+- Stable publish path is blocked deterministically on distribution/adoption/governance failures.
+- Release orchestration diagnostics provide invariant-linked expected-vs-actual entries for CI triage.
+
+## Phase 8: Bridge V2 & Platform Parity (🚧 Active)
+
+**Goal**: Consolidate Bridge V2 expressiveness and platform feature parity into a deterministic baseline suitable for the next release train.
 
 ### Planned Milestones
 
 | Milestone | Focus | Outcome |
 |---|---|---|
-| **M7.1 Release Evidence Consolidation** | Unify release-readiness evidence into one deterministic contract for CI and package validation | Machine-checkable release decision baseline |
-| **M7.2 Packaging and Distribution Determinism** | Ensure NuGet/package metadata, compatibility, and changelog expectations are policy-governed | Deterministic release artifact quality |
-| **M7.3 Adoption Readiness Signals** | Align docs/templates/runtime evidence with framework adoption KPIs | Verifiable framework adoption readiness gate |
+| **M8.1 Bridge Diagnostic Safety Net** | Generator diagnostics and boundary guardrails | Deterministic diagnostics for unsupported patterns |
+| **M8.2 Bridge Cancellation Support** | CancellationToken to AbortSignal contract | Cross-boundary cancellation semantics |
+| **M8.3 Bridge AsyncEnumerable Streaming** | Stream transport and iterator contract | Deterministic pull-based streaming over RPC |
+| **M8.4 Bridge Generics & Overload Boundary** | Overload support and generic boundary clarity | Expanded expressiveness with explicit unsupported cases |
+| **M8.5 Platform Feature Parity** | Adapter feature gap closure and compatibility updates | Auditable cross-platform parity baseline |
 
 ---
 
 ## Dependencies & Prerequisites
 
 ```
-Phase 0 (✅ Done) ──► Phase 1 (✅ Done) ──► Phase 2 (✅ Core Done) ──► Phase 3 (✅ Done) ──► Phase 4 (✅ Done) ──► Phase 5 (✅ Completed) ──► Phase 6 (✅ Completed) ──► Phase 7 (🚧 Active)
+Phase 0 (✅ Done) ──► Phase 1 (✅ Done) ──► Phase 2 (✅ Core Done) ──► Phase 3 (✅ Done) ──► Phase 4 (✅ Done) ──► Phase 5 (✅ Completed) ──► Phase 6 (✅ Completed) ──► Phase 7 (✅ Completed) ──► Phase 8 (🚧 Active)
      │                      │                       │                         │                         │                                   │
      │                      │                       └── 2.4 depends on Phase 1│                         └── framework-positioning baseline    └── release orchestration builds on deterministic transition governance
      │                      └── Builds on F6 (RPC) + F3 (Policy)             └── Shell layer builds on stable GA baseline
      └── F4 (WebResource) used by Phase 2                                       and reuses bridge/policy/testability core
 ```
 
-Phase 1 and Phase 2 are mostly independent in implementation but compose together. Phase 4 depends on completed GA-grade stability from Phase 3 and focuses on product-level shell capabilities. Phase 5 pivots from "host count" to "framework positioning + dual-path adoption" with web-first developer productivity and AI-agent operability as primary outcomes. Phase 6 productizes transition governance baselines, and Phase 7 focuses on release orchestration with deterministic publication quality gates.
+Phase 1 and Phase 2 are mostly independent in implementation but compose together. Phase 4 depends on completed GA-grade stability from Phase 3 and focuses on product-level shell capabilities. Phase 5 pivots from "host count" to "framework positioning + dual-path adoption" with web-first developer productivity and AI-agent operability as primary outcomes. Phase 6 productizes transition governance baselines, Phase 7 closes release orchestration governance, and Phase 8 focuses on Bridge V2 expressiveness and platform parity consolidation.
 
 ---
 

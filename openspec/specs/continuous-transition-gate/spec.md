@@ -30,6 +30,10 @@ Closeout transition governance MUST assert that `completedPhase` and `activePhas
 - **WHEN** completed/active phase metadata does not represent a single adjacent rollover pair from roadmap baseline
 - **THEN** transition continuity governance fails before release evidence acceptance
 
+#### Scenario: Stale completed-phase closeout references fail parity
+- **WHEN** transition metadata is updated to a new adjacent baseline but closeout archive references remain pinned to the previous completed phase
+- **THEN** continuous transition gate governance reports deterministic parity failures and blocks release progression
+
 ### Requirement: Continuous transition gate failures SHALL emit lane-aware invariant diagnostics
 Any continuous transition gate failure MUST emit machine-readable diagnostics including invariant id, lane context, artifact path, and expected-vs-actual transition-gate values.
 

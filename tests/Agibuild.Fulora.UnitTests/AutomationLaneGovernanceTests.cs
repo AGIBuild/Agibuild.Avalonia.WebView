@@ -686,16 +686,16 @@ public sealed class AutomationLaneGovernanceTests
         var roadmap = File.ReadAllText(roadmapPath);
         Assert.Matches(new Regex(@"## Phase \d+: .+\(✅ Completed\)", RegexOptions.Multiline), roadmap);
         Assert.Matches(new Regex(@"## Phase \d+: .+\(🚧 Active\)", RegexOptions.Multiline), roadmap);
-        AssertSourceContains(roadmap, "Completed phase id: `phase6-governance-productization`", PhaseTransitionConsistency, roadmapPath);
-        AssertSourceContains(roadmap, "Active phase id: `phase7-release-orchestration`", PhaseTransitionConsistency, roadmapPath);
+        AssertSourceContains(roadmap, "Completed phase id: `phase7-release-orchestration`", PhaseTransitionConsistency, roadmapPath);
+        AssertSourceContains(roadmap, "Active phase id: `phase8-bridge-v2-parity`", PhaseTransitionConsistency, roadmapPath);
         AssertSourceContains(roadmap, "Closeout snapshot artifact: `artifacts/test-results/closeout-snapshot.json`", PhaseTransitionConsistency, roadmapPath);
         AssertSourceContains(roadmap, "### Evidence Source Mapping", PhaseTransitionConsistency, roadmapPath);
 
         var completedPhaseCloseoutChangeIds = new[]
         {
-            "2026-02-26-phase6-foundation-governance-hardening",
-            "2026-02-27-phase6-governance-productization",
-            "2026-02-27-phase6-continuous-transition-gate"
+            "2026-02-28-phase7-release-orchestration-foundation",
+            "2026-02-28-phase7-packaging-distribution-determinism",
+            "2026-02-28-phase7-adoption-readiness-signals"
         };
         foreach (var changeId in completedPhaseCloseoutChangeIds)
             AssertSourceContains(roadmap, changeId, PhaseTransitionConsistency, roadmapPath);

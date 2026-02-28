@@ -1,18 +1,4 @@
-# roadmap-phase-transition-management Specification
-
-## Purpose
-Define machine-checkable roadmap phase transition and closeout evidence mapping contracts for deterministic governance rollover.
-## Requirements
-### Requirement: Roadmap phase rollover SHALL remain machine-checkable and deterministic
-The roadmap SHALL publish one completed phase id and one active phase id in stable machine-checkable marker format, and phase rollover updates MUST move both markers together as one atomic baseline transition.
-
-#### Scenario: Adjacent phase rollover succeeds
-- **WHEN** governance baseline advances from one phase transition pair to the next
-- **THEN** roadmap markers expose exactly one updated completed phase id and one updated active phase id in stable marker format
-
-#### Scenario: Partial marker update is rejected
-- **WHEN** only completed or active marker is changed during phase rollover
-- **THEN** governance assertions fail deterministically before release closeout evidence is accepted
+## MODIFIED Requirements
 
 ### Requirement: Closeout evidence mapping SHALL align with completed phase artifacts
 Roadmap closeout evidence references MUST map to archived changes that belong to the completed phase baseline used by transition governance, and MUST remain synchronized with the release closeout snapshot transition baseline constants.
@@ -28,4 +14,3 @@ Roadmap closeout evidence references MUST map to archived changes that belong to
 #### Scenario: Closeout snapshot baseline drift is rejected
 - **WHEN** roadmap completed-phase evidence mapping is updated but closeout snapshot transition constants still reference the previous baseline
 - **THEN** governance fails deterministically before release closeout evidence is accepted
-
