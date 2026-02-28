@@ -85,57 +85,141 @@ internal static class BridgeHostEmitter
 
         foreach (var method in model.Methods)
         {
-            sb.AppendLine($"{indent}        rpc.Handle(\"{method.RpcMethodName}\", async (global::System.Text.Json.JsonElement? __args) =>");
-            sb.AppendLine($"{indent}        {{");
-
-            // Deserialize parameters
-            foreach (var param in method.Parameters)
+            if (method.IsAsyncEnumerable)
             {
-                var camel = param.CamelCaseName;
-                var type = param.TypeFullName;
-
-                if (param.IsNullable || param.HasDefaultValue)
-                {
-                    var defaultVal = param.HasDefaultValue ? param.DefaultValueLiteral ?? "default" : "default";
-                    sb.AppendLine($"{indent}            {type} __{camel} = {defaultVal};");
-                    sb.AppendLine($"{indent}            if (__args.HasValue && __args.Value.TryGetProperty(\"{camel}\", out var __{camel}Prop) && __{camel}Prop.ValueKind != global::System.Text.Json.JsonValueKind.Null)");
-                    sb.AppendLine($"{indent}                __{camel} = __{camel}Prop.Deserialize<{type}>(BridgeGeneratedJsonOptions.Instance);");
-                }
-                else
-                {
-                    sb.AppendLine($"{indent}            var __{camel}Prop = __args.HasValue && __args.Value.TryGetProperty(\"{camel}\", out var __p_{camel}) ? __p_{camel} : default;");
-                    sb.AppendLine($"{indent}            var __{camel} = __{camel}Prop.Deserialize<{type}>(BridgeGeneratedJsonOptions.Instance)!;");
-                }
+                EmitStreamingHandler(sb, method, indent);
             }
-
-            // Call implementation
-            var paramList = string.Join(", ", method.Parameters.Select(p => $"__{p.CamelCaseName}"));
-
-            if (method.IsAsync && method.HasReturnValue)
+            else if (method.HasCancellationToken)
             {
-                sb.AppendLine($"{indent}            var __result = await impl.{method.Name}({paramList}).ConfigureAwait(false);");
-                sb.AppendLine($"{indent}            return (object?)__result;");
-            }
-            else if (method.IsAsync)
-            {
-                sb.AppendLine($"{indent}            await impl.{method.Name}({paramList}).ConfigureAwait(false);");
-                sb.AppendLine($"{indent}            return (object?)null;");
-            }
-            else if (method.HasReturnValue)
-            {
-                sb.AppendLine($"{indent}            var __result = impl.{method.Name}({paramList});");
-                sb.AppendLine($"{indent}            return (object?)__result;");
+                EmitCancellableHandler(sb, method, indent);
             }
             else
             {
-                sb.AppendLine($"{indent}            impl.{method.Name}({paramList});");
-                sb.AppendLine($"{indent}            return (object?)null;");
+                EmitStandardHandler(sb, method, indent);
             }
-
-            sb.AppendLine($"{indent}        }});");
         }
 
         sb.AppendLine($"{indent}    }}");
+    }
+
+    private static void EmitStandardHandler(StringBuilder sb, BridgeMethodModel method, string indent)
+    {
+        sb.AppendLine($"{indent}        rpc.Handle(\"{method.RpcMethodName}\", async (global::System.Text.Json.JsonElement? __args) =>");
+        sb.AppendLine($"{indent}        {{");
+        EmitParameterDeserialization(sb, method, indent);
+        EmitMethodInvocation(sb, method, indent);
+        sb.AppendLine($"{indent}        }});");
+    }
+
+    private static void EmitCancellableHandler(StringBuilder sb, BridgeMethodModel method, string indent)
+    {
+        sb.AppendLine($"{indent}        rpc.Handle(\"{method.RpcMethodName}\", async (global::System.Text.Json.JsonElement? __args, global::System.Threading.CancellationToken __ct) =>");
+        sb.AppendLine($"{indent}        {{");
+        EmitParameterDeserialization(sb, method, indent);
+        EmitMethodInvocation(sb, method, indent);
+        sb.AppendLine($"{indent}        }});");
+    }
+
+    private static void EmitStreamingHandler(StringBuilder sb, BridgeMethodModel method, string indent)
+    {
+        var innerType = method.AsyncEnumerableInnerType ?? "object";
+        var hasCt = method.HasCancellationToken;
+
+        if (hasCt)
+        {
+            sb.AppendLine($"{indent}        rpc.Handle(\"{method.RpcMethodName}\", async (global::System.Text.Json.JsonElement? __args, global::System.Threading.CancellationToken __ct) =>");
+        }
+        else
+        {
+            sb.AppendLine($"{indent}        rpc.Handle(\"{method.RpcMethodName}\", async (global::System.Text.Json.JsonElement? __args) =>");
+        }
+        sb.AppendLine($"{indent}        {{");
+
+        EmitParameterDeserialization(sb, method, indent);
+
+        var paramList = string.Join(", ", method.Parameters.Select(p =>
+            p.IsCancellationToken ? "__ct" : $"__{p.CamelCaseName}"));
+
+        sb.AppendLine($"{indent}            var __enumerable = impl.{method.Name}({paramList});");
+        sb.AppendLine($"{indent}            var __enumerator = __enumerable.GetAsyncEnumerator({(hasCt ? "__ct" : "default")});");
+        sb.AppendLine($"{indent}            var __token = global::System.Guid.NewGuid().ToString(\"N\");");
+        sb.AppendLine();
+        sb.AppendLine($"{indent}            // Prefetch first item for reduced latency");
+        sb.AppendLine($"{indent}            object?[]? __prefetch = null;");
+        sb.AppendLine($"{indent}            if (await __enumerator.MoveNextAsync().ConfigureAwait(false))");
+        sb.AppendLine($"{indent}            {{");
+        sb.AppendLine($"{indent}                __prefetch = new object?[] {{ __enumerator.Current }};");
+        sb.AppendLine($"{indent}            }}");
+        sb.AppendLine($"{indent}            else");
+        sb.AppendLine($"{indent}            {{");
+        sb.AppendLine($"{indent}                await __enumerator.DisposeAsync().ConfigureAwait(false);");
+        sb.AppendLine($"{indent}                return (object?)new {{ token = __token, values = global::System.Array.Empty<object>(), finished = true }};");
+        sb.AppendLine($"{indent}            }}");
+        sb.AppendLine();
+        sb.AppendLine($"{indent}            rpc.RegisterEnumerator(__token,");
+        sb.AppendLine($"{indent}                async () =>");
+        sb.AppendLine($"{indent}                {{");
+        sb.AppendLine($"{indent}                    if (await __enumerator.MoveNextAsync().ConfigureAwait(false))");
+        sb.AppendLine($"{indent}                        return ((object?)__enumerator.Current, false);");
+        sb.AppendLine($"{indent}                    return (null, true);");
+        sb.AppendLine($"{indent}                }},");
+        sb.AppendLine($"{indent}                async () => await __enumerator.DisposeAsync().ConfigureAwait(false));");
+        sb.AppendLine();
+        sb.AppendLine($"{indent}            return (object?)new {{ token = __token, values = __prefetch }};");
+
+        sb.AppendLine($"{indent}        }});");
+    }
+
+    private static void EmitParameterDeserialization(StringBuilder sb, BridgeMethodModel method, string indent)
+    {
+        foreach (var param in method.Parameters)
+        {
+            if (param.IsCancellationToken)
+                continue;
+
+            var camel = param.CamelCaseName;
+            var type = param.TypeFullName;
+
+            if (param.IsNullable || param.HasDefaultValue)
+            {
+                var defaultVal = param.HasDefaultValue ? param.DefaultValueLiteral ?? "default" : "default";
+                sb.AppendLine($"{indent}            {type} __{camel} = {defaultVal};");
+                sb.AppendLine($"{indent}            if (__args.HasValue && __args.Value.TryGetProperty(\"{camel}\", out var __{camel}Prop) && __{camel}Prop.ValueKind != global::System.Text.Json.JsonValueKind.Null)");
+                sb.AppendLine($"{indent}                __{camel} = __{camel}Prop.Deserialize<{type}>(BridgeGeneratedJsonOptions.Instance);");
+            }
+            else
+            {
+                sb.AppendLine($"{indent}            var __{camel}Prop = __args.HasValue && __args.Value.TryGetProperty(\"{camel}\", out var __p_{camel}) ? __p_{camel} : default;");
+                sb.AppendLine($"{indent}            var __{camel} = __{camel}Prop.Deserialize<{type}>(BridgeGeneratedJsonOptions.Instance)!;");
+            }
+        }
+    }
+
+    private static void EmitMethodInvocation(StringBuilder sb, BridgeMethodModel method, string indent)
+    {
+        var paramList = string.Join(", ", method.Parameters.Select(p =>
+            p.IsCancellationToken ? "__ct" : $"__{p.CamelCaseName}"));
+
+        if (method.IsAsync && method.HasReturnValue)
+        {
+            sb.AppendLine($"{indent}            var __result = await impl.{method.Name}({paramList}).ConfigureAwait(false);");
+            sb.AppendLine($"{indent}            return (object?)__result;");
+        }
+        else if (method.IsAsync)
+        {
+            sb.AppendLine($"{indent}            await impl.{method.Name}({paramList}).ConfigureAwait(false);");
+            sb.AppendLine($"{indent}            return (object?)null;");
+        }
+        else if (method.HasReturnValue)
+        {
+            sb.AppendLine($"{indent}            var __result = impl.{method.Name}({paramList});");
+            sb.AppendLine($"{indent}            return (object?)__result;");
+        }
+        else
+        {
+            sb.AppendLine($"{indent}            impl.{method.Name}({paramList});");
+            sb.AppendLine($"{indent}            return (object?)null;");
+        }
     }
 
     private static void EmitUnregisterHandlers(StringBuilder sb, BridgeInterfaceModel model, string indent)
@@ -160,14 +244,106 @@ internal static class BridgeHostEmitter
         sb.Append($"{indent}    window.agWebView.bridge.{model.ServiceName} = {{ ");
 
         var jsMethodParts = new List<string>();
-        foreach (var m in model.Methods)
+        var overloadGroups = model.Methods
+            .GroupBy(m => m.CamelCaseName)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        foreach (var kv in overloadGroups)
         {
-            jsMethodParts.Add($"{m.CamelCaseName}: function(params) {{ return window.agWebView.rpc.invoke('{m.RpcMethodName}', params); }}");
+            if (kv.Value.Count == 1)
+            {
+                jsMethodParts.Add(EmitSingleJsMethod(kv.Value[0]));
+            }
+            else
+            {
+                jsMethodParts.Add(EmitOverloadedJsMethod(kv.Key, kv.Value));
+            }
         }
         sb.Append(string.Join(", ", jsMethodParts));
 
         sb.AppendLine(" };");
         sb.AppendLine($"{indent}}})();\";");
+    }
+
+    private static string EmitSingleJsMethod(BridgeMethodModel m)
+    {
+        if (m.IsAsyncEnumerable)
+        {
+            var rpcParamNames = m.Parameters
+                .Where(p => !p.IsCancellationToken)
+                .Select(p => p.CamelCaseName)
+                .ToList();
+
+            var jb = new StringBuilder();
+            jb.Append($"{m.CamelCaseName}: function(");
+            jb.Append(string.Join(", ", rpcParamNames));
+            jb.Append(") { ");
+
+            var paramsObj = rpcParamNames.Count > 0
+                ? "{ " + string.Join(", ", rpcParamNames.Select(n => $"{n}: {n}")) + " }"
+                : "undefined";
+
+            jb.Append($"return window.agWebView.rpc._createAsyncIterable('{m.RpcMethodName}', {paramsObj}); }}");
+            return jb.ToString();
+        }
+
+        if (m.HasCancellationToken)
+        {
+            var rpcParamNames = m.Parameters
+                .Where(p => !p.IsCancellationToken)
+                .Select(p => p.CamelCaseName)
+                .ToList();
+
+            var jb = new StringBuilder();
+            jb.Append($"{m.CamelCaseName}: function(");
+            jb.Append(string.Join(", ", rpcParamNames.Concat(new[] { "options" })));
+            jb.Append(") { ");
+
+            var paramsObj = rpcParamNames.Count > 0
+                ? "{ " + string.Join(", ", rpcParamNames.Select(n => $"{n}: {n}")) + " }"
+                : "undefined";
+
+            jb.Append($"var p = window.agWebView.rpc.invoke('{m.RpcMethodName}', {paramsObj}");
+            jb.Append(", options && options.signal");
+            jb.Append("); return p; }");
+            return jb.ToString();
+        }
+
+        return $"{m.CamelCaseName}: function(params) {{ return window.agWebView.rpc.invoke('{m.RpcMethodName}', params); }}";
+    }
+
+    private static string EmitOverloadedJsMethod(string camelName, List<BridgeMethodModel> overloads)
+    {
+        var sorted = overloads.OrderByDescending(m => m.VisibleParameterCount).ToList();
+        var allParamNames = sorted[0].Parameters
+            .Where(p => !p.IsCancellationToken)
+            .Select(p => p.CamelCaseName)
+            .ToList();
+
+        var jb = new StringBuilder();
+        jb.Append($"{camelName}: function() {{ ");
+
+        for (int i = 0; i < sorted.Count; i++)
+        {
+            var m = sorted[i];
+            var visibleParams = m.Parameters.Where(p => !p.IsCancellationToken).ToList();
+            var paramsObj = visibleParams.Count > 0
+                ? "{ " + string.Join(", ", visibleParams.Select((p, idx) => $"{p.CamelCaseName}: arguments[{idx}]")) + " }"
+                : "undefined";
+
+            if (i < sorted.Count - 1)
+            {
+                jb.Append($"if (arguments.length >= {visibleParams.Count}) ");
+                jb.Append($"return window.agWebView.rpc.invoke('{m.RpcMethodName}', {paramsObj}); ");
+            }
+            else
+            {
+                jb.Append($"return window.agWebView.rpc.invoke('{m.RpcMethodName}', {paramsObj}); ");
+            }
+        }
+
+        jb.Append("}");
+        return jb.ToString();
     }
 
     private static string GetFullClassName(string ns, string className)

@@ -28,11 +28,22 @@ The attribute SHALL accept an optional `Name` property (string) to override the 
 The Core assembly SHALL define an `IBridgeService` interface with:
 - `void Expose<T>(T implementation, BridgeOptions? options = null)` — registers a `[JsExport]` service implementation
 - `T GetProxy<T>()` — returns a proxy for a `[JsImport]` interface
-- `void Remove<T>()` — unregisters a previously exposed service
+- `void Remove<T>()` — unregisters a previously exposed service and removes the JS-side stub
 
 #### Scenario: IBridgeService is resolvable
 - **WHEN** a consumer references `IBridgeService`
 - **THEN** it compiles without missing type errors
+
+#### Scenario: Remove cleans up JS stub
+- **WHEN** `Remove<T>()` is called for a previously exposed service
+- **THEN** RPC handlers for that service are unregistered
+- **AND** `window.agWebView.bridge.<ServiceName>` is deleted via script execution
+- **AND** the service name is logged via the bridge tracer
+
+#### Scenario: Remove cleanup tolerates script execution failure
+- **WHEN** `Remove<T>()` is called and the JS stub cleanup script fails (e.g., page not loaded)
+- **THEN** the RPC handlers are still unregistered
+- **AND** the error is logged but does not propagate as an exception
 
 ### Requirement: BridgeOptions type exists in Core assembly
 The Core assembly SHALL define a `BridgeOptions` class with:
@@ -162,3 +173,26 @@ The `WebView` Avalonia control SHALL expose an `IBridgeService? Bridge` property
 #### Scenario: WebView.Bridge delegates to core
 - **WHEN** the WebView control is attached
 - **THEN** `WebView.Bridge` returns the same instance as `WebViewCore.Bridge`
+
+### Requirement: IWebViewRpcService SHALL support CancellationToken-aware handlers
+The `IWebViewRpcService` interface SHALL expose methods for registering and retrieving CancellationTokenSources keyed by request ID, enabling cancellation-aware bridge handlers.
+
+#### Scenario: Register and retrieve CTS
+- **WHEN** a bridge handler registers a CTS for an active request
+- **THEN** the CTS is retrievable by request ID for cancellation
+
+### Requirement: Overloaded export methods register with unique RPC names
+When `Bridge.Expose<T>(impl)` is called with an interface that has overloaded methods, each overload SHALL be registered with a unique RPC method name based on its visible parameter count.
+
+#### Scenario: Overloaded method RPC handlers are individually addressable
+- **WHEN** `Bridge.Expose<ISearchService>(impl)` is called where `ISearchService` has `Search(string q)` and `Search(string q, int limit)`
+- **THEN** RPC handlers for `SearchService.search` and `SearchService.search$2` are registered
+- **AND** each handler correctly deserializes and invokes its respective overload
+
+### Requirement: Overloaded import proxy dispatches to correct RPC name
+When `Bridge.GetProxy<T>()` is called with an interface that has overloaded methods, each proxy method SHALL invoke its specific RPC method name.
+
+#### Scenario: Proxy overload calls correct RPC endpoint
+- **WHEN** a proxy for an overloaded import interface is obtained
+- **AND** the 2-param overload is called
+- **THEN** the proxy sends an RPC request to `Service.method$2`

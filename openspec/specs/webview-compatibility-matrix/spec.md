@@ -169,7 +169,8 @@ The compatibility matrix SHALL list screenshot capture as an Extended capability
 The compatibility matrix SHALL list print-to-pdf as an Extended capability with:
 - Windows (WebView2): supported via `CoreWebView2.PrintToPdfAsync`
 - macOS/iOS (WKWebView): supported via native PDF rendering
-- Android/GTK: not supported (throws `NotSupportedException`)
+- Android: not supported (throws `NotSupportedException`)
+- GTK/Linux: not supported — WebKitGTK lacks a PDF export API
 - CT: contract tests via mock adapter verifying PDF header, options pass-through, and unsupported behavior
 
 #### Scenario: Print to PDF is listed in matrix
@@ -204,6 +205,20 @@ Platform coverage claims in matrix rows SHALL include deterministic coverage tok
 #### Scenario: Declared platform has empty coverage token list
 - **WHEN** matrix governance checks platform coverage payload
 - **THEN** validation fails with capability id and platform name
+
+### Requirement: Compatibility matrix documents macOS DevTools toggle limitation
+The compatibility matrix SHALL mark macOS OpenDevTools/CloseDevTools as ⚠️ (No-op) with a note that the Web Inspector is available via right-click when EnableDevTools is set.
+
+#### Scenario: Matrix shows macOS DevTools toggle status
+- **WHEN** a developer consults the compatibility matrix for DevTools
+- **THEN** macOS shows ⚠️ with note about right-click access
+
+### Requirement: Compatibility matrix documents IAsyncPreloadScriptAdapter as Windows-only
+The compatibility matrix SHALL include an IAsyncPreloadScriptAdapter row marking Windows as ✅ and all other platforms as ❌ (fallback to sync IPreloadScriptAdapter).
+
+#### Scenario: Matrix shows async preload cross-platform status
+- **WHEN** a developer consults the compatibility matrix for async preload
+- **THEN** only Windows is marked ✅, others show ❌ with fallback note
 
 ### Requirement: Compatibility declarations SHALL distinguish unsupported from undeclared
 Platform compatibility declarations SHALL explicitly mark unsupported platform scope with deterministic token (`n/a`) instead of omitting platform keys.

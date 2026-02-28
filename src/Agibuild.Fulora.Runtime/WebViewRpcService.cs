@@ -22,7 +22,10 @@ internal sealed class WebViewRpcService : IWebViewRpcService
     };
 
     private readonly ConcurrentDictionary<string, Func<JsonElement?, Task<object?>>> _handlers = new();
+    private readonly ConcurrentDictionary<string, Func<JsonElement?, CancellationToken, Task<object?>>> _cancellableHandlers = new();
     private readonly ConcurrentDictionary<string, TaskCompletionSource<JsonElement>> _pendingCalls = new();
+    private readonly ConcurrentDictionary<string, CancellationTokenSource> _activeCancellations = new();
+    private readonly ConcurrentDictionary<string, ActiveEnumerator> _activeEnumerators = new();
     private readonly Func<string, Task<string?>> _invokeScript;
     private readonly ILogger _logger;
 
@@ -48,10 +51,70 @@ internal sealed class WebViewRpcService : IWebViewRpcService
         _handlers[method] = args => Task.FromResult(handler(args));
     }
 
+    public void Handle(string method, Func<JsonElement?, CancellationToken, Task<object?>> handler)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(method);
+        ArgumentNullException.ThrowIfNull(handler);
+        _cancellableHandlers[method] = handler;
+        _handlers[method] = args => handler(args, CancellationToken.None);
+    }
+
     public void RemoveHandler(string method)
     {
         ArgumentException.ThrowIfNullOrEmpty(method);
         _handlers.TryRemove(method, out _);
+        _cancellableHandlers.TryRemove(method, out _);
+    }
+
+    // ==================== Cancellation support ====================
+
+    internal void RegisterCancellation(string requestId, CancellationTokenSource cts)
+    {
+        _activeCancellations[requestId] = cts;
+    }
+
+    internal void UnregisterCancellation(string requestId)
+    {
+        if (_activeCancellations.TryRemove(requestId, out var cts))
+        {
+            cts.Dispose();
+        }
+    }
+
+    // ==================== Enumerator support ====================
+
+    internal void RegisterEnumerator(string token, Func<Task<(object? Value, bool Finished)>> moveNext, Func<Task> dispose)
+    {
+        _activeEnumerators[token] = new ActiveEnumerator(moveNext, dispose);
+        _handlers[$"$/enumerator/next/{token}"] = async (JsonElement? args) =>
+        {
+            if (_activeEnumerators.TryGetValue(token, out var enumerator))
+            {
+                var (value, finished) = await enumerator.MoveNext();
+                if (finished)
+                {
+                    await DisposeEnumerator(token);
+                }
+                return new EnumeratorNextResult { Values = finished ? [] : [value], Finished = finished };
+            }
+            return new EnumeratorNextResult { Values = [], Finished = true };
+        };
+    }
+
+    internal async Task DisposeEnumerator(string token)
+    {
+        if (_activeEnumerators.TryRemove(token, out var enumerator))
+        {
+            _handlers.TryRemove($"$/enumerator/next/{token}", out _);
+            try
+            {
+                await enumerator.Dispose();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "RPC: failed to dispose enumerator {Token}", token);
+            }
+        }
     }
 
     // ==================== C# → JS calls ====================
@@ -121,8 +184,42 @@ internal sealed class WebViewRpcService : IWebViewRpcService
             if (!root.TryGetProperty("jsonrpc", out var ver) || ver.GetString() != "2.0")
                 return false;
 
+            // Handle notifications (no id field at all) — $/cancelRequest and $/enumerator/abort
+            if (!root.TryGetProperty("id", out var idProp))
+            {
+                if (root.TryGetProperty("method", out var notifMethod))
+                {
+                    var methodName = notifMethod.GetString();
+                    if (methodName == "$/cancelRequest" && root.TryGetProperty("params", out var cancelParams))
+                    {
+                        if (cancelParams.TryGetProperty("id", out var cancelId))
+                        {
+                            var targetId = cancelId.GetString();
+                            if (targetId is not null && _activeCancellations.TryGetValue(targetId, out var cts))
+                            {
+                                cts.Cancel();
+                            }
+                        }
+                        return true;
+                    }
+
+                    if (methodName == "$/enumerator/abort" && root.TryGetProperty("params", out var abortParams))
+                    {
+                        if (abortParams.TryGetProperty("token", out var tokenProp))
+                        {
+                            var token = tokenProp.GetString();
+                            if (token is not null)
+                            {
+                                _ = DisposeEnumerator(token);
+                            }
+                        }
+                        return true;
+                    }
+                }
+                return false;
+            }
+
             // Is it a response to a pending C#→JS call?
-            if (root.TryGetProperty("id", out var idProp))
             {
                 var id = idProp.GetString();
                 if (id is not null && _pendingCalls.TryRemove(id, out var tcs))
@@ -170,14 +267,35 @@ internal sealed class WebViewRpcService : IWebViewRpcService
 
         try
         {
+            if (_cancellableHandlers.TryGetValue(method, out var cancellableHandler))
+            {
+                using var cts = new CancellationTokenSource();
+                RegisterCancellation(id, cts);
+                try
+                {
+                    var result = await cancellableHandler(paramsProp, cts.Token);
+                    await SendSuccessResponseAsync(id, result);
+                }
+                finally
+                {
+                    UnregisterCancellation(id);
+                }
+                return;
+            }
+
             if (!_handlers.TryGetValue(method, out var handler))
             {
                 await SendErrorResponseAsync(id, -32601, $"Method not found: {method}");
                 return;
             }
 
-            var result = await handler(paramsProp);
-            await SendSuccessResponseAsync(id, result);
+            var handlerResult = await handler(paramsProp);
+            await SendSuccessResponseAsync(id, handlerResult);
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogDebug("RPC: handler for '{Method}' was cancelled", method);
+            await SendErrorResponseAsync(id, -32800, "Request cancelled");
         }
         catch (WebViewRpcException rpcEx)
         {
@@ -234,11 +352,21 @@ internal sealed class WebViewRpcService : IWebViewRpcService
                 }
             }
             window.agWebView.rpc = {
-                invoke: function(method, params) {
+                invoke: function(method, params, signal) {
                     return new Promise(function(resolve, reject) {
                         var id = '__js_' + (nextId++);
                         pending[id] = { resolve: resolve, reject: reject };
                         post(JSON.stringify({ jsonrpc: '2.0', id: id, method: method, params: params }));
+                        if (signal) {
+                            var onAbort = function() {
+                                post(JSON.stringify({ jsonrpc: '2.0', method: '$/cancelRequest', params: { id: id } }));
+                            };
+                            if (signal.aborted) {
+                                onAbort();
+                            } else {
+                                signal.addEventListener('abort', onAbort, { once: true });
+                            }
+                        }
                     });
                 },
                 handle: function(method, handler) {
@@ -274,6 +402,41 @@ internal sealed class WebViewRpcService : IWebViewRpcService
                             p.resolve(msg.result);
                         }
                     }
+                },
+                _createAsyncIterable: function(method, params) {
+                    var rpc = window.agWebView.rpc;
+                    return {
+                        [Symbol.asyncIterator]: function() {
+                            var token = null;
+                            var buffer = [];
+                            var done = false;
+                            var initPromise = rpc.invoke(method, params).then(function(r) {
+                                token = r.token;
+                                if (r.values) { for (var i = 0; i < r.values.length; i++) buffer.push(r.values[i]); }
+                                if (r.finished) done = true;
+                            });
+                            return {
+                                next: function() {
+                                    return initPromise.then(function() {
+                                        if (buffer.length > 0) return { value: buffer.shift(), done: false };
+                                        if (done) return { value: undefined, done: true };
+                                        return rpc.invoke('$/enumerator/next/' + token).then(function(r) {
+                                            if (r.finished) { done = true; return { value: undefined, done: true }; }
+                                            if (r.values && r.values.length > 0) return { value: r.values[0], done: false };
+                                            return { value: undefined, done: true };
+                                        });
+                                    });
+                                },
+                                return: function() {
+                                    if (token && !done) {
+                                        done = true;
+                                        post(JSON.stringify({ jsonrpc: '2.0', method: '$/enumerator/abort', params: { token: token } }));
+                                    }
+                                    return Promise.resolve({ value: undefined, done: true });
+                                }
+                            };
+                        }
+                    };
                 }
             };
         })();
@@ -329,6 +492,29 @@ internal sealed class WebViewRpcService : IWebViewRpcService
 
         [JsonPropertyName("error")]
         public RpcError? Error { get; set; }
+    }
+
+    internal sealed record ActiveEnumerator(
+        Func<Task<(object? Value, bool Finished)>> MoveNext,
+        Func<Task> Dispose);
+
+    internal sealed class EnumeratorNextResult
+    {
+        [JsonPropertyName("values")]
+        public object?[] Values { get; set; } = [];
+
+        [JsonPropertyName("finished")]
+        public bool Finished { get; set; }
+    }
+
+    internal sealed class EnumeratorInitResult
+    {
+        [JsonPropertyName("token")]
+        public string Token { get; set; } = "";
+
+        [JsonPropertyName("values")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public object?[]? Values { get; set; }
     }
 }
 

@@ -60,7 +60,7 @@
 | `TryGetCookieManager()` | Extended | ⚠️ | ⚠️ | ⚠️ | N/A | ⚠️ | CT+IT | Platform storage model differs; must list supported ops |
 | `TryGetCommandManager()` | Extended | ✅ | ✅ | ✅ | N/A | ✅ | CT | Copy/Cut/Paste/SelectAll/Undo/Redo via native editing commands |
 | `CaptureScreenshotAsync()` | Extended | ✅ | ✅ | ✅ | N/A | ✅ | CT | Returns PNG bytes; all 5 platforms supported |
-| `PrintToPdfAsync()` | Extended | ✅ | ✅ | ❌ | N/A | ❌ | CT | Windows/macOS/iOS: PDF bytes; Android/GTK: `NotSupportedException` |
+| `PrintToPdfAsync()` | Extended | ✅ | ✅ | ❌ | ❌ | ❌ | CT | Windows/macOS/iOS: PDF bytes; Android: `NotSupportedException`; GTK: not implemented (WebKitGTK lacks PDF export API) |
 | `Rpc` (JS ↔ C# RPC) | Extended | ✅ | ✅ | ✅ | N/A | ✅ | CT | JSON-RPC 2.0 over WebMessage bridge; requires bridge enabled |
 | `INativeWebViewHandleProvider` | Extended | ✅ | ✅ | ✅ | N/A | ✅ | IT | Handle type differs per platform; document stability & lifetime |
 
@@ -144,7 +144,9 @@
 
 | Option | Level | Windows | macOS/iOS | Android | Linux (Dialog) | Test | Notes |
 |---|---|---:|---:|---:|---:|---|---|
-| `EnableDevTools` | Extended | ✅ | ⚠️ | ⚠️ | ❌ | IT | Platform-specific behavior; must specify defaults |
+| `EnableDevTools` | Extended | ✅ | ⚠️ | ⚠️ | ✅ | IT | Platform-specific behavior; macOS: `OpenDevTools()`/`CloseDevTools()` are no-ops (WKWebView has no public API), Web Inspector accessible via right-click → Inspect Element when enabled; GTK: functional via WebKitGTK inspector |
+| `IAsyncPreloadScriptAdapter` | Extended | ✅ | ❌ | ❌ | ❌ | CT | Windows-only (WebView2 `AddScriptToExecuteOnDocumentCreatedAsync`); other platforms fall back to sync `IPreloadScriptAdapter` wrapped in `Task.FromResult` |
+| `ContextMenuRequested` | Extended | ✅ | ⚠️ | ⚠️ | ✅ | IT | GTK: wired via WebKitGTK `context-menu` signal; macOS: no-op (WKWebView lacks public context menu interception API); Android: event declared but not raised |
 | UserAgent override | Extended | ✅ | ⚠️ | ⚠️ | ❌ | IT | Some platforms restrict UA; document exact effect |
 | Persistent storage profile / user data dir | Extended | ✅ | ⚠️ | ⚠️ | ❌ | IT | Windows WebView2 supports explicit user data folder |
 | Private/Ephemeral mode | Extended | ⚠️ | ✅ | ⚠️ | ✅ | IT | AuthFlow prefers ephemeral by default |

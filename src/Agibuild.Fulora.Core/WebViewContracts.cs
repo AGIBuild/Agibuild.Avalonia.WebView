@@ -1058,6 +1058,16 @@ public interface IWebViewRpcService
     /// <summary>Registers a synchronous C# handler callable from JS.</summary>
     void Handle(string method, Func<JsonElement?, object?> handler);
 
+    /// <summary>Registers a cancellation-aware async handler. The CancellationToken is cancelled when a $/cancelRequest is received.</summary>
+    void Handle(string method, Func<JsonElement?, CancellationToken, Task<object?>> handler)
+        => Handle(method, args => handler(args, CancellationToken.None));
+
+    /// <summary>Registers a streaming enumerator for pull-based consumption. Returns a unique token for the enumerator.</summary>
+    void RegisterEnumerator(string token, Func<Task<(object? Value, bool Finished)>> moveNext, Func<Task> dispose)
+    {
+        // Default no-op for implementations that don't support streaming
+    }
+
     /// <summary>Removes a previously registered handler.</summary>
     void RemoveHandler(string method);
 

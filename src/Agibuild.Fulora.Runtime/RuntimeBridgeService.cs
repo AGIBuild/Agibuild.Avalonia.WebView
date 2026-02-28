@@ -182,8 +182,22 @@ internal sealed class RuntimeBridgeService : IBridgeService, IDisposable
                     _rpc.RemoveHandler(method);
             }
 
+            CleanupJsStub(service.ServiceName);
+
             _tracer.OnServiceRemoved(service.ServiceName);
             _logger.LogDebug("Bridge: removed {Service}", service.ServiceName);
+        }
+    }
+
+    private void CleanupJsStub(string serviceName)
+    {
+        try
+        {
+            _ = _invokeScript($"delete window.agWebView.bridge.{serviceName};");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "Bridge: failed to clean up JS stub for {Service}", serviceName);
         }
     }
 
@@ -534,8 +548,13 @@ internal sealed class RuntimeBridgeService : IBridgeService, IDisposable
 
         public void Handle(string method, Func<JsonElement?, object?> handler)
         {
-            // Convert sync handler to async, wrap with rate limit, register.
             Func<JsonElement?, Task<object?>> asyncHandler = args => Task.FromResult(handler(args));
+            _inner.Handle(method, WrapWithRateLimit(asyncHandler, _limit));
+        }
+
+        public void Handle(string method, Func<JsonElement?, CancellationToken, Task<object?>> handler)
+        {
+            Func<JsonElement?, Task<object?>> asyncHandler = args => handler(args, CancellationToken.None);
             _inner.Handle(method, WrapWithRateLimit(asyncHandler, _limit));
         }
 

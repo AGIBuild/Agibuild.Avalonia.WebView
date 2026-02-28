@@ -70,6 +70,15 @@ typedef bool (*ag_gtk_scheme_request_cb)(
     const char** out_mime_type_utf8,
     int* out_status_code);
 
+typedef bool (*ag_gtk_context_menu_cb)(
+    void* user_data,
+    double x, double y,
+    const char* link_uri,
+    const char* selection_text,
+    int media_type, /* 0=None, 1=Image, 2=Video, 3=Audio */
+    const char* media_source_uri,
+    bool is_editable);
+
 struct ag_gtk_callbacks
 {
     ag_gtk_policy_request_cb on_policy_request;
@@ -79,6 +88,7 @@ struct ag_gtk_callbacks
     ag_gtk_download_cb on_download;
     ag_gtk_permission_cb on_permission;
     ag_gtk_scheme_request_cb on_scheme_request;
+    ag_gtk_context_menu_cb on_context_menu;
 };
 
 /* ========== Cookie operation callbacks ========== */
@@ -532,6 +542,55 @@ static gboolean on_permission_request(WebKitWebView* web_view, WebKitPermissionR
     return FALSE; /* Let WebKitGTK handle default behavior */
 }
 
+/* ========== Context menu signal handler ========== */
+
+static gboolean on_context_menu(WebKitWebView* web_view, WebKitContextMenu* context_menu,
+                                GdkEvent* event, WebKitHitTestResult* hit_test_result,
+                                gpointer user_data)
+{
+    shim_state* s = (shim_state*)user_data;
+    if (atomic_load(&s->detached)) return FALSE;
+    if (s->callbacks.on_context_menu == NULL) return FALSE;
+
+    double x = 0, y = 0;
+    if (event != NULL && event->type == GDK_BUTTON_PRESS)
+    {
+        x = ((GdkEventButton*)event)->x;
+        y = ((GdkEventButton*)event)->y;
+    }
+
+    const char* link_uri = NULL;
+    const char* media_uri = NULL;
+    bool is_editable = false;
+    int media_type = 0;
+
+    if (hit_test_result != NULL)
+    {
+        if (webkit_hit_test_result_context_is_link(hit_test_result))
+            link_uri = webkit_hit_test_result_get_link_uri(hit_test_result);
+
+        is_editable = webkit_hit_test_result_context_is_editable(hit_test_result);
+
+        if (webkit_hit_test_result_context_is_image(hit_test_result))
+        {
+            media_type = 1;
+            media_uri = webkit_hit_test_result_get_image_uri(hit_test_result);
+        }
+        else if (webkit_hit_test_result_context_is_media(hit_test_result))
+        {
+            media_type = 2; /* Video — WebKitGTK doesn't distinguish video/audio */
+            media_uri = webkit_hit_test_result_get_media_uri(hit_test_result);
+        }
+    }
+
+    /* Selection text requires evaluating JS; WebKitGTK doesn't expose it via hit-test.
+       Pass NULL and let the managed side handle it if needed. */
+    bool handled = s->callbacks.on_context_menu(
+        s->user_data, x, y, link_uri, NULL, media_type, media_uri, is_editable);
+
+    return handled ? TRUE : FALSE;
+}
+
 /* ========== Attach helper ========== */
 
 typedef struct
@@ -618,6 +677,12 @@ static void do_attach(void* data)
 
     /* Permission signal */
     g_signal_connect(s->web_view, "permission-request", G_CALLBACK(on_permission_request), s);
+
+    /* Context menu signal */
+    if (s->callbacks.on_context_menu != NULL)
+    {
+        g_signal_connect(s->web_view, "context-menu", G_CALLBACK(on_context_menu), s);
+    }
 
     /* Add WebView to the plug */
     gtk_container_add(GTK_CONTAINER(s->plug), GTK_WIDGET(s->web_view));

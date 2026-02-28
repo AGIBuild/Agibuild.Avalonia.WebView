@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 
 namespace Agibuild.Fulora.Bridge.Generator;
@@ -18,6 +19,7 @@ internal static class ModelExtractor
 
         var serviceName = GetServiceName(attribute, interfaceSymbol);
         var methods = ExtractMethods(interfaceSymbol, serviceName);
+        var diagnostics = ValidateInterface(interfaceSymbol, methods);
 
         return new BridgeInterfaceModel
         {
@@ -29,7 +31,79 @@ internal static class ModelExtractor
             ServiceName = serviceName,
             Direction = direction,
             Methods = methods,
+            ValidationErrors = diagnostics,
         };
+    }
+
+    private static ImmutableArray<BridgeDiagnosticInfo> ValidateInterface(
+        INamedTypeSymbol interfaceSymbol,
+        ImmutableArray<BridgeMethodModel> methods)
+    {
+        var builder = ImmutableArray.CreateBuilder<BridgeDiagnosticInfo>();
+        var interfaceName = interfaceSymbol.Name;
+
+        if (interfaceSymbol.IsGenericType)
+        {
+            builder.Add(new BridgeDiagnosticInfo("AGBR006", interfaceName));
+        }
+
+        // Check for overloads with same visible parameter count (can't be disambiguated).
+        var overloadGroups = methods
+            .GroupBy(m => m.Name)
+            .Where(g => g.Count() > 1);
+
+        foreach (var group in overloadGroups)
+        {
+            var paramCountCollision = group
+                .GroupBy(m => m.VisibleParameterCount)
+                .Any(pc => pc.Count() > 1);
+
+            if (paramCountCollision)
+            {
+                builder.Add(new BridgeDiagnosticInfo("AGBR002", interfaceName, group.Key));
+            }
+        }
+
+        foreach (var member in interfaceSymbol.GetMembers())
+        {
+            if (member is not IMethodSymbol method || method.MethodKind != MethodKind.Ordinary)
+                continue;
+
+            if (method.IsGenericMethod)
+            {
+                builder.Add(new BridgeDiagnosticInfo("AGBR001", method.Name));
+            }
+
+            foreach (var param in method.Parameters)
+            {
+                if (param.RefKind is RefKind.Ref or RefKind.Out or RefKind.In)
+                {
+                    builder.Add(new BridgeDiagnosticInfo("AGBR003", method.Name, param.RefKind.ToString().ToLowerInvariant(), param.Name));
+                }
+
+                // CancellationToken is now supported — no diagnostic needed
+            }
+
+            // IAsyncEnumerable is now supported — no diagnostic needed
+        }
+
+        return builder.ToImmutable();
+    }
+
+    private static bool IsCancellationTokenType(ITypeSymbol type)
+    {
+        return type.Name == "CancellationToken" &&
+               type.ContainingNamespace?.ToDisplayString() == "System.Threading";
+    }
+
+    private static bool IsAsyncEnumerableType(ITypeSymbol type)
+    {
+        if (type is INamedTypeSymbol named && named.IsGenericType)
+        {
+            return named.OriginalDefinition.Name == "IAsyncEnumerable" &&
+                   named.OriginalDefinition.ContainingNamespace?.ToDisplayString() == "System.Collections.Generic";
+        }
+        return false;
     }
 
     private static string GetServiceName(AttributeData attribute, INamedTypeSymbol interfaceSymbol)
@@ -61,13 +135,21 @@ internal static class ModelExtractor
             var isAsync = IsTaskType(method.ReturnType);
             var hasReturnValue = false;
             string? innerReturnType = null;
+            var isAsyncEnumerable = IsAsyncEnumerableType(method.ReturnType);
+            string? asyncEnumerableInnerType = null;
 
-            if (isAsync && method.ReturnType is INamedTypeSymbol namedReturn && namedReturn.IsGenericType)
+            if (isAsyncEnumerable && method.ReturnType is INamedTypeSymbol asyncEnumReturn && asyncEnumReturn.IsGenericType)
+            {
+                asyncEnumerableInnerType = asyncEnumReturn.TypeArguments[0].ToDisplayString();
+                hasReturnValue = true;
+                innerReturnType = asyncEnumerableInnerType;
+            }
+            else if (isAsync && method.ReturnType is INamedTypeSymbol namedReturn && namedReturn.IsGenericType)
             {
                 hasReturnValue = true;
                 innerReturnType = namedReturn.TypeArguments[0].ToDisplayString();
             }
-            else if (!isAsync && !method.ReturnsVoid)
+            else if (!isAsync && !method.ReturnsVoid && !isAsyncEnumerable)
             {
                 hasReturnValue = true;
                 innerReturnType = method.ReturnType.ToDisplayString();
@@ -85,10 +167,48 @@ internal static class ModelExtractor
                 HasReturnValue = hasReturnValue,
                 InnerReturnTypeFullName = innerReturnType,
                 Parameters = parameters,
+                IsAsyncEnumerable = isAsyncEnumerable,
+                AsyncEnumerableInnerType = asyncEnumerableInnerType,
             });
         }
 
-        return builder.ToImmutable();
+        return AssignOverloadRpcNames(builder, serviceName);
+    }
+
+    private static ImmutableArray<BridgeMethodModel> AssignOverloadRpcNames(
+        ImmutableArray<BridgeMethodModel>.Builder methods,
+        string serviceName)
+    {
+        var groups = methods.GroupBy(m => m.CamelCaseName).ToList();
+        var hasOverloads = groups.Any(g => g.Count() > 1);
+        if (!hasOverloads)
+            return methods.ToImmutable();
+
+        var result = ImmutableArray.CreateBuilder<BridgeMethodModel>(methods.Count);
+        foreach (var group in groups)
+        {
+            var overloads = group.ToList();
+            if (overloads.Count == 1)
+            {
+                result.Add(overloads[0]);
+                continue;
+            }
+
+            var sorted = overloads.OrderBy(m => m.VisibleParameterCount).ToList();
+            var minCount = sorted[0].VisibleParameterCount;
+
+            for (int i = 0; i < sorted.Count; i++)
+            {
+                var m = sorted[i];
+                var rpcName = i == 0
+                    ? $"{serviceName}.{m.CamelCaseName}"
+                    : $"{serviceName}.{m.CamelCaseName}${m.VisibleParameterCount}";
+
+                result.Add(m with { RpcMethodName = rpcName, IsOverload = true });
+            }
+        }
+
+        return result.ToImmutable();
     }
 
     private static ImmutableArray<BridgeParameterModel> ExtractParameters(IMethodSymbol method)
@@ -107,6 +227,7 @@ internal static class ModelExtractor
                 DefaultValueLiteral = param.HasExplicitDefaultValue
                     ? GetDefaultValueLiteral(param)
                     : null,
+                IsCancellationToken = IsCancellationTokenType(param.Type),
             });
         }
 

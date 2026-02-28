@@ -7,7 +7,10 @@ using Agibuild.Fulora.Adapters.Abstractions;
 namespace Agibuild.Fulora.Adapters.Gtk;
 
 internal sealed class GtkWebViewAdapter : IWebViewAdapter, INativeWebViewHandleProvider, ICookieAdapter, IWebViewAdapterOptions,
-    ICustomSchemeAdapter, IDownloadAdapter, IPermissionAdapter, ICommandAdapter, IScreenshotAdapter, /* IPrintAdapter: GTK WebKitGTK lacks a direct PDF export API */
+    ICustomSchemeAdapter, IDownloadAdapter, IPermissionAdapter, ICommandAdapter, IScreenshotAdapter,
+    // PLATFORM LIMITATION: IPrintAdapter is not implemented. WebKitGTK lacks a PDF export API.
+    // webkit_web_view_get_snapshot returns a Cairo raster surface, not PDF.
+    // webkit_print_operation_run_dialog requires a display and cannot produce headless PDF output.
     IFindInPageAdapter, IZoomAdapter, IPreloadScriptAdapter, IContextMenuAdapter, IDevToolsAdapter
 {
     private static bool DiagnosticsEnabled
@@ -30,6 +33,7 @@ internal sealed class GtkWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
     private NativeMethods.DownloadCb? _downloadCb;
     private NativeMethods.PermissionCb? _permissionCb;
     private NativeMethods.SchemeRequestCb? _schemeRequestCb;
+    private NativeMethods.ContextMenuCb? _contextMenuCb;
 
     private byte[]? _schemeResponseData;
     private GCHandle _schemeResponsePin;
@@ -154,6 +158,18 @@ internal sealed class GtkWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
             };
         }
 
+        _contextMenuCb = (userData, x, y, linkUriUtf8, selectionTextUtf8, mediaType, mediaSourceUriUtf8, isEditable) =>
+        {
+            var self = NativeMethods.FromUserData(userData);
+            if (self is null) return false;
+            return self.OnContextMenuNative(x, y,
+                NativeMethods.PtrToStringNullable(linkUriUtf8),
+                NativeMethods.PtrToStringNullable(selectionTextUtf8),
+                mediaType,
+                NativeMethods.PtrToStringNullable(mediaSourceUriUtf8),
+                isEditable);
+        };
+
         _callbacks = new NativeMethods.AgGtkCallbacks
         {
             on_policy_request = Marshal.GetFunctionPointerForDelegate(_policyCb),
@@ -163,6 +179,7 @@ internal sealed class GtkWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
             on_download = Marshal.GetFunctionPointerForDelegate(_downloadCb),
             on_permission = Marshal.GetFunctionPointerForDelegate(_permissionCb),
             on_scheme_request = Marshal.GetFunctionPointerForDelegate(_schemeRequestCb),
+            on_context_menu = Marshal.GetFunctionPointerForDelegate(_contextMenuCb),
         };
 
         _native = NativeMethods.Create(ref _callbacks, GCHandle.ToIntPtr(_selfHandle));
@@ -1019,7 +1036,19 @@ internal sealed class GtkWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
             public IntPtr on_download;
             public IntPtr on_permission;
             public IntPtr on_scheme_request;
+            public IntPtr on_context_menu;
         }
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        [return: MarshalAs(UnmanagedType.I1)]
+        internal delegate bool ContextMenuCb(
+            IntPtr userData,
+            double x, double y,
+            IntPtr linkUriUtf8,
+            IntPtr selectionTextUtf8,
+            int mediaType,
+            IntPtr mediaSourceUriUtf8,
+            [MarshalAs(UnmanagedType.I1)] bool isEditable);
 
         // Cookie management
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -1283,12 +1312,36 @@ internal sealed class GtkWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
 
     // ==================== IContextMenuAdapter ====================
 
-    // WebKitGTK context-menu interception is not wired in this adapter yet.
-    // Keep no-op accessors to satisfy IContextMenuAdapter without triggering unused-event warnings.
-    public event EventHandler<ContextMenuRequestedEventArgs>? ContextMenuRequested
+    public event EventHandler<ContextMenuRequestedEventArgs>? ContextMenuRequested;
+
+    private bool OnContextMenuNative(double x, double y, string? linkUri, string? selectionText,
+        int mediaType, string? mediaSourceUri, bool isEditable)
     {
-        add { }
-        remove { }
+        var handler = ContextMenuRequested;
+        if (handler is null)
+            return false;
+
+        var ctxMediaType = mediaType switch
+        {
+            1 => ContextMenuMediaType.Image,
+            2 => ContextMenuMediaType.Video,
+            3 => ContextMenuMediaType.Audio,
+            _ => ContextMenuMediaType.None,
+        };
+
+        var args = new ContextMenuRequestedEventArgs
+        {
+            X = x,
+            Y = y,
+            LinkUri = string.IsNullOrEmpty(linkUri) ? null : new Uri(linkUri),
+            SelectionText = selectionText,
+            MediaType = ctxMediaType,
+            MediaSourceUri = string.IsNullOrEmpty(mediaSourceUri) ? null : new Uri(mediaSourceUri),
+            IsEditable = isEditable,
+        };
+
+        handler(this, args);
+        return args.Handled;
     }
 
     // ==================== IDevToolsAdapter ====================

@@ -101,3 +101,43 @@ Both `WebView` control and `WebDialog` SHALL expose the `Rpc` property.
 #### Scenario: Consumer uses RPC from WebView control
 - **WHEN** a consumer accesses `webView.Rpc`
 - **THEN** it returns the `IWebViewRpcService` instance
+
+### Requirement: RPC service SHALL handle $/cancelRequest notifications
+The RPC service SHALL process incoming `$/cancelRequest` notifications that have no `id` field. When received, it SHALL cancel the CancellationTokenSource associated with the specified request ID.
+
+#### Scenario: Cancel request cancels active handler
+- **WHEN** a JS→C# RPC call is in progress with request ID "req-1"
+- **AND** the RPC service receives `{"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":"req-1"}}`
+- **THEN** the CancellationTokenSource for "req-1" is cancelled
+
+#### Scenario: Cancel request for unknown ID is ignored
+- **WHEN** the RPC service receives `$/cancelRequest` for a request ID that is not active
+- **THEN** the notification is silently ignored
+
+### Requirement: RPC service SHALL support CancellationTokenSource registration
+The RPC service SHALL provide a mechanism for handlers to register a CancellationTokenSource against a request ID, and to clean up after the handler completes.
+
+#### Scenario: CTS registration and cleanup
+- **WHEN** a handler registers a CTS for request ID "req-1" and completes normally
+- **THEN** the CTS is removed from the active set and disposed
+
+### Requirement: RPC service SHALL handle $/enumerator/next requests
+The RPC service SHALL process `$/enumerator/next` requests that reference an active enumerator token. It SHALL advance the enumerator and return the next item(s) with a `finished` flag.
+
+#### Scenario: Next request returns item
+- **WHEN** an active enumerator has items remaining
+- **AND** `$/enumerator/next` is received with the enumerator token
+- **THEN** the response contains `{ values: [item], finished: false }`
+
+#### Scenario: Next request returns finished
+- **WHEN** the enumerator has no more items
+- **AND** `$/enumerator/next` is received
+- **THEN** the response contains `{ values: [], finished: true }`
+- **AND** the enumerator is disposed
+
+### Requirement: RPC service SHALL handle $/enumerator/abort notifications
+The RPC service SHALL process `$/enumerator/abort` notifications to dispose active enumerators early.
+
+#### Scenario: Abort disposes enumerator
+- **WHEN** `$/enumerator/abort` is received for an active token
+- **THEN** the enumerator is disposed and removed from active tracking

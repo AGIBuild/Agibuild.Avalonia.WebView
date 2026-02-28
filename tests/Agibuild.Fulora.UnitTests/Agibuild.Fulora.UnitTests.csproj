@@ -16,9 +16,7 @@
     <ProjectReference Include="..\..\src\Agibuild.Fulora.Runtime\Agibuild.Fulora.Runtime.csproj" />
     <ProjectReference Include="..\..\src\Agibuild.Fulora.DependencyInjection\Agibuild.Fulora.DependencyInjection.csproj" />
     <ProjectReference Include="..\Agibuild.Fulora.Testing\Agibuild.Fulora.Testing.csproj" />
-    <ProjectReference Include="..\..\src\Agibuild.Fulora.Bridge.Generator\Agibuild.Fulora.Bridge.Generator.csproj"
-                      OutputItemType="Analyzer"
-                      ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\..\src\Agibuild.Fulora.Bridge.Generator\Agibuild.Fulora.Bridge.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="true" />
   </ItemGroup>
 
   <ItemGroup>
@@ -26,6 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.12.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.2" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.2" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.2" />

@@ -1338,19 +1338,17 @@ internal sealed class MacOSWebViewAdapter : IWebViewAdapter, INativeWebViewHandl
     }
 
     // ==================== IDevToolsAdapter ====================
-    // WKWebView does not have a public API to programmatically open/close the Web Inspector.
-    // isInspectable is set at init time via ag_wk_set_enable_dev_tools.
-    // TODO: Expose _WKInspector private API or use NSMenu programmatic trigger in future.
+    // PLATFORM LIMITATION: WKWebView has no public API for programmatic Web Inspector control.
+    // OpenDevTools() and CloseDevTools() are permanent no-ops on macOS/iOS.
+    // When EnableDevTools is set, users can access the Web Inspector via right-click → Inspect Element.
+    // The private _WKInspector API is intentionally not used to avoid App Store rejection.
 
     public void OpenDevTools()
     {
-        // No public WKWebView API for this — no-op for now.
-        // Users can right-click → Inspect Element when isInspectable is enabled.
     }
 
     public void CloseDevTools()
     {
-        // No public WKWebView API — no-op.
     }
 
     public bool IsDevToolsOpen => false;

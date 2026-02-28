@@ -107,22 +107,45 @@ internal static class TypeScriptEmitter
 
         foreach (var method in model.Methods)
         {
-            var tsParams = string.Join(", ", method.Parameters.Select(p =>
-            {
-                var tsType = CSharpTypeToTypeScript(p.TypeFullName);
-                var optional = p.IsNullable || p.HasDefaultValue ? "?" : "";
-                return $"{p.CamelCaseName}{optional}: {tsType}";
-            }));
-
-            var tsReturn = method.HasReturnValue
-                ? $"Promise<{CSharpTypeToTypeScript(method.InnerReturnTypeFullName ?? "void")}>"
-                : "Promise<void>";
-
-            sb.AppendLine($"  {method.CamelCaseName}({tsParams}): {tsReturn};");
+            sb.AppendLine($"  {EmitTsMethodSignature(method)}");
         }
 
         sb.AppendLine("}");
         return sb.ToString();
+    }
+
+    private static string EmitTsMethodSignature(BridgeMethodModel method)
+    {
+        var regularParams = method.Parameters.Where(p => !p.IsCancellationToken).ToList();
+        var hasCancellation = method.HasCancellationToken;
+
+        var tsParamParts = regularParams.Select(p =>
+        {
+            var tsType = CSharpTypeToTypeScript(p.TypeFullName);
+            var optional = p.IsNullable || p.HasDefaultValue ? "?" : "";
+            return $"{p.CamelCaseName}{optional}: {tsType}";
+        }).ToList();
+
+        if (hasCancellation)
+        {
+            tsParamParts.Add("options?: { signal?: AbortSignal }");
+        }
+
+        var tsParams = string.Join(", ", tsParamParts);
+
+        string tsReturn;
+        if (method.IsAsyncEnumerable)
+        {
+            tsReturn = $"AsyncIterable<{CSharpTypeToTypeScript(method.AsyncEnumerableInnerType ?? "unknown")}>";
+        }
+        else
+        {
+            tsReturn = method.HasReturnValue
+                ? $"Promise<{CSharpTypeToTypeScript(method.InnerReturnTypeFullName ?? "void")}>"
+                : "Promise<void>";
+        }
+
+        return $"{method.CamelCaseName}({tsParams}): {tsReturn};";
     }
 
     internal static string CSharpTypeToTypeScript(string csharpType)
@@ -141,6 +164,13 @@ internal static class TypeScriptEmitter
         if (type is "System.DateTime" or "System.DateTimeOffset") return "string"; // ISO 8601
         if (type is "System.Guid") return "string";
         if (type is "byte[]" or "System.Byte[]") return "string"; // base64
+
+        // IAsyncEnumerable
+        if (type.StartsWith("System.Collections.Generic.IAsyncEnumerable<"))
+        {
+            var inner = ExtractGenericArg(type);
+            return $"AsyncIterable<{CSharpTypeToTypeScript(inner)}>";
+        }
 
         // Collections
         if (type.StartsWith("System.Collections.Generic.List<") || type.StartsWith("System.Collections.Generic.IList<")
@@ -174,8 +204,29 @@ internal static class TypeScriptEmitter
     private static List<string> ExtractGenericArgs(string type)
     {
         var inner = ExtractGenericArg(type);
-        // Simple split on comma (doesn't handle nested generics, but sufficient for V1)
-        return inner.Split(',').Select(s => s.Trim()).ToList();
+        var args = new List<string>();
+        int depth = 0;
+        int start = 0;
+
+        for (int i = 0; i < inner.Length; i++)
+        {
+            switch (inner[i])
+            {
+                case '<':
+                    depth++;
+                    break;
+                case '>':
+                    depth--;
+                    break;
+                case ',' when depth == 0:
+                    args.Add(inner.Substring(start, i - start).Trim());
+                    start = i + 1;
+                    break;
+            }
+        }
+
+        args.Add(inner.Substring(start).Trim());
+        return args;
     }
 
     private static string EscapeVerbatim(string s) => s.Replace("\"", "\"\"");

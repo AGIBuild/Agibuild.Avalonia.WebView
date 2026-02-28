@@ -37,6 +37,9 @@ public sealed class WebViewBridgeGenerator : IIncrementalGenerator
         // Emit BridgeRegistration for each [JsExport]
         context.RegisterSourceOutput(exports, static (spc, model) =>
         {
+            ReportDiagnostics(spc, model);
+            if (!model.IsValid) return;
+
             var source = BridgeHostEmitter.Emit(model);
             spc.AddSource($"{model.ServiceName}BridgeRegistration.g.cs", source);
         });
@@ -44,6 +47,9 @@ public sealed class WebViewBridgeGenerator : IIncrementalGenerator
         // Emit BridgeProxy for each [JsImport]
         context.RegisterSourceOutput(imports, static (spc, model) =>
         {
+            ReportDiagnostics(spc, model);
+            if (!model.IsValid) return;
+
             var source = BridgeProxyEmitter.Emit(model);
             spc.AddSource($"{model.ServiceName}BridgeProxy.g.cs", source);
         });
@@ -53,19 +59,20 @@ public sealed class WebViewBridgeGenerator : IIncrementalGenerator
         context.RegisterSourceOutput(allModels, static (spc, combined) =>
         {
             var (exportList, importList) = combined;
-            if (exportList.Length == 0 && importList.Length == 0) return;
 
-            // Use the first namespace we find, or global
-            var ns = exportList.Length > 0 ? exportList[0].Namespace
-                   : importList.Length > 0 ? importList[0].Namespace
+            var validExports = exportList.Where(m => m.IsValid).ToImmutableArray();
+            var validImports = importList.Where(m => m.IsValid).ToImmutableArray();
+
+            if (validExports.Length == 0 && validImports.Length == 0) return;
+
+            var ns = validExports.Length > 0 ? validExports[0].Namespace
+                   : validImports.Length > 0 ? validImports[0].Namespace
                    : "";
 
-            // Shared JSON options
             var jsonSource = JsonOptionsEmitter.Emit(ns);
             spc.AddSource("BridgeGeneratedJsonOptions.g.cs", jsonSource);
 
-            // TypeScript declarations as embedded string constants
-            var tsSource = TypeScriptEmitter.EmitDeclarations(exportList, importList);
+            var tsSource = TypeScriptEmitter.EmitDeclarations(validExports, validImports);
             spc.AddSource("BridgeTypeScriptDeclarations.g.cs", tsSource);
         });
     }
@@ -79,5 +86,31 @@ public sealed class WebViewBridgeGenerator : IIncrementalGenerator
         if (attribute is null) return null;
 
         return ModelExtractor.Extract(interfaceSymbol, attribute, direction);
+    }
+
+    private static void ReportDiagnostics(SourceProductionContext spc, BridgeInterfaceModel model)
+    {
+        if (model.IsValid) return;
+
+        foreach (var info in model.ValidationErrors)
+        {
+            var descriptor = info.DiagnosticId switch
+            {
+                "AGBR001" => BridgeDiagnostics.GenericMethodNotSupported,
+                "AGBR002" => BridgeDiagnostics.OverloadNotSupported,
+                "AGBR003" => BridgeDiagnostics.RefOutInNotSupported,
+                "AGBR004" => BridgeDiagnostics.CancellationTokenNotSupported,
+                "AGBR005" => BridgeDiagnostics.AsyncEnumerableNotSupported,
+                "AGBR006" => BridgeDiagnostics.OpenGenericInterfaceNotSupported,
+                _ => null,
+            };
+
+            if (descriptor is null) continue;
+
+            spc.ReportDiagnostic(Diagnostic.Create(
+                descriptor,
+                Location.None,
+                info.Arg0, info.Arg1, info.Arg2));
+        }
     }
 }
