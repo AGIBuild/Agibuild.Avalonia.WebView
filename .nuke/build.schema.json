@@ -24,6 +24,8 @@
     "ExecutableTarget": {
       "type": "string",
       "enum": [
+        "AdoptionReadinessGovernanceCi",
+        "AdoptionReadinessGovernanceCiPublish",
         "AutomationLaneReport",
         "BridgeDistributionGovernance",
         "Build",
@@ -34,6 +36,7 @@
         "ContractAutomation",
         "Coverage",
         "DependencyVulnerabilityGovernance",
+        "DistributionReadinessGovernance",
         "IntegrationTests",
         "NugetPackageTest",
         "OpenSpecStrictGovernance",

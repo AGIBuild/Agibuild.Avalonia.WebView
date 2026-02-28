@@ -317,6 +317,146 @@ public static class GovernanceAssertionHelper
         _ = ReadRequiredString(reason, "expected", invariantId, artifactPath);
         _ = ReadRequiredString(reason, "actual", invariantId, artifactPath);
     }
+
+    public static JsonElement RequireDistributionReadinessSummary(JsonElement root, string invariantId, string artifactPath)
+    {
+        var summary = RequireProperty(root, "distributionReadiness", invariantId, artifactPath);
+        if (summary.ValueKind != JsonValueKind.Object)
+        {
+            throw new GovernanceInvariantViolationException(
+                invariantId,
+                artifactPath,
+                "distributionReadiness object present",
+                $"distributionReadiness kind = {summary.ValueKind}");
+        }
+
+        if (!summary.TryGetProperty("state", out var stateNode) || stateNode.ValueKind != JsonValueKind.String || string.IsNullOrWhiteSpace(stateNode.GetString()))
+        {
+            throw new GovernanceInvariantViolationException(
+                invariantId,
+                artifactPath,
+                "distributionReadiness.state as non-empty string",
+                "missing or invalid");
+        }
+
+        return summary;
+    }
+
+    public static JsonElement RequireAdoptionReadinessSummary(JsonElement root, string invariantId, string artifactPath)
+    {
+        var summary = RequireProperty(root, "adoptionReadiness", invariantId, artifactPath);
+        if (summary.ValueKind != JsonValueKind.Object)
+        {
+            throw new GovernanceInvariantViolationException(
+                invariantId,
+                artifactPath,
+                "adoptionReadiness object present",
+                $"adoptionReadiness kind = {summary.ValueKind}");
+        }
+
+        if (!summary.TryGetProperty("state", out var stateNode) || stateNode.ValueKind != JsonValueKind.String || string.IsNullOrWhiteSpace(stateNode.GetString()))
+        {
+            throw new GovernanceInvariantViolationException(
+                invariantId,
+                artifactPath,
+                "adoptionReadiness.state as non-empty string",
+                "missing or invalid");
+        }
+
+        return summary;
+    }
+
+    public static JsonElement RequireReadinessFindingsArray(JsonElement root, string propertyName, string invariantId, string artifactPath)
+    {
+        var findings = RequireProperty(root, propertyName, invariantId, artifactPath);
+        if (findings.ValueKind != JsonValueKind.Array)
+        {
+            throw new GovernanceInvariantViolationException(
+                invariantId,
+                artifactPath,
+                $"{propertyName} as array",
+                $"{propertyName} kind = {findings.ValueKind}");
+        }
+
+        return findings;
+    }
+
+    public static void AssertDistributionReadinessFailure(JsonElement failure, string invariantId, string artifactPath)
+    {
+        static string ReadRequiredString(JsonElement node, string propertyName, string invariantIdValue, string artifactPathValue)
+        {
+            if (!node.TryGetProperty(propertyName, out var property) || property.ValueKind != JsonValueKind.String)
+            {
+                throw new GovernanceInvariantViolationException(
+                    invariantIdValue,
+                    artifactPathValue,
+                    $"property '{propertyName}' as non-empty string",
+                    "property missing or not string");
+            }
+
+            var value = property.GetString();
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                throw new GovernanceInvariantViolationException(
+                    invariantIdValue,
+                    artifactPathValue,
+                    $"property '{propertyName}' as non-empty string",
+                    "value empty");
+            }
+
+            return value!;
+        }
+
+        _ = ReadRequiredString(failure, "category", invariantId, artifactPath);
+        _ = ReadRequiredString(failure, "invariantId", invariantId, artifactPath);
+        _ = ReadRequiredString(failure, "sourceArtifact", invariantId, artifactPath);
+        _ = ReadRequiredString(failure, "expected", invariantId, artifactPath);
+        _ = ReadRequiredString(failure, "actual", invariantId, artifactPath);
+    }
+
+    public static void AssertAdoptionReadinessFinding(JsonElement finding, string invariantId, string artifactPath)
+    {
+        static string ReadRequiredString(JsonElement node, string propertyName, string invariantIdValue, string artifactPathValue)
+        {
+            if (!node.TryGetProperty(propertyName, out var property) || property.ValueKind != JsonValueKind.String)
+            {
+                throw new GovernanceInvariantViolationException(
+                    invariantIdValue,
+                    artifactPathValue,
+                    $"property '{propertyName}' as non-empty string",
+                    "property missing or not string");
+            }
+
+            var value = property.GetString();
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                throw new GovernanceInvariantViolationException(
+                    invariantIdValue,
+                    artifactPathValue,
+                    $"property '{propertyName}' as non-empty string",
+                    "value empty");
+            }
+
+            return value!;
+        }
+
+        var policyTier = ReadRequiredString(finding, "policyTier", invariantId, artifactPath);
+        if (!string.Equals(policyTier, "blocking", StringComparison.Ordinal)
+            && !string.Equals(policyTier, "advisory", StringComparison.Ordinal))
+        {
+            throw new GovernanceInvariantViolationException(
+                invariantId,
+                artifactPath,
+                "policyTier in {blocking, advisory}",
+                $"policyTier = {policyTier}");
+        }
+
+        _ = ReadRequiredString(finding, "category", invariantId, artifactPath);
+        _ = ReadRequiredString(finding, "invariantId", invariantId, artifactPath);
+        _ = ReadRequiredString(finding, "sourceArtifact", invariantId, artifactPath);
+        _ = ReadRequiredString(finding, "expected", invariantId, artifactPath);
+        _ = ReadRequiredString(finding, "actual", invariantId, artifactPath);
+    }
 }
 
 /// <summary>

@@ -1,7 +1,7 @@
 # release-orchestration-gate Specification
 
 ## Purpose
-TBD - created by archiving change phase7-release-orchestration-foundation. Update Purpose after archive.
+Define deterministic release-orchestration decision contracts that gate publication side effects on machine-checkable readiness evidence.
 ## Requirements
 ### Requirement: Release orchestration SHALL emit deterministic decision state
 The release orchestration workflow SHALL emit a machine-checkable decision state with values `ready` or `blocked` based on governed release inputs.
@@ -27,4 +27,26 @@ Release publish actions MUST execute only when release orchestration decision st
 #### Scenario: Publish is prevented when blocked
 - **WHEN** decision state is `blocked`
 - **THEN** publish targets are not executed and pipeline terminates with deterministic diagnostics
+
+### Requirement: Release orchestration SHALL evaluate distribution-readiness input
+Release orchestration gate MUST consume distribution-readiness governance output as a first-class decision input for publish readiness.
+
+#### Scenario: Ready decision requires passing distribution input
+- **WHEN** release orchestration evaluates publish readiness
+- **THEN** decision state can be `ready` only if distribution readiness input is passing
+
+#### Scenario: Distribution failure blocks publication
+- **WHEN** distribution readiness input is failing
+- **THEN** release orchestration decision is `blocked` with deterministic distribution reason entries
+
+### Requirement: Release orchestration SHALL apply deterministic policy to adoption-readiness findings
+Release orchestration gate MUST evaluate adoption-readiness findings using deterministic blocking/advisory policy mapping.
+
+#### Scenario: Blocking adoption finding blocks publication
+- **WHEN** adoption readiness includes at least one blocking finding
+- **THEN** release decision is `blocked` and publish side effects are prevented
+
+#### Scenario: Advisory-only adoption findings do not force block
+- **WHEN** adoption readiness contains advisory findings only and all blocking gates pass
+- **THEN** release decision may remain `ready` while advisory diagnostics are preserved in evidence
 

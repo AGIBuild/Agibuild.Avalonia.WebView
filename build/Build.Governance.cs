@@ -16,6 +16,11 @@ partial class BuildTask
     const string ReleaseOrchestrationDecisionInvariantId = "GOV-027";
     const string ReleaseOrchestrationBlockingReasonSchemaInvariantId = "GOV-028";
     const string StablePublishReadinessInvariantId = "GOV-029";
+    const string DistributionReadinessDecisionInvariantId = "GOV-030";
+    const string DistributionReadinessSchemaInvariantId = "GOV-031";
+    const string AdoptionReadinessSchemaInvariantId = "GOV-032";
+    const string AdoptionReadinessPolicyInvariantId = "GOV-033";
+    const string ReleaseEvidenceReadinessSectionsInvariantId = "GOV-034";
 
     private sealed record TransitionGateParityRule(string Group, string CiDependency, string CiPublishDependency);
 
@@ -34,6 +39,21 @@ partial class BuildTask
         string Expected,
         string Actual);
 
+    private sealed record DistributionReadinessFailure(
+        string Category,
+        string InvariantId,
+        string SourceArtifact,
+        string Expected,
+        string Actual);
+
+    private sealed record AdoptionReadinessFinding(
+        string PolicyTier,
+        string Category,
+        string InvariantId,
+        string SourceArtifact,
+        string Expected,
+        string Actual);
+
     static readonly TransitionGateParityRule[] CloseoutCriticalTransitionGateParityRules =
     [
         new("coverage", "Coverage", "Coverage"),
@@ -43,7 +63,8 @@ partial class BuildTask
         new("typescript-declaration-governance", "TypeScriptDeclarationGovernance", "TypeScriptDeclarationGovernance"),
         new("openspec-strict-governance", "OpenSpecStrictGovernance", "OpenSpecStrictGovernance"),
         new("release-closeout-snapshot", "ReleaseCloseoutSnapshot", "ReleaseCloseoutSnapshot"),
-        new("runtime-critical-path-governance", "RuntimeCriticalPathExecutionGovernanceCi", "RuntimeCriticalPathExecutionGovernanceCiPublish")
+        new("runtime-critical-path-governance", "RuntimeCriticalPathExecutionGovernanceCi", "RuntimeCriticalPathExecutionGovernanceCiPublish"),
+        new("adoption-readiness-governance", "AdoptionReadinessGovernanceCi", "AdoptionReadinessGovernanceCiPublish")
     ];
 
     Target DependencyVulnerabilityGovernance => _ => _
@@ -523,6 +544,404 @@ partial class BuildTask
                 Assert.Fail("Bridge distribution governance failed:\n" + string.Join('\n', failures));
         });
 
+    Target DistributionReadinessGovernance => _ => _
+        .Description("Evaluates deterministic package/distribution readiness before release orchestration.")
+        .DependsOn(ValidatePackage)
+        .Executes(() =>
+        {
+            TestResultsDirectory.CreateDirectory();
+
+            var failures = new List<DistributionReadinessFailure>();
+            void AddFailure(string category, string invariantId, string sourceArtifact, string expected, string actual)
+                => failures.Add(new DistributionReadinessFailure(category, invariantId, sourceArtifact, expected, actual));
+
+            var canonicalPackageIds = new[]
+            {
+                "Agibuild.Fulora",
+                "Agibuild.Fulora.Core",
+                "Agibuild.Fulora.Runtime",
+                "Agibuild.Fulora.Adapters.Abstractions",
+                "Agibuild.Fulora.Bridge.Generator",
+                "Agibuild.Fulora.Testing"
+            };
+
+            foreach (var packageId in canonicalPackageIds)
+            {
+                var hasPackage = PackageOutputDirectory
+                    .GlobFiles($"{packageId}.*.nupkg")
+                    .Any(path => !path.Name.EndsWith(".symbols.nupkg", StringComparison.OrdinalIgnoreCase));
+                if (!hasPackage)
+                {
+                    AddFailure(
+                        category: "package-metadata",
+                        invariantId: DistributionReadinessDecisionInvariantId,
+                        sourceArtifact: "artifacts/packages",
+                        expected: $"canonical package '{packageId}' exists",
+                        actual: "missing");
+                }
+            }
+
+            var changelogPath = RootDirectory / "CHANGELOG.md";
+            if (!File.Exists(changelogPath))
+            {
+                AddFailure(
+                    category: "evidence",
+                    invariantId: DistributionReadinessSchemaInvariantId,
+                    sourceArtifact: "CHANGELOG.md",
+                    expected: "changelog file exists",
+                    actual: "missing");
+            }
+            else
+            {
+                var changelog = File.ReadAllText(changelogPath);
+                if (!changelog.Contains("## [1.0.0]", StringComparison.Ordinal))
+                {
+                    AddFailure(
+                        category: "evidence",
+                        invariantId: DistributionReadinessSchemaInvariantId,
+                        sourceArtifact: "CHANGELOG.md",
+                        expected: "Keep-a-Changelog section for [1.0.0] present",
+                        actual: "section missing");
+                }
+            }
+
+            string? packedVersion = null;
+            try
+            {
+                packedVersion = ResolvePackedAgibuildVersion("Agibuild.Fulora");
+            }
+            catch (Exception ex)
+            {
+                AddFailure(
+                    category: "package-metadata",
+                    invariantId: DistributionReadinessDecisionInvariantId,
+                    sourceArtifact: "artifacts/packages",
+                    expected: "packed version resolved for Agibuild.Fulora",
+                    actual: ex.Message);
+            }
+
+            var isStableRelease = packedVersion is not null && !packedVersion.Contains('-', StringComparison.Ordinal);
+            if (isStableRelease)
+            {
+                var mainPackagePrefix = "Agibuild.Fulora.";
+                var mainPackage = PackageOutputDirectory
+                    .GlobFiles("Agibuild.Fulora.*.nupkg")
+                    .Where(path => !path.Name.EndsWith(".symbols.nupkg", StringComparison.OrdinalIgnoreCase))
+                    .FirstOrDefault(path =>
+                        path.Name.StartsWith(mainPackagePrefix, StringComparison.OrdinalIgnoreCase)
+                        && path.Name.Length > mainPackagePrefix.Length
+                        && char.IsDigit(path.Name[mainPackagePrefix.Length]));
+
+                if (mainPackage is null)
+                {
+                    AddFailure(
+                        category: "package-metadata",
+                        invariantId: StablePublishReadinessInvariantId,
+                        sourceArtifact: "artifacts/packages",
+                        expected: "stable main package nupkg exists",
+                        actual: "missing");
+                }
+                else
+                {
+                    using var archive = System.IO.Compression.ZipFile.OpenRead(mainPackage);
+                    var nuspecEntry = archive.Entries.FirstOrDefault(e =>
+                        e.FullName.EndsWith(".nuspec", StringComparison.OrdinalIgnoreCase));
+                    if (nuspecEntry is null)
+                    {
+                        AddFailure(
+                            category: "package-metadata",
+                            invariantId: StablePublishReadinessInvariantId,
+                            sourceArtifact: mainPackage.Name,
+                            expected: "nuspec exists in package",
+                            actual: "missing");
+                    }
+                    else
+                    {
+                        using var stream = nuspecEntry.Open();
+                        var nuspecDoc = System.Xml.Linq.XDocument.Load(stream);
+                        var ns = nuspecDoc.Root?.GetDefaultNamespace() ?? System.Xml.Linq.XNamespace.None;
+                        var metadata = nuspecDoc.Root?.Element(ns + "metadata");
+
+                        var id = metadata?.Element(ns + "id")?.Value;
+                        var description = metadata?.Element(ns + "description")?.Value;
+                        var licenseExpr = metadata?.Element(ns + "license")?.Value;
+                        var projectUrl = metadata?.Element(ns + "projectUrl")?.Value;
+
+                        if (string.IsNullOrWhiteSpace(id) || !id.StartsWith("Agibuild.Fulora", StringComparison.Ordinal))
+                        {
+                            AddFailure(
+                                category: "package-metadata",
+                                invariantId: StablePublishReadinessInvariantId,
+                                sourceArtifact: mainPackage.Name,
+                                expected: "stable package id uses canonical Agibuild.Fulora prefix",
+                                actual: id ?? "<null>");
+                        }
+
+                        if (string.IsNullOrWhiteSpace(licenseExpr))
+                        {
+                            AddFailure(
+                                category: "package-metadata",
+                                invariantId: StablePublishReadinessInvariantId,
+                                sourceArtifact: mainPackage.Name,
+                                expected: "stable package license expression present",
+                                actual: "missing");
+                        }
+
+                        if (string.IsNullOrWhiteSpace(projectUrl))
+                        {
+                            AddFailure(
+                                category: "package-metadata",
+                                invariantId: StablePublishReadinessInvariantId,
+                                sourceArtifact: mainPackage.Name,
+                                expected: "stable package projectUrl present",
+                                actual: "missing");
+                        }
+
+                        if (!string.IsNullOrWhiteSpace(description)
+                            && (description.Contains("preview", StringComparison.OrdinalIgnoreCase)
+                                || description.Contains("pre-release", StringComparison.OrdinalIgnoreCase)))
+                        {
+                            AddFailure(
+                                category: "package-metadata",
+                                invariantId: StablePublishReadinessInvariantId,
+                                sourceArtifact: mainPackage.Name,
+                                expected: "stable package description has no preview language",
+                                actual: description);
+                        }
+                    }
+                }
+            }
+
+            var state = failures.Count == 0 ? "pass" : "fail";
+            var evaluatedAtUtc = DateTime.UtcNow.ToString("o");
+            var reportPayload = new
+            {
+                schemaVersion = 1,
+                provenance = new
+                {
+                    laneContext = "CiPublish",
+                    producerTarget = "DistributionReadinessGovernance",
+                    timestamp = evaluatedAtUtc
+                },
+                summary = new
+                {
+                    state,
+                    isStableRelease,
+                    version = packedVersion ?? "unknown",
+                    failureCount = failures.Count
+                },
+                failures = failures.Select(f => new
+                {
+                    category = f.Category,
+                    invariantId = f.InvariantId,
+                    sourceArtifact = f.SourceArtifact,
+                    expected = f.Expected,
+                    actual = f.Actual
+                }).ToArray()
+            };
+
+            File.WriteAllText(
+                DistributionReadinessGovernanceReportFile,
+                JsonSerializer.Serialize(reportPayload, new JsonSerializerOptions { WriteIndented = true }));
+            Serilog.Log.Information("Distribution readiness governance report written to {Path}", DistributionReadinessGovernanceReportFile);
+
+            if (failures.Count > 0)
+            {
+                var lines = failures.Select(f =>
+                    $"- [{f.Category}] [{f.InvariantId}] {f.SourceArtifact}: expected {f.Expected}, actual {f.Actual}");
+                Assert.Fail("Distribution readiness governance failed:\n" + string.Join('\n', lines));
+            }
+        });
+
+    Target AdoptionReadinessGovernanceCi => _ => _
+        .Description("Evaluates adoption-readiness signals in Ci lane.")
+        .DependsOn(AutomationLaneReport, RuntimeCriticalPathExecutionGovernanceCi)
+        .Executes(() => EvaluateAdoptionReadiness(
+            laneContext: "Ci",
+            producerTarget: "AdoptionReadinessGovernanceCi",
+            expectedRuntimeLaneContext: "Ci"));
+
+    Target AdoptionReadinessGovernanceCiPublish => _ => _
+        .Description("Evaluates adoption-readiness signals in CiPublish lane.")
+        .DependsOn(AutomationLaneReport, RuntimeCriticalPathExecutionGovernanceCiPublish)
+        .Executes(() => EvaluateAdoptionReadiness(
+            laneContext: "CiPublish",
+            producerTarget: "AdoptionReadinessGovernanceCiPublish",
+            expectedRuntimeLaneContext: "CiPublish"));
+
+    void EvaluateAdoptionReadiness(string laneContext, string producerTarget, string expectedRuntimeLaneContext)
+    {
+        TestResultsDirectory.CreateDirectory();
+
+        var blockingFindings = new List<AdoptionReadinessFinding>();
+        var advisoryFindings = new List<AdoptionReadinessFinding>();
+
+        void AddBlocking(string category, string invariantId, string sourceArtifact, string expected, string actual) =>
+            blockingFindings.Add(new AdoptionReadinessFinding("blocking", category, invariantId, sourceArtifact, expected, actual));
+        void AddAdvisory(string category, string invariantId, string sourceArtifact, string expected, string actual) =>
+            advisoryFindings.Add(new AdoptionReadinessFinding("advisory", category, invariantId, sourceArtifact, expected, actual));
+
+        var readmePath = RootDirectory / "README.md";
+        if (!File.Exists(readmePath))
+        {
+            AddBlocking(
+                category: "adoption-docs",
+                invariantId: AdoptionReadinessSchemaInvariantId,
+                sourceArtifact: "README.md",
+                expected: "README exists",
+                actual: "missing");
+        }
+        else
+        {
+            var readme = File.ReadAllText(readmePath);
+            if (!readme.Contains("Roadmap Alignment", StringComparison.Ordinal))
+            {
+                AddBlocking(
+                    category: "adoption-docs",
+                    invariantId: AdoptionReadinessSchemaInvariantId,
+                    sourceArtifact: "README.md",
+                    expected: "Roadmap Alignment section present",
+                    actual: "section missing");
+            }
+
+            if (!readme.Contains("Phase 7", StringComparison.Ordinal))
+            {
+                AddAdvisory(
+                    category: "adoption-docs",
+                    invariantId: AdoptionReadinessPolicyInvariantId,
+                    sourceArtifact: "README.md",
+                    expected: "Phase 7 roadmap line is surfaced",
+                    actual: "phase marker missing");
+            }
+        }
+
+        var templateConfigPath = RootDirectory / "templates" / "agibuild-hybrid" / ".template.config" / "template.json";
+        var appShellPresetPath = RootDirectory / "templates" / "agibuild-hybrid" / "HybridApp.Desktop" / "MainWindow.AppShellPreset.cs";
+        if (!File.Exists(templateConfigPath))
+        {
+            AddBlocking(
+                category: "adoption-template",
+                invariantId: AdoptionReadinessSchemaInvariantId,
+                sourceArtifact: "templates/agibuild-hybrid/.template.config/template.json",
+                expected: "template configuration exists",
+                actual: "missing");
+        }
+        if (!File.Exists(appShellPresetPath))
+        {
+            AddBlocking(
+                category: "adoption-template",
+                invariantId: AdoptionReadinessSchemaInvariantId,
+                sourceArtifact: "templates/agibuild-hybrid/HybridApp.Desktop/MainWindow.AppShellPreset.cs",
+                expected: "app-shell preset implementation exists",
+                actual: "missing");
+        }
+
+        if (!File.Exists(AutomationLaneReportFile))
+        {
+            AddBlocking(
+                category: "adoption-runtime",
+                invariantId: AdoptionReadinessSchemaInvariantId,
+                sourceArtifact: "artifacts/test-results/automation-lane-report.json",
+                expected: "automation lane report exists",
+                actual: "missing");
+        }
+
+        if (!File.Exists(RuntimeCriticalPathGovernanceReportFile))
+        {
+            AddBlocking(
+                category: "adoption-runtime",
+                invariantId: AdoptionReadinessSchemaInvariantId,
+                sourceArtifact: "artifacts/test-results/runtime-critical-path-governance-report.json",
+                expected: "runtime critical-path governance report exists",
+                actual: "missing");
+        }
+        else
+        {
+            using var runtimeDoc = JsonDocument.Parse(File.ReadAllText(RuntimeCriticalPathGovernanceReportFile));
+            var root = runtimeDoc.RootElement;
+            var failureCount = root.TryGetProperty("failureCount", out var failureNode) && failureNode.ValueKind == JsonValueKind.Number
+                ? failureNode.GetInt32()
+                : -1;
+            if (failureCount > 0)
+            {
+                AddBlocking(
+                    category: "adoption-runtime",
+                    invariantId: AdoptionReadinessPolicyInvariantId,
+                    sourceArtifact: "artifacts/test-results/runtime-critical-path-governance-report.json",
+                    expected: "failureCount = 0",
+                    actual: $"failureCount = {failureCount}");
+            }
+
+            var runtimeLaneContext = root.TryGetProperty("provenance", out var provenanceNode)
+                                     && provenanceNode.TryGetProperty("laneContext", out var laneContextNode)
+                ? laneContextNode.GetString()
+                : null;
+            if (!string.Equals(runtimeLaneContext, expectedRuntimeLaneContext, StringComparison.Ordinal))
+            {
+                AddBlocking(
+                    category: "adoption-runtime",
+                    invariantId: AdoptionReadinessPolicyInvariantId,
+                    sourceArtifact: "artifacts/test-results/runtime-critical-path-governance-report.json",
+                    expected: $"provenance.laneContext = {expectedRuntimeLaneContext}",
+                    actual: $"provenance.laneContext = {runtimeLaneContext ?? "<null>"}");
+            }
+        }
+
+        var state = blockingFindings.Count > 0
+            ? "fail"
+            : advisoryFindings.Count > 0
+                ? "warn"
+                : "pass";
+        var evaluatedAtUtc = DateTime.UtcNow.ToString("o");
+
+        var reportPayload = new
+        {
+            schemaVersion = 1,
+            provenance = new
+            {
+                laneContext,
+                producerTarget,
+                timestamp = evaluatedAtUtc
+            },
+            summary = new
+            {
+                state,
+                blockingFindingCount = blockingFindings.Count,
+                advisoryFindingCount = advisoryFindings.Count
+            },
+            blockingFindings = blockingFindings.Select(f => new
+            {
+                policyTier = f.PolicyTier,
+                category = f.Category,
+                invariantId = f.InvariantId,
+                sourceArtifact = f.SourceArtifact,
+                expected = f.Expected,
+                actual = f.Actual
+            }).ToArray(),
+            advisoryFindings = advisoryFindings.Select(f => new
+            {
+                policyTier = f.PolicyTier,
+                category = f.Category,
+                invariantId = f.InvariantId,
+                sourceArtifact = f.SourceArtifact,
+                expected = f.Expected,
+                actual = f.Actual
+            }).ToArray()
+        };
+
+        File.WriteAllText(
+            AdoptionReadinessGovernanceReportFile,
+            JsonSerializer.Serialize(reportPayload, new JsonSerializerOptions { WriteIndented = true }));
+        Serilog.Log.Information("Adoption readiness governance report written to {Path}", AdoptionReadinessGovernanceReportFile);
+
+        if (blockingFindings.Count > 0)
+        {
+            var lines = blockingFindings.Select(f =>
+                $"- [{f.Category}] [{f.InvariantId}] {f.SourceArtifact}: expected {f.Expected}, actual {f.Actual}");
+            Assert.Fail("Adoption readiness governance failed:\n" + string.Join('\n', lines));
+        }
+    }
+
     static bool IsToolAvailable(string toolName)
     {
         try
@@ -934,6 +1353,8 @@ partial class BuildTask
             TypeScriptDeclarationGovernance,
             OpenSpecStrictGovernance,
             BridgeDistributionGovernance,
+            DistributionReadinessGovernance,
+            AdoptionReadinessGovernanceCiPublish,
             ValidatePackage)
         .Executes(() =>
         {
@@ -950,7 +1371,9 @@ partial class BuildTask
                 new { Category = "governance", InvariantId = ReleaseOrchestrationDecisionInvariantId, RelativePath = "artifacts/test-results/dependency-governance-report.json", FullPath = DependencyGovernanceReportFile.ToString() },
                 new { Category = "governance", InvariantId = ReleaseOrchestrationDecisionInvariantId, RelativePath = "artifacts/test-results/typescript-governance-report.json", FullPath = TypeScriptGovernanceReportFile.ToString() },
                 new { Category = "governance", InvariantId = ReleaseOrchestrationDecisionInvariantId, RelativePath = "artifacts/test-results/runtime-critical-path-governance-report.json", FullPath = RuntimeCriticalPathGovernanceReportFile.ToString() },
-                new { Category = "governance", InvariantId = ReleaseOrchestrationDecisionInvariantId, RelativePath = "artifacts/test-results/bridge-distribution-governance-report.json", FullPath = BridgeDistributionGovernanceReportFile.ToString() }
+                new { Category = "governance", InvariantId = ReleaseOrchestrationDecisionInvariantId, RelativePath = "artifacts/test-results/bridge-distribution-governance-report.json", FullPath = BridgeDistributionGovernanceReportFile.ToString() },
+                new { Category = "governance", InvariantId = DistributionReadinessSchemaInvariantId, RelativePath = "artifacts/test-results/distribution-readiness-governance-report.json", FullPath = DistributionReadinessGovernanceReportFile.ToString() },
+                new { Category = "governance", InvariantId = AdoptionReadinessSchemaInvariantId, RelativePath = "artifacts/test-results/adoption-readiness-governance-report.json", FullPath = AdoptionReadinessGovernanceReportFile.ToString() }
             };
 
             foreach (var artifact in requiredArtifacts)
@@ -1037,6 +1460,160 @@ partial class BuildTask
                 }
             }
 
+            var distributionSummaryObject = new JsonObject
+            {
+                ["state"] = "unknown",
+                ["isStableRelease"] = false,
+                ["version"] = "unknown",
+                ["failureCount"] = -1,
+                ["sourceArtifact"] = "artifacts/test-results/distribution-readiness-governance-report.json"
+            };
+            var distributionFailureArray = new JsonArray();
+            if (File.Exists(DistributionReadinessGovernanceReportFile))
+            {
+                var distributionNode = JsonNode.Parse(File.ReadAllText(DistributionReadinessGovernanceReportFile))?.AsObject()
+                    ?? new JsonObject();
+                var summaryNode = distributionNode["summary"] as JsonObject;
+                if (summaryNode is null)
+                {
+                    AddBlockingReason(
+                        category: "evidence",
+                        invariantId: DistributionReadinessSchemaInvariantId,
+                        sourceArtifact: "artifacts/test-results/distribution-readiness-governance-report.json",
+                        expected: "summary section present",
+                        actual: "summary section missing");
+                }
+                else
+                {
+                    var state = summaryNode["state"]?.GetValue<string>() ?? "unknown";
+                    var isStable = summaryNode["isStableRelease"]?.GetValue<bool>() ?? false;
+                    var version = summaryNode["version"]?.GetValue<string>() ?? "unknown";
+                    var failureCount = summaryNode["failureCount"]?.GetValue<int>() ?? -1;
+
+                    distributionSummaryObject["state"] = state;
+                    distributionSummaryObject["isStableRelease"] = isStable;
+                    distributionSummaryObject["version"] = version;
+                    distributionSummaryObject["failureCount"] = failureCount;
+
+                    if (!string.Equals(state, "pass", StringComparison.Ordinal))
+                    {
+                        AddBlockingReason(
+                            category: "governance",
+                            invariantId: DistributionReadinessDecisionInvariantId,
+                            sourceArtifact: "artifacts/test-results/distribution-readiness-governance-report.json",
+                            expected: "distribution summary state = pass",
+                            actual: $"distribution summary state = {state}");
+                    }
+                }
+
+                var failureNodes = distributionNode["failures"] as JsonArray;
+                if (failureNodes is not null)
+                {
+                    foreach (var node in failureNodes.OfType<JsonObject>())
+                    {
+                        var category = node["category"]?.GetValue<string>() ?? "package-metadata";
+                        var invariantId = node["invariantId"]?.GetValue<string>() ?? DistributionReadinessDecisionInvariantId;
+                        var sourceArtifact = node["sourceArtifact"]?.GetValue<string>() ?? "artifacts/packages";
+                        var expected = node["expected"]?.GetValue<string>() ?? "distribution policy satisfied";
+                        var actual = node["actual"]?.GetValue<string>() ?? "violation";
+
+                        distributionFailureArray.Add(new JsonObject
+                        {
+                            ["category"] = category,
+                            ["invariantId"] = invariantId,
+                            ["sourceArtifact"] = sourceArtifact,
+                            ["expected"] = expected,
+                            ["actual"] = actual
+                        });
+
+                        AddBlockingReason(
+                            category: category,
+                            invariantId: invariantId,
+                            sourceArtifact: sourceArtifact,
+                            expected: expected,
+                            actual: actual);
+                    }
+                }
+            }
+
+            var adoptionSummaryObject = new JsonObject
+            {
+                ["state"] = "unknown",
+                ["blockingFindingCount"] = -1,
+                ["advisoryFindingCount"] = -1,
+                ["sourceArtifact"] = "artifacts/test-results/adoption-readiness-governance-report.json"
+            };
+            var adoptionBlockingArray = new JsonArray();
+            var adoptionAdvisoryArray = new JsonArray();
+            if (File.Exists(AdoptionReadinessGovernanceReportFile))
+            {
+                var adoptionNode = JsonNode.Parse(File.ReadAllText(AdoptionReadinessGovernanceReportFile))?.AsObject()
+                    ?? new JsonObject();
+                var summaryNode = adoptionNode["summary"] as JsonObject;
+                if (summaryNode is null)
+                {
+                    AddBlockingReason(
+                        category: "evidence",
+                        invariantId: AdoptionReadinessSchemaInvariantId,
+                        sourceArtifact: "artifacts/test-results/adoption-readiness-governance-report.json",
+                        expected: "summary section present",
+                        actual: "summary section missing");
+                }
+                else
+                {
+                    adoptionSummaryObject["state"] = summaryNode["state"]?.GetValue<string>() ?? "unknown";
+                    adoptionSummaryObject["blockingFindingCount"] = summaryNode["blockingFindingCount"]?.GetValue<int>() ?? -1;
+                    adoptionSummaryObject["advisoryFindingCount"] = summaryNode["advisoryFindingCount"]?.GetValue<int>() ?? -1;
+                }
+
+                var blockingNodes = adoptionNode["blockingFindings"] as JsonArray;
+                if (blockingNodes is not null)
+                {
+                    foreach (var node in blockingNodes.OfType<JsonObject>())
+                    {
+                        var category = node["category"]?.GetValue<string>() ?? "governance";
+                        var invariantId = node["invariantId"]?.GetValue<string>() ?? AdoptionReadinessPolicyInvariantId;
+                        var sourceArtifact = node["sourceArtifact"]?.GetValue<string>() ?? "artifacts/test-results/adoption-readiness-governance-report.json";
+                        var expected = node["expected"]?.GetValue<string>() ?? "blocking adoption findings absent";
+                        var actual = node["actual"]?.GetValue<string>() ?? "blocking finding present";
+
+                        adoptionBlockingArray.Add(new JsonObject
+                        {
+                            ["policyTier"] = node["policyTier"]?.GetValue<string>() ?? "blocking",
+                            ["category"] = category,
+                            ["invariantId"] = invariantId,
+                            ["sourceArtifact"] = sourceArtifact,
+                            ["expected"] = expected,
+                            ["actual"] = actual
+                        });
+
+                        AddBlockingReason(
+                            category: "governance",
+                            invariantId: invariantId,
+                            sourceArtifact: sourceArtifact,
+                            expected: expected,
+                            actual: actual);
+                    }
+                }
+
+                var advisoryNodes = adoptionNode["advisoryFindings"] as JsonArray;
+                if (advisoryNodes is not null)
+                {
+                    foreach (var node in advisoryNodes.OfType<JsonObject>())
+                    {
+                        adoptionAdvisoryArray.Add(new JsonObject
+                        {
+                            ["policyTier"] = node["policyTier"]?.GetValue<string>() ?? "advisory",
+                            ["category"] = node["category"]?.GetValue<string>() ?? "governance",
+                            ["invariantId"] = node["invariantId"]?.GetValue<string>() ?? AdoptionReadinessPolicyInvariantId,
+                            ["sourceArtifact"] = node["sourceArtifact"]?.GetValue<string>() ?? "artifacts/test-results/adoption-readiness-governance-report.json",
+                            ["expected"] = node["expected"]?.GetValue<string>() ?? "advisory finding absent",
+                            ["actual"] = node["actual"]?.GetValue<string>() ?? "advisory finding present"
+                        });
+                    }
+                }
+            }
+
             var mainPackagePattern = "Agibuild.Fulora.*.nupkg";
             var hasCanonicalMainPackage = PackageOutputDirectory.GlobFiles(mainPackagePattern)
                 .Any(path => !path.Name.EndsWith(".symbols.nupkg", StringComparison.OrdinalIgnoreCase));
@@ -1094,6 +1671,11 @@ partial class BuildTask
             {
                 var snapshotNode = JsonNode.Parse(File.ReadAllText(CloseoutSnapshotFile))?.AsObject()
                     ?? new JsonObject();
+                snapshotNode["distributionReadiness"] = distributionSummaryObject;
+                snapshotNode["distributionReadinessFailures"] = distributionFailureArray;
+                snapshotNode["adoptionReadiness"] = adoptionSummaryObject;
+                snapshotNode["adoptionBlockingFindings"] = adoptionBlockingArray;
+                snapshotNode["adoptionAdvisoryFindings"] = adoptionAdvisoryArray;
                 snapshotNode["releaseDecision"] = decisionObject;
                 snapshotNode["releaseBlockingReasons"] = blockingReasonArray;
 
@@ -1118,6 +1700,19 @@ partial class BuildTask
                     isStableRelease,
                     version = packedVersion ?? "unknown",
                     blockingReasonCount = blockingReasons.Count
+                },
+                distributionReadiness = new
+                {
+                    state = distributionSummaryObject["state"]?.GetValue<string>() ?? "unknown",
+                    isStableRelease = distributionSummaryObject["isStableRelease"]?.GetValue<bool>() ?? false,
+                    version = distributionSummaryObject["version"]?.GetValue<string>() ?? "unknown",
+                    failureCount = distributionSummaryObject["failureCount"]?.GetValue<int>() ?? -1
+                },
+                adoptionReadiness = new
+                {
+                    state = adoptionSummaryObject["state"]?.GetValue<string>() ?? "unknown",
+                    blockingFindingCount = adoptionSummaryObject["blockingFindingCount"]?.GetValue<int>() ?? -1,
+                    advisoryFindingCount = adoptionSummaryObject["advisoryFindingCount"]?.GetValue<int>() ?? -1
                 },
                 blockingReasons = blockingReasons.Select(reason => new
                 {

@@ -83,3 +83,31 @@ When release decision summary state is `blocked`, the evidence payload MUST incl
 - **WHEN** consumers parse blocked release evidence
 - **THEN** they can deterministically identify blocking categories and sources without free-text parsing
 
+### Requirement: CI evidence v2 SHALL include distribution-readiness summary
+CI evidence contract v2 MUST include a structured distribution-readiness summary section containing deterministic status, lane context, and report linkage.
+
+#### Scenario: Distribution summary is present in evidence payload
+- **WHEN** release evidence v2 is generated for `CiPublish`
+- **THEN** payload contains non-empty distribution readiness section with deterministic state and source artifact reference
+
+### Requirement: CI evidence v2 SHALL expose distribution failure entries as structured data
+When distribution readiness fails, evidence payload MUST expose structured failure entries with stable categories and expected-vs-actual details.
+
+#### Scenario: Distribution failure entries are machine-auditable
+- **WHEN** distribution readiness state is failed
+- **THEN** evidence payload includes structured failure entries that do not require free-text parsing
+
+### Requirement: CI evidence v2 SHALL include adoption-readiness summary
+CI evidence contract v2 MUST include structured adoption-readiness summary fields with deterministic state, blocking/advisory counts, and source report linkage.
+
+#### Scenario: Adoption summary is present in release evidence
+- **WHEN** `CiPublish` emits release evidence v2
+- **THEN** payload includes non-empty adoption readiness summary with deterministic status fields
+
+### Requirement: CI evidence v2 SHALL include adoption finding entries when non-passing
+When adoption readiness includes non-passing signals, evidence payload MUST include structured finding entries with policy tier and expected-vs-actual details.
+
+#### Scenario: Adoption finding entries are machine-readable
+- **WHEN** adoption readiness contains blocking or advisory findings
+- **THEN** evidence payload includes structured entries that can be parsed without free-text interpretation
+

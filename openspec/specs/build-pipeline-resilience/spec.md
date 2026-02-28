@@ -207,3 +207,31 @@ Release orchestration blocking failures MUST be classified into deterministic ca
 - **WHEN** release orchestration blocks publication
 - **THEN** diagnostics include a stable category and actionable source mapping
 
+### Requirement: CiPublish SHALL emit distribution-readiness governance artifact
+`CiPublish` MUST produce a deterministic distribution-readiness governance artifact before release orchestration final decision evaluation.
+
+#### Scenario: Distribution artifact is produced before decision
+- **WHEN** `CiPublish` executes governed release targets
+- **THEN** distribution-readiness artifact is generated and available to release orchestration consumption
+
+### Requirement: Distribution governance failures SHALL be deterministic and category-classified
+Distribution governance failures MUST be emitted with stable failure categories and expected-vs-actual diagnostics so release triage remains machine-driven.
+
+#### Scenario: Distribution fault includes stable category and diagnostics
+- **WHEN** distribution governance detects missing package or metadata policy violation
+- **THEN** emitted diagnostics contain stable category, source artifact mapping, and expected-vs-actual fields
+
+### Requirement: CI pipelines SHALL emit adoption-readiness governance report
+Governed CI lanes MUST emit an adoption-readiness governance report artifact with deterministic schema and lane provenance metadata.
+
+#### Scenario: Adoption-readiness report is emitted in CI
+- **WHEN** governed CI lane completes adoption-readiness evaluation
+- **THEN** machine-readable adoption report artifact is produced with deterministic provenance fields
+
+### Requirement: Adoption-readiness report production SHALL remain lane-consistent
+`Ci` and `CiPublish` lane orchestration MUST keep adoption-readiness producer/consumer wiring deterministic and auditable.
+
+#### Scenario: Lane wiring for adoption report is consistent
+- **WHEN** governance inspects lane dependency graph and produced artifacts
+- **THEN** adoption-readiness report linkage remains deterministic across lanes
+

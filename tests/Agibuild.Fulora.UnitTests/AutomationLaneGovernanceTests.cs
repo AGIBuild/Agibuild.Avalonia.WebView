@@ -115,7 +115,9 @@ public sealed class AutomationLaneGovernanceTests
         {
             "Target ContractAutomation", "Target RuntimeAutomation", "Target AutomationLaneReport",
             "Target WarningGovernance", "Target WarningGovernanceSyntheticCheck",
-            "Target ReleaseCloseoutSnapshot", "Target ReleaseOrchestrationGovernance"
+            "Target ReleaseCloseoutSnapshot", "Target DistributionReadinessGovernance",
+            "Target AdoptionReadinessGovernanceCi", "Target AdoptionReadinessGovernanceCiPublish",
+            "Target ReleaseOrchestrationGovernance"
         };
         foreach (var target in requiredTargets)
             AssertSourceContains(combinedSource, target, BuildPipelineTargetGraph, "build/Build*.cs");
@@ -124,7 +126,8 @@ public sealed class AutomationLaneGovernanceTests
         {
             "automation-lane-report.json", "warning-governance-report.json",
             "warning-governance.baseline.json", "nuget-smoke-retry-telemetry.json",
-            "closeout-snapshot.json", "release-orchestration-decision-report.json"
+            "closeout-snapshot.json", "distribution-readiness-governance-report.json",
+            "adoption-readiness-governance-report.json", "release-orchestration-decision-report.json"
         };
         foreach (var artifact in requiredArtifacts)
             AssertSourceContains(combinedSource, artifact, BuildPipelineTargetGraph, "build/Build*.cs");
@@ -551,7 +554,9 @@ public sealed class AutomationLaneGovernanceTests
         {
             "Target OpenSpecStrictGovernance", "Target DependencyVulnerabilityGovernance",
             "Target TypeScriptDeclarationGovernance", "Target ReleaseCloseoutSnapshot",
-            "Target ContinuousTransitionGateGovernance", "Target ReleaseOrchestrationGovernance"
+            "Target ContinuousTransitionGateGovernance", "Target DistributionReadinessGovernance",
+            "Target AdoptionReadinessGovernanceCi", "Target AdoptionReadinessGovernanceCiPublish",
+            "Target ReleaseOrchestrationGovernance"
         };
         foreach (var target in requiredTargets)
             AssertSourceContains(combinedSource, target, CiTargetOpenSpecGate, "build/Build*.cs");
@@ -567,7 +572,8 @@ public sealed class AutomationLaneGovernanceTests
         {
             "OpenSpecStrictGovernance", "DependencyVulnerabilityGovernance",
             "TypeScriptDeclarationGovernance", "ReleaseCloseoutSnapshot",
-            "RuntimeCriticalPathExecutionGovernanceCi", "ContinuousTransitionGateGovernance"
+            "RuntimeCriticalPathExecutionGovernanceCi", "ContinuousTransitionGateGovernance",
+            "AdoptionReadinessGovernanceCi"
         };
         foreach (var dep in ciDependencies)
         {
@@ -581,6 +587,7 @@ public sealed class AutomationLaneGovernanceTests
             "OpenSpecStrictGovernance", "DependencyVulnerabilityGovernance",
             "TypeScriptDeclarationGovernance", "ReleaseCloseoutSnapshot",
             "RuntimeCriticalPathExecutionGovernanceCiPublish", "ContinuousTransitionGateGovernance",
+            "DistributionReadinessGovernance", "AdoptionReadinessGovernanceCiPublish",
             "ReleaseOrchestrationGovernance"
         };
         foreach (var dep in ciPublishDependencies)
@@ -609,6 +616,7 @@ public sealed class AutomationLaneGovernanceTests
             ("openspec-strict-governance", "OpenSpecStrictGovernance", "OpenSpecStrictGovernance"),
             ("release-closeout-snapshot", "ReleaseCloseoutSnapshot", "ReleaseCloseoutSnapshot"),
             ("runtime-critical-path-governance", "RuntimeCriticalPathExecutionGovernanceCi", "RuntimeCriticalPathExecutionGovernanceCiPublish"),
+            ("adoption-readiness-governance", "AdoptionReadinessGovernanceCi", "AdoptionReadinessGovernanceCiPublish"),
             ("continuous-transition-gate", "ContinuousTransitionGateGovernance", "ContinuousTransitionGateGovernance")
         };
 
@@ -883,7 +891,11 @@ public sealed class AutomationLaneGovernanceTests
         AssertSourceContains(combinedSource, "activePhase", EvidenceContractV2Schema, "build/Build.Governance.cs");
         AssertSourceContains(combinedSource, "TransitionLaneProvenanceInvariantId", EvidenceContractV2Schema, "build/Build.Governance.cs");
         AssertSourceContains(combinedSource, "closeoutArchives", EvidenceContractV2Schema, "build/Build.Governance.cs");
+        AssertSourceContains(combinedSource, "distributionReadiness", EvidenceContractV2Schema, "build/Build.Governance.cs");
+        AssertSourceContains(combinedSource, "adoptionReadiness", EvidenceContractV2Schema, "build/Build.Governance.cs");
         AssertSourceContains(combinedSource, "closeout-snapshot.json", EvidenceContractV2Schema, "build/Build.cs");
+        AssertSourceContains(combinedSource, "distribution-readiness-governance-report.json", EvidenceContractV2Schema, "build/Build.cs");
+        AssertSourceContains(combinedSource, "adoption-readiness-governance-report.json", EvidenceContractV2Schema, "build/Build.cs");
         AssertSourceContains(combinedSource, "release-orchestration-decision-report.json", EvidenceContractV2Schema, "build/Build.cs");
     }
 
@@ -996,10 +1008,108 @@ public sealed class AutomationLaneGovernanceTests
         AssertSourceContains(governanceSource, "decisionState = blockingReasons.Count == 0 ? \"ready\" : \"blocked\"", StablePublishReadiness, "build/Build.Governance.cs");
         AssertSourceContains(governanceSource, "if (string.Equals(decisionState, \"blocked\", StringComparison.Ordinal))", StablePublishReadiness, "build/Build.Governance.cs");
         AssertSourceContains(governanceSource, "Release orchestration governance blocked publication", StablePublishReadiness, "build/Build.Governance.cs");
+        AssertSourceContains(governanceSource, "DistributionReadinessGovernanceReportFile", StablePublishReadiness, "build/Build.Governance.cs");
+        AssertSourceContains(governanceSource, "AdoptionReadinessGovernanceReportFile", StablePublishReadiness, "build/Build.Governance.cs");
 
         Assert.Matches(
             new Regex(@"Target\s+CiPublish\s*=>[\s\S]*?\.DependsOn\([\s\S]*ReleaseOrchestrationGovernance[\s\S]*Publish[\s\S]*\);", RegexOptions.Multiline),
             mainSource);
+    }
+
+    [Fact]
+    public void Ci_evidence_v2_includes_distribution_and_adoption_readiness_sections()
+    {
+        const string artifactPath = "artifacts/test-results/closeout-snapshot.json";
+        using var doc = JsonDocument.Parse(
+            """
+            {
+              "schemaVersion": 2,
+              "distributionReadiness": {
+                "state": "pass",
+                "isStableRelease": false,
+                "version": "0.1.0-preview.1",
+                "failureCount": 0
+              },
+              "distributionReadinessFailures": [],
+              "adoptionReadiness": {
+                "state": "warn",
+                "blockingFindingCount": 0,
+                "advisoryFindingCount": 1
+              },
+              "adoptionBlockingFindings": [],
+              "adoptionAdvisoryFindings": [
+                {
+                  "policyTier": "advisory",
+                  "category": "adoption-docs",
+                  "invariantId": "GOV-033",
+                  "sourceArtifact": "README.md",
+                  "expected": "phase marker present",
+                  "actual": "phase marker missing"
+                }
+              ]
+            }
+            """);
+
+        var distribution = RequireDistributionReadinessSummary(doc.RootElement, ReleaseEvidenceReadinessSections, artifactPath);
+        Assert.Equal("pass", distribution.GetProperty("state").GetString());
+
+        var adoption = RequireAdoptionReadinessSummary(doc.RootElement, ReleaseEvidenceReadinessSections, artifactPath);
+        Assert.Equal("warn", adoption.GetProperty("state").GetString());
+
+        var distributionFailures = RequireReadinessFindingsArray(doc.RootElement, "distributionReadinessFailures", DistributionReadinessSchema, artifactPath);
+        Assert.Empty(distributionFailures.EnumerateArray());
+
+        var adoptionAdvisories = RequireReadinessFindingsArray(doc.RootElement, "adoptionAdvisoryFindings", AdoptionReadinessSchema, artifactPath);
+        var advisory = adoptionAdvisories.EnumerateArray().First();
+        AssertAdoptionReadinessFinding(advisory, AdoptionReadinessSchema, artifactPath);
+    }
+
+    [Fact]
+    public void Adoption_readiness_policy_tier_is_structured_and_deterministic()
+    {
+        const string artifactPath = "artifacts/test-results/adoption-readiness-governance-report.json";
+        using var validDoc = JsonDocument.Parse(
+            """
+            {
+              "summary": {
+                "state": "fail"
+              },
+              "blockingFindings": [
+                {
+                  "policyTier": "blocking",
+                  "category": "adoption-runtime",
+                  "invariantId": "GOV-033",
+                  "sourceArtifact": "artifacts/test-results/runtime-critical-path-governance-report.json",
+                  "expected": "failureCount = 0",
+                  "actual": "failureCount = 1"
+                }
+              ],
+              "advisoryFindings": []
+            }
+            """);
+
+        var blockingFindings = RequireReadinessFindingsArray(validDoc.RootElement, "blockingFindings", AdoptionReadinessPolicy, artifactPath);
+        Assert.Single(blockingFindings.EnumerateArray());
+        AssertAdoptionReadinessFinding(blockingFindings.EnumerateArray().First(), AdoptionReadinessPolicy, artifactPath);
+
+        using var invalidDoc = JsonDocument.Parse(
+            """
+            {
+              "blockingFindings": [
+                {
+                  "policyTier": "optional",
+                  "category": "adoption-runtime",
+                  "invariantId": "GOV-033",
+                  "sourceArtifact": "artifacts/test-results/runtime-critical-path-governance-report.json",
+                  "expected": "failureCount = 0",
+                  "actual": "failureCount = 1"
+                }
+              ]
+            }
+            """);
+        var invalidFindings = RequireReadinessFindingsArray(invalidDoc.RootElement, "blockingFindings", AdoptionReadinessPolicy, artifactPath);
+        Assert.Throws<GovernanceInvariantViolationException>(() =>
+            AssertAdoptionReadinessFinding(invalidFindings.EnumerateArray().First(), AdoptionReadinessPolicy, artifactPath));
     }
 
     private static string ReadCombinedBuildSource(string repoRoot)

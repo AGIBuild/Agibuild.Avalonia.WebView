@@ -1,7 +1,7 @@
 # roadmap-phase-transition-management Specification
 
 ## Purpose
-TBD - created by archiving change phase6-closeout-phase7-bootstrap. Update Purpose after archive.
+Define machine-checkable roadmap phase transition and closeout evidence mapping contracts for deterministic governance rollover.
 ## Requirements
 ### Requirement: Roadmap phase rollover SHALL remain machine-checkable and deterministic
 The roadmap SHALL publish one completed phase id and one active phase id in stable machine-checkable marker format, and phase rollover updates MUST move both markers together as one atomic baseline transition.

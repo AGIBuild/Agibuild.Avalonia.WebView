@@ -35,4 +35,9 @@ public static class GovernanceInvariantIds
     public const string ReleaseOrchestrationDecisionGate = "GOV-027";
     public const string ReleaseOrchestrationReasonSchema = "GOV-028";
     public const string StablePublishReadiness = "GOV-029";
+    public const string DistributionReadinessGate = "GOV-030";
+    public const string DistributionReadinessSchema = "GOV-031";
+    public const string AdoptionReadinessSchema = "GOV-032";
+    public const string AdoptionReadinessPolicy = "GOV-033";
+    public const string ReleaseEvidenceReadinessSections = "GOV-034";
 }
