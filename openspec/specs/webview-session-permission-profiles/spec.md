@@ -1,7 +1,7 @@
 # webview-session-permission-profiles Specification
 
 ## Purpose
-TBD - created by archiving change phase4-session-permission-profiles. Update Purpose after archive.
+Define explicit session-permission profile contracts that keep multi-window permission governance deterministic, auditable, and testable.
 ## Requirements
 ### Requirement: Session-permission profile model is explicit and opt-in
 The runtime SHALL define an explicit, opt-in session-permission profile model that binds session scope behavior and permission governance under one profile identity.

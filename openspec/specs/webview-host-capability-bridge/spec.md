@@ -1,7 +1,7 @@
 # webview-host-capability-bridge Specification
 
 ## Purpose
-TBD - created by archiving change phase4-host-capability-bridge. Update Purpose after archive.
+Define typed, policy-governed host capability bridge contracts and deterministic diagnostics for outbound and inbound system-integration flows.
 ## Requirements
 ### Requirement: Host capability bridge is typed and opt-in
 The system SHALL provide an opt-in typed host capability bridge with explicit operations for clipboard, file dialog, external open, notification, application menu, system tray, and supported system actions.

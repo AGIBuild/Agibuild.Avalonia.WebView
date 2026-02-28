@@ -2,9 +2,7 @@
 
 ## Purpose
 Define version progression, release artifacts, and governance for the 1.0 release train (MinVer tag-driven flow, README/CHANGELOG freshness, stable package metadata).
-
 ## Requirements
-
 ### Requirement: Version progression follows tag-driven MinVer flow
 The release pipeline SHALL derive package versions from git tags using MinVer. A `v1.0.0-preview.N` tag SHALL produce preview packages; a `v1.0.0` tag SHALL produce the stable release.
 
@@ -45,3 +43,22 @@ Stable release package identities SHALL use the canonical `Agibuild.Fulora.` pre
 #### Scenario: Stable package identity is canonical
 - **WHEN** release validation inspects primary stable package outputs
 - **THEN** package IDs use the `Agibuild.Fulora.` prefix as canonical identity
+
+### Requirement: Stable publication SHALL require release-orchestration ready state
+Tag/version semantics alone MUST NOT authorize stable publication; stable package publication SHALL require release-orchestration decision state `ready`.
+
+#### Scenario: Stable tag with ready decision publishes
+- **WHEN** nearest tag indicates stable release and release orchestration decision is `ready`
+- **THEN** publication workflow proceeds to package push
+
+#### Scenario: Stable tag with blocked decision is rejected
+- **WHEN** nearest tag indicates stable release but release orchestration decision is `blocked`
+- **THEN** publication workflow fails before push with deterministic blocking diagnostics
+
+### Requirement: Preview publication SHALL surface orchestration state for auditability
+Preview publication flows MUST include release-orchestration decision state in generated evidence even when policy permits publishing with non-blocking advisories.
+
+#### Scenario: Preview release records orchestration state
+- **WHEN** preview package workflow runs
+- **THEN** release evidence includes orchestration decision state and advisory diagnostics mapping
+

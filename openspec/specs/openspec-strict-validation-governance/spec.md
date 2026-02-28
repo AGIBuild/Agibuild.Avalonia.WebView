@@ -1,7 +1,7 @@
 # openspec-strict-validation-governance Specification
 
 ## Purpose
-TBD - created by archiving change openspec-strict-validation-debt-cleanup. Update Purpose after archive.
+Define strict governance rules that keep repository OpenSpec artifacts structurally valid, normatively enforceable, and phase-transition auditable in CI.
 ## Requirements
 ### Requirement: Repository specs comply with strict OpenSpec structure
 All repository-owned spec files SHALL include a `## Purpose` section and a `## Requirements` section in strict-compatible format.
@@ -37,4 +37,15 @@ Governance checks SHALL fail when Phase 5 roadmap closeout markers drift from th
 #### Scenario: Roadmap closeout marker regression is detected
 - **WHEN** roadmap Phase 5 state or evidence mapping markers are removed or changed unexpectedly
 - **THEN** governance tests fail with deterministic diagnostics
+
+### Requirement: Spec purpose text SHALL be finalized and non-placeholder
+Repository-owned spec files MUST keep `## Purpose` content finalized and descriptive; placeholder tokens such as `TBD`, archive reminder text, or deferred-purpose markers are not allowed in canonical specs.
+
+#### Scenario: Placeholder purpose is detected
+- **WHEN** a canonical spec purpose contains `TBD` placeholder text or archive reminder wording
+- **THEN** strict governance baseline fails and requires purpose finalization
+
+#### Scenario: Finalized purpose passes strict baseline review
+- **WHEN** canonical specs provide explicit purpose statements aligned to capability scope
+- **THEN** strict governance baseline remains valid for release and archival workflows
 

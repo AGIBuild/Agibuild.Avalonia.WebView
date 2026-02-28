@@ -1,7 +1,7 @@
 # template-shell-presets Specification
 
 ## Purpose
-TBD - created by archiving change phase4-shell-dx-templates. Update Purpose after archive.
+Define template shell preset contracts that generate deterministic baseline and app-shell experiences with policy-governed system-integration wiring.
 ## Requirements
 ### Requirement: Template exposes explicit shell preset choices
 The `agibuild-hybrid` template SHALL expose an explicit shell preset parameter to control generated shell wiring.

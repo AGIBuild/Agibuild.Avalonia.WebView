@@ -89,6 +89,7 @@ partial class BuildTask : NukeBuild
     AbsolutePath CloseoutSnapshotFile => TestResultsDirectory / "closeout-snapshot.json";
     AbsolutePath BridgeDistributionGovernanceReportFile => TestResultsDirectory / "bridge-distribution-governance-report.json";
     AbsolutePath TransitionGateGovernanceReportFile => TestResultsDirectory / "transition-gate-governance-report.json";
+    AbsolutePath ReleaseOrchestrationDecisionReportFile => TestResultsDirectory / "release-orchestration-decision-report.json";
     AbsolutePath AutomationLaneManifestFile => TestsDirectory / "automation-lanes.json";
     AbsolutePath RuntimeCriticalPathManifestFile => TestsDirectory / "runtime-critical-path.manifest.json";
     AbsolutePath WarningGovernanceBaselineFile => TestsDirectory / "warning-governance.baseline.json";
@@ -199,5 +200,5 @@ partial class BuildTask : NukeBuild
 
     Target CiPublish => _ => _
         .Description("Full release pipeline: compile → coverage → lane automation → package smoke → publish.")
-        .DependsOn(Coverage, AutomationLaneReport, NugetPackageTest, RuntimeCriticalPathExecutionGovernanceCiPublish, WarningGovernance, DependencyVulnerabilityGovernance, TypeScriptDeclarationGovernance, OpenSpecStrictGovernance, ReleaseCloseoutSnapshot, ContinuousTransitionGateGovernance, BridgeDistributionGovernance, PackTemplate, Publish);
+        .DependsOn(Coverage, AutomationLaneReport, NugetPackageTest, RuntimeCriticalPathExecutionGovernanceCiPublish, WarningGovernance, DependencyVulnerabilityGovernance, TypeScriptDeclarationGovernance, OpenSpecStrictGovernance, ReleaseCloseoutSnapshot, ContinuousTransitionGateGovernance, BridgeDistributionGovernance, ReleaseOrchestrationGovernance, PackTemplate, Publish);
 }

@@ -1,7 +1,7 @@
 # shell-system-integration Specification
 
 ## Purpose
-TBD - created by archiving change shell-system-integration-extension. Update Purpose after archive.
+Define deterministic typed shell system-integration contracts for menu, tray, and system-action capabilities with explicit policy and allowlist governance.
 ## Requirements
 ### Requirement: System integration capabilities SHALL be typed and policy-governed
 The system SHALL expose menu, tray, and system-action operations through typed capability contracts evaluated by policy before provider execution.

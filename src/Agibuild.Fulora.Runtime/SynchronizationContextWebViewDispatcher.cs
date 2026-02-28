@@ -7,14 +7,22 @@ internal sealed class SynchronizationContextWebViewDispatcher : IWebViewDispatch
 {
     private readonly SynchronizationContext _context;
     private readonly bool _hasCapturedContext;
+    private readonly int _capturedThreadId;
 
     public SynchronizationContextWebViewDispatcher()
     {
         _context = SynchronizationContext.Current ?? new SynchronizationContext();
         _hasCapturedContext = SynchronizationContext.Current is not null;
+        _capturedThreadId = Environment.CurrentManagedThreadId;
     }
 
-    public bool CheckAccess() => !_hasCapturedContext || SynchronizationContext.Current == _context;
+    public bool CheckAccess()
+    {
+        if (Environment.CurrentManagedThreadId == _capturedThreadId)
+            return true;
+
+        return !_hasCapturedContext || SynchronizationContext.Current == _context;
+    }
 
     public Task InvokeAsync(Action action)
     {

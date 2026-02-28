@@ -1,7 +1,7 @@
 # observability-diagnostic-schema-versioning Specification
 
 ## Purpose
-TBD - created by archiving change phase6-observability-v3-schema-versioning. Update Purpose after archive.
+Define shared diagnostic schema-version contracts and governance assertions so observability invariants remain consistent across automation lanes.
 ## Requirements
 ### Requirement: Diagnostic schema assertions are unified across automation lanes
 The repository SHALL provide a single shared assertion entrypoint for diagnostic schema invariants that is reusable by ContractAutomation, RuntimeAutomation, and governance tests.

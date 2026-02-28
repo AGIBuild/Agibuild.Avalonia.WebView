@@ -1,7 +1,7 @@
 # webview-shortcut-routing Specification
 
 ## Purpose
-TBD - created by archiving change phase4-shell-shortcut-routing. Update Purpose after archive.
+Define reusable keyboard shortcut routing contracts with deterministic gesture matching and explicit non-handled outcomes when capabilities are unavailable.
 ## Requirements
 ### Requirement: WebView shortcut routing provides deterministic gesture-to-action execution
 The system SHALL provide a reusable shortcut router that maps keyboard gestures to WebView actions with deterministic matching semantics.

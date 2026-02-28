@@ -82,10 +82,13 @@ public partial class MainWindow : Window
 
             // ── Step 7: Bridge.Expose on real WebView uses source-generated proxy ──
             UpdateStatus($"Step 7/{TotalSteps}: Bridge.Expose<ISmokeExportService> on real WebView bridge...");
-            WebViewControl.Bridge.Expose<ISmokeExportService>(new SmokeExportService());
-            // If we reach here without exception, Expose worked (source-gen or reflection fallback).
-            // Clean up to leave bridge in original state.
-            WebViewControl.Bridge.Remove<ISmokeExportService>();
+            await Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                WebViewControl.Bridge.Expose<ISmokeExportService>(new SmokeExportService());
+                // If we reach here without exception, Expose worked (source-gen or reflection fallback).
+                // Clean up to leave bridge in original state.
+                WebViewControl.Bridge.Remove<ISmokeExportService>();
+            });
 
             UpdateStatus($"PASSED: All {TotalSteps} smoke tests passed.");
             WriteResult("PASSED");

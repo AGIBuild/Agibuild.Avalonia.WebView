@@ -8,9 +8,9 @@
 ## Phase Overview
 
 ```
-Phase 0 (✅ Done)        Phase 1 (✅ Done)       Phase 2 (✅ Core Done)  Phase 3 (✅ Done)      Phase 4 (✅ Done)      Phase 5 (✅ Completed)
-Foundation               Type-Safe Bridge       SPA Hosting            Polish & GA            Application Shell       Framework Positioning Foundation
-─────────────────────    ────────────────────   ────────────────────   ────────────────────   ────────────────────    ─────────────────────────────────
+Phase 0 (✅ Done)        Phase 1 (✅ Done)       Phase 2 (✅ Core Done)  Phase 3 (✅ Done)      Phase 4 (✅ Done)      Phase 5 (✅ Completed)        Phase 6 (✅ Completed)         Phase 7 (🚧 Active)
+Foundation               Type-Safe Bridge       SPA Hosting            Polish & GA            Application Shell       Framework Positioning Foundation Governance Productization        Release Orchestration
+─────────────────────    ────────────────────   ────────────────────   ────────────────────   ────────────────────    ───────────────────────────────── ─────────────────────────────── ─────────────────────────
 • Cross-platform         • Source Generator     • Custom protocol      • Project template      • Shell policy kit      • Typed capability gateway
   adapters (5 platforms)   for C# → JS proxy      file serving        • API docs site           (new window/download/ • Policy-first execution model
 • Full-control           • Source Generator     • Embedded resource    • Performance             permission/session)   • Agent-friendly diagnostics
@@ -468,11 +468,11 @@ dotnet new agibuild-hybrid -n MyApp --frontend react
 
 ### Phase Transition Status (Machine-checkable)
 
-- Completed phase id: `phase5-framework-positioning-foundation`
-- Active phase id: `phase6-governance-productization`
+- Completed phase id: `phase6-governance-productization`
+- Active phase id: `phase7-release-orchestration`
 - Closeout snapshot artifact: `artifacts/test-results/closeout-snapshot.json`
 
-## Phase 6: Governance Productization (🚧 Active)
+## Phase 6: Governance Productization (✅ Completed)
 
 **Goal**: Productize phase transition governance so release evidence and CI gates remain phase-neutral, semantic, and deterministic across future roadmap increments.
 
@@ -484,26 +484,54 @@ dotnet new agibuild-hybrid -n MyApp --frontend react
 | **M6.2 Semantic Transition Invariants** | Govern roadmap/evidence transitions by invariant IDs instead of hardcoded phase literals | Machine-checkable transition diagnostics with stable invariant IDs |
 | **M6.3 Continuous Transition Gate** | Keep `Ci`/`CiPublish` gate continuity while roadmap moves to next active phase | Deterministic enforcement of completed-phase + active-phase transition metadata |
 
-### Initial Evidence Mapping
+### Latest Evidence Snapshot
 
-- Build closeout contract source: `build/Build.Governance.cs` (`ReleaseCloseoutSnapshot`)
-- CI target dependency source: `build/Build.cs` (`Ci`, `CiPublish`)
-- Transition invariant governance source: `tests/Agibuild.Fulora.UnitTests/AutomationLaneGovernanceTests.cs`
-- Validation baseline: `nuke Test`, `nuke Coverage`, `openspec validate --all --strict`
+- Release: `v0.1.16-preview` (pre-release)
+- `nuke Test`: Unit `779`, Integration `151`, Total `930` (pass)
+- `nuke Coverage`: Line `94.17%` (pass, threshold `90%`)
+- OpenSpec archive evidence:
+  - `2026-02-26-phase6-foundation-governance-hardening`
+  - `2026-02-27-phase6-governance-productization`
+  - `2026-02-27-phase6-continuous-transition-gate`
+
+### Evidence Source Mapping
+
+- Governance foundation hardening closeout: `openspec/changes/archive/2026-02-26-phase6-foundation-governance-hardening/verification-evidence.md`
+- Phase 6 governance productization closeout: `openspec/changes/archive/2026-02-27-phase6-governance-productization/verification-evidence.md`
+- Continuous transition gate closeout: `openspec/changes/archive/2026-02-27-phase6-continuous-transition-gate/verification-evidence.md`
+- Validation command baseline: `nuke Test`, `nuke Coverage`, `openspec validate --all --strict`
+
+### Phase 6 Exit Criteria
+
+- Closeout snapshot contract and transition continuity checks stay lane-consistent across `Ci` and `CiPublish`.
+- Roadmap transition markers are machine-checkable and aligned with governance assertions.
+- Deterministic transition diagnostics are emitted for parity and continuity failures.
+
+## Phase 7: Release Orchestration (🚧 Active)
+
+**Goal**: Convert governance-complete framework foundations into release-orchestrated product readiness with deterministic publication quality gates and adoption-oriented evidence.
+
+### Planned Milestones
+
+| Milestone | Focus | Outcome |
+|---|---|---|
+| **M7.1 Release Evidence Consolidation** | Unify release-readiness evidence into one deterministic contract for CI and package validation | Machine-checkable release decision baseline |
+| **M7.2 Packaging and Distribution Determinism** | Ensure NuGet/package metadata, compatibility, and changelog expectations are policy-governed | Deterministic release artifact quality |
+| **M7.3 Adoption Readiness Signals** | Align docs/templates/runtime evidence with framework adoption KPIs | Verifiable framework adoption readiness gate |
 
 ---
 
 ## Dependencies & Prerequisites
 
 ```
-Phase 0 (✅ Done) ──► Phase 1 (✅ Done) ──► Phase 2 (✅ Core Done) ──► Phase 3 (✅ Done) ──► Phase 4 (✅ Done) ──► Phase 5 (✅ Completed)
-     │                      │                       │                         │                         │
-     │                      │                       └── 2.4 depends on Phase 1│                         └── framework-positioning baseline
-     │                      └── Builds on F6 (RPC) + F3 (Policy)             └── Shell layer builds on stable GA baseline   builds on shell + bridge + governance
+Phase 0 (✅ Done) ──► Phase 1 (✅ Done) ──► Phase 2 (✅ Core Done) ──► Phase 3 (✅ Done) ──► Phase 4 (✅ Done) ──► Phase 5 (✅ Completed) ──► Phase 6 (✅ Completed) ──► Phase 7 (🚧 Active)
+     │                      │                       │                         │                         │                                   │
+     │                      │                       └── 2.4 depends on Phase 1│                         └── framework-positioning baseline    └── release orchestration builds on deterministic transition governance
+     │                      └── Builds on F6 (RPC) + F3 (Policy)             └── Shell layer builds on stable GA baseline
      └── F4 (WebResource) used by Phase 2                                       and reuses bridge/policy/testability core
 ```
 
-Phase 1 and Phase 2 are mostly independent in implementation but compose together. Phase 4 depends on completed GA-grade stability from Phase 3 and focuses on product-level shell capabilities. Phase 5 pivots from "host count" to "framework positioning + dual-path adoption" with web-first developer productivity and AI-agent operability as primary outcomes.
+Phase 1 and Phase 2 are mostly independent in implementation but compose together. Phase 4 depends on completed GA-grade stability from Phase 3 and focuses on product-level shell capabilities. Phase 5 pivots from "host count" to "framework positioning + dual-path adoption" with web-first developer productivity and AI-agent operability as primary outcomes. Phase 6 productizes transition governance baselines, and Phase 7 focuses on release orchestration with deterministic publication quality gates.
 
 ---
 

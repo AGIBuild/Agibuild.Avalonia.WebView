@@ -42,6 +42,7 @@
         "Publish",
         "PublishTemplate",
         "ReleaseCloseoutSnapshot",
+        "ReleaseOrchestrationGovernance",
         "Restore",
         "RuntimeAutomation",
         "RuntimeCriticalPathExecutionGovernanceCi",

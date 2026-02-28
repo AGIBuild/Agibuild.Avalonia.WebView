@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using Nuke.Common;
 using Nuke.Common.IO;
@@ -12,6 +13,9 @@ partial class BuildTask
     const string TransitionGateParityInvariantId = "GOV-024";
     const string TransitionLaneProvenanceInvariantId = "GOV-025";
     const string TransitionGateDiagnosticSchemaInvariantId = "GOV-026";
+    const string ReleaseOrchestrationDecisionInvariantId = "GOV-027";
+    const string ReleaseOrchestrationBlockingReasonSchemaInvariantId = "GOV-028";
+    const string StablePublishReadinessInvariantId = "GOV-029";
 
     private sealed record TransitionGateParityRule(string Group, string CiDependency, string CiPublishDependency);
 
@@ -22,6 +26,13 @@ partial class BuildTask
         string Expected,
         string Actual,
         string Group);
+
+    private sealed record ReleaseOrchestrationBlockingReason(
+        string Category,
+        string InvariantId,
+        string SourceArtifact,
+        string Expected,
+        string Actual);
 
     static readonly TransitionGateParityRule[] CloseoutCriticalTransitionGateParityRules =
     [
@@ -780,8 +791,8 @@ partial class BuildTask
         .DependsOn(Coverage, AutomationLaneReport, OpenSpecStrictGovernance)
         .Executes(() =>
         {
-            const string completedPhase = "phase5-framework-positioning-foundation";
-            const string activePhase = "phase6-governance-productization";
+            const string completedPhase = "phase6-governance-productization";
+            const string activePhase = "phase7-release-orchestration";
             const string transitionInvariantId = "GOV-022";
             var roadmapPath = RootDirectory / "openspec" / "ROADMAP.md";
             var (roadmapCompletedPhase, roadmapActivePhase) = ReadRoadmapTransitionState(File.ReadAllText(roadmapPath));
@@ -820,9 +831,9 @@ partial class BuildTask
             var archiveDirectory = RootDirectory / "openspec" / "changes" / "archive";
             var completedPhaseCloseoutChangeIds = new[]
             {
-                "system-integration-contract-v2-freeze",
-                "template-webfirst-dx-panel",
-                "system-integration-diagnostic-export"
+                "phase6-foundation-governance-hardening",
+                "phase6-governance-productization",
+                "phase6-continuous-transition-gate"
             };
             var closeoutArchives = Directory.Exists(archiveDirectory)
                 ? completedPhaseCloseoutChangeIds
@@ -910,5 +921,224 @@ partial class BuildTask
                 CloseoutSnapshotFile,
                 JsonSerializer.Serialize(snapshotPayload, new JsonSerializerOptions { WriteIndented = true }));
             Serilog.Log.Information("CI evidence snapshot (v2) written to {Path}", CloseoutSnapshotFile);
+        });
+
+    Target ReleaseOrchestrationGovernance => _ => _
+        .Description("Evaluates release-orchestration readiness and blocks publish side-effects when not ready.")
+        .DependsOn(
+            ReleaseCloseoutSnapshot,
+            ContinuousTransitionGateGovernance,
+            RuntimeCriticalPathExecutionGovernanceCiPublish,
+            WarningGovernance,
+            DependencyVulnerabilityGovernance,
+            TypeScriptDeclarationGovernance,
+            OpenSpecStrictGovernance,
+            BridgeDistributionGovernance,
+            ValidatePackage)
+        .Executes(() =>
+        {
+            TestResultsDirectory.CreateDirectory();
+
+            var blockingReasons = new List<ReleaseOrchestrationBlockingReason>();
+            void AddBlockingReason(string category, string invariantId, string sourceArtifact, string expected, string actual)
+                => blockingReasons.Add(new ReleaseOrchestrationBlockingReason(category, invariantId, sourceArtifact, expected, actual));
+
+            var requiredArtifacts = new[]
+            {
+                new { Category = "evidence", InvariantId = ReleaseOrchestrationDecisionInvariantId, RelativePath = "artifacts/test-results/closeout-snapshot.json", FullPath = CloseoutSnapshotFile.ToString() },
+                new { Category = "governance", InvariantId = ReleaseOrchestrationDecisionInvariantId, RelativePath = "artifacts/test-results/transition-gate-governance-report.json", FullPath = TransitionGateGovernanceReportFile.ToString() },
+                new { Category = "governance", InvariantId = ReleaseOrchestrationDecisionInvariantId, RelativePath = "artifacts/test-results/dependency-governance-report.json", FullPath = DependencyGovernanceReportFile.ToString() },
+                new { Category = "governance", InvariantId = ReleaseOrchestrationDecisionInvariantId, RelativePath = "artifacts/test-results/typescript-governance-report.json", FullPath = TypeScriptGovernanceReportFile.ToString() },
+                new { Category = "governance", InvariantId = ReleaseOrchestrationDecisionInvariantId, RelativePath = "artifacts/test-results/runtime-critical-path-governance-report.json", FullPath = RuntimeCriticalPathGovernanceReportFile.ToString() },
+                new { Category = "governance", InvariantId = ReleaseOrchestrationDecisionInvariantId, RelativePath = "artifacts/test-results/bridge-distribution-governance-report.json", FullPath = BridgeDistributionGovernanceReportFile.ToString() }
+            };
+
+            foreach (var artifact in requiredArtifacts)
+            {
+                if (!File.Exists(artifact.FullPath))
+                {
+                    AddBlockingReason(
+                        category: artifact.Category,
+                        invariantId: artifact.InvariantId,
+                        sourceArtifact: artifact.RelativePath,
+                        expected: "artifact exists",
+                        actual: "missing");
+                }
+            }
+
+            if (File.Exists(CloseoutSnapshotFile))
+            {
+                using var snapshotDoc = JsonDocument.Parse(File.ReadAllText(CloseoutSnapshotFile));
+                var root = snapshotDoc.RootElement;
+
+                if (root.TryGetProperty("coverage", out var coverage))
+                {
+                    var linePercent = coverage.GetProperty("linePercent").GetDouble();
+                    var lineThreshold = coverage.GetProperty("lineThreshold").GetInt32();
+                    var branchPercent = coverage.GetProperty("branchPercent").GetDouble();
+                    var branchThreshold = coverage.GetProperty("branchThreshold").GetInt32();
+
+                    if (linePercent < lineThreshold)
+                    {
+                        AddBlockingReason(
+                            category: "quality-threshold",
+                            invariantId: ReleaseOrchestrationDecisionInvariantId,
+                            sourceArtifact: "artifacts/test-results/closeout-snapshot.json",
+                            expected: $"linePercent >= {lineThreshold}",
+                            actual: $"linePercent = {linePercent:F2}");
+                    }
+
+                    if (branchPercent < branchThreshold)
+                    {
+                        AddBlockingReason(
+                            category: "quality-threshold",
+                            invariantId: ReleaseOrchestrationDecisionInvariantId,
+                            sourceArtifact: "artifacts/test-results/closeout-snapshot.json",
+                            expected: $"branchPercent >= {branchThreshold}",
+                            actual: $"branchPercent = {branchPercent:F2}");
+                    }
+                }
+                else
+                {
+                    AddBlockingReason(
+                        category: "evidence",
+                        invariantId: ReleaseOrchestrationBlockingReasonSchemaInvariantId,
+                        sourceArtifact: "artifacts/test-results/closeout-snapshot.json",
+                        expected: "coverage section present",
+                        actual: "coverage section missing");
+                }
+
+                if (!root.TryGetProperty("governance", out JsonElement governanceSection))
+                {
+                    AddBlockingReason(
+                        category: "governance",
+                        invariantId: ReleaseOrchestrationBlockingReasonSchemaInvariantId,
+                        sourceArtifact: "artifacts/test-results/closeout-snapshot.json",
+                        expected: "governance section present",
+                        actual: "governance section missing");
+                }
+            }
+
+            if (File.Exists(TransitionGateGovernanceReportFile))
+            {
+                using var transitionDoc = JsonDocument.Parse(File.ReadAllText(TransitionGateGovernanceReportFile));
+                var failureCount = transitionDoc.RootElement.TryGetProperty("failureCount", out var failureNode)
+                    ? failureNode.GetInt32()
+                    : 0;
+
+                if (failureCount > 0)
+                {
+                    AddBlockingReason(
+                        category: "governance",
+                        invariantId: TransitionGateParityInvariantId,
+                        sourceArtifact: "artifacts/test-results/transition-gate-governance-report.json",
+                        expected: "failureCount = 0",
+                        actual: $"failureCount = {failureCount}");
+                }
+            }
+
+            var mainPackagePattern = "Agibuild.Fulora.*.nupkg";
+            var hasCanonicalMainPackage = PackageOutputDirectory.GlobFiles(mainPackagePattern)
+                .Any(path => !path.Name.EndsWith(".symbols.nupkg", StringComparison.OrdinalIgnoreCase));
+            if (!hasCanonicalMainPackage)
+            {
+                AddBlockingReason(
+                    category: "package-metadata",
+                    invariantId: ReleaseOrchestrationDecisionInvariantId,
+                    sourceArtifact: "artifacts/packages",
+                    expected: $"at least one package matching {mainPackagePattern}",
+                    actual: "none");
+            }
+
+            string? packedVersion = null;
+            try
+            {
+                packedVersion = ResolvePackedAgibuildVersion("Agibuild.Fulora");
+            }
+            catch (Exception ex)
+            {
+                AddBlockingReason(
+                    category: "package-metadata",
+                    invariantId: StablePublishReadinessInvariantId,
+                    sourceArtifact: "artifacts/packages",
+                    expected: "packed version resolved for Agibuild.Fulora",
+                    actual: ex.Message);
+            }
+
+            var isStableRelease = packedVersion is not null && !packedVersion.Contains('-', StringComparison.Ordinal);
+            var decisionState = blockingReasons.Count == 0 ? "ready" : "blocked";
+            var evaluatedAtUtc = DateTime.UtcNow.ToString("o");
+
+            var decisionObject = new JsonObject
+            {
+                ["state"] = decisionState,
+                ["isStableRelease"] = isStableRelease,
+                ["version"] = packedVersion ?? "unknown",
+                ["laneContext"] = "CiPublish",
+                ["producerTarget"] = "ReleaseOrchestrationGovernance",
+                ["evaluatedAtUtc"] = evaluatedAtUtc,
+                ["blockingReasonCount"] = blockingReasons.Count
+            };
+
+            var blockingReasonArray = new JsonArray(
+                blockingReasons.Select(reason => new JsonObject
+                {
+                    ["category"] = reason.Category,
+                    ["invariantId"] = reason.InvariantId,
+                    ["sourceArtifact"] = reason.SourceArtifact,
+                    ["expected"] = reason.Expected,
+                    ["actual"] = reason.Actual
+                }).ToArray());
+
+            if (File.Exists(CloseoutSnapshotFile))
+            {
+                var snapshotNode = JsonNode.Parse(File.ReadAllText(CloseoutSnapshotFile))?.AsObject()
+                    ?? new JsonObject();
+                snapshotNode["releaseDecision"] = decisionObject;
+                snapshotNode["releaseBlockingReasons"] = blockingReasonArray;
+
+                File.WriteAllText(
+                    CloseoutSnapshotFile,
+                    snapshotNode.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
+                Serilog.Log.Information("Closeout snapshot updated with release decision payload at {Path}", CloseoutSnapshotFile);
+            }
+
+            var reportPayload = new
+            {
+                schemaVersion = 1,
+                provenance = new
+                {
+                    laneContext = "CiPublish",
+                    producerTarget = "ReleaseOrchestrationGovernance",
+                    timestamp = evaluatedAtUtc
+                },
+                decision = new
+                {
+                    state = decisionState,
+                    isStableRelease,
+                    version = packedVersion ?? "unknown",
+                    blockingReasonCount = blockingReasons.Count
+                },
+                blockingReasons = blockingReasons.Select(reason => new
+                {
+                    category = reason.Category,
+                    invariantId = reason.InvariantId,
+                    sourceArtifact = reason.SourceArtifact,
+                    expected = reason.Expected,
+                    actual = reason.Actual
+                }).ToArray()
+            };
+
+            File.WriteAllText(
+                ReleaseOrchestrationDecisionReportFile,
+                JsonSerializer.Serialize(reportPayload, new JsonSerializerOptions { WriteIndented = true }));
+            Serilog.Log.Information("Release orchestration decision report written to {Path}", ReleaseOrchestrationDecisionReportFile);
+
+            if (string.Equals(decisionState, "blocked", StringComparison.Ordinal))
+            {
+                var lines = blockingReasons.Select(reason =>
+                    $"- [{reason.Category}] [{reason.InvariantId}] {reason.SourceArtifact}: expected {reason.Expected}, actual {reason.Actual}");
+                Assert.Fail("Release orchestration governance blocked publication:\n" + string.Join('\n', lines));
+            }
         });
 }

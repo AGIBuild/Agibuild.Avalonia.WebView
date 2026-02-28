@@ -114,7 +114,8 @@ public sealed class AutomationLaneGovernanceTests
         var requiredTargets = new[]
         {
             "Target ContractAutomation", "Target RuntimeAutomation", "Target AutomationLaneReport",
-            "Target WarningGovernance", "Target WarningGovernanceSyntheticCheck", "Target ReleaseCloseoutSnapshot"
+            "Target WarningGovernance", "Target WarningGovernanceSyntheticCheck",
+            "Target ReleaseCloseoutSnapshot", "Target ReleaseOrchestrationGovernance"
         };
         foreach (var target in requiredTargets)
             AssertSourceContains(combinedSource, target, BuildPipelineTargetGraph, "build/Build*.cs");
@@ -123,7 +124,7 @@ public sealed class AutomationLaneGovernanceTests
         {
             "automation-lane-report.json", "warning-governance-report.json",
             "warning-governance.baseline.json", "nuget-smoke-retry-telemetry.json",
-            "closeout-snapshot.json"
+            "closeout-snapshot.json", "release-orchestration-decision-report.json"
         };
         foreach (var artifact in requiredArtifacts)
             AssertSourceContains(combinedSource, artifact, BuildPipelineTargetGraph, "build/Build*.cs");
@@ -550,7 +551,7 @@ public sealed class AutomationLaneGovernanceTests
         {
             "Target OpenSpecStrictGovernance", "Target DependencyVulnerabilityGovernance",
             "Target TypeScriptDeclarationGovernance", "Target ReleaseCloseoutSnapshot",
-            "Target ContinuousTransitionGateGovernance"
+            "Target ContinuousTransitionGateGovernance", "Target ReleaseOrchestrationGovernance"
         };
         foreach (var target in requiredTargets)
             AssertSourceContains(combinedSource, target, CiTargetOpenSpecGate, "build/Build*.cs");
@@ -579,7 +580,8 @@ public sealed class AutomationLaneGovernanceTests
         {
             "OpenSpecStrictGovernance", "DependencyVulnerabilityGovernance",
             "TypeScriptDeclarationGovernance", "ReleaseCloseoutSnapshot",
-            "RuntimeCriticalPathExecutionGovernanceCiPublish", "ContinuousTransitionGateGovernance"
+            "RuntimeCriticalPathExecutionGovernanceCiPublish", "ContinuousTransitionGateGovernance",
+            "ReleaseOrchestrationGovernance"
         };
         foreach (var dep in ciPublishDependencies)
         {
@@ -676,16 +678,16 @@ public sealed class AutomationLaneGovernanceTests
         var roadmap = File.ReadAllText(roadmapPath);
         Assert.Matches(new Regex(@"## Phase \d+: .+\(✅ Completed\)", RegexOptions.Multiline), roadmap);
         Assert.Matches(new Regex(@"## Phase \d+: .+\(🚧 Active\)", RegexOptions.Multiline), roadmap);
-        AssertSourceContains(roadmap, "Completed phase id: `phase5-framework-positioning-foundation`", PhaseTransitionConsistency, roadmapPath);
-        AssertSourceContains(roadmap, "Active phase id: `phase6-governance-productization`", PhaseTransitionConsistency, roadmapPath);
+        AssertSourceContains(roadmap, "Completed phase id: `phase6-governance-productization`", PhaseTransitionConsistency, roadmapPath);
+        AssertSourceContains(roadmap, "Active phase id: `phase7-release-orchestration`", PhaseTransitionConsistency, roadmapPath);
         AssertSourceContains(roadmap, "Closeout snapshot artifact: `artifacts/test-results/closeout-snapshot.json`", PhaseTransitionConsistency, roadmapPath);
         AssertSourceContains(roadmap, "### Evidence Source Mapping", PhaseTransitionConsistency, roadmapPath);
 
         var completedPhaseCloseoutChangeIds = new[]
         {
-            "2026-02-24-system-integration-contract-v2-freeze",
-            "2026-02-24-template-webfirst-dx-panel",
-            "2026-02-24-system-integration-diagnostic-export"
+            "2026-02-26-phase6-foundation-governance-hardening",
+            "2026-02-27-phase6-governance-productization",
+            "2026-02-27-phase6-continuous-transition-gate"
         };
         foreach (var changeId in completedPhaseCloseoutChangeIds)
             AssertSourceContains(roadmap, changeId, PhaseTransitionConsistency, roadmapPath);
@@ -875,11 +877,14 @@ public sealed class AutomationLaneGovernanceTests
         AssertSourceContains(combinedSource, "producerTarget = \"ReleaseCloseoutSnapshot\"", EvidenceContractV2Schema, "build/Build.Governance.cs");
         AssertSourceContains(combinedSource, "transition = new", EvidenceContractV2Schema, "build/Build.Governance.cs");
         AssertSourceContains(combinedSource, "transitionContinuity = new", EvidenceContractV2Schema, "build/Build.Governance.cs");
+        AssertSourceContains(combinedSource, "releaseDecision", EvidenceContractV2Schema, "build/Build.Governance.cs");
+        AssertSourceContains(combinedSource, "releaseBlockingReasons", EvidenceContractV2Schema, "build/Build.Governance.cs");
         AssertSourceContains(combinedSource, "completedPhase", EvidenceContractV2Schema, "build/Build.Governance.cs");
         AssertSourceContains(combinedSource, "activePhase", EvidenceContractV2Schema, "build/Build.Governance.cs");
         AssertSourceContains(combinedSource, "TransitionLaneProvenanceInvariantId", EvidenceContractV2Schema, "build/Build.Governance.cs");
         AssertSourceContains(combinedSource, "closeoutArchives", EvidenceContractV2Schema, "build/Build.Governance.cs");
         AssertSourceContains(combinedSource, "closeout-snapshot.json", EvidenceContractV2Schema, "build/Build.cs");
+        AssertSourceContains(combinedSource, "release-orchestration-decision-report.json", EvidenceContractV2Schema, "build/Build.cs");
     }
 
     [Fact]
@@ -899,6 +904,101 @@ public sealed class AutomationLaneGovernanceTests
 
         Assert.Matches(
             new Regex(@"Target\s+CiPublish\s*=>[\s\S]*?\.DependsOn\([\s\S]*BridgeDistributionGovernance[\s\S]*\);", RegexOptions.Multiline),
+            mainSource);
+    }
+
+    [Fact]
+    public void CiPublish_release_orchestration_gate_runs_before_publish_side_effects()
+    {
+        var repoRoot = FindRepoRoot();
+        var mainSource = File.ReadAllText(Path.Combine(repoRoot, "build", "Build.cs"));
+        var governanceSource = File.ReadAllText(Path.Combine(repoRoot, "build", "Build.Governance.cs"));
+
+        Assert.Matches(
+            new Regex(@"Target\s+CiPublish\s*=>[\s\S]*?\.DependsOn\([\s\S]*ReleaseOrchestrationGovernance[\s\S]*Publish[\s\S]*\);", RegexOptions.Multiline),
+            mainSource);
+
+        AssertSourceContains(governanceSource, "Target ReleaseOrchestrationGovernance", ReleaseOrchestrationDecisionGate, "build/Build.Governance.cs");
+        AssertSourceContains(governanceSource, ".DependsOn(", ReleaseOrchestrationDecisionGate, "build/Build.Governance.cs");
+        AssertSourceContains(governanceSource, "ContinuousTransitionGateGovernance", ReleaseOrchestrationDecisionGate, "build/Build.Governance.cs");
+        AssertSourceContains(governanceSource, "ValidatePackage", ReleaseOrchestrationDecisionGate, "build/Build.Governance.cs");
+        AssertSourceContains(governanceSource, "Release orchestration governance blocked publication", ReleaseOrchestrationDecisionGate, "build/Build.Governance.cs");
+    }
+
+    [Fact]
+    public void Ci_evidence_v2_release_decision_requires_structured_blocking_reason_schema()
+    {
+        const string artifactPath = "artifacts/test-results/closeout-snapshot.json";
+        using var validDoc = JsonDocument.Parse(
+            """
+            {
+              "schemaVersion": 2,
+              "releaseDecision": {
+                "state": "blocked",
+                "isStableRelease": true
+              },
+              "releaseBlockingReasons": [
+                {
+                  "category": "governance",
+                  "invariantId": "GOV-027",
+                  "sourceArtifact": "artifacts/test-results/transition-gate-governance-report.json",
+                  "expected": "failureCount = 0",
+                  "actual": "failureCount = 1"
+                }
+              ]
+            }
+            """);
+
+        var decision = RequireReleaseDecision(validDoc.RootElement, ReleaseOrchestrationDecisionGate, artifactPath);
+        Assert.Equal("blocked", decision.GetProperty("state").GetString());
+
+        var reasons = RequireReleaseBlockingReasons(validDoc.RootElement, ReleaseOrchestrationReasonSchema, artifactPath);
+        Assert.Single(reasons.EnumerateArray());
+        var reason = reasons.EnumerateArray().First();
+        AssertReleaseBlockingReason(reason, ReleaseOrchestrationReasonSchema, artifactPath);
+        AssertControlledVocabulary(
+            [reason.GetProperty("category").GetString()!],
+            new HashSet<string>(StringComparer.Ordinal) { "evidence", "package-metadata", "governance", "quality-threshold" },
+            ReleaseOrchestrationReasonSchema,
+            "releaseBlockingReasons.category");
+
+        using var invalidDoc = JsonDocument.Parse(
+            """
+            {
+              "releaseDecision": {
+                "state": "blocked"
+              },
+              "releaseBlockingReasons": [
+                {
+                  "invariantId": "GOV-027",
+                  "sourceArtifact": "artifacts/test-results/closeout-snapshot.json",
+                  "expected": "artifact exists",
+                  "actual": "missing"
+                }
+              ]
+            }
+            """);
+
+        var invalidReasons = RequireReleaseBlockingReasons(invalidDoc.RootElement, ReleaseOrchestrationReasonSchema, artifactPath);
+        Assert.Throws<GovernanceInvariantViolationException>(() =>
+            AssertReleaseBlockingReason(invalidReasons.EnumerateArray().First(), ReleaseOrchestrationReasonSchema, artifactPath));
+    }
+
+    [Fact]
+    public void Stable_publish_requires_release_orchestration_ready_state()
+    {
+        var repoRoot = FindRepoRoot();
+        var governanceSource = File.ReadAllText(Path.Combine(repoRoot, "build", "Build.Governance.cs"));
+        var mainSource = File.ReadAllText(Path.Combine(repoRoot, "build", "Build.cs"));
+
+        AssertSourceContains(governanceSource, "ResolvePackedAgibuildVersion(\"Agibuild.Fulora\")", StablePublishReadiness, "build/Build.Governance.cs");
+        AssertSourceContains(governanceSource, "isStableRelease", StablePublishReadiness, "build/Build.Governance.cs");
+        AssertSourceContains(governanceSource, "decisionState = blockingReasons.Count == 0 ? \"ready\" : \"blocked\"", StablePublishReadiness, "build/Build.Governance.cs");
+        AssertSourceContains(governanceSource, "if (string.Equals(decisionState, \"blocked\", StringComparison.Ordinal))", StablePublishReadiness, "build/Build.Governance.cs");
+        AssertSourceContains(governanceSource, "Release orchestration governance blocked publication", StablePublishReadiness, "build/Build.Governance.cs");
+
+        Assert.Matches(
+            new Regex(@"Target\s+CiPublish\s*=>[\s\S]*?\.DependsOn\([\s\S]*ReleaseOrchestrationGovernance[\s\S]*Publish[\s\S]*\);", RegexOptions.Multiline),
             mainSource);
     }
 

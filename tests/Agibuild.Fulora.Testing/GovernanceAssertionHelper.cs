@@ -234,6 +234,89 @@ public static class GovernanceAssertionHelper
         _ = ReadRequiredString(diagnostic, "expected", invariantId, artifactPath);
         _ = ReadRequiredString(diagnostic, "actual", invariantId, artifactPath);
     }
+
+    public static JsonElement RequireReleaseDecision(JsonElement root, string invariantId, string artifactPath)
+    {
+        var decision = RequireProperty(root, "releaseDecision", invariantId, artifactPath);
+        if (decision.ValueKind != JsonValueKind.Object)
+        {
+            throw new GovernanceInvariantViolationException(
+                invariantId,
+                artifactPath,
+                "releaseDecision object present",
+                $"releaseDecision kind = {decision.ValueKind}");
+        }
+
+        if (!decision.TryGetProperty("state", out var stateNode) || stateNode.ValueKind != JsonValueKind.String)
+        {
+            throw new GovernanceInvariantViolationException(
+                invariantId,
+                artifactPath,
+                "releaseDecision.state as non-empty string",
+                "missing or not string");
+        }
+
+        var state = stateNode.GetString();
+        if (!string.Equals(state, "ready", StringComparison.Ordinal)
+            && !string.Equals(state, "blocked", StringComparison.Ordinal))
+        {
+            throw new GovernanceInvariantViolationException(
+                invariantId,
+                artifactPath,
+                "releaseDecision.state in {ready, blocked}",
+                $"releaseDecision.state = {state ?? "<null>"}");
+        }
+
+        return decision;
+    }
+
+    public static JsonElement RequireReleaseBlockingReasons(JsonElement root, string invariantId, string artifactPath)
+    {
+        var reasons = RequireProperty(root, "releaseBlockingReasons", invariantId, artifactPath);
+        if (reasons.ValueKind != JsonValueKind.Array)
+        {
+            throw new GovernanceInvariantViolationException(
+                invariantId,
+                artifactPath,
+                "releaseBlockingReasons as array",
+                $"releaseBlockingReasons kind = {reasons.ValueKind}");
+        }
+
+        return reasons;
+    }
+
+    public static void AssertReleaseBlockingReason(JsonElement reason, string invariantId, string artifactPath)
+    {
+        static string ReadRequiredString(JsonElement node, string propertyName, string invariantIdValue, string artifactPathValue)
+        {
+            if (!node.TryGetProperty(propertyName, out var property) || property.ValueKind != JsonValueKind.String)
+            {
+                throw new GovernanceInvariantViolationException(
+                    invariantIdValue,
+                    artifactPathValue,
+                    $"property '{propertyName}' as non-empty string",
+                    "property missing or not string");
+            }
+
+            var value = property.GetString();
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                throw new GovernanceInvariantViolationException(
+                    invariantIdValue,
+                    artifactPathValue,
+                    $"property '{propertyName}' as non-empty string",
+                    "value empty");
+            }
+
+            return value!;
+        }
+
+        _ = ReadRequiredString(reason, "category", invariantId, artifactPath);
+        _ = ReadRequiredString(reason, "invariantId", invariantId, artifactPath);
+        _ = ReadRequiredString(reason, "sourceArtifact", invariantId, artifactPath);
+        _ = ReadRequiredString(reason, "expected", invariantId, artifactPath);
+        _ = ReadRequiredString(reason, "actual", invariantId, artifactPath);
+    }
 }
 
 /// <summary>

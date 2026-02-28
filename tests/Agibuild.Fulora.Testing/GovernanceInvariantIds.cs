@@ -32,4 +32,7 @@ public static class GovernanceInvariantIds
     public const string TransitionGateParityConsistency = "GOV-024";
     public const string TransitionLaneProvenanceConsistency = "GOV-025";
     public const string TransitionGateDiagnosticSchema = "GOV-026";
+    public const string ReleaseOrchestrationDecisionGate = "GOV-027";
+    public const string ReleaseOrchestrationReasonSchema = "GOV-028";
+    public const string StablePublishReadiness = "GOV-029";
 }

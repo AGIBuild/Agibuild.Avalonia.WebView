@@ -2,7 +2,6 @@
 
 ## Purpose
 Define the CI evidence contract v2 schema and provenance requirements for governed release evidence artifacts, enabling machine-auditable test summaries, coverage summaries, and source artifact lineage in `CiPublish` outputs.
-
 ## Requirements
 ### Requirement: Release evidence snapshot SHALL use explicit schema version v2
 Governed release evidence artifacts in `CiPublish` MUST include an explicit `schemaVersion` field set to `2` and MUST expose deterministic core fields for test summary, coverage summary, and source artifact references.
@@ -65,3 +64,22 @@ Closeout snapshot v2 transition fields MUST match the repository roadmap machine
 #### Scenario: Snapshot phase ids drift from roadmap state
 - **WHEN** completed or active phase identifiers in the snapshot diverge from roadmap machine-checkable transition state
 - **THEN** evidence governance fails before release-readiness sign-off
+
+### Requirement: CI evidence v2 SHALL include release decision summary
+Release evidence under contract v2 MUST include a release decision summary section with deterministic `state` and timestamped evaluation context.
+
+#### Scenario: Ready decision summary is present
+- **WHEN** release orchestration passes all governed checks
+- **THEN** v2 evidence contains decision summary with `state = ready` and non-empty evaluation context
+
+#### Scenario: Blocked decision summary is present
+- **WHEN** release orchestration blocks publication
+- **THEN** v2 evidence contains decision summary with `state = blocked` and blocking reason references
+
+### Requirement: CI evidence v2 blocked summaries SHALL carry structured reason entries
+When release decision summary state is `blocked`, the evidence payload MUST include structured blocking reason entries with category, invariant/source reference, and expected-vs-actual fields.
+
+#### Scenario: Blocking reasons are machine-auditable
+- **WHEN** consumers parse blocked release evidence
+- **THEN** they can deterministically identify blocking categories and sources without free-text parsing
+
