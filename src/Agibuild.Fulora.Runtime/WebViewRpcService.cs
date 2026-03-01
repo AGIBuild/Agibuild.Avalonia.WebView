@@ -300,6 +300,8 @@ internal sealed class WebViewRpcService : IWebViewRpcService
                     var method = methodProp.GetString();
                     if (method is not null)
                     {
+                        // Mark request as active before scheduling async dispatch so early cancel notifications are not lost.
+                        _activeRequestIds[id!] = 0;
                         _ = DispatchRequestAsync(id!, method, root);
                         return true;
                     }
@@ -452,6 +454,8 @@ internal sealed class WebViewRpcService : IWebViewRpcService
             var method = methodProp.GetString();
             if (method is not null && id is not null)
             {
+                // Keep cancellation visibility consistent with single-request dispatch path.
+                _activeRequestIds[id] = 0;
                 return await DispatchTrackedRequestCoreAsync(id, method, root);
             }
         }

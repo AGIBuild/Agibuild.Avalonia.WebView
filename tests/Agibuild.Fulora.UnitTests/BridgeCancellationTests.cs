@@ -49,6 +49,7 @@ public sealed class BridgeCancellationTests
     [Fact]
     public void CancellationToken_method_does_not_report_AGBR004()
     {
+        var cancellationToken = TestContext.Current.CancellationToken;
         var source = """
             using Agibuild.Fulora;
             using System.Threading;
@@ -76,13 +77,17 @@ public sealed class BridgeCancellationTests
 
         var compilation = CSharpCompilation.Create(
             "TestAssembly",
-            [CSharpSyntaxTree.ParseText(source)],
+            [CSharpSyntaxTree.ParseText(source, cancellationToken: cancellationToken)],
             references,
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
         var generator = new WebViewBridgeGenerator();
         GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
-        driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out _, out var diagnostics);
+        driver = driver.RunGeneratorsAndUpdateCompilation(
+            compilation,
+            out _,
+            out var diagnostics,
+            cancellationToken);
 
         Assert.DoesNotContain(diagnostics, d => d.Id == "AGBR004");
         Assert.Contains(driver.GetRunResult().GeneratedTrees, t => t.FilePath.Contains("CancellableBridgeRegistration"));
@@ -91,6 +96,7 @@ public sealed class BridgeCancellationTests
     [Fact]
     public void Generated_TypeScript_includes_AbortSignal_option()
     {
+        var cancellationToken = TestContext.Current.CancellationToken;
         var source = """
             using Agibuild.Fulora;
             using System.Threading;
@@ -119,19 +125,23 @@ public sealed class BridgeCancellationTests
 
         var compilation = CSharpCompilation.Create(
             "TestAssembly",
-            [CSharpSyntaxTree.ParseText(source)],
+            [CSharpSyntaxTree.ParseText(source, cancellationToken: cancellationToken)],
             references,
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
         var generator = new WebViewBridgeGenerator();
         GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
-        driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out _, out _);
+        driver = driver.RunGeneratorsAndUpdateCompilation(
+            compilation,
+            out _,
+            out _,
+            cancellationToken);
 
         var tsTree = driver.GetRunResult().GeneratedTrees
             .FirstOrDefault(t => t.FilePath.Contains("BridgeTypeScriptDeclarations"));
 
         Assert.NotNull(tsTree);
-        var tsContent = tsTree!.GetText().ToString();
+        var tsContent = tsTree!.GetText(cancellationToken).ToString();
 
         Assert.Contains("signal?: AbortSignal", tsContent);
         Assert.Contains("search(query: string, options?: { signal?: AbortSignal }): Promise<string>", tsContent);
