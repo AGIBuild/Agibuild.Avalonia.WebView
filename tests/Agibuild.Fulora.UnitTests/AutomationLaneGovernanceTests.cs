@@ -232,9 +232,11 @@ public sealed class AutomationLaneGovernanceTests
         AssertFileExists(desktopProjectPath, TemplateMetadataSchema);
         var desktopProject = File.ReadAllText(desktopProjectPath);
 
-        AssertSourceContains(desktopProject, "<PackageReference Include=\"Agibuild.Fulora\"", TemplateMetadataSchema, desktopProjectPath);
+        AssertSourceContains(desktopProject, "<PackageReference Include=\"Agibuild.Fulora.Avalonia\"", TemplateMetadataSchema, desktopProjectPath);
         AssertSourceContains(desktopProject, "<PackageReference Include=\"Avalonia\"", TemplateMetadataSchema, desktopProjectPath);
         AssertSourceContains(desktopProject, "<PackageReference Include=\"Avalonia.Desktop\"", TemplateMetadataSchema, desktopProjectPath);
+        Assert.DoesNotContain("<PackageReference Include=\"Agibuild.Fulora\"",
+            desktopProject, StringComparison.Ordinal);
         Assert.DoesNotContain("Agibuild.Fulora.Core", desktopProject, StringComparison.Ordinal);
         Assert.DoesNotContain("Agibuild.Fulora.Runtime", desktopProject, StringComparison.Ordinal);
         Assert.DoesNotContain("Agibuild.Fulora.Adapters.Abstractions", desktopProject, StringComparison.Ordinal);
@@ -346,7 +348,7 @@ public sealed class AutomationLaneGovernanceTests
 
         Assert.DoesNotContain("ExternalOpenHandler", appShellPreset, StringComparison.Ordinal);
 
-        AssertSourceContains(desktopProject, "Agibuild.Fulora", TemplateMetadataSchema, desktopProjectPath);
+        AssertSourceContains(desktopProject, "Agibuild.Fulora.Avalonia", TemplateMetadataSchema, desktopProjectPath);
         Assert.DoesNotContain(".WithInterFont()", desktopProgram, StringComparison.Ordinal);
 
         var indexMarkers = new[]
@@ -1003,7 +1005,7 @@ public sealed class AutomationLaneGovernanceTests
         var governanceSource = File.ReadAllText(Path.Combine(repoRoot, "build", "Build.Governance.cs"));
         var mainSource = File.ReadAllText(Path.Combine(repoRoot, "build", "Build.cs"));
 
-        AssertSourceContains(governanceSource, "ResolvePackedAgibuildVersion(\"Agibuild.Fulora\")", StablePublishReadiness, "build/Build.Governance.cs");
+        AssertSourceContains(governanceSource, "ResolvePackedAgibuildVersion(\"Agibuild.Fulora.Avalonia\")", StablePublishReadiness, "build/Build.Governance.cs");
         AssertSourceContains(governanceSource, "isStableRelease", StablePublishReadiness, "build/Build.Governance.cs");
         AssertSourceContains(governanceSource, "decisionState = blockingReasons.Count == 0 ? \"ready\" : \"blocked\"", StablePublishReadiness, "build/Build.Governance.cs");
         AssertSourceContains(governanceSource, "if (string.Equals(decisionState, \"blocked\", StringComparison.Ordinal))", StablePublishReadiness, "build/Build.Governance.cs");

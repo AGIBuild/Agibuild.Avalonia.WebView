@@ -23,7 +23,7 @@
     <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.11" />
     <!-- *-* = always resolve the latest version (including prerelease) from configured sources.
          The nuget.config in this directory points to ../../artifacts/packages/ as a local feed. -->
-    <PackageReference Include="Agibuild.Fulora" Version="$(AgibuildPackageVersion)" />
+    <PackageReference Include="Agibuild.Fulora.Avalonia" Version="$(AgibuildPackageVersion)" />
     <PackageReference Include="Agibuild.Fulora.Core" Version="$(AgibuildPackageVersion)" />
     <PackageReference Include="Agibuild.Fulora.Bridge.Generator" Version="$(AgibuildPackageVersion)"
                       OutputItemType="Analyzer"

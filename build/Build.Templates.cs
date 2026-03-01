@@ -75,6 +75,17 @@ partial class BuildTask
                 Serilog.Log.Information("Creating SmokeApp from template...");
                 DotNet($"new agibuild-hybrid -n SmokeApp -o \"{projectDir}\" --shellPreset app-shell");
 
+                // Hard-cut invariant: generated desktop host references the Avalonia host package identity.
+                var desktopCsprojPath = projectDir / "SmokeApp.Desktop" / "SmokeApp.Desktop.csproj";
+                Assert.True(File.Exists(desktopCsprojPath), $"Generated desktop project not found: {desktopCsprojPath}");
+                var desktopCsproj = File.ReadAllText(desktopCsprojPath);
+                Assert.True(
+                    desktopCsproj.Contains("PackageReference Include=\"Agibuild.Fulora.Avalonia\"", StringComparison.Ordinal),
+                    "TemplateE2E expected generated desktop project to reference Agibuild.Fulora.Avalonia.");
+                Assert.True(
+                    !desktopCsproj.Contains("PackageReference Include=\"Agibuild.Fulora\"", StringComparison.Ordinal),
+                    "TemplateE2E detected legacy Agibuild.Fulora package reference in generated desktop project.");
+
                 // ── Step 4: Write nuget.config pointing to local feed ──
                 var nugetConfigPath = projectDir / "nuget.config";
                 var nugetConfigContent = $"""

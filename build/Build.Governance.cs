@@ -557,7 +557,7 @@ partial class BuildTask
 
             var canonicalPackageIds = new[]
             {
-                "Agibuild.Fulora",
+                "Agibuild.Fulora.Avalonia",
                 "Agibuild.Fulora.Core",
                 "Agibuild.Fulora.Runtime",
                 "Agibuild.Fulora.Adapters.Abstractions",
@@ -608,7 +608,7 @@ partial class BuildTask
             string? packedVersion = null;
             try
             {
-                packedVersion = ResolvePackedAgibuildVersion("Agibuild.Fulora");
+                packedVersion = ResolvePackedAgibuildVersion("Agibuild.Fulora.Avalonia");
             }
             catch (Exception ex)
             {
@@ -616,16 +616,17 @@ partial class BuildTask
                     category: "package-metadata",
                     invariantId: DistributionReadinessDecisionInvariantId,
                     sourceArtifact: "artifacts/packages",
-                    expected: "packed version resolved for Agibuild.Fulora",
+                    expected: "packed version resolved for Agibuild.Fulora.Avalonia",
                     actual: ex.Message);
             }
 
             var isStableRelease = packedVersion is not null && !packedVersion.Contains('-', StringComparison.Ordinal);
             if (isStableRelease)
             {
-                var mainPackagePrefix = "Agibuild.Fulora.";
+                const string primaryHostPackageId = "Agibuild.Fulora.Avalonia";
+                var mainPackagePrefix = $"{primaryHostPackageId}.";
                 var mainPackage = PackageOutputDirectory
-                    .GlobFiles("Agibuild.Fulora.*.nupkg")
+                    .GlobFiles($"{primaryHostPackageId}.*.nupkg")
                     .Where(path => !path.Name.EndsWith(".symbols.nupkg", StringComparison.OrdinalIgnoreCase))
                     .FirstOrDefault(path =>
                         path.Name.StartsWith(mainPackagePrefix, StringComparison.OrdinalIgnoreCase)
@@ -667,13 +668,23 @@ partial class BuildTask
                         var licenseExpr = metadata?.Element(ns + "license")?.Value;
                         var projectUrl = metadata?.Element(ns + "projectUrl")?.Value;
 
-                        if (string.IsNullOrWhiteSpace(id) || !id.StartsWith("Agibuild.Fulora", StringComparison.Ordinal))
+                        if (string.IsNullOrWhiteSpace(id) || !id.StartsWith("Agibuild.Fulora.", StringComparison.Ordinal))
                         {
                             AddFailure(
                                 category: "package-metadata",
                                 invariantId: StablePublishReadinessInvariantId,
                                 sourceArtifact: mainPackage.Name,
                                 expected: "stable package id uses canonical Agibuild.Fulora prefix",
+                                actual: id ?? "<null>");
+                        }
+
+                        if (!string.Equals(id, primaryHostPackageId, StringComparison.Ordinal))
+                        {
+                            AddFailure(
+                                category: "package-metadata",
+                                invariantId: StablePublishReadinessInvariantId,
+                                sourceArtifact: mainPackage.Name,
+                                expected: $"primary host package id = {primaryHostPackageId}",
                                 actual: id ?? "<null>");
                         }
 
@@ -1614,7 +1625,7 @@ partial class BuildTask
                 }
             }
 
-            var mainPackagePattern = "Agibuild.Fulora.*.nupkg";
+            var mainPackagePattern = "Agibuild.Fulora.Avalonia.*.nupkg";
             var hasCanonicalMainPackage = PackageOutputDirectory.GlobFiles(mainPackagePattern)
                 .Any(path => !path.Name.EndsWith(".symbols.nupkg", StringComparison.OrdinalIgnoreCase));
             if (!hasCanonicalMainPackage)
@@ -1630,7 +1641,7 @@ partial class BuildTask
             string? packedVersion = null;
             try
             {
-                packedVersion = ResolvePackedAgibuildVersion("Agibuild.Fulora");
+                packedVersion = ResolvePackedAgibuildVersion("Agibuild.Fulora.Avalonia");
             }
             catch (Exception ex)
             {
@@ -1638,7 +1649,7 @@ partial class BuildTask
                     category: "package-metadata",
                     invariantId: StablePublishReadinessInvariantId,
                     sourceArtifact: "artifacts/packages",
-                    expected: "packed version resolved for Agibuild.Fulora",
+                    expected: "packed version resolved for Agibuild.Fulora.Avalonia",
                     actual: ex.Message);
             }
 

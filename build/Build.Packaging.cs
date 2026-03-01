@@ -88,11 +88,13 @@ partial class BuildTask
 
             Assert.NotEmpty(nupkgFiles, "No .nupkg files found in output directory.");
 
-            var mainPackagePrefix = "Agibuild.Fulora.";
+            const string primaryHostPackageId = "Agibuild.Fulora.Avalonia";
+            var mainPackagePrefix = $"{primaryHostPackageId}.";
             var nupkgPath = nupkgFiles.FirstOrDefault(f =>
                     f.Name.StartsWith(mainPackagePrefix, StringComparison.OrdinalIgnoreCase)
+                    && f.Name.Length > mainPackagePrefix.Length
                     && char.IsDigit(f.Name[mainPackagePrefix.Length]))
-                ?? throw new Exception("Main package Agibuild.Fulora.*.nupkg not found in output directory.");
+                ?? throw new Exception($"Main package {primaryHostPackageId}.*.nupkg not found in output directory.");
             Serilog.Log.Information("Validating package: {Package}", nupkgPath.Name);
 
             using var archive = ZipFile.OpenRead(nupkgPath);
@@ -110,7 +112,7 @@ partial class BuildTask
                 ["lib/net10.0/Agibuild.Fulora.DependencyInjection.dll"] = "DI extensions",
                 ["lib/net10.0/Agibuild.Fulora.Adapters.Windows.dll"] = "Windows adapter",
                 ["lib/net10.0/Agibuild.Fulora.Adapters.Gtk.dll"] = "Linux GTK adapter",
-                ["buildTransitive/Agibuild.Fulora.targets"] = "MSBuild targets",
+                ["buildTransitive/Agibuild.Fulora.Avalonia.targets"] = "MSBuild targets",
                 ["README.md"] = "Package readme",
             };
 
@@ -268,7 +270,7 @@ partial class BuildTask
         .DependsOn(ValidatePackage)
         .Executes(() =>
         {
-            var packedVersion = ResolvePackedAgibuildVersion("Agibuild.Fulora");
+            var packedVersion = ResolvePackedAgibuildVersion("Agibuild.Fulora.Avalonia");
             Serilog.Log.Information("NuGet package smoke pinned to packed version: {Version}", packedVersion);
 
             var resolvedRoot = ResolveNugetPackagesRoot();
