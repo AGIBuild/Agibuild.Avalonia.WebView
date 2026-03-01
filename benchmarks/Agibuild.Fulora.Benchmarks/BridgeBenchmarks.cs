@@ -1,14 +1,10 @@
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
-using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Agibuild.Fulora.Benchmarks;
 
-/// <summary>
-/// Measures Bridge RPC round-trip latency for typed service calls.
-/// Uses a mock adapter so no real browser is involved — we measure the C# dispatch overhead.
-/// </summary>
 [MemoryDiagnoser]
 [SimpleJob(RuntimeMoniker.Net90)]
 public class BridgeBenchmarks
@@ -23,9 +19,36 @@ public class BridgeBenchmarks
         Task<int> Add(int a, int b);
     }
 
+    [JsExport]
+    public interface ICancellableBenchService
+    {
+        Task<string> Process(string input, CancellationToken ct);
+    }
+
+    [JsExport]
+    public interface IStreamBenchService
+    {
+        IAsyncEnumerable<int> StreamNumbers(int count);
+    }
+
     private sealed class CalcServiceImpl : ICalcService
     {
         public Task<int> Add(int a, int b) => Task.FromResult(a + b);
+    }
+
+    private sealed class CancellableBenchServiceImpl : ICancellableBenchService
+    {
+        public Task<string> Process(string input, CancellationToken ct) => Task.FromResult(input);
+    }
+
+    private sealed class StreamBenchServiceImpl : IStreamBenchService
+    {
+        public async IAsyncEnumerable<int> StreamNumbers(int count)
+        {
+            for (var i = 0; i < count; i++)
+                yield return i;
+            await Task.CompletedTask;
+        }
     }
 
     [GlobalSetup]
@@ -35,12 +58,12 @@ public class BridgeBenchmarks
         _adapter = new Testing.MockWebViewAdapter();
         _core = new WebViewCore(_adapter, _dispatcher);
 
-        // Enable bridge
         _core.EnableWebMessageBridge(new WebMessageBridgeOptions());
         _dispatcher.RunAll();
 
-        // Expose service
         _core.Bridge.Expose<ICalcService>(new CalcServiceImpl());
+        _core.Bridge.Expose<ICancellableBenchService>(new CancellableBenchServiceImpl());
+        _core.Bridge.Expose<IStreamBenchService>(new StreamBenchServiceImpl());
         _dispatcher.RunAll();
     }
 
@@ -50,9 +73,6 @@ public class BridgeBenchmarks
         _core.Dispose();
     }
 
-    /// <summary>
-    /// Simulates a JS→C# RPC call by sending a raw WebMessage and measuring dispatch time.
-    /// </summary>
     [Benchmark(Description = "Bridge: JS→C# typed call (Add)")]
     public async Task BridgeTypedCall()
     {
@@ -69,15 +89,44 @@ public class BridgeBenchmarks
         await Task.CompletedTask;
     }
 
-    /// <summary>
-    /// Measures the overhead of Expose + Remove cycle.
-    /// </summary>
     [Benchmark(Description = "Bridge: Expose + Remove cycle")]
     public void BridgeExposeRemoveCycle()
     {
         _core.Bridge.Expose<ICalcService>(new CalcServiceImpl());
         _dispatcher.RunAll();
         _core.Bridge.Remove<ICalcService>();
+    }
+
+    [Benchmark(Description = "Bridge: CancellationToken dispatch")]
+    public async Task BridgeCancellationDispatch()
+    {
+        var request = JsonSerializer.Serialize(new
+        {
+            jsonrpc = "2.0",
+            id = 2,
+            method = "CancellableBenchService.Process",
+            @params = new { input = "bench" }
+        });
+
+        _adapter.RaiseWebMessage(request, "app://localhost", Guid.Empty);
+        _dispatcher.RunAll();
+        await Task.CompletedTask;
+    }
+
+    [Benchmark(Description = "Bridge: IAsyncEnumerable streaming")]
+    public async Task BridgeStreamingDispatch()
+    {
+        var request = JsonSerializer.Serialize(new
+        {
+            jsonrpc = "2.0",
+            id = 3,
+            method = "StreamBenchService.StreamNumbers",
+            @params = new { count = 5 }
+        });
+
+        _adapter.RaiseWebMessage(request, "app://localhost", Guid.Empty);
+        _dispatcher.RunAll();
+        await Task.CompletedTask;
     }
 }
 

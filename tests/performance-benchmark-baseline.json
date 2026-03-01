@@ -1,6 +1,7 @@
 {
-  "version": 1,
+  "version": 2,
   "allowedRegressionPercent": 10.0,
+  "updatedAt": "2026-03-01",
   "metrics": [
     {
       "id": "typed-bridge-call-dispatch",
@@ -13,6 +14,14 @@
     {
       "id": "raw-rpc-dispatch",
       "baselineMs": 0.55
+    },
+    {
+      "id": "cancellation-token-dispatch",
+      "baselineMs": 0.85
+    },
+    {
+      "id": "async-enumerable-streaming",
+      "baselineMs": 1.50
     }
   ]
 }
