@@ -300,9 +300,12 @@ internal sealed class WebViewRpcService : IWebViewRpcService
                     var method = methodProp.GetString();
                     if (method is not null)
                     {
-                        // Mark request as active before scheduling async dispatch so early cancel notifications are not lost.
-                        _activeRequestIds[id!] = 0;
-                        _ = DispatchRequestAsync(id!, method, root);
+                        if (id is not null)
+                        {
+                            // Mark request as active before scheduling async dispatch so early cancel notifications are not lost.
+                            _activeRequestIds[id] = 0;
+                        }
+                        _ = DispatchRequestAsync(id, method, root);
                         return true;
                     }
                 }
@@ -316,9 +319,11 @@ internal sealed class WebViewRpcService : IWebViewRpcService
         return false;
     }
 
-    private async Task DispatchRequestAsync(string id, string method, JsonElement root)
+    private async Task DispatchRequestAsync(string? id, string method, JsonElement root)
     {
-        var responseJson = await DispatchTrackedRequestCoreAsync(id, method, root);
+        var responseJson = id is null
+            ? await DispatchRequestCoreAsync(id, method, root)
+            : await DispatchTrackedRequestCoreAsync(id, method, root);
         await SendResponseAsync(responseJson);
     }
 
@@ -336,7 +341,7 @@ internal sealed class WebViewRpcService : IWebViewRpcService
         }
     }
 
-    private async Task<string> DispatchRequestCoreAsync(string id, string method, JsonElement root)
+    private async Task<string> DispatchRequestCoreAsync(string? id, string method, JsonElement root)
     {
         JsonElement? paramsProp = root.TryGetProperty("params", out var p) ? p.Clone() : null;
 
@@ -345,16 +350,23 @@ internal sealed class WebViewRpcService : IWebViewRpcService
             if (_cancellableHandlers.TryGetValue(method, out var cancellableHandler))
             {
                 using var cts = new CancellationTokenSource();
-                RegisterCancellation(id, cts);
-                try
+                if (id is not null)
                 {
-                    var result = await cancellableHandler(paramsProp, cts.Token);
-                    return BuildSuccessResponseJson(id, result);
+                    RegisterCancellation(id, cts);
+                    try
+                    {
+                        var result = await cancellableHandler(paramsProp, cts.Token);
+                        return BuildSuccessResponseJson(id, result);
+                    }
+                    finally
+                    {
+                        UnregisterCancellation(id);
+                    }
                 }
-                finally
-                {
-                    UnregisterCancellation(id);
-                }
+
+                // For malformed requests with JSON null id, do not participate in cancellation tracking.
+                var nullIdResult = await cancellableHandler(paramsProp, CancellationToken.None);
+                return BuildSuccessResponseJson(id, nullIdResult);
             }
 
             if (!_handlers.TryGetValue(method, out var handler))
@@ -384,7 +396,7 @@ internal sealed class WebViewRpcService : IWebViewRpcService
 
     [UnconditionalSuppressMessage("Trimming", "IL2026",
         Justification = "RPC result serialization uses runtime types; the handler is responsible for type safety.")]
-    private string BuildSuccessResponseJson(string id, object? result)
+    private string BuildSuccessResponseJson(string? id, object? result)
     {
         var response = new RpcResponse
         {
