@@ -39,7 +39,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agibuild.Fulora.Runtime", "src\Agibuild.Fulora.Runtime\Agibuild.Fulora.Runtime.csproj", "{A66AD6F6-895E-49E8-9909-F0B0B2BDDFFC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agibuild.Fulora", "src\Agibuild.Fulora\Agibuild.Fulora.csproj", "{6C4EC49C-CE6E-44E7-8ACF-8A36EB246C96}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agibuild.Fulora.Avalonia", "src\Agibuild.Fulora.Avalonia\Agibuild.Fulora.Avalonia.csproj", "{6C4EC49C-CE6E-44E7-8ACF-8A36EB246C96}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agibuild.Fulora.Adapters.iOS", "src\Agibuild.Fulora.Adapters.iOS\Agibuild.Fulora.Adapters.iOS.csproj", "{D160712D-707E-4FFC-8AA5-A7E261BE19B3}"
 EndProject

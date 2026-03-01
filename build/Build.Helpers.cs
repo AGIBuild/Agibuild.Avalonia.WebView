@@ -385,7 +385,7 @@ partial class BuildTask
         }
 
         // Main packable project
-        yield return SrcDirectory / "Agibuild.Fulora" / "Agibuild.Fulora.csproj";
+        yield return SrcDirectory / "Agibuild.Fulora.Avalonia" / "Agibuild.Fulora.Avalonia.csproj";
 
         // Test projects
         yield return TestsDirectory / "Agibuild.Fulora.Testing" / "Agibuild.Fulora.Testing.csproj";

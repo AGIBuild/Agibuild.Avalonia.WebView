@@ -4,6 +4,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Agibuild.Fulora</RootNamespace>
+    <AssemblyName>Agibuild.Fulora</AssemblyName>
 
     <IsPackable>true</IsPackable>
     <PackageId>Agibuild.Fulora.Avalonia</PackageId>

@@ -101,7 +101,7 @@ partial class BuildTask : NukeBuild
     AbsolutePath CoverageReportDirectory => ArtifactsDirectory / "coverage-report";
 
     AbsolutePath PackProject =>
-        SrcDirectory / "Agibuild.Fulora" / "Agibuild.Fulora.csproj";
+        SrcDirectory / "Agibuild.Fulora.Avalonia" / "Agibuild.Fulora.Avalonia.csproj";
 
     AbsolutePath UnitTestsProject =>
         TestsDirectory / "Agibuild.Fulora.UnitTests" / "Agibuild.Fulora.UnitTests.csproj";

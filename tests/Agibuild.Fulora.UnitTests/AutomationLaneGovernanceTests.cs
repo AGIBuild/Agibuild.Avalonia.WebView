@@ -157,7 +157,7 @@ public sealed class AutomationLaneGovernanceTests
     {
         var repoRoot = FindRepoRoot();
         var adapterProjectPath = Path.Combine(repoRoot, "src", "Agibuild.Fulora.Adapters.Windows", "Agibuild.Fulora.Adapters.Windows.csproj");
-        var packProjectPath = Path.Combine(repoRoot, "src", "Agibuild.Fulora", "Agibuild.Fulora.csproj");
+        var packProjectPath = Path.Combine(repoRoot, "src", "Agibuild.Fulora.Avalonia", "Agibuild.Fulora.Avalonia.csproj");
 
         AssertFileExists(adapterProjectPath, WebView2ReferenceModel);
         AssertFileExists(packProjectPath, WebView2ReferenceModel);
@@ -208,9 +208,9 @@ public sealed class AutomationLaneGovernanceTests
 
         var hostLayerSourceFiles = new[]
         {
-            Path.Combine(repoRoot, "src", "Agibuild.Fulora", "WebView.cs"),
-            Path.Combine(repoRoot, "src", "Agibuild.Fulora", "AvaloniaWebDialog.cs"),
-            Path.Combine(repoRoot, "src", "Agibuild.Fulora", "AppBuilderExtensions.cs")
+            Path.Combine(repoRoot, "src", "Agibuild.Fulora.Avalonia", "WebView.cs"),
+            Path.Combine(repoRoot, "src", "Agibuild.Fulora.Avalonia", "AvaloniaWebDialog.cs"),
+            Path.Combine(repoRoot, "src", "Agibuild.Fulora.Avalonia", "AppBuilderExtensions.cs")
         };
         foreach (var sourceFile in hostLayerSourceFiles)
             AssertFileExists(sourceFile, HostNeutralDependencyBoundary);
@@ -748,7 +748,7 @@ public sealed class AutomationLaneGovernanceTests
         AssertSourceContains(props, "<PackageLicenseExpression>", PackageMetadata, directoryBuildPropsPath);
         AssertSourceContains(props, "<PackageProjectUrl>", PackageMetadata, directoryBuildPropsPath);
 
-        var mainCsprojPath = Path.Combine(repoRoot, "src", "Agibuild.Fulora", "Agibuild.Fulora.csproj");
+        var mainCsprojPath = Path.Combine(repoRoot, "src", "Agibuild.Fulora.Avalonia", "Agibuild.Fulora.Avalonia.csproj");
         AssertFileExists(mainCsprojPath, PackageMetadata);
 
         var csproj = File.ReadAllText(mainCsprojPath);

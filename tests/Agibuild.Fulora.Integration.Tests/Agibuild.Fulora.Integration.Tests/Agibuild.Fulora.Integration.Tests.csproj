@@ -29,7 +29,7 @@
     <ProjectReference Include="..\..\..\src\Agibuild.Fulora.Core\Agibuild.Fulora.Core.csproj" />
     <ProjectReference Include="..\..\..\src\Agibuild.Fulora.Adapters.Abstractions\Agibuild.Fulora.Adapters.Abstractions.csproj" />
     <ProjectReference Include="..\..\..\src\Agibuild.Fulora.Runtime\Agibuild.Fulora.Runtime.csproj" />
-    <ProjectReference Include="..\..\..\src\Agibuild.Fulora\Agibuild.Fulora.csproj" />
+    <ProjectReference Include="..\..\..\src\Agibuild.Fulora.Avalonia\Agibuild.Fulora.Avalonia.csproj" />
     <ProjectReference Include="..\..\Agibuild.Fulora.Testing\Agibuild.Fulora.Testing.csproj" />
     <ProjectReference Include="..\..\..\src\Agibuild.Fulora.Bridge.Generator\Agibuild.Fulora.Bridge.Generator.csproj"
                       OutputItemType="Analyzer"

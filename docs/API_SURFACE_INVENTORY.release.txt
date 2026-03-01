@@ -670,7 +670,7 @@ type Agibuild.Fulora.WebViewEnvironmentOptions
 --------------------------------------------------------------------------------
 
 Assembly: Agibuild.Fulora
-Path: <repo>\src\Agibuild.Fulora\bin\Release\net10.0\Agibuild.Fulora.dll
+Path: <repo>\src\Agibuild.Fulora.Avalonia\bin\Release\net10.0\Agibuild.Fulora.dll
 PublicTypes: 5
 
 type Agibuild.Fulora.AppBuilderExtensions

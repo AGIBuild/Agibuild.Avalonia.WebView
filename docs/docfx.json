@@ -6,7 +6,7 @@
           "files": [
             "src/Agibuild.Fulora.Core/Agibuild.Fulora.Core.csproj",
             "src/Agibuild.Fulora.Runtime/Agibuild.Fulora.Runtime.csproj",
-            "src/Agibuild.Fulora/Agibuild.Fulora.csproj"
+            "src/Agibuild.Fulora.Avalonia/Agibuild.Fulora.Avalonia.csproj"
           ],
           "src": ".."
         }
