@@ -3,16 +3,25 @@
 ## Purpose
 Define machine-checkable roadmap phase transition and closeout evidence mapping contracts for deterministic governance rollover.
 ## Requirements
-### Requirement: Roadmap phase rollover SHALL remain machine-checkable and deterministic
-The roadmap SHALL publish one completed phase id and one active phase id in stable machine-checkable marker format, and phase rollover updates MUST move both markers together as one atomic baseline transition.
+### Requirement: ROADMAP phase transition markers track completed and active phases
 
-#### Scenario: Adjacent phase rollover succeeds
-- **WHEN** governance baseline advances from one phase transition pair to the next
-- **THEN** roadmap markers expose exactly one updated completed phase id and one updated active phase id in stable marker format
+The ROADMAP SHALL contain machine-checkable transition markers identifying exactly one completed phase and one active phase. The completed phase id SHALL be `phase8-bridge-v2-parity` and the active phase id SHALL be `phase9-ga-release-readiness`.
 
-#### Scenario: Partial marker update is rejected
-- **WHEN** only completed or active marker is changed during phase rollover
-- **THEN** governance assertions fail deterministically before release closeout evidence is accepted
+#### Scenario: Transition markers reflect Phase 8 completed and Phase 9 active
+
+- **WHEN** the ROADMAP Phase Transition Status section is read
+- **THEN** it SHALL contain `Completed phase id: \`phase8-bridge-v2-parity\``
+- **AND** it SHALL contain `Active phase id: \`phase9-ga-release-readiness\``
+
+#### Scenario: Phase 8 header shows completed status
+
+- **WHEN** the ROADMAP Phase 8 section header is read
+- **THEN** it SHALL contain `(✅ Completed)` status marker
+
+#### Scenario: Phase 8 closeout evidence lists archived change IDs
+
+- **WHEN** the ROADMAP Phase 8 section is read
+- **THEN** it SHALL list OpenSpec archive change IDs covering M8.1–M8.9 milestones
 
 ### Requirement: Closeout evidence mapping SHALL align with completed phase artifacts
 Roadmap closeout evidence references MUST map to archived changes that belong to the completed phase baseline used by transition governance, and MUST remain synchronized with the release closeout snapshot transition baseline constants.

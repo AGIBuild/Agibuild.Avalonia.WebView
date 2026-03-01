@@ -15,24 +15,23 @@ Parity SHALL be evaluated by invariant-defined target groups so lane-specific na
 - **WHEN** a closeout-critical transition-gate group exists in one lane but is missing or unmapped in the other lane
 - **THEN** governance fails with deterministic diagnostics before release progression
 
-### Requirement: Transition metadata continuity SHALL remain phase-semantic and lane-consistent
-Closeout transition governance MUST assert that `completedPhase` and `activePhase` metadata remain semantically consistent with machine-checkable roadmap transition state, MUST remain consistent with lane provenance context, and MUST be updated as an adjacent pair when roadmap baseline rolls to the next phase.
+### Requirement: Continuous transition gate enforces completed and active phase pair
 
-#### Scenario: Semantic continuity passes
-- **WHEN** closeout snapshot transition metadata matches roadmap machine-checkable transition state and lane provenance context
-- **THEN** transition continuity governance passes
+The `ContinuousTransitionGateGovernance` target and `AutomationLaneGovernanceTests` SHALL enforce that the completed phase is `phase8-bridge-v2-parity` and the active phase is `phase9-ga-release-readiness`. Closeout change ID assertions SHALL reference Phase 8 archive entries.
 
-#### Scenario: Semantic continuity mismatch fails
-- **WHEN** snapshot transition metadata diverges from roadmap machine-checkable transition state or lane provenance context
-- **THEN** governance fails with deterministic transition continuity diagnostics
+#### Scenario: Build.Governance.cs constants reflect Phase 8 → Phase 9 transition
 
-#### Scenario: Non-adjacent or partial rollover is rejected
-- **WHEN** completed/active phase metadata does not represent a single adjacent rollover pair from roadmap baseline
-- **THEN** transition continuity governance fails before release evidence acceptance
+- **WHEN** the `ReleaseCloseoutSnapshot` target executes
+- **THEN** the `completedPhase` constant SHALL be `"phase8-bridge-v2-parity"`
+- **AND** the `activePhase` constant SHALL be `"phase9-ga-release-readiness"`
+- **AND** the `completedPhaseCloseoutChangeIds` array SHALL contain Phase 8 archive change IDs
 
-#### Scenario: Stale completed-phase closeout references fail parity
-- **WHEN** transition metadata is updated to a new adjacent baseline but closeout archive references remain pinned to the previous completed phase
-- **THEN** continuous transition gate governance reports deterministic parity failures and blocks release progression
+#### Scenario: Governance unit test asserts Phase 8 → Phase 9 markers in ROADMAP
+
+- **WHEN** `Phase_transition_roadmap_and_shell_governance_artifacts_remain_consistent` executes
+- **THEN** it SHALL assert ROADMAP contains `Completed phase id: \`phase8-bridge-v2-parity\``
+- **AND** it SHALL assert ROADMAP contains `Active phase id: \`phase9-ga-release-readiness\``
+- **AND** it SHALL assert ROADMAP contains Phase 8 closeout archive change IDs
 
 ### Requirement: Continuous transition gate failures SHALL emit lane-aware invariant diagnostics
 Any continuous transition gate failure MUST emit machine-readable diagnostics including invariant id, lane context, artifact path, and expected-vs-actual transition-gate values.

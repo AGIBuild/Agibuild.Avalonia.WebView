@@ -8,29 +8,21 @@
 ## Phase Overview
 
 ```
-Phase 0 (✅ Done)        Phase 1 (✅ Done)       Phase 2 (✅ Core Done)  Phase 3 (✅ Done)      Phase 4 (✅ Done)      Phase 5 (✅ Completed)        Phase 6 (✅ Completed)         Phase 7 (✅ Completed)       Phase 8 (🚧 Active)
-Foundation               Type-Safe Bridge       SPA Hosting            Polish & GA            Application Shell       Framework Positioning Foundation Governance Productization        Release Orchestration      Bridge V2 & Platform Parity
-─────────────────────    ────────────────────   ────────────────────   ────────────────────   ────────────────────    ───────────────────────────────── ─────────────────────────────── ─────────────────────────   ─────────────────────────────
-• Cross-platform         • Source Generator     • Custom protocol      • Project template      • Shell policy kit      • Typed capability gateway
-  adapters (5 platforms)   for C# → JS proxy      file serving        • API docs site           (new window/download/ • Policy-first execution model
-• Full-control           • Source Generator     • Embedded resource    • Performance             permission/session)   • Agent-friendly diagnostics
-  navigation               for JS → C# proxy     provider               benchmarks             • Multi-window lifecycle • Web-first template flow
-• WebMessage bridge      • TypeScript .d.ts     • Dev mode HMR proxy   • GA release            • Host capability bridge • Pain-point-driven governance
-  with policy              generation           • SPA router fallback    readiness review         (clipboard/file dialogs/
-• Cookies, Commands,     • Bridge security      • Bridge + SPA         • Breaking change         external open/notify)
-  Screenshot, PDF,         integration            integration            audit                  • Shell presets in template
+Phase 0 (✅ Done)        Phase 1 (✅ Done)       Phase 2 (✅ Core Done)  Phase 3 (✅ Done)      Phase 4 (✅ Done)      Phase 5 (✅ Completed)        Phase 6 (✅ Completed)         Phase 7 (✅ Completed)       Phase 8 (✅ Completed)                Phase 9 (🚧 Active)
+Foundation               Type-Safe Bridge       SPA Hosting            Polish & GA            Application Shell       Framework Positioning Foundation Governance Productization        Release Orchestration      Bridge V2 & Platform Parity          GA Release Readiness
+─────────────────────    ────────────────────   ────────────────────   ────────────────────   ────────────────────    ───────────────────────────────── ─────────────────────────────── ─────────────────────────   ─────────────────────────────────   ─────────────────────────
+• Cross-platform         • Source Generator     • Custom protocol      • Project template      • Shell policy kit      • Typed capability gateway                                                                 • Bridge diagnostics safety net     • API surface freeze
+  adapters (5 platforms)   for C# → JS proxy      file serving        • API docs site           (new window/download/ • Policy-first execution model                                                                • Cancellation + streaming parity   • npm bridge publication
+• Full-control           • Source Generator     • Embedded resource    • Performance             permission/session)   • Agent-friendly diagnostics                                                                  • Overloads and generic boundaries  • Performance re-baseline
+  navigation               for JS → C# proxy     provider               benchmarks             • Multi-window lifecycle • Web-first template flow                                                                    • Binary payload (byte[] ↔ Uint8Array)• Changelog & release notes
+• WebMessage bridge      • TypeScript .d.ts     • Dev mode HMR proxy   • GA release            • Host capability bridge • Pain-point-driven governance                                                                • SPA asset hot update              • Migration guide
+  with policy              generation           • SPA router fallback    readiness review         (clipboard/file dialogs/                                                                                             • Shell activation orchestration    • 1.0.0 stable release
+• Cookies, Commands,     • Bridge security      • Bridge + SPA         • Breaking change         external open/notify)                                                                                                 • Deep-link native registration
+  Screenshot, PDF,         integration            integration            audit                  • Shell presets in template                                                                                             • Platform feature parity closure
   RPC, Zoom, Find,       • MockBridge for       • Sample: Avalonia     • GTK/Linux             • Stress + soak automation
   Preload, ContextMenu     unit testing           + React app            smoke validation
 • 1113 CT + 180 IT       • Migration path       • Sample: Avalonia
 • WebDialog, Auth          from raw RPC           + Vue app
-                                                                                                                           • Bridge diagnostics safety net
-                                                                                                                           • Cancellation + streaming parity
-                                                                                                                           • Overloads and generic boundaries
-                                                                                                                           • Binary payload (byte[] ↔ Uint8Array)
-                                                                                                                           • SPA asset hot update (signature + rollback)
-                                                                                                                           • Shell activation orchestration
-                                                                                                                           • Deep-link native registration
-                                                                                                                           • Platform feature parity closure
 ```
 
 ---
@@ -476,8 +468,8 @@ dotnet new agibuild-hybrid -n MyApp --frontend react
 
 ### Phase Transition Status (Machine-checkable)
 
-- Completed phase id: `phase7-release-orchestration`
-- Active phase id: `phase8-bridge-v2-parity`
+- Completed phase id: `phase8-bridge-v2-parity`
+- Active phase id: `phase9-ga-release-readiness`
 - Closeout snapshot artifact: `artifacts/test-results/closeout-snapshot.json`
 
 ## Phase 6: Governance Productization (✅ Completed)
@@ -539,7 +531,7 @@ dotnet new agibuild-hybrid -n MyApp --frontend react
 - Stable publish path is blocked deterministically on distribution/adoption/governance failures.
 - Release orchestration diagnostics provide invariant-linked expected-vs-actual entries for CI triage.
 
-## Phase 8: Bridge V2 & Platform Parity (🚧 Active)
+## Phase 8: Bridge V2 & Platform Parity (✅ Completed)
 
 **Goal**: Consolidate Bridge V2 expressiveness and platform feature parity into a deterministic baseline suitable for the next release train.
 
@@ -555,31 +547,78 @@ dotnet new agibuild-hybrid -n MyApp --frontend react
 | **M8.6 SPA Asset Hot Update** | Signed package install, activation, rollback | Production-ready SPA version management with signature verification | ✅ Done |
 | **M8.7 Shell Activation Orchestration** | Single-instance ownership and forwarding | Primary/secondary activation coordination with deterministic dispatch | ✅ Done |
 | **M8.8 Deep-link Native Registration** | OS-level URI scheme registration and ingestion | Policy-governed, idempotent activation pipeline from native entrypoint | ✅ Done |
-| **M8.9 Platform Feature Parity** | Adapter feature gap closure and compatibility updates | Auditable cross-platform parity baseline | 🚧 In Progress |
+| **M8.9 Platform Feature Parity** | Adapter feature gap closure and compatibility updates | Auditable cross-platform parity baseline | ✅ Done |
 
 ### Latest Evidence Snapshot
 
 - `nuke Test`: Unit `1113`, Integration `180`, Total `1293` (pass)
-- OpenSpec archive evidence:
-  - `2026-02-28-bridge-cancellation-token-support`
-  - `2026-02-28-bridge-async-enumerable-streaming`
-  - `2026-02-28-bridge-generics-overloads`
-  - `2026-03-01-phase9-functional-triple-track` (binary payload, activation orchestration, SPA hot update)
-  - `2026-03-01-deep-link-native-registration`
+- `nuke ReleaseOrchestrationGovernance`: all targets pass
+
+### OpenSpec Archive Evidence
+
+- `2026-02-28-bridge-diagnostics-safety-net` (M8.1)
+- `2026-02-28-bridge-cancellation-token-support` (M8.2)
+- `2026-02-28-bridge-async-enumerable-streaming` (M8.3)
+- `2026-02-28-bridge-generics-overloads` (M8.4)
+- `2026-03-01-phase9-functional-triple-track` (M8.5 binary payload, M8.6 SPA hot update, M8.7 activation orchestration)
+- `2026-03-01-deep-link-native-registration` (M8.8)
+- `2026-02-28-platform-feature-parity` (M8.9)
+- `2026-02-28-phase7-closeout-phase8-reconciliation` (Phase 7→8 transition)
+
+### Evidence Source Mapping
+
+- Bridge V2 closeout: archived changes covering M8.1–M8.5
+- Shell activation + deep-link closeout: archived changes covering M8.6–M8.8
+- Platform parity closeout: `openspec/changes/archive/2026-02-28-platform-feature-parity/`
+- Validation command baseline: `nuke Test`, `nuke Coverage`, `openspec validate --all --strict`
+
+### Phase 8 Exit Criteria
+
+- All Bridge V2 capabilities (cancellation, streaming, overloads, binary payload) have CT + IT coverage.
+- SPA asset hot update with signature verification and rollback is production-ready.
+- Shell activation orchestration and deep-link native registration are policy-governed.
+- Platform feature parity gaps are documented in compatibility matrix with clear status markers.
+- All M8.1–M8.9 milestones completed and archived.
+
+---
+
+## Phase 9: GA Release Readiness (🚧 Active)
+
+**Goal**: Convert the fully-featured preview framework into a 1.0 stable release with frozen API surface, published npm package, updated performance baselines, and structured release artifacts.
+
+### Milestones
+
+| Milestone | Focus | Outcome | Status |
+|---|---|---|---|
+| **M9.1 Phase 8 Evidence Closeout** | Final closeout snapshot with Phase 8 evidence | Machine-checkable transition from Phase 8 → Phase 9 | 🚧 In Progress |
+| **M9.2 API Surface Freeze** | Breaking change audit and semver 1.0.0 commitment | Stable public API surface with no preview-breaking changes | Planned |
+| **M9.3 npm Bridge Publication** | `@agibuild/bridge` published to npm registry | Frontend developers can `npm install @agibuild/bridge` | Planned |
+| **M9.4 Performance Re-baseline** | Updated benchmarks after Phase 8 changes | Current bridge latency, SPA load, and memory baselines | Planned |
+| **M9.5 Changelog & Release Notes** | Structured changelog from v0.1.0-preview to v1.0.0 | Auditable release history for adopters | Planned |
+| **M9.6 Migration Guide** | Electron/Tauri → Fulora migration documentation | Actionable migration path for target adopters | Planned |
+| **M9.7 Stable Release Gate** | 1.0.0 stable NuGet + npm publish | Production-ready stable release | Planned |
+
+### Phase 9 Exit Criteria
+
+- Package version has no preview suffix (1.0.0).
+- `@agibuild/bridge` is published to npm with matching version.
+- Structured changelog artifact exists and covers all phases.
+- All governance targets pass with stable release configuration.
+- Migration guide covers at least one alternative framework (Electron or Tauri).
 
 ---
 
 ## Dependencies & Prerequisites
 
 ```
-Phase 0 (✅ Done) ──► Phase 1 (✅ Done) ──► Phase 2 (✅ Core Done) ──► Phase 3 (✅ Done) ──► Phase 4 (✅ Done) ──► Phase 5 (✅ Completed) ──► Phase 6 (✅ Completed) ──► Phase 7 (✅ Completed) ──► Phase 8 (🚧 Active)
+Phase 0 (✅ Done) ──► Phase 1 (✅ Done) ──► Phase 2 (✅ Core Done) ──► Phase 3 (✅ Done) ──► Phase 4 (✅ Done) ──► Phase 5 (✅ Completed) ──► Phase 6 (✅ Completed) ──► Phase 7 (✅ Completed) ──► Phase 8 (✅ Completed) ──► Phase 9 (🚧 Active)
      │                      │                       │                         │                         │                                   │
      │                      │                       └── 2.4 depends on Phase 1│                         └── framework-positioning baseline    └── release orchestration builds on deterministic transition governance
      │                      └── Builds on F6 (RPC) + F3 (Policy)             └── Shell layer builds on stable GA baseline
      └── F4 (WebResource) used by Phase 2                                       and reuses bridge/policy/testability core
 ```
 
-Phase 1 and Phase 2 are mostly independent in implementation but compose together. Phase 4 depends on completed GA-grade stability from Phase 3 and focuses on product-level shell capabilities. Phase 5 pivots from "host count" to "framework positioning + dual-path adoption" with web-first developer productivity and AI-agent operability as primary outcomes. Phase 6 productizes transition governance baselines, Phase 7 closes release orchestration governance, and Phase 8 focuses on Bridge V2 expressiveness and platform parity consolidation.
+Phase 1 and Phase 2 are mostly independent in implementation but compose together. Phase 4 depends on completed GA-grade stability from Phase 3 and focuses on product-level shell capabilities. Phase 5 pivots from "host count" to "framework positioning + dual-path adoption" with web-first developer productivity and AI-agent operability as primary outcomes. Phase 6 productizes transition governance baselines, Phase 7 closes release orchestration governance, Phase 8 closes Bridge V2 expressiveness and platform parity consolidation, and Phase 9 targets 1.0 GA release readiness.
 
 ---
 

@@ -688,16 +688,21 @@ public sealed class AutomationLaneGovernanceTests
         var roadmap = File.ReadAllText(roadmapPath);
         Assert.Matches(new Regex(@"## Phase \d+: .+\(✅ Completed\)", RegexOptions.Multiline), roadmap);
         Assert.Matches(new Regex(@"## Phase \d+: .+\(🚧 Active\)", RegexOptions.Multiline), roadmap);
-        AssertSourceContains(roadmap, "Completed phase id: `phase7-release-orchestration`", PhaseTransitionConsistency, roadmapPath);
-        AssertSourceContains(roadmap, "Active phase id: `phase8-bridge-v2-parity`", PhaseTransitionConsistency, roadmapPath);
+        AssertSourceContains(roadmap, "Completed phase id: `phase8-bridge-v2-parity`", PhaseTransitionConsistency, roadmapPath);
+        AssertSourceContains(roadmap, "Active phase id: `phase9-ga-release-readiness`", PhaseTransitionConsistency, roadmapPath);
         AssertSourceContains(roadmap, "Closeout snapshot artifact: `artifacts/test-results/closeout-snapshot.json`", PhaseTransitionConsistency, roadmapPath);
         AssertSourceContains(roadmap, "### Evidence Source Mapping", PhaseTransitionConsistency, roadmapPath);
 
         var completedPhaseCloseoutChangeIds = new[]
         {
-            "2026-02-28-phase7-release-orchestration-foundation",
-            "2026-02-28-phase7-packaging-distribution-determinism",
-            "2026-02-28-phase7-adoption-readiness-signals"
+            "2026-02-28-bridge-diagnostics-safety-net",
+            "2026-02-28-bridge-cancellation-token-support",
+            "2026-02-28-bridge-async-enumerable-streaming",
+            "2026-02-28-bridge-generics-overloads",
+            "2026-03-01-phase9-functional-triple-track",
+            "2026-03-01-deep-link-native-registration",
+            "2026-02-28-platform-feature-parity",
+            "2026-02-28-phase7-closeout-phase8-reconciliation"
         };
         foreach (var changeId in completedPhaseCloseoutChangeIds)
             AssertSourceContains(roadmap, changeId, PhaseTransitionConsistency, roadmapPath);
