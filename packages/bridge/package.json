@@ -1,6 +1,6 @@
 {
   "name": "@agibuild/bridge",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Typed bridge client runtime for Agibuild.Fulora — call C# services from JavaScript with full type safety.",
   "type": "module",
   "main": "./dist/index.js",

@@ -22,7 +22,7 @@
          Examples: v0.2.0-preview, v0.2.1-preview, v1.0.0 -->
     <MinVerTagPrefix>v</MinVerTagPrefix>
     <MinVerDefaultPreReleaseIdentifiers>preview</MinVerDefaultPreReleaseIdentifiers>
-    <MinVerMinimumMajorMinor>0.1</MinVerMinimumMajorMinor>
+    <MinVerMinimumMajorMinor>1.0</MinVerMinimumMajorMinor>
   </PropertyGroup>
 
   <!-- MinVer package: conditional on CPM vs non-CPM projects -->

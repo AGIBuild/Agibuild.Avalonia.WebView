@@ -596,7 +596,7 @@ dotnet new agibuild-hybrid -n MyApp --frontend react
 | **M9.4 Performance Re-baseline** | Updated benchmarks after Phase 8 changes | Current bridge latency, SPA load, and memory baselines | ✅ Done |
 | **M9.5 Changelog & Release Notes** | Structured changelog from v0.1.0-preview to v1.0.0 | Auditable release history for adopters | ✅ Done |
 | **M9.6 Migration Guide** | Electron/Tauri → Fulora migration documentation | Actionable migration path for target adopters | ✅ Done |
-| **M9.7 Stable Release Gate** | 1.0.0 stable NuGet + npm publish | Production-ready stable release | Planned |
+| **M9.7 Stable Release Gate** | 1.0.0 stable NuGet + npm publish | Production-ready stable release | ✅ Done |
 
 ### Phase 9 Exit Criteria
 
