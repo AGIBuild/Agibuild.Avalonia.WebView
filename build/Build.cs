@@ -161,6 +161,10 @@ partial class BuildTask : NukeBuild
     AbsolutePath ReactWebDirectory => ReactSampleDirectory / "AvaloniReact.Web";
     AbsolutePath ReactDesktopProject => ReactSampleDirectory / "AvaloniReact.Desktop" / "AvaloniReact.Desktop.csproj";
 
+    AbsolutePath VueSampleDirectory => RootDirectory / "samples" / "avalonia-vue";
+    AbsolutePath VueWebDirectory => VueSampleDirectory / "AvaloniVue.Web";
+    AbsolutePath VueDesktopProject => VueSampleDirectory / "AvaloniVue.Desktop" / "AvaloniVue.Desktop.csproj";
+
     // ──────────────────────────────── Core Lifecycle ────────────────────────────────────
 
     Target Clean => _ => _

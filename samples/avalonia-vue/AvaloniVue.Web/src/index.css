@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+/* Use class-based dark mode (.dark on <html>) instead of @media prefers-color-scheme. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Allow root font-size to be controlled by JS (Settings page). */
+html {
+  font-size: var(--app-font-size, 16px);
+}

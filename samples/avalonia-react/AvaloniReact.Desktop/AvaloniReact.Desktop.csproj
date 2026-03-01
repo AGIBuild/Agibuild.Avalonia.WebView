@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Agibuild.Fulora.Avalonia" Version="0.1.17-preview" />
+    <PackageReference Include="Agibuild.Fulora.Avalonia" Version="0.1.21-preview" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>MinimalHybrid.Bridge</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Agibuild.Fulora.Core" Version="0.1.21-preview" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Agibuild.Fulora.Bridge.Generator" Version="0.1.21-preview"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+</Project>

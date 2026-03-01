@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <RootNamespace>MinimalHybrid.Desktop</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.*" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.*" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Agibuild.Fulora.Avalonia" Version="0.1.21-preview" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MinimalHybrid.Bridge\MinimalHybrid.Bridge.csproj" />
+  </ItemGroup>
+
+  <!-- Embed static wwwroot for release builds -->
+  <ItemGroup>
+    <EmbeddedResource Include="..\wwwroot\**\*" LinkBase="wwwroot" />
+  </ItemGroup>
+
+</Project>

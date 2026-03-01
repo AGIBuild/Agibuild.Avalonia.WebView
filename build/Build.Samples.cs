@@ -78,17 +78,17 @@ partial class BuildTask
         };
     }
 
-    void EnsureReactDepsInstalled()
+    void EnsureSampleWebDepsInstalled(AbsolutePath webDirectory)
     {
-        Assert.DirectoryExists(ReactWebDirectory, $"React web project not found at {ReactWebDirectory}.");
-        EnsureNpmAvailable(ReactWebDirectory);
+        Assert.DirectoryExists(webDirectory, $"Web project not found at {webDirectory}.");
+        EnsureNpmAvailable(webDirectory);
 
-        var nodeModules = ReactWebDirectory / "node_modules";
+        var nodeModules = webDirectory / "node_modules";
         var bridgeRuntimeEntry = nodeModules / "@agibuild" / "bridge" / "dist" / "index.js";
         if (!Directory.Exists(nodeModules))
         {
-            Serilog.Log.Information("node_modules not found, running npm install...");
-            RunNpmProcess("install", workingDirectory: ReactWebDirectory, timeoutMs: 120_000);
+            Serilog.Log.Information("node_modules not found in {Dir}, running npm install...", webDirectory);
+            RunNpmProcess("install", workingDirectory: webDirectory, timeoutMs: 120_000);
             Serilog.Log.Information("npm install completed.");
             return;
         }
@@ -96,7 +96,7 @@ partial class BuildTask
         if (!File.Exists(bridgeRuntimeEntry))
         {
             Serilog.Log.Information("Bridge runtime entry not found at {Path}, refreshing npm install...", bridgeRuntimeEntry);
-            RunNpmProcess("install", workingDirectory: ReactWebDirectory, timeoutMs: 120_000);
+            RunNpmProcess("install", workingDirectory: webDirectory, timeoutMs: 120_000);
             Serilog.Log.Information("npm install completed.");
         }
     }
@@ -128,71 +128,86 @@ partial class BuildTask
         throw new TimeoutException($"{url} did not become available within {timeoutSeconds}s.");
     }
 
+    void StartDevServer(AbsolutePath webDirectory, int port)
+    {
+        EnsureSampleWebDepsInstalled(webDirectory);
+
+        Serilog.Log.Information("Starting Vite dev server on http://localhost:{Port} ...", port);
+        var process = new Process
+        {
+            StartInfo = CreateNpmProcessStartInfo("run dev", webDirectory, redirectStdout: false, redirectStderr: false)
+        };
+        process.Start();
+        process.WaitForExit();
+
+        if (process.ExitCode != 0)
+            Serilog.Log.Warning("Vite dev server exited with code {Code}.", process.ExitCode);
+    }
+
+    void StartDesktopApp(AbsolutePath desktopProject, AbsolutePath webDirectory, int devPort)
+    {
+        Assert.FileExists(desktopProject, $"Desktop project not found at {desktopProject}.");
+
+        Process? viteProcess = null;
+
+        if (string.Equals(Configuration, "Debug", StringComparison.OrdinalIgnoreCase))
+        {
+            var devUrl = $"http://localhost:{devPort}";
+            if (IsHttpReady(devUrl))
+            {
+                Serilog.Log.Information("Vite dev server already running on port {Port}.", devPort);
+            }
+            else
+            {
+                EnsureSampleWebDepsInstalled(webDirectory);
+
+                Serilog.Log.Information("Starting Vite dev server in background...");
+                viteProcess = new Process
+                {
+                    StartInfo = CreateNpmProcessStartInfo("run dev", webDirectory, redirectStdout: false, redirectStderr: false)
+                };
+                viteProcess.Start();
+
+                WaitForPort(devPort, timeoutSeconds: 60);
+                Serilog.Log.Information("Vite dev server is ready on http://localhost:{Port}", devPort);
+            }
+        }
+
+        try
+        {
+            DotNetRun(s => s
+                .SetProjectFile(desktopProject)
+                .SetConfiguration(Configuration));
+        }
+        finally
+        {
+            if (viteProcess is { HasExited: false })
+            {
+                Serilog.Log.Information("Stopping Vite dev server...");
+                try { viteProcess.Kill(entireProcessTree: true); }
+                catch { /* best effort */ }
+                viteProcess.Dispose();
+            }
+        }
+    }
+
     // ──────────────────────────── React Sample Targets ────────────────────────────
 
     Target StartReactDev => _ => _
         .Description("Starts the React Vite dev server for the AvaloniReact sample (standalone, foreground).")
-        .Executes(() =>
-        {
-            EnsureReactDepsInstalled();
-
-            Serilog.Log.Information("Starting Vite dev server on http://localhost:5173 ...");
-            var process = new Process
-            {
-                StartInfo = CreateNpmProcessStartInfo("run dev", ReactWebDirectory, redirectStdout: false, redirectStderr: false)
-            };
-            process.Start();
-            process.WaitForExit();
-
-            if (process.ExitCode != 0)
-                Serilog.Log.Warning("Vite dev server exited with code {Code}.", process.ExitCode);
-        });
+        .Executes(() => StartDevServer(ReactWebDirectory, port: 5173));
 
     Target StartReactApp => _ => _
         .Description("Launches the AvaloniReact desktop sample. In Debug: auto-starts Vite dev server if needed.")
-        .Executes(() =>
-        {
-            Assert.FileExists(ReactDesktopProject, $"AvaloniReact desktop project not found at {ReactDesktopProject}.");
+        .Executes(() => StartDesktopApp(ReactDesktopProject, ReactWebDirectory, devPort: 5173));
 
-            Process? viteProcess = null;
+    // ──────────────────────────── Vue Sample Targets ──────────────────────────────
 
-            if (string.Equals(Configuration, "Debug", StringComparison.OrdinalIgnoreCase))
-            {
-                if (IsHttpReady("http://localhost:5173"))
-                {
-                    Serilog.Log.Information("Vite dev server already running on port 5173.");
-                }
-                else
-                {
-                    EnsureReactDepsInstalled();
+    Target StartVueDev => _ => _
+        .Description("Starts the Vue Vite dev server for the AvaloniVue sample (standalone, foreground).")
+        .Executes(() => StartDevServer(VueWebDirectory, port: 5174));
 
-                    Serilog.Log.Information("Starting Vite dev server in background...");
-                    viteProcess = new Process
-                    {
-                        StartInfo = CreateNpmProcessStartInfo("run dev", ReactWebDirectory, redirectStdout: false, redirectStderr: false)
-                    };
-                    viteProcess.Start();
-
-                    WaitForPort(5173, timeoutSeconds: 60);
-                    Serilog.Log.Information("Vite dev server is ready on http://localhost:5173");
-                }
-            }
-
-            try
-            {
-                DotNetRun(s => s
-                    .SetProjectFile(ReactDesktopProject)
-                    .SetConfiguration(Configuration));
-            }
-            finally
-            {
-                if (viteProcess is { HasExited: false })
-                {
-                    Serilog.Log.Information("Stopping Vite dev server...");
-                    try { viteProcess.Kill(entireProcessTree: true); }
-                    catch { /* best effort */ }
-                    viteProcess.Dispose();
-                }
-            }
-        });
+    Target StartVueApp => _ => _
+        .Description("Launches the AvaloniVue desktop sample. In Debug: auto-starts Vite dev server if needed.")
+        .Executes(() => StartDesktopApp(VueDesktopProject, VueWebDirectory, devPort: 5174));
 }

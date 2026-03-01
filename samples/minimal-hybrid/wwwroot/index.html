@@ -66,13 +66,40 @@
     </div>
 
     <script>
+        // Standalone mock: when running in a plain browser without Avalonia host, inject a
+        // minimal bridge so the page can render for dev preview.
+        (function () {
+            var isInWebView = (window.chrome && window.chrome.webview) ||
+                              (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.agibuildWebView);
+            if (typeof window !== 'undefined' && !window.agWebView?.rpc && !isInWebView) {
+                window.agWebView = {
+                    rpc: {
+                        invoke: function (method, params) {
+                            if (method === 'AppService.getCurrentUser') {
+                                return Promise.resolve({ name: 'Mock User', email: 'mock@example.com', role: 'viewer' });
+                            }
+                            if (method === 'AppService.saveSettings') {
+                                return Promise.resolve();
+                            }
+                            if (method === 'AppService.searchItems') {
+                                return Promise.resolve([
+                                    { id: '1', title: 'Mock Item', description: 'Running in standalone browser' }
+                                ]);
+                            }
+                            return Promise.reject(new Error('Unknown method: ' + method));
+                        },
+                        handle: function () {}
+                    }
+                };
+            }
+        })();
+
         const resultEl = document.getElementById('result');
 
         function log(msg) {
             resultEl.textContent = typeof msg === 'object' ? JSON.stringify(msg, null, 2) : msg;
         }
 
-        // Wait for bridge to be ready
         function waitForBridge() {
             return new Promise((resolve) => {
                 const check = () => {
