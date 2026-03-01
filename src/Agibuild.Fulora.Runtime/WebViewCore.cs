@@ -1031,24 +1031,6 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         }
     }
 
-    private Task InvokeAsyncOnUiThread(Func<Task> func)
-    {
-        if (_disposed)
-        {
-            return Task.FromException(ClassifyFailure(
-                new ObjectDisposedException(nameof(WebViewCore)),
-                operationType: "Dispatch",
-                defaultCategory: WebViewOperationFailureCategory.Disposed));
-        }
-
-        if (_dispatcher.CheckAccess())
-        {
-            return func();
-        }
-
-        return InvokeWithDispatchFailureMappingAsync(func);
-    }
-
     private Task<T> InvokeAsyncOnUiThread<T>(Func<Task<T>> func)
     {
         if (_disposed)
@@ -1065,21 +1047,6 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         }
 
         return InvokeWithDispatchFailureMappingAsync(func);
-    }
-
-    private async Task InvokeWithDispatchFailureMappingAsync(Func<Task> func)
-    {
-        Task dispatchedTask;
-        try
-        {
-            dispatchedTask = _dispatcher.InvokeAsync(func);
-        }
-        catch (Exception ex)
-        {
-            throw ClassifyFailure(ex, operationType: "Dispatch", defaultCategory: WebViewOperationFailureCategory.DispatchFailed);
-        }
-
-        await dispatchedTask.ConfigureAwait(false);
     }
 
     private async Task<T> InvokeWithDispatchFailureMappingAsync<T>(Func<Task<T>> func)

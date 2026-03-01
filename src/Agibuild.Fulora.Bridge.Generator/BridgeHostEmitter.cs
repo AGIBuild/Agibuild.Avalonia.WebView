@@ -397,10 +397,23 @@ internal static class BridgeHostEmitter
                 ? "{ " + string.Join(", ", rpcParamNames.Select(n => $"{n}: {n}")) + " }"
                 : "undefined";
 
-            jb.Append($"var p = window.agWebView.rpc.invoke('{m.RpcMethodName}', {paramsObj}");
+            jb.Append($"var __call = window.agWebView.rpc.invoke('{m.RpcMethodName}', {paramsObj}");
             jb.Append(", options && options.signal");
-            jb.Append("); return p; }");
+            jb.Append(");");
+            if (IsByteArrayType(m.InnerReturnTypeFullName ?? m.ReturnTypeFullName))
+            {
+                jb.Append(" return __call.then(function(__r) { return window.agWebView.rpc._decodeBinaryResult(__r); }); }");
+            }
+            else
+            {
+                jb.Append(" return __call; }");
+            }
             return jb.ToString();
+        }
+
+        if (IsByteArrayType(m.InnerReturnTypeFullName ?? m.ReturnTypeFullName))
+        {
+            return $"{m.CamelCaseName}: function(params) {{ var __call = window.agWebView.rpc.invoke('{m.RpcMethodName}', params); return __call.then(function(__r) {{ return window.agWebView.rpc._decodeBinaryResult(__r); }}); }}";
         }
 
         return $"{m.CamelCaseName}: function(params) {{ return window.agWebView.rpc.invoke('{m.RpcMethodName}', params); }}";
@@ -428,11 +441,25 @@ internal static class BridgeHostEmitter
             if (i < sorted.Count - 1)
             {
                 jb.Append($"if (arguments.length >= {visibleParams.Count}) ");
-                jb.Append($"return window.agWebView.rpc.invoke('{m.RpcMethodName}', {paramsObj}); ");
+                if (IsByteArrayType(m.InnerReturnTypeFullName ?? m.ReturnTypeFullName))
+                {
+                    jb.Append($"return window.agWebView.rpc.invoke('{m.RpcMethodName}', {paramsObj}).then(function(__r) {{ return window.agWebView.rpc._decodeBinaryResult(__r); }}); ");
+                }
+                else
+                {
+                    jb.Append($"return window.agWebView.rpc.invoke('{m.RpcMethodName}', {paramsObj}); ");
+                }
             }
             else
             {
-                jb.Append($"return window.agWebView.rpc.invoke('{m.RpcMethodName}', {paramsObj}); ");
+                if (IsByteArrayType(m.InnerReturnTypeFullName ?? m.ReturnTypeFullName))
+                {
+                    jb.Append($"return window.agWebView.rpc.invoke('{m.RpcMethodName}', {paramsObj}).then(function(__r) {{ return window.agWebView.rpc._decodeBinaryResult(__r); }}); ");
+                }
+                else
+                {
+                    jb.Append($"return window.agWebView.rpc.invoke('{m.RpcMethodName}', {paramsObj}); ");
+                }
             }
         }
 
@@ -443,5 +470,17 @@ internal static class BridgeHostEmitter
     private static string GetFullClassName(string ns, string className)
     {
         return string.IsNullOrEmpty(ns) ? $"global::{className}" : $"global::{ns}.{className}";
+    }
+
+    private static bool IsByteArrayType(string? type)
+    {
+        if (string.IsNullOrWhiteSpace(type))
+            return false;
+
+        var normalized = type!.Trim();
+        if (normalized.EndsWith("?", System.StringComparison.Ordinal))
+            normalized = normalized.Substring(0, normalized.Length - 1);
+
+        return normalized is "byte[]" or "System.Byte[]";
     }
 }

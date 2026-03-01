@@ -505,11 +505,54 @@ internal sealed class WebViewRpcService : IWebViewRpcService
                 }
             }
             window.agWebView.rpc = {
+                _uint8ToBase64: function(bytes) {
+                    var binary = '';
+                    for (var i = 0; i < bytes.length; i++) {
+                        binary += String.fromCharCode(bytes[i]);
+                    }
+                    return btoa(binary);
+                },
+                _base64ToUint8: function(base64) {
+                    var binary = atob(base64 || '');
+                    var bytes = new Uint8Array(binary.length);
+                    for (var i = 0; i < binary.length; i++) {
+                        bytes[i] = binary.charCodeAt(i);
+                    }
+                    return bytes;
+                },
+                _encodeBinaryPayload: function(value) {
+                    if (value === null || value === undefined) return value;
+                    if (value instanceof Uint8Array) {
+                        return window.agWebView.rpc._uint8ToBase64(value);
+                    }
+                    if (Array.isArray(value)) {
+                        var mapped = new Array(value.length);
+                        for (var i = 0; i < value.length; i++) {
+                            mapped[i] = window.agWebView.rpc._encodeBinaryPayload(value[i]);
+                        }
+                        return mapped;
+                    }
+                    if (typeof value === 'object') {
+                        var result = {};
+                        for (var key in value) {
+                            if (Object.prototype.hasOwnProperty.call(value, key)) {
+                                result[key] = window.agWebView.rpc._encodeBinaryPayload(value[key]);
+                            }
+                        }
+                        return result;
+                    }
+                    return value;
+                },
+                _decodeBinaryResult: function(value) {
+                    if (typeof value !== 'string') return value;
+                    return window.agWebView.rpc._base64ToUint8(value);
+                },
                 invoke: function(method, params, signal) {
                     return new Promise(function(resolve, reject) {
                         var id = '__js_' + (nextId++);
                         pending[id] = { resolve: resolve, reject: reject };
-                        post(JSON.stringify({ jsonrpc: '2.0', id: id, method: method, params: params }));
+                        var encodedParams = window.agWebView.rpc._encodeBinaryPayload(params);
+                        post(JSON.stringify({ jsonrpc: '2.0', id: id, method: method, params: encodedParams }));
                         if (signal) {
                             var onAbort = function() {
                                 post(JSON.stringify({ jsonrpc: '2.0', method: '$/cancelRequest', params: { id: id } }));
@@ -551,7 +594,12 @@ internal sealed class WebViewRpcService : IWebViewRpcService
                     for (var i = 0; i < calls.length; i++) {
                         var id = '__js_' + (nextId++);
                         ids.push(id);
-                        requests.push({ jsonrpc: '2.0', id: id, method: calls[i].method, params: calls[i].params });
+                        requests.push({
+                            jsonrpc: '2.0',
+                            id: id,
+                            method: calls[i].method,
+                            params: window.agWebView.rpc._encodeBinaryPayload(calls[i].params)
+                        });
                     }
                     var resultPromises = ids.map(function(id) {
                         return new Promise(function(resolve, reject) {

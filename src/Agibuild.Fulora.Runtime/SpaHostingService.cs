@@ -13,7 +13,6 @@ internal sealed class SpaHostingService : IDisposable
     private readonly SpaHostingOptions _options;
     private readonly ILogger _logger;
     private readonly HttpClient? _devProxy;
-    private readonly string _schemePrefix;
     private bool _disposed;
 
     // MIME type mappings for common web assets.
@@ -51,23 +50,37 @@ internal sealed class SpaHostingService : IDisposable
     {
         _options = options ?? throw new ArgumentNullException(nameof(options));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _schemePrefix = $"{options.Scheme}://";
+        var hasEmbeddedPrefix = options.EmbeddedResourcePrefix is not null;
+        var hasEmbeddedAssembly = options.ResourceAssembly is not null;
+        if (hasEmbeddedPrefix != hasEmbeddedAssembly)
+        {
+            throw new ArgumentException(
+                "EmbeddedResourcePrefix and ResourceAssembly must be configured together.",
+                nameof(options));
+        }
+
+        var hasEmbedded = hasEmbeddedPrefix && hasEmbeddedAssembly;
+        var hasExternalAssets = options.ActiveAssetDirectoryProvider is not null;
 
         if (options.DevServerUrl is not null)
         {
             _devProxy = new HttpClient { BaseAddress = new Uri(options.DevServerUrl.TrimEnd('/') + "/") };
             _logger.LogDebug("SPA: dev proxy mode → {DevServer}", options.DevServerUrl);
         }
-        else if (options.EmbeddedResourcePrefix is null || options.ResourceAssembly is null)
+        else if (hasEmbedded)
         {
-            throw new ArgumentException(
-                "Either DevServerUrl or both EmbeddedResourcePrefix and ResourceAssembly must be set.",
-                nameof(options));
+            _logger.LogDebug("SPA: embedded mode, prefix={Prefix}, assembly={Assembly}",
+                options.EmbeddedResourcePrefix, options.ResourceAssembly!.GetName().Name);
+        }
+        else if (hasExternalAssets)
+        {
+            _logger.LogDebug("SPA: external active-asset mode enabled");
         }
         else
         {
-            _logger.LogDebug("SPA: embedded mode, prefix={Prefix}, assembly={Assembly}",
-                options.EmbeddedResourcePrefix, options.ResourceAssembly.GetName().Name);
+            throw new ArgumentException(
+                "One hosting source must be configured: DevServerUrl, embedded resources, or ActiveAssetDirectoryProvider.",
+                nameof(options));
         }
     }
 
@@ -106,10 +119,82 @@ internal sealed class SpaHostingService : IDisposable
             return HandleViaDevProxy(e, path);
         }
 
+        if (HandleViaExternalAssets(e, path))
+        {
+            return true;
+        }
+
+        if (_options.EmbeddedResourcePrefix is null || _options.ResourceAssembly is null)
+        {
+            e.ResponseStatusCode = 404;
+            e.ResponseBody = new MemoryStream(Encoding.UTF8.GetBytes("Not Found"));
+            e.ResponseContentType = "text/plain";
+            e.Handled = true;
+            return true;
+        }
+
         return HandleViaEmbeddedResource(e, path);
     }
 
     // ==================== Embedded resource serving ====================
+
+    private bool HandleViaExternalAssets(WebResourceRequestedEventArgs e, string path)
+    {
+        if (_options.ActiveAssetDirectoryProvider is null)
+            return false;
+
+        var activeDirectory = _options.ActiveAssetDirectoryProvider();
+        if (string.IsNullOrWhiteSpace(activeDirectory))
+            return false;
+
+        var rootDirectory = Path.GetFullPath(activeDirectory);
+        if (!Directory.Exists(rootDirectory))
+        {
+            e.ResponseStatusCode = 404;
+            e.ResponseBody = new MemoryStream(Encoding.UTF8.GetBytes("Active asset directory not found"));
+            e.ResponseContentType = "text/plain";
+            e.Handled = true;
+            return true;
+        }
+
+        var normalizedPath = path.Replace('/', Path.DirectorySeparatorChar);
+        var candidatePath = Path.GetFullPath(Path.Combine(rootDirectory, normalizedPath));
+        if (!candidatePath.StartsWith(rootDirectory, StringComparison.OrdinalIgnoreCase))
+        {
+            e.ResponseStatusCode = 400;
+            e.ResponseBody = new MemoryStream(Encoding.UTF8.GetBytes("Invalid asset path"));
+            e.ResponseContentType = "text/plain";
+            e.Handled = true;
+            return true;
+        }
+
+        var filePath = candidatePath;
+        if (!File.Exists(filePath) && path != _options.FallbackDocument)
+        {
+            filePath = Path.Combine(rootDirectory, _options.FallbackDocument);
+        }
+
+        if (!File.Exists(filePath))
+        {
+            e.ResponseStatusCode = 404;
+            e.ResponseBody = new MemoryStream(Encoding.UTF8.GetBytes("Not Found"));
+            e.ResponseContentType = "text/plain";
+            e.Handled = true;
+            return true;
+        }
+
+        var ext = Path.GetExtension(filePath);
+        e.ResponseBody = File.OpenRead(filePath);
+        e.ResponseContentType = GetMimeType(ext);
+        e.ResponseStatusCode = 200;
+        e.Handled = true;
+        e.ResponseHeaders ??= new Dictionary<string, string>();
+        e.ResponseHeaders["Cache-Control"] = IsHashedFilename(path)
+            ? "public, max-age=31536000, immutable"
+            : "no-cache";
+        ApplyDefaultHeaders(e);
+        return true;
+    }
 
     private bool HandleViaEmbeddedResource(WebResourceRequestedEventArgs e, string path)
     {

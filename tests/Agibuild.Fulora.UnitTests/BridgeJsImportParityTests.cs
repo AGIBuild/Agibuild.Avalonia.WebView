@@ -183,6 +183,53 @@ public sealed class BridgeJsImportParityTests
         Assert.Contains("AsyncIterable<number>", text);
     }
 
+    [Fact]
+    public void TypeScript_byte_array_maps_to_Uint8Array()
+    {
+        var source = """
+            using Agibuild.Fulora;
+            using System.Threading.Tasks;
+
+            [JsExport]
+            public interface IBlobService
+            {
+                Task<byte[]> Echo(byte[] payload);
+            }
+            """;
+
+        var (_, result) = RunGenerator(source);
+        var tsFile = result.GeneratedTrees
+            .FirstOrDefault(t => t.FilePath.Contains("BridgeTypeScriptDeclarations"));
+        Assert.NotNull(tsFile);
+
+        var text = tsFile!.GetText().ToString();
+        Assert.Contains("echo(payload: Uint8Array): Promise<Uint8Array>", text);
+    }
+
+    [Fact]
+    public void JsExport_binary_return_method_stub_decodes_base64_to_uint8array()
+    {
+        var source = """
+            using Agibuild.Fulora;
+            using System.Threading.Tasks;
+
+            [JsExport]
+            public interface IBlobService
+            {
+                Task<byte[]> Load();
+            }
+            """;
+
+        var (_, result) = RunGenerator(source);
+        var regFile = result.GeneratedTrees
+            .FirstOrDefault(t => t.FilePath.Contains("BlobServiceBridgeRegistration"));
+        Assert.NotNull(regFile);
+
+        var text = regFile!.GetText().ToString();
+        Assert.Contains("_decodeBinaryResult", text);
+        Assert.Contains("then(function(__r)", text);
+    }
+
     // ==================== InvokeAsync CT overload on RPC service ====================
 
     [Fact]

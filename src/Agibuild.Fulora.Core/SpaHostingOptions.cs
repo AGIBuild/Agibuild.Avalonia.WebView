@@ -56,6 +56,12 @@ public sealed class SpaHostingOptions
     public IDictionary<string, string>? DefaultHeaders { get; init; }
 
     /// <summary>
+    /// Optional callback that returns currently active external asset directory.
+    /// When provided and returning a non-empty path, SPA hosting serves assets from that directory.
+    /// </summary>
+    public Func<string?>? ActiveAssetDirectoryProvider { get; init; }
+
+    /// <summary>
     /// Builds the base URL for this scheme. Example: "app://localhost".
     /// </summary>
     internal string BaseUrl => $"{Scheme}://{Host}";

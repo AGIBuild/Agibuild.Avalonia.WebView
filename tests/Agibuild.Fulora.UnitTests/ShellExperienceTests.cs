@@ -634,6 +634,94 @@ public sealed class ShellExperienceTests
         Assert.Equal(PermissionState.Default, observedArgs!.State);
     }
 
+    [Fact]
+    public void Host_capability_calls_without_bridge_return_deterministic_deny()
+    {
+        using var webView = new DevToolsTrackingWebView();
+        using var shell = new WebViewShellExperience(webView, new WebViewShellExperienceOptions());
+
+        var write = shell.WriteClipboardText("hello");
+        var open = shell.ShowOpenFileDialog(new WebViewOpenFileDialogRequest { Title = "Open" });
+        var save = shell.ShowSaveFileDialog(new WebViewSaveFileDialogRequest { Title = "Save", SuggestedFileName = "a.txt" });
+        var notify = shell.ShowNotification(new WebViewNotificationRequest { Title = "t", Message = "m" });
+
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Deny, write.Outcome);
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Deny, open.Outcome);
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Deny, save.Outcome);
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Deny, notify.Outcome);
+        Assert.Equal("host-capability-bridge-not-configured", write.DenyReason);
+        Assert.Equal("host-capability-bridge-not-configured", open.DenyReason);
+        Assert.Equal("host-capability-bridge-not-configured", save.DenyReason);
+        Assert.Equal("host-capability-bridge-not-configured", notify.DenyReason);
+    }
+
+    [Fact]
+    public void TryGetManagedWindow_returns_false_for_unknown_id()
+    {
+        var dispatcher = new TestDispatcher();
+        var adapter = MockWebViewAdapter.Create();
+        using var core = new WebViewCore(adapter, dispatcher);
+        using var shell = new WebViewShellExperience(core, new WebViewShellExperienceOptions());
+
+        var found = shell.TryGetManagedWindow(Guid.NewGuid(), out var managed);
+
+        Assert.False(found);
+        Assert.Null(managed);
+    }
+
+    [Fact]
+    public void TryGetManagedWindow_returns_true_for_tracked_window()
+    {
+        var dispatcher = new TestDispatcher();
+        var adapter = MockWebViewAdapter.Create();
+        using var core = new WebViewCore(adapter, dispatcher);
+
+        DevToolsTrackingWebView? createdChild = null;
+        using var shell = new WebViewShellExperience(core, new WebViewShellExperienceOptions
+        {
+            NewWindowPolicy = new DelegateNewWindowPolicy((_, _, _) => WebViewNewWindowStrategyDecision.ManagedWindow()),
+            ManagedWindowFactory = _ =>
+            {
+                createdChild = new DevToolsTrackingWebView();
+                return createdChild;
+            }
+        });
+
+        adapter.RaiseNewWindowRequested(new Uri("https://example.com/managed"));
+        DispatcherTestPump.WaitUntil(dispatcher, () => shell.ManagedWindowCount == 1);
+
+        var windowId = Assert.Single(shell.GetManagedWindowIds());
+        var found = shell.TryGetManagedWindow(windowId, out var managed);
+
+        Assert.True(found);
+        Assert.Same(createdChild, managed);
+    }
+
+    [Fact]
+    public void DelegateMenuPruningPolicy_executes_delegate_and_returns_decision()
+    {
+        using var webView = new DevToolsTrackingWebView();
+        var policy = new DelegateMenuPruningPolicy((_, ctx) =>
+            WebViewMenuPruningDecision.Allow(ctx.RequestedMenuModel));
+
+        var request = new WebViewMenuModelRequest
+        {
+            Items = [new WebViewMenuItemModel { Id = "file", Label = "File", IsEnabled = true }]
+        };
+        var context = new WebViewMenuPruningPolicyContext(
+            RootWindowId: Guid.NewGuid(),
+            TargetWindowId: null,
+            RequestedMenuModel: request,
+            CurrentEffectiveMenuModel: null,
+            ProfileIdentity: null,
+            ProfilePermissionDecision: null);
+
+        var decision = policy.Decide(webView, context);
+
+        Assert.True(decision.IsAllowed);
+        Assert.Same(request, decision.EffectiveMenuModel);
+    }
+
     private sealed class DevToolsTrackingWebView : IWebView
     {
         public Uri Source { get; set; } = new("about:blank");

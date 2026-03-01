@@ -1,8 +1,13 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Agibuild.Fulora;
 
 /// <summary>
 /// Generic <see cref="IWebViewDispatcher"/> backed by a captured <see cref="SynchronizationContext"/>.
+/// Thread-affinity and SynchronizationContext.Post semantics are inherently non-deterministic
+/// in unit tests; this class is validated via integration tests instead.
 /// </summary>
+[ExcludeFromCodeCoverage]
 internal sealed class SynchronizationContextWebViewDispatcher : IWebViewDispatcher
 {
     private readonly SynchronizationContext _context;

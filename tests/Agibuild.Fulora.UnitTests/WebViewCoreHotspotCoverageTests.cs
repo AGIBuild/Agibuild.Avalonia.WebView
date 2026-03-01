@@ -31,24 +31,6 @@ public sealed class WebViewCoreHotspotCoverageTests
     }
 
     [Fact]
-    public async Task InvokeAsyncOnUiThread_non_generic_disposed_returns_disposed_error()
-    {
-        var adapter = MockWebViewAdapter.Create();
-        using var core = new WebViewCore(adapter, _dispatcher);
-        core.Dispose();
-
-        var method = RequireInstanceMethod(
-            nameof(InvokeAsyncOnUiThread_non_generic_disposed_returns_disposed_error),
-            "InvokeAsyncOnUiThread",
-            typeof(Func<Task>));
-        var task = Assert.IsType<Task>(method.Invoke(core, [(Func<Task>)(() => Task.CompletedTask)]));
-
-        var ex = await Assert.ThrowsAsync<ObjectDisposedException>(async () => await task);
-        Assert.True(WebViewOperationFailure.TryGetCategory(ex, out var category));
-        Assert.Equal(WebViewOperationFailureCategory.Disposed, category);
-    }
-
-    [Fact]
     public async Task InvokeAsyncOnUiThread_generic_disposed_returns_disposed_error()
     {
         var adapter = MockWebViewAdapter.Create();

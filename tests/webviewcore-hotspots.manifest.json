@@ -11,15 +11,6 @@
       "testMethod": "OnNativeNavigationStartingOnUiThread_disposed_denies_navigation"
     },
     {
-      "id": "invoke-ui-disposed-non-generic",
-      "runtimeMethod": "WebViewCore.InvokeAsyncOnUiThread(Func<Task>)",
-      "branchIntent": "Disposed guard returns categorized failure before dispatcher invocation.",
-      "owner": "webview-runtime",
-      "lane": "ContractAutomation",
-      "testFile": "tests/Agibuild.Fulora.UnitTests/WebViewCoreHotspotCoverageTests.cs",
-      "testMethod": "InvokeAsyncOnUiThread_non_generic_disposed_returns_disposed_error"
-    },
-    {
       "id": "invoke-ui-disposed-generic",
       "runtimeMethod": "WebViewCore.InvokeAsyncOnUiThread(Func<Task<T>>)",
       "branchIntent": "Generic dispatcher path enforces disposed guard deterministically.",

@@ -181,7 +181,7 @@ internal static class TypeScriptEmitter
         if (type is "void" or "System.Void") return "void";
         if (type is "System.DateTime" or "System.DateTimeOffset") return "string"; // ISO 8601
         if (type is "System.Guid") return "string";
-        if (type is "byte[]" or "System.Byte[]") return "string"; // base64
+        if (type is "byte[]" or "System.Byte[]") return "Uint8Array";
 
         // IBridgeEvent
         if (type.StartsWith("Agibuild.Fulora.IBridgeEvent<"))

@@ -240,5 +240,7 @@ public sealed class BridgeStreamingTests
         Assert.Contains("_createAsyncIterable", WebViewRpcService.JsStub);
         Assert.Contains("$/enumerator/next", WebViewRpcService.JsStub);
         Assert.Contains("$/enumerator/abort", WebViewRpcService.JsStub);
+        Assert.Contains("_encodeBinaryPayload", WebViewRpcService.JsStub);
+        Assert.Contains("_decodeBinaryResult", WebViewRpcService.JsStub);
     }
 }
