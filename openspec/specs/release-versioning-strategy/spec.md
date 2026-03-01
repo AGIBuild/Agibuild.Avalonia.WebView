@@ -34,7 +34,7 @@ The repository SHALL contain a `CHANGELOG.md` following Keep-a-Changelog format 
 
 ### Requirement: Stable package metadata SHALL meet publication standards
 Stable (non-prerelease) NuGet packages SHALL include valid license expression, project URL, and description without "preview" language.
-Stable release package identities SHALL use the canonical `Agibuild.Fulora.` prefix for primary distributable artifacts.
+Stable release package identities SHALL use the canonical `Agibuild.Fulora.` prefix for primary distributable artifacts, and the primary Avalonia host package identity SHALL be `Agibuild.Fulora.Avalonia`.
 
 #### Scenario: Stable package nuspec is valid
 - **WHEN** `nuke ValidatePackage` runs for a stable-versioned package
@@ -43,6 +43,8 @@ Stable release package identities SHALL use the canonical `Agibuild.Fulora.` pre
 #### Scenario: Stable package identity is canonical
 - **WHEN** release validation inspects primary stable package outputs
 - **THEN** package IDs use the `Agibuild.Fulora.` prefix as canonical identity
+- **AND** the primary host package ID equals `Agibuild.Fulora.Avalonia`
+- **AND** legacy primary host package ID `Agibuild.Fulora` is not accepted
 
 ### Requirement: Stable publication SHALL require release-orchestration ready state
 Tag/version semantics alone MUST NOT authorize stable publication; stable package publication SHALL require release-orchestration decision state `ready`.
