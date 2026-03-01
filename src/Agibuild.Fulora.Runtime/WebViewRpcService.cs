@@ -25,6 +25,8 @@ internal sealed class WebViewRpcService : IWebViewRpcService
     private readonly ConcurrentDictionary<string, Func<JsonElement?, CancellationToken, Task<object?>>> _cancellableHandlers = new();
     private readonly ConcurrentDictionary<string, TaskCompletionSource<JsonElement>> _pendingCalls = new();
     private readonly ConcurrentDictionary<string, CancellationTokenSource> _activeCancellations = new();
+    private readonly ConcurrentDictionary<string, byte> _activeRequestIds = new();
+    private readonly ConcurrentDictionary<string, byte> _pendingCancellationRequests = new();
     private readonly ConcurrentDictionary<string, ActiveEnumerator> _activeEnumerators = new();
     private readonly Func<string, Task<string?>> _invokeScript;
     private readonly ILogger _logger;
@@ -71,10 +73,15 @@ internal sealed class WebViewRpcService : IWebViewRpcService
     internal void RegisterCancellation(string requestId, CancellationTokenSource cts)
     {
         _activeCancellations[requestId] = cts;
+        if (_pendingCancellationRequests.TryRemove(requestId, out _))
+        {
+            cts.Cancel();
+        }
     }
 
     internal void UnregisterCancellation(string requestId)
     {
+        _pendingCancellationRequests.TryRemove(requestId, out _);
         if (_activeCancellations.TryRemove(requestId, out var cts))
         {
             cts.Dispose();
@@ -309,8 +316,22 @@ internal sealed class WebViewRpcService : IWebViewRpcService
 
     private async Task DispatchRequestAsync(string id, string method, JsonElement root)
     {
-        var responseJson = await DispatchRequestCoreAsync(id, method, root);
+        var responseJson = await DispatchTrackedRequestCoreAsync(id, method, root);
         await SendResponseAsync(responseJson);
+    }
+
+    private async Task<string> DispatchTrackedRequestCoreAsync(string id, string method, JsonElement root)
+    {
+        _activeRequestIds[id] = 0;
+        try
+        {
+            return await DispatchRequestCoreAsync(id, method, root);
+        }
+        finally
+        {
+            _activeRequestIds.TryRemove(id, out _);
+            _pendingCancellationRequests.TryRemove(id, out _);
+        }
     }
 
     private async Task<string> DispatchRequestCoreAsync(string id, string method, JsonElement root)
@@ -431,7 +452,7 @@ internal sealed class WebViewRpcService : IWebViewRpcService
             var method = methodProp.GetString();
             if (method is not null && id is not null)
             {
-                return await DispatchRequestCoreAsync(id, method, root);
+                return await DispatchTrackedRequestCoreAsync(id, method, root);
             }
         }
 
@@ -450,8 +471,18 @@ internal sealed class WebViewRpcService : IWebViewRpcService
             if (cancelParams.TryGetProperty("id", out var cancelId))
             {
                 var targetId = cancelId.GetString();
-                if (targetId is not null && _activeCancellations.TryGetValue(targetId, out var cts))
-                    cts.Cancel();
+                if (targetId is not null)
+                {
+                    if (_activeCancellations.TryGetValue(targetId, out var cts))
+                    {
+                        cts.Cancel();
+                    }
+                    else if (_activeRequestIds.ContainsKey(targetId))
+                    {
+                        // Cancellation may arrive before CTS registration; defer until handler registration.
+                        _pendingCancellationRequests[targetId] = 0;
+                    }
+                }
             }
             return true;
         }
