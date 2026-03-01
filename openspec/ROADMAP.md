@@ -590,8 +590,8 @@ dotnet new agibuild-hybrid -n MyApp --frontend react
 
 | Milestone | Focus | Outcome | Status |
 |---|---|---|---|
-| **M9.1 Phase 8 Evidence Closeout** | Final closeout snapshot with Phase 8 evidence | Machine-checkable transition from Phase 8 → Phase 9 | 🚧 In Progress |
-| **M9.2 API Surface Freeze** | Breaking change audit and semver 1.0.0 commitment | Stable public API surface with no preview-breaking changes | Planned |
+| **M9.1 Phase 8 Evidence Closeout** | Final closeout snapshot with Phase 8 evidence | Machine-checkable transition from Phase 8 → Phase 9 | ✅ Done |
+| **M9.2 API Surface Freeze** | Breaking change audit and semver 1.0.0 commitment | Stable public API surface with no preview-breaking changes | ✅ Done |
 | **M9.3 npm Bridge Publication** | `@agibuild/bridge` published to npm registry | Frontend developers can `npm install @agibuild/bridge` | Planned |
 | **M9.4 Performance Re-baseline** | Updated benchmarks after Phase 8 changes | Current bridge latency, SPA load, and memory baselines | Planned |
 | **M9.5 Changelog & Release Notes** | Structured changelog from v0.1.0-preview to v1.0.0 | Auditable release history for adopters | Planned |

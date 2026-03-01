@@ -72,15 +72,24 @@ API surface review MUST include traceability pointers from boundary-sensitive pu
 - **THEN** review fails until at least one runtime evidence path is linked for that API boundary OR a tracked action item is recorded to add such evidence
 
 ### Requirement: 1.0 API freeze inventory is complete and versioned
-API surface review for the 1.0 release SHALL produce a complete inventory of all public types and members, stored in a canonical, diff-reviewable location, with explicit freeze/deprecation status per item.
+API surface review for the 1.0 release SHALL produce a complete inventory of all public types and members, stored in a canonical, diff-reviewable location, with explicit freeze/deprecation status per item. The inventory SHALL include all Phase 8 additions (deep-link registration, SPA hot update, Bridge V2 generated signatures).
 
 #### Scenario: 1.0 freeze inventory is generated
 - **WHEN** pre-release API review runs for the 1.0 release train
 - **THEN** `docs/API_SURFACE_REVIEW.md` is updated with a timestamped 1.0 freeze inventory listing all public types and their members
+- **AND** `docs/API_SURFACE_INVENTORY.release.txt` is regenerated from a Release build
 
-#### Scenario: Experimental API is flagged for removal
-- **WHEN** a public API introduced during preview is deemed non-essential for 1.0
-- **THEN** review marks it `[Obsolete]` with migration guidance or schedules removal for 2.0
+#### Scenario: Phase 8 additions are included in freeze inventory
+- **WHEN** the 1.0 freeze inventory is generated
+- **THEN** it SHALL include public types from deep-link registration (`DeepLinkActivationEnvelope`, `IDeepLinkRegistrationService`, etc.), SPA hot update (`SpaAssetHotUpdateService`), and Bridge V2 capability changes
+
+#### Scenario: Experimental API is explicitly resolved
+- **WHEN** a public API carries `[Experimental]` at freeze time
+- **THEN** the review records one of: (a) graduated (attribute removed), (b) kept experimental with justification, or (c) marked `[Obsolete]` with migration guidance
+
+#### Scenario: IWebView interface gap is resolved
+- **WHEN** the 1.0 freeze audit checks IWebView consistency
+- **THEN** commonly-used feature members (ZoomFactor, FindInPage, PreloadScript, ContextMenuRequested) SHALL be present on `IWebView` or explicitly documented as deferred with justification
 
 ### Requirement: Naming convention compliance is enforced for 1.0 surface
 All public types, methods, and properties in the 1.0 release SHALL comply with .NET naming guidelines. Non-compliant names introduced during preview SHALL be renamed or marked obsolete.

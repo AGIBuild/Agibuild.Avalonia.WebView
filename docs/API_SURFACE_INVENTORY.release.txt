@@ -1,799 +1,2108 @@
-GeneratedAtUtc: 2026-02-16T19:13:56.8943879Z
+GeneratedAtUtc: 2026-03-01T12:34:02.5986302Z
 Configuration: Release
 
-Assembly: Agibuild.Fulora.Adapters.Abstractions
-Path: <repo>\src\Agibuild.Fulora.Adapters.Abstractions\bin\Release\net10.0\Agibuild.Fulora.Adapters.Abstractions.dll
-PublicTypes: 0
-
---------------------------------------------------------------------------------
-
-Assembly: Agibuild.Fulora.Bridge.Generator
-Path: <repo>\src\Agibuild.Fulora.Bridge.Generator\bin\Release\netstandard2.0\Agibuild.Fulora.Bridge.Generator.dll
-PublicTypes: 1
-
-type Agibuild.Fulora.Bridge.Generator.WebViewBridgeGenerator
-  - method System.Void Agibuild.Fulora.Bridge.Generator.WebViewBridgeGenerator::.ctor()
-  - method System.Void Agibuild.Fulora.Bridge.Generator.WebViewBridgeGenerator::Initialize(Microsoft.CodeAnalysis.IncrementalGeneratorInitializationContext)
-
---------------------------------------------------------------------------------
-
 Assembly: Agibuild.Fulora.Core
-Path: <repo>\src\Agibuild.Fulora.Core\bin\Release\net10.0\Agibuild.Fulora.Core.dll
-PublicTypes: 66
+Path: <repo>/src/Agibuild.Fulora.Core/bin/Release/net10.0/Agibuild.Fulora.Core.dll
+PublicTypes: 72
 
 type Agibuild.Fulora.AdapterCreatedEventArgs
-  - property Avalonia.Platform.IPlatformHandle Agibuild.Fulora.AdapterCreatedEventArgs::PlatformHandle
-  - method System.Void Agibuild.Fulora.AdapterCreatedEventArgs::.ctor(Avalonia.Platform.IPlatformHandle)
+  - constructor System.Void .ctor(Agibuild.Fulora.INativeHandle)
+  - method Agibuild.Fulora.INativeHandle get_PlatformHandle()
+  - property Agibuild.Fulora.INativeHandle PlatformHandle
 
 type Agibuild.Fulora.AuthOptions
-  - property System.Uri Agibuild.Fulora.AuthOptions::AuthorizeUri
-  - property System.Uri Agibuild.Fulora.AuthOptions::CallbackUri
-  - property System.Nullable`1<System.TimeSpan> Agibuild.Fulora.AuthOptions::Timeout
-  - property System.Boolean Agibuild.Fulora.AuthOptions::UseEphemeralSession
-  - method System.Void Agibuild.Fulora.AuthOptions::.ctor()
+  - constructor System.Void .ctor()
+  - property System.Uri AuthorizeUri
+  - property System.Uri CallbackUri
+  - method System.Uri get_AuthorizeUri()
+  - method System.Uri get_CallbackUri()
+  - method System.Nullable`1[System.TimeSpan] get_Timeout()
+  - method System.Boolean get_UseEphemeralSession()
+  - method System.Void set_AuthorizeUri(System.Uri)
+  - method System.Void set_CallbackUri(System.Uri)
+  - method System.Void set_Timeout(System.Nullable`1[System.TimeSpan])
+  - method System.Void set_UseEphemeralSession(System.Boolean)
+  - property System.Nullable`1[System.TimeSpan] Timeout
+  - property System.Boolean UseEphemeralSession
+
+type Agibuild.Fulora.BridgeCallContext
+  - constructor System.Void .ctor()
+  - property System.Nullable`1[System.Text.Json.JsonElement] Arguments
+  - property System.Threading.CancellationToken CancellationToken
+  - method System.Nullable`1[System.Text.Json.JsonElement] get_Arguments()
+  - method System.Threading.CancellationToken get_CancellationToken()
+  - method System.String get_MethodName()
+  - method System.Collections.Generic.IDictionary`2[System.String,System.Object] get_Properties()
+  - method System.String get_ServiceName()
+  - property System.String MethodName
+  - property System.Collections.Generic.IDictionary`2[System.String,System.Object] Properties
+  - property System.String ServiceName
+  - method System.Void set_Arguments(System.Nullable`1[System.Text.Json.JsonElement])
+  - method System.Void set_CancellationToken(System.Threading.CancellationToken)
+  - method System.Void set_MethodName(System.String)
+  - method System.Void set_ServiceName(System.String)
+
+type Agibuild.Fulora.BridgeCallDelegate
+  - constructor System.Void .ctor(System.Object, System.IntPtr)
+  - method System.IAsyncResult BeginInvoke(Agibuild.Fulora.BridgeCallContext, System.AsyncCallback, System.Object)
+  - method System.Threading.Tasks.Task`1[System.Object] EndInvoke(System.IAsyncResult)
+  - method System.Threading.Tasks.Task`1[System.Object] Invoke(Agibuild.Fulora.BridgeCallContext)
+
+type Agibuild.Fulora.BridgeEvent`1
+  - constructor System.Void .ctor()
+  - method System.Void Emit(T)
 
 type Agibuild.Fulora.BridgeOptions
-  - property System.Collections.Generic.IReadOnlySet`1<System.String> Agibuild.Fulora.BridgeOptions::AllowedOrigins
-  - property Agibuild.Fulora.RateLimit Agibuild.Fulora.BridgeOptions::RateLimit
-  - method System.Void Agibuild.Fulora.BridgeOptions::.ctor()
+  - constructor System.Void .ctor()
+  - property System.Collections.Generic.IReadOnlySet`1[System.String] AllowedOrigins
+  - method System.Collections.Generic.IReadOnlySet`1[System.String] get_AllowedOrigins()
+  - method System.Collections.Generic.IReadOnlyList`1[Agibuild.Fulora.IBridgeMiddleware] get_Middleware()
+  - method Agibuild.Fulora.RateLimit get_RateLimit()
+  - property System.Collections.Generic.IReadOnlyList`1[Agibuild.Fulora.IBridgeMiddleware] Middleware
+  - property Agibuild.Fulora.RateLimit RateLimit
+  - method System.Void set_AllowedOrigins(System.Collections.Generic.IReadOnlySet`1[System.String])
+  - method System.Void set_Middleware(System.Collections.Generic.IReadOnlyList`1[Agibuild.Fulora.IBridgeMiddleware])
+  - method System.Void set_RateLimit(Agibuild.Fulora.RateLimit)
 
 type Agibuild.Fulora.BridgeProxyAttribute
-  - property System.Type Agibuild.Fulora.BridgeProxyAttribute::InterfaceType
-  - property System.Type Agibuild.Fulora.BridgeProxyAttribute::ProxyType
-  - method System.Void Agibuild.Fulora.BridgeProxyAttribute::.ctor(System.Type,System.Type)
+  - constructor System.Void .ctor(System.Type, System.Type)
+  - method System.Type get_InterfaceType()
+  - method System.Type get_ProxyType()
+  - property System.Type InterfaceType
+  - property System.Type ProxyType
 
 type Agibuild.Fulora.BridgeRegistrationAttribute
-  - property System.Type Agibuild.Fulora.BridgeRegistrationAttribute::InterfaceType
-  - property System.Type Agibuild.Fulora.BridgeRegistrationAttribute::RegistrationType
-  - method System.Void Agibuild.Fulora.BridgeRegistrationAttribute::.ctor(System.Type,System.Type)
+  - constructor System.Void .ctor(System.Type, System.Type)
+  - method System.Type get_InterfaceType()
+  - method System.Type get_RegistrationType()
+  - property System.Type InterfaceType
+  - property System.Type RegistrationType
 
 type Agibuild.Fulora.ContextMenuMediaType
-  - field Agibuild.Fulora.ContextMenuMediaType Agibuild.Fulora.ContextMenuMediaType::Audio
-  - field Agibuild.Fulora.ContextMenuMediaType Agibuild.Fulora.ContextMenuMediaType::Image
-  - field Agibuild.Fulora.ContextMenuMediaType Agibuild.Fulora.ContextMenuMediaType::None
-  - field Agibuild.Fulora.ContextMenuMediaType Agibuild.Fulora.ContextMenuMediaType::Video
-  - field System.Int32 Agibuild.Fulora.ContextMenuMediaType::value__
+  - field Agibuild.Fulora.ContextMenuMediaType Audio
+  - field Agibuild.Fulora.ContextMenuMediaType Image
+  - field Agibuild.Fulora.ContextMenuMediaType None
+  - field System.Int32 value__
+  - field Agibuild.Fulora.ContextMenuMediaType Video
 
 type Agibuild.Fulora.ContextMenuRequestedEventArgs
-  - property System.Boolean Agibuild.Fulora.ContextMenuRequestedEventArgs::Handled
-  - property System.Boolean Agibuild.Fulora.ContextMenuRequestedEventArgs::IsEditable
-  - property System.Uri Agibuild.Fulora.ContextMenuRequestedEventArgs::LinkUri
-  - property System.Uri Agibuild.Fulora.ContextMenuRequestedEventArgs::MediaSourceUri
-  - property Agibuild.Fulora.ContextMenuMediaType Agibuild.Fulora.ContextMenuRequestedEventArgs::MediaType
-  - property System.String Agibuild.Fulora.ContextMenuRequestedEventArgs::SelectionText
-  - property System.Double Agibuild.Fulora.ContextMenuRequestedEventArgs::X
-  - property System.Double Agibuild.Fulora.ContextMenuRequestedEventArgs::Y
-  - method System.Void Agibuild.Fulora.ContextMenuRequestedEventArgs::.ctor()
+  - constructor System.Void .ctor()
+  - method System.Boolean get_Handled()
+  - method System.Boolean get_IsEditable()
+  - method System.Uri get_LinkUri()
+  - method System.Uri get_MediaSourceUri()
+  - method Agibuild.Fulora.ContextMenuMediaType get_MediaType()
+  - method System.String get_SelectionText()
+  - method System.Double get_X()
+  - method System.Double get_Y()
+  - property System.Boolean Handled
+  - property System.Boolean IsEditable
+  - property System.Uri LinkUri
+  - property System.Uri MediaSourceUri
+  - property Agibuild.Fulora.ContextMenuMediaType MediaType
+  - property System.String SelectionText
+  - method System.Void set_Handled(System.Boolean)
+  - method System.Void set_IsEditable(System.Boolean)
+  - method System.Void set_LinkUri(System.Uri)
+  - method System.Void set_MediaSourceUri(System.Uri)
+  - method System.Void set_MediaType(Agibuild.Fulora.ContextMenuMediaType)
+  - method System.Void set_SelectionText(System.String)
+  - method System.Void set_X(System.Double)
+  - method System.Void set_Y(System.Double)
+  - property System.Double X
+  - property System.Double Y
 
 type Agibuild.Fulora.CustomSchemeRegistration
-  - property System.Boolean Agibuild.Fulora.CustomSchemeRegistration::HasAuthorityComponent
-  - property System.String Agibuild.Fulora.CustomSchemeRegistration::SchemeName
-  - property System.Boolean Agibuild.Fulora.CustomSchemeRegistration::TreatAsSecure
-  - method System.Void Agibuild.Fulora.CustomSchemeRegistration::.ctor()
+  - constructor System.Void .ctor()
+  - method System.Boolean get_HasAuthorityComponent()
+  - method System.String get_SchemeName()
+  - method System.Boolean get_TreatAsSecure()
+  - property System.Boolean HasAuthorityComponent
+  - property System.String SchemeName
+  - method System.Void set_HasAuthorityComponent(System.Boolean)
+  - method System.Void set_SchemeName(System.String)
+  - method System.Void set_TreatAsSecure(System.Boolean)
+  - property System.Boolean TreatAsSecure
 
 type Agibuild.Fulora.DownloadRequestedEventArgs
-  - property System.Boolean Agibuild.Fulora.DownloadRequestedEventArgs::Cancel
-  - property System.Nullable`1<System.Int64> Agibuild.Fulora.DownloadRequestedEventArgs::ContentLength
-  - property System.String Agibuild.Fulora.DownloadRequestedEventArgs::ContentType
-  - property System.String Agibuild.Fulora.DownloadRequestedEventArgs::DownloadPath
-  - property System.Uri Agibuild.Fulora.DownloadRequestedEventArgs::DownloadUri
-  - property System.Boolean Agibuild.Fulora.DownloadRequestedEventArgs::Handled
-  - property System.String Agibuild.Fulora.DownloadRequestedEventArgs::SuggestedFileName
-  - method System.Void Agibuild.Fulora.DownloadRequestedEventArgs::.ctor(System.Uri,System.String,System.String,System.Nullable`1<System.Int64>)
+  - constructor System.Void .ctor(System.Uri, System.String, System.String, System.Nullable`1[System.Int64])
+  - property System.Boolean Cancel
+  - property System.Nullable`1[System.Int64] ContentLength
+  - property System.String ContentType
+  - property System.String DownloadPath
+  - property System.Uri DownloadUri
+  - method System.Boolean get_Cancel()
+  - method System.Nullable`1[System.Int64] get_ContentLength()
+  - method System.String get_ContentType()
+  - method System.String get_DownloadPath()
+  - method System.Uri get_DownloadUri()
+  - method System.Boolean get_Handled()
+  - method System.String get_SuggestedFileName()
+  - property System.Boolean Handled
+  - method System.Void set_Cancel(System.Boolean)
+  - method System.Void set_DownloadPath(System.String)
+  - method System.Void set_Handled(System.Boolean)
+  - property System.String SuggestedFileName
 
 type Agibuild.Fulora.EnvironmentRequestedEventArgs
-  - method System.Void Agibuild.Fulora.EnvironmentRequestedEventArgs::.ctor()
+  - constructor System.Void .ctor()
 
 type Agibuild.Fulora.FindInPageOptions
-  - property System.Boolean Agibuild.Fulora.FindInPageOptions::CaseSensitive
-  - property System.Boolean Agibuild.Fulora.FindInPageOptions::Forward
-  - method System.Void Agibuild.Fulora.FindInPageOptions::.ctor()
+  - constructor System.Void .ctor()
+  - property System.Boolean CaseSensitive
+  - property System.Boolean Forward
+  - method System.Boolean get_CaseSensitive()
+  - method System.Boolean get_Forward()
+  - method System.Void set_CaseSensitive(System.Boolean)
+  - method System.Void set_Forward(System.Boolean)
 
 type Agibuild.Fulora.FindInPageResult
-  - property System.Int32 Agibuild.Fulora.FindInPageResult::ActiveMatchIndex
-  - property System.Int32 Agibuild.Fulora.FindInPageResult::TotalMatches
-  - method System.Void Agibuild.Fulora.FindInPageResult::.ctor()
+  - constructor System.Void .ctor()
+  - property System.Int32 ActiveMatchIndex
+  - method System.Int32 get_ActiveMatchIndex()
+  - method System.Int32 get_TotalMatches()
+  - method System.Void set_ActiveMatchIndex(System.Int32)
+  - method System.Void set_TotalMatches(System.Int32)
+  - property System.Int32 TotalMatches
 
 type Agibuild.Fulora.IAndroidWebViewPlatformHandle
-  - property System.IntPtr Agibuild.Fulora.IAndroidWebViewPlatformHandle::AndroidWebViewHandle
+  - property System.IntPtr AndroidWebViewHandle
+  - method System.IntPtr get_AndroidWebViewHandle()
 
 type Agibuild.Fulora.IAppleWKWebViewPlatformHandle
-  - property System.IntPtr Agibuild.Fulora.IAppleWKWebViewPlatformHandle::WKWebViewHandle
+  - method System.IntPtr get_WKWebViewHandle()
+  - property System.IntPtr WKWebViewHandle
+
+type Agibuild.Fulora.IBridgeEvent`1
+
+type Agibuild.Fulora.IBridgeMiddleware
+  - method System.Threading.Tasks.Task`1[System.Object] InvokeAsync(Agibuild.Fulora.BridgeCallContext, Agibuild.Fulora.BridgeCallDelegate)
 
 type Agibuild.Fulora.IBridgeService
-  - method System.Void Agibuild.Fulora.IBridgeService::Expose(T,Agibuild.Fulora.BridgeOptions)
-  - method T Agibuild.Fulora.IBridgeService::GetProxy()
-  - method System.Void Agibuild.Fulora.IBridgeService::Remove()
+  - method System.Void Expose[T](T, Agibuild.Fulora.BridgeOptions)
+  - method T GetProxy[T]()
+  - method System.Void Remove[T]()
 
 type Agibuild.Fulora.IBridgeServiceRegistration`1
-  - property System.Collections.Generic.IReadOnlyList`1<System.String> Agibuild.Fulora.IBridgeServiceRegistration`1::MethodNames
-  - property System.String Agibuild.Fulora.IBridgeServiceRegistration`1::ServiceName
-  - method System.String Agibuild.Fulora.IBridgeServiceRegistration`1::GetJsStub()
-  - method System.Void Agibuild.Fulora.IBridgeServiceRegistration`1::RegisterHandlers(Agibuild.Fulora.IWebViewRpcService,T)
-  - method System.Void Agibuild.Fulora.IBridgeServiceRegistration`1::UnregisterHandlers(Agibuild.Fulora.IWebViewRpcService)
+  - method System.Void DisconnectEvents(T)
+  - method System.Collections.Generic.IReadOnlyList`1[System.String] get_MethodNames()
+  - method System.String get_ServiceName()
+  - method System.String GetJsStub()
+  - property System.Collections.Generic.IReadOnlyList`1[System.String] MethodNames
+  - method System.Void RegisterHandlers(Agibuild.Fulora.IWebViewRpcService, T)
+  - property System.String ServiceName
+  - method System.Void UnregisterHandlers(Agibuild.Fulora.IWebViewRpcService)
 
 type Agibuild.Fulora.IBridgeTracer
-  - method System.Void Agibuild.Fulora.IBridgeTracer::OnExportCallEnd(System.String,System.String,System.Int64,System.String)
-  - method System.Void Agibuild.Fulora.IBridgeTracer::OnExportCallError(System.String,System.String,System.Int64,System.Exception)
-  - method System.Void Agibuild.Fulora.IBridgeTracer::OnExportCallStart(System.String,System.String,System.String)
-  - method System.Void Agibuild.Fulora.IBridgeTracer::OnImportCallEnd(System.String,System.String,System.Int64)
-  - method System.Void Agibuild.Fulora.IBridgeTracer::OnImportCallStart(System.String,System.String,System.String)
-  - method System.Void Agibuild.Fulora.IBridgeTracer::OnServiceExposed(System.String,System.Int32,System.Boolean)
-  - method System.Void Agibuild.Fulora.IBridgeTracer::OnServiceRemoved(System.String)
+  - method System.Void OnExportCallEnd(System.String, System.String, System.Int64, System.String)
+  - method System.Void OnExportCallError(System.String, System.String, System.Int64, System.Exception)
+  - method System.Void OnExportCallStart(System.String, System.String, System.String)
+  - method System.Void OnImportCallEnd(System.String, System.String, System.Int64)
+  - method System.Void OnImportCallStart(System.String, System.String, System.String)
+  - method System.Void OnServiceExposed(System.String, System.Int32, System.Boolean)
+  - method System.Void OnServiceRemoved(System.String)
 
 type Agibuild.Fulora.ICommandManager
-  - method System.Threading.Tasks.Task Agibuild.Fulora.ICommandManager::CopyAsync()
-  - method System.Threading.Tasks.Task Agibuild.Fulora.ICommandManager::CutAsync()
-  - method System.Threading.Tasks.Task Agibuild.Fulora.ICommandManager::PasteAsync()
-  - method System.Threading.Tasks.Task Agibuild.Fulora.ICommandManager::RedoAsync()
-  - method System.Threading.Tasks.Task Agibuild.Fulora.ICommandManager::SelectAllAsync()
-  - method System.Threading.Tasks.Task Agibuild.Fulora.ICommandManager::UndoAsync()
+  - method System.Threading.Tasks.Task CopyAsync()
+  - method System.Threading.Tasks.Task CutAsync()
+  - method System.Threading.Tasks.Task PasteAsync()
+  - method System.Threading.Tasks.Task RedoAsync()
+  - method System.Threading.Tasks.Task SelectAllAsync()
+  - method System.Threading.Tasks.Task UndoAsync()
 
 type Agibuild.Fulora.ICookieManager
-  - method System.Threading.Tasks.Task Agibuild.Fulora.ICookieManager::ClearAllCookiesAsync()
-  - method System.Threading.Tasks.Task Agibuild.Fulora.ICookieManager::DeleteCookieAsync(Agibuild.Fulora.WebViewCookie)
-  - method System.Threading.Tasks.Task`1<System.Collections.Generic.IReadOnlyList`1<Agibuild.Fulora.WebViewCookie>> Agibuild.Fulora.ICookieManager::GetCookiesAsync(System.Uri)
-  - method System.Threading.Tasks.Task Agibuild.Fulora.ICookieManager::SetCookieAsync(Agibuild.Fulora.WebViewCookie)
+  - method System.Threading.Tasks.Task ClearAllCookiesAsync()
+  - method System.Threading.Tasks.Task DeleteCookieAsync(Agibuild.Fulora.WebViewCookie)
+  - method System.Threading.Tasks.Task`1[System.Collections.Generic.IReadOnlyList`1[Agibuild.Fulora.WebViewCookie]] GetCookiesAsync(System.Uri)
+  - method System.Threading.Tasks.Task SetCookieAsync(Agibuild.Fulora.WebViewCookie)
 
 type Agibuild.Fulora.IGtkWebViewPlatformHandle
-  - property System.IntPtr Agibuild.Fulora.IGtkWebViewPlatformHandle::WebKitWebViewHandle
+  - method System.IntPtr get_WebKitWebViewHandle()
+  - property System.IntPtr WebKitWebViewHandle
+
+type Agibuild.Fulora.INativeHandle
+  - method System.IntPtr get_Handle()
+  - method System.String get_HandleDescriptor()
+  - property System.IntPtr Handle
+  - property System.String HandleDescriptor
 
 type Agibuild.Fulora.INativeWebViewHandleProvider
-  - method Avalonia.Platform.IPlatformHandle Agibuild.Fulora.INativeWebViewHandleProvider::TryGetWebViewHandle()
+  - method Agibuild.Fulora.INativeHandle TryGetWebViewHandle()
 
 type Agibuild.Fulora.ITopLevelWindow
-  - property Avalonia.Platform.IPlatformHandle Agibuild.Fulora.ITopLevelWindow::PlatformHandle
+  - method Agibuild.Fulora.INativeHandle get_PlatformHandle()
+  - property Agibuild.Fulora.INativeHandle PlatformHandle
 
 type Agibuild.Fulora.IWebAuthBroker
-  - method System.Threading.Tasks.Task`1<Agibuild.Fulora.WebAuthResult> Agibuild.Fulora.IWebAuthBroker::AuthenticateAsync(Agibuild.Fulora.ITopLevelWindow,Agibuild.Fulora.AuthOptions)
+  - method System.Threading.Tasks.Task`1[Agibuild.Fulora.WebAuthResult] AuthenticateAsync(Agibuild.Fulora.ITopLevelWindow, Agibuild.Fulora.AuthOptions)
 
 type Agibuild.Fulora.IWebDialog
-  - property System.Boolean Agibuild.Fulora.IWebDialog::CanUserResize
-  - property System.String Agibuild.Fulora.IWebDialog::Title
-  - event System.EventHandler Agibuild.Fulora.IWebDialog::Closing
-  - method System.Void Agibuild.Fulora.IWebDialog::Close()
-  - method System.Boolean Agibuild.Fulora.IWebDialog::Move(System.Int32,System.Int32)
-  - method System.Boolean Agibuild.Fulora.IWebDialog::Resize(System.Int32,System.Int32)
-  - method System.Void Agibuild.Fulora.IWebDialog::Show()
-  - method System.Boolean Agibuild.Fulora.IWebDialog::Show(Avalonia.Platform.IPlatformHandle)
+  - method System.Void add_Closing(System.EventHandler)
+  - property System.Boolean CanUserResize
+  - method System.Void Close()
+  - event System.EventHandler Closing
+  - method System.Boolean get_CanUserResize()
+  - method System.String get_Title()
+  - method System.Boolean Move(System.Int32, System.Int32)
+  - method System.Void remove_Closing(System.EventHandler)
+  - method System.Boolean Resize(System.Int32, System.Int32)
+  - method System.Void set_CanUserResize(System.Boolean)
+  - method System.Void set_Title(System.String)
+  - method System.Void Show()
+  - method System.Boolean Show(Agibuild.Fulora.INativeHandle)
+  - property System.String Title
 
 type Agibuild.Fulora.IWebDialogFactory
-  - method Agibuild.Fulora.IWebDialog Agibuild.Fulora.IWebDialogFactory::Create(Agibuild.Fulora.IWebViewEnvironmentOptions)
+  - method Agibuild.Fulora.IWebDialog Create(Agibuild.Fulora.IWebViewEnvironmentOptions)
 
 type Agibuild.Fulora.IWebMessageDropDiagnosticsSink
-  - method System.Void Agibuild.Fulora.IWebMessageDropDiagnosticsSink::OnMessageDropped(Agibuild.Fulora.WebMessageDropDiagnostic& modreq(System.Runtime.InteropServices.InAttribute))
+  - method System.Void OnMessageDropped(Agibuild.Fulora.WebMessageDropDiagnostic&)
 
 type Agibuild.Fulora.IWebMessagePolicy
-  - method Agibuild.Fulora.WebMessagePolicyDecision Agibuild.Fulora.IWebMessagePolicy::Evaluate(Agibuild.Fulora.WebMessageEnvelope& modreq(System.Runtime.InteropServices.InAttribute))
+  - method Agibuild.Fulora.WebMessagePolicyDecision Evaluate(Agibuild.Fulora.WebMessageEnvelope&)
 
 type Agibuild.Fulora.IWebView
-  - property Agibuild.Fulora.IBridgeService Agibuild.Fulora.IWebView::Bridge
-  - property System.Boolean Agibuild.Fulora.IWebView::CanGoBack
-  - property System.Boolean Agibuild.Fulora.IWebView::CanGoForward
-  - property System.Guid Agibuild.Fulora.IWebView::ChannelId
-  - property System.Boolean Agibuild.Fulora.IWebView::IsLoading
-  - property Agibuild.Fulora.IWebViewRpcService Agibuild.Fulora.IWebView::Rpc
-  - property System.Uri Agibuild.Fulora.IWebView::Source
-  - event System.EventHandler`1<Agibuild.Fulora.AdapterCreatedEventArgs> Agibuild.Fulora.IWebView::AdapterCreated
-  - event System.EventHandler Agibuild.Fulora.IWebView::AdapterDestroyed
-  - event System.EventHandler`1<Agibuild.Fulora.ContextMenuRequestedEventArgs> Agibuild.Fulora.IWebView::ContextMenuRequested
-  - event System.EventHandler`1<Agibuild.Fulora.DownloadRequestedEventArgs> Agibuild.Fulora.IWebView::DownloadRequested
-  - event System.EventHandler`1<Agibuild.Fulora.EnvironmentRequestedEventArgs> Agibuild.Fulora.IWebView::EnvironmentRequested
-  - event System.EventHandler`1<Agibuild.Fulora.NavigationCompletedEventArgs> Agibuild.Fulora.IWebView::NavigationCompleted
-  - event System.EventHandler`1<Agibuild.Fulora.NavigationStartingEventArgs> Agibuild.Fulora.IWebView::NavigationStarted
-  - event System.EventHandler`1<Agibuild.Fulora.NewWindowRequestedEventArgs> Agibuild.Fulora.IWebView::NewWindowRequested
-  - event System.EventHandler`1<Agibuild.Fulora.PermissionRequestedEventArgs> Agibuild.Fulora.IWebView::PermissionRequested
-  - event System.EventHandler`1<Agibuild.Fulora.WebMessageReceivedEventArgs> Agibuild.Fulora.IWebView::WebMessageReceived
-  - event System.EventHandler`1<Agibuild.Fulora.WebResourceRequestedEventArgs> Agibuild.Fulora.IWebView::WebResourceRequested
-  - method System.Threading.Tasks.Task`1<System.String> Agibuild.Fulora.IWebView::AddPreloadScriptAsync(System.String)
-  - method System.Threading.Tasks.Task`1<System.Byte[]> Agibuild.Fulora.IWebView::CaptureScreenshotAsync()
-  - method System.Threading.Tasks.Task Agibuild.Fulora.IWebView::CloseDevToolsAsync()
-  - method System.Threading.Tasks.Task`1<Agibuild.Fulora.FindInPageResult> Agibuild.Fulora.IWebView::FindInPageAsync(System.String,Agibuild.Fulora.FindInPageOptions)
-  - method System.Threading.Tasks.Task`1<System.Double> Agibuild.Fulora.IWebView::GetZoomFactorAsync()
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.IWebView::GoBackAsync()
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.IWebView::GoForwardAsync()
-  - method System.Threading.Tasks.Task`1<System.String> Agibuild.Fulora.IWebView::InvokeScriptAsync(System.String)
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.IWebView::IsDevToolsOpenAsync()
-  - method System.Threading.Tasks.Task Agibuild.Fulora.IWebView::NavigateAsync(System.Uri)
-  - method System.Threading.Tasks.Task Agibuild.Fulora.IWebView::NavigateToStringAsync(System.String)
-  - method System.Threading.Tasks.Task Agibuild.Fulora.IWebView::NavigateToStringAsync(System.String,System.Uri)
-  - method System.Threading.Tasks.Task Agibuild.Fulora.IWebView::OpenDevToolsAsync()
-  - method System.Threading.Tasks.Task`1<System.Byte[]> Agibuild.Fulora.IWebView::PrintToPdfAsync(Agibuild.Fulora.PdfPrintOptions)
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.IWebView::RefreshAsync()
-  - method System.Threading.Tasks.Task Agibuild.Fulora.IWebView::RemovePreloadScriptAsync(System.String)
-  - method System.Threading.Tasks.Task Agibuild.Fulora.IWebView::SetZoomFactorAsync(System.Double)
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.IWebView::StopAsync()
-  - method System.Threading.Tasks.Task Agibuild.Fulora.IWebView::StopFindInPageAsync(System.Boolean)
-  - method Agibuild.Fulora.ICommandManager Agibuild.Fulora.IWebView::TryGetCommandManager()
-  - method Agibuild.Fulora.ICookieManager Agibuild.Fulora.IWebView::TryGetCookieManager()
-  - method System.Threading.Tasks.Task`1<Avalonia.Platform.IPlatformHandle> Agibuild.Fulora.IWebView::TryGetWebViewHandleAsync()
+  - event System.EventHandler`1[Agibuild.Fulora.AdapterCreatedEventArgs] AdapterCreated
+  - event System.EventHandler AdapterDestroyed
+  - method System.Void add_AdapterCreated(System.EventHandler`1[Agibuild.Fulora.AdapterCreatedEventArgs])
+  - method System.Void add_AdapterDestroyed(System.EventHandler)
+  - method System.Void add_ContextMenuRequested(System.EventHandler`1[Agibuild.Fulora.ContextMenuRequestedEventArgs])
+  - method System.Void add_DownloadRequested(System.EventHandler`1[Agibuild.Fulora.DownloadRequestedEventArgs])
+  - method System.Void add_EnvironmentRequested(System.EventHandler`1[Agibuild.Fulora.EnvironmentRequestedEventArgs])
+  - method System.Void add_NavigationCompleted(System.EventHandler`1[Agibuild.Fulora.NavigationCompletedEventArgs])
+  - method System.Void add_NavigationStarted(System.EventHandler`1[Agibuild.Fulora.NavigationStartingEventArgs])
+  - method System.Void add_NewWindowRequested(System.EventHandler`1[Agibuild.Fulora.NewWindowRequestedEventArgs])
+  - method System.Void add_PermissionRequested(System.EventHandler`1[Agibuild.Fulora.PermissionRequestedEventArgs])
+  - method System.Void add_WebMessageReceived(System.EventHandler`1[Agibuild.Fulora.WebMessageReceivedEventArgs])
+  - method System.Void add_WebResourceRequested(System.EventHandler`1[Agibuild.Fulora.WebResourceRequestedEventArgs])
+  - method System.Threading.Tasks.Task`1[System.String] AddPreloadScriptAsync(System.String)
+  - property Agibuild.Fulora.IBridgeService Bridge
+  - property System.Boolean CanGoBack
+  - property System.Boolean CanGoForward
+  - method System.Threading.Tasks.Task`1[System.Byte[]] CaptureScreenshotAsync()
+  - property System.Guid ChannelId
+  - method System.Threading.Tasks.Task CloseDevToolsAsync()
+  - event System.EventHandler`1[Agibuild.Fulora.ContextMenuRequestedEventArgs] ContextMenuRequested
+  - event System.EventHandler`1[Agibuild.Fulora.DownloadRequestedEventArgs] DownloadRequested
+  - event System.EventHandler`1[Agibuild.Fulora.EnvironmentRequestedEventArgs] EnvironmentRequested
+  - method System.Threading.Tasks.Task`1[Agibuild.Fulora.FindInPageResult] FindInPageAsync(System.String, Agibuild.Fulora.FindInPageOptions)
+  - method Agibuild.Fulora.IBridgeService get_Bridge()
+  - method System.Boolean get_CanGoBack()
+  - method System.Boolean get_CanGoForward()
+  - method System.Guid get_ChannelId()
+  - method System.Boolean get_IsLoading()
+  - method Agibuild.Fulora.IWebViewRpcService get_Rpc()
+  - method System.Uri get_Source()
+  - method System.Threading.Tasks.Task`1[System.Double] GetZoomFactorAsync()
+  - method System.Threading.Tasks.Task`1[System.Boolean] GoBackAsync()
+  - method System.Threading.Tasks.Task`1[System.Boolean] GoForwardAsync()
+  - method System.Threading.Tasks.Task`1[System.String] InvokeScriptAsync(System.String)
+  - method System.Threading.Tasks.Task`1[System.Boolean] IsDevToolsOpenAsync()
+  - property System.Boolean IsLoading
+  - method System.Threading.Tasks.Task NavigateAsync(System.Uri)
+  - method System.Threading.Tasks.Task NavigateToStringAsync(System.String)
+  - method System.Threading.Tasks.Task NavigateToStringAsync(System.String, System.Uri)
+  - event System.EventHandler`1[Agibuild.Fulora.NavigationCompletedEventArgs] NavigationCompleted
+  - event System.EventHandler`1[Agibuild.Fulora.NavigationStartingEventArgs] NavigationStarted
+  - event System.EventHandler`1[Agibuild.Fulora.NewWindowRequestedEventArgs] NewWindowRequested
+  - method System.Threading.Tasks.Task OpenDevToolsAsync()
+  - event System.EventHandler`1[Agibuild.Fulora.PermissionRequestedEventArgs] PermissionRequested
+  - method System.Threading.Tasks.Task`1[System.Byte[]] PrintToPdfAsync(Agibuild.Fulora.PdfPrintOptions)
+  - method System.Threading.Tasks.Task`1[System.Boolean] RefreshAsync()
+  - method System.Void remove_AdapterCreated(System.EventHandler`1[Agibuild.Fulora.AdapterCreatedEventArgs])
+  - method System.Void remove_AdapterDestroyed(System.EventHandler)
+  - method System.Void remove_ContextMenuRequested(System.EventHandler`1[Agibuild.Fulora.ContextMenuRequestedEventArgs])
+  - method System.Void remove_DownloadRequested(System.EventHandler`1[Agibuild.Fulora.DownloadRequestedEventArgs])
+  - method System.Void remove_EnvironmentRequested(System.EventHandler`1[Agibuild.Fulora.EnvironmentRequestedEventArgs])
+  - method System.Void remove_NavigationCompleted(System.EventHandler`1[Agibuild.Fulora.NavigationCompletedEventArgs])
+  - method System.Void remove_NavigationStarted(System.EventHandler`1[Agibuild.Fulora.NavigationStartingEventArgs])
+  - method System.Void remove_NewWindowRequested(System.EventHandler`1[Agibuild.Fulora.NewWindowRequestedEventArgs])
+  - method System.Void remove_PermissionRequested(System.EventHandler`1[Agibuild.Fulora.PermissionRequestedEventArgs])
+  - method System.Void remove_WebMessageReceived(System.EventHandler`1[Agibuild.Fulora.WebMessageReceivedEventArgs])
+  - method System.Void remove_WebResourceRequested(System.EventHandler`1[Agibuild.Fulora.WebResourceRequestedEventArgs])
+  - method System.Threading.Tasks.Task RemovePreloadScriptAsync(System.String)
+  - property Agibuild.Fulora.IWebViewRpcService Rpc
+  - method System.Void set_Source(System.Uri)
+  - method System.Threading.Tasks.Task SetZoomFactorAsync(System.Double)
+  - property System.Uri Source
+  - method System.Threading.Tasks.Task`1[System.Boolean] StopAsync()
+  - method System.Threading.Tasks.Task StopFindInPageAsync(System.Boolean)
+  - method Agibuild.Fulora.ICommandManager TryGetCommandManager()
+  - method Agibuild.Fulora.ICookieManager TryGetCookieManager()
+  - method System.Threading.Tasks.Task`1[Agibuild.Fulora.INativeHandle] TryGetWebViewHandleAsync()
+  - event System.EventHandler`1[Agibuild.Fulora.WebMessageReceivedEventArgs] WebMessageReceived
+  - event System.EventHandler`1[Agibuild.Fulora.WebResourceRequestedEventArgs] WebResourceRequested
 
 type Agibuild.Fulora.IWebViewDispatcher
-  - method System.Boolean Agibuild.Fulora.IWebViewDispatcher::CheckAccess()
-  - method System.Threading.Tasks.Task Agibuild.Fulora.IWebViewDispatcher::InvokeAsync(System.Action)
-  - method System.Threading.Tasks.Task`1<T> Agibuild.Fulora.IWebViewDispatcher::InvokeAsync(System.Func`1<T>)
-  - method System.Threading.Tasks.Task Agibuild.Fulora.IWebViewDispatcher::InvokeAsync(System.Func`1<System.Threading.Tasks.Task>)
-  - method System.Threading.Tasks.Task`1<T> Agibuild.Fulora.IWebViewDispatcher::InvokeAsync(System.Func`1<System.Threading.Tasks.Task`1<T>>)
+  - method System.Boolean CheckAccess()
+  - method System.Threading.Tasks.Task InvokeAsync(System.Action)
+  - method System.Threading.Tasks.Task`1[T] InvokeAsync[T](System.Func`1[T])
+  - method System.Threading.Tasks.Task InvokeAsync(System.Func`1[System.Threading.Tasks.Task])
+  - method System.Threading.Tasks.Task`1[T] InvokeAsync[T](System.Func`1[System.Threading.Tasks.Task`1[T]])
 
 type Agibuild.Fulora.IWebViewEnvironmentOptions
-  - property System.Collections.Generic.IReadOnlyList`1<Agibuild.Fulora.CustomSchemeRegistration> Agibuild.Fulora.IWebViewEnvironmentOptions::CustomSchemes
-  - property System.String Agibuild.Fulora.IWebViewEnvironmentOptions::CustomUserAgent
-  - property System.Boolean Agibuild.Fulora.IWebViewEnvironmentOptions::EnableDevTools
-  - property System.Collections.Generic.IReadOnlyList`1<System.String> Agibuild.Fulora.IWebViewEnvironmentOptions::PreloadScripts
-  - property System.Boolean Agibuild.Fulora.IWebViewEnvironmentOptions::UseEphemeralSession
+  - property System.Collections.Generic.IReadOnlyList`1[Agibuild.Fulora.CustomSchemeRegistration] CustomSchemes
+  - property System.String CustomUserAgent
+  - property System.Boolean EnableDevTools
+  - method System.Collections.Generic.IReadOnlyList`1[Agibuild.Fulora.CustomSchemeRegistration] get_CustomSchemes()
+  - method System.String get_CustomUserAgent()
+  - method System.Boolean get_EnableDevTools()
+  - method System.Collections.Generic.IReadOnlyList`1[System.String] get_PreloadScripts()
+  - method System.Boolean get_UseEphemeralSession()
+  - property System.Collections.Generic.IReadOnlyList`1[System.String] PreloadScripts
+  - method System.Void set_CustomUserAgent(System.String)
+  - method System.Void set_EnableDevTools(System.Boolean)
+  - method System.Void set_UseEphemeralSession(System.Boolean)
+  - property System.Boolean UseEphemeralSession
 
 type Agibuild.Fulora.IWebViewRpcService
-  - method System.Void Agibuild.Fulora.IWebViewRpcService::Handle(System.String,System.Func`2<System.Nullable`1<System.Text.Json.JsonElement>,System.Threading.Tasks.Task`1<System.Object>>)
-  - method System.Void Agibuild.Fulora.IWebViewRpcService::Handle(System.String,System.Func`2<System.Nullable`1<System.Text.Json.JsonElement>,System.Object>)
-  - method System.Threading.Tasks.Task`1<System.Text.Json.JsonElement> Agibuild.Fulora.IWebViewRpcService::InvokeAsync(System.String,System.Object)
-  - method System.Threading.Tasks.Task`1<T> Agibuild.Fulora.IWebViewRpcService::InvokeAsync(System.String,System.Object)
-  - method System.Void Agibuild.Fulora.IWebViewRpcService::RemoveHandler(System.String)
+  - method System.Void Handle(System.String, System.Func`2[System.Nullable`1[System.Text.Json.JsonElement],System.Threading.Tasks.Task`1[System.Object]])
+  - method System.Void Handle(System.String, System.Func`2[System.Nullable`1[System.Text.Json.JsonElement],System.Object])
+  - method System.Void Handle(System.String, System.Func`3[System.Nullable`1[System.Text.Json.JsonElement],System.Threading.CancellationToken,System.Threading.Tasks.Task`1[System.Object]])
+  - method System.Threading.Tasks.Task`1[System.Text.Json.JsonElement] InvokeAsync(System.String, System.Object)
+  - method System.Threading.Tasks.Task`1[T] InvokeAsync[T](System.String, System.Object)
+  - method System.Threading.Tasks.Task`1[System.Text.Json.JsonElement] InvokeAsync(System.String, System.Object, System.Threading.CancellationToken)
+  - method System.Threading.Tasks.Task`1[T] InvokeAsync[T](System.String, System.Object, System.Threading.CancellationToken)
+  - method System.Threading.Tasks.Task NotifyAsync(System.String, System.Object)
+  - method System.Void RegisterEnumerator(System.String, System.Func`1[System.Threading.Tasks.Task`1[System.ValueTuple`2[System.Object,System.Boolean]]], System.Func`1[System.Threading.Tasks.Task])
+  - method System.Void RemoveHandler(System.String)
 
 type Agibuild.Fulora.IWindowsWebView2PlatformHandle
-  - property System.IntPtr Agibuild.Fulora.IWindowsWebView2PlatformHandle::CoreWebView2ControllerHandle
-  - property System.IntPtr Agibuild.Fulora.IWindowsWebView2PlatformHandle::CoreWebView2Handle
+  - property System.IntPtr CoreWebView2ControllerHandle
+  - property System.IntPtr CoreWebView2Handle
+  - method System.IntPtr get_CoreWebView2ControllerHandle()
+  - method System.IntPtr get_CoreWebView2Handle()
 
 type Agibuild.Fulora.JsExportAttribute
-  - property System.String Agibuild.Fulora.JsExportAttribute::Name
-  - method System.Void Agibuild.Fulora.JsExportAttribute::.ctor()
+  - constructor System.Void .ctor()
+  - method System.String get_Name()
+  - property System.String Name
+  - method System.Void set_Name(System.String)
 
 type Agibuild.Fulora.JsImportAttribute
-  - property System.String Agibuild.Fulora.JsImportAttribute::Name
-  - method System.Void Agibuild.Fulora.JsImportAttribute::.ctor()
+  - constructor System.Void .ctor()
+  - method System.String get_Name()
+  - property System.String Name
+  - method System.Void set_Name(System.String)
 
 type Agibuild.Fulora.MockBridgeService
-  - property System.Int32 Agibuild.Fulora.MockBridgeService::ExposedCount
-  - method System.Void Agibuild.Fulora.MockBridgeService::.ctor()
-  - method System.Void Agibuild.Fulora.MockBridgeService::Dispose()
-  - method System.Void Agibuild.Fulora.MockBridgeService::Expose(T,Agibuild.Fulora.BridgeOptions)
-  - method T Agibuild.Fulora.MockBridgeService::GetExposedImplementation()
-  - method T Agibuild.Fulora.MockBridgeService::GetProxy()
-  - method System.Void Agibuild.Fulora.MockBridgeService::Remove()
-  - method System.Void Agibuild.Fulora.MockBridgeService::Reset()
-  - method System.Void Agibuild.Fulora.MockBridgeService::SetupProxy(T)
-  - method System.Boolean Agibuild.Fulora.MockBridgeService::WasExposed()
+  - constructor System.Void .ctor()
+  - method System.Void Dispose()
+  - method System.Void Expose[T](T, Agibuild.Fulora.BridgeOptions)
+  - property System.Int32 ExposedCount
+  - method System.Int32 get_ExposedCount()
+  - method T GetExposedImplementation[T]()
+  - method T GetProxy[T]()
+  - method System.Void Remove[T]()
+  - method System.Void Reset()
+  - method System.Void SetupProxy[T](T)
+  - method System.Boolean WasExposed[T]()
 
 type Agibuild.Fulora.NavigationCompletedEventArgs
-  - property System.Exception Agibuild.Fulora.NavigationCompletedEventArgs::Error
-  - property System.Guid Agibuild.Fulora.NavigationCompletedEventArgs::NavigationId
-  - property System.Uri Agibuild.Fulora.NavigationCompletedEventArgs::RequestUri
-  - property Agibuild.Fulora.NavigationCompletedStatus Agibuild.Fulora.NavigationCompletedEventArgs::Status
-  - method System.Void Agibuild.Fulora.NavigationCompletedEventArgs::.ctor()
-  - method System.Void Agibuild.Fulora.NavigationCompletedEventArgs::.ctor(System.Guid,System.Uri,Agibuild.Fulora.NavigationCompletedStatus,System.Exception)
+  - constructor System.Void .ctor()
+  - constructor System.Void .ctor(System.Guid, System.Uri, Agibuild.Fulora.NavigationCompletedStatus, System.Exception)
+  - property System.Exception Error
+  - method System.Exception get_Error()
+  - method System.Guid get_NavigationId()
+  - method System.Uri get_RequestUri()
+  - method Agibuild.Fulora.NavigationCompletedStatus get_Status()
+  - property System.Guid NavigationId
+  - property System.Uri RequestUri
+  - property Agibuild.Fulora.NavigationCompletedStatus Status
 
 type Agibuild.Fulora.NavigationCompletedStatus
-  - field Agibuild.Fulora.NavigationCompletedStatus Agibuild.Fulora.NavigationCompletedStatus::Canceled
-  - field Agibuild.Fulora.NavigationCompletedStatus Agibuild.Fulora.NavigationCompletedStatus::Failure
-  - field Agibuild.Fulora.NavigationCompletedStatus Agibuild.Fulora.NavigationCompletedStatus::Success
-  - field Agibuild.Fulora.NavigationCompletedStatus Agibuild.Fulora.NavigationCompletedStatus::Superseded
-  - field System.Int32 Agibuild.Fulora.NavigationCompletedStatus::value__
+  - field Agibuild.Fulora.NavigationCompletedStatus Canceled
+  - field Agibuild.Fulora.NavigationCompletedStatus Failure
+  - field Agibuild.Fulora.NavigationCompletedStatus Success
+  - field Agibuild.Fulora.NavigationCompletedStatus Superseded
+  - field System.Int32 value__
 
 type Agibuild.Fulora.NavigationStartingEventArgs
-  - property System.Boolean Agibuild.Fulora.NavigationStartingEventArgs::Cancel
-  - property System.Guid Agibuild.Fulora.NavigationStartingEventArgs::NavigationId
-  - property System.Uri Agibuild.Fulora.NavigationStartingEventArgs::RequestUri
-  - method System.Void Agibuild.Fulora.NavigationStartingEventArgs::.ctor(System.Uri)
-  - method System.Void Agibuild.Fulora.NavigationStartingEventArgs::.ctor(System.Guid,System.Uri)
+  - constructor System.Void .ctor(System.Uri)
+  - constructor System.Void .ctor(System.Guid, System.Uri)
+  - property System.Boolean Cancel
+  - method System.Boolean get_Cancel()
+  - method System.Guid get_NavigationId()
+  - method System.Uri get_RequestUri()
+  - property System.Guid NavigationId
+  - property System.Uri RequestUri
+  - method System.Void set_Cancel(System.Boolean)
 
 type Agibuild.Fulora.NewWindowRequestedEventArgs
-  - property System.Boolean Agibuild.Fulora.NewWindowRequestedEventArgs::Handled
-  - property System.Uri Agibuild.Fulora.NewWindowRequestedEventArgs::Uri
-  - method System.Void Agibuild.Fulora.NewWindowRequestedEventArgs::.ctor(System.Uri)
+  - constructor System.Void .ctor(System.Uri)
+  - method System.Boolean get_Handled()
+  - method System.Uri get_Uri()
+  - property System.Boolean Handled
+  - method System.Void set_Handled(System.Boolean)
+  - property System.Uri Uri
 
 type Agibuild.Fulora.NullBridgeTracer
-  - field Agibuild.Fulora.NullBridgeTracer Agibuild.Fulora.NullBridgeTracer::Instance
-  - method System.Void Agibuild.Fulora.NullBridgeTracer::.ctor()
-  - method System.Void Agibuild.Fulora.NullBridgeTracer::OnExportCallEnd(System.String,System.String,System.Int64,System.String)
-  - method System.Void Agibuild.Fulora.NullBridgeTracer::OnExportCallError(System.String,System.String,System.Int64,System.Exception)
-  - method System.Void Agibuild.Fulora.NullBridgeTracer::OnExportCallStart(System.String,System.String,System.String)
-  - method System.Void Agibuild.Fulora.NullBridgeTracer::OnImportCallEnd(System.String,System.String,System.Int64)
-  - method System.Void Agibuild.Fulora.NullBridgeTracer::OnImportCallStart(System.String,System.String,System.String)
-  - method System.Void Agibuild.Fulora.NullBridgeTracer::OnServiceExposed(System.String,System.Int32,System.Boolean)
-  - method System.Void Agibuild.Fulora.NullBridgeTracer::OnServiceRemoved(System.String)
+  - constructor System.Void .ctor()
+  - field Agibuild.Fulora.NullBridgeTracer Instance
+  - method System.Void OnExportCallEnd(System.String, System.String, System.Int64, System.String)
+  - method System.Void OnExportCallError(System.String, System.String, System.Int64, System.Exception)
+  - method System.Void OnExportCallStart(System.String, System.String, System.String)
+  - method System.Void OnImportCallEnd(System.String, System.String, System.Int64)
+  - method System.Void OnImportCallStart(System.String, System.String, System.String)
+  - method System.Void OnServiceExposed(System.String, System.Int32, System.Boolean)
+  - method System.Void OnServiceRemoved(System.String)
 
 type Agibuild.Fulora.PdfPrintOptions
-  - property System.Boolean Agibuild.Fulora.PdfPrintOptions::Landscape
-  - property System.Double Agibuild.Fulora.PdfPrintOptions::MarginBottom
-  - property System.Double Agibuild.Fulora.PdfPrintOptions::MarginLeft
-  - property System.Double Agibuild.Fulora.PdfPrintOptions::MarginRight
-  - property System.Double Agibuild.Fulora.PdfPrintOptions::MarginTop
-  - property System.Double Agibuild.Fulora.PdfPrintOptions::PageHeight
-  - property System.Double Agibuild.Fulora.PdfPrintOptions::PageWidth
-  - property System.Boolean Agibuild.Fulora.PdfPrintOptions::PrintBackground
-  - property System.Double Agibuild.Fulora.PdfPrintOptions::Scale
-  - method System.Void Agibuild.Fulora.PdfPrintOptions::.ctor()
+  - constructor System.Void .ctor()
+  - method System.Boolean get_Landscape()
+  - method System.Double get_MarginBottom()
+  - method System.Double get_MarginLeft()
+  - method System.Double get_MarginRight()
+  - method System.Double get_MarginTop()
+  - method System.Double get_PageHeight()
+  - method System.Double get_PageWidth()
+  - method System.Boolean get_PrintBackground()
+  - method System.Double get_Scale()
+  - property System.Boolean Landscape
+  - property System.Double MarginBottom
+  - property System.Double MarginLeft
+  - property System.Double MarginRight
+  - property System.Double MarginTop
+  - property System.Double PageHeight
+  - property System.Double PageWidth
+  - property System.Boolean PrintBackground
+  - property System.Double Scale
+  - method System.Void set_Landscape(System.Boolean)
+  - method System.Void set_MarginBottom(System.Double)
+  - method System.Void set_MarginLeft(System.Double)
+  - method System.Void set_MarginRight(System.Double)
+  - method System.Void set_MarginTop(System.Double)
+  - method System.Void set_PageHeight(System.Double)
+  - method System.Void set_PageWidth(System.Double)
+  - method System.Void set_PrintBackground(System.Boolean)
+  - method System.Void set_Scale(System.Double)
 
 type Agibuild.Fulora.PermissionRequestedEventArgs
-  - property System.Uri Agibuild.Fulora.PermissionRequestedEventArgs::Origin
-  - property Agibuild.Fulora.WebViewPermissionKind Agibuild.Fulora.PermissionRequestedEventArgs::PermissionKind
-  - property Agibuild.Fulora.PermissionState Agibuild.Fulora.PermissionRequestedEventArgs::State
-  - method System.Void Agibuild.Fulora.PermissionRequestedEventArgs::.ctor(Agibuild.Fulora.WebViewPermissionKind,System.Uri)
+  - constructor System.Void .ctor(Agibuild.Fulora.WebViewPermissionKind, System.Uri)
+  - method System.Uri get_Origin()
+  - method Agibuild.Fulora.WebViewPermissionKind get_PermissionKind()
+  - method Agibuild.Fulora.PermissionState get_State()
+  - property System.Uri Origin
+  - property Agibuild.Fulora.WebViewPermissionKind PermissionKind
+  - method System.Void set_State(Agibuild.Fulora.PermissionState)
+  - property Agibuild.Fulora.PermissionState State
 
 type Agibuild.Fulora.PermissionState
-  - field Agibuild.Fulora.PermissionState Agibuild.Fulora.PermissionState::Allow
-  - field Agibuild.Fulora.PermissionState Agibuild.Fulora.PermissionState::Default
-  - field Agibuild.Fulora.PermissionState Agibuild.Fulora.PermissionState::Deny
-  - field System.Int32 Agibuild.Fulora.PermissionState::value__
+  - field Agibuild.Fulora.PermissionState Allow
+  - field Agibuild.Fulora.PermissionState Default
+  - field Agibuild.Fulora.PermissionState Deny
+  - field System.Int32 value__
 
 type Agibuild.Fulora.RateLimit
-  - property System.Int32 Agibuild.Fulora.RateLimit::MaxCalls
-  - property System.TimeSpan Agibuild.Fulora.RateLimit::Window
-  - method System.Void Agibuild.Fulora.RateLimit::.ctor(System.Int32,System.TimeSpan)
+  - constructor System.Void .ctor(System.Int32, System.TimeSpan)
+  - method System.Int32 get_MaxCalls()
+  - method System.TimeSpan get_Window()
+  - property System.Int32 MaxCalls
+  - property System.TimeSpan Window
 
 type Agibuild.Fulora.ScriptResultHelper
-  - method System.String Agibuild.Fulora.ScriptResultHelper::NormalizeJsonResult(System.String)
+  - method System.String NormalizeJsonResult(System.String)
 
 type Agibuild.Fulora.SpaHostingOptions
-  - property System.Boolean Agibuild.Fulora.SpaHostingOptions::AutoInjectBridgeScript
-  - property System.Collections.Generic.IDictionary`2<System.String,System.String> Agibuild.Fulora.SpaHostingOptions::DefaultHeaders
-  - property System.String Agibuild.Fulora.SpaHostingOptions::DevServerUrl
-  - property System.String Agibuild.Fulora.SpaHostingOptions::EmbeddedResourcePrefix
-  - property System.Uri Agibuild.Fulora.SpaHostingOptions::EntryPointUri
-  - property System.String Agibuild.Fulora.SpaHostingOptions::FallbackDocument
-  - property System.String Agibuild.Fulora.SpaHostingOptions::Host
-  - property System.Reflection.Assembly Agibuild.Fulora.SpaHostingOptions::ResourceAssembly
-  - property System.String Agibuild.Fulora.SpaHostingOptions::Scheme
-  - method System.Void Agibuild.Fulora.SpaHostingOptions::.ctor()
+  - constructor System.Void .ctor()
+  - property System.Func`1[System.String] ActiveAssetDirectoryProvider
+  - property System.Boolean AutoInjectBridgeScript
+  - property System.Collections.Generic.IDictionary`2[System.String,System.String] DefaultHeaders
+  - property System.String DevServerUrl
+  - property System.String EmbeddedResourcePrefix
+  - property System.Uri EntryPointUri
+  - property System.String FallbackDocument
+  - method System.Func`1[System.String] get_ActiveAssetDirectoryProvider()
+  - method System.Boolean get_AutoInjectBridgeScript()
+  - method System.Collections.Generic.IDictionary`2[System.String,System.String] get_DefaultHeaders()
+  - method System.String get_DevServerUrl()
+  - method System.String get_EmbeddedResourcePrefix()
+  - method System.Uri get_EntryPointUri()
+  - method System.String get_FallbackDocument()
+  - method System.String get_Host()
+  - method System.Reflection.Assembly get_ResourceAssembly()
+  - method System.String get_Scheme()
+  - property System.String Host
+  - property System.Reflection.Assembly ResourceAssembly
+  - property System.String Scheme
+  - method System.Void set_ActiveAssetDirectoryProvider(System.Func`1[System.String])
+  - method System.Void set_AutoInjectBridgeScript(System.Boolean)
+  - method System.Void set_DefaultHeaders(System.Collections.Generic.IDictionary`2[System.String,System.String])
+  - method System.Void set_DevServerUrl(System.String)
+  - method System.Void set_EmbeddedResourcePrefix(System.String)
+  - method System.Void set_FallbackDocument(System.String)
+  - method System.Void set_Host(System.String)
+  - method System.Void set_ResourceAssembly(System.Reflection.Assembly)
+  - method System.Void set_Scheme(System.String)
 
 type Agibuild.Fulora.WebAuthCallbackMatcher
-  - method System.Boolean Agibuild.Fulora.WebAuthCallbackMatcher::IsStrictMatch(System.Uri,System.Uri)
+  - method System.Boolean IsStrictMatch(System.Uri, System.Uri)
 
 type Agibuild.Fulora.WebAuthResult
-  - property System.Uri Agibuild.Fulora.WebAuthResult::CallbackUri
-  - property System.String Agibuild.Fulora.WebAuthResult::Error
-  - property Agibuild.Fulora.WebAuthStatus Agibuild.Fulora.WebAuthResult::Status
-  - method System.Void Agibuild.Fulora.WebAuthResult::.ctor()
+  - constructor System.Void .ctor()
+  - property System.Uri CallbackUri
+  - property System.String Error
+  - method System.Uri get_CallbackUri()
+  - method System.String get_Error()
+  - method Agibuild.Fulora.WebAuthStatus get_Status()
+  - method System.Void set_CallbackUri(System.Uri)
+  - method System.Void set_Error(System.String)
+  - method System.Void set_Status(Agibuild.Fulora.WebAuthStatus)
+  - property Agibuild.Fulora.WebAuthStatus Status
 
 type Agibuild.Fulora.WebAuthStatus
-  - field Agibuild.Fulora.WebAuthStatus Agibuild.Fulora.WebAuthStatus::Error
-  - field Agibuild.Fulora.WebAuthStatus Agibuild.Fulora.WebAuthStatus::Success
-  - field Agibuild.Fulora.WebAuthStatus Agibuild.Fulora.WebAuthStatus::Timeout
-  - field Agibuild.Fulora.WebAuthStatus Agibuild.Fulora.WebAuthStatus::UserCancel
-  - field System.Int32 Agibuild.Fulora.WebAuthStatus::value__
+  - field Agibuild.Fulora.WebAuthStatus Error
+  - field Agibuild.Fulora.WebAuthStatus Success
+  - field Agibuild.Fulora.WebAuthStatus Timeout
+  - field Agibuild.Fulora.WebAuthStatus UserCancel
+  - field System.Int32 value__
 
 type Agibuild.Fulora.WebMessageDropDiagnostic
-  - property System.Guid Agibuild.Fulora.WebMessageDropDiagnostic::ChannelId
-  - property System.String Agibuild.Fulora.WebMessageDropDiagnostic::Origin
-  - property Agibuild.Fulora.WebMessageDropReason Agibuild.Fulora.WebMessageDropDiagnostic::Reason
-  - method System.Void Agibuild.Fulora.WebMessageDropDiagnostic::.ctor(Agibuild.Fulora.WebMessageDropReason,System.String,System.Guid)
-  - method System.Void Agibuild.Fulora.WebMessageDropDiagnostic::Deconstruct(Agibuild.Fulora.WebMessageDropReason&,System.String&,System.Guid&)
-  - method System.Boolean Agibuild.Fulora.WebMessageDropDiagnostic::Equals(System.Object)
-  - method System.Boolean Agibuild.Fulora.WebMessageDropDiagnostic::Equals(Agibuild.Fulora.WebMessageDropDiagnostic)
-  - method System.Int32 Agibuild.Fulora.WebMessageDropDiagnostic::GetHashCode()
-  - method System.String Agibuild.Fulora.WebMessageDropDiagnostic::ToString()
-  - method System.Boolean Agibuild.Fulora.WebMessageDropDiagnostic::op_Equality(Agibuild.Fulora.WebMessageDropDiagnostic,Agibuild.Fulora.WebMessageDropDiagnostic)
-  - method System.Boolean Agibuild.Fulora.WebMessageDropDiagnostic::op_Inequality(Agibuild.Fulora.WebMessageDropDiagnostic,Agibuild.Fulora.WebMessageDropDiagnostic)
+  - constructor System.Void .ctor(Agibuild.Fulora.WebMessageDropReason, System.String, System.Guid)
+  - property System.Guid ChannelId
+  - method System.Void Deconstruct(Agibuild.Fulora.WebMessageDropReason&, System.String&, System.Guid&)
+  - method System.Boolean Equals(System.Object)
+  - method System.Boolean Equals(Agibuild.Fulora.WebMessageDropDiagnostic)
+  - method System.Guid get_ChannelId()
+  - method System.String get_Origin()
+  - method Agibuild.Fulora.WebMessageDropReason get_Reason()
+  - method System.Int32 GetHashCode()
+  - method System.Boolean op_Equality(Agibuild.Fulora.WebMessageDropDiagnostic, Agibuild.Fulora.WebMessageDropDiagnostic)
+  - method System.Boolean op_Inequality(Agibuild.Fulora.WebMessageDropDiagnostic, Agibuild.Fulora.WebMessageDropDiagnostic)
+  - property System.String Origin
+  - property Agibuild.Fulora.WebMessageDropReason Reason
+  - method System.Void set_ChannelId(System.Guid)
+  - method System.Void set_Origin(System.String)
+  - method System.Void set_Reason(Agibuild.Fulora.WebMessageDropReason)
+  - method System.String ToString()
 
 type Agibuild.Fulora.WebMessageDropReason
-  - field Agibuild.Fulora.WebMessageDropReason Agibuild.Fulora.WebMessageDropReason::ChannelMismatch
-  - field Agibuild.Fulora.WebMessageDropReason Agibuild.Fulora.WebMessageDropReason::OriginNotAllowed
-  - field Agibuild.Fulora.WebMessageDropReason Agibuild.Fulora.WebMessageDropReason::ProtocolMismatch
-  - field System.Int32 Agibuild.Fulora.WebMessageDropReason::value__
+  - field Agibuild.Fulora.WebMessageDropReason ChannelMismatch
+  - field Agibuild.Fulora.WebMessageDropReason OriginNotAllowed
+  - field Agibuild.Fulora.WebMessageDropReason ProtocolMismatch
+  - field System.Int32 value__
 
 type Agibuild.Fulora.WebMessageEnvelope
-  - property System.String Agibuild.Fulora.WebMessageEnvelope::Body
-  - property System.Guid Agibuild.Fulora.WebMessageEnvelope::ChannelId
-  - property System.String Agibuild.Fulora.WebMessageEnvelope::Origin
-  - property System.Int32 Agibuild.Fulora.WebMessageEnvelope::ProtocolVersion
-  - method System.Void Agibuild.Fulora.WebMessageEnvelope::.ctor(System.String,System.String,System.Guid,System.Int32)
-  - method System.Void Agibuild.Fulora.WebMessageEnvelope::Deconstruct(System.String&,System.String&,System.Guid&,System.Int32&)
-  - method System.Boolean Agibuild.Fulora.WebMessageEnvelope::Equals(System.Object)
-  - method System.Boolean Agibuild.Fulora.WebMessageEnvelope::Equals(Agibuild.Fulora.WebMessageEnvelope)
-  - method System.Int32 Agibuild.Fulora.WebMessageEnvelope::GetHashCode()
-  - method System.String Agibuild.Fulora.WebMessageEnvelope::ToString()
-  - method System.Boolean Agibuild.Fulora.WebMessageEnvelope::op_Equality(Agibuild.Fulora.WebMessageEnvelope,Agibuild.Fulora.WebMessageEnvelope)
-  - method System.Boolean Agibuild.Fulora.WebMessageEnvelope::op_Inequality(Agibuild.Fulora.WebMessageEnvelope,Agibuild.Fulora.WebMessageEnvelope)
+  - constructor System.Void .ctor(System.String, System.String, System.Guid, System.Int32)
+  - property System.String Body
+  - property System.Guid ChannelId
+  - method System.Void Deconstruct(System.String&, System.String&, System.Guid&, System.Int32&)
+  - method System.Boolean Equals(System.Object)
+  - method System.Boolean Equals(Agibuild.Fulora.WebMessageEnvelope)
+  - method System.String get_Body()
+  - method System.Guid get_ChannelId()
+  - method System.String get_Origin()
+  - method System.Int32 get_ProtocolVersion()
+  - method System.Int32 GetHashCode()
+  - method System.Boolean op_Equality(Agibuild.Fulora.WebMessageEnvelope, Agibuild.Fulora.WebMessageEnvelope)
+  - method System.Boolean op_Inequality(Agibuild.Fulora.WebMessageEnvelope, Agibuild.Fulora.WebMessageEnvelope)
+  - property System.String Origin
+  - property System.Int32 ProtocolVersion
+  - method System.Void set_Body(System.String)
+  - method System.Void set_ChannelId(System.Guid)
+  - method System.Void set_Origin(System.String)
+  - method System.Void set_ProtocolVersion(System.Int32)
+  - method System.String ToString()
 
 type Agibuild.Fulora.WebMessagePolicyDecision
-  - property System.Nullable`1<Agibuild.Fulora.WebMessageDropReason> Agibuild.Fulora.WebMessagePolicyDecision::DropReason
-  - property System.Boolean Agibuild.Fulora.WebMessagePolicyDecision::IsAllowed
-  - method System.Void Agibuild.Fulora.WebMessagePolicyDecision::.ctor(System.Boolean,System.Nullable`1<Agibuild.Fulora.WebMessageDropReason>)
-  - method Agibuild.Fulora.WebMessagePolicyDecision Agibuild.Fulora.WebMessagePolicyDecision::Allow()
-  - method System.Void Agibuild.Fulora.WebMessagePolicyDecision::Deconstruct(System.Boolean&,System.Nullable`1<Agibuild.Fulora.WebMessageDropReason>&)
-  - method Agibuild.Fulora.WebMessagePolicyDecision Agibuild.Fulora.WebMessagePolicyDecision::Deny(Agibuild.Fulora.WebMessageDropReason)
-  - method System.Boolean Agibuild.Fulora.WebMessagePolicyDecision::Equals(System.Object)
-  - method System.Boolean Agibuild.Fulora.WebMessagePolicyDecision::Equals(Agibuild.Fulora.WebMessagePolicyDecision)
-  - method System.Int32 Agibuild.Fulora.WebMessagePolicyDecision::GetHashCode()
-  - method System.String Agibuild.Fulora.WebMessagePolicyDecision::ToString()
-  - method System.Boolean Agibuild.Fulora.WebMessagePolicyDecision::op_Equality(Agibuild.Fulora.WebMessagePolicyDecision,Agibuild.Fulora.WebMessagePolicyDecision)
-  - method System.Boolean Agibuild.Fulora.WebMessagePolicyDecision::op_Inequality(Agibuild.Fulora.WebMessagePolicyDecision,Agibuild.Fulora.WebMessagePolicyDecision)
+  - constructor System.Void .ctor(System.Boolean, System.Nullable`1[Agibuild.Fulora.WebMessageDropReason])
+  - method Agibuild.Fulora.WebMessagePolicyDecision Allow()
+  - method System.Void Deconstruct(System.Boolean&, System.Nullable`1[Agibuild.Fulora.WebMessageDropReason]&)
+  - method Agibuild.Fulora.WebMessagePolicyDecision Deny(Agibuild.Fulora.WebMessageDropReason)
+  - property System.Nullable`1[Agibuild.Fulora.WebMessageDropReason] DropReason
+  - method System.Boolean Equals(System.Object)
+  - method System.Boolean Equals(Agibuild.Fulora.WebMessagePolicyDecision)
+  - method System.Nullable`1[Agibuild.Fulora.WebMessageDropReason] get_DropReason()
+  - method System.Boolean get_IsAllowed()
+  - method System.Int32 GetHashCode()
+  - property System.Boolean IsAllowed
+  - method System.Boolean op_Equality(Agibuild.Fulora.WebMessagePolicyDecision, Agibuild.Fulora.WebMessagePolicyDecision)
+  - method System.Boolean op_Inequality(Agibuild.Fulora.WebMessagePolicyDecision, Agibuild.Fulora.WebMessagePolicyDecision)
+  - method System.Void set_DropReason(System.Nullable`1[Agibuild.Fulora.WebMessageDropReason])
+  - method System.Void set_IsAllowed(System.Boolean)
+  - method System.String ToString()
 
 type Agibuild.Fulora.WebMessageReceivedEventArgs
-  - property System.String Agibuild.Fulora.WebMessageReceivedEventArgs::Body
-  - property System.Guid Agibuild.Fulora.WebMessageReceivedEventArgs::ChannelId
-  - property System.String Agibuild.Fulora.WebMessageReceivedEventArgs::Origin
-  - property System.Int32 Agibuild.Fulora.WebMessageReceivedEventArgs::ProtocolVersion
-  - method System.Void Agibuild.Fulora.WebMessageReceivedEventArgs::.ctor()
-  - method System.Void Agibuild.Fulora.WebMessageReceivedEventArgs::.ctor(System.String,System.String,System.Guid)
-  - method System.Void Agibuild.Fulora.WebMessageReceivedEventArgs::.ctor(System.String,System.String,System.Guid,System.Int32)
+  - constructor System.Void .ctor()
+  - constructor System.Void .ctor(System.String, System.String, System.Guid)
+  - constructor System.Void .ctor(System.String, System.String, System.Guid, System.Int32)
+  - property System.String Body
+  - property System.Guid ChannelId
+  - method System.String get_Body()
+  - method System.Guid get_ChannelId()
+  - method System.String get_Origin()
+  - method System.Int32 get_ProtocolVersion()
+  - property System.String Origin
+  - property System.Int32 ProtocolVersion
 
 type Agibuild.Fulora.WebResourceRequestedEventArgs
-  - property System.Boolean Agibuild.Fulora.WebResourceRequestedEventArgs::Handled
-  - property System.String Agibuild.Fulora.WebResourceRequestedEventArgs::Method
-  - property System.Collections.Generic.IReadOnlyDictionary`2<System.String,System.String> Agibuild.Fulora.WebResourceRequestedEventArgs::RequestHeaders
-  - property System.Uri Agibuild.Fulora.WebResourceRequestedEventArgs::RequestUri
-  - property System.IO.Stream Agibuild.Fulora.WebResourceRequestedEventArgs::ResponseBody
-  - property System.String Agibuild.Fulora.WebResourceRequestedEventArgs::ResponseContentType
-  - property System.Collections.Generic.IDictionary`2<System.String,System.String> Agibuild.Fulora.WebResourceRequestedEventArgs::ResponseHeaders
-  - property System.Int32 Agibuild.Fulora.WebResourceRequestedEventArgs::ResponseStatusCode
-  - method System.Void Agibuild.Fulora.WebResourceRequestedEventArgs::.ctor()
-  - method System.Void Agibuild.Fulora.WebResourceRequestedEventArgs::.ctor(System.Uri,System.String,System.Collections.Generic.IReadOnlyDictionary`2<System.String,System.String>)
+  - constructor System.Void .ctor()
+  - constructor System.Void .ctor(System.Uri, System.String, System.Collections.Generic.IReadOnlyDictionary`2[System.String,System.String])
+  - method System.Boolean get_Handled()
+  - method System.String get_Method()
+  - method System.Collections.Generic.IReadOnlyDictionary`2[System.String,System.String] get_RequestHeaders()
+  - method System.Uri get_RequestUri()
+  - method System.IO.Stream get_ResponseBody()
+  - method System.String get_ResponseContentType()
+  - method System.Collections.Generic.IDictionary`2[System.String,System.String] get_ResponseHeaders()
+  - method System.Int32 get_ResponseStatusCode()
+  - property System.Boolean Handled
+  - property System.String Method
+  - property System.Collections.Generic.IReadOnlyDictionary`2[System.String,System.String] RequestHeaders
+  - property System.Uri RequestUri
+  - property System.IO.Stream ResponseBody
+  - property System.String ResponseContentType
+  - property System.Collections.Generic.IDictionary`2[System.String,System.String] ResponseHeaders
+  - property System.Int32 ResponseStatusCode
+  - method System.Void set_Handled(System.Boolean)
+  - method System.Void set_Method(System.String)
+  - method System.Void set_RequestHeaders(System.Collections.Generic.IReadOnlyDictionary`2[System.String,System.String])
+  - method System.Void set_RequestUri(System.Uri)
+  - method System.Void set_ResponseBody(System.IO.Stream)
+  - method System.Void set_ResponseContentType(System.String)
+  - method System.Void set_ResponseHeaders(System.Collections.Generic.IDictionary`2[System.String,System.String])
+  - method System.Void set_ResponseStatusCode(System.Int32)
 
 type Agibuild.Fulora.WebViewCommand
-  - field Agibuild.Fulora.WebViewCommand Agibuild.Fulora.WebViewCommand::Copy
-  - field Agibuild.Fulora.WebViewCommand Agibuild.Fulora.WebViewCommand::Cut
-  - field Agibuild.Fulora.WebViewCommand Agibuild.Fulora.WebViewCommand::Paste
-  - field Agibuild.Fulora.WebViewCommand Agibuild.Fulora.WebViewCommand::Redo
-  - field Agibuild.Fulora.WebViewCommand Agibuild.Fulora.WebViewCommand::SelectAll
-  - field Agibuild.Fulora.WebViewCommand Agibuild.Fulora.WebViewCommand::Undo
-  - field System.Int32 Agibuild.Fulora.WebViewCommand::value__
+  - field Agibuild.Fulora.WebViewCommand Copy
+  - field Agibuild.Fulora.WebViewCommand Cut
+  - field Agibuild.Fulora.WebViewCommand Paste
+  - field Agibuild.Fulora.WebViewCommand Redo
+  - field Agibuild.Fulora.WebViewCommand SelectAll
+  - field Agibuild.Fulora.WebViewCommand Undo
+  - field System.Int32 value__
 
 type Agibuild.Fulora.WebViewCookie
-  - property System.String Agibuild.Fulora.WebViewCookie::Domain
-  - property System.Nullable`1<System.DateTimeOffset> Agibuild.Fulora.WebViewCookie::Expires
-  - property System.Boolean Agibuild.Fulora.WebViewCookie::IsHttpOnly
-  - property System.Boolean Agibuild.Fulora.WebViewCookie::IsSecure
-  - property System.String Agibuild.Fulora.WebViewCookie::Name
-  - property System.String Agibuild.Fulora.WebViewCookie::Path
-  - property System.String Agibuild.Fulora.WebViewCookie::Value
-  - method System.Void Agibuild.Fulora.WebViewCookie::.ctor(System.String,System.String,System.String,System.String,System.Nullable`1<System.DateTimeOffset>,System.Boolean,System.Boolean)
-  - method Agibuild.Fulora.WebViewCookie Agibuild.Fulora.WebViewCookie::<Clone>$()
-  - method System.Void Agibuild.Fulora.WebViewCookie::Deconstruct(System.String&,System.String&,System.String&,System.String&,System.Nullable`1<System.DateTimeOffset>&,System.Boolean&,System.Boolean&)
-  - method System.Boolean Agibuild.Fulora.WebViewCookie::Equals(System.Object)
-  - method System.Boolean Agibuild.Fulora.WebViewCookie::Equals(Agibuild.Fulora.WebViewCookie)
-  - method System.Int32 Agibuild.Fulora.WebViewCookie::GetHashCode()
-  - method System.String Agibuild.Fulora.WebViewCookie::ToString()
-  - method System.Boolean Agibuild.Fulora.WebViewCookie::op_Equality(Agibuild.Fulora.WebViewCookie,Agibuild.Fulora.WebViewCookie)
-  - method System.Boolean Agibuild.Fulora.WebViewCookie::op_Inequality(Agibuild.Fulora.WebViewCookie,Agibuild.Fulora.WebViewCookie)
+  - constructor System.Void .ctor(System.String, System.String, System.String, System.String, System.Nullable`1[System.DateTimeOffset], System.Boolean, System.Boolean)
+  - method Agibuild.Fulora.WebViewCookie <Clone>$()
+  - method System.Void Deconstruct(System.String&, System.String&, System.String&, System.String&, System.Nullable`1[System.DateTimeOffset]&, System.Boolean&, System.Boolean&)
+  - property System.String Domain
+  - method System.Boolean Equals(System.Object)
+  - method System.Boolean Equals(Agibuild.Fulora.WebViewCookie)
+  - property System.Nullable`1[System.DateTimeOffset] Expires
+  - method System.String get_Domain()
+  - method System.Nullable`1[System.DateTimeOffset] get_Expires()
+  - method System.Boolean get_IsHttpOnly()
+  - method System.Boolean get_IsSecure()
+  - method System.String get_Name()
+  - method System.String get_Path()
+  - method System.String get_Value()
+  - method System.Int32 GetHashCode()
+  - property System.Boolean IsHttpOnly
+  - property System.Boolean IsSecure
+  - property System.String Name
+  - method System.Boolean op_Equality(Agibuild.Fulora.WebViewCookie, Agibuild.Fulora.WebViewCookie)
+  - method System.Boolean op_Inequality(Agibuild.Fulora.WebViewCookie, Agibuild.Fulora.WebViewCookie)
+  - property System.String Path
+  - method System.Void set_Domain(System.String)
+  - method System.Void set_Expires(System.Nullable`1[System.DateTimeOffset])
+  - method System.Void set_IsHttpOnly(System.Boolean)
+  - method System.Void set_IsSecure(System.Boolean)
+  - method System.Void set_Name(System.String)
+  - method System.Void set_Path(System.String)
+  - method System.Void set_Value(System.String)
+  - method System.String ToString()
+  - property System.String Value
 
 type Agibuild.Fulora.WebViewNavigationException
-  - property System.Guid Agibuild.Fulora.WebViewNavigationException::NavigationId
-  - property System.Uri Agibuild.Fulora.WebViewNavigationException::RequestUri
-  - method System.Void Agibuild.Fulora.WebViewNavigationException::.ctor(System.String,System.Guid,System.Uri,System.Exception)
+  - constructor System.Void .ctor(System.String, System.Guid, System.Uri, System.Exception)
+  - method System.Guid get_NavigationId()
+  - method System.Uri get_RequestUri()
+  - property System.Guid NavigationId
+  - property System.Uri RequestUri
 
 type Agibuild.Fulora.WebViewNetworkException
-  - method System.Void Agibuild.Fulora.WebViewNetworkException::.ctor(System.String,System.Guid,System.Uri,System.Exception)
+  - constructor System.Void .ctor(System.String, System.Guid, System.Uri, System.Exception)
 
 type Agibuild.Fulora.WebViewOperationFailure
-  - method System.Void Agibuild.Fulora.WebViewOperationFailure::SetCategory(System.Exception,Agibuild.Fulora.WebViewOperationFailureCategory)
-  - method System.Boolean Agibuild.Fulora.WebViewOperationFailure::TryGetCategory(System.Exception,Agibuild.Fulora.WebViewOperationFailureCategory&)
+  - method System.Void SetCategory(System.Exception, Agibuild.Fulora.WebViewOperationFailureCategory)
+  - method System.Boolean TryGetCategory(System.Exception, Agibuild.Fulora.WebViewOperationFailureCategory&)
 
 type Agibuild.Fulora.WebViewOperationFailureCategory
-  - field Agibuild.Fulora.WebViewOperationFailureCategory Agibuild.Fulora.WebViewOperationFailureCategory::AdapterFailed
-  - field Agibuild.Fulora.WebViewOperationFailureCategory Agibuild.Fulora.WebViewOperationFailureCategory::DispatchFailed
-  - field Agibuild.Fulora.WebViewOperationFailureCategory Agibuild.Fulora.WebViewOperationFailureCategory::Disposed
-  - field Agibuild.Fulora.WebViewOperationFailureCategory Agibuild.Fulora.WebViewOperationFailureCategory::NotReady
-  - field System.Int32 Agibuild.Fulora.WebViewOperationFailureCategory::value__
+  - field Agibuild.Fulora.WebViewOperationFailureCategory AdapterFailed
+  - field Agibuild.Fulora.WebViewOperationFailureCategory DispatchFailed
+  - field Agibuild.Fulora.WebViewOperationFailureCategory Disposed
+  - field Agibuild.Fulora.WebViewOperationFailureCategory NotReady
+  - field System.Int32 value__
 
 type Agibuild.Fulora.WebViewPermissionKind
-  - field Agibuild.Fulora.WebViewPermissionKind Agibuild.Fulora.WebViewPermissionKind::Camera
-  - field Agibuild.Fulora.WebViewPermissionKind Agibuild.Fulora.WebViewPermissionKind::ClipboardRead
-  - field Agibuild.Fulora.WebViewPermissionKind Agibuild.Fulora.WebViewPermissionKind::ClipboardWrite
-  - field Agibuild.Fulora.WebViewPermissionKind Agibuild.Fulora.WebViewPermissionKind::Geolocation
-  - field Agibuild.Fulora.WebViewPermissionKind Agibuild.Fulora.WebViewPermissionKind::Microphone
-  - field Agibuild.Fulora.WebViewPermissionKind Agibuild.Fulora.WebViewPermissionKind::Midi
-  - field Agibuild.Fulora.WebViewPermissionKind Agibuild.Fulora.WebViewPermissionKind::Notifications
-  - field Agibuild.Fulora.WebViewPermissionKind Agibuild.Fulora.WebViewPermissionKind::Other
-  - field Agibuild.Fulora.WebViewPermissionKind Agibuild.Fulora.WebViewPermissionKind::Sensors
-  - field Agibuild.Fulora.WebViewPermissionKind Agibuild.Fulora.WebViewPermissionKind::Unknown
-  - field System.Int32 Agibuild.Fulora.WebViewPermissionKind::value__
+  - field Agibuild.Fulora.WebViewPermissionKind Camera
+  - field Agibuild.Fulora.WebViewPermissionKind ClipboardRead
+  - field Agibuild.Fulora.WebViewPermissionKind ClipboardWrite
+  - field Agibuild.Fulora.WebViewPermissionKind Geolocation
+  - field Agibuild.Fulora.WebViewPermissionKind Microphone
+  - field Agibuild.Fulora.WebViewPermissionKind Midi
+  - field Agibuild.Fulora.WebViewPermissionKind Notifications
+  - field Agibuild.Fulora.WebViewPermissionKind Other
+  - field Agibuild.Fulora.WebViewPermissionKind Sensors
+  - field Agibuild.Fulora.WebViewPermissionKind Unknown
+  - field System.Int32 value__
 
 type Agibuild.Fulora.WebViewRpcException
-  - property System.Int32 Agibuild.Fulora.WebViewRpcException::Code
-  - method System.Void Agibuild.Fulora.WebViewRpcException::.ctor(System.Int32,System.String)
+  - constructor System.Void .ctor(System.Int32, System.String)
+  - property System.Int32 Code
+  - method System.Int32 get_Code()
 
 type Agibuild.Fulora.WebViewScriptException
-  - method System.Void Agibuild.Fulora.WebViewScriptException::.ctor(System.String,System.Exception)
+  - constructor System.Void .ctor(System.String, System.Exception)
 
 type Agibuild.Fulora.WebViewSslException
-  - method System.Void Agibuild.Fulora.WebViewSslException::.ctor(System.String,System.Guid,System.Uri,System.Exception)
+  - constructor System.Void .ctor(System.String, System.Guid, System.Uri, System.Exception)
 
 type Agibuild.Fulora.WebViewTimeoutException
-  - method System.Void Agibuild.Fulora.WebViewTimeoutException::.ctor(System.String,System.Guid,System.Uri,System.Exception)
-
---------------------------------------------------------------------------------
-
-Assembly: Agibuild.Fulora.DependencyInjection
-Path: <repo>\src\Agibuild.Fulora.DependencyInjection\bin\Release\net10.0\Agibuild.Fulora.DependencyInjection.dll
-PublicTypes: 2
-
-type Agibuild.Fulora.DependencyInjection.ServiceCollectionExtensions
-  - method Microsoft.Extensions.DependencyInjection.IServiceCollection Agibuild.Fulora.DependencyInjection.ServiceCollectionExtensions::AddWebView(Microsoft.Extensions.DependencyInjection.IServiceCollection)
-
-type Microsoft.Extensions.DependencyInjection.WebViewServiceCollectionExtensions
-  - method Microsoft.Extensions.DependencyInjection.IServiceCollection Microsoft.Extensions.DependencyInjection.WebViewServiceCollectionExtensions::AddWebView(Microsoft.Extensions.DependencyInjection.IServiceCollection)
-  - method System.IServiceProvider Microsoft.Extensions.DependencyInjection.WebViewServiceCollectionExtensions::UseAgibuildWebView(System.IServiceProvider)
+  - constructor System.Void .ctor(System.String, System.Guid, System.Uri, System.Exception)
 
 --------------------------------------------------------------------------------
 
 Assembly: Agibuild.Fulora.Runtime
-Path: <repo>\src\Agibuild.Fulora.Runtime\bin\Release\net10.0\Agibuild.Fulora.Runtime.dll
-PublicTypes: 11
+Path: <repo>/src/Agibuild.Fulora.Runtime/bin/Release/net10.0/Agibuild.Fulora.Runtime.dll
+PublicTypes: 100
 
 type Agibuild.Fulora.BridgeImportProxy
-  - method System.Void Agibuild.Fulora.BridgeImportProxy::.ctor()
+  - constructor System.Void .ctor()
 
 type Agibuild.Fulora.IDialogHost
-  - property System.Boolean Agibuild.Fulora.IDialogHost::CanUserResize
-  - property System.String Agibuild.Fulora.IDialogHost::Title
-  - event System.EventHandler Agibuild.Fulora.IDialogHost::HostClosing
-  - method System.Void Agibuild.Fulora.IDialogHost::Close()
-  - method System.Boolean Agibuild.Fulora.IDialogHost::Move(System.Int32,System.Int32)
-  - method System.Boolean Agibuild.Fulora.IDialogHost::Resize(System.Int32,System.Int32)
-  - method System.Void Agibuild.Fulora.IDialogHost::Show()
-  - method System.Boolean Agibuild.Fulora.IDialogHost::ShowWithOwner(Avalonia.Platform.IPlatformHandle)
+  - method System.Void add_HostClosing(System.EventHandler)
+  - property System.Boolean CanUserResize
+  - method System.Void Close()
+  - method System.Boolean get_CanUserResize()
+  - method System.String get_Title()
+  - event System.EventHandler HostClosing
+  - method System.Boolean Move(System.Int32, System.Int32)
+  - method System.Void remove_HostClosing(System.EventHandler)
+  - method System.Boolean Resize(System.Int32, System.Int32)
+  - method System.Void set_CanUserResize(System.Boolean)
+  - method System.Void set_Title(System.String)
+  - method System.Void Show()
+  - method System.Boolean ShowWithOwner(Agibuild.Fulora.INativeHandle)
+  - property System.String Title
 
 type Agibuild.Fulora.LoggingBridgeTracer
-  - method System.Void Agibuild.Fulora.LoggingBridgeTracer::.ctor(Microsoft.Extensions.Logging.ILogger)
-  - method System.Void Agibuild.Fulora.LoggingBridgeTracer::OnExportCallEnd(System.String,System.String,System.Int64,System.String)
-  - method System.Void Agibuild.Fulora.LoggingBridgeTracer::OnExportCallError(System.String,System.String,System.Int64,System.Exception)
-  - method System.Void Agibuild.Fulora.LoggingBridgeTracer::OnExportCallStart(System.String,System.String,System.String)
-  - method System.Void Agibuild.Fulora.LoggingBridgeTracer::OnImportCallEnd(System.String,System.String,System.Int64)
-  - method System.Void Agibuild.Fulora.LoggingBridgeTracer::OnImportCallStart(System.String,System.String,System.String)
-  - method System.Void Agibuild.Fulora.LoggingBridgeTracer::OnServiceExposed(System.String,System.Int32,System.Boolean)
-  - method System.Void Agibuild.Fulora.LoggingBridgeTracer::OnServiceRemoved(System.String)
+  - constructor System.Void .ctor(Microsoft.Extensions.Logging.ILogger)
+  - method System.Void OnExportCallEnd(System.String, System.String, System.Int64, System.String)
+  - method System.Void OnExportCallError(System.String, System.String, System.Int64, System.Exception)
+  - method System.Void OnExportCallStart(System.String, System.String, System.String)
+  - method System.Void OnImportCallEnd(System.String, System.String, System.Int64)
+  - method System.Void OnImportCallStart(System.String, System.String, System.String)
+  - method System.Void OnServiceExposed(System.String, System.Int32, System.Boolean)
+  - method System.Void OnServiceRemoved(System.String)
+
+type Agibuild.Fulora.Shell.DeepLinkActivationEnvelope
+  - constructor System.Void .ctor(System.Guid, System.String, System.Uri, Agibuild.Fulora.Shell.DeepLinkActivationSource, System.DateTimeOffset)
+  - property System.Guid ActivationId
+  - method System.Guid get_ActivationId()
+  - method System.String get_IdempotencyKey()
+  - method System.DateTimeOffset get_OccurredAtUtc()
+  - method System.Uri get_RawUri()
+  - method System.String get_Route()
+  - method Agibuild.Fulora.Shell.DeepLinkActivationSource get_Source()
+  - property System.String IdempotencyKey
+  - property System.DateTimeOffset OccurredAtUtc
+  - property System.Uri RawUri
+  - property System.String Route
+  - property Agibuild.Fulora.Shell.DeepLinkActivationSource Source
+
+type Agibuild.Fulora.Shell.DeepLinkActivationIngressResult
+  - constructor System.Void .ctor(Agibuild.Fulora.Shell.DeepLinkActivationIngressStatus, System.String)
+  - method Agibuild.Fulora.Shell.DeepLinkActivationIngressResult <Clone>$()
+  - method System.Void Deconstruct(Agibuild.Fulora.Shell.DeepLinkActivationIngressStatus&, System.String&)
+  - method Agibuild.Fulora.Shell.DeepLinkActivationIngressResult Dispatched()
+  - method Agibuild.Fulora.Shell.DeepLinkActivationIngressResult Duplicate()
+  - method System.Boolean Equals(System.Object)
+  - method System.Boolean Equals(Agibuild.Fulora.Shell.DeepLinkActivationIngressResult)
+  - method System.String get_Reason()
+  - method Agibuild.Fulora.Shell.DeepLinkActivationIngressStatus get_Status()
+  - method System.Int32 GetHashCode()
+  - method Agibuild.Fulora.Shell.DeepLinkActivationIngressResult NoMatchingRoute()
+  - method System.Boolean op_Equality(Agibuild.Fulora.Shell.DeepLinkActivationIngressResult, Agibuild.Fulora.Shell.DeepLinkActivationIngressResult)
+  - method System.Boolean op_Inequality(Agibuild.Fulora.Shell.DeepLinkActivationIngressResult, Agibuild.Fulora.Shell.DeepLinkActivationIngressResult)
+  - method Agibuild.Fulora.Shell.DeepLinkActivationIngressResult PolicyDenied(System.String)
+  - property System.String Reason
+  - method System.Void set_Reason(System.String)
+  - method System.Void set_Status(Agibuild.Fulora.Shell.DeepLinkActivationIngressStatus)
+  - property Agibuild.Fulora.Shell.DeepLinkActivationIngressStatus Status
+  - method System.String ToString()
+
+type Agibuild.Fulora.Shell.DeepLinkActivationIngressStatus
+  - field Agibuild.Fulora.Shell.DeepLinkActivationIngressStatus Dispatched
+  - field Agibuild.Fulora.Shell.DeepLinkActivationIngressStatus Duplicate
+  - field Agibuild.Fulora.Shell.DeepLinkActivationIngressStatus NoMatchingRoute
+  - field Agibuild.Fulora.Shell.DeepLinkActivationIngressStatus PolicyDenied
+  - field System.Int32 value__
+
+type Agibuild.Fulora.Shell.DeepLinkActivationSource
+  - field Agibuild.Fulora.Shell.DeepLinkActivationSource HostInjected
+  - field Agibuild.Fulora.Shell.DeepLinkActivationSource ProtocolLaunch
+  - field Agibuild.Fulora.Shell.DeepLinkActivationSource SecondaryForward
+  - field System.Int32 value__
+
+type Agibuild.Fulora.Shell.DeepLinkAdmissionDecision
+  - constructor System.Void .ctor(System.Boolean, System.String)
+  - method Agibuild.Fulora.Shell.DeepLinkAdmissionDecision <Clone>$()
+  - method Agibuild.Fulora.Shell.DeepLinkAdmissionDecision Allow()
+  - method System.Void Deconstruct(System.Boolean&, System.String&)
+  - method Agibuild.Fulora.Shell.DeepLinkAdmissionDecision Deny(System.String)
+  - property System.String DenyReason
+  - method System.Boolean Equals(System.Object)
+  - method System.Boolean Equals(Agibuild.Fulora.Shell.DeepLinkAdmissionDecision)
+  - method System.String get_DenyReason()
+  - method System.Boolean get_IsAllowed()
+  - method System.Int32 GetHashCode()
+  - property System.Boolean IsAllowed
+  - method System.Boolean op_Equality(Agibuild.Fulora.Shell.DeepLinkAdmissionDecision, Agibuild.Fulora.Shell.DeepLinkAdmissionDecision)
+  - method System.Boolean op_Inequality(Agibuild.Fulora.Shell.DeepLinkAdmissionDecision, Agibuild.Fulora.Shell.DeepLinkAdmissionDecision)
+  - method System.Void set_DenyReason(System.String)
+  - method System.Void set_IsAllowed(System.Boolean)
+  - method System.String ToString()
+
+type Agibuild.Fulora.Shell.DeepLinkDiagnosticEventArgs
+  - constructor System.Void .ctor(System.Guid, Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType, System.String, System.String, System.String, System.Uri)
+  - property System.Guid CorrelationId
+  - property Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType EventType
+  - method System.Guid get_CorrelationId()
+  - method Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType get_EventType()
+  - method System.String get_Outcome()
+  - method System.Uri get_RawUri()
+  - method System.String get_Reason()
+  - method System.String get_Route()
+  - property System.String Outcome
+  - property System.Uri RawUri
+  - property System.String Reason
+  - property System.String Route
+
+type Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType
+  - field Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType ActivationNormalized
+  - field Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType Dispatched
+  - field Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType DuplicateSuppressed
+  - field Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType NoMatchingRoute
+  - field Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType PolicyDenied
+  - field Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType RegistrationAttempt
+  - field System.Int32 value__
+
+type Agibuild.Fulora.Shell.DeepLinkPlatformEntryDescriptor
+  - constructor System.Void .ctor(System.String, Agibuild.Fulora.Shell.DeepLinkPlatformSupport, System.String)
+  - method Agibuild.Fulora.Shell.DeepLinkPlatformEntryDescriptor <Clone>$()
+  - property System.Collections.Generic.IReadOnlyList`1[Agibuild.Fulora.Shell.DeepLinkPlatformEntryDescriptor] All
+  - property Agibuild.Fulora.Shell.DeepLinkPlatformEntryDescriptor Android
+  - method System.Void Deconstruct(System.String&, Agibuild.Fulora.Shell.DeepLinkPlatformSupport&, System.String&)
+  - property System.String EntrypointDescription
+  - method System.Boolean Equals(System.Object)
+  - method System.Boolean Equals(Agibuild.Fulora.Shell.DeepLinkPlatformEntryDescriptor)
+  - method System.Collections.Generic.IReadOnlyList`1[Agibuild.Fulora.Shell.DeepLinkPlatformEntryDescriptor] get_All()
+  - method Agibuild.Fulora.Shell.DeepLinkPlatformEntryDescriptor get_Android()
+  - method System.String get_EntrypointDescription()
+  - method Agibuild.Fulora.Shell.DeepLinkPlatformEntryDescriptor get_iOS()
+  - method Agibuild.Fulora.Shell.DeepLinkPlatformEntryDescriptor get_Linux()
+  - method Agibuild.Fulora.Shell.DeepLinkPlatformEntryDescriptor get_MacOS()
+  - method System.String get_PlatformName()
+  - method Agibuild.Fulora.Shell.DeepLinkPlatformSupport get_Support()
+  - method Agibuild.Fulora.Shell.DeepLinkPlatformEntryDescriptor get_Windows()
+  - method System.Int32 GetHashCode()
+  - property Agibuild.Fulora.Shell.DeepLinkPlatformEntryDescriptor iOS
+  - property Agibuild.Fulora.Shell.DeepLinkPlatformEntryDescriptor Linux
+  - property Agibuild.Fulora.Shell.DeepLinkPlatformEntryDescriptor MacOS
+  - method System.Boolean op_Equality(Agibuild.Fulora.Shell.DeepLinkPlatformEntryDescriptor, Agibuild.Fulora.Shell.DeepLinkPlatformEntryDescriptor)
+  - method System.Boolean op_Inequality(Agibuild.Fulora.Shell.DeepLinkPlatformEntryDescriptor, Agibuild.Fulora.Shell.DeepLinkPlatformEntryDescriptor)
+  - property System.String PlatformName
+  - method System.Void set_EntrypointDescription(System.String)
+  - method System.Void set_PlatformName(System.String)
+  - method System.Void set_Support(Agibuild.Fulora.Shell.DeepLinkPlatformSupport)
+  - property Agibuild.Fulora.Shell.DeepLinkPlatformSupport Support
+  - method System.String ToString()
+  - property Agibuild.Fulora.Shell.DeepLinkPlatformEntryDescriptor Windows
+
+type Agibuild.Fulora.Shell.DeepLinkPlatformEntrypoint
+  - method System.Threading.Tasks.Task`1[Agibuild.Fulora.Shell.DeepLinkActivationIngressResult] HandlePlatformActivationAsync(Agibuild.Fulora.Shell.IDeepLinkRegistrationService, System.String, Agibuild.Fulora.Shell.DeepLinkActivationSource, System.Threading.CancellationToken)
+
+type Agibuild.Fulora.Shell.DeepLinkPlatformSupport
+  - field Agibuild.Fulora.Shell.DeepLinkPlatformSupport NotSupported
+  - field Agibuild.Fulora.Shell.DeepLinkPlatformSupport Supported
+  - field System.Int32 value__
+
+type Agibuild.Fulora.Shell.DeepLinkRegistrationResult
+  - constructor System.Void .ctor(Agibuild.Fulora.Shell.DeepLinkRegistrationStatus, System.String)
+  - method Agibuild.Fulora.Shell.DeepLinkRegistrationResult <Clone>$()
+  - method Agibuild.Fulora.Shell.DeepLinkRegistrationResult Accepted()
+  - method System.Void Deconstruct(Agibuild.Fulora.Shell.DeepLinkRegistrationStatus&, System.String&)
+  - method System.Boolean Equals(System.Object)
+  - method System.Boolean Equals(Agibuild.Fulora.Shell.DeepLinkRegistrationResult)
+  - method System.String get_Reason()
+  - method Agibuild.Fulora.Shell.DeepLinkRegistrationStatus get_Status()
+  - method System.Int32 GetHashCode()
+  - method System.Boolean op_Equality(Agibuild.Fulora.Shell.DeepLinkRegistrationResult, Agibuild.Fulora.Shell.DeepLinkRegistrationResult)
+  - method System.Boolean op_Inequality(Agibuild.Fulora.Shell.DeepLinkRegistrationResult, Agibuild.Fulora.Shell.DeepLinkRegistrationResult)
+  - property System.String Reason
+  - method Agibuild.Fulora.Shell.DeepLinkRegistrationResult Rejected(System.String)
+  - method System.Void set_Reason(System.String)
+  - method System.Void set_Status(Agibuild.Fulora.Shell.DeepLinkRegistrationStatus)
+  - property Agibuild.Fulora.Shell.DeepLinkRegistrationStatus Status
+  - method System.String ToString()
+
+type Agibuild.Fulora.Shell.DeepLinkRegistrationService
+  - constructor System.Void .ctor(Agibuild.Fulora.Shell.IDeepLinkAdmissionPolicy, System.Nullable`1[System.TimeSpan])
+  - method System.Void add_DiagnosticEvent(System.EventHandler`1[Agibuild.Fulora.Shell.DeepLinkDiagnosticEventArgs])
+  - event System.EventHandler`1[Agibuild.Fulora.Shell.DeepLinkDiagnosticEventArgs] DiagnosticEvent
+  - method System.Threading.Tasks.Task`1[Agibuild.Fulora.Shell.DeepLinkActivationIngressResult] IngestActivationAsync(System.Uri, Agibuild.Fulora.Shell.DeepLinkActivationSource, System.Threading.CancellationToken)
+  - method Agibuild.Fulora.Shell.DeepLinkRegistrationResult RegisterRoute(Agibuild.Fulora.Shell.DeepLinkRouteDeclaration)
+  - method System.Void remove_DiagnosticEvent(System.EventHandler`1[Agibuild.Fulora.Shell.DeepLinkDiagnosticEventArgs])
+
+type Agibuild.Fulora.Shell.DeepLinkRegistrationStatus
+  - field Agibuild.Fulora.Shell.DeepLinkRegistrationStatus Accepted
+  - field Agibuild.Fulora.Shell.DeepLinkRegistrationStatus Rejected
+  - field System.Int32 value__
+
+type Agibuild.Fulora.Shell.DeepLinkRouteDeclaration
+  - constructor System.Void .ctor(System.String, System.String, System.String)
+  - property System.String AppIdentity
+  - method System.String get_AppIdentity()
+  - method System.String get_HostPattern()
+  - method System.String get_Scheme()
+  - property System.String HostPattern
+  - property System.String Scheme
+
+type Agibuild.Fulora.Shell.DelegateCommandPolicy
+  - constructor System.Void .ctor(System.Func`3[Agibuild.Fulora.IWebView,Agibuild.Fulora.Shell.WebViewShellCommandPolicyContext,Agibuild.Fulora.Shell.WebViewShellCommandDecision])
+  - method Agibuild.Fulora.Shell.WebViewShellCommandDecision Decide(Agibuild.Fulora.IWebView, Agibuild.Fulora.Shell.WebViewShellCommandPolicyContext)
+
+type Agibuild.Fulora.Shell.DelegateDevToolsPolicy
+  - constructor System.Void .ctor(System.Func`3[Agibuild.Fulora.IWebView,Agibuild.Fulora.Shell.WebViewShellDevToolsPolicyContext,Agibuild.Fulora.Shell.WebViewShellDevToolsDecision])
+  - method Agibuild.Fulora.Shell.WebViewShellDevToolsDecision Decide(Agibuild.Fulora.IWebView, Agibuild.Fulora.Shell.WebViewShellDevToolsPolicyContext)
+
+type Agibuild.Fulora.Shell.DelegateDownloadPolicy
+  - constructor System.Void .ctor(System.Action`2[Agibuild.Fulora.IWebView,Agibuild.Fulora.DownloadRequestedEventArgs])
+  - method System.Void Handle(Agibuild.Fulora.IWebView, Agibuild.Fulora.DownloadRequestedEventArgs)
+
+type Agibuild.Fulora.Shell.DelegateMenuPruningPolicy
+  - constructor System.Void .ctor(System.Func`3[Agibuild.Fulora.IWebView,Agibuild.Fulora.Shell.WebViewMenuPruningPolicyContext,Agibuild.Fulora.Shell.WebViewMenuPruningDecision])
+  - method Agibuild.Fulora.Shell.WebViewMenuPruningDecision Decide(Agibuild.Fulora.IWebView, Agibuild.Fulora.Shell.WebViewMenuPruningPolicyContext)
+
+type Agibuild.Fulora.Shell.DelegateNewWindowPolicy
+  - constructor System.Void .ctor(System.Func`4[Agibuild.Fulora.IWebView,Agibuild.Fulora.NewWindowRequestedEventArgs,Agibuild.Fulora.Shell.WebViewNewWindowPolicyContext,Agibuild.Fulora.Shell.WebViewNewWindowStrategyDecision])
+  - constructor System.Void .ctor(System.Action`2[Agibuild.Fulora.IWebView,Agibuild.Fulora.NewWindowRequestedEventArgs])
+  - method Agibuild.Fulora.Shell.WebViewNewWindowStrategyDecision Decide(Agibuild.Fulora.IWebView, Agibuild.Fulora.NewWindowRequestedEventArgs, Agibuild.Fulora.Shell.WebViewNewWindowPolicyContext)
+
+type Agibuild.Fulora.Shell.DelegatePermissionPolicy
+  - constructor System.Void .ctor(System.Action`2[Agibuild.Fulora.IWebView,Agibuild.Fulora.PermissionRequestedEventArgs])
+  - method System.Void Handle(Agibuild.Fulora.IWebView, Agibuild.Fulora.PermissionRequestedEventArgs)
+
+type Agibuild.Fulora.Shell.DelegateSessionPermissionProfileResolver
+  - constructor System.Void .ctor(System.Func`3[Agibuild.Fulora.Shell.WebViewSessionPermissionProfileContext,Agibuild.Fulora.Shell.WebViewSessionPermissionProfile,Agibuild.Fulora.Shell.WebViewSessionPermissionProfile])
+  - method Agibuild.Fulora.Shell.WebViewSessionPermissionProfile Resolve(Agibuild.Fulora.Shell.WebViewSessionPermissionProfileContext, Agibuild.Fulora.Shell.WebViewSessionPermissionProfile)
+
+type Agibuild.Fulora.Shell.DelegateSessionPolicy
+  - constructor System.Void .ctor(System.Func`2[Agibuild.Fulora.Shell.WebViewShellSessionContext,Agibuild.Fulora.Shell.WebViewShellSessionDecision])
+  - method Agibuild.Fulora.Shell.WebViewShellSessionDecision Resolve(Agibuild.Fulora.Shell.WebViewShellSessionContext)
+
+type Agibuild.Fulora.Shell.IDeepLinkAdmissionPolicy
+  - method Agibuild.Fulora.Shell.DeepLinkAdmissionDecision Evaluate(Agibuild.Fulora.Shell.DeepLinkActivationEnvelope)
+
+type Agibuild.Fulora.Shell.IDeepLinkRegistrationService
+  - method System.Threading.Tasks.Task`1[Agibuild.Fulora.Shell.DeepLinkActivationIngressResult] IngestActivationAsync(System.Uri, Agibuild.Fulora.Shell.DeepLinkActivationSource, System.Threading.CancellationToken)
+  - method Agibuild.Fulora.Shell.DeepLinkRegistrationResult RegisterRoute(Agibuild.Fulora.Shell.DeepLinkRouteDeclaration)
+
+type Agibuild.Fulora.Shell.IsolatedSessionPolicy
+  - constructor System.Void .ctor()
+  - method Agibuild.Fulora.Shell.WebViewShellSessionDecision Resolve(Agibuild.Fulora.Shell.WebViewShellSessionContext)
+
+type Agibuild.Fulora.Shell.IWebViewDownloadPolicy
+  - method System.Void Handle(Agibuild.Fulora.IWebView, Agibuild.Fulora.DownloadRequestedEventArgs)
+
+type Agibuild.Fulora.Shell.IWebViewHostCapabilityPolicy
+  - method Agibuild.Fulora.Shell.WebViewHostCapabilityDecision Evaluate(Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext&)
+
+type Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider
+  - method System.Void ApplyMenuModel(Agibuild.Fulora.Shell.WebViewMenuModelRequest)
+  - method System.Void ExecuteSystemAction(Agibuild.Fulora.Shell.WebViewSystemActionRequest)
+  - method System.Void OpenExternal(System.Uri)
+  - method System.String ReadClipboardText()
+  - method System.Void ShowNotification(Agibuild.Fulora.Shell.WebViewNotificationRequest)
+  - method Agibuild.Fulora.Shell.WebViewFileDialogResult ShowOpenFileDialog(Agibuild.Fulora.Shell.WebViewOpenFileDialogRequest)
+  - method Agibuild.Fulora.Shell.WebViewFileDialogResult ShowSaveFileDialog(Agibuild.Fulora.Shell.WebViewSaveFileDialogRequest)
+  - method System.Void UpdateTrayState(Agibuild.Fulora.Shell.WebViewTrayStateRequest)
+  - method System.Void WriteClipboardText(System.String)
+
+type Agibuild.Fulora.Shell.IWebViewNewWindowPolicy
+  - method Agibuild.Fulora.Shell.WebViewNewWindowStrategyDecision Decide(Agibuild.Fulora.IWebView, Agibuild.Fulora.NewWindowRequestedEventArgs, Agibuild.Fulora.Shell.WebViewNewWindowPolicyContext)
+
+type Agibuild.Fulora.Shell.IWebViewPermissionPolicy
+  - method System.Void Handle(Agibuild.Fulora.IWebView, Agibuild.Fulora.PermissionRequestedEventArgs)
+
+type Agibuild.Fulora.Shell.IWebViewSessionPermissionProfileResolver
+  - method Agibuild.Fulora.Shell.WebViewSessionPermissionProfile Resolve(Agibuild.Fulora.Shell.WebViewSessionPermissionProfileContext, Agibuild.Fulora.Shell.WebViewSessionPermissionProfile)
+
+type Agibuild.Fulora.Shell.IWebViewShellCommandPolicy
+  - method Agibuild.Fulora.Shell.WebViewShellCommandDecision Decide(Agibuild.Fulora.IWebView, Agibuild.Fulora.Shell.WebViewShellCommandPolicyContext)
+
+type Agibuild.Fulora.Shell.IWebViewShellDevToolsPolicy
+  - method Agibuild.Fulora.Shell.WebViewShellDevToolsDecision Decide(Agibuild.Fulora.IWebView, Agibuild.Fulora.Shell.WebViewShellDevToolsPolicyContext)
+
+type Agibuild.Fulora.Shell.IWebViewShellMenuPruningPolicy
+  - method Agibuild.Fulora.Shell.WebViewMenuPruningDecision Decide(Agibuild.Fulora.IWebView, Agibuild.Fulora.Shell.WebViewMenuPruningPolicyContext)
+
+type Agibuild.Fulora.Shell.IWebViewShellSessionPolicy
+  - method Agibuild.Fulora.Shell.WebViewShellSessionDecision Resolve(Agibuild.Fulora.Shell.WebViewShellSessionContext)
+
+type Agibuild.Fulora.Shell.NavigateInPlaceNewWindowPolicy
+  - constructor System.Void .ctor()
+  - method Agibuild.Fulora.Shell.WebViewNewWindowStrategyDecision Decide(Agibuild.Fulora.IWebView, Agibuild.Fulora.NewWindowRequestedEventArgs, Agibuild.Fulora.Shell.WebViewNewWindowPolicyContext)
+
+type Agibuild.Fulora.Shell.SharedSessionPolicy
+  - constructor System.Void .ctor()
+  - method Agibuild.Fulora.Shell.WebViewShellSessionDecision Resolve(Agibuild.Fulora.Shell.WebViewShellSessionContext)
+
+type Agibuild.Fulora.Shell.WebViewFileDialogResult
+  - constructor System.Void .ctor()
+  - method System.Boolean get_IsCanceled()
+  - method System.Collections.Generic.IReadOnlyList`1[System.String] get_Paths()
+  - property System.Boolean IsCanceled
+  - property System.Collections.Generic.IReadOnlyList`1[System.String] Paths
+  - method System.Void set_IsCanceled(System.Boolean)
+  - method System.Void set_Paths(System.Collections.Generic.IReadOnlyList`1[System.String])
+
+type Agibuild.Fulora.Shell.WebViewHostCapabilityBridge
+  - constructor System.Void .ctor(Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider, Agibuild.Fulora.Shell.IWebViewHostCapabilityPolicy, Agibuild.Fulora.Shell.WebViewHostCapabilityBridgeOptions)
+  - method System.Void add_CapabilityCallCompleted(System.EventHandler`1[Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticEventArgs])
+  - method System.Void add_SystemIntegrationEventDispatched(System.EventHandler`1[Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest])
+  - method Agibuild.Fulora.Shell.WebViewHostCapabilityCallResult`1[System.Object] ApplyMenuModel(Agibuild.Fulora.Shell.WebViewMenuModelRequest, System.Guid, System.Nullable`1[System.Guid], System.Nullable`1[System.Guid])
+  - event System.EventHandler`1[Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticEventArgs] CapabilityCallCompleted
+  - method Agibuild.Fulora.Shell.WebViewHostCapabilityCallResult`1[Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest] DispatchSystemIntegrationEvent(Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest, System.Guid, System.Nullable`1[System.Guid], System.Nullable`1[System.Guid])
+  - method Agibuild.Fulora.Shell.WebViewHostCapabilityCallResult`1[System.Object] ExecuteSystemAction(Agibuild.Fulora.Shell.WebViewSystemActionRequest, System.Guid, System.Nullable`1[System.Guid], System.Nullable`1[System.Guid])
+  - method Agibuild.Fulora.Shell.WebViewHostCapabilityCallResult`1[System.Object] OpenExternal(System.Uri, System.Guid, System.Nullable`1[System.Guid], System.Nullable`1[System.Guid])
+  - method Agibuild.Fulora.Shell.WebViewHostCapabilityCallResult`1[System.String] ReadClipboardText(System.Guid, System.Nullable`1[System.Guid], System.Nullable`1[System.Guid])
+  - method System.Void remove_CapabilityCallCompleted(System.EventHandler`1[Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticEventArgs])
+  - method System.Void remove_SystemIntegrationEventDispatched(System.EventHandler`1[Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest])
+  - method Agibuild.Fulora.Shell.WebViewHostCapabilityCallResult`1[System.Object] ShowNotification(Agibuild.Fulora.Shell.WebViewNotificationRequest, System.Guid, System.Nullable`1[System.Guid], System.Nullable`1[System.Guid])
+  - method Agibuild.Fulora.Shell.WebViewHostCapabilityCallResult`1[Agibuild.Fulora.Shell.WebViewFileDialogResult] ShowOpenFileDialog(Agibuild.Fulora.Shell.WebViewOpenFileDialogRequest, System.Guid, System.Nullable`1[System.Guid], System.Nullable`1[System.Guid])
+  - method Agibuild.Fulora.Shell.WebViewHostCapabilityCallResult`1[Agibuild.Fulora.Shell.WebViewFileDialogResult] ShowSaveFileDialog(Agibuild.Fulora.Shell.WebViewSaveFileDialogRequest, System.Guid, System.Nullable`1[System.Guid], System.Nullable`1[System.Guid])
+  - event System.EventHandler`1[Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest] SystemIntegrationEventDispatched
+  - method Agibuild.Fulora.Shell.WebViewHostCapabilityCallResult`1[System.Object] UpdateTrayState(Agibuild.Fulora.Shell.WebViewTrayStateRequest, System.Guid, System.Nullable`1[System.Guid], System.Nullable`1[System.Guid])
+  - method Agibuild.Fulora.Shell.WebViewHostCapabilityCallResult`1[System.Object] WriteClipboardText(System.String, System.Guid, System.Nullable`1[System.Guid], System.Nullable`1[System.Guid])
+
+type Agibuild.Fulora.Shell.WebViewHostCapabilityBridgeOptions
+  - constructor System.Void .ctor()
+  - field System.Int32 DefaultSystemIntegrationMetadataTotalLength
+  - method System.Int32 get_SystemIntegrationMetadataTotalLength()
+  - field System.Int32 MaxSystemIntegrationMetadataTotalLength
+  - field System.Int32 MinSystemIntegrationMetadataTotalLength
+  - method System.Void set_SystemIntegrationMetadataTotalLength(System.Int32)
+  - property System.Int32 SystemIntegrationMetadataTotalLength
+
+type Agibuild.Fulora.Shell.WebViewHostCapabilityCallOutcome
+  - field Agibuild.Fulora.Shell.WebViewHostCapabilityCallOutcome Allow
+  - field Agibuild.Fulora.Shell.WebViewHostCapabilityCallOutcome Deny
+  - field Agibuild.Fulora.Shell.WebViewHostCapabilityCallOutcome Failure
+  - field System.Int32 value__
+
+type Agibuild.Fulora.Shell.WebViewHostCapabilityCallResult`1
+  - property System.String DenyReason
+  - property System.Exception Error
+  - method System.String get_DenyReason()
+  - method System.Exception get_Error()
+  - method System.Boolean get_IsAllowed()
+  - method System.Boolean get_IsSuccess()
+  - method Agibuild.Fulora.Shell.WebViewHostCapabilityCallOutcome get_Outcome()
+  - method T get_Value()
+  - method System.Boolean get_WasAuthorized()
+  - property System.Boolean IsAllowed
+  - property System.Boolean IsSuccess
+  - property Agibuild.Fulora.Shell.WebViewHostCapabilityCallOutcome Outcome
+  - property T Value
+  - property System.Boolean WasAuthorized
+
+type Agibuild.Fulora.Shell.WebViewHostCapabilityDecision
+  - constructor System.Void .ctor(Agibuild.Fulora.Shell.WebViewHostCapabilityDecisionKind, System.String)
+  - method Agibuild.Fulora.Shell.WebViewHostCapabilityDecision Allow()
+  - method System.Void Deconstruct(Agibuild.Fulora.Shell.WebViewHostCapabilityDecisionKind&, System.String&)
+  - method Agibuild.Fulora.Shell.WebViewHostCapabilityDecision Deny(System.String)
+  - method System.Boolean Equals(System.Object)
+  - method System.Boolean Equals(Agibuild.Fulora.Shell.WebViewHostCapabilityDecision)
+  - method System.Boolean get_IsAllowed()
+  - method Agibuild.Fulora.Shell.WebViewHostCapabilityDecisionKind get_Kind()
+  - method System.String get_Reason()
+  - method System.Int32 GetHashCode()
+  - property System.Boolean IsAllowed
+  - property Agibuild.Fulora.Shell.WebViewHostCapabilityDecisionKind Kind
+  - method System.Boolean op_Equality(Agibuild.Fulora.Shell.WebViewHostCapabilityDecision, Agibuild.Fulora.Shell.WebViewHostCapabilityDecision)
+  - method System.Boolean op_Inequality(Agibuild.Fulora.Shell.WebViewHostCapabilityDecision, Agibuild.Fulora.Shell.WebViewHostCapabilityDecision)
+  - property System.String Reason
+  - method System.Void set_Kind(Agibuild.Fulora.Shell.WebViewHostCapabilityDecisionKind)
+  - method System.Void set_Reason(System.String)
+  - method System.String ToString()
+
+type Agibuild.Fulora.Shell.WebViewHostCapabilityDecisionKind
+  - field Agibuild.Fulora.Shell.WebViewHostCapabilityDecisionKind Allow
+  - field Agibuild.Fulora.Shell.WebViewHostCapabilityDecisionKind Deny
+  - field System.Int32 value__
+
+type Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticEventArgs
+  - constructor System.Void .ctor(System.Guid, System.Guid, System.Nullable`1[System.Guid], System.Nullable`1[System.Guid], Agibuild.Fulora.Shell.WebViewHostCapabilityOperation, System.Uri, Agibuild.Fulora.Shell.WebViewHostCapabilityCallOutcome, System.Boolean, System.String, System.Nullable`1[Agibuild.Fulora.WebViewOperationFailureCategory], System.Int64)
+  - property System.Guid CorrelationId
+  - field System.Int32 CurrentDiagnosticSchemaVersion
+  - property System.String DenyReason
+  - property System.Int32 DiagnosticSchemaVersion
+  - property System.Int64 DurationMilliseconds
+  - property System.Nullable`1[Agibuild.Fulora.WebViewOperationFailureCategory] FailureCategory
+  - method System.Guid get_CorrelationId()
+  - method System.String get_DenyReason()
+  - method System.Int32 get_DiagnosticSchemaVersion()
+  - method System.Int64 get_DurationMilliseconds()
+  - method System.Nullable`1[Agibuild.Fulora.WebViewOperationFailureCategory] get_FailureCategory()
+  - method Agibuild.Fulora.Shell.WebViewHostCapabilityOperation get_Operation()
+  - method Agibuild.Fulora.Shell.WebViewHostCapabilityCallOutcome get_Outcome()
+  - method System.Nullable`1[System.Guid] get_ParentWindowId()
+  - method System.Uri get_RequestUri()
+  - method System.Guid get_RootWindowId()
+  - method System.Nullable`1[System.Guid] get_TargetWindowId()
+  - method System.Boolean get_WasAuthorized()
+  - property Agibuild.Fulora.Shell.WebViewHostCapabilityOperation Operation
+  - property Agibuild.Fulora.Shell.WebViewHostCapabilityCallOutcome Outcome
+  - property System.Nullable`1[System.Guid] ParentWindowId
+  - property System.Uri RequestUri
+  - property System.Guid RootWindowId
+  - property System.Nullable`1[System.Guid] TargetWindowId
+  - method Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord ToExportRecord()
+  - property System.Boolean WasAuthorized
+
+type Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord
+  - constructor System.Void .ctor(System.Int32, System.String, System.String, System.String, System.String, System.String, System.String, System.String, System.Boolean, System.String, System.String, System.Int64)
+  - property System.String CorrelationId
+  - property System.String DenyReason
+  - property System.Int64 DurationMilliseconds
+  - property System.String FailureCategory
+  - method System.String get_CorrelationId()
+  - method System.String get_DenyReason()
+  - method System.Int64 get_DurationMilliseconds()
+  - method System.String get_FailureCategory()
+  - method System.String get_Operation()
+  - method System.String get_Outcome()
+  - method System.String get_ParentWindowId()
+  - method System.String get_RequestUri()
+  - method System.String get_RootWindowId()
+  - method System.Int32 get_SchemaVersion()
+  - method System.String get_TargetWindowId()
+  - method System.Boolean get_WasAuthorized()
+  - property System.String Operation
+  - property System.String Outcome
+  - property System.String ParentWindowId
+  - property System.String RequestUri
+  - property System.String RootWindowId
+  - property System.Int32 SchemaVersion
+  - property System.String TargetWindowId
+  - property System.Boolean WasAuthorized
+
+type Agibuild.Fulora.Shell.WebViewHostCapabilityOperation
+  - field Agibuild.Fulora.Shell.WebViewHostCapabilityOperation ClipboardReadText
+  - field Agibuild.Fulora.Shell.WebViewHostCapabilityOperation ClipboardWriteText
+  - field Agibuild.Fulora.Shell.WebViewHostCapabilityOperation ExternalOpen
+  - field Agibuild.Fulora.Shell.WebViewHostCapabilityOperation FileDialogOpen
+  - field Agibuild.Fulora.Shell.WebViewHostCapabilityOperation FileDialogSave
+  - field Agibuild.Fulora.Shell.WebViewHostCapabilityOperation MenuApplyModel
+  - field Agibuild.Fulora.Shell.WebViewHostCapabilityOperation MenuInteractionEventDispatch
+  - field Agibuild.Fulora.Shell.WebViewHostCapabilityOperation NotificationShow
+  - field Agibuild.Fulora.Shell.WebViewHostCapabilityOperation SystemActionExecute
+  - field Agibuild.Fulora.Shell.WebViewHostCapabilityOperation TrayInteractionEventDispatch
+  - field Agibuild.Fulora.Shell.WebViewHostCapabilityOperation TrayUpdateState
+  - field System.Int32 value__
+
+type Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext
+  - constructor System.Void .ctor(System.Guid, System.Nullable`1[System.Guid], System.Nullable`1[System.Guid], Agibuild.Fulora.Shell.WebViewHostCapabilityOperation, System.Uri)
+  - method System.Void Deconstruct(System.Guid&, System.Nullable`1[System.Guid]&, System.Nullable`1[System.Guid]&, Agibuild.Fulora.Shell.WebViewHostCapabilityOperation&, System.Uri&)
+  - method System.Boolean Equals(System.Object)
+  - method System.Boolean Equals(Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext)
+  - method Agibuild.Fulora.Shell.WebViewHostCapabilityOperation get_Operation()
+  - method System.Nullable`1[System.Guid] get_ParentWindowId()
+  - method System.Uri get_RequestUri()
+  - method System.Guid get_RootWindowId()
+  - method System.Nullable`1[System.Guid] get_TargetWindowId()
+  - method System.Int32 GetHashCode()
+  - method System.Boolean op_Equality(Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext, Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext)
+  - method System.Boolean op_Inequality(Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext, Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext)
+  - property Agibuild.Fulora.Shell.WebViewHostCapabilityOperation Operation
+  - property System.Nullable`1[System.Guid] ParentWindowId
+  - property System.Uri RequestUri
+  - property System.Guid RootWindowId
+  - method System.Void set_Operation(Agibuild.Fulora.Shell.WebViewHostCapabilityOperation)
+  - method System.Void set_ParentWindowId(System.Nullable`1[System.Guid])
+  - method System.Void set_RequestUri(System.Uri)
+  - method System.Void set_RootWindowId(System.Guid)
+  - method System.Void set_TargetWindowId(System.Nullable`1[System.Guid])
+  - property System.Nullable`1[System.Guid] TargetWindowId
+  - method System.String ToString()
+
+type Agibuild.Fulora.Shell.WebViewManagedWindowCreateContext
+  - constructor System.Void .ctor(System.Guid, System.Guid, System.Uri, System.String, Agibuild.Fulora.Shell.WebViewShellSessionDecision, System.String)
+  - method System.Guid get_ParentWindowId()
+  - method System.String get_ProfileIdentity()
+  - method System.String get_ScopeIdentity()
+  - method Agibuild.Fulora.Shell.WebViewShellSessionDecision get_SessionDecision()
+  - method System.Uri get_TargetUri()
+  - method System.Guid get_WindowId()
+  - property System.Guid ParentWindowId
+  - property System.String ProfileIdentity
+  - property System.String ScopeIdentity
+  - property Agibuild.Fulora.Shell.WebViewShellSessionDecision SessionDecision
+  - property System.Uri TargetUri
+  - property System.Guid WindowId
+
+type Agibuild.Fulora.Shell.WebViewManagedWindowLifecycleEventArgs
+  - constructor System.Void .ctor(System.Guid, System.Guid, Agibuild.Fulora.Shell.WebViewManagedWindowLifecycleState, Agibuild.Fulora.Shell.WebViewShellSessionDecision, System.String)
+  - method System.Guid get_ParentWindowId()
+  - method System.String get_ProfileIdentity()
+  - method Agibuild.Fulora.Shell.WebViewShellSessionDecision get_SessionDecision()
+  - method Agibuild.Fulora.Shell.WebViewManagedWindowLifecycleState get_State()
+  - method System.Guid get_WindowId()
+  - property System.Guid ParentWindowId
+  - property System.String ProfileIdentity
+  - property Agibuild.Fulora.Shell.WebViewShellSessionDecision SessionDecision
+  - property Agibuild.Fulora.Shell.WebViewManagedWindowLifecycleState State
+  - property System.Guid WindowId
+
+type Agibuild.Fulora.Shell.WebViewManagedWindowLifecycleState
+  - field Agibuild.Fulora.Shell.WebViewManagedWindowLifecycleState Attached
+  - field Agibuild.Fulora.Shell.WebViewManagedWindowLifecycleState Closed
+  - field Agibuild.Fulora.Shell.WebViewManagedWindowLifecycleState Closing
+  - field Agibuild.Fulora.Shell.WebViewManagedWindowLifecycleState Created
+  - field Agibuild.Fulora.Shell.WebViewManagedWindowLifecycleState Ready
+  - field System.Int32 value__
+
+type Agibuild.Fulora.Shell.WebViewMenuItemModel
+  - constructor System.Void .ctor()
+  - property System.Collections.Generic.IReadOnlyList`1[Agibuild.Fulora.Shell.WebViewMenuItemModel] Children
+  - method System.Collections.Generic.IReadOnlyList`1[Agibuild.Fulora.Shell.WebViewMenuItemModel] get_Children()
+  - method System.String get_Id()
+  - method System.Boolean get_IsEnabled()
+  - method System.String get_Label()
+  - property System.String Id
+  - property System.Boolean IsEnabled
+  - property System.String Label
+  - method System.Void set_Children(System.Collections.Generic.IReadOnlyList`1[Agibuild.Fulora.Shell.WebViewMenuItemModel])
+  - method System.Void set_Id(System.String)
+  - method System.Void set_IsEnabled(System.Boolean)
+  - method System.Void set_Label(System.String)
+
+type Agibuild.Fulora.Shell.WebViewMenuModelRequest
+  - constructor System.Void .ctor()
+  - method System.Collections.Generic.IReadOnlyList`1[Agibuild.Fulora.Shell.WebViewMenuItemModel] get_Items()
+  - property System.Collections.Generic.IReadOnlyList`1[Agibuild.Fulora.Shell.WebViewMenuItemModel] Items
+  - method System.Void set_Items(System.Collections.Generic.IReadOnlyList`1[Agibuild.Fulora.Shell.WebViewMenuItemModel])
+
+type Agibuild.Fulora.Shell.WebViewMenuPruningDecision
+  - constructor System.Void .ctor(System.Boolean, Agibuild.Fulora.Shell.WebViewMenuModelRequest, System.String)
+  - method Agibuild.Fulora.Shell.WebViewMenuPruningDecision <Clone>$()
+  - method Agibuild.Fulora.Shell.WebViewMenuPruningDecision Allow(Agibuild.Fulora.Shell.WebViewMenuModelRequest)
+  - method System.Void Deconstruct(System.Boolean&, Agibuild.Fulora.Shell.WebViewMenuModelRequest&, System.String&)
+  - method Agibuild.Fulora.Shell.WebViewMenuPruningDecision Deny(System.String)
+  - property System.String DenyReason
+  - property Agibuild.Fulora.Shell.WebViewMenuModelRequest EffectiveMenuModel
+  - method System.Boolean Equals(System.Object)
+  - method System.Boolean Equals(Agibuild.Fulora.Shell.WebViewMenuPruningDecision)
+  - method System.String get_DenyReason()
+  - method Agibuild.Fulora.Shell.WebViewMenuModelRequest get_EffectiveMenuModel()
+  - method System.Boolean get_IsAllowed()
+  - method System.Int32 GetHashCode()
+  - property System.Boolean IsAllowed
+  - method System.Boolean op_Equality(Agibuild.Fulora.Shell.WebViewMenuPruningDecision, Agibuild.Fulora.Shell.WebViewMenuPruningDecision)
+  - method System.Boolean op_Inequality(Agibuild.Fulora.Shell.WebViewMenuPruningDecision, Agibuild.Fulora.Shell.WebViewMenuPruningDecision)
+  - method System.Void set_DenyReason(System.String)
+  - method System.Void set_EffectiveMenuModel(Agibuild.Fulora.Shell.WebViewMenuModelRequest)
+  - method System.Void set_IsAllowed(System.Boolean)
+  - method System.String ToString()
+
+type Agibuild.Fulora.Shell.WebViewMenuPruningPolicyContext
+  - constructor System.Void .ctor(System.Guid, System.Nullable`1[System.Guid], Agibuild.Fulora.Shell.WebViewMenuModelRequest, Agibuild.Fulora.Shell.WebViewMenuModelRequest, System.String, System.Nullable`1[Agibuild.Fulora.Shell.WebViewPermissionProfileDecision])
+  - method Agibuild.Fulora.Shell.WebViewMenuPruningPolicyContext <Clone>$()
+  - property Agibuild.Fulora.Shell.WebViewMenuModelRequest CurrentEffectiveMenuModel
+  - method System.Void Deconstruct(System.Guid&, System.Nullable`1[System.Guid]&, Agibuild.Fulora.Shell.WebViewMenuModelRequest&, Agibuild.Fulora.Shell.WebViewMenuModelRequest&, System.String&, System.Nullable`1[Agibuild.Fulora.Shell.WebViewPermissionProfileDecision]&)
+  - method System.Boolean Equals(System.Object)
+  - method System.Boolean Equals(Agibuild.Fulora.Shell.WebViewMenuPruningPolicyContext)
+  - method Agibuild.Fulora.Shell.WebViewMenuModelRequest get_CurrentEffectiveMenuModel()
+  - method System.String get_ProfileIdentity()
+  - method System.Nullable`1[Agibuild.Fulora.Shell.WebViewPermissionProfileDecision] get_ProfilePermissionDecision()
+  - method Agibuild.Fulora.Shell.WebViewMenuModelRequest get_RequestedMenuModel()
+  - method System.Guid get_RootWindowId()
+  - method System.Nullable`1[System.Guid] get_TargetWindowId()
+  - method System.Int32 GetHashCode()
+  - method System.Boolean op_Equality(Agibuild.Fulora.Shell.WebViewMenuPruningPolicyContext, Agibuild.Fulora.Shell.WebViewMenuPruningPolicyContext)
+  - method System.Boolean op_Inequality(Agibuild.Fulora.Shell.WebViewMenuPruningPolicyContext, Agibuild.Fulora.Shell.WebViewMenuPruningPolicyContext)
+  - property System.String ProfileIdentity
+  - property System.Nullable`1[Agibuild.Fulora.Shell.WebViewPermissionProfileDecision] ProfilePermissionDecision
+  - property Agibuild.Fulora.Shell.WebViewMenuModelRequest RequestedMenuModel
+  - property System.Guid RootWindowId
+  - method System.Void set_CurrentEffectiveMenuModel(Agibuild.Fulora.Shell.WebViewMenuModelRequest)
+  - method System.Void set_ProfileIdentity(System.String)
+  - method System.Void set_ProfilePermissionDecision(System.Nullable`1[Agibuild.Fulora.Shell.WebViewPermissionProfileDecision])
+  - method System.Void set_RequestedMenuModel(Agibuild.Fulora.Shell.WebViewMenuModelRequest)
+  - method System.Void set_RootWindowId(System.Guid)
+  - method System.Void set_TargetWindowId(System.Nullable`1[System.Guid])
+  - property System.Nullable`1[System.Guid] TargetWindowId
+  - method System.String ToString()
+
+type Agibuild.Fulora.Shell.WebViewNewWindowPolicyContext
+  - constructor System.Void .ctor(System.Guid, System.Guid, System.Uri, System.String)
+  - method Agibuild.Fulora.Shell.WebViewNewWindowPolicyContext <Clone>$()
+  - property System.Guid CandidateWindowId
+  - method System.Void Deconstruct(System.Guid&, System.Guid&, System.Uri&, System.String&)
+  - method System.Boolean Equals(System.Object)
+  - method System.Boolean Equals(Agibuild.Fulora.Shell.WebViewNewWindowPolicyContext)
+  - method System.Guid get_CandidateWindowId()
+  - method System.String get_ScopeIdentity()
+  - method System.Guid get_SourceWindowId()
+  - method System.Uri get_TargetUri()
+  - method System.Int32 GetHashCode()
+  - method System.Boolean op_Equality(Agibuild.Fulora.Shell.WebViewNewWindowPolicyContext, Agibuild.Fulora.Shell.WebViewNewWindowPolicyContext)
+  - method System.Boolean op_Inequality(Agibuild.Fulora.Shell.WebViewNewWindowPolicyContext, Agibuild.Fulora.Shell.WebViewNewWindowPolicyContext)
+  - property System.String ScopeIdentity
+  - method System.Void set_CandidateWindowId(System.Guid)
+  - method System.Void set_ScopeIdentity(System.String)
+  - method System.Void set_SourceWindowId(System.Guid)
+  - method System.Void set_TargetUri(System.Uri)
+  - property System.Guid SourceWindowId
+  - property System.Uri TargetUri
+  - method System.String ToString()
+
+type Agibuild.Fulora.Shell.WebViewNewWindowStrategy
+  - field Agibuild.Fulora.Shell.WebViewNewWindowStrategy Delegate
+  - field Agibuild.Fulora.Shell.WebViewNewWindowStrategy ExternalBrowser
+  - field Agibuild.Fulora.Shell.WebViewNewWindowStrategy InPlace
+  - field Agibuild.Fulora.Shell.WebViewNewWindowStrategy ManagedWindow
+  - field System.Int32 value__
+
+type Agibuild.Fulora.Shell.WebViewNewWindowStrategyDecision
+  - constructor System.Void .ctor(Agibuild.Fulora.Shell.WebViewNewWindowStrategy, System.Boolean, System.String)
+  - method Agibuild.Fulora.Shell.WebViewNewWindowStrategyDecision <Clone>$()
+  - method System.Void Deconstruct(Agibuild.Fulora.Shell.WebViewNewWindowStrategy&, System.Boolean&, System.String&)
+  - method Agibuild.Fulora.Shell.WebViewNewWindowStrategyDecision Delegate(System.Boolean)
+  - method System.Boolean Equals(System.Object)
+  - method System.Boolean Equals(Agibuild.Fulora.Shell.WebViewNewWindowStrategyDecision)
+  - method Agibuild.Fulora.Shell.WebViewNewWindowStrategyDecision ExternalBrowser()
+  - method System.Boolean get_Handled()
+  - method System.String get_ScopeIdentityOverride()
+  - method Agibuild.Fulora.Shell.WebViewNewWindowStrategy get_Strategy()
+  - method System.Int32 GetHashCode()
+  - property System.Boolean Handled
+  - method Agibuild.Fulora.Shell.WebViewNewWindowStrategyDecision InPlace()
+  - method Agibuild.Fulora.Shell.WebViewNewWindowStrategyDecision ManagedWindow(System.String)
+  - method System.Boolean op_Equality(Agibuild.Fulora.Shell.WebViewNewWindowStrategyDecision, Agibuild.Fulora.Shell.WebViewNewWindowStrategyDecision)
+  - method System.Boolean op_Inequality(Agibuild.Fulora.Shell.WebViewNewWindowStrategyDecision, Agibuild.Fulora.Shell.WebViewNewWindowStrategyDecision)
+  - property System.String ScopeIdentityOverride
+  - method System.Void set_Handled(System.Boolean)
+  - method System.Void set_ScopeIdentityOverride(System.String)
+  - method System.Void set_Strategy(Agibuild.Fulora.Shell.WebViewNewWindowStrategy)
+  - property Agibuild.Fulora.Shell.WebViewNewWindowStrategy Strategy
+  - method System.String ToString()
+
+type Agibuild.Fulora.Shell.WebViewNotificationRequest
+  - constructor System.Void .ctor()
+  - method System.String get_Message()
+  - method System.String get_Title()
+  - property System.String Message
+  - method System.Void set_Message(System.String)
+  - method System.Void set_Title(System.String)
+  - property System.String Title
+
+type Agibuild.Fulora.Shell.WebViewOpenFileDialogRequest
+  - constructor System.Void .ctor()
+  - property System.Boolean AllowMultiple
+  - method System.Boolean get_AllowMultiple()
+  - method System.String get_Title()
+  - method System.Void set_AllowMultiple(System.Boolean)
+  - method System.Void set_Title(System.String)
+  - property System.String Title
+
+type Agibuild.Fulora.Shell.WebViewPermissionProfileDecision
+  - constructor System.Void .ctor(Agibuild.Fulora.PermissionState, System.Boolean)
+  - method Agibuild.Fulora.Shell.WebViewPermissionProfileDecision Allow()
+  - method System.Void Deconstruct(Agibuild.Fulora.PermissionState&, System.Boolean&)
+  - method Agibuild.Fulora.Shell.WebViewPermissionProfileDecision DefaultFallback()
+  - method Agibuild.Fulora.Shell.WebViewPermissionProfileDecision Deny()
+  - method System.Boolean Equals(System.Object)
+  - method System.Boolean Equals(Agibuild.Fulora.Shell.WebViewPermissionProfileDecision)
+  - method System.Boolean get_IsExplicit()
+  - method Agibuild.Fulora.PermissionState get_State()
+  - method System.Int32 GetHashCode()
+  - property System.Boolean IsExplicit
+  - method System.Boolean op_Equality(Agibuild.Fulora.Shell.WebViewPermissionProfileDecision, Agibuild.Fulora.Shell.WebViewPermissionProfileDecision)
+  - method System.Boolean op_Inequality(Agibuild.Fulora.Shell.WebViewPermissionProfileDecision, Agibuild.Fulora.Shell.WebViewPermissionProfileDecision)
+  - method System.Void set_IsExplicit(System.Boolean)
+  - method System.Void set_State(Agibuild.Fulora.PermissionState)
+  - property Agibuild.Fulora.PermissionState State
+  - method System.String ToString()
+
+type Agibuild.Fulora.Shell.WebViewSaveFileDialogRequest
+  - constructor System.Void .ctor()
+  - method System.String get_SuggestedFileName()
+  - method System.String get_Title()
+  - method System.Void set_SuggestedFileName(System.String)
+  - method System.Void set_Title(System.String)
+  - property System.String SuggestedFileName
+  - property System.String Title
+
+type Agibuild.Fulora.Shell.WebViewSessionPermissionProfile
+  - constructor System.Void .ctor()
+  - property Agibuild.Fulora.Shell.WebViewPermissionProfileDecision DefaultPermissionDecision
+  - method Agibuild.Fulora.Shell.WebViewPermissionProfileDecision get_DefaultPermissionDecision()
+  - method System.Boolean get_InheritParentSessionDecision()
+  - method System.Collections.Generic.IReadOnlyDictionary`2[Agibuild.Fulora.WebViewPermissionKind,Agibuild.Fulora.Shell.WebViewPermissionProfileDecision] get_PermissionDecisions()
+  - method System.String get_ProfileHash()
+  - method System.String get_ProfileIdentity()
+  - method System.String get_ProfileVersion()
+  - method Agibuild.Fulora.Shell.WebViewShellSessionDecision get_SessionDecisionOverride()
+  - property System.Boolean InheritParentSessionDecision
+  - property System.Collections.Generic.IReadOnlyDictionary`2[Agibuild.Fulora.WebViewPermissionKind,Agibuild.Fulora.Shell.WebViewPermissionProfileDecision] PermissionDecisions
+  - property System.String ProfileHash
+  - property System.String ProfileIdentity
+  - property System.String ProfileVersion
+  - method Agibuild.Fulora.Shell.WebViewPermissionProfileDecision ResolvePermissionDecision(Agibuild.Fulora.WebViewPermissionKind)
+  - property Agibuild.Fulora.Shell.WebViewShellSessionDecision SessionDecisionOverride
+  - method System.Void set_DefaultPermissionDecision(Agibuild.Fulora.Shell.WebViewPermissionProfileDecision)
+  - method System.Void set_InheritParentSessionDecision(System.Boolean)
+  - method System.Void set_PermissionDecisions(System.Collections.Generic.IReadOnlyDictionary`2[Agibuild.Fulora.WebViewPermissionKind,Agibuild.Fulora.Shell.WebViewPermissionProfileDecision])
+  - method System.Void set_ProfileHash(System.String)
+  - method System.Void set_ProfileIdentity(System.String)
+  - method System.Void set_ProfileVersion(System.String)
+  - method System.Void set_SessionDecisionOverride(Agibuild.Fulora.Shell.WebViewShellSessionDecision)
+
+type Agibuild.Fulora.Shell.WebViewSessionPermissionProfileContext
+  - constructor System.Void .ctor(System.Guid, System.Nullable`1[System.Guid], System.Guid, System.String, System.Uri, System.Nullable`1[Agibuild.Fulora.WebViewPermissionKind])
+  - method Agibuild.Fulora.Shell.WebViewSessionPermissionProfileContext <Clone>$()
+  - method System.Void Deconstruct(System.Guid&, System.Nullable`1[System.Guid]&, System.Guid&, System.String&, System.Uri&, System.Nullable`1[Agibuild.Fulora.WebViewPermissionKind]&)
+  - method System.Boolean Equals(System.Object)
+  - method System.Boolean Equals(Agibuild.Fulora.Shell.WebViewSessionPermissionProfileContext)
+  - method System.Nullable`1[System.Guid] get_ParentWindowId()
+  - method System.Nullable`1[Agibuild.Fulora.WebViewPermissionKind] get_PermissionKind()
+  - method System.Uri get_RequestUri()
+  - method System.Guid get_RootWindowId()
+  - method System.String get_ScopeIdentity()
+  - method System.Guid get_WindowId()
+  - method System.Int32 GetHashCode()
+  - method System.Boolean op_Equality(Agibuild.Fulora.Shell.WebViewSessionPermissionProfileContext, Agibuild.Fulora.Shell.WebViewSessionPermissionProfileContext)
+  - method System.Boolean op_Inequality(Agibuild.Fulora.Shell.WebViewSessionPermissionProfileContext, Agibuild.Fulora.Shell.WebViewSessionPermissionProfileContext)
+  - property System.Nullable`1[System.Guid] ParentWindowId
+  - property System.Nullable`1[Agibuild.Fulora.WebViewPermissionKind] PermissionKind
+  - property System.Uri RequestUri
+  - property System.Guid RootWindowId
+  - property System.String ScopeIdentity
+  - method System.Void set_ParentWindowId(System.Nullable`1[System.Guid])
+  - method System.Void set_PermissionKind(System.Nullable`1[Agibuild.Fulora.WebViewPermissionKind])
+  - method System.Void set_RequestUri(System.Uri)
+  - method System.Void set_RootWindowId(System.Guid)
+  - method System.Void set_ScopeIdentity(System.String)
+  - method System.Void set_WindowId(System.Guid)
+  - method System.String ToString()
+  - property System.Guid WindowId
+
+type Agibuild.Fulora.Shell.WebViewSessionPermissionProfileDiagnosticEventArgs
+  - constructor System.Void .ctor(System.Guid, System.Nullable`1[System.Guid], System.String, System.String, System.String, System.String, Agibuild.Fulora.Shell.WebViewShellSessionDecision, System.Nullable`1[Agibuild.Fulora.WebViewPermissionKind], Agibuild.Fulora.Shell.WebViewPermissionProfileDecision)
+  - field System.Int32 CurrentDiagnosticSchemaVersion
+  - property System.Int32 DiagnosticSchemaVersion
+  - method System.Int32 get_DiagnosticSchemaVersion()
+  - method System.Nullable`1[System.Guid] get_ParentWindowId()
+  - method Agibuild.Fulora.Shell.WebViewPermissionProfileDecision get_PermissionDecision()
+  - method System.Nullable`1[Agibuild.Fulora.WebViewPermissionKind] get_PermissionKind()
+  - method System.String get_ProfileHash()
+  - method System.String get_ProfileIdentity()
+  - method System.String get_ProfileVersion()
+  - method System.String get_ScopeIdentity()
+  - method Agibuild.Fulora.Shell.WebViewShellSessionDecision get_SessionDecision()
+  - method System.Guid get_WindowId()
+  - property System.Nullable`1[System.Guid] ParentWindowId
+  - property Agibuild.Fulora.Shell.WebViewPermissionProfileDecision PermissionDecision
+  - property System.Nullable`1[Agibuild.Fulora.WebViewPermissionKind] PermissionKind
+  - property System.String ProfileHash
+  - property System.String ProfileIdentity
+  - property System.String ProfileVersion
+  - property System.String ScopeIdentity
+  - property Agibuild.Fulora.Shell.WebViewShellSessionDecision SessionDecision
+  - property System.Guid WindowId
+
+type Agibuild.Fulora.Shell.WebViewShellActivationCoordinator
+  - method Agibuild.Fulora.Shell.WebViewShellActivationRegistration Register(System.String, System.Func`3[Agibuild.Fulora.Shell.WebViewShellActivationRequest,System.Threading.CancellationToken,System.Threading.Tasks.Task])
+
+type Agibuild.Fulora.Shell.WebViewShellActivationForwardResult
+  - constructor System.Void .ctor(Agibuild.Fulora.Shell.WebViewShellActivationForwardStatus, System.String)
+  - method Agibuild.Fulora.Shell.WebViewShellActivationForwardResult <Clone>$()
+  - method System.Void Deconstruct(Agibuild.Fulora.Shell.WebViewShellActivationForwardStatus&, System.String&)
+  - method Agibuild.Fulora.Shell.WebViewShellActivationForwardResult Delivered()
+  - method System.Boolean Equals(System.Object)
+  - method System.Boolean Equals(Agibuild.Fulora.Shell.WebViewShellActivationForwardResult)
+  - method System.String get_Reason()
+  - method Agibuild.Fulora.Shell.WebViewShellActivationForwardStatus get_Status()
+  - method System.Int32 GetHashCode()
+  - method Agibuild.Fulora.Shell.WebViewShellActivationForwardResult NoActivePrimary()
+  - method System.Boolean op_Equality(Agibuild.Fulora.Shell.WebViewShellActivationForwardResult, Agibuild.Fulora.Shell.WebViewShellActivationForwardResult)
+  - method System.Boolean op_Inequality(Agibuild.Fulora.Shell.WebViewShellActivationForwardResult, Agibuild.Fulora.Shell.WebViewShellActivationForwardResult)
+  - property System.String Reason
+  - method System.Void set_Reason(System.String)
+  - method System.Void set_Status(Agibuild.Fulora.Shell.WebViewShellActivationForwardStatus)
+  - property Agibuild.Fulora.Shell.WebViewShellActivationForwardStatus Status
+  - method System.String ToString()
+
+type Agibuild.Fulora.Shell.WebViewShellActivationForwardStatus
+  - field Agibuild.Fulora.Shell.WebViewShellActivationForwardStatus Delivered
+  - field Agibuild.Fulora.Shell.WebViewShellActivationForwardStatus NoActivePrimary
+  - field System.Int32 value__
+
+type Agibuild.Fulora.Shell.WebViewShellActivationRegistration
+  - method System.Void Dispose()
+  - method System.Threading.Tasks.Task`1[Agibuild.Fulora.Shell.WebViewShellActivationForwardResult] ForwardAsync(Agibuild.Fulora.Shell.WebViewShellActivationRequest, System.Threading.CancellationToken)
+  - method System.Boolean get_IsPrimary()
+  - property System.Boolean IsPrimary
+
+type Agibuild.Fulora.Shell.WebViewShellActivationRequest
+  - constructor System.Void .ctor(System.Uri, System.Collections.Generic.IReadOnlyDictionary`2[System.String,System.String], System.Nullable`1[System.DateTimeOffset])
+  - property System.Uri DeepLinkUri
+  - method System.Uri get_DeepLinkUri()
+  - method System.Collections.Generic.IReadOnlyDictionary`2[System.String,System.String] get_Metadata()
+  - method System.DateTimeOffset get_ReceivedAtUtc()
+  - property System.Collections.Generic.IReadOnlyDictionary`2[System.String,System.String] Metadata
+  - property System.DateTimeOffset ReceivedAtUtc
+
+type Agibuild.Fulora.Shell.WebViewShellCommandDecision
+  - constructor System.Void .ctor(System.Boolean, System.String)
+  - method Agibuild.Fulora.Shell.WebViewShellCommandDecision <Clone>$()
+  - method Agibuild.Fulora.Shell.WebViewShellCommandDecision Allow()
+  - method System.Void Deconstruct(System.Boolean&, System.String&)
+  - method Agibuild.Fulora.Shell.WebViewShellCommandDecision Deny(System.String)
+  - property System.String DenyReason
+  - method System.Boolean Equals(System.Object)
+  - method System.Boolean Equals(Agibuild.Fulora.Shell.WebViewShellCommandDecision)
+  - method System.String get_DenyReason()
+  - method System.Boolean get_IsAllowed()
+  - method System.Int32 GetHashCode()
+  - property System.Boolean IsAllowed
+  - method System.Boolean op_Equality(Agibuild.Fulora.Shell.WebViewShellCommandDecision, Agibuild.Fulora.Shell.WebViewShellCommandDecision)
+  - method System.Boolean op_Inequality(Agibuild.Fulora.Shell.WebViewShellCommandDecision, Agibuild.Fulora.Shell.WebViewShellCommandDecision)
+  - method System.Void set_DenyReason(System.String)
+  - method System.Void set_IsAllowed(System.Boolean)
+  - method System.String ToString()
+
+type Agibuild.Fulora.Shell.WebViewShellCommandPolicyContext
+  - constructor System.Void .ctor(System.Guid, System.Nullable`1[System.Guid], Agibuild.Fulora.WebViewCommand)
+  - method Agibuild.Fulora.Shell.WebViewShellCommandPolicyContext <Clone>$()
+  - property Agibuild.Fulora.WebViewCommand Command
+  - method System.Void Deconstruct(System.Guid&, System.Nullable`1[System.Guid]&, Agibuild.Fulora.WebViewCommand&)
+  - method System.Boolean Equals(System.Object)
+  - method System.Boolean Equals(Agibuild.Fulora.Shell.WebViewShellCommandPolicyContext)
+  - method Agibuild.Fulora.WebViewCommand get_Command()
+  - method System.Guid get_RootWindowId()
+  - method System.Nullable`1[System.Guid] get_TargetWindowId()
+  - method System.Int32 GetHashCode()
+  - method System.Boolean op_Equality(Agibuild.Fulora.Shell.WebViewShellCommandPolicyContext, Agibuild.Fulora.Shell.WebViewShellCommandPolicyContext)
+  - method System.Boolean op_Inequality(Agibuild.Fulora.Shell.WebViewShellCommandPolicyContext, Agibuild.Fulora.Shell.WebViewShellCommandPolicyContext)
+  - property System.Guid RootWindowId
+  - method System.Void set_Command(Agibuild.Fulora.WebViewCommand)
+  - method System.Void set_RootWindowId(System.Guid)
+  - method System.Void set_TargetWindowId(System.Nullable`1[System.Guid])
+  - property System.Nullable`1[System.Guid] TargetWindowId
+  - method System.String ToString()
+
+type Agibuild.Fulora.Shell.WebViewShellDevToolsAction
+  - field Agibuild.Fulora.Shell.WebViewShellDevToolsAction Close
+  - field Agibuild.Fulora.Shell.WebViewShellDevToolsAction Open
+  - field Agibuild.Fulora.Shell.WebViewShellDevToolsAction Query
+  - field System.Int32 value__
+
+type Agibuild.Fulora.Shell.WebViewShellDevToolsDecision
+  - constructor System.Void .ctor(System.Boolean, System.String)
+  - method Agibuild.Fulora.Shell.WebViewShellDevToolsDecision <Clone>$()
+  - method Agibuild.Fulora.Shell.WebViewShellDevToolsDecision Allow()
+  - method System.Void Deconstruct(System.Boolean&, System.String&)
+  - method Agibuild.Fulora.Shell.WebViewShellDevToolsDecision Deny(System.String)
+  - property System.String DenyReason
+  - method System.Boolean Equals(System.Object)
+  - method System.Boolean Equals(Agibuild.Fulora.Shell.WebViewShellDevToolsDecision)
+  - method System.String get_DenyReason()
+  - method System.Boolean get_IsAllowed()
+  - method System.Int32 GetHashCode()
+  - property System.Boolean IsAllowed
+  - method System.Boolean op_Equality(Agibuild.Fulora.Shell.WebViewShellDevToolsDecision, Agibuild.Fulora.Shell.WebViewShellDevToolsDecision)
+  - method System.Boolean op_Inequality(Agibuild.Fulora.Shell.WebViewShellDevToolsDecision, Agibuild.Fulora.Shell.WebViewShellDevToolsDecision)
+  - method System.Void set_DenyReason(System.String)
+  - method System.Void set_IsAllowed(System.Boolean)
+  - method System.String ToString()
+
+type Agibuild.Fulora.Shell.WebViewShellDevToolsPolicyContext
+  - constructor System.Void .ctor(System.Guid, System.Nullable`1[System.Guid], Agibuild.Fulora.Shell.WebViewShellDevToolsAction)
+  - method Agibuild.Fulora.Shell.WebViewShellDevToolsPolicyContext <Clone>$()
+  - property Agibuild.Fulora.Shell.WebViewShellDevToolsAction Action
+  - method System.Void Deconstruct(System.Guid&, System.Nullable`1[System.Guid]&, Agibuild.Fulora.Shell.WebViewShellDevToolsAction&)
+  - method System.Boolean Equals(System.Object)
+  - method System.Boolean Equals(Agibuild.Fulora.Shell.WebViewShellDevToolsPolicyContext)
+  - method Agibuild.Fulora.Shell.WebViewShellDevToolsAction get_Action()
+  - method System.Guid get_RootWindowId()
+  - method System.Nullable`1[System.Guid] get_TargetWindowId()
+  - method System.Int32 GetHashCode()
+  - method System.Boolean op_Equality(Agibuild.Fulora.Shell.WebViewShellDevToolsPolicyContext, Agibuild.Fulora.Shell.WebViewShellDevToolsPolicyContext)
+  - method System.Boolean op_Inequality(Agibuild.Fulora.Shell.WebViewShellDevToolsPolicyContext, Agibuild.Fulora.Shell.WebViewShellDevToolsPolicyContext)
+  - property System.Guid RootWindowId
+  - method System.Void set_Action(Agibuild.Fulora.Shell.WebViewShellDevToolsAction)
+  - method System.Void set_RootWindowId(System.Guid)
+  - method System.Void set_TargetWindowId(System.Nullable`1[System.Guid])
+  - property System.Nullable`1[System.Guid] TargetWindowId
+  - method System.String ToString()
+
+type Agibuild.Fulora.Shell.WebViewShellExperience
+  - constructor System.Void .ctor(Agibuild.Fulora.IWebView, Agibuild.Fulora.Shell.WebViewShellExperienceOptions)
+  - method System.Void add_ManagedWindowLifecycleChanged(System.EventHandler`1[Agibuild.Fulora.Shell.WebViewManagedWindowLifecycleEventArgs])
+  - method System.Void add_PolicyError(System.EventHandler`1[Agibuild.Fulora.Shell.WebViewShellPolicyErrorEventArgs])
+  - method System.Void add_SessionPermissionProfileEvaluated(System.EventHandler`1[Agibuild.Fulora.Shell.WebViewSessionPermissionProfileDiagnosticEventArgs])
+  - method System.Void add_SystemIntegrationEventReceived(System.EventHandler`1[Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest])
+  - method Agibuild.Fulora.Shell.WebViewHostCapabilityCallResult`1[System.Object] ApplyMenuModel(Agibuild.Fulora.Shell.WebViewMenuModelRequest)
+  - method System.Threading.Tasks.Task`1[System.Boolean] CloseDevToolsAsync()
+  - method System.Threading.Tasks.Task`1[System.Boolean] CloseManagedWindowAsync(System.Guid, System.Nullable`1[System.TimeSpan], System.Threading.CancellationToken)
+  - method System.Void Dispose()
+  - property Agibuild.Fulora.Shell.WebViewMenuModelRequest EffectiveMenuModel
+  - method System.Threading.Tasks.Task`1[System.Boolean] ExecuteCommandAsync(Agibuild.Fulora.WebViewCommand)
+  - method Agibuild.Fulora.Shell.WebViewHostCapabilityCallResult`1[System.Object] ExecuteSystemAction(Agibuild.Fulora.Shell.WebViewSystemActionRequest)
+  - method Agibuild.Fulora.Shell.WebViewMenuModelRequest get_EffectiveMenuModel()
+  - method System.Int32 get_ManagedWindowCount()
+  - method System.String get_RootProfileIdentity()
+  - method System.Guid get_RootWindowId()
+  - method Agibuild.Fulora.Shell.WebViewShellSessionDecision get_SessionDecision()
+  - method System.Collections.Generic.IReadOnlyList`1[System.Guid] GetManagedWindowIds()
+  - method System.Threading.Tasks.Task`1[System.Boolean] IsDevToolsOpenAsync()
+  - property System.Int32 ManagedWindowCount
+  - event System.EventHandler`1[Agibuild.Fulora.Shell.WebViewManagedWindowLifecycleEventArgs] ManagedWindowLifecycleChanged
+  - method System.Threading.Tasks.Task`1[System.Boolean] OpenDevToolsAsync()
+  - event System.EventHandler`1[Agibuild.Fulora.Shell.WebViewShellPolicyErrorEventArgs] PolicyError
+  - method Agibuild.Fulora.Shell.WebViewHostCapabilityCallResult`1[Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest] PublishSystemIntegrationEvent(Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest)
+  - method Agibuild.Fulora.Shell.WebViewHostCapabilityCallResult`1[System.String] ReadClipboardText()
+  - method System.Void remove_ManagedWindowLifecycleChanged(System.EventHandler`1[Agibuild.Fulora.Shell.WebViewManagedWindowLifecycleEventArgs])
+  - method System.Void remove_PolicyError(System.EventHandler`1[Agibuild.Fulora.Shell.WebViewShellPolicyErrorEventArgs])
+  - method System.Void remove_SessionPermissionProfileEvaluated(System.EventHandler`1[Agibuild.Fulora.Shell.WebViewSessionPermissionProfileDiagnosticEventArgs])
+  - method System.Void remove_SystemIntegrationEventReceived(System.EventHandler`1[Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest])
+  - property System.String RootProfileIdentity
+  - property System.Guid RootWindowId
+  - property Agibuild.Fulora.Shell.WebViewShellSessionDecision SessionDecision
+  - event System.EventHandler`1[Agibuild.Fulora.Shell.WebViewSessionPermissionProfileDiagnosticEventArgs] SessionPermissionProfileEvaluated
+  - method Agibuild.Fulora.Shell.WebViewHostCapabilityCallResult`1[System.Object] ShowNotification(Agibuild.Fulora.Shell.WebViewNotificationRequest)
+  - method Agibuild.Fulora.Shell.WebViewHostCapabilityCallResult`1[Agibuild.Fulora.Shell.WebViewFileDialogResult] ShowOpenFileDialog(Agibuild.Fulora.Shell.WebViewOpenFileDialogRequest)
+  - method Agibuild.Fulora.Shell.WebViewHostCapabilityCallResult`1[Agibuild.Fulora.Shell.WebViewFileDialogResult] ShowSaveFileDialog(Agibuild.Fulora.Shell.WebViewSaveFileDialogRequest)
+  - event System.EventHandler`1[Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest] SystemIntegrationEventReceived
+  - method System.Boolean TryGetManagedWindow(System.Guid, Agibuild.Fulora.IWebView&)
+  - method Agibuild.Fulora.Shell.WebViewHostCapabilityCallResult`1[System.Object] UpdateTrayState(Agibuild.Fulora.Shell.WebViewTrayStateRequest)
+  - method Agibuild.Fulora.Shell.WebViewHostCapabilityCallResult`1[System.Object] WriteClipboardText(System.String)
+
+type Agibuild.Fulora.Shell.WebViewShellExperienceOptions
+  - constructor System.Void .ctor()
+  - property Agibuild.Fulora.Shell.IWebViewShellCommandPolicy CommandPolicy
+  - property Agibuild.Fulora.Shell.IWebViewShellDevToolsPolicy DevToolsPolicy
+  - property System.Action`2[Agibuild.Fulora.IWebView,Agibuild.Fulora.DownloadRequestedEventArgs] DownloadHandler
+  - property Agibuild.Fulora.Shell.IWebViewDownloadPolicy DownloadPolicy
+  - method Agibuild.Fulora.Shell.IWebViewShellCommandPolicy get_CommandPolicy()
+  - method Agibuild.Fulora.Shell.IWebViewShellDevToolsPolicy get_DevToolsPolicy()
+  - method System.Action`2[Agibuild.Fulora.IWebView,Agibuild.Fulora.DownloadRequestedEventArgs] get_DownloadHandler()
+  - method Agibuild.Fulora.Shell.IWebViewDownloadPolicy get_DownloadPolicy()
+  - method Agibuild.Fulora.Shell.WebViewHostCapabilityBridge get_HostCapabilityBridge()
+  - method System.Func`3[Agibuild.Fulora.IWebView,System.Threading.CancellationToken,System.Threading.Tasks.Task] get_ManagedWindowCloseAsync()
+  - method System.TimeSpan get_ManagedWindowCloseTimeout()
+  - method System.Func`2[Agibuild.Fulora.Shell.WebViewManagedWindowCreateContext,Agibuild.Fulora.IWebView] get_ManagedWindowFactory()
+  - method Agibuild.Fulora.Shell.IWebViewShellMenuPruningPolicy get_MenuPruningPolicy()
+  - method Agibuild.Fulora.Shell.IWebViewNewWindowPolicy get_NewWindowPolicy()
+  - method System.Action`2[Agibuild.Fulora.IWebView,Agibuild.Fulora.PermissionRequestedEventArgs] get_PermissionHandler()
+  - method Agibuild.Fulora.Shell.IWebViewPermissionPolicy get_PermissionPolicy()
+  - method System.Action`2[Agibuild.Fulora.IWebView,Agibuild.Fulora.Shell.WebViewShellPolicyErrorEventArgs] get_PolicyErrorHandler()
+  - method Agibuild.Fulora.Shell.WebViewShellSessionContext get_SessionContext()
+  - method Agibuild.Fulora.Shell.IWebViewSessionPermissionProfileResolver get_SessionPermissionProfileResolver()
+  - method Agibuild.Fulora.Shell.IWebViewShellSessionPolicy get_SessionPolicy()
+  - method System.Collections.Generic.IReadOnlySet`1[Agibuild.Fulora.Shell.WebViewSystemAction] get_SystemActionWhitelist()
+  - property Agibuild.Fulora.Shell.WebViewHostCapabilityBridge HostCapabilityBridge
+  - property System.Func`3[Agibuild.Fulora.IWebView,System.Threading.CancellationToken,System.Threading.Tasks.Task] ManagedWindowCloseAsync
+  - property System.TimeSpan ManagedWindowCloseTimeout
+  - property System.Func`2[Agibuild.Fulora.Shell.WebViewManagedWindowCreateContext,Agibuild.Fulora.IWebView] ManagedWindowFactory
+  - property Agibuild.Fulora.Shell.IWebViewShellMenuPruningPolicy MenuPruningPolicy
+  - property Agibuild.Fulora.Shell.IWebViewNewWindowPolicy NewWindowPolicy
+  - property System.Action`2[Agibuild.Fulora.IWebView,Agibuild.Fulora.PermissionRequestedEventArgs] PermissionHandler
+  - property Agibuild.Fulora.Shell.IWebViewPermissionPolicy PermissionPolicy
+  - property System.Action`2[Agibuild.Fulora.IWebView,Agibuild.Fulora.Shell.WebViewShellPolicyErrorEventArgs] PolicyErrorHandler
+  - property Agibuild.Fulora.Shell.WebViewShellSessionContext SessionContext
+  - property Agibuild.Fulora.Shell.IWebViewSessionPermissionProfileResolver SessionPermissionProfileResolver
+  - property Agibuild.Fulora.Shell.IWebViewShellSessionPolicy SessionPolicy
+  - method System.Void set_CommandPolicy(Agibuild.Fulora.Shell.IWebViewShellCommandPolicy)
+  - method System.Void set_DevToolsPolicy(Agibuild.Fulora.Shell.IWebViewShellDevToolsPolicy)
+  - method System.Void set_DownloadHandler(System.Action`2[Agibuild.Fulora.IWebView,Agibuild.Fulora.DownloadRequestedEventArgs])
+  - method System.Void set_DownloadPolicy(Agibuild.Fulora.Shell.IWebViewDownloadPolicy)
+  - method System.Void set_HostCapabilityBridge(Agibuild.Fulora.Shell.WebViewHostCapabilityBridge)
+  - method System.Void set_ManagedWindowCloseAsync(System.Func`3[Agibuild.Fulora.IWebView,System.Threading.CancellationToken,System.Threading.Tasks.Task])
+  - method System.Void set_ManagedWindowCloseTimeout(System.TimeSpan)
+  - method System.Void set_ManagedWindowFactory(System.Func`2[Agibuild.Fulora.Shell.WebViewManagedWindowCreateContext,Agibuild.Fulora.IWebView])
+  - method System.Void set_MenuPruningPolicy(Agibuild.Fulora.Shell.IWebViewShellMenuPruningPolicy)
+  - method System.Void set_NewWindowPolicy(Agibuild.Fulora.Shell.IWebViewNewWindowPolicy)
+  - method System.Void set_PermissionHandler(System.Action`2[Agibuild.Fulora.IWebView,Agibuild.Fulora.PermissionRequestedEventArgs])
+  - method System.Void set_PermissionPolicy(Agibuild.Fulora.Shell.IWebViewPermissionPolicy)
+  - method System.Void set_PolicyErrorHandler(System.Action`2[Agibuild.Fulora.IWebView,Agibuild.Fulora.Shell.WebViewShellPolicyErrorEventArgs])
+  - method System.Void set_SessionContext(Agibuild.Fulora.Shell.WebViewShellSessionContext)
+  - method System.Void set_SessionPermissionProfileResolver(Agibuild.Fulora.Shell.IWebViewSessionPermissionProfileResolver)
+  - method System.Void set_SessionPolicy(Agibuild.Fulora.Shell.IWebViewShellSessionPolicy)
+  - method System.Void set_SystemActionWhitelist(System.Collections.Generic.IReadOnlySet`1[Agibuild.Fulora.Shell.WebViewSystemAction])
+  - property System.Collections.Generic.IReadOnlySet`1[Agibuild.Fulora.Shell.WebViewSystemAction] SystemActionWhitelist
+
+type Agibuild.Fulora.Shell.WebViewShellPolicyDomain
+  - field Agibuild.Fulora.Shell.WebViewShellPolicyDomain Command
+  - field Agibuild.Fulora.Shell.WebViewShellPolicyDomain DevTools
+  - field Agibuild.Fulora.Shell.WebViewShellPolicyDomain Download
+  - field Agibuild.Fulora.Shell.WebViewShellPolicyDomain ExternalOpen
+  - field Agibuild.Fulora.Shell.WebViewShellPolicyDomain ManagedWindowLifecycle
+  - field Agibuild.Fulora.Shell.WebViewShellPolicyDomain NewWindow
+  - field Agibuild.Fulora.Shell.WebViewShellPolicyDomain Permission
+  - field Agibuild.Fulora.Shell.WebViewShellPolicyDomain Session
+  - field Agibuild.Fulora.Shell.WebViewShellPolicyDomain SystemIntegration
+  - field System.Int32 value__
+
+type Agibuild.Fulora.Shell.WebViewShellPolicyErrorEventArgs
+  - constructor System.Void .ctor(Agibuild.Fulora.Shell.WebViewShellPolicyDomain, System.Exception)
+  - property Agibuild.Fulora.Shell.WebViewShellPolicyDomain Domain
+  - property System.Exception Exception
+  - method Agibuild.Fulora.Shell.WebViewShellPolicyDomain get_Domain()
+  - method System.Exception get_Exception()
+
+type Agibuild.Fulora.Shell.WebViewShellSessionContext
+  - constructor System.Void .ctor(System.String)
+  - method Agibuild.Fulora.Shell.WebViewShellSessionContext <Clone>$()
+  - method System.Void Deconstruct(System.String&)
+  - method System.Boolean Equals(System.Object)
+  - method System.Boolean Equals(Agibuild.Fulora.Shell.WebViewShellSessionContext)
+  - method System.Nullable`1[System.Guid] get_ParentWindowId()
+  - method System.Uri get_RequestUri()
+  - method System.String get_ScopeIdentity()
+  - method System.Nullable`1[System.Guid] get_WindowId()
+  - method System.Int32 GetHashCode()
+  - method System.Boolean op_Equality(Agibuild.Fulora.Shell.WebViewShellSessionContext, Agibuild.Fulora.Shell.WebViewShellSessionContext)
+  - method System.Boolean op_Inequality(Agibuild.Fulora.Shell.WebViewShellSessionContext, Agibuild.Fulora.Shell.WebViewShellSessionContext)
+  - property System.Nullable`1[System.Guid] ParentWindowId
+  - property System.Uri RequestUri
+  - property System.String ScopeIdentity
+  - method System.Void set_ParentWindowId(System.Nullable`1[System.Guid])
+  - method System.Void set_RequestUri(System.Uri)
+  - method System.Void set_ScopeIdentity(System.String)
+  - method System.Void set_WindowId(System.Nullable`1[System.Guid])
+  - method System.String ToString()
+  - property System.Nullable`1[System.Guid] WindowId
+
+type Agibuild.Fulora.Shell.WebViewShellSessionDecision
+  - constructor System.Void .ctor(Agibuild.Fulora.Shell.WebViewShellSessionScope, System.String)
+  - method Agibuild.Fulora.Shell.WebViewShellSessionDecision <Clone>$()
+  - method System.Void Deconstruct(Agibuild.Fulora.Shell.WebViewShellSessionScope&, System.String&)
+  - method System.Boolean Equals(System.Object)
+  - method System.Boolean Equals(Agibuild.Fulora.Shell.WebViewShellSessionDecision)
+  - method Agibuild.Fulora.Shell.WebViewShellSessionScope get_Scope()
+  - method System.String get_ScopeIdentity()
+  - method System.Int32 GetHashCode()
+  - method System.Boolean op_Equality(Agibuild.Fulora.Shell.WebViewShellSessionDecision, Agibuild.Fulora.Shell.WebViewShellSessionDecision)
+  - method System.Boolean op_Inequality(Agibuild.Fulora.Shell.WebViewShellSessionDecision, Agibuild.Fulora.Shell.WebViewShellSessionDecision)
+  - property Agibuild.Fulora.Shell.WebViewShellSessionScope Scope
+  - property System.String ScopeIdentity
+  - method System.Void set_Scope(Agibuild.Fulora.Shell.WebViewShellSessionScope)
+  - method System.Void set_ScopeIdentity(System.String)
+  - method System.String ToString()
+
+type Agibuild.Fulora.Shell.WebViewShellSessionScope
+  - field Agibuild.Fulora.Shell.WebViewShellSessionScope Isolated
+  - field Agibuild.Fulora.Shell.WebViewShellSessionScope Shared
+  - field System.Int32 value__
+
+type Agibuild.Fulora.Shell.WebViewSystemAction
+  - field Agibuild.Fulora.Shell.WebViewSystemAction FocusMainWindow
+  - field Agibuild.Fulora.Shell.WebViewSystemAction Quit
+  - field Agibuild.Fulora.Shell.WebViewSystemAction Restart
+  - field Agibuild.Fulora.Shell.WebViewSystemAction ShowAbout
+  - field System.Int32 value__
+
+type Agibuild.Fulora.Shell.WebViewSystemActionRequest
+  - constructor System.Void .ctor()
+  - property Agibuild.Fulora.Shell.WebViewSystemAction Action
+  - method Agibuild.Fulora.Shell.WebViewSystemAction get_Action()
+  - method System.Void set_Action(Agibuild.Fulora.Shell.WebViewSystemAction)
+
+type Agibuild.Fulora.Shell.WebViewSystemIntegrationEventKind
+  - field Agibuild.Fulora.Shell.WebViewSystemIntegrationEventKind MenuItemInvoked
+  - field Agibuild.Fulora.Shell.WebViewSystemIntegrationEventKind TrayInteracted
+  - field System.Int32 value__
+
+type Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest
+  - constructor System.Void .ctor()
+  - property System.String Context
+  - method System.String get_Context()
+  - method System.String get_ItemId()
+  - method Agibuild.Fulora.Shell.WebViewSystemIntegrationEventKind get_Kind()
+  - method System.Collections.Generic.IReadOnlyDictionary`2[System.String,System.String] get_Metadata()
+  - method System.DateTimeOffset get_OccurredAtUtc()
+  - method System.String get_Source()
+  - property System.String ItemId
+  - property Agibuild.Fulora.Shell.WebViewSystemIntegrationEventKind Kind
+  - property System.Collections.Generic.IReadOnlyDictionary`2[System.String,System.String] Metadata
+  - property System.DateTimeOffset OccurredAtUtc
+  - method System.Void set_Context(System.String)
+  - method System.Void set_ItemId(System.String)
+  - method System.Void set_Kind(Agibuild.Fulora.Shell.WebViewSystemIntegrationEventKind)
+  - method System.Void set_Metadata(System.Collections.Generic.IReadOnlyDictionary`2[System.String,System.String])
+  - method System.Void set_OccurredAtUtc(System.DateTimeOffset)
+  - method System.Void set_Source(System.String)
+  - property System.String Source
+
+type Agibuild.Fulora.Shell.WebViewTrayStateRequest
+  - constructor System.Void .ctor()
+  - method System.String get_IconPath()
+  - method System.Boolean get_IsVisible()
+  - method System.String get_Tooltip()
+  - property System.String IconPath
+  - property System.Boolean IsVisible
+  - method System.Void set_IconPath(System.String)
+  - method System.Void set_IsVisible(System.Boolean)
+  - method System.Void set_Tooltip(System.String)
+  - property System.String Tooltip
+
+type Agibuild.Fulora.SpaAssetHotUpdateResult
+  - constructor System.Void .ctor(System.Boolean, System.String, System.String, System.String)
+  - method Agibuild.Fulora.SpaAssetHotUpdateResult <Clone>$()
+  - property System.String Code
+  - method System.Void Deconstruct(System.Boolean&, System.String&, System.String&, System.String&)
+  - property System.String DirectoryPath
+  - method System.Boolean Equals(System.Object)
+  - method System.Boolean Equals(Agibuild.Fulora.SpaAssetHotUpdateResult)
+  - method System.String get_Code()
+  - method System.String get_DirectoryPath()
+  - method System.Boolean get_Succeeded()
+  - method System.String get_Version()
+  - method System.Int32 GetHashCode()
+  - method System.Boolean op_Equality(Agibuild.Fulora.SpaAssetHotUpdateResult, Agibuild.Fulora.SpaAssetHotUpdateResult)
+  - method System.Boolean op_Inequality(Agibuild.Fulora.SpaAssetHotUpdateResult, Agibuild.Fulora.SpaAssetHotUpdateResult)
+  - method System.Void set_Code(System.String)
+  - method System.Void set_DirectoryPath(System.String)
+  - method System.Void set_Succeeded(System.Boolean)
+  - method System.Void set_Version(System.String)
+  - property System.Boolean Succeeded
+  - method System.String ToString()
+  - property System.String Version
+
+type Agibuild.Fulora.SpaAssetHotUpdateService
+  - constructor System.Void .ctor(System.String)
+  - method Agibuild.Fulora.SpaAssetHotUpdateResult ActivateVersion(System.String)
+  - method System.String GetActiveAssetDirectory()
+  - method System.Threading.Tasks.Task`1[Agibuild.Fulora.SpaAssetHotUpdateResult] InstallSignedPackageAsync(System.IO.Stream, System.String, System.Byte[], System.Security.Cryptography.RSA, System.Threading.CancellationToken)
+  - method Agibuild.Fulora.SpaAssetHotUpdateResult Rollback()
 
 type Agibuild.Fulora.SpaHostingExtensions
-  - method Agibuild.Fulora.WebViewEnvironmentOptions Agibuild.Fulora.SpaHostingExtensions::AddDevServerProxy(Agibuild.Fulora.WebViewEnvironmentOptions,System.String,System.String)
-  - method Agibuild.Fulora.WebViewEnvironmentOptions Agibuild.Fulora.SpaHostingExtensions::AddEmbeddedFileProvider(Agibuild.Fulora.WebViewEnvironmentOptions,System.String,System.Reflection.Assembly,System.String)
+  - method Agibuild.Fulora.WebViewEnvironmentOptions AddDevServerProxy(Agibuild.Fulora.WebViewEnvironmentOptions, System.String, System.String)
+  - method Agibuild.Fulora.WebViewEnvironmentOptions AddEmbeddedFileProvider(Agibuild.Fulora.WebViewEnvironmentOptions, System.String, System.Reflection.Assembly, System.String)
 
 type Agibuild.Fulora.WebAuthBroker
-  - method System.Void Agibuild.Fulora.WebAuthBroker::.ctor(Agibuild.Fulora.IWebDialogFactory)
-  - method System.Threading.Tasks.Task`1<Agibuild.Fulora.WebAuthResult> Agibuild.Fulora.WebAuthBroker::AuthenticateAsync(Agibuild.Fulora.ITopLevelWindow,Agibuild.Fulora.AuthOptions)
+  - constructor System.Void .ctor(Agibuild.Fulora.IWebDialogFactory)
+  - method System.Threading.Tasks.Task`1[Agibuild.Fulora.WebAuthResult] AuthenticateAsync(Agibuild.Fulora.ITopLevelWindow, Agibuild.Fulora.AuthOptions)
 
 type Agibuild.Fulora.WebAuthBrokerWithSemantics
-  - method System.Void Agibuild.Fulora.WebAuthBrokerWithSemantics::.ctor(Agibuild.Fulora.IWebAuthBroker)
-  - method System.Threading.Tasks.Task`1<Agibuild.Fulora.WebAuthResult> Agibuild.Fulora.WebAuthBrokerWithSemantics::AuthenticateAsync(Agibuild.Fulora.ITopLevelWindow,Agibuild.Fulora.AuthOptions)
+  - constructor System.Void .ctor(Agibuild.Fulora.IWebAuthBroker)
+  - method System.Threading.Tasks.Task`1[Agibuild.Fulora.WebAuthResult] AuthenticateAsync(Agibuild.Fulora.ITopLevelWindow, Agibuild.Fulora.AuthOptions)
 
 type Agibuild.Fulora.WebDialog
-  - property Agibuild.Fulora.IBridgeService Agibuild.Fulora.WebDialog::Bridge
-  - property System.Boolean Agibuild.Fulora.WebDialog::CanGoBack
-  - property System.Boolean Agibuild.Fulora.WebDialog::CanGoForward
-  - property System.Boolean Agibuild.Fulora.WebDialog::CanUserResize
-  - property System.Guid Agibuild.Fulora.WebDialog::ChannelId
-  - property System.Boolean Agibuild.Fulora.WebDialog::IsLoading
-  - property Agibuild.Fulora.IWebViewRpcService Agibuild.Fulora.WebDialog::Rpc
-  - property System.Uri Agibuild.Fulora.WebDialog::Source
-  - property System.String Agibuild.Fulora.WebDialog::Title
-  - event System.EventHandler`1<Agibuild.Fulora.AdapterCreatedEventArgs> Agibuild.Fulora.WebDialog::AdapterCreated
-  - event System.EventHandler Agibuild.Fulora.WebDialog::AdapterDestroyed
-  - event System.EventHandler Agibuild.Fulora.WebDialog::Closing
-  - event System.EventHandler`1<Agibuild.Fulora.ContextMenuRequestedEventArgs> Agibuild.Fulora.WebDialog::ContextMenuRequested
-  - event System.EventHandler`1<Agibuild.Fulora.DownloadRequestedEventArgs> Agibuild.Fulora.WebDialog::DownloadRequested
-  - event System.EventHandler`1<Agibuild.Fulora.EnvironmentRequestedEventArgs> Agibuild.Fulora.WebDialog::EnvironmentRequested
-  - event System.EventHandler`1<Agibuild.Fulora.NavigationCompletedEventArgs> Agibuild.Fulora.WebDialog::NavigationCompleted
-  - event System.EventHandler`1<Agibuild.Fulora.NavigationStartingEventArgs> Agibuild.Fulora.WebDialog::NavigationStarted
-  - event System.EventHandler`1<Agibuild.Fulora.NewWindowRequestedEventArgs> Agibuild.Fulora.WebDialog::NewWindowRequested
-  - event System.EventHandler`1<Agibuild.Fulora.PermissionRequestedEventArgs> Agibuild.Fulora.WebDialog::PermissionRequested
-  - event System.EventHandler`1<Agibuild.Fulora.WebMessageReceivedEventArgs> Agibuild.Fulora.WebDialog::WebMessageReceived
-  - event System.EventHandler`1<Agibuild.Fulora.WebResourceRequestedEventArgs> Agibuild.Fulora.WebDialog::WebResourceRequested
-  - method System.Threading.Tasks.Task`1<System.String> Agibuild.Fulora.WebDialog::AddPreloadScriptAsync(System.String)
-  - method System.Threading.Tasks.Task`1<System.Byte[]> Agibuild.Fulora.WebDialog::CaptureScreenshotAsync()
-  - method System.Void Agibuild.Fulora.WebDialog::Close()
-  - method System.Threading.Tasks.Task Agibuild.Fulora.WebDialog::CloseDevToolsAsync()
-  - method System.Void Agibuild.Fulora.WebDialog::Dispose()
-  - method System.Threading.Tasks.Task`1<Agibuild.Fulora.FindInPageResult> Agibuild.Fulora.WebDialog::FindInPageAsync(System.String,Agibuild.Fulora.FindInPageOptions)
-  - method System.Threading.Tasks.Task`1<System.Double> Agibuild.Fulora.WebDialog::GetZoomFactorAsync()
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.WebDialog::GoBackAsync()
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.WebDialog::GoForwardAsync()
-  - method System.Threading.Tasks.Task`1<System.String> Agibuild.Fulora.WebDialog::InvokeScriptAsync(System.String)
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.WebDialog::IsDevToolsOpenAsync()
-  - method System.Boolean Agibuild.Fulora.WebDialog::Move(System.Int32,System.Int32)
-  - method System.Threading.Tasks.Task Agibuild.Fulora.WebDialog::NavigateAsync(System.Uri)
-  - method System.Threading.Tasks.Task Agibuild.Fulora.WebDialog::NavigateToStringAsync(System.String)
-  - method System.Threading.Tasks.Task Agibuild.Fulora.WebDialog::NavigateToStringAsync(System.String,System.Uri)
-  - method System.Threading.Tasks.Task Agibuild.Fulora.WebDialog::OpenDevToolsAsync()
-  - method System.Threading.Tasks.Task`1<System.Byte[]> Agibuild.Fulora.WebDialog::PrintToPdfAsync(Agibuild.Fulora.PdfPrintOptions)
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.WebDialog::RefreshAsync()
-  - method System.Threading.Tasks.Task Agibuild.Fulora.WebDialog::RemovePreloadScriptAsync(System.String)
-  - method System.Boolean Agibuild.Fulora.WebDialog::Resize(System.Int32,System.Int32)
-  - method System.Threading.Tasks.Task Agibuild.Fulora.WebDialog::SetZoomFactorAsync(System.Double)
-  - method System.Void Agibuild.Fulora.WebDialog::Show()
-  - method System.Boolean Agibuild.Fulora.WebDialog::Show(Avalonia.Platform.IPlatformHandle)
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.WebDialog::StopAsync()
-  - method System.Threading.Tasks.Task Agibuild.Fulora.WebDialog::StopFindInPageAsync(System.Boolean)
-  - method Agibuild.Fulora.ICommandManager Agibuild.Fulora.WebDialog::TryGetCommandManager()
-  - method Agibuild.Fulora.ICookieManager Agibuild.Fulora.WebDialog::TryGetCookieManager()
-  - method System.Threading.Tasks.Task`1<Avalonia.Platform.IPlatformHandle> Agibuild.Fulora.WebDialog::TryGetWebViewHandleAsync()
+  - event System.EventHandler`1[Agibuild.Fulora.AdapterCreatedEventArgs] AdapterCreated
+  - event System.EventHandler AdapterDestroyed
+  - method System.Void add_AdapterCreated(System.EventHandler`1[Agibuild.Fulora.AdapterCreatedEventArgs])
+  - method System.Void add_AdapterDestroyed(System.EventHandler)
+  - method System.Void add_Closing(System.EventHandler)
+  - method System.Void add_ContextMenuRequested(System.EventHandler`1[Agibuild.Fulora.ContextMenuRequestedEventArgs])
+  - method System.Void add_DownloadRequested(System.EventHandler`1[Agibuild.Fulora.DownloadRequestedEventArgs])
+  - method System.Void add_EnvironmentRequested(System.EventHandler`1[Agibuild.Fulora.EnvironmentRequestedEventArgs])
+  - method System.Void add_NavigationCompleted(System.EventHandler`1[Agibuild.Fulora.NavigationCompletedEventArgs])
+  - method System.Void add_NavigationStarted(System.EventHandler`1[Agibuild.Fulora.NavigationStartingEventArgs])
+  - method System.Void add_NewWindowRequested(System.EventHandler`1[Agibuild.Fulora.NewWindowRequestedEventArgs])
+  - method System.Void add_PermissionRequested(System.EventHandler`1[Agibuild.Fulora.PermissionRequestedEventArgs])
+  - method System.Void add_WebMessageReceived(System.EventHandler`1[Agibuild.Fulora.WebMessageReceivedEventArgs])
+  - method System.Void add_WebResourceRequested(System.EventHandler`1[Agibuild.Fulora.WebResourceRequestedEventArgs])
+  - method System.Threading.Tasks.Task`1[System.String] AddPreloadScriptAsync(System.String)
+  - property Agibuild.Fulora.IBridgeService Bridge
+  - property System.Boolean CanGoBack
+  - property System.Boolean CanGoForward
+  - property System.Boolean CanUserResize
+  - method System.Threading.Tasks.Task`1[System.Byte[]] CaptureScreenshotAsync()
+  - property System.Guid ChannelId
+  - method System.Void Close()
+  - method System.Threading.Tasks.Task CloseDevToolsAsync()
+  - event System.EventHandler Closing
+  - event System.EventHandler`1[Agibuild.Fulora.ContextMenuRequestedEventArgs] ContextMenuRequested
+  - method System.Void Dispose()
+  - event System.EventHandler`1[Agibuild.Fulora.DownloadRequestedEventArgs] DownloadRequested
+  - event System.EventHandler`1[Agibuild.Fulora.EnvironmentRequestedEventArgs] EnvironmentRequested
+  - method System.Threading.Tasks.Task`1[Agibuild.Fulora.FindInPageResult] FindInPageAsync(System.String, Agibuild.Fulora.FindInPageOptions)
+  - method Agibuild.Fulora.IBridgeService get_Bridge()
+  - method System.Boolean get_CanGoBack()
+  - method System.Boolean get_CanGoForward()
+  - method System.Boolean get_CanUserResize()
+  - method System.Guid get_ChannelId()
+  - method System.Boolean get_IsLoading()
+  - method Agibuild.Fulora.IWebViewRpcService get_Rpc()
+  - method System.Uri get_Source()
+  - method System.String get_Title()
+  - method System.Threading.Tasks.Task`1[System.Double] GetZoomFactorAsync()
+  - method System.Threading.Tasks.Task`1[System.Boolean] GoBackAsync()
+  - method System.Threading.Tasks.Task`1[System.Boolean] GoForwardAsync()
+  - method System.Threading.Tasks.Task`1[System.String] InvokeScriptAsync(System.String)
+  - method System.Threading.Tasks.Task`1[System.Boolean] IsDevToolsOpenAsync()
+  - property System.Boolean IsLoading
+  - method System.Boolean Move(System.Int32, System.Int32)
+  - method System.Threading.Tasks.Task NavigateAsync(System.Uri)
+  - method System.Threading.Tasks.Task NavigateToStringAsync(System.String)
+  - method System.Threading.Tasks.Task NavigateToStringAsync(System.String, System.Uri)
+  - event System.EventHandler`1[Agibuild.Fulora.NavigationCompletedEventArgs] NavigationCompleted
+  - event System.EventHandler`1[Agibuild.Fulora.NavigationStartingEventArgs] NavigationStarted
+  - event System.EventHandler`1[Agibuild.Fulora.NewWindowRequestedEventArgs] NewWindowRequested
+  - method System.Threading.Tasks.Task OpenDevToolsAsync()
+  - event System.EventHandler`1[Agibuild.Fulora.PermissionRequestedEventArgs] PermissionRequested
+  - method System.Threading.Tasks.Task`1[System.Byte[]] PrintToPdfAsync(Agibuild.Fulora.PdfPrintOptions)
+  - method System.Threading.Tasks.Task`1[System.Boolean] RefreshAsync()
+  - method System.Void remove_AdapterCreated(System.EventHandler`1[Agibuild.Fulora.AdapterCreatedEventArgs])
+  - method System.Void remove_AdapterDestroyed(System.EventHandler)
+  - method System.Void remove_Closing(System.EventHandler)
+  - method System.Void remove_ContextMenuRequested(System.EventHandler`1[Agibuild.Fulora.ContextMenuRequestedEventArgs])
+  - method System.Void remove_DownloadRequested(System.EventHandler`1[Agibuild.Fulora.DownloadRequestedEventArgs])
+  - method System.Void remove_EnvironmentRequested(System.EventHandler`1[Agibuild.Fulora.EnvironmentRequestedEventArgs])
+  - method System.Void remove_NavigationCompleted(System.EventHandler`1[Agibuild.Fulora.NavigationCompletedEventArgs])
+  - method System.Void remove_NavigationStarted(System.EventHandler`1[Agibuild.Fulora.NavigationStartingEventArgs])
+  - method System.Void remove_NewWindowRequested(System.EventHandler`1[Agibuild.Fulora.NewWindowRequestedEventArgs])
+  - method System.Void remove_PermissionRequested(System.EventHandler`1[Agibuild.Fulora.PermissionRequestedEventArgs])
+  - method System.Void remove_WebMessageReceived(System.EventHandler`1[Agibuild.Fulora.WebMessageReceivedEventArgs])
+  - method System.Void remove_WebResourceRequested(System.EventHandler`1[Agibuild.Fulora.WebResourceRequestedEventArgs])
+  - method System.Threading.Tasks.Task RemovePreloadScriptAsync(System.String)
+  - method System.Boolean Resize(System.Int32, System.Int32)
+  - property Agibuild.Fulora.IWebViewRpcService Rpc
+  - method System.Void set_CanUserResize(System.Boolean)
+  - method System.Void set_Source(System.Uri)
+  - method System.Void set_Title(System.String)
+  - method System.Threading.Tasks.Task SetZoomFactorAsync(System.Double)
+  - method System.Void Show()
+  - method System.Boolean Show(Agibuild.Fulora.INativeHandle)
+  - property System.Uri Source
+  - method System.Threading.Tasks.Task`1[System.Boolean] StopAsync()
+  - method System.Threading.Tasks.Task StopFindInPageAsync(System.Boolean)
+  - property System.String Title
+  - method Agibuild.Fulora.ICommandManager TryGetCommandManager()
+  - method Agibuild.Fulora.ICookieManager TryGetCookieManager()
+  - method System.Threading.Tasks.Task`1[Agibuild.Fulora.INativeHandle] TryGetWebViewHandleAsync()
+  - event System.EventHandler`1[Agibuild.Fulora.WebMessageReceivedEventArgs] WebMessageReceived
+  - event System.EventHandler`1[Agibuild.Fulora.WebResourceRequestedEventArgs] WebResourceRequested
 
 type Agibuild.Fulora.WebMessageBridgeOptions
-  - property System.Collections.Generic.IReadOnlySet`1<System.String> Agibuild.Fulora.WebMessageBridgeOptions::AllowedOrigins
-  - property Agibuild.Fulora.IWebMessageDropDiagnosticsSink Agibuild.Fulora.WebMessageBridgeOptions::DropDiagnosticsSink
-  - property System.Int32 Agibuild.Fulora.WebMessageBridgeOptions::ProtocolVersion
-  - method System.Void Agibuild.Fulora.WebMessageBridgeOptions::.ctor()
+  - constructor System.Void .ctor()
+  - property System.Collections.Generic.IReadOnlySet`1[System.String] AllowedOrigins
+  - property Agibuild.Fulora.IWebMessageDropDiagnosticsSink DropDiagnosticsSink
+  - method System.Collections.Generic.IReadOnlySet`1[System.String] get_AllowedOrigins()
+  - method Agibuild.Fulora.IWebMessageDropDiagnosticsSink get_DropDiagnosticsSink()
+  - method System.Int32 get_ProtocolVersion()
+  - property System.Int32 ProtocolVersion
+  - method System.Void set_AllowedOrigins(System.Collections.Generic.IReadOnlySet`1[System.String])
+  - method System.Void set_DropDiagnosticsSink(Agibuild.Fulora.IWebMessageDropDiagnosticsSink)
+  - method System.Void set_ProtocolVersion(System.Int32)
 
 type Agibuild.Fulora.WebViewCore
-  - property Agibuild.Fulora.IBridgeService Agibuild.Fulora.WebViewCore::Bridge
-  - property System.Boolean Agibuild.Fulora.WebViewCore::CanGoBack
-  - property System.Boolean Agibuild.Fulora.WebViewCore::CanGoForward
-  - property System.Guid Agibuild.Fulora.WebViewCore::ChannelId
-  - property System.Boolean Agibuild.Fulora.WebViewCore::IsLoading
-  - property Agibuild.Fulora.IWebViewRpcService Agibuild.Fulora.WebViewCore::Rpc
-  - property System.Uri Agibuild.Fulora.WebViewCore::Source
-  - event System.EventHandler`1<Agibuild.Fulora.AdapterCreatedEventArgs> Agibuild.Fulora.WebViewCore::AdapterCreated
-  - event System.EventHandler Agibuild.Fulora.WebViewCore::AdapterDestroyed
-  - event System.EventHandler`1<Agibuild.Fulora.ContextMenuRequestedEventArgs> Agibuild.Fulora.WebViewCore::ContextMenuRequested
-  - event System.EventHandler`1<Agibuild.Fulora.DownloadRequestedEventArgs> Agibuild.Fulora.WebViewCore::DownloadRequested
-  - event System.EventHandler`1<Agibuild.Fulora.EnvironmentRequestedEventArgs> Agibuild.Fulora.WebViewCore::EnvironmentRequested
-  - event System.EventHandler`1<Agibuild.Fulora.NavigationCompletedEventArgs> Agibuild.Fulora.WebViewCore::NavigationCompleted
-  - event System.EventHandler`1<Agibuild.Fulora.NavigationStartingEventArgs> Agibuild.Fulora.WebViewCore::NavigationStarted
-  - event System.EventHandler`1<Agibuild.Fulora.NewWindowRequestedEventArgs> Agibuild.Fulora.WebViewCore::NewWindowRequested
-  - event System.EventHandler`1<Agibuild.Fulora.PermissionRequestedEventArgs> Agibuild.Fulora.WebViewCore::PermissionRequested
-  - event System.EventHandler`1<Agibuild.Fulora.WebMessageReceivedEventArgs> Agibuild.Fulora.WebViewCore::WebMessageReceived
-  - event System.EventHandler`1<Agibuild.Fulora.WebResourceRequestedEventArgs> Agibuild.Fulora.WebViewCore::WebResourceRequested
-  - event System.EventHandler`1<System.Double> Agibuild.Fulora.WebViewCore::ZoomFactorChanged
-  - method System.Threading.Tasks.Task`1<System.String> Agibuild.Fulora.WebViewCore::AddPreloadScriptAsync(System.String)
-  - method System.Threading.Tasks.Task`1<System.Byte[]> Agibuild.Fulora.WebViewCore::CaptureScreenshotAsync()
-  - method System.Threading.Tasks.Task Agibuild.Fulora.WebViewCore::CloseDevToolsAsync()
-  - method Agibuild.Fulora.IWebView Agibuild.Fulora.WebViewCore::CreateDefault(Agibuild.Fulora.IWebViewDispatcher)
-  - method Agibuild.Fulora.IWebView Agibuild.Fulora.WebViewCore::CreateDefault(Agibuild.Fulora.IWebViewDispatcher,Microsoft.Extensions.Logging.ILogger`1<Agibuild.Fulora.WebViewCore>)
-  - method System.Void Agibuild.Fulora.WebViewCore::DisableWebMessageBridge()
-  - method System.Void Agibuild.Fulora.WebViewCore::Dispose()
-  - method System.Void Agibuild.Fulora.WebViewCore::EnableSpaHosting(Agibuild.Fulora.SpaHostingOptions)
-  - method System.Void Agibuild.Fulora.WebViewCore::EnableWebMessageBridge(Agibuild.Fulora.WebMessageBridgeOptions)
-  - method System.Threading.Tasks.Task`1<Agibuild.Fulora.FindInPageResult> Agibuild.Fulora.WebViewCore::FindInPageAsync(System.String,Agibuild.Fulora.FindInPageOptions)
-  - method System.Threading.Tasks.Task`1<System.Double> Agibuild.Fulora.WebViewCore::GetZoomFactorAsync()
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.WebViewCore::GoBackAsync()
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.WebViewCore::GoForwardAsync()
-  - method System.Threading.Tasks.Task`1<System.String> Agibuild.Fulora.WebViewCore::InvokeScriptAsync(System.String)
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.WebViewCore::IsDevToolsOpenAsync()
-  - method System.Threading.Tasks.Task Agibuild.Fulora.WebViewCore::NavigateAsync(System.Uri)
-  - method System.Threading.Tasks.Task Agibuild.Fulora.WebViewCore::NavigateToStringAsync(System.String)
-  - method System.Threading.Tasks.Task Agibuild.Fulora.WebViewCore::NavigateToStringAsync(System.String,System.Uri)
-  - method System.Threading.Tasks.Task Agibuild.Fulora.WebViewCore::OpenDevToolsAsync()
-  - method System.Threading.Tasks.Task`1<System.Byte[]> Agibuild.Fulora.WebViewCore::PrintToPdfAsync(Agibuild.Fulora.PdfPrintOptions)
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.WebViewCore::RefreshAsync()
-  - method System.Threading.Tasks.Task Agibuild.Fulora.WebViewCore::RemovePreloadScriptAsync(System.String)
-  - method System.Void Agibuild.Fulora.WebViewCore::SetCustomUserAgent(System.String)
-  - method System.Threading.Tasks.Task Agibuild.Fulora.WebViewCore::SetZoomFactorAsync(System.Double)
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.WebViewCore::StopAsync()
-  - method System.Threading.Tasks.Task Agibuild.Fulora.WebViewCore::StopFindInPageAsync(System.Boolean)
-  - method Agibuild.Fulora.ICommandManager Agibuild.Fulora.WebViewCore::TryGetCommandManager()
-  - method Agibuild.Fulora.ICookieManager Agibuild.Fulora.WebViewCore::TryGetCookieManager()
-  - method Avalonia.Platform.IPlatformHandle Agibuild.Fulora.WebViewCore::TryGetWebViewHandle()
-  - method System.Threading.Tasks.Task`1<Avalonia.Platform.IPlatformHandle> Agibuild.Fulora.WebViewCore::TryGetWebViewHandleAsync()
+  - event System.EventHandler`1[Agibuild.Fulora.AdapterCreatedEventArgs] AdapterCreated
+  - event System.EventHandler AdapterDestroyed
+  - method System.Void add_AdapterCreated(System.EventHandler`1[Agibuild.Fulora.AdapterCreatedEventArgs])
+  - method System.Void add_AdapterDestroyed(System.EventHandler)
+  - method System.Void add_ContextMenuRequested(System.EventHandler`1[Agibuild.Fulora.ContextMenuRequestedEventArgs])
+  - method System.Void add_DownloadRequested(System.EventHandler`1[Agibuild.Fulora.DownloadRequestedEventArgs])
+  - method System.Void add_EnvironmentRequested(System.EventHandler`1[Agibuild.Fulora.EnvironmentRequestedEventArgs])
+  - method System.Void add_NavigationCompleted(System.EventHandler`1[Agibuild.Fulora.NavigationCompletedEventArgs])
+  - method System.Void add_NavigationStarted(System.EventHandler`1[Agibuild.Fulora.NavigationStartingEventArgs])
+  - method System.Void add_NewWindowRequested(System.EventHandler`1[Agibuild.Fulora.NewWindowRequestedEventArgs])
+  - method System.Void add_PermissionRequested(System.EventHandler`1[Agibuild.Fulora.PermissionRequestedEventArgs])
+  - method System.Void add_WebMessageReceived(System.EventHandler`1[Agibuild.Fulora.WebMessageReceivedEventArgs])
+  - method System.Void add_WebResourceRequested(System.EventHandler`1[Agibuild.Fulora.WebResourceRequestedEventArgs])
+  - method System.Void add_ZoomFactorChanged(System.EventHandler`1[System.Double])
+  - method System.Threading.Tasks.Task`1[System.String] AddPreloadScriptAsync(System.String)
+  - property Agibuild.Fulora.IBridgeService Bridge
+  - property System.Boolean CanGoBack
+  - property System.Boolean CanGoForward
+  - method System.Threading.Tasks.Task`1[System.Byte[]] CaptureScreenshotAsync()
+  - property System.Guid ChannelId
+  - method System.Threading.Tasks.Task CloseDevToolsAsync()
+  - event System.EventHandler`1[Agibuild.Fulora.ContextMenuRequestedEventArgs] ContextMenuRequested
+  - method Agibuild.Fulora.IWebView CreateDefault(Agibuild.Fulora.IWebViewDispatcher)
+  - method Agibuild.Fulora.IWebView CreateDefault(Agibuild.Fulora.IWebViewDispatcher, Microsoft.Extensions.Logging.ILogger`1[Agibuild.Fulora.WebViewCore])
+  - method System.Void DisableWebMessageBridge()
+  - method System.Void Dispose()
+  - event System.EventHandler`1[Agibuild.Fulora.DownloadRequestedEventArgs] DownloadRequested
+  - method System.Void EnableSpaHosting(Agibuild.Fulora.SpaHostingOptions)
+  - method System.Void EnableWebMessageBridge(Agibuild.Fulora.WebMessageBridgeOptions)
+  - event System.EventHandler`1[Agibuild.Fulora.EnvironmentRequestedEventArgs] EnvironmentRequested
+  - method System.Threading.Tasks.Task`1[Agibuild.Fulora.FindInPageResult] FindInPageAsync(System.String, Agibuild.Fulora.FindInPageOptions)
+  - method Agibuild.Fulora.IBridgeService get_Bridge()
+  - method System.Boolean get_CanGoBack()
+  - method System.Boolean get_CanGoForward()
+  - method System.Guid get_ChannelId()
+  - method System.Boolean get_IsLoading()
+  - method Agibuild.Fulora.IWebViewRpcService get_Rpc()
+  - method System.Uri get_Source()
+  - method System.Threading.Tasks.Task`1[System.Double] GetZoomFactorAsync()
+  - method System.Threading.Tasks.Task`1[System.Boolean] GoBackAsync()
+  - method System.Threading.Tasks.Task`1[System.Boolean] GoForwardAsync()
+  - method System.Threading.Tasks.Task`1[System.String] InvokeScriptAsync(System.String)
+  - method System.Threading.Tasks.Task`1[System.Boolean] IsDevToolsOpenAsync()
+  - property System.Boolean IsLoading
+  - method System.Threading.Tasks.Task NavigateAsync(System.Uri)
+  - method System.Threading.Tasks.Task NavigateToStringAsync(System.String)
+  - method System.Threading.Tasks.Task NavigateToStringAsync(System.String, System.Uri)
+  - event System.EventHandler`1[Agibuild.Fulora.NavigationCompletedEventArgs] NavigationCompleted
+  - event System.EventHandler`1[Agibuild.Fulora.NavigationStartingEventArgs] NavigationStarted
+  - event System.EventHandler`1[Agibuild.Fulora.NewWindowRequestedEventArgs] NewWindowRequested
+  - method System.Threading.Tasks.Task OpenDevToolsAsync()
+  - event System.EventHandler`1[Agibuild.Fulora.PermissionRequestedEventArgs] PermissionRequested
+  - method System.Threading.Tasks.Task`1[System.Byte[]] PrintToPdfAsync(Agibuild.Fulora.PdfPrintOptions)
+  - method System.Threading.Tasks.Task`1[System.Boolean] RefreshAsync()
+  - method System.Void remove_AdapterCreated(System.EventHandler`1[Agibuild.Fulora.AdapterCreatedEventArgs])
+  - method System.Void remove_AdapterDestroyed(System.EventHandler)
+  - method System.Void remove_ContextMenuRequested(System.EventHandler`1[Agibuild.Fulora.ContextMenuRequestedEventArgs])
+  - method System.Void remove_DownloadRequested(System.EventHandler`1[Agibuild.Fulora.DownloadRequestedEventArgs])
+  - method System.Void remove_EnvironmentRequested(System.EventHandler`1[Agibuild.Fulora.EnvironmentRequestedEventArgs])
+  - method System.Void remove_NavigationCompleted(System.EventHandler`1[Agibuild.Fulora.NavigationCompletedEventArgs])
+  - method System.Void remove_NavigationStarted(System.EventHandler`1[Agibuild.Fulora.NavigationStartingEventArgs])
+  - method System.Void remove_NewWindowRequested(System.EventHandler`1[Agibuild.Fulora.NewWindowRequestedEventArgs])
+  - method System.Void remove_PermissionRequested(System.EventHandler`1[Agibuild.Fulora.PermissionRequestedEventArgs])
+  - method System.Void remove_WebMessageReceived(System.EventHandler`1[Agibuild.Fulora.WebMessageReceivedEventArgs])
+  - method System.Void remove_WebResourceRequested(System.EventHandler`1[Agibuild.Fulora.WebResourceRequestedEventArgs])
+  - method System.Void remove_ZoomFactorChanged(System.EventHandler`1[System.Double])
+  - method System.Threading.Tasks.Task RemovePreloadScriptAsync(System.String)
+  - property Agibuild.Fulora.IWebViewRpcService Rpc
+  - method System.Void set_Source(System.Uri)
+  - method System.Void SetCustomUserAgent(System.String)
+  - method System.Threading.Tasks.Task SetZoomFactorAsync(System.Double)
+  - property System.Uri Source
+  - method System.Threading.Tasks.Task`1[System.Boolean] StopAsync()
+  - method System.Threading.Tasks.Task StopFindInPageAsync(System.Boolean)
+  - method Agibuild.Fulora.ICommandManager TryGetCommandManager()
+  - method Agibuild.Fulora.ICookieManager TryGetCookieManager()
+  - method Agibuild.Fulora.INativeHandle TryGetWebViewHandle()
+  - method System.Threading.Tasks.Task`1[Agibuild.Fulora.INativeHandle] TryGetWebViewHandleAsync()
+  - event System.EventHandler`1[Agibuild.Fulora.WebMessageReceivedEventArgs] WebMessageReceived
+  - event System.EventHandler`1[Agibuild.Fulora.WebResourceRequestedEventArgs] WebResourceRequested
+  - event System.EventHandler`1[System.Double] ZoomFactorChanged
 
 type Agibuild.Fulora.WebViewEnvironment
-  - property Microsoft.Extensions.Logging.ILoggerFactory Agibuild.Fulora.WebViewEnvironment::LoggerFactory
-  - property Agibuild.Fulora.IWebViewEnvironmentOptions Agibuild.Fulora.WebViewEnvironment::Options
-  - method System.Void Agibuild.Fulora.WebViewEnvironment::Initialize(Microsoft.Extensions.Logging.ILoggerFactory)
-  - method System.Void Agibuild.Fulora.WebViewEnvironment::Initialize(Microsoft.Extensions.Logging.ILoggerFactory,Agibuild.Fulora.IWebViewEnvironmentOptions)
+  - method Microsoft.Extensions.Logging.ILoggerFactory get_LoggerFactory()
+  - method Agibuild.Fulora.IWebViewEnvironmentOptions get_Options()
+  - method System.Void Initialize(Microsoft.Extensions.Logging.ILoggerFactory)
+  - method System.Void Initialize(Microsoft.Extensions.Logging.ILoggerFactory, Agibuild.Fulora.IWebViewEnvironmentOptions)
+  - property Microsoft.Extensions.Logging.ILoggerFactory LoggerFactory
+  - property Agibuild.Fulora.IWebViewEnvironmentOptions Options
+  - method System.Void set_LoggerFactory(Microsoft.Extensions.Logging.ILoggerFactory)
+  - method System.Void set_Options(Agibuild.Fulora.IWebViewEnvironmentOptions)
 
 type Agibuild.Fulora.WebViewEnvironmentOptions
-  - property System.Collections.Generic.IReadOnlyList`1<Agibuild.Fulora.CustomSchemeRegistration> Agibuild.Fulora.WebViewEnvironmentOptions::CustomSchemes
-  - property System.String Agibuild.Fulora.WebViewEnvironmentOptions::CustomUserAgent
-  - property System.Boolean Agibuild.Fulora.WebViewEnvironmentOptions::EnableDevTools
-  - property System.Collections.Generic.IReadOnlyList`1<System.String> Agibuild.Fulora.WebViewEnvironmentOptions::PreloadScripts
-  - property System.Boolean Agibuild.Fulora.WebViewEnvironmentOptions::UseEphemeralSession
-  - method System.Void Agibuild.Fulora.WebViewEnvironmentOptions::.ctor()
-
---------------------------------------------------------------------------------
-
-Assembly: Agibuild.Fulora
-Path: <repo>\src\Agibuild.Fulora.Avalonia\bin\Release\net10.0\Agibuild.Fulora.dll
-PublicTypes: 5
-
-type Agibuild.Fulora.AppBuilderExtensions
-  - method Avalonia.AppBuilder Agibuild.Fulora.AppBuilderExtensions::UseAgibuildWebView(Avalonia.AppBuilder)
-  - method Avalonia.AppBuilder Agibuild.Fulora.AppBuilderExtensions::UseAgibuildWebView(Avalonia.AppBuilder,Microsoft.Extensions.Logging.ILoggerFactory)
-
-type Agibuild.Fulora.AvaloniaWebDialog
-  - property Agibuild.Fulora.IBridgeService Agibuild.Fulora.AvaloniaWebDialog::Bridge
-  - property System.Boolean Agibuild.Fulora.AvaloniaWebDialog::CanGoBack
-  - property System.Boolean Agibuild.Fulora.AvaloniaWebDialog::CanGoForward
-  - property System.Boolean Agibuild.Fulora.AvaloniaWebDialog::CanUserResize
-  - property System.Guid Agibuild.Fulora.AvaloniaWebDialog::ChannelId
-  - property System.Boolean Agibuild.Fulora.AvaloniaWebDialog::IsLoading
-  - property Agibuild.Fulora.IWebViewRpcService Agibuild.Fulora.AvaloniaWebDialog::Rpc
-  - property System.Uri Agibuild.Fulora.AvaloniaWebDialog::Source
-  - property System.String Agibuild.Fulora.AvaloniaWebDialog::Title
-  - event System.EventHandler`1<Agibuild.Fulora.AdapterCreatedEventArgs> Agibuild.Fulora.AvaloniaWebDialog::AdapterCreated
-  - event System.EventHandler Agibuild.Fulora.AvaloniaWebDialog::AdapterDestroyed
-  - event System.EventHandler Agibuild.Fulora.AvaloniaWebDialog::Closing
-  - event System.EventHandler`1<Agibuild.Fulora.ContextMenuRequestedEventArgs> Agibuild.Fulora.AvaloniaWebDialog::ContextMenuRequested
-  - event System.EventHandler`1<Agibuild.Fulora.DownloadRequestedEventArgs> Agibuild.Fulora.AvaloniaWebDialog::DownloadRequested
-  - event System.EventHandler`1<Agibuild.Fulora.EnvironmentRequestedEventArgs> Agibuild.Fulora.AvaloniaWebDialog::EnvironmentRequested
-  - event System.EventHandler`1<Agibuild.Fulora.NavigationCompletedEventArgs> Agibuild.Fulora.AvaloniaWebDialog::NavigationCompleted
-  - event System.EventHandler`1<Agibuild.Fulora.NavigationStartingEventArgs> Agibuild.Fulora.AvaloniaWebDialog::NavigationStarted
-  - event System.EventHandler`1<Agibuild.Fulora.NewWindowRequestedEventArgs> Agibuild.Fulora.AvaloniaWebDialog::NewWindowRequested
-  - event System.EventHandler`1<Agibuild.Fulora.PermissionRequestedEventArgs> Agibuild.Fulora.AvaloniaWebDialog::PermissionRequested
-  - event System.EventHandler`1<Agibuild.Fulora.WebMessageReceivedEventArgs> Agibuild.Fulora.AvaloniaWebDialog::WebMessageReceived
-  - event System.EventHandler`1<Agibuild.Fulora.WebResourceRequestedEventArgs> Agibuild.Fulora.AvaloniaWebDialog::WebResourceRequested
-  - method System.Void Agibuild.Fulora.AvaloniaWebDialog::.ctor(Agibuild.Fulora.IWebViewEnvironmentOptions)
-  - method System.Threading.Tasks.Task`1<System.String> Agibuild.Fulora.AvaloniaWebDialog::AddPreloadScriptAsync(System.String)
-  - method System.Threading.Tasks.Task`1<System.Byte[]> Agibuild.Fulora.AvaloniaWebDialog::CaptureScreenshotAsync()
-  - method System.Void Agibuild.Fulora.AvaloniaWebDialog::Close()
-  - method System.Threading.Tasks.Task Agibuild.Fulora.AvaloniaWebDialog::CloseDevToolsAsync()
-  - method System.Void Agibuild.Fulora.AvaloniaWebDialog::Dispose()
-  - method System.Threading.Tasks.Task`1<Agibuild.Fulora.FindInPageResult> Agibuild.Fulora.AvaloniaWebDialog::FindInPageAsync(System.String,Agibuild.Fulora.FindInPageOptions)
-  - method System.Threading.Tasks.Task`1<System.Double> Agibuild.Fulora.AvaloniaWebDialog::GetZoomFactorAsync()
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.AvaloniaWebDialog::GoBackAsync()
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.AvaloniaWebDialog::GoForwardAsync()
-  - method System.Threading.Tasks.Task`1<System.String> Agibuild.Fulora.AvaloniaWebDialog::InvokeScriptAsync(System.String)
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.AvaloniaWebDialog::IsDevToolsOpenAsync()
-  - method System.Boolean Agibuild.Fulora.AvaloniaWebDialog::Move(System.Int32,System.Int32)
-  - method System.Threading.Tasks.Task Agibuild.Fulora.AvaloniaWebDialog::NavigateAsync(System.Uri)
-  - method System.Threading.Tasks.Task Agibuild.Fulora.AvaloniaWebDialog::NavigateToStringAsync(System.String)
-  - method System.Threading.Tasks.Task Agibuild.Fulora.AvaloniaWebDialog::NavigateToStringAsync(System.String,System.Uri)
-  - method System.Threading.Tasks.Task Agibuild.Fulora.AvaloniaWebDialog::OpenDevToolsAsync()
-  - method System.Threading.Tasks.Task`1<System.Byte[]> Agibuild.Fulora.AvaloniaWebDialog::PrintToPdfAsync(Agibuild.Fulora.PdfPrintOptions)
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.AvaloniaWebDialog::RefreshAsync()
-  - method System.Threading.Tasks.Task Agibuild.Fulora.AvaloniaWebDialog::RemovePreloadScriptAsync(System.String)
-  - method System.Boolean Agibuild.Fulora.AvaloniaWebDialog::Resize(System.Int32,System.Int32)
-  - method System.Threading.Tasks.Task Agibuild.Fulora.AvaloniaWebDialog::SetZoomFactorAsync(System.Double)
-  - method System.Void Agibuild.Fulora.AvaloniaWebDialog::Show()
-  - method System.Boolean Agibuild.Fulora.AvaloniaWebDialog::Show(Avalonia.Platform.IPlatformHandle)
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.AvaloniaWebDialog::StopAsync()
-  - method System.Threading.Tasks.Task Agibuild.Fulora.AvaloniaWebDialog::StopFindInPageAsync(System.Boolean)
-  - method Agibuild.Fulora.ICommandManager Agibuild.Fulora.AvaloniaWebDialog::TryGetCommandManager()
-  - method Agibuild.Fulora.ICookieManager Agibuild.Fulora.AvaloniaWebDialog::TryGetCookieManager()
-  - method System.Threading.Tasks.Task`1<Avalonia.Platform.IPlatformHandle> Agibuild.Fulora.AvaloniaWebDialog::TryGetWebViewHandleAsync()
-
-type Agibuild.Fulora.AvaloniaWebDialogFactory
-  - method System.Void Agibuild.Fulora.AvaloniaWebDialogFactory::.ctor()
-  - method Agibuild.Fulora.IWebDialog Agibuild.Fulora.AvaloniaWebDialogFactory::Create(Agibuild.Fulora.IWebViewEnvironmentOptions)
-
-type Agibuild.Fulora.WebView
-  - field Avalonia.DirectProperty`2<Agibuild.Fulora.WebView,System.Boolean> Agibuild.Fulora.WebView::CanGoBackProperty
-  - field Avalonia.DirectProperty`2<Agibuild.Fulora.WebView,System.Boolean> Agibuild.Fulora.WebView::CanGoForwardProperty
-  - field Avalonia.DirectProperty`2<Agibuild.Fulora.WebView,System.Boolean> Agibuild.Fulora.WebView::IsLoadingProperty
-  - field Avalonia.StyledProperty`1<System.Uri> Agibuild.Fulora.WebView::SourceProperty
-  - field Avalonia.StyledProperty`1<System.Double> Agibuild.Fulora.WebView::ZoomFactorProperty
-  - property Agibuild.Fulora.IBridgeService Agibuild.Fulora.WebView::Bridge
-  - property System.Boolean Agibuild.Fulora.WebView::CanGoBack
-  - property System.Boolean Agibuild.Fulora.WebView::CanGoForward
-  - property System.Guid Agibuild.Fulora.WebView::ChannelId
-  - property Agibuild.Fulora.IWebViewEnvironmentOptions Agibuild.Fulora.WebView::EnvironmentOptions
-  - property System.Boolean Agibuild.Fulora.WebView::IsAvailable
-  - property System.Boolean Agibuild.Fulora.WebView::IsLoading
-  - property Microsoft.Extensions.Logging.ILoggerFactory Agibuild.Fulora.WebView::LoggerFactory
-  - property Agibuild.Fulora.IWebViewRpcService Agibuild.Fulora.WebView::Rpc
-  - property System.Uri Agibuild.Fulora.WebView::Source
-  - property System.Double Agibuild.Fulora.WebView::ZoomFactor
-  - event System.EventHandler`1<Agibuild.Fulora.AdapterCreatedEventArgs> Agibuild.Fulora.WebView::AdapterCreated
-  - event System.EventHandler Agibuild.Fulora.WebView::AdapterDestroyed
-  - event System.EventHandler`1<Agibuild.Fulora.ContextMenuRequestedEventArgs> Agibuild.Fulora.WebView::ContextMenuRequested
-  - event System.EventHandler`1<Agibuild.Fulora.DownloadRequestedEventArgs> Agibuild.Fulora.WebView::DownloadRequested
-  - event System.EventHandler`1<Agibuild.Fulora.EnvironmentRequestedEventArgs> Agibuild.Fulora.WebView::EnvironmentRequested
-  - event System.EventHandler`1<Agibuild.Fulora.NavigationCompletedEventArgs> Agibuild.Fulora.WebView::NavigationCompleted
-  - event System.EventHandler`1<Agibuild.Fulora.NavigationStartingEventArgs> Agibuild.Fulora.WebView::NavigationStarted
-  - event System.EventHandler`1<Agibuild.Fulora.NewWindowRequestedEventArgs> Agibuild.Fulora.WebView::NewWindowRequested
-  - event System.EventHandler`1<Agibuild.Fulora.PermissionRequestedEventArgs> Agibuild.Fulora.WebView::PermissionRequested
-  - event System.EventHandler`1<Agibuild.Fulora.WebMessageReceivedEventArgs> Agibuild.Fulora.WebView::WebMessageReceived
-  - event System.EventHandler`1<Agibuild.Fulora.WebResourceRequestedEventArgs> Agibuild.Fulora.WebView::WebResourceRequested
-  - event System.EventHandler`1<System.Double> Agibuild.Fulora.WebView::ZoomFactorChanged
-  - method System.Void Agibuild.Fulora.WebView::.ctor()
-  - method System.Threading.Tasks.Task`1<System.String> Agibuild.Fulora.WebView::AddPreloadScriptAsync(System.String)
-  - method System.Threading.Tasks.Task`1<System.Byte[]> Agibuild.Fulora.WebView::CaptureScreenshotAsync()
-  - method System.Threading.Tasks.Task Agibuild.Fulora.WebView::CloseDevToolsAsync()
-  - method System.Void Agibuild.Fulora.WebView::DisableWebMessageBridge()
-  - method System.Void Agibuild.Fulora.WebView::Dispose()
-  - method System.Void Agibuild.Fulora.WebView::EnableSpaHosting(Agibuild.Fulora.SpaHostingOptions)
-  - method System.Void Agibuild.Fulora.WebView::EnableWebMessageBridge(Agibuild.Fulora.WebMessageBridgeOptions)
-  - method System.Threading.Tasks.Task`1<Agibuild.Fulora.FindInPageResult> Agibuild.Fulora.WebView::FindInPageAsync(System.String,Agibuild.Fulora.FindInPageOptions)
-  - method System.Threading.Tasks.Task`1<System.Double> Agibuild.Fulora.WebView::GetZoomFactorAsync()
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.WebView::GoBackAsync()
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.WebView::GoForwardAsync()
-  - method System.Threading.Tasks.Task`1<System.String> Agibuild.Fulora.WebView::InvokeScriptAsync(System.String)
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.WebView::IsDevToolsOpenAsync()
-  - method System.Threading.Tasks.Task Agibuild.Fulora.WebView::NavigateAsync(System.Uri)
-  - method System.Threading.Tasks.Task Agibuild.Fulora.WebView::NavigateToStringAsync(System.String)
-  - method System.Threading.Tasks.Task Agibuild.Fulora.WebView::NavigateToStringAsync(System.String,System.Uri)
-  - method System.Threading.Tasks.Task Agibuild.Fulora.WebView::OpenDevToolsAsync()
-  - method System.Threading.Tasks.Task`1<System.Byte[]> Agibuild.Fulora.WebView::PrintToPdfAsync(Agibuild.Fulora.PdfPrintOptions)
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.WebView::RefreshAsync()
-  - method System.Threading.Tasks.Task Agibuild.Fulora.WebView::RemovePreloadScriptAsync(System.String)
-  - method System.Void Agibuild.Fulora.WebView::SetCustomUserAgent(System.String)
-  - method System.Threading.Tasks.Task Agibuild.Fulora.WebView::SetZoomFactorAsync(System.Double)
-  - method System.Threading.Tasks.Task`1<System.Boolean> Agibuild.Fulora.WebView::StopAsync()
-  - method System.Threading.Tasks.Task Agibuild.Fulora.WebView::StopFindInPageAsync(System.Boolean)
-  - method Agibuild.Fulora.ICommandManager Agibuild.Fulora.WebView::TryGetCommandManager()
-  - method Agibuild.Fulora.ICookieManager Agibuild.Fulora.WebView::TryGetCookieManager()
-  - method Avalonia.Platform.IPlatformHandle Agibuild.Fulora.WebView::TryGetWebViewHandle()
-  - method System.Threading.Tasks.Task`1<Avalonia.Platform.IPlatformHandle> Agibuild.Fulora.WebView::TryGetWebViewHandleAsync()
-
-type Agibuild.Fulora.WebViewServiceCollectionExtensions
-  - method Microsoft.Extensions.DependencyInjection.IServiceCollection Agibuild.Fulora.WebViewServiceCollectionExtensions::AddWebViewDialogServices(Microsoft.Extensions.DependencyInjection.IServiceCollection)
+  - constructor System.Void .ctor()
+  - property System.Collections.Generic.IReadOnlyList`1[Agibuild.Fulora.CustomSchemeRegistration] CustomSchemes
+  - property System.String CustomUserAgent
+  - property System.Boolean EnableDevTools
+  - method System.Collections.Generic.IReadOnlyList`1[Agibuild.Fulora.CustomSchemeRegistration] get_CustomSchemes()
+  - method System.String get_CustomUserAgent()
+  - method System.Boolean get_EnableDevTools()
+  - method System.Collections.Generic.IReadOnlyList`1[System.String] get_PreloadScripts()
+  - method System.Boolean get_UseEphemeralSession()
+  - property System.Collections.Generic.IReadOnlyList`1[System.String] PreloadScripts
+  - method System.Void set_CustomSchemes(System.Collections.Generic.IReadOnlyList`1[Agibuild.Fulora.CustomSchemeRegistration])
+  - method System.Void set_CustomUserAgent(System.String)
+  - method System.Void set_EnableDevTools(System.Boolean)
+  - method System.Void set_PreloadScripts(System.Collections.Generic.IReadOnlyList`1[System.String])
+  - method System.Void set_UseEphemeralSession(System.Boolean)
+  - property System.Boolean UseEphemeralSession
 
 --------------------------------------------------------------------------------
 
