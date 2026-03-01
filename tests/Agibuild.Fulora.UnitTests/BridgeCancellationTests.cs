@@ -158,11 +158,10 @@ public sealed class BridgeCancellationTests
             """{"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":"cancel-1"}}""",
             "*", core.ChannelId);
 
-        _dispatcher.RunAll();
-
-        // Wait for the handler to complete (should be quick due to cancellation)
-        Thread.Sleep(200);
-        _dispatcher.RunAll();
+        DispatcherTestPump.WaitUntil(
+            _dispatcher,
+            () => capturedScripts.Any(s => s.Contains("_onResponse") && s.Contains("-32800")),
+            timeout: TimeSpan.FromSeconds(5));
 
         var lastResponse = capturedScripts.LastOrDefault(s => s.Contains("_onResponse"));
         Assert.NotNull(lastResponse);
