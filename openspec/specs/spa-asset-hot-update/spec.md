@@ -1,4 +1,7 @@
-## ADDED Requirements
+## Purpose
+Define deterministic signed SPA asset package hot-update, activation, and rollback behavior for production hosting workflows.
+
+## Requirements
 
 ### Requirement: SPA update package installation SHALL verify signature before activation
 SPA hot-update workflow MUST validate package signature and digest before any active version switch.

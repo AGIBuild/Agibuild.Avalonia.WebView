@@ -57,12 +57,12 @@ public sealed class BranchCoverageRound3Tests
     #region Easy: WebViewAdapterRegistry Windows adapter path
 
     [Fact]
-    public void TryCreateForCurrentPlatform_returns_adapter_when_windows_registered()
+    public void TryCreateForCurrentPlatform_returns_adapter_when_current_platform_registered()
     {
-        // Register a Windows adapter so the success path (best is not null) is covered.
+        // Register an adapter for the current OS so this assertion is deterministic in CI matrix runs.
         var reg = new WebViewAdapterRegistration(
-            WebViewAdapterPlatform.Windows, "branch-coverage-test-adapter",
-            () => new MockWebViewAdapter(), Priority: -1000);
+            GetCurrentPlatformForTest(), "branch-coverage-test-adapter",
+            () => new MockWebViewAdapter(), Priority: int.MaxValue);
         WebViewAdapterRegistry.Register(reg);
 
         var result = WebViewAdapterRegistry.TryCreateForCurrentPlatform(out var adapter, out var reason);
@@ -72,6 +72,31 @@ public sealed class BranchCoverageRound3Tests
     }
 
     #endregion
+
+    private static WebViewAdapterPlatform GetCurrentPlatformForTest()
+    {
+        if (OperatingSystem.IsWindows())
+        {
+            return WebViewAdapterPlatform.Windows;
+        }
+
+        if (OperatingSystem.IsIOS())
+        {
+            return WebViewAdapterPlatform.iOS;
+        }
+
+        if (OperatingSystem.IsMacOS())
+        {
+            return WebViewAdapterPlatform.MacOS;
+        }
+
+        if (OperatingSystem.IsAndroid())
+        {
+            return WebViewAdapterPlatform.Android;
+        }
+
+        return WebViewAdapterPlatform.Gtk;
+    }
 
     #region Easy: ActivationRequest explicit receivedAtUtc
 

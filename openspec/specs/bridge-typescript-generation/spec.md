@@ -1,4 +1,7 @@
-## MODIFIED Requirements
+## Purpose
+Define deterministic CLR-to-TypeScript bridge declaration generation, including typed binary mapping for `byte[]`.
+
+## Requirements
 
 ### Requirement: TypeScript emitter maps supported CLR types deterministically
 The generator SHALL map supported CLR types to TypeScript declarations and SHALL emit per-service interfaces with deterministic naming and JSDoc metadata. The type mapper SHALL correctly handle nested generic types by using bracket-depth-aware parsing instead of simple comma splitting. The binary CLR type `byte[]` SHALL map to `Uint8Array`.

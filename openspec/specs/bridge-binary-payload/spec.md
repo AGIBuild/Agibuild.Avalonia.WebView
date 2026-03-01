@@ -1,4 +1,7 @@
-## ADDED Requirements
+## Purpose
+Define deterministic binary payload ergonomics for bridge-generated JS/TS contracts while preserving JSON-RPC transport compatibility.
+
+## Requirements
 
 ### Requirement: Bridge generated JS/TS contracts SHALL support typed binary payload ergonomics
 Bridge-generated client contracts MUST support `byte[]` payloads as typed binary values on JavaScript side while preserving deterministic JSON-RPC transport.

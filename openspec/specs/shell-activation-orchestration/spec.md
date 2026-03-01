@@ -1,4 +1,7 @@
-## ADDED Requirements
+## Purpose
+Define deterministic in-process shell activation orchestration for deep-link routing and single-instance ownership handoff.
+
+## Requirements
 
 ### Requirement: Shell activation orchestration SHALL provide deterministic primary-instance ownership
 Shell runtime MUST provide a deterministic in-process coordinator that allows exactly one primary activation owner per app identity at a time.
