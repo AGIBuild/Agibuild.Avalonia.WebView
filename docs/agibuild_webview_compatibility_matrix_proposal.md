@@ -161,7 +161,38 @@
 | Protocol/version check | Baseline | ✅ | ✅ | ✅ | ✅ | CT | Unknown protocol version must be rejected |
 | Channel isolation per WebView instance | Baseline | ✅ | ✅ | ✅ | ✅ | CT | Message must bind to instance/channel |
 
-### 2.5 WebDialog（`IWebDialog`）
+### 2.5 Bridge V2 Capabilities
+
+| Capability | Level | Windows | macOS/iOS | Android | Linux (Dialog) | Test | Contract Requirements |
+|---|---|---:|---:|---:|---:|---|---|
+| Binary payload (`byte[]` ↔ `Uint8Array`) | Baseline | ✅ | ✅ | ✅ | ✅ | CT+IT | Base64 transport; `_encodeBinaryPayload` / `_decodeBinaryResult` round-trip |
+| CancellationToken (`AbortSignal`) | Baseline | ✅ | ✅ | ✅ | ✅ | CT+IT | `$/cancelRequest` → `-32800`; handler CTS cancellation propagation |
+| IAsyncEnumerable streaming | Baseline | ✅ | ✅ | ✅ | ✅ | CT+IT | Pull-based `$/enumerator/next` + `$/enumerator/abort`; token-gated |
+| Method overloads (`$N` suffix) | Baseline | ✅ | ✅ | ✅ | ✅ | CT+IT | Fewest-param keeps original name; others get `$N` suffix by param count |
+| Generic interface rejection (`AGBR006`) | Baseline | ✅ | ✅ | ✅ | ✅ | CT | Open generic `[JsExport]` reports deterministic diagnostic |
+
+### 2.6 Shell Activation（`IDeepLinkRegistrationService`）
+
+| Capability | Level | Windows | macOS/iOS | Android | Linux | Test | Contract Requirements |
+|---|---|---:|---:|---:|---:|---|---|
+| Deep-link route registration | Baseline | ✅ | ✅ | ✅ | ✅ | CT | Typed declaration accepted/rejected deterministically |
+| Activation normalization | Baseline | ✅ | ✅ | ✅ | ✅ | CT | Equivalent URI variants normalize to same canonical route |
+| Activation policy admission | Baseline | ✅ | ✅ | ✅ | ✅ | CT | Policy deny blocks dispatch deterministically |
+| Activation idempotency | Baseline | ✅ | ✅ | ✅ | ✅ | CT | Duplicate within replay window suppressed |
+| Orchestration dispatch | Baseline | ✅ | ✅ | ✅ | ✅ | CT+IT | Primary receives exactly once; no-primary returns failure |
+| Platform entrypoint mapping | Extended | ✅ | ✅ | ✅ | ✅ | IT | OS protocol handler → runtime ingress; descriptor per platform |
+| Activation diagnostics | Extended | ✅ | ✅ | ✅ | ✅ | CT+IT | Structured events with correlation ID, event type, outcome |
+
+### 2.7 SPA Asset Hot Update
+
+| Capability | Level | Windows | macOS/iOS | Android | Linux | Test | Contract Requirements |
+|---|---|---:|---:|---:|---:|---|---|
+| Signed package install | Baseline | ✅ | ✅ | ✅ | ✅ | CT+IT | RSA signature verification before extraction; rejected on mismatch |
+| Version activation | Baseline | ✅ | ✅ | ✅ | ✅ | CT+IT | Atomic pointer swap; SpaHostingService serves active version |
+| Rollback to previous | Baseline | ✅ | ✅ | ✅ | ✅ | CT+IT | Restores previous activation pointer; fails gracefully if missing |
+| Path traversal protection | Baseline | ✅ | ✅ | ✅ | ✅ | CT | External asset paths validated against root boundary |
+
+### 2.8 WebDialog（`IWebDialog`）
 
 | Capability | Level | Windows | macOS/iOS | Android | Linux | Test | Notes |
 |---|---|---:|---:|---:|---:|---|---|
@@ -172,7 +203,7 @@
 | `Resize/Move` | Extended | ✅ | ⚠️ | ⚠️ | ⚠️ | IT | Not guaranteed; return false when not supported |
 | `Closing` event | Baseline | ✅ | ✅ | ✅ | ✅ | IT | Must fire once; order vs Close() specified in contract |
 
-### 2.6 AuthFlow（`IWebAuthBroker`）
+### 2.9 AuthFlow（`IWebAuthBroker`）
 
 | Capability | Level | Windows | macOS/iOS | Android | Linux | Test | Contract Requirements |
 |---|---|---:|---:|---:|---:|---|---|

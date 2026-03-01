@@ -53,6 +53,7 @@ Fulora is designed to close that gap by default.
 - `[JsExport]` / `[JsImport]` contracts
 - source-generated C# and JS-facing proxies
 - AOT-safe, reflection-free path
+- V2: binary payload (`byte[]` ↔ `Uint8Array`), `CancellationToken` ↔ `AbortSignal`, `IAsyncEnumerable` streaming, method overloads
 
 ### 2) Typed capability gateway for host/system operations
 - desktop/system capabilities converge into one typed entry model
@@ -70,6 +71,11 @@ Fulora is designed to close that gap by default.
 - starter path optimized for web-first hybrid desktop/mobile delivery
 - minimal host glue, typed contracts preserved end-to-end
 
+### 6) Shell activation & deep-link
+- single-instance activation orchestration (primary/secondary)
+- deep-link native registration with policy-governed admission
+- SPA asset hot update with signature verification and rollback
+
 ## Roadmap Alignment
 
 | Phase | Theme | Status |
@@ -80,6 +86,9 @@ Fulora is designed to close that gap by default.
 | Phase 3 | Polish & GA | ✅ Done |
 | Phase 4 | Application Shell | ✅ Done |
 | Phase 5 | Framework Positioning Foundation | ✅ Completed |
+| Phase 6 | Governance Productization | ✅ Completed |
+| Phase 7 | Release Orchestration | ✅ Completed |
+| Phase 8 | Bridge V2 & Platform Parity | 🚧 Active |
 
 Read more:
 - [Roadmap](openspec/ROADMAP.md)
@@ -271,14 +280,14 @@ dotnet run --project MyApp.Desktop
 
 | Metric | Value |
 |--------|-------|
-| Unit tests | 766 |
-| Integration tests | 149 |
+| Unit tests | 1113 |
+| Integration tests | 180 |
 | Line coverage | **95.87%** |
 | Branch coverage | **84.8%** |
 | Method coverage | **98.2%** |
 
 ```bash
-nuke Test            # Unit + Integration (915 tests)
+nuke Test            # Unit + Integration (1293 tests)
 nuke Coverage        # Coverage report + threshold enforcement
 nuke NugetPackageTest  # Pack → install → run smoke test
 nuke TemplateE2E     # Template end-to-end test

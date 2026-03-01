@@ -86,6 +86,42 @@ options.AddEmbeddedFileProvider("app", typeof(App).Assembly, "wwwroot");
 options.AddDevServerProxy("app", "http://localhost:5173");
 ```
 
+## SPA Asset Hot Update (Phase 8)
+
+`SpaAssetHotUpdateService` enables signed package-based version management for production SPA assets:
+
+```csharp
+var hotUpdate = new SpaAssetHotUpdateService(rootDirectory);
+
+// Install a signed package (signature verified before extraction)
+var install = await hotUpdate.InstallSignedPackageAsync(
+    packageStream, "2.0.0", signature, publicKey);
+
+// Activate the new version (atomic pointer swap)
+var activate = hotUpdate.ActivateVersion("2.0.0");
+
+// Roll back to previous version if needed
+var rollback = hotUpdate.Rollback();
+```
+
+Integration with SPA hosting:
+
+```csharp
+webView.EnableSpaHosting(new SpaHostingOptions
+{
+    Scheme = "app",
+    Host = "localhost",
+    FallbackDocument = "index.html",
+    ActiveAssetDirectoryProvider = hotUpdate.GetActiveAssetDirectory
+});
+```
+
+Key behaviors:
+- **Signature verification**: RSA signature checked before extraction; invalid packages are rejected
+- **Atomic activation**: version pointer swap is atomic; no partial state
+- **Rollback**: restores previous activation pointer; fails gracefully if previous version is missing
+- **Path traversal protection**: external asset paths are validated against the root boundary
+
 ## Governance Recommendations
 
 - keep `app://` as the single navigation surface in all environments

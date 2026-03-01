@@ -11,6 +11,7 @@
     <ProjectReference Include="..\Agibuild.Fulora.Integration.Tests\Agibuild.Fulora.Integration.Tests\Agibuild.Fulora.Integration.Tests.csproj" />
     <ProjectReference Include="..\Agibuild.Fulora.Testing\Agibuild.Fulora.Testing.csproj" />
     <ProjectReference Include="..\..\src\Agibuild.Fulora.Runtime\Agibuild.Fulora.Runtime.csproj" />
+    <ProjectReference Include="..\..\src\Agibuild.Fulora.Bridge.Generator\Agibuild.Fulora.Bridge.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="true" />
   </ItemGroup>
 
   <ItemGroup>

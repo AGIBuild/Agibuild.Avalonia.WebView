@@ -21,11 +21,15 @@ Foundation               Type-Safe Bridge       SPA Hosting            Polish & 
   Screenshot, PDF,         integration            integration            audit                  • Shell presets in template
   RPC, Zoom, Find,       • MockBridge for       • Sample: Avalonia     • GTK/Linux             • Stress + soak automation
   Preload, ContextMenu     unit testing           + React app            smoke validation
-• 391 CT + 80 IT         • Migration path       • Sample: Avalonia
+• 1113 CT + 180 IT       • Migration path       • Sample: Avalonia
 • WebDialog, Auth          from raw RPC           + Vue app
                                                                                                                            • Bridge diagnostics safety net
                                                                                                                            • Cancellation + streaming parity
                                                                                                                            • Overloads and generic boundaries
+                                                                                                                           • Binary payload (byte[] ↔ Uint8Array)
+                                                                                                                           • SPA asset hot update (signature + rollback)
+                                                                                                                           • Shell activation orchestration
+                                                                                                                           • Deep-link native registration
                                                                                                                            • Platform feature parity closure
 ```
 
@@ -35,7 +39,7 @@ Foundation               Type-Safe Bridge       SPA Hosting            Polish & 
 
 **Goal**: Establish a production-quality cross-platform WebView control with contract-driven design.
 
-**Status**: All 18 changes archived. 391 unit tests, 80 integration tests, 96%+ line coverage.
+**Status**: All 18 changes archived. 1113 unit tests, 180 integration tests, 95%+ line coverage.
 
 <details>
 <summary>Delivered capabilities (click to expand)</summary>
@@ -83,7 +87,7 @@ Foundation               Type-Safe Bridge       SPA Hosting            Polish & 
 | Complex type serialization | Source Generator generates STJ context | AOT safe; no runtime reflection |
 | Bridge stub injection | Preload Script (F4) + `onBridgeReady` callback | Guarantees document-start timing |
 | Error propagation | `message` always; `data.type` only when DevTools enabled | Security: no stack trace leak |
-| V1 scope exclusions | No generics in methods, no overloads, no ref/out, no CancellationToken, no IAsyncEnumerable | Control complexity; iterate later |
+| V1 scope exclusions | No generics in methods, no ref/out | Control complexity; overloads, CancellationToken, IAsyncEnumerable, and byte[] added in Phase 8 (Bridge V2) |
 | Source Generator project | Separate `netstandard2.0` analyzer project | Roslyn requirement |
 
 ### 1.1 Bridge Contracts & Source Generator (C# → JS)
@@ -539,15 +543,29 @@ dotnet new agibuild-hybrid -n MyApp --frontend react
 
 **Goal**: Consolidate Bridge V2 expressiveness and platform feature parity into a deterministic baseline suitable for the next release train.
 
-### Planned Milestones
+### Milestones
 
-| Milestone | Focus | Outcome |
-|---|---|---|
-| **M8.1 Bridge Diagnostic Safety Net** | Generator diagnostics and boundary guardrails | Deterministic diagnostics for unsupported patterns |
-| **M8.2 Bridge Cancellation Support** | CancellationToken to AbortSignal contract | Cross-boundary cancellation semantics |
-| **M8.3 Bridge AsyncEnumerable Streaming** | Stream transport and iterator contract | Deterministic pull-based streaming over RPC |
-| **M8.4 Bridge Generics & Overload Boundary** | Overload support and generic boundary clarity | Expanded expressiveness with explicit unsupported cases |
-| **M8.5 Platform Feature Parity** | Adapter feature gap closure and compatibility updates | Auditable cross-platform parity baseline |
+| Milestone | Focus | Outcome | Status |
+|---|---|---|---|
+| **M8.1 Bridge Diagnostic Safety Net** | Generator diagnostics and boundary guardrails | Deterministic diagnostics for unsupported patterns | ✅ Done |
+| **M8.2 Bridge Cancellation Support** | CancellationToken to AbortSignal contract | Cross-boundary cancellation semantics | ✅ Done |
+| **M8.3 Bridge AsyncEnumerable Streaming** | Stream transport and iterator contract | Deterministic pull-based streaming over RPC | ✅ Done |
+| **M8.4 Bridge Generics & Overload Boundary** | Overload support and generic boundary clarity | Expanded expressiveness with explicit unsupported cases | ✅ Done |
+| **M8.5 Bridge Binary Payload** | byte[] ↔ Uint8Array transport | Base64 round-trip with encode/decode helpers | ✅ Done |
+| **M8.6 SPA Asset Hot Update** | Signed package install, activation, rollback | Production-ready SPA version management with signature verification | ✅ Done |
+| **M8.7 Shell Activation Orchestration** | Single-instance ownership and forwarding | Primary/secondary activation coordination with deterministic dispatch | ✅ Done |
+| **M8.8 Deep-link Native Registration** | OS-level URI scheme registration and ingestion | Policy-governed, idempotent activation pipeline from native entrypoint | ✅ Done |
+| **M8.9 Platform Feature Parity** | Adapter feature gap closure and compatibility updates | Auditable cross-platform parity baseline | 🚧 In Progress |
+
+### Latest Evidence Snapshot
+
+- `nuke Test`: Unit `1113`, Integration `180`, Total `1293` (pass)
+- OpenSpec archive evidence:
+  - `2026-02-28-bridge-cancellation-token-support`
+  - `2026-02-28-bridge-async-enumerable-streaming`
+  - `2026-02-28-bridge-generics-overloads`
+  - `2026-03-01-phase9-functional-triple-track` (binary payload, activation orchestration, SPA hot update)
+  - `2026-03-01-deep-link-native-registration`
 
 ---
 

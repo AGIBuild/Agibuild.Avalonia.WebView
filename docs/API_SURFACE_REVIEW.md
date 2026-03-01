@@ -2,7 +2,7 @@
 
 **Date**: 2026-02-17  
 **Status**: Pre-1.0 Audit  
-**Test Count**: 525 CTs passing
+**Test Count**: 1293 CTs passing (1113 unit + 180 integration)
 
 ---
 

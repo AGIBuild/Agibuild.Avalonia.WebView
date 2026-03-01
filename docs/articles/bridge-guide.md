@@ -139,6 +139,92 @@ Analyzer package reference:
                   ReferenceOutputAssembly="false" />
 ```
 
+## Bridge V2 Capabilities (Phase 8)
+
+Phase 8 expanded bridge expressiveness beyond the initial V1 contract:
+
+### Binary Payload (`byte[]` ↔ `Uint8Array`)
+
+C# `byte[]` parameters and return values are automatically transported as base64-encoded strings.
+The generated JS stub handles encoding/decoding transparently.
+
+```csharp
+[JsExport]
+public interface IBlobService
+{
+    Task<byte[]> GetThumbnail(string id);
+    Task UploadChunk(byte[] data);
+}
+```
+
+In TypeScript, these map to `Uint8Array`:
+
+```typescript
+getThumbnail(id: string): Promise<Uint8Array>;
+uploadChunk(data: Uint8Array): Promise<void>;
+```
+
+### CancellationToken (`AbortSignal`)
+
+Methods with a trailing `CancellationToken` parameter expose an `AbortSignal`-based cancellation option in JavaScript.
+
+```csharp
+[JsExport]
+public interface ISearchService
+{
+    Task<string[]> Search(string query, CancellationToken ct);
+}
+```
+
+TypeScript signature:
+
+```typescript
+search(query: string, options?: { signal?: AbortSignal }): Promise<string[]>;
+```
+
+When the signal is aborted, a `$/cancelRequest` notification is sent over the bridge, and the C# handler receives cancellation through the token.
+
+### IAsyncEnumerable Streaming
+
+`IAsyncEnumerable<T>` return types enable pull-based streaming over the bridge.
+
+```csharp
+[JsExport]
+public interface ILogService
+{
+    IAsyncEnumerable<string> TailLogs(string filter);
+}
+```
+
+TypeScript maps this to `AsyncIterable<string>`. The runtime uses `$/enumerator/next` and `$/enumerator/abort` protocol messages for flow control.
+
+### Method Overloads
+
+Overloaded methods are supported with automatic `$N` suffix disambiguation:
+
+```csharp
+[JsExport]
+public interface ISearchService
+{
+    Task<string[]> Search(string query);
+    Task<string[]> Search(string query, int limit);
+    Task<string[]> Search(string query, int limit, string sortBy);
+}
+```
+
+The fewest-parameter overload keeps the original name; others get a `$N` suffix based on parameter count:
+
+```typescript
+search(query: string): Promise<string[]>;           // Search(string)
+search$2(query: string, limit: number): ...;         // Search(string, int)
+search$3(query: string, limit: number, sortBy: string): ...; // Search(string, int, string)
+```
+
+### Generic Interface Boundary
+
+Open generic interfaces on `[JsExport]` are rejected at compile time with diagnostic `AGBR006`.
+Closed generic types in parameters and return values are fully supported.
+
 ## Related Documents
 
 - [Getting Started](./getting-started.md)

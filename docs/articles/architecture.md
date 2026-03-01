@@ -80,6 +80,24 @@ Capability calls follow the same runtime sequence:
 | `deny` | Policy rejected before execution | Return explicit deny result + diagnostics |
 | `failure` | Execution attempted but failed deterministically | Return failure result + diagnostics |
 
+## Shell Activation & Deep-link Architecture (Phase 8)
+
+Shell activation orchestration and deep-link registration extend the runtime with OS-level app lifecycle management:
+
+```
+OS Protocol Handler → DeepLinkPlatformEntrypoint
+    → DeepLinkRegistrationService (normalize → policy → idempotency)
+        → WebViewShellActivationCoordinator (primary/secondary dispatch)
+            → Application handler
+```
+
+Key architectural properties:
+- **Single-instance ownership**: `WebViewShellActivationCoordinator` manages primary/secondary instance registration; secondary instances forward activation to the primary
+- **Policy-first admission**: deep-link activations are evaluated against `IDeepLinkAdmissionPolicy` before dispatch
+- **Idempotent delivery**: duplicate activations within a configurable replay window are suppressed using deterministic idempotency keys
+- **Canonical envelope**: raw platform URIs are normalized into `DeepLinkActivationEnvelope` with scheme/host/path canonicalization
+- **Structured diagnostics**: each lifecycle stage emits `DeepLinkDiagnosticEventArgs` with correlation ID, event type, and outcome
+
 ## Security and Governance Layers
 
 - **WebMessage policy**: origin, channel, and protocol boundaries
