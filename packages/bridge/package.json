@@ -1,7 +1,7 @@
 {
   "name": "@agibuild/bridge",
   "version": "0.1.0",
-  "description": "Typed bridge client runtime for Agibuild.Fulora",
+  "description": "Typed bridge client runtime for Agibuild.Fulora — call C# services from JavaScript with full type safety.",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -18,6 +18,25 @@
     "build": "tsc -p tsconfig.json",
     "prepare": "npm run build"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AGIBuild/Agibuild.Avalonia.WebView.git",
+    "directory": "packages/bridge"
+  },
+  "homepage": "https://github.com/AGIBuild/Agibuild.Avalonia.WebView#readme",
+  "bugs": {
+    "url": "https://github.com/AGIBuild/Agibuild.Avalonia.WebView/issues"
+  },
+  "author": "AGIBuild",
+  "keywords": [
+    "webview",
+    "bridge",
+    "avalonia",
+    "rpc",
+    "csharp",
+    "interop",
+    "fulora"
+  ],
   "devDependencies": {
     "typescript": "^5.9.3"
   },

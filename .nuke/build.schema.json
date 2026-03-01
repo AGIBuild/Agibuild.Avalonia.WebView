@@ -38,6 +38,7 @@
         "DependencyVulnerabilityGovernance",
         "DistributionReadinessGovernance",
         "IntegrationTests",
+        "NpmPublish",
         "NugetPackageTest",
         "OpenSpecStrictGovernance",
         "Pack",
@@ -160,6 +161,11 @@
         "iOSSimulator": {
           "type": "string",
           "description": "iOS Simulator device name. Default: auto-detect first available iPhone simulator"
+        },
+        "NpmToken": {
+          "type": "string",
+          "description": "npm auth token for @agibuild/bridge publication",
+          "default": "Secrets must be entered via 'nuke :secrets [profile]'"
         },
         "NuGetApiKey": {
           "type": "string",

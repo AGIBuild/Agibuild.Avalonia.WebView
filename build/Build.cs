@@ -41,6 +41,10 @@ partial class BuildTask : NukeBuild
     [Secret]
     readonly string? NuGetApiKey = Environment.GetEnvironmentVariable("NUGET_API_KEY");
 
+    [Parameter("npm auth token for @agibuild/bridge publication.")]
+    [Secret]
+    readonly string? NpmToken = Environment.GetEnvironmentVariable("NPM_TOKEN");
+
     [Parameter("Minimum line coverage percentage (0-100). Default: 90")]
     readonly int CoverageThreshold = 90;
 

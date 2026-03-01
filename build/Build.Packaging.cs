@@ -263,6 +263,24 @@ partial class BuildTask
             }
         });
 
+    // ──────────────────────────── npm Publish ────────────────────────────
+
+    Target NpmPublish => _ => _
+        .Description("Publishes @agibuild/bridge to the npm registry with token-based authentication.")
+        .Requires(() => NpmToken)
+        .Executes(() =>
+        {
+            var bridgeDir = RootDirectory / "packages" / "bridge";
+
+            RunNpmCaptureAll("install", workingDirectory: bridgeDir, timeoutMs: 120_000);
+            RunNpmCaptureAll("run build", workingDirectory: bridgeDir, timeoutMs: 60_000);
+
+            var publishArgs = $"publish --access public --//registry.npmjs.org/:_authToken={NpmToken}";
+            RunNpmCaptureAll(publishArgs, workingDirectory: bridgeDir, timeoutMs: 60_000);
+
+            Serilog.Log.Information("@agibuild/bridge published to npm registry.");
+        });
+
     // ──────────────────────────── NuGet Package Smoke Test ────────────────────────────
 
     Target NugetPackageTest => _ => _
