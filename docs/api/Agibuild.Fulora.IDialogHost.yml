@@ -1,0 +1,417 @@
+### YamlMime:ManagedReference
+items:
+- uid: Agibuild.Fulora.IDialogHost
+  commentId: T:Agibuild.Fulora.IDialogHost
+  id: IDialogHost
+  parent: Agibuild.Fulora
+  children:
+  - Agibuild.Fulora.IDialogHost.CanUserResize
+  - Agibuild.Fulora.IDialogHost.Close
+  - Agibuild.Fulora.IDialogHost.HostClosing
+  - Agibuild.Fulora.IDialogHost.Move(System.Int32,System.Int32)
+  - Agibuild.Fulora.IDialogHost.Resize(System.Int32,System.Int32)
+  - Agibuild.Fulora.IDialogHost.Show
+  - Agibuild.Fulora.IDialogHost.ShowWithOwner(Agibuild.Fulora.INativeHandle)
+  - Agibuild.Fulora.IDialogHost.Title
+  langs:
+  - csharp
+  - vb
+  name: IDialogHost
+  nameWithType: IDialogHost
+  fullName: Agibuild.Fulora.IDialogHost
+  type: Interface
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebDialog.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: IDialogHost
+    path: ../src/Agibuild.Fulora.Runtime/WebDialog.cs
+    startLine: 237
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: >-
+    Abstraction for the dialog window host (platform window management).
+
+    Kept host-framework-neutral to enable unit testing with mocks.
+  example: []
+  syntax:
+    content: public interface IDialogHost
+    content.vb: Public Interface IDialogHost
+- uid: Agibuild.Fulora.IDialogHost.Title
+  commentId: P:Agibuild.Fulora.IDialogHost.Title
+  id: Title
+  parent: Agibuild.Fulora.IDialogHost
+  langs:
+  - csharp
+  - vb
+  name: Title
+  nameWithType: IDialogHost.Title
+  fullName: Agibuild.Fulora.IDialogHost.Title
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebDialog.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Title
+    path: ../src/Agibuild.Fulora.Runtime/WebDialog.cs
+    startLine: 240
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Window title.
+  example: []
+  syntax:
+    content: string? Title { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Property Title As String
+  overload: Agibuild.Fulora.IDialogHost.Title*
+- uid: Agibuild.Fulora.IDialogHost.CanUserResize
+  commentId: P:Agibuild.Fulora.IDialogHost.CanUserResize
+  id: CanUserResize
+  parent: Agibuild.Fulora.IDialogHost
+  langs:
+  - csharp
+  - vb
+  name: CanUserResize
+  nameWithType: IDialogHost.CanUserResize
+  fullName: Agibuild.Fulora.IDialogHost.CanUserResize
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebDialog.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: CanUserResize
+    path: ../src/Agibuild.Fulora.Runtime/WebDialog.cs
+    startLine: 242
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Whether user can resize the window.
+  example: []
+  syntax:
+    content: bool CanUserResize { get; set; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Property CanUserResize As Boolean
+  overload: Agibuild.Fulora.IDialogHost.CanUserResize*
+- uid: Agibuild.Fulora.IDialogHost.Show
+  commentId: M:Agibuild.Fulora.IDialogHost.Show
+  id: Show
+  parent: Agibuild.Fulora.IDialogHost
+  langs:
+  - csharp
+  - vb
+  name: Show()
+  nameWithType: IDialogHost.Show()
+  fullName: Agibuild.Fulora.IDialogHost.Show()
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebDialog.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Show
+    path: ../src/Agibuild.Fulora.Runtime/WebDialog.cs
+    startLine: 245
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Shows the host window.
+  example: []
+  syntax:
+    content: void Show()
+    content.vb: Sub Show()
+  overload: Agibuild.Fulora.IDialogHost.Show*
+- uid: Agibuild.Fulora.IDialogHost.ShowWithOwner(Agibuild.Fulora.INativeHandle)
+  commentId: M:Agibuild.Fulora.IDialogHost.ShowWithOwner(Agibuild.Fulora.INativeHandle)
+  id: ShowWithOwner(Agibuild.Fulora.INativeHandle)
+  parent: Agibuild.Fulora.IDialogHost
+  langs:
+  - csharp
+  - vb
+  name: ShowWithOwner(INativeHandle)
+  nameWithType: IDialogHost.ShowWithOwner(INativeHandle)
+  fullName: Agibuild.Fulora.IDialogHost.ShowWithOwner(Agibuild.Fulora.INativeHandle)
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebDialog.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: ShowWithOwner
+    path: ../src/Agibuild.Fulora.Runtime/WebDialog.cs
+    startLine: 247
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Shows the host window with an owner handle.
+  example: []
+  syntax:
+    content: bool ShowWithOwner(INativeHandle owner)
+    parameters:
+    - id: owner
+      type: Agibuild.Fulora.INativeHandle
+    return:
+      type: System.Boolean
+    content.vb: Function ShowWithOwner(owner As INativeHandle) As Boolean
+  overload: Agibuild.Fulora.IDialogHost.ShowWithOwner*
+- uid: Agibuild.Fulora.IDialogHost.Close
+  commentId: M:Agibuild.Fulora.IDialogHost.Close
+  id: Close
+  parent: Agibuild.Fulora.IDialogHost
+  langs:
+  - csharp
+  - vb
+  name: Close()
+  nameWithType: IDialogHost.Close()
+  fullName: Agibuild.Fulora.IDialogHost.Close()
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebDialog.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Close
+    path: ../src/Agibuild.Fulora.Runtime/WebDialog.cs
+    startLine: 249
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Closes the host window.
+  example: []
+  syntax:
+    content: void Close()
+    content.vb: Sub Close()
+  overload: Agibuild.Fulora.IDialogHost.Close*
+- uid: Agibuild.Fulora.IDialogHost.Resize(System.Int32,System.Int32)
+  commentId: M:Agibuild.Fulora.IDialogHost.Resize(System.Int32,System.Int32)
+  id: Resize(System.Int32,System.Int32)
+  parent: Agibuild.Fulora.IDialogHost
+  langs:
+  - csharp
+  - vb
+  name: Resize(int, int)
+  nameWithType: IDialogHost.Resize(int, int)
+  fullName: Agibuild.Fulora.IDialogHost.Resize(int, int)
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebDialog.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Resize
+    path: ../src/Agibuild.Fulora.Runtime/WebDialog.cs
+    startLine: 251
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Resizes the host window.
+  example: []
+  syntax:
+    content: bool Resize(int width, int height)
+    parameters:
+    - id: width
+      type: System.Int32
+    - id: height
+      type: System.Int32
+    return:
+      type: System.Boolean
+    content.vb: Function Resize(width As Integer, height As Integer) As Boolean
+  overload: Agibuild.Fulora.IDialogHost.Resize*
+  nameWithType.vb: IDialogHost.Resize(Integer, Integer)
+  fullName.vb: Agibuild.Fulora.IDialogHost.Resize(Integer, Integer)
+  name.vb: Resize(Integer, Integer)
+- uid: Agibuild.Fulora.IDialogHost.Move(System.Int32,System.Int32)
+  commentId: M:Agibuild.Fulora.IDialogHost.Move(System.Int32,System.Int32)
+  id: Move(System.Int32,System.Int32)
+  parent: Agibuild.Fulora.IDialogHost
+  langs:
+  - csharp
+  - vb
+  name: Move(int, int)
+  nameWithType: IDialogHost.Move(int, int)
+  fullName: Agibuild.Fulora.IDialogHost.Move(int, int)
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebDialog.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Move
+    path: ../src/Agibuild.Fulora.Runtime/WebDialog.cs
+    startLine: 253
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Moves the host window.
+  example: []
+  syntax:
+    content: bool Move(int x, int y)
+    parameters:
+    - id: x
+      type: System.Int32
+    - id: y
+      type: System.Int32
+    return:
+      type: System.Boolean
+    content.vb: Function Move(x As Integer, y As Integer) As Boolean
+  overload: Agibuild.Fulora.IDialogHost.Move*
+  nameWithType.vb: IDialogHost.Move(Integer, Integer)
+  fullName.vb: Agibuild.Fulora.IDialogHost.Move(Integer, Integer)
+  name.vb: Move(Integer, Integer)
+- uid: Agibuild.Fulora.IDialogHost.HostClosing
+  commentId: E:Agibuild.Fulora.IDialogHost.HostClosing
+  id: HostClosing
+  parent: Agibuild.Fulora.IDialogHost
+  langs:
+  - csharp
+  - vb
+  name: HostClosing
+  nameWithType: IDialogHost.HostClosing
+  fullName: Agibuild.Fulora.IDialogHost.HostClosing
+  type: Event
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebDialog.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: HostClosing
+    path: ../src/Agibuild.Fulora.Runtime/WebDialog.cs
+    startLine: 256
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Raised when host window is closing.
+  example: []
+  syntax:
+    content: event EventHandler? HostClosing
+    return:
+      type: System.EventHandler
+    content.vb: Event HostClosing As EventHandler
+references:
+- uid: Agibuild.Fulora
+  commentId: N:Agibuild.Fulora
+  href: Agibuild.html
+  name: Agibuild.Fulora
+  nameWithType: Agibuild.Fulora
+  fullName: Agibuild.Fulora
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+- uid: Agibuild.Fulora.IDialogHost.Title*
+  commentId: Overload:Agibuild.Fulora.IDialogHost.Title
+  href: Agibuild.Fulora.IDialogHost.html#Agibuild_Fulora_IDialogHost_Title
+  name: Title
+  nameWithType: IDialogHost.Title
+  fullName: Agibuild.Fulora.IDialogHost.Title
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: Agibuild.Fulora.IDialogHost.CanUserResize*
+  commentId: Overload:Agibuild.Fulora.IDialogHost.CanUserResize
+  href: Agibuild.Fulora.IDialogHost.html#Agibuild_Fulora_IDialogHost_CanUserResize
+  name: CanUserResize
+  nameWithType: IDialogHost.CanUserResize
+  fullName: Agibuild.Fulora.IDialogHost.CanUserResize
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: Agibuild.Fulora.IDialogHost.Show*
+  commentId: Overload:Agibuild.Fulora.IDialogHost.Show
+  href: Agibuild.Fulora.IDialogHost.html#Agibuild_Fulora_IDialogHost_Show
+  name: Show
+  nameWithType: IDialogHost.Show
+  fullName: Agibuild.Fulora.IDialogHost.Show
+- uid: Agibuild.Fulora.IDialogHost.ShowWithOwner*
+  commentId: Overload:Agibuild.Fulora.IDialogHost.ShowWithOwner
+  href: Agibuild.Fulora.IDialogHost.html#Agibuild_Fulora_IDialogHost_ShowWithOwner_Agibuild_Fulora_INativeHandle_
+  name: ShowWithOwner
+  nameWithType: IDialogHost.ShowWithOwner
+  fullName: Agibuild.Fulora.IDialogHost.ShowWithOwner
+- uid: Agibuild.Fulora.INativeHandle
+  commentId: T:Agibuild.Fulora.INativeHandle
+  parent: Agibuild.Fulora
+  href: Agibuild.Fulora.INativeHandle.html
+  name: INativeHandle
+  nameWithType: INativeHandle
+  fullName: Agibuild.Fulora.INativeHandle
+- uid: Agibuild.Fulora.IDialogHost.Close*
+  commentId: Overload:Agibuild.Fulora.IDialogHost.Close
+  href: Agibuild.Fulora.IDialogHost.html#Agibuild_Fulora_IDialogHost_Close
+  name: Close
+  nameWithType: IDialogHost.Close
+  fullName: Agibuild.Fulora.IDialogHost.Close
+- uid: Agibuild.Fulora.IDialogHost.Resize*
+  commentId: Overload:Agibuild.Fulora.IDialogHost.Resize
+  href: Agibuild.Fulora.IDialogHost.html#Agibuild_Fulora_IDialogHost_Resize_System_Int32_System_Int32_
+  name: Resize
+  nameWithType: IDialogHost.Resize
+  fullName: Agibuild.Fulora.IDialogHost.Resize
+- uid: System.Int32
+  commentId: T:System.Int32
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int32
+  name: int
+  nameWithType: int
+  fullName: int
+  nameWithType.vb: Integer
+  fullName.vb: Integer
+  name.vb: Integer
+- uid: Agibuild.Fulora.IDialogHost.Move*
+  commentId: Overload:Agibuild.Fulora.IDialogHost.Move
+  href: Agibuild.Fulora.IDialogHost.html#Agibuild_Fulora_IDialogHost_Move_System_Int32_System_Int32_
+  name: Move
+  nameWithType: IDialogHost.Move
+  fullName: Agibuild.Fulora.IDialogHost.Move
+- uid: System.EventHandler
+  commentId: T:System.EventHandler
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.eventhandler
+  name: EventHandler
+  nameWithType: EventHandler
+  fullName: System.EventHandler

@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>API Surface Review — Agibuild.Fulora | Agibuild.Fulora </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="API Surface Review — Agibuild.Fulora | Agibuild.Fulora ">
+      
+      
+      <link rel="icon" href="favicon.ico">
+      <link rel="stylesheet" href="public/docfx.min.css">
+      <link rel="stylesheet" href="public/main.css">
+      <meta name="docfx:navrel" content="toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/AGIBuild/Agibuild.Fulora/blob/main/docs/API_SURFACE_REVIEW.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="index.html">
+            <img id="logo" class="svg" src="logo.svg" alt="Agibuild.Fulora">
+            Agibuild.Fulora
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+
+      <div class="content">
+        <div class="actionbar">
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+<h1 id="api-surface-review--agibuildfulora">API Surface Review — Agibuild.Fulora</h1>
+
+<p><strong>Date</strong>: 2026-03-01
+<strong>Status</strong>: 1.0 Freeze Audit
+<strong>Test Count</strong>: 1293 CTs passing (1113 unit + 180 integration)
+<strong>Inventory</strong>: <code>docs/API_SURFACE_INVENTORY.release.txt</code> (Core: 72 types, Runtime: 100 types)</p>
+<hr>
+<h2 id="summary">Summary</h2>
+<p>The public API surface is frozen for the 1.0 GA release. All previously identified action items from the pre-1.0 audit (2026-02-17) have been resolved. Phase 8 additions (deep-link registration, SPA hot update, Bridge V2 capabilities) have been audited for naming consistency and interface coverage.</p>
+<hr>
+<h2 id="10-freeze-status">1.0 Freeze Status</h2>
+<h3 id="iwebview-interface-coverage-resolved-">IWebView Interface Coverage (Resolved ✅)</h3>
+<p>The following members have been promoted to <code>IWebView</code> (additive, non-breaking):</p>
+<table>
+<thead>
+<tr>
+<th>Member</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GetZoomFactorAsync</code> / <code>SetZoomFactorAsync</code></td>
+<td>✅ On IWebView</td>
+</tr>
+<tr>
+<td><code>FindInPageAsync</code> / <code>StopFindInPageAsync</code></td>
+<td>✅ On IWebView</td>
+</tr>
+<tr>
+<td><code>AddPreloadScriptAsync</code> / <code>RemovePreloadScriptAsync</code></td>
+<td>✅ On IWebView</td>
+</tr>
+<tr>
+<td><code>ContextMenuRequested</code></td>
+<td>✅ On IWebView</td>
+</tr>
+</tbody>
+</table>
+<p>The following remain on concrete types only (by design):</p>
+<table>
+<thead>
+<tr>
+<th>Member</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SetCustomUserAgent</code></td>
+<td>Init-time configuration; not a runtime feature</td>
+</tr>
+<tr>
+<td><code>EnableWebMessageBridge</code> / <code>DisableWebMessageBridge</code></td>
+<td>Advanced plumbing; auto-managed by Bridge property</td>
+</tr>
+<tr>
+<td><code>EnableSpaHosting</code></td>
+<td>Configuration via <code>WebViewEnvironmentOptions</code>; deferred to post-1.0</td>
+</tr>
+</tbody>
+</table>
+<h3 id="experimental-attributes-resolved-">Experimental Attributes (Resolved ✅)</h3>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Type</th>
+<th>1.0 Decision</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AGWV001</td>
+<td><code>ICookieManager</code></td>
+<td><strong>Keep experimental</strong></td>
+<td>Cookie management has platform gaps (Android adapter returns null). Graduating implies full cross-platform support commitment.</td>
+</tr>
+<tr>
+<td>AGWV004</td>
+<td><code>WebResourceRequestedEventArgs</code></td>
+<td><strong>Graduated</strong></td>
+<td>Attribute removed. Stable and widely used across all adapters.</td>
+</tr>
+<tr>
+<td>AGWV005</td>
+<td><code>EnvironmentRequestedEventArgs</code></td>
+<td><strong>Keep experimental</strong></td>
+<td>Placeholder with no concrete implementation. Will be designed in a future release.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="phase-8-additions-audit-new-">Phase 8 Additions Audit (New ✅)</h3>
+<p>Phase 8 introduced the following public API surface, all passing naming convention validation:</p>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Key Public Types</th>
+<th>Convention Check</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Deep Link Registration</td>
+<td><code>DeepLinkActivationEnvelope</code>, <code>DeepLinkRegistrationService</code>, <code>IDeepLinkRegistrationService</code>, <code>IDeepLinkAdmissionPolicy</code>, <code>DeepLinkRouteDeclaration</code>, <code>DeepLinkPlatformEntrypoint</code></td>
+<td>✅ PascalCase, I* prefix, *EventArgs suffix</td>
+</tr>
+<tr>
+<td>Deep Link Diagnostics</td>
+<td><code>DeepLinkDiagnosticEventArgs</code>, <code>DeepLinkDiagnosticEventType</code></td>
+<td>✅ Follows .NET event pattern</td>
+</tr>
+<tr>
+<td>Deep Link Results</td>
+<td><code>DeepLinkRegistrationResult</code>, <code>DeepLinkActivationIngressResult</code>, <code>DeepLinkAdmissionDecision</code></td>
+<td>✅ Record pattern with factory methods</td>
+</tr>
+<tr>
+<td>SPA Hot Update</td>
+<td><code>SpaAssetHotUpdateService</code>, <code>SpaAssetHotUpdateResult</code></td>
+<td>✅ PascalCase</td>
+</tr>
+<tr>
+<td>Bridge V2</td>
+<td><code>JsExportAttribute</code>, <code>JsImportAttribute</code>, <code>IBridgeService</code>, <code>BridgeCallOptions</code></td>
+<td>✅ PascalCase, I* prefix, *Attribute suffix</td>
+</tr>
+</tbody>
+</table>
+<h3 id="type-naming-consistency-">Type Naming Consistency ✅</h3>
+<p>All 172 public types (72 Core + 100 Runtime) follow .NET naming conventions:</p>
+<ul>
+<li><code>I*</code> prefix for interfaces</li>
+<li><code>*Attribute</code> suffix for attributes</li>
+<li><code>*EventArgs</code> suffix for event argument types</li>
+<li>PascalCase throughout</li>
+<li>No convention violations detected</li>
+</ul>
+<hr>
+<h2 id="action-items-resolution">Action Items Resolution</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Action</th>
+<th>Original Priority</th>
+<th>Resolution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Promote Zoom/Find/Preload/ContextMenu to IWebView</td>
+<td>High</td>
+<td>✅ Completed — all promoted to IWebView</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Expose EnableSpaHosting on WebView control</td>
+<td>Medium</td>
+<td>⏸ Deferred to post-1.0 — adequate workaround via WebViewEnvironmentOptions</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Graduate AGWV004 from Experimental</td>
+<td>Low</td>
+<td>✅ Completed — attribute removed</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Document event lifecycle on WebView control</td>
+<td>Low</td>
+<td>✅ Documented — pre-attach subscription is no-op by design for Avalonia lifecycle</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Version as 1.0.0-preview.1 → 1.0.0</td>
+<td>—</td>
+<td>🔜 Pending — M9.6 Stable Release Gate</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="evidence-pointers-api--executable">Evidence Pointers (API → Executable)</h2>
+<ul>
+<li><strong>Navigation cancel semantics</strong>: <code>tests/Agibuild.Fulora.UnitTests/ContractSemanticsV1NavigationTests.cs</code></li>
+<li><strong>Native navigation cancel</strong>: <code>tests/Agibuild.Fulora.UnitTests/ContractSemanticsV1NativeNavigationTests.cs</code></li>
+<li><strong>WebMessage bridge policy/drop</strong>: <code>tests/Agibuild.Fulora.UnitTests/WebViewCoreHotspotCoverageTests.cs</code></li>
+<li><strong>DevTools toggle (core)</strong>: <code>tests/Agibuild.Fulora.UnitTests/RuntimeCoverageTests.cs</code></li>
+<li><strong>DevTools toggle (GTK smoke)</strong>: <code>tests/Agibuild.Fulora.Integration.Tests/Agibuild.Fulora.Integration.Tests/ViewModels/GtkWebViewSmokeViewModel.cs</code></li>
+<li><strong>Deep link registration</strong>: <code>tests/Agibuild.Fulora.UnitTests/DeepLinkRegistrationServiceTests.cs</code></li>
+<li><strong>Deep link activation</strong>: <code>tests/Agibuild.Fulora.UnitTests/DeepLinkActivationTests.cs</code></li>
+<li><strong>Bridge cancellation</strong>: <code>tests/Agibuild.Fulora.UnitTests/BridgeCancellationTests.cs</code></li>
+<li><strong>Bridge streaming</strong>: <code>tests/Agibuild.Fulora.UnitTests/BridgeStreamingTests.cs</code></li>
+<li><strong>SPA hot update</strong>: <code>tests/Agibuild.Fulora.UnitTests/SpaAssetHotUpdateTests.cs</code></li>
+</ul>
+<hr>
+<h2 id="public-api-inventory-generated">Public API Inventory (generated)</h2>
+<p>Snapshot source:</p>
+<ul>
+<li><code>dotnet build -c Release</code> (2026-03-01)</li>
+<li>Generator: <code>tools/gen-api-inventory.csx</code></li>
+</ul>
+<details><summary>Inventory (Release)</summary>
+<pre><code class="lang-text">See `docs/API_SURFACE_INVENTORY.release.txt`.
+</code></pre>
+</details>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/AGIBuild/Agibuild.Fulora/blob/main/docs/API_SURFACE_REVIEW.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          Agibuild.Fulora — Cross-platform Hybrid App Framework
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

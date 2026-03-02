@@ -1,0 +1,115 @@
+### YamlMime:ManagedReference
+items:
+- uid: Agibuild.Fulora.Shell.IWebViewShellSessionPolicy
+  commentId: T:Agibuild.Fulora.Shell.IWebViewShellSessionPolicy
+  id: IWebViewShellSessionPolicy
+  parent: Agibuild.Fulora.Shell
+  children:
+  - Agibuild.Fulora.Shell.IWebViewShellSessionPolicy.Resolve(Agibuild.Fulora.Shell.WebViewShellSessionContext)
+  langs:
+  - csharp
+  - vb
+  name: IWebViewShellSessionPolicy
+  nameWithType: IWebViewShellSessionPolicy
+  fullName: Agibuild.Fulora.Shell.IWebViewShellSessionPolicy
+  type: Interface
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewShellExperience.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: IWebViewShellSessionPolicy
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewShellExperience.cs
+    startLine: 384
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Policy for resolving shell session scope.
+  example: []
+  syntax:
+    content: public interface IWebViewShellSessionPolicy
+    content.vb: Public Interface IWebViewShellSessionPolicy
+- uid: Agibuild.Fulora.Shell.IWebViewShellSessionPolicy.Resolve(Agibuild.Fulora.Shell.WebViewShellSessionContext)
+  commentId: M:Agibuild.Fulora.Shell.IWebViewShellSessionPolicy.Resolve(Agibuild.Fulora.Shell.WebViewShellSessionContext)
+  id: Resolve(Agibuild.Fulora.Shell.WebViewShellSessionContext)
+  parent: Agibuild.Fulora.Shell.IWebViewShellSessionPolicy
+  langs:
+  - csharp
+  - vb
+  name: Resolve(WebViewShellSessionContext)
+  nameWithType: IWebViewShellSessionPolicy.Resolve(WebViewShellSessionContext)
+  fullName: Agibuild.Fulora.Shell.IWebViewShellSessionPolicy.Resolve(Agibuild.Fulora.Shell.WebViewShellSessionContext)
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewShellExperience.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Resolve
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewShellExperience.cs
+    startLine: 387
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Resolves a session decision from shell context.
+  example: []
+  syntax:
+    content: WebViewShellSessionDecision Resolve(WebViewShellSessionContext context)
+    parameters:
+    - id: context
+      type: Agibuild.Fulora.Shell.WebViewShellSessionContext
+    return:
+      type: Agibuild.Fulora.Shell.WebViewShellSessionDecision
+    content.vb: Function Resolve(context As WebViewShellSessionContext) As WebViewShellSessionDecision
+  overload: Agibuild.Fulora.Shell.IWebViewShellSessionPolicy.Resolve*
+references:
+- uid: Agibuild.Fulora.Shell
+  commentId: N:Agibuild.Fulora.Shell
+  href: Agibuild.html
+  name: Agibuild.Fulora.Shell
+  nameWithType: Agibuild.Fulora.Shell
+  fullName: Agibuild.Fulora.Shell
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  - name: .
+  - uid: Agibuild.Fulora.Shell
+    name: Shell
+    href: Agibuild.Fulora.Shell.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  - name: .
+  - uid: Agibuild.Fulora.Shell
+    name: Shell
+    href: Agibuild.Fulora.Shell.html
+- uid: Agibuild.Fulora.Shell.IWebViewShellSessionPolicy.Resolve*
+  commentId: Overload:Agibuild.Fulora.Shell.IWebViewShellSessionPolicy.Resolve
+  href: Agibuild.Fulora.Shell.IWebViewShellSessionPolicy.html#Agibuild_Fulora_Shell_IWebViewShellSessionPolicy_Resolve_Agibuild_Fulora_Shell_WebViewShellSessionContext_
+  name: Resolve
+  nameWithType: IWebViewShellSessionPolicy.Resolve
+  fullName: Agibuild.Fulora.Shell.IWebViewShellSessionPolicy.Resolve
+- uid: Agibuild.Fulora.Shell.WebViewShellSessionContext
+  commentId: T:Agibuild.Fulora.Shell.WebViewShellSessionContext
+  parent: Agibuild.Fulora.Shell
+  href: Agibuild.Fulora.Shell.WebViewShellSessionContext.html
+  name: WebViewShellSessionContext
+  nameWithType: WebViewShellSessionContext
+  fullName: Agibuild.Fulora.Shell.WebViewShellSessionContext
+- uid: Agibuild.Fulora.Shell.WebViewShellSessionDecision
+  commentId: T:Agibuild.Fulora.Shell.WebViewShellSessionDecision
+  parent: Agibuild.Fulora.Shell
+  href: Agibuild.Fulora.Shell.WebViewShellSessionDecision.html
+  name: WebViewShellSessionDecision
+  nameWithType: WebViewShellSessionDecision
+  fullName: Agibuild.Fulora.Shell.WebViewShellSessionDecision

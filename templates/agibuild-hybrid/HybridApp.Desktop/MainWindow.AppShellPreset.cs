@@ -12,6 +12,8 @@ public partial class MainWindow
 {
     private EventHandler<KeyEventArgs>? _shortcutHandler;
     private WebViewShellExperience? _shell;
+    private AvaloniaHostCapabilityProvider? _avaloniaProvider;
+    private ThemeService? _themeService;
     private DesktopHostService? _desktopHostService;
     private HashSet<WebViewSystemAction>? _systemActionWhitelist;
     private ShowAboutScenarioState? _showAboutScenarioState;
@@ -21,9 +23,10 @@ public partial class MainWindow
         if (_shell is not null)
             return;
 
-        // App-shell preset: provide common host-side shell governance defaults.
+        // App-shell preset: wrap the template provider with Avalonia tray/menu bindings.
+        _avaloniaProvider = new AvaloniaHostCapabilityProvider(new TemplateHostCapabilityProvider());
         var capabilityBridge = new WebViewHostCapabilityBridge(
-            new TemplateHostCapabilityProvider(),
+            _avaloniaProvider,
             new TemplateHostCapabilityPolicy(() => _showAboutScenarioState?.Scenario == DesktopShowAboutScenario.PolicyDenied));
         _systemActionWhitelist = new HashSet<WebViewSystemAction>
         {
@@ -111,6 +114,9 @@ public partial class MainWindow
             throw new InvalidOperationException("Shell preset must be initialized before registering shell bridge services.");
 
         WebView.Bridge.Expose<IDesktopHostService>(_desktopHostService);
+
+        _themeService = new ThemeService(new AvaloniaThemeProvider());
+        WebView.Bridge.Expose<IThemeService>(_themeService);
     }
 
     partial void DisposeShellPreset()
@@ -121,6 +127,12 @@ public partial class MainWindow
         _shortcutHandler = null;
         _desktopHostService?.Dispose();
         _desktopHostService = null;
+
+        _themeService?.Dispose();
+        _themeService = null;
+
+        _avaloniaProvider?.Dispose();
+        _avaloniaProvider = null;
 
         _shell?.Dispose();
         _shell = null;

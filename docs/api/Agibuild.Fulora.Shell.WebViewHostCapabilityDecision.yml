@@ -1,0 +1,620 @@
+### YamlMime:ManagedReference
+items:
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision
+  commentId: T:Agibuild.Fulora.Shell.WebViewHostCapabilityDecision
+  id: WebViewHostCapabilityDecision
+  parent: Agibuild.Fulora.Shell
+  children:
+  - Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.#ctor(Agibuild.Fulora.Shell.WebViewHostCapabilityDecisionKind,System.String)
+  - Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.Allow
+  - Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.Deny(System.String)
+  - Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.IsAllowed
+  - Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.Kind
+  - Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.Reason
+  langs:
+  - csharp
+  - vb
+  name: WebViewHostCapabilityDecision
+  nameWithType: WebViewHostCapabilityDecision
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision
+  type: Struct
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: WebViewHostCapabilityDecision
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 61
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Authorization decision for a capability request.
+  example: []
+  syntax:
+    content: 'public readonly record struct WebViewHostCapabilityDecision : IEquatable<WebViewHostCapabilityDecision>'
+    content.vb: Public Structure WebViewHostCapabilityDecision Implements IEquatable(Of WebViewHostCapabilityDecision)
+  implements:
+  - System.IEquatable{Agibuild.Fulora.Shell.WebViewHostCapabilityDecision}
+  inheritedMembers:
+  - System.ValueType.Equals(System.Object)
+  - System.ValueType.GetHashCode
+  - System.ValueType.ToString
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.GetType
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.#ctor(Agibuild.Fulora.Shell.WebViewHostCapabilityDecisionKind,System.String)
+  commentId: M:Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.#ctor(Agibuild.Fulora.Shell.WebViewHostCapabilityDecisionKind,System.String)
+  id: '#ctor(Agibuild.Fulora.Shell.WebViewHostCapabilityDecisionKind,System.String)'
+  parent: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision
+  langs:
+  - csharp
+  - vb
+  name: WebViewHostCapabilityDecision(WebViewHostCapabilityDecisionKind, string?)
+  nameWithType: WebViewHostCapabilityDecision.WebViewHostCapabilityDecision(WebViewHostCapabilityDecisionKind, string?)
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.WebViewHostCapabilityDecision(Agibuild.Fulora.Shell.WebViewHostCapabilityDecisionKind, string?)
+  type: Constructor
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: .ctor
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 61
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Authorization decision for a capability request.
+  example: []
+  syntax:
+    content: public WebViewHostCapabilityDecision(WebViewHostCapabilityDecisionKind Kind, string? Reason = null)
+    parameters:
+    - id: Kind
+      type: Agibuild.Fulora.Shell.WebViewHostCapabilityDecisionKind
+    - id: Reason
+      type: System.String
+    content.vb: Public Sub New(Kind As WebViewHostCapabilityDecisionKind, Reason As String = Nothing)
+  overload: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.#ctor*
+  nameWithType.vb: WebViewHostCapabilityDecision.New(WebViewHostCapabilityDecisionKind, String)
+  fullName.vb: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.New(Agibuild.Fulora.Shell.WebViewHostCapabilityDecisionKind, String)
+  name.vb: New(WebViewHostCapabilityDecisionKind, String)
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.Kind
+  commentId: P:Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.Kind
+  id: Kind
+  parent: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision
+  langs:
+  - csharp
+  - vb
+  name: Kind
+  nameWithType: WebViewHostCapabilityDecision.Kind
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.Kind
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Kind
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 62
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  syntax:
+    content: public WebViewHostCapabilityDecisionKind Kind { get; init; }
+    parameters: []
+    return:
+      type: Agibuild.Fulora.Shell.WebViewHostCapabilityDecisionKind
+    content.vb: Public Property Kind As WebViewHostCapabilityDecisionKind
+  overload: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.Kind*
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.Reason
+  commentId: P:Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.Reason
+  id: Reason
+  parent: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision
+  langs:
+  - csharp
+  - vb
+  name: Reason
+  nameWithType: WebViewHostCapabilityDecision.Reason
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.Reason
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Reason
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 63
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  syntax:
+    content: public string? Reason { get; init; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property Reason As String
+  overload: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.Reason*
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.Allow
+  commentId: M:Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.Allow
+  id: Allow
+  parent: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision
+  langs:
+  - csharp
+  - vb
+  name: Allow()
+  nameWithType: WebViewHostCapabilityDecision.Allow()
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.Allow()
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Allow
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 66
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Create an allow decision.
+  example: []
+  syntax:
+    content: public static WebViewHostCapabilityDecision Allow()
+    return:
+      type: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision
+    content.vb: Public Shared Function Allow() As WebViewHostCapabilityDecision
+  overload: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.Allow*
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.Deny(System.String)
+  commentId: M:Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.Deny(System.String)
+  id: Deny(System.String)
+  parent: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision
+  langs:
+  - csharp
+  - vb
+  name: Deny(string?)
+  nameWithType: WebViewHostCapabilityDecision.Deny(string?)
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.Deny(string?)
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Deny
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 70
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Create a deny decision.
+  example: []
+  syntax:
+    content: public static WebViewHostCapabilityDecision Deny(string? reason = null)
+    parameters:
+    - id: reason
+      type: System.String
+    return:
+      type: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision
+    content.vb: Public Shared Function Deny(reason As String = Nothing) As WebViewHostCapabilityDecision
+  overload: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.Deny*
+  nameWithType.vb: WebViewHostCapabilityDecision.Deny(String)
+  fullName.vb: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.Deny(String)
+  name.vb: Deny(String)
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.IsAllowed
+  commentId: P:Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.IsAllowed
+  id: IsAllowed
+  parent: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision
+  langs:
+  - csharp
+  - vb
+  name: IsAllowed
+  nameWithType: WebViewHostCapabilityDecision.IsAllowed
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.IsAllowed
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: IsAllowed
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 76
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: True when this request is allowed.
+  example: []
+  syntax:
+    content: public bool IsAllowed { get; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public ReadOnly Property IsAllowed As Boolean
+  overload: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.IsAllowed*
+references:
+- uid: Agibuild.Fulora.Shell
+  commentId: N:Agibuild.Fulora.Shell
+  href: Agibuild.html
+  name: Agibuild.Fulora.Shell
+  nameWithType: Agibuild.Fulora.Shell
+  fullName: Agibuild.Fulora.Shell
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  - name: .
+  - uid: Agibuild.Fulora.Shell
+    name: Shell
+    href: Agibuild.Fulora.Shell.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  - name: .
+  - uid: Agibuild.Fulora.Shell
+    name: Shell
+    href: Agibuild.Fulora.Shell.html
+- uid: System.IEquatable{Agibuild.Fulora.Shell.WebViewHostCapabilityDecision}
+  commentId: T:System.IEquatable{Agibuild.Fulora.Shell.WebViewHostCapabilityDecision}
+  parent: System
+  definition: System.IEquatable`1
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  name: IEquatable<WebViewHostCapabilityDecision>
+  nameWithType: IEquatable<WebViewHostCapabilityDecision>
+  fullName: System.IEquatable<Agibuild.Fulora.Shell.WebViewHostCapabilityDecision>
+  nameWithType.vb: IEquatable(Of WebViewHostCapabilityDecision)
+  fullName.vb: System.IEquatable(Of Agibuild.Fulora.Shell.WebViewHostCapabilityDecision)
+  name.vb: IEquatable(Of WebViewHostCapabilityDecision)
+  spec.csharp:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: <
+  - uid: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision
+    name: WebViewHostCapabilityDecision
+    href: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.html
+  - name: '>'
+  spec.vb:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision
+    name: WebViewHostCapabilityDecision
+    href: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.html
+  - name: )
+- uid: System.ValueType.Equals(System.Object)
+  commentId: M:System.ValueType.Equals(System.Object)
+  parent: System.ValueType
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.valuetype.equals
+  name: Equals(object)
+  nameWithType: ValueType.Equals(object)
+  fullName: System.ValueType.Equals(object)
+  nameWithType.vb: ValueType.Equals(Object)
+  fullName.vb: System.ValueType.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.ValueType.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetype.equals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.ValueType.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetype.equals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.ValueType.GetHashCode
+  commentId: M:System.ValueType.GetHashCode
+  parent: System.ValueType
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.valuetype.gethashcode
+  name: GetHashCode()
+  nameWithType: ValueType.GetHashCode()
+  fullName: System.ValueType.GetHashCode()
+  spec.csharp:
+  - uid: System.ValueType.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetype.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.ValueType.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetype.gethashcode
+  - name: (
+  - name: )
+- uid: System.ValueType.ToString
+  commentId: M:System.ValueType.ToString
+  parent: System.ValueType
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.valuetype.tostring
+  name: ToString()
+  nameWithType: ValueType.ToString()
+  fullName: System.ValueType.ToString()
+  spec.csharp:
+  - uid: System.ValueType.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetype.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.ValueType.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetype.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.IEquatable`1
+  commentId: T:System.IEquatable`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  name: IEquatable<T>
+  nameWithType: IEquatable<T>
+  fullName: System.IEquatable<T>
+  nameWithType.vb: IEquatable(Of T)
+  fullName.vb: System.IEquatable(Of T)
+  name.vb: IEquatable(Of T)
+  spec.csharp:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: System.ValueType
+  commentId: T:System.ValueType
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.valuetype
+  name: ValueType
+  nameWithType: ValueType
+  fullName: System.ValueType
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.#ctor*
+  commentId: Overload:Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.#ctor
+  href: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.html#Agibuild_Fulora_Shell_WebViewHostCapabilityDecision__ctor_Agibuild_Fulora_Shell_WebViewHostCapabilityDecisionKind_System_String_
+  name: WebViewHostCapabilityDecision
+  nameWithType: WebViewHostCapabilityDecision.WebViewHostCapabilityDecision
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.WebViewHostCapabilityDecision
+  nameWithType.vb: WebViewHostCapabilityDecision.New
+  fullName.vb: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.New
+  name.vb: New
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityDecisionKind
+  commentId: T:Agibuild.Fulora.Shell.WebViewHostCapabilityDecisionKind
+  parent: Agibuild.Fulora.Shell
+  href: Agibuild.Fulora.Shell.WebViewHostCapabilityDecisionKind.html
+  name: WebViewHostCapabilityDecisionKind
+  nameWithType: WebViewHostCapabilityDecisionKind
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityDecisionKind
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.Kind*
+  commentId: Overload:Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.Kind
+  href: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.html#Agibuild_Fulora_Shell_WebViewHostCapabilityDecision_Kind
+  name: Kind
+  nameWithType: WebViewHostCapabilityDecision.Kind
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.Kind
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.Reason*
+  commentId: Overload:Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.Reason
+  href: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.html#Agibuild_Fulora_Shell_WebViewHostCapabilityDecision_Reason
+  name: Reason
+  nameWithType: WebViewHostCapabilityDecision.Reason
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.Reason
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.Allow*
+  commentId: Overload:Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.Allow
+  href: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.html#Agibuild_Fulora_Shell_WebViewHostCapabilityDecision_Allow
+  name: Allow
+  nameWithType: WebViewHostCapabilityDecision.Allow
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.Allow
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision
+  commentId: T:Agibuild.Fulora.Shell.WebViewHostCapabilityDecision
+  parent: Agibuild.Fulora.Shell
+  href: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.html
+  name: WebViewHostCapabilityDecision
+  nameWithType: WebViewHostCapabilityDecision
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.Deny*
+  commentId: Overload:Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.Deny
+  href: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.html#Agibuild_Fulora_Shell_WebViewHostCapabilityDecision_Deny_System_String_
+  name: Deny
+  nameWithType: WebViewHostCapabilityDecision.Deny
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.Deny
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.IsAllowed*
+  commentId: Overload:Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.IsAllowed
+  href: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.html#Agibuild_Fulora_Shell_WebViewHostCapabilityDecision_IsAllowed
+  name: IsAllowed
+  nameWithType: WebViewHostCapabilityDecision.IsAllowed
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.IsAllowed
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean

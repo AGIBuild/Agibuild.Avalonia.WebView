@@ -101,6 +101,7 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
     private IWebMessageDropDiagnosticsSink? _webMessageDropDiagnosticsSink;
     private WebViewRpcService? _rpcService;
     private RuntimeBridgeService? _bridgeService;
+    private IBridgeTracer? _bridgeTracer;
     private SpaHostingService? _spaHostingService;
 
     internal WebViewCore(IWebViewAdapter adapter, IWebViewDispatcher dispatcher)
@@ -646,6 +647,21 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
     // ==================== Bridge ====================
 
     /// <inheritdoc />
+    public IBridgeTracer? BridgeTracer
+    {
+        get => _bridgeTracer;
+        set
+        {
+            if (_bridgeService is not null)
+            {
+                _logger.LogWarning("BridgeTracer set after Bridge was already created — change ignored.");
+                return;
+            }
+            _bridgeTracer = value;
+        }
+    }
+
+    /// <inheritdoc />
     public IBridgeService Bridge
     {
         get
@@ -665,7 +681,8 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
                 _rpcService!,
                 script => InvokeScriptAsync(script),
                 _logger,
-                enableDevTools: _environmentOptions.EnableDevTools);
+                enableDevTools: _environmentOptions.EnableDevTools,
+                tracer: _bridgeTracer);
 
             _logger.LogDebug("Bridge: auto-created RuntimeBridgeService");
             return _bridgeService;

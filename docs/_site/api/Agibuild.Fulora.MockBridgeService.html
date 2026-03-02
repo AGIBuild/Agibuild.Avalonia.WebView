@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Class MockBridgeService | Agibuild.Fulora </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Class MockBridgeService | Agibuild.Fulora ">
+      
+      <meta name="description" content="A mock implementation of  for unit testing. Allows testing ViewModels and services that depend on Bridge without a real WebView.  Deliverable 1.5: MockBridge for consumer unit testing.">
+      <link rel="icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/AGIBuild/Agibuild.Fulora/new/main/apiSpec/new?filename=Agibuild_Fulora_MockBridgeService.md&amp;value=---%0Auid%3A%20Agibuild.Fulora.MockBridgeService%0Asummary%3A%20&#39;*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax&#39;%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../logo.svg" alt="Agibuild.Fulora">
+            Agibuild.Fulora
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="Agibuild.Fulora.MockBridgeService">
+
+
+
+  <h1 id="Agibuild_Fulora_MockBridgeService" data-uid="Agibuild.Fulora.MockBridgeService" class="text-break">
+Class MockBridgeService  <a class="header-action link-secondary" title="View source" href="https://github.com/AGIBuild/Agibuild.Fulora/blob/main/src/Agibuild.Fulora.Core/MockBridgeService.cs/#L25"><i class="bi bi-code-slash"></i></a>
+  </h1>
+
+  <div class="facts text-secondary">
+    <dl><dt>Namespace</dt><dd><a class="xref" href="Agibuild.html">Agibuild</a>.<a class="xref" href="Agibuild.Fulora.html">Fulora</a></dd></dl>
+  <dl><dt>Assembly</dt><dd>Agibuild.Fulora.Core.dll</dd></dl>
+  </div>
+
+  <div class="markdown summary"><p>A mock implementation of <a class="xref" href="Agibuild.Fulora.IBridgeService.html">IBridgeService</a> for unit testing.
+Allows testing ViewModels and services that depend on Bridge without a real WebView.</p>
+<p>
+Deliverable 1.5: MockBridge for consumer unit testing.
+</p>
+</div>
+  <div class="markdown conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public sealed class MockBridgeService : IBridgeService</code></pre>
+  </div>
+
+
+
+
+  <dl class="typelist inheritance">
+    <dt>Inheritance</dt>
+    <dd>
+      <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a></div>
+      <div><span class="xref">MockBridgeService</span></div>
+    </dd>
+  </dl>
+
+  <dl class="typelist implements">
+    <dt>Implements</dt>
+    <dd>
+      <div><a class="xref" href="Agibuild.Fulora.IBridgeService.html">IBridgeService</a></div>
+    </dd>
+  </dl>
+
+
+  <dl class="typelist inheritedMembers">
+    <dt>Inherited Members</dt>
+    <dd>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)">object.Equals(object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)">object.Equals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gethashcode">object.GetHashCode()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gettype">object.GetType()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.referenceequals">object.ReferenceEquals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.tostring">object.ToString()</a>
+    </div>
+  </dd></dl>
+
+  <dl class="typelist extensionMethods">
+    <dt>Extension Methods</dt>
+    <dd>
+  <div>
+      <a class="xref" href="Agibuild.Fulora.BridgePluginExtensions.html#Agibuild_Fulora_BridgePluginExtensions_UsePlugin__1_Agibuild_Fulora_IBridgeService_System_IServiceProvider_">BridgePluginExtensions.UsePlugin&lt;TPlugin&gt;(IBridgeService, IServiceProvider?)</a>
+  </div>
+  </dd></dl>
+
+
+  <h2 id="Agibuild_Fulora_MockBridgeService_examples">Examples</h2>
+  <pre><code class="lang-csharp">var mock = new MockBridgeService();
+mock.SetupExpose&lt;IAppService&gt;(); // Records that Expose was called
+var proxy = mock.SetupProxy&lt;IUiController&gt;(new FakeUiController());
+
+var vm = new MyViewModel(mock);
+await vm.Initialize();
+
+Assert.True(mock.WasExposed&lt;IAppService&gt;());</code></pre>
+
+
+
+
+  <h2 class="section" id="properties">Properties
+</h2>
+
+
+  <a id="Agibuild_Fulora_MockBridgeService_ExposedCount_" data-uid="Agibuild.Fulora.MockBridgeService.ExposedCount*"></a>
+
+  <h3 id="Agibuild_Fulora_MockBridgeService_ExposedCount" data-uid="Agibuild.Fulora.MockBridgeService.ExposedCount">
+  ExposedCount
+  <a class="header-action link-secondary" title="View source" href="https://github.com/AGIBuild/Agibuild.Fulora/blob/main/src/Agibuild.Fulora.Core/MockBridgeService.cs/#L84"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Returns the number of services exposed.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int ExposedCount { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <h2 class="section" id="methods">Methods
+</h2>
+
+
+  <a id="Agibuild_Fulora_MockBridgeService_Dispose_" data-uid="Agibuild.Fulora.MockBridgeService.Dispose*"></a>
+
+  <h3 id="Agibuild_Fulora_MockBridgeService_Dispose" data-uid="Agibuild.Fulora.MockBridgeService.Dispose">
+  Dispose()
+  <a class="header-action link-secondary" title="View source" href="https://github.com/AGIBuild/Agibuild.Fulora/blob/main/src/Agibuild.Fulora.Core/MockBridgeService.cs/#L99"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Marks the mock as disposed. Subsequent operations throw.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Dispose()</code></pre>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="Agibuild_Fulora_MockBridgeService_Expose_" data-uid="Agibuild.Fulora.MockBridgeService.Expose*"></a>
+
+  <h3 id="Agibuild_Fulora_MockBridgeService_Expose__1___0_Agibuild_Fulora_BridgeOptions_" data-uid="Agibuild.Fulora.MockBridgeService.Expose``1(``0,Agibuild.Fulora.BridgeOptions)">
+  Expose&lt;T&gt;(T, BridgeOptions?)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/AGIBuild/Agibuild.Fulora/blob/main/src/Agibuild.Fulora.Core/MockBridgeService.cs/#L35"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Registers a service as if <a class="xref" href="Agibuild.Fulora.MockBridgeService.html#Agibuild_Fulora_MockBridgeService_Expose__1___0_Agibuild_Fulora_BridgeOptions_">Expose&lt;T&gt;(T, BridgeOptions?)</a> was called.
+The implementation is recorded for later assertions.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Expose&lt;T&gt;(T implementation, BridgeOptions? options = null) where T : class</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>implementation</code> <span class="xref">T</span></dt>
+    <dd></dd>
+    <dt><code>options</code> <a class="xref" href="Agibuild.Fulora.BridgeOptions.html">BridgeOptions</a></dt>
+    <dd></dd>
+  </dl>
+
+
+  <h4 class="section">Type Parameters</h4>
+  <dl class="parameters">
+    <dt><code>T</code></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+  <a id="Agibuild_Fulora_MockBridgeService_GetExposedImplementation_" data-uid="Agibuild.Fulora.MockBridgeService.GetExposedImplementation*"></a>
+
+  <h3 id="Agibuild_Fulora_MockBridgeService_GetExposedImplementation__1" data-uid="Agibuild.Fulora.MockBridgeService.GetExposedImplementation``1">
+  GetExposedImplementation&lt;T&gt;()
+  <a class="header-action link-secondary" title="View source" href="https://github.com/AGIBuild/Agibuild.Fulora/blob/main/src/Agibuild.Fulora.Core/MockBridgeService.cs/#L80"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Returns the implementation passed to <a class="xref" href="Agibuild.Fulora.MockBridgeService.html#Agibuild_Fulora_MockBridgeService_Expose__1___0_Agibuild_Fulora_BridgeOptions_">Expose&lt;T&gt;(T, BridgeOptions?)</a>, or null.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public T? GetExposedImplementation&lt;T&gt;() where T : class</code></pre>
+  </div>
+
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><span class="xref">T</span></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Type Parameters</h4>
+  <dl class="parameters">
+    <dt><code>T</code></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+  <a id="Agibuild_Fulora_MockBridgeService_GetProxy_" data-uid="Agibuild.Fulora.MockBridgeService.GetProxy*"></a>
+
+  <h3 id="Agibuild_Fulora_MockBridgeService_GetProxy__1" data-uid="Agibuild.Fulora.MockBridgeService.GetProxy``1">
+  GetProxy&lt;T&gt;()
+  <a class="header-action link-secondary" title="View source" href="https://github.com/AGIBuild/Agibuild.Fulora/blob/main/src/Agibuild.Fulora.Core/MockBridgeService.cs/#L45"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Returns a proxy for the given interface. Must have been set up via <a class="xref" href="Agibuild.Fulora.MockBridgeService.html#Agibuild_Fulora_MockBridgeService_SetupProxy__1___0_">SetupProxy&lt;T&gt;(T)</a> first.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public T GetProxy&lt;T&gt;() where T : class</code></pre>
+  </div>
+
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><span class="xref">T</span></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Type Parameters</h4>
+  <dl class="parameters">
+    <dt><code>T</code></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+  <a id="Agibuild_Fulora_MockBridgeService_Remove_" data-uid="Agibuild.Fulora.MockBridgeService.Remove*"></a>
+
+  <h3 id="Agibuild_Fulora_MockBridgeService_Remove__1" data-uid="Agibuild.Fulora.MockBridgeService.Remove``1">
+  Remove&lt;T&gt;()
+  <a class="header-action link-secondary" title="View source" href="https://github.com/AGIBuild/Agibuild.Fulora/blob/main/src/Agibuild.Fulora.Core/MockBridgeService.cs/#L57"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Removes an exposed service.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Remove&lt;T&gt;() where T : class</code></pre>
+  </div>
+
+
+
+  <h4 class="section">Type Parameters</h4>
+  <dl class="parameters">
+    <dt><code>T</code></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+  <a id="Agibuild_Fulora_MockBridgeService_Reset_" data-uid="Agibuild.Fulora.MockBridgeService.Reset*"></a>
+
+  <h3 id="Agibuild_Fulora_MockBridgeService_Reset" data-uid="Agibuild.Fulora.MockBridgeService.Reset">
+  Reset()
+  <a class="header-action link-secondary" title="View source" href="https://github.com/AGIBuild/Agibuild.Fulora/blob/main/src/Agibuild.Fulora.Core/MockBridgeService.cs/#L87"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Resets all state.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void Reset()</code></pre>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="Agibuild_Fulora_MockBridgeService_SetupProxy_" data-uid="Agibuild.Fulora.MockBridgeService.SetupProxy*"></a>
+
+  <h3 id="Agibuild_Fulora_MockBridgeService_SetupProxy__1___0_" data-uid="Agibuild.Fulora.MockBridgeService.SetupProxy``1(``0)">
+  SetupProxy&lt;T&gt;(T)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/AGIBuild/Agibuild.Fulora/blob/main/src/Agibuild.Fulora.Core/MockBridgeService.cs/#L68"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Configures a mock proxy that will be returned by <a class="xref" href="Agibuild.Fulora.MockBridgeService.html#Agibuild_Fulora_MockBridgeService_GetProxy__1">GetProxy&lt;T&gt;()</a>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public void SetupProxy&lt;T&gt;(T proxy) where T : class</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>proxy</code> <span class="xref">T</span></dt>
+    <dd></dd>
+  </dl>
+
+
+  <h4 class="section">Type Parameters</h4>
+  <dl class="parameters">
+    <dt><code>T</code></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+  <a id="Agibuild_Fulora_MockBridgeService_WasExposed_" data-uid="Agibuild.Fulora.MockBridgeService.WasExposed*"></a>
+
+  <h3 id="Agibuild_Fulora_MockBridgeService_WasExposed__1" data-uid="Agibuild.Fulora.MockBridgeService.WasExposed``1">
+  WasExposed&lt;T&gt;()
+  <a class="header-action link-secondary" title="View source" href="https://github.com/AGIBuild/Agibuild.Fulora/blob/main/src/Agibuild.Fulora.Core/MockBridgeService.cs/#L77"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Returns whether <a class="xref" href="Agibuild.Fulora.MockBridgeService.html#Agibuild_Fulora_MockBridgeService_Expose__1___0_Agibuild_Fulora_BridgeOptions_">Expose&lt;T&gt;(T, BridgeOptions?)</a> was called for the given interface.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool WasExposed&lt;T&gt;() where T : class</code></pre>
+  </div>
+
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Type Parameters</h4>
+  <dl class="parameters">
+    <dt><code>T</code></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/AGIBuild/Agibuild.Fulora/blob/main/src/Agibuild.Fulora.Core/MockBridgeService.cs/#L25" class="edit-link">Edit this page</a>
+        </div>
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          Agibuild.Fulora — Cross-platform Hybrid App Framework
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

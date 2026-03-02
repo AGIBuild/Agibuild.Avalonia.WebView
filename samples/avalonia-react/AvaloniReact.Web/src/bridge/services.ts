@@ -3,7 +3,8 @@
  * Each proxy maps to a C# [JsExport] service exposed via the Agibuild WebView Bridge.
  */
 
-import { bridgeClient, type BridgeServiceMethod } from '@agibuild/bridge';
+import { type BridgeServiceMethod } from '@agibuild/bridge';
+import { bridge as bridgeClient } from './client';
 
 // ─── Types mirroring C# models ──────────────────────────────────────────────
 

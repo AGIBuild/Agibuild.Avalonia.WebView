@@ -1,0 +1,115 @@
+### YamlMime:ManagedReference
+items:
+- uid: Agibuild.Fulora.Shell.IDeepLinkAdmissionPolicy
+  commentId: T:Agibuild.Fulora.Shell.IDeepLinkAdmissionPolicy
+  id: IDeepLinkAdmissionPolicy
+  parent: Agibuild.Fulora.Shell
+  children:
+  - Agibuild.Fulora.Shell.IDeepLinkAdmissionPolicy.Evaluate(Agibuild.Fulora.Shell.DeepLinkActivationEnvelope)
+  langs:
+  - csharp
+  - vb
+  name: IDeepLinkAdmissionPolicy
+  nameWithType: IDeepLinkAdmissionPolicy
+  fullName: Agibuild.Fulora.Shell.IDeepLinkAdmissionPolicy
+  type: Interface
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: IDeepLinkAdmissionPolicy
+    path: ../src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+    startLine: 173
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Policy interface for deep-link activation admission.
+  example: []
+  syntax:
+    content: public interface IDeepLinkAdmissionPolicy
+    content.vb: Public Interface IDeepLinkAdmissionPolicy
+- uid: Agibuild.Fulora.Shell.IDeepLinkAdmissionPolicy.Evaluate(Agibuild.Fulora.Shell.DeepLinkActivationEnvelope)
+  commentId: M:Agibuild.Fulora.Shell.IDeepLinkAdmissionPolicy.Evaluate(Agibuild.Fulora.Shell.DeepLinkActivationEnvelope)
+  id: Evaluate(Agibuild.Fulora.Shell.DeepLinkActivationEnvelope)
+  parent: Agibuild.Fulora.Shell.IDeepLinkAdmissionPolicy
+  langs:
+  - csharp
+  - vb
+  name: Evaluate(DeepLinkActivationEnvelope)
+  nameWithType: IDeepLinkAdmissionPolicy.Evaluate(DeepLinkActivationEnvelope)
+  fullName: Agibuild.Fulora.Shell.IDeepLinkAdmissionPolicy.Evaluate(Agibuild.Fulora.Shell.DeepLinkActivationEnvelope)
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Evaluate
+    path: ../src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+    startLine: 178
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Evaluates whether a canonical activation envelope should be admitted for orchestration dispatch.
+  example: []
+  syntax:
+    content: DeepLinkAdmissionDecision Evaluate(DeepLinkActivationEnvelope envelope)
+    parameters:
+    - id: envelope
+      type: Agibuild.Fulora.Shell.DeepLinkActivationEnvelope
+    return:
+      type: Agibuild.Fulora.Shell.DeepLinkAdmissionDecision
+    content.vb: Function Evaluate(envelope As DeepLinkActivationEnvelope) As DeepLinkAdmissionDecision
+  overload: Agibuild.Fulora.Shell.IDeepLinkAdmissionPolicy.Evaluate*
+references:
+- uid: Agibuild.Fulora.Shell
+  commentId: N:Agibuild.Fulora.Shell
+  href: Agibuild.html
+  name: Agibuild.Fulora.Shell
+  nameWithType: Agibuild.Fulora.Shell
+  fullName: Agibuild.Fulora.Shell
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  - name: .
+  - uid: Agibuild.Fulora.Shell
+    name: Shell
+    href: Agibuild.Fulora.Shell.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  - name: .
+  - uid: Agibuild.Fulora.Shell
+    name: Shell
+    href: Agibuild.Fulora.Shell.html
+- uid: Agibuild.Fulora.Shell.IDeepLinkAdmissionPolicy.Evaluate*
+  commentId: Overload:Agibuild.Fulora.Shell.IDeepLinkAdmissionPolicy.Evaluate
+  href: Agibuild.Fulora.Shell.IDeepLinkAdmissionPolicy.html#Agibuild_Fulora_Shell_IDeepLinkAdmissionPolicy_Evaluate_Agibuild_Fulora_Shell_DeepLinkActivationEnvelope_
+  name: Evaluate
+  nameWithType: IDeepLinkAdmissionPolicy.Evaluate
+  fullName: Agibuild.Fulora.Shell.IDeepLinkAdmissionPolicy.Evaluate
+- uid: Agibuild.Fulora.Shell.DeepLinkActivationEnvelope
+  commentId: T:Agibuild.Fulora.Shell.DeepLinkActivationEnvelope
+  parent: Agibuild.Fulora.Shell
+  href: Agibuild.Fulora.Shell.DeepLinkActivationEnvelope.html
+  name: DeepLinkActivationEnvelope
+  nameWithType: DeepLinkActivationEnvelope
+  fullName: Agibuild.Fulora.Shell.DeepLinkActivationEnvelope
+- uid: Agibuild.Fulora.Shell.DeepLinkAdmissionDecision
+  commentId: T:Agibuild.Fulora.Shell.DeepLinkAdmissionDecision
+  parent: Agibuild.Fulora.Shell
+  href: Agibuild.Fulora.Shell.DeepLinkAdmissionDecision.html
+  name: DeepLinkAdmissionDecision
+  nameWithType: DeepLinkAdmissionDecision
+  fullName: Agibuild.Fulora.Shell.DeepLinkAdmissionDecision

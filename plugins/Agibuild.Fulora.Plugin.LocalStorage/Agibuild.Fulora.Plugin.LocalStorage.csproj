@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Agibuild.Fulora.Plugin.LocalStorage</RootNamespace>
+
+    <IsPackable>true</IsPackable>
+    <PackageId>Agibuild.Fulora.Plugin.LocalStorage</PackageId>
+    <Description>Local storage bridge plugin for Agibuild Fulora — key-value persistence via JSON file storage, registered in one call with UsePlugin.</Description>
+    <PackageTags>fulora;bridge;plugin;local-storage;key-value</PackageTags>
+    <Authors>AGIBuild</Authors>
+    <License>MIT</License>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Agibuild.Fulora.Core\Agibuild.Fulora.Core.csproj" />
+    <ProjectReference Include="..\..\src\Agibuild.Fulora.Bridge.Generator\Agibuild.Fulora.Bridge.Generator.csproj"
+                      OutputItemType="Analyzer" ReferenceOutputAssembly="true" />
+  </ItemGroup>
+</Project>

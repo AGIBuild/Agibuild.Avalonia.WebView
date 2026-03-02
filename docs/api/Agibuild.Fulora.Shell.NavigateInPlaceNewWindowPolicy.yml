@@ -1,0 +1,433 @@
+### YamlMime:ManagedReference
+items:
+- uid: Agibuild.Fulora.Shell.NavigateInPlaceNewWindowPolicy
+  commentId: T:Agibuild.Fulora.Shell.NavigateInPlaceNewWindowPolicy
+  id: NavigateInPlaceNewWindowPolicy
+  parent: Agibuild.Fulora.Shell
+  children:
+  - Agibuild.Fulora.Shell.NavigateInPlaceNewWindowPolicy.Decide(Agibuild.Fulora.IWebView,Agibuild.Fulora.NewWindowRequestedEventArgs,Agibuild.Fulora.Shell.WebViewNewWindowPolicyContext)
+  langs:
+  - csharp
+  - vb
+  name: NavigateInPlaceNewWindowPolicy
+  nameWithType: NavigateInPlaceNewWindowPolicy
+  fullName: Agibuild.Fulora.Shell.NavigateInPlaceNewWindowPolicy
+  type: Class
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewShellExperience.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: NavigateInPlaceNewWindowPolicy
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewShellExperience.cs
+    startLine: 420
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: New-window policy that preserves the v1 fallback behavior (navigate in-place when unhandled).
+  example: []
+  syntax:
+    content: 'public sealed class NavigateInPlaceNewWindowPolicy : IWebViewNewWindowPolicy'
+    content.vb: Public NotInheritable Class NavigateInPlaceNewWindowPolicy Implements IWebViewNewWindowPolicy
+  inheritance:
+  - System.Object
+  implements:
+  - Agibuild.Fulora.Shell.IWebViewNewWindowPolicy
+  inheritedMembers:
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.GetHashCode
+  - System.Object.GetType
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.ToString
+- uid: Agibuild.Fulora.Shell.NavigateInPlaceNewWindowPolicy.Decide(Agibuild.Fulora.IWebView,Agibuild.Fulora.NewWindowRequestedEventArgs,Agibuild.Fulora.Shell.WebViewNewWindowPolicyContext)
+  commentId: M:Agibuild.Fulora.Shell.NavigateInPlaceNewWindowPolicy.Decide(Agibuild.Fulora.IWebView,Agibuild.Fulora.NewWindowRequestedEventArgs,Agibuild.Fulora.Shell.WebViewNewWindowPolicyContext)
+  id: Decide(Agibuild.Fulora.IWebView,Agibuild.Fulora.NewWindowRequestedEventArgs,Agibuild.Fulora.Shell.WebViewNewWindowPolicyContext)
+  parent: Agibuild.Fulora.Shell.NavigateInPlaceNewWindowPolicy
+  langs:
+  - csharp
+  - vb
+  name: Decide(IWebView, NewWindowRequestedEventArgs, WebViewNewWindowPolicyContext)
+  nameWithType: NavigateInPlaceNewWindowPolicy.Decide(IWebView, NewWindowRequestedEventArgs, WebViewNewWindowPolicyContext)
+  fullName: Agibuild.Fulora.Shell.NavigateInPlaceNewWindowPolicy.Decide(Agibuild.Fulora.IWebView, Agibuild.Fulora.NewWindowRequestedEventArgs, Agibuild.Fulora.Shell.WebViewNewWindowPolicyContext)
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewShellExperience.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Decide
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewShellExperience.cs
+    startLine: 423
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Resolves a strategy decision for the new-window request.
+  example: []
+  syntax:
+    content: public WebViewNewWindowStrategyDecision Decide(IWebView webView, NewWindowRequestedEventArgs e, WebViewNewWindowPolicyContext context)
+    parameters:
+    - id: webView
+      type: Agibuild.Fulora.IWebView
+    - id: e
+      type: Agibuild.Fulora.NewWindowRequestedEventArgs
+    - id: context
+      type: Agibuild.Fulora.Shell.WebViewNewWindowPolicyContext
+    return:
+      type: Agibuild.Fulora.Shell.WebViewNewWindowStrategyDecision
+    content.vb: Public Function Decide(webView As IWebView, e As NewWindowRequestedEventArgs, context As WebViewNewWindowPolicyContext) As WebViewNewWindowStrategyDecision
+  overload: Agibuild.Fulora.Shell.NavigateInPlaceNewWindowPolicy.Decide*
+  implements:
+  - Agibuild.Fulora.Shell.IWebViewNewWindowPolicy.Decide(Agibuild.Fulora.IWebView,Agibuild.Fulora.NewWindowRequestedEventArgs,Agibuild.Fulora.Shell.WebViewNewWindowPolicyContext)
+references:
+- uid: Agibuild.Fulora.Shell
+  commentId: N:Agibuild.Fulora.Shell
+  href: Agibuild.html
+  name: Agibuild.Fulora.Shell
+  nameWithType: Agibuild.Fulora.Shell
+  fullName: Agibuild.Fulora.Shell
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  - name: .
+  - uid: Agibuild.Fulora.Shell
+    name: Shell
+    href: Agibuild.Fulora.Shell.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  - name: .
+  - uid: Agibuild.Fulora.Shell
+    name: Shell
+    href: Agibuild.Fulora.Shell.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: Agibuild.Fulora.Shell.IWebViewNewWindowPolicy
+  commentId: T:Agibuild.Fulora.Shell.IWebViewNewWindowPolicy
+  parent: Agibuild.Fulora.Shell
+  href: Agibuild.Fulora.Shell.IWebViewNewWindowPolicy.html
+  name: IWebViewNewWindowPolicy
+  nameWithType: IWebViewNewWindowPolicy
+  fullName: Agibuild.Fulora.Shell.IWebViewNewWindowPolicy
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: Agibuild.Fulora.Shell.NavigateInPlaceNewWindowPolicy.Decide*
+  commentId: Overload:Agibuild.Fulora.Shell.NavigateInPlaceNewWindowPolicy.Decide
+  href: Agibuild.Fulora.Shell.NavigateInPlaceNewWindowPolicy.html#Agibuild_Fulora_Shell_NavigateInPlaceNewWindowPolicy_Decide_Agibuild_Fulora_IWebView_Agibuild_Fulora_NewWindowRequestedEventArgs_Agibuild_Fulora_Shell_WebViewNewWindowPolicyContext_
+  name: Decide
+  nameWithType: NavigateInPlaceNewWindowPolicy.Decide
+  fullName: Agibuild.Fulora.Shell.NavigateInPlaceNewWindowPolicy.Decide
+- uid: Agibuild.Fulora.Shell.IWebViewNewWindowPolicy.Decide(Agibuild.Fulora.IWebView,Agibuild.Fulora.NewWindowRequestedEventArgs,Agibuild.Fulora.Shell.WebViewNewWindowPolicyContext)
+  commentId: M:Agibuild.Fulora.Shell.IWebViewNewWindowPolicy.Decide(Agibuild.Fulora.IWebView,Agibuild.Fulora.NewWindowRequestedEventArgs,Agibuild.Fulora.Shell.WebViewNewWindowPolicyContext)
+  parent: Agibuild.Fulora.Shell.IWebViewNewWindowPolicy
+  href: Agibuild.Fulora.Shell.IWebViewNewWindowPolicy.html#Agibuild_Fulora_Shell_IWebViewNewWindowPolicy_Decide_Agibuild_Fulora_IWebView_Agibuild_Fulora_NewWindowRequestedEventArgs_Agibuild_Fulora_Shell_WebViewNewWindowPolicyContext_
+  name: Decide(IWebView, NewWindowRequestedEventArgs, WebViewNewWindowPolicyContext)
+  nameWithType: IWebViewNewWindowPolicy.Decide(IWebView, NewWindowRequestedEventArgs, WebViewNewWindowPolicyContext)
+  fullName: Agibuild.Fulora.Shell.IWebViewNewWindowPolicy.Decide(Agibuild.Fulora.IWebView, Agibuild.Fulora.NewWindowRequestedEventArgs, Agibuild.Fulora.Shell.WebViewNewWindowPolicyContext)
+  spec.csharp:
+  - uid: Agibuild.Fulora.Shell.IWebViewNewWindowPolicy.Decide(Agibuild.Fulora.IWebView,Agibuild.Fulora.NewWindowRequestedEventArgs,Agibuild.Fulora.Shell.WebViewNewWindowPolicyContext)
+    name: Decide
+    href: Agibuild.Fulora.Shell.IWebViewNewWindowPolicy.html#Agibuild_Fulora_Shell_IWebViewNewWindowPolicy_Decide_Agibuild_Fulora_IWebView_Agibuild_Fulora_NewWindowRequestedEventArgs_Agibuild_Fulora_Shell_WebViewNewWindowPolicyContext_
+  - name: (
+  - uid: Agibuild.Fulora.IWebView
+    name: IWebView
+    href: Agibuild.Fulora.IWebView.html
+  - name: ','
+  - name: " "
+  - uid: Agibuild.Fulora.NewWindowRequestedEventArgs
+    name: NewWindowRequestedEventArgs
+    href: Agibuild.Fulora.NewWindowRequestedEventArgs.html
+  - name: ','
+  - name: " "
+  - uid: Agibuild.Fulora.Shell.WebViewNewWindowPolicyContext
+    name: WebViewNewWindowPolicyContext
+    href: Agibuild.Fulora.Shell.WebViewNewWindowPolicyContext.html
+  - name: )
+  spec.vb:
+  - uid: Agibuild.Fulora.Shell.IWebViewNewWindowPolicy.Decide(Agibuild.Fulora.IWebView,Agibuild.Fulora.NewWindowRequestedEventArgs,Agibuild.Fulora.Shell.WebViewNewWindowPolicyContext)
+    name: Decide
+    href: Agibuild.Fulora.Shell.IWebViewNewWindowPolicy.html#Agibuild_Fulora_Shell_IWebViewNewWindowPolicy_Decide_Agibuild_Fulora_IWebView_Agibuild_Fulora_NewWindowRequestedEventArgs_Agibuild_Fulora_Shell_WebViewNewWindowPolicyContext_
+  - name: (
+  - uid: Agibuild.Fulora.IWebView
+    name: IWebView
+    href: Agibuild.Fulora.IWebView.html
+  - name: ','
+  - name: " "
+  - uid: Agibuild.Fulora.NewWindowRequestedEventArgs
+    name: NewWindowRequestedEventArgs
+    href: Agibuild.Fulora.NewWindowRequestedEventArgs.html
+  - name: ','
+  - name: " "
+  - uid: Agibuild.Fulora.Shell.WebViewNewWindowPolicyContext
+    name: WebViewNewWindowPolicyContext
+    href: Agibuild.Fulora.Shell.WebViewNewWindowPolicyContext.html
+  - name: )
+- uid: Agibuild.Fulora.IWebView
+  commentId: T:Agibuild.Fulora.IWebView
+  parent: Agibuild.Fulora
+  href: Agibuild.Fulora.IWebView.html
+  name: IWebView
+  nameWithType: IWebView
+  fullName: Agibuild.Fulora.IWebView
+- uid: Agibuild.Fulora.NewWindowRequestedEventArgs
+  commentId: T:Agibuild.Fulora.NewWindowRequestedEventArgs
+  parent: Agibuild.Fulora
+  href: Agibuild.Fulora.NewWindowRequestedEventArgs.html
+  name: NewWindowRequestedEventArgs
+  nameWithType: NewWindowRequestedEventArgs
+  fullName: Agibuild.Fulora.NewWindowRequestedEventArgs
+- uid: Agibuild.Fulora.Shell.WebViewNewWindowPolicyContext
+  commentId: T:Agibuild.Fulora.Shell.WebViewNewWindowPolicyContext
+  parent: Agibuild.Fulora.Shell
+  href: Agibuild.Fulora.Shell.WebViewNewWindowPolicyContext.html
+  name: WebViewNewWindowPolicyContext
+  nameWithType: WebViewNewWindowPolicyContext
+  fullName: Agibuild.Fulora.Shell.WebViewNewWindowPolicyContext
+- uid: Agibuild.Fulora.Shell.WebViewNewWindowStrategyDecision
+  commentId: T:Agibuild.Fulora.Shell.WebViewNewWindowStrategyDecision
+  parent: Agibuild.Fulora.Shell
+  href: Agibuild.Fulora.Shell.WebViewNewWindowStrategyDecision.html
+  name: WebViewNewWindowStrategyDecision
+  nameWithType: WebViewNewWindowStrategyDecision
+  fullName: Agibuild.Fulora.Shell.WebViewNewWindowStrategyDecision
+- uid: Agibuild.Fulora
+  commentId: N:Agibuild.Fulora
+  href: Agibuild.html
+  name: Agibuild.Fulora
+  nameWithType: Agibuild.Fulora
+  fullName: Agibuild.Fulora
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html

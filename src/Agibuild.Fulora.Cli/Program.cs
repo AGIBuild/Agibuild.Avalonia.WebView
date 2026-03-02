@@ -1,12 +1,13 @@
 using System.CommandLine;
 using Agibuild.Fulora.Cli.Commands;
 
-var root = new RootCommand("Agibuild.Fulora CLI — hybrid app development toolkit")
-{
-    NewCommand.Create(),
-    GenerateCommand.Create(),
-    DevCommand.Create(),
-    AddCommand.Create()
-};
+var rootCommand = new RootCommand("Agibuild.Fulora CLI — scaffold, develop, and manage hybrid apps");
 
-return await root.Parse(args).InvokeAsync();
+rootCommand.Subcommands.Add(NewCommand.Create());
+rootCommand.Subcommands.Add(GenerateCommand.Create());
+rootCommand.Subcommands.Add(DevCommand.Create());
+rootCommand.Subcommands.Add(AddCommand.Create());
+
+var config = new CommandLineConfiguration(rootCommand);
+var parseResult = config.Parse(args);
+return await parseResult.InvokeAsync();

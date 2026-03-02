@@ -1,0 +1,184 @@
+### YamlMime:ManagedReference
+items:
+- uid: Agibuild.Fulora.Shell.WebViewSystemAction
+  commentId: T:Agibuild.Fulora.Shell.WebViewSystemAction
+  id: WebViewSystemAction
+  parent: Agibuild.Fulora.Shell
+  children:
+  - Agibuild.Fulora.Shell.WebViewSystemAction.FocusMainWindow
+  - Agibuild.Fulora.Shell.WebViewSystemAction.Quit
+  - Agibuild.Fulora.Shell.WebViewSystemAction.Restart
+  - Agibuild.Fulora.Shell.WebViewSystemAction.ShowAbout
+  langs:
+  - csharp
+  - vb
+  name: WebViewSystemAction
+  nameWithType: WebViewSystemAction
+  fullName: Agibuild.Fulora.Shell.WebViewSystemAction
+  type: Enum
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: WebViewSystemAction
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 174
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Supported typed system actions.
+  example: []
+  syntax:
+    content: public enum WebViewSystemAction
+    content.vb: Public Enum WebViewSystemAction
+- uid: Agibuild.Fulora.Shell.WebViewSystemAction.Quit
+  commentId: F:Agibuild.Fulora.Shell.WebViewSystemAction.Quit
+  id: Quit
+  parent: Agibuild.Fulora.Shell.WebViewSystemAction
+  langs:
+  - csharp
+  - vb
+  name: Quit
+  nameWithType: WebViewSystemAction.Quit
+  fullName: Agibuild.Fulora.Shell.WebViewSystemAction.Quit
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Quit
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 177
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Quit application.
+  example: []
+  syntax:
+    content: Quit = 0
+    return:
+      type: Agibuild.Fulora.Shell.WebViewSystemAction
+- uid: Agibuild.Fulora.Shell.WebViewSystemAction.Restart
+  commentId: F:Agibuild.Fulora.Shell.WebViewSystemAction.Restart
+  id: Restart
+  parent: Agibuild.Fulora.Shell.WebViewSystemAction
+  langs:
+  - csharp
+  - vb
+  name: Restart
+  nameWithType: WebViewSystemAction.Restart
+  fullName: Agibuild.Fulora.Shell.WebViewSystemAction.Restart
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Restart
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 179
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Restart application.
+  example: []
+  syntax:
+    content: Restart = 1
+    return:
+      type: Agibuild.Fulora.Shell.WebViewSystemAction
+- uid: Agibuild.Fulora.Shell.WebViewSystemAction.FocusMainWindow
+  commentId: F:Agibuild.Fulora.Shell.WebViewSystemAction.FocusMainWindow
+  id: FocusMainWindow
+  parent: Agibuild.Fulora.Shell.WebViewSystemAction
+  langs:
+  - csharp
+  - vb
+  name: FocusMainWindow
+  nameWithType: WebViewSystemAction.FocusMainWindow
+  fullName: Agibuild.Fulora.Shell.WebViewSystemAction.FocusMainWindow
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: FocusMainWindow
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 181
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Focus main window.
+  example: []
+  syntax:
+    content: FocusMainWindow = 2
+    return:
+      type: Agibuild.Fulora.Shell.WebViewSystemAction
+- uid: Agibuild.Fulora.Shell.WebViewSystemAction.ShowAbout
+  commentId: F:Agibuild.Fulora.Shell.WebViewSystemAction.ShowAbout
+  id: ShowAbout
+  parent: Agibuild.Fulora.Shell.WebViewSystemAction
+  langs:
+  - csharp
+  - vb
+  name: ShowAbout
+  nameWithType: WebViewSystemAction.ShowAbout
+  fullName: Agibuild.Fulora.Shell.WebViewSystemAction.ShowAbout
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: ShowAbout
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 183
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Show application about dialog.
+  example: []
+  syntax:
+    content: ShowAbout = 3
+    return:
+      type: Agibuild.Fulora.Shell.WebViewSystemAction
+references:
+- uid: Agibuild.Fulora.Shell
+  commentId: N:Agibuild.Fulora.Shell
+  href: Agibuild.html
+  name: Agibuild.Fulora.Shell
+  nameWithType: Agibuild.Fulora.Shell
+  fullName: Agibuild.Fulora.Shell
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  - name: .
+  - uid: Agibuild.Fulora.Shell
+    name: Shell
+    href: Agibuild.Fulora.Shell.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  - name: .
+  - uid: Agibuild.Fulora.Shell
+    name: Shell
+    href: Agibuild.Fulora.Shell.html
+- uid: Agibuild.Fulora.Shell.WebViewSystemAction
+  commentId: T:Agibuild.Fulora.Shell.WebViewSystemAction
+  parent: Agibuild.Fulora.Shell
+  href: Agibuild.Fulora.Shell.WebViewSystemAction.html
+  name: WebViewSystemAction
+  nameWithType: WebViewSystemAction
+  fullName: Agibuild.Fulora.Shell.WebViewSystemAction

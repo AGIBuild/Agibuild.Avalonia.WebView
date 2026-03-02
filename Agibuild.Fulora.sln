@@ -1,4 +1,4 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
 VisualStudioVersion = 18.2.11415.280
@@ -48,6 +48,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "benchmarks", "benchmarks", "{66320409-64EC-F7C5-3DEF-65E7510DAAD1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agibuild.Fulora.Benchmarks", "benchmarks\Agibuild.Fulora.Benchmarks\Agibuild.Fulora.Benchmarks.csproj", "{174EC413-AB3B-4750-A183-2F54C77939E3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agibuild.Fulora.Cli", "src\Agibuild.Fulora.Cli\Agibuild.Fulora.Cli.csproj", "{66332D1E-A0AB-4D86-803C-4056F53056E8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -303,6 +305,18 @@ Global
 		{174EC413-AB3B-4750-A183-2F54C77939E3}.Release|x64.Build.0 = Release|Any CPU
 		{174EC413-AB3B-4750-A183-2F54C77939E3}.Release|x86.ActiveCfg = Release|Any CPU
 		{174EC413-AB3B-4750-A183-2F54C77939E3}.Release|x86.Build.0 = Release|Any CPU
+		{66332D1E-A0AB-4D86-803C-4056F53056E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{66332D1E-A0AB-4D86-803C-4056F53056E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{66332D1E-A0AB-4D86-803C-4056F53056E8}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{66332D1E-A0AB-4D86-803C-4056F53056E8}.Debug|x64.Build.0 = Debug|Any CPU
+		{66332D1E-A0AB-4D86-803C-4056F53056E8}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{66332D1E-A0AB-4D86-803C-4056F53056E8}.Debug|x86.Build.0 = Debug|Any CPU
+		{66332D1E-A0AB-4D86-803C-4056F53056E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{66332D1E-A0AB-4D86-803C-4056F53056E8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{66332D1E-A0AB-4D86-803C-4056F53056E8}.Release|x64.ActiveCfg = Release|Any CPU
+		{66332D1E-A0AB-4D86-803C-4056F53056E8}.Release|x64.Build.0 = Release|Any CPU
+		{66332D1E-A0AB-4D86-803C-4056F53056E8}.Release|x86.ActiveCfg = Release|Any CPU
+		{66332D1E-A0AB-4D86-803C-4056F53056E8}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -321,6 +335,7 @@ Global
 		{D160712D-707E-4FFC-8AA5-A7E261BE19B3} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{AC3040CE-E279-46CC-AC9F-D78250FCE641} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{174EC413-AB3B-4750-A183-2F54C77939E3} = {66320409-64EC-F7C5-3DEF-65E7510DAAD1}
+		{66332D1E-A0AB-4D86-803C-4056F53056E8} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C362CE2E-275A-4392-B5A1-CA3A6612BDBF}

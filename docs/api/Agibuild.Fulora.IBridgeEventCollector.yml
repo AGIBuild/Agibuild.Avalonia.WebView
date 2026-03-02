@@ -1,0 +1,481 @@
+### YamlMime:ManagedReference
+items:
+- uid: Agibuild.Fulora.IBridgeEventCollector
+  commentId: T:Agibuild.Fulora.IBridgeEventCollector
+  id: IBridgeEventCollector
+  parent: Agibuild.Fulora
+  children:
+  - Agibuild.Fulora.IBridgeEventCollector.Capacity
+  - Agibuild.Fulora.IBridgeEventCollector.Clear
+  - Agibuild.Fulora.IBridgeEventCollector.Count
+  - Agibuild.Fulora.IBridgeEventCollector.DroppedCount
+  - Agibuild.Fulora.IBridgeEventCollector.GetEvents
+  - Agibuild.Fulora.IBridgeEventCollector.Subscribe(System.Action{Agibuild.Fulora.BridgeDevToolsEvent})
+  langs:
+  - csharp
+  - vb
+  name: IBridgeEventCollector
+  nameWithType: IBridgeEventCollector
+  fullName: Agibuild.Fulora.IBridgeEventCollector
+  type: Interface
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/IBridgeEventCollector.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: IBridgeEventCollector
+    path: ../src/Agibuild.Fulora.Core/IBridgeEventCollector.cs
+    startLine: 5
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Collects bridge call events in a bounded buffer for DevTools consumption.
+  example: []
+  syntax:
+    content: public interface IBridgeEventCollector
+    content.vb: Public Interface IBridgeEventCollector
+- uid: Agibuild.Fulora.IBridgeEventCollector.Count
+  commentId: P:Agibuild.Fulora.IBridgeEventCollector.Count
+  id: Count
+  parent: Agibuild.Fulora.IBridgeEventCollector
+  langs:
+  - csharp
+  - vb
+  name: Count
+  nameWithType: IBridgeEventCollector.Count
+  fullName: Agibuild.Fulora.IBridgeEventCollector.Count
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/IBridgeEventCollector.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Count
+    path: ../src/Agibuild.Fulora.Core/IBridgeEventCollector.cs
+    startLine: 8
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Current number of events in the buffer.
+  example: []
+  syntax:
+    content: int Count { get; }
+    parameters: []
+    return:
+      type: System.Int32
+    content.vb: ReadOnly Property Count As Integer
+  overload: Agibuild.Fulora.IBridgeEventCollector.Count*
+- uid: Agibuild.Fulora.IBridgeEventCollector.DroppedCount
+  commentId: P:Agibuild.Fulora.IBridgeEventCollector.DroppedCount
+  id: DroppedCount
+  parent: Agibuild.Fulora.IBridgeEventCollector
+  langs:
+  - csharp
+  - vb
+  name: DroppedCount
+  nameWithType: IBridgeEventCollector.DroppedCount
+  fullName: Agibuild.Fulora.IBridgeEventCollector.DroppedCount
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/IBridgeEventCollector.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: DroppedCount
+    path: ../src/Agibuild.Fulora.Core/IBridgeEventCollector.cs
+    startLine: 11
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Number of events dropped due to buffer overflow.
+  example: []
+  syntax:
+    content: long DroppedCount { get; }
+    parameters: []
+    return:
+      type: System.Int64
+    content.vb: ReadOnly Property DroppedCount As Long
+  overload: Agibuild.Fulora.IBridgeEventCollector.DroppedCount*
+- uid: Agibuild.Fulora.IBridgeEventCollector.Capacity
+  commentId: P:Agibuild.Fulora.IBridgeEventCollector.Capacity
+  id: Capacity
+  parent: Agibuild.Fulora.IBridgeEventCollector
+  langs:
+  - csharp
+  - vb
+  name: Capacity
+  nameWithType: IBridgeEventCollector.Capacity
+  fullName: Agibuild.Fulora.IBridgeEventCollector.Capacity
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/IBridgeEventCollector.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Capacity
+    path: ../src/Agibuild.Fulora.Core/IBridgeEventCollector.cs
+    startLine: 14
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Maximum number of events the buffer can hold.
+  example: []
+  syntax:
+    content: int Capacity { get; }
+    parameters: []
+    return:
+      type: System.Int32
+    content.vb: ReadOnly Property Capacity As Integer
+  overload: Agibuild.Fulora.IBridgeEventCollector.Capacity*
+- uid: Agibuild.Fulora.IBridgeEventCollector.GetEvents
+  commentId: M:Agibuild.Fulora.IBridgeEventCollector.GetEvents
+  id: GetEvents
+  parent: Agibuild.Fulora.IBridgeEventCollector
+  langs:
+  - csharp
+  - vb
+  name: GetEvents()
+  nameWithType: IBridgeEventCollector.GetEvents()
+  fullName: Agibuild.Fulora.IBridgeEventCollector.GetEvents()
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/IBridgeEventCollector.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: GetEvents
+    path: ../src/Agibuild.Fulora.Core/IBridgeEventCollector.cs
+    startLine: 17
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Returns a snapshot of all buffered events, oldest first.
+  example: []
+  syntax:
+    content: IReadOnlyList<BridgeDevToolsEvent> GetEvents()
+    return:
+      type: System.Collections.Generic.IReadOnlyList{Agibuild.Fulora.BridgeDevToolsEvent}
+    content.vb: Function GetEvents() As IReadOnlyList(Of BridgeDevToolsEvent)
+  overload: Agibuild.Fulora.IBridgeEventCollector.GetEvents*
+- uid: Agibuild.Fulora.IBridgeEventCollector.Clear
+  commentId: M:Agibuild.Fulora.IBridgeEventCollector.Clear
+  id: Clear
+  parent: Agibuild.Fulora.IBridgeEventCollector
+  langs:
+  - csharp
+  - vb
+  name: Clear()
+  nameWithType: IBridgeEventCollector.Clear()
+  fullName: Agibuild.Fulora.IBridgeEventCollector.Clear()
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/IBridgeEventCollector.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Clear
+    path: ../src/Agibuild.Fulora.Core/IBridgeEventCollector.cs
+    startLine: 20
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Clears all buffered events and resets the dropped count.
+  example: []
+  syntax:
+    content: void Clear()
+    content.vb: Sub Clear()
+  overload: Agibuild.Fulora.IBridgeEventCollector.Clear*
+- uid: Agibuild.Fulora.IBridgeEventCollector.Subscribe(System.Action{Agibuild.Fulora.BridgeDevToolsEvent})
+  commentId: M:Agibuild.Fulora.IBridgeEventCollector.Subscribe(System.Action{Agibuild.Fulora.BridgeDevToolsEvent})
+  id: Subscribe(System.Action{Agibuild.Fulora.BridgeDevToolsEvent})
+  parent: Agibuild.Fulora.IBridgeEventCollector
+  langs:
+  - csharp
+  - vb
+  name: Subscribe(Action<BridgeDevToolsEvent>)
+  nameWithType: IBridgeEventCollector.Subscribe(Action<BridgeDevToolsEvent>)
+  fullName: Agibuild.Fulora.IBridgeEventCollector.Subscribe(System.Action<Agibuild.Fulora.BridgeDevToolsEvent>)
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/IBridgeEventCollector.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Subscribe
+    path: ../src/Agibuild.Fulora.Core/IBridgeEventCollector.cs
+    startLine: 26
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: >-
+    Registers a callback invoked whenever a new event is added.
+
+    Returns a disposable that unregisters the callback.
+  example: []
+  syntax:
+    content: IDisposable Subscribe(Action<BridgeDevToolsEvent> onEvent)
+    parameters:
+    - id: onEvent
+      type: System.Action{Agibuild.Fulora.BridgeDevToolsEvent}
+    return:
+      type: System.IDisposable
+    content.vb: Function Subscribe(onEvent As Action(Of BridgeDevToolsEvent)) As IDisposable
+  overload: Agibuild.Fulora.IBridgeEventCollector.Subscribe*
+  nameWithType.vb: IBridgeEventCollector.Subscribe(Action(Of BridgeDevToolsEvent))
+  fullName.vb: Agibuild.Fulora.IBridgeEventCollector.Subscribe(System.Action(Of Agibuild.Fulora.BridgeDevToolsEvent))
+  name.vb: Subscribe(Action(Of BridgeDevToolsEvent))
+references:
+- uid: Agibuild.Fulora
+  commentId: N:Agibuild.Fulora
+  href: Agibuild.html
+  name: Agibuild.Fulora
+  nameWithType: Agibuild.Fulora
+  fullName: Agibuild.Fulora
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+- uid: Agibuild.Fulora.IBridgeEventCollector.Count*
+  commentId: Overload:Agibuild.Fulora.IBridgeEventCollector.Count
+  href: Agibuild.Fulora.IBridgeEventCollector.html#Agibuild_Fulora_IBridgeEventCollector_Count
+  name: Count
+  nameWithType: IBridgeEventCollector.Count
+  fullName: Agibuild.Fulora.IBridgeEventCollector.Count
+- uid: System.Int32
+  commentId: T:System.Int32
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int32
+  name: int
+  nameWithType: int
+  fullName: int
+  nameWithType.vb: Integer
+  fullName.vb: Integer
+  name.vb: Integer
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: Agibuild.Fulora.IBridgeEventCollector.DroppedCount*
+  commentId: Overload:Agibuild.Fulora.IBridgeEventCollector.DroppedCount
+  href: Agibuild.Fulora.IBridgeEventCollector.html#Agibuild_Fulora_IBridgeEventCollector_DroppedCount
+  name: DroppedCount
+  nameWithType: IBridgeEventCollector.DroppedCount
+  fullName: Agibuild.Fulora.IBridgeEventCollector.DroppedCount
+- uid: System.Int64
+  commentId: T:System.Int64
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int64
+  name: long
+  nameWithType: long
+  fullName: long
+  nameWithType.vb: Long
+  fullName.vb: Long
+  name.vb: Long
+- uid: Agibuild.Fulora.IBridgeEventCollector.Capacity*
+  commentId: Overload:Agibuild.Fulora.IBridgeEventCollector.Capacity
+  href: Agibuild.Fulora.IBridgeEventCollector.html#Agibuild_Fulora_IBridgeEventCollector_Capacity
+  name: Capacity
+  nameWithType: IBridgeEventCollector.Capacity
+  fullName: Agibuild.Fulora.IBridgeEventCollector.Capacity
+- uid: Agibuild.Fulora.IBridgeEventCollector.GetEvents*
+  commentId: Overload:Agibuild.Fulora.IBridgeEventCollector.GetEvents
+  href: Agibuild.Fulora.IBridgeEventCollector.html#Agibuild_Fulora_IBridgeEventCollector_GetEvents
+  name: GetEvents
+  nameWithType: IBridgeEventCollector.GetEvents
+  fullName: Agibuild.Fulora.IBridgeEventCollector.GetEvents
+- uid: System.Collections.Generic.IReadOnlyList{Agibuild.Fulora.BridgeDevToolsEvent}
+  commentId: T:System.Collections.Generic.IReadOnlyList{Agibuild.Fulora.BridgeDevToolsEvent}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IReadOnlyList`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<BridgeDevToolsEvent>
+  nameWithType: IReadOnlyList<BridgeDevToolsEvent>
+  fullName: System.Collections.Generic.IReadOnlyList<Agibuild.Fulora.BridgeDevToolsEvent>
+  nameWithType.vb: IReadOnlyList(Of BridgeDevToolsEvent)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of Agibuild.Fulora.BridgeDevToolsEvent)
+  name.vb: IReadOnlyList(Of BridgeDevToolsEvent)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: Agibuild.Fulora.BridgeDevToolsEvent
+    name: BridgeDevToolsEvent
+    href: Agibuild.Fulora.BridgeDevToolsEvent.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: Agibuild.Fulora.BridgeDevToolsEvent
+    name: BridgeDevToolsEvent
+    href: Agibuild.Fulora.BridgeDevToolsEvent.html
+  - name: )
+- uid: System.Collections.Generic.IReadOnlyList`1
+  commentId: T:System.Collections.Generic.IReadOnlyList`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<T>
+  nameWithType: IReadOnlyList<T>
+  fullName: System.Collections.Generic.IReadOnlyList<T>
+  nameWithType.vb: IReadOnlyList(Of T)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of T)
+  name.vb: IReadOnlyList(Of T)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System.Collections.Generic
+  commentId: N:System.Collections.Generic
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Collections.Generic
+  nameWithType: System.Collections.Generic
+  fullName: System.Collections.Generic
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+- uid: Agibuild.Fulora.IBridgeEventCollector.Clear*
+  commentId: Overload:Agibuild.Fulora.IBridgeEventCollector.Clear
+  href: Agibuild.Fulora.IBridgeEventCollector.html#Agibuild_Fulora_IBridgeEventCollector_Clear
+  name: Clear
+  nameWithType: IBridgeEventCollector.Clear
+  fullName: Agibuild.Fulora.IBridgeEventCollector.Clear
+- uid: Agibuild.Fulora.IBridgeEventCollector.Subscribe*
+  commentId: Overload:Agibuild.Fulora.IBridgeEventCollector.Subscribe
+  href: Agibuild.Fulora.IBridgeEventCollector.html#Agibuild_Fulora_IBridgeEventCollector_Subscribe_System_Action_Agibuild_Fulora_BridgeDevToolsEvent__
+  name: Subscribe
+  nameWithType: IBridgeEventCollector.Subscribe
+  fullName: Agibuild.Fulora.IBridgeEventCollector.Subscribe
+- uid: System.Action{Agibuild.Fulora.BridgeDevToolsEvent}
+  commentId: T:System.Action{Agibuild.Fulora.BridgeDevToolsEvent}
+  parent: System
+  definition: System.Action`1
+  href: https://learn.microsoft.com/dotnet/api/system.action-1
+  name: Action<BridgeDevToolsEvent>
+  nameWithType: Action<BridgeDevToolsEvent>
+  fullName: System.Action<Agibuild.Fulora.BridgeDevToolsEvent>
+  nameWithType.vb: Action(Of BridgeDevToolsEvent)
+  fullName.vb: System.Action(Of Agibuild.Fulora.BridgeDevToolsEvent)
+  name.vb: Action(Of BridgeDevToolsEvent)
+  spec.csharp:
+  - uid: System.Action`1
+    name: Action
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.action-1
+  - name: <
+  - uid: Agibuild.Fulora.BridgeDevToolsEvent
+    name: BridgeDevToolsEvent
+    href: Agibuild.Fulora.BridgeDevToolsEvent.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Action`1
+    name: Action
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.action-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: Agibuild.Fulora.BridgeDevToolsEvent
+    name: BridgeDevToolsEvent
+    href: Agibuild.Fulora.BridgeDevToolsEvent.html
+  - name: )
+- uid: System.IDisposable
+  commentId: T:System.IDisposable
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.idisposable
+  name: IDisposable
+  nameWithType: IDisposable
+  fullName: System.IDisposable
+- uid: System.Action`1
+  commentId: T:System.Action`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.action-1
+  name: Action<T>
+  nameWithType: Action<T>
+  fullName: System.Action<T>
+  nameWithType.vb: Action(Of T)
+  fullName.vb: System.Action(Of T)
+  name.vb: Action(Of T)
+  spec.csharp:
+  - uid: System.Action`1
+    name: Action
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.action-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Action`1
+    name: Action
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.action-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )

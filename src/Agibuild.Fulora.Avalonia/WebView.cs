@@ -213,6 +213,24 @@ public class WebView : NativeControlHost, IWebView
     public IWebViewRpcService? Rpc => _core?.Rpc;
 
     /// <summary>
+    /// Sets the bridge tracer for observability. Must be set before the first access to
+    /// <see cref="Bridge"/>; changes after the bridge is created are silently ignored.
+    /// </summary>
+    public IBridgeTracer? BridgeTracer
+    {
+        get => _core?.BridgeTracer;
+        set
+        {
+            if (_core is not null)
+                _core.BridgeTracer = value;
+            else
+                _pendingBridgeTracer = value;
+        }
+    }
+
+    private IBridgeTracer? _pendingBridgeTracer;
+
+    /// <summary>
     /// Gets the type-safe bridge service for exposing C# services to JS (<see cref="JsExportAttribute"/>)
     /// and importing JS services into C# (<see cref="JsImportAttribute"/>).
     /// Accessing this property auto-enables the WebMessage bridge if not already enabled.
@@ -502,6 +520,12 @@ public class WebView : NativeControlHost, IWebView
                          ?? (ILogger<WebViewCore>)NullLogger<WebViewCore>.Instance;
 
             _core = WebViewCore.CreateForControl(dispatcher, logger, EnvironmentOptions);
+
+            if (_pendingBridgeTracer is not null)
+            {
+                _core.BridgeTracer = _pendingBridgeTracer;
+                _pendingBridgeTracer = null;
+            }
 
             // Subscribe before Attach so we receive AdapterCreated raised during Attach().
             SubscribeCoreEvents();

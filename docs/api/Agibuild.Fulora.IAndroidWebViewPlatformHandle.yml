@@ -1,0 +1,133 @@
+### YamlMime:ManagedReference
+items:
+- uid: Agibuild.Fulora.IAndroidWebViewPlatformHandle
+  commentId: T:Agibuild.Fulora.IAndroidWebViewPlatformHandle
+  id: IAndroidWebViewPlatformHandle
+  parent: Agibuild.Fulora
+  children:
+  - Agibuild.Fulora.IAndroidWebViewPlatformHandle.AndroidWebViewHandle
+  langs:
+  - csharp
+  - vb
+  name: IAndroidWebViewPlatformHandle
+  nameWithType: IAndroidWebViewPlatformHandle
+  fullName: Agibuild.Fulora.IAndroidWebViewPlatformHandle
+  type: Interface
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/WebViewContracts.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: IAndroidWebViewPlatformHandle
+    path: ../src/Agibuild.Fulora.Core/WebViewContracts.cs
+    startLine: 489
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Typed platform handle for Android WebView.
+  example: []
+  syntax:
+    content: 'public interface IAndroidWebViewPlatformHandle : INativeHandle'
+    content.vb: Public Interface IAndroidWebViewPlatformHandle Inherits INativeHandle
+  inheritedMembers:
+  - Agibuild.Fulora.INativeHandle.Handle
+  - Agibuild.Fulora.INativeHandle.HandleDescriptor
+- uid: Agibuild.Fulora.IAndroidWebViewPlatformHandle.AndroidWebViewHandle
+  commentId: P:Agibuild.Fulora.IAndroidWebViewPlatformHandle.AndroidWebViewHandle
+  id: AndroidWebViewHandle
+  parent: Agibuild.Fulora.IAndroidWebViewPlatformHandle
+  langs:
+  - csharp
+  - vb
+  name: AndroidWebViewHandle
+  nameWithType: IAndroidWebViewPlatformHandle.AndroidWebViewHandle
+  fullName: Agibuild.Fulora.IAndroidWebViewPlatformHandle.AndroidWebViewHandle
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/WebViewContracts.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: AndroidWebViewHandle
+    path: ../src/Agibuild.Fulora.Core/WebViewContracts.cs
+    startLine: 492
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: JNI handle to the Android <code>WebView</code> instance.
+  example: []
+  syntax:
+    content: nint AndroidWebViewHandle { get; }
+    parameters: []
+    return:
+      type: System.IntPtr
+    content.vb: ReadOnly Property AndroidWebViewHandle As IntPtr
+  overload: Agibuild.Fulora.IAndroidWebViewPlatformHandle.AndroidWebViewHandle*
+references:
+- uid: Agibuild.Fulora
+  commentId: N:Agibuild.Fulora
+  href: Agibuild.html
+  name: Agibuild.Fulora
+  nameWithType: Agibuild.Fulora
+  fullName: Agibuild.Fulora
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+- uid: Agibuild.Fulora.INativeHandle.Handle
+  commentId: P:Agibuild.Fulora.INativeHandle.Handle
+  parent: Agibuild.Fulora.INativeHandle
+  href: Agibuild.Fulora.INativeHandle.html#Agibuild_Fulora_INativeHandle_Handle
+  name: Handle
+  nameWithType: INativeHandle.Handle
+  fullName: Agibuild.Fulora.INativeHandle.Handle
+- uid: Agibuild.Fulora.INativeHandle.HandleDescriptor
+  commentId: P:Agibuild.Fulora.INativeHandle.HandleDescriptor
+  parent: Agibuild.Fulora.INativeHandle
+  href: Agibuild.Fulora.INativeHandle.html#Agibuild_Fulora_INativeHandle_HandleDescriptor
+  name: HandleDescriptor
+  nameWithType: INativeHandle.HandleDescriptor
+  fullName: Agibuild.Fulora.INativeHandle.HandleDescriptor
+- uid: Agibuild.Fulora.INativeHandle
+  commentId: T:Agibuild.Fulora.INativeHandle
+  parent: Agibuild.Fulora
+  href: Agibuild.Fulora.INativeHandle.html
+  name: INativeHandle
+  nameWithType: INativeHandle
+  fullName: Agibuild.Fulora.INativeHandle
+- uid: Agibuild.Fulora.IAndroidWebViewPlatformHandle.AndroidWebViewHandle*
+  commentId: Overload:Agibuild.Fulora.IAndroidWebViewPlatformHandle.AndroidWebViewHandle
+  href: Agibuild.Fulora.IAndroidWebViewPlatformHandle.html#Agibuild_Fulora_IAndroidWebViewPlatformHandle_AndroidWebViewHandle
+  name: AndroidWebViewHandle
+  nameWithType: IAndroidWebViewPlatformHandle.AndroidWebViewHandle
+  fullName: Agibuild.Fulora.IAndroidWebViewPlatformHandle.AndroidWebViewHandle
+- uid: System.IntPtr
+  commentId: T:System.IntPtr
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.intptr
+  name: nint
+  nameWithType: nint
+  fullName: nint
+  nameWithType.vb: IntPtr
+  fullName.vb: System.IntPtr
+  name.vb: IntPtr
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System

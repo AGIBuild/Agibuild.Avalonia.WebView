@@ -1,0 +1,655 @@
+### YamlMime:ManagedReference
+items:
+- uid: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest
+  commentId: T:Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest
+  id: WebViewSystemIntegrationEventRequest
+  parent: Agibuild.Fulora.Shell
+  children:
+  - Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.Context
+  - Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.ItemId
+  - Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.Kind
+  - Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.Metadata
+  - Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.OccurredAtUtc
+  - Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.Source
+  langs:
+  - csharp
+  - vb
+  name: WebViewSystemIntegrationEventRequest
+  nameWithType: WebViewSystemIntegrationEventRequest
+  fullName: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest
+  type: Class
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: WebViewSystemIntegrationEventRequest
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 200
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Typed inbound system integration event payload.
+  example: []
+  syntax:
+    content: public sealed class WebViewSystemIntegrationEventRequest
+    content.vb: Public NotInheritable Class WebViewSystemIntegrationEventRequest
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.GetHashCode
+  - System.Object.GetType
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.ToString
+- uid: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.Source
+  commentId: P:Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.Source
+  id: Source
+  parent: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest
+  langs:
+  - csharp
+  - vb
+  name: Source
+  nameWithType: WebViewSystemIntegrationEventRequest.Source
+  fullName: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.Source
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Source
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 203
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Stable host-originated event source identity.
+  example: []
+  syntax:
+    content: public string? Source { get; init; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property Source As String
+  overload: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.Source*
+- uid: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.OccurredAtUtc
+  commentId: P:Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.OccurredAtUtc
+  id: OccurredAtUtc
+  parent: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest
+  langs:
+  - csharp
+  - vb
+  name: OccurredAtUtc
+  nameWithType: WebViewSystemIntegrationEventRequest.OccurredAtUtc
+  fullName: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.OccurredAtUtc
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: OccurredAtUtc
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 205
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: UTC timestamp of when the host event occurred.
+  example: []
+  syntax:
+    content: public DateTimeOffset OccurredAtUtc { get; init; }
+    parameters: []
+    return:
+      type: System.DateTimeOffset
+    content.vb: Public Property OccurredAtUtc As DateTimeOffset
+  overload: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.OccurredAtUtc*
+- uid: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.Kind
+  commentId: P:Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.Kind
+  id: Kind
+  parent: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest
+  langs:
+  - csharp
+  - vb
+  name: Kind
+  nameWithType: WebViewSystemIntegrationEventRequest.Kind
+  fullName: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.Kind
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Kind
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 207
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Event kind.
+  example: []
+  syntax:
+    content: public WebViewSystemIntegrationEventKind Kind { get; init; }
+    parameters: []
+    return:
+      type: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventKind
+    content.vb: Public Property Kind As WebViewSystemIntegrationEventKind
+  overload: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.Kind*
+- uid: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.ItemId
+  commentId: P:Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.ItemId
+  id: ItemId
+  parent: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest
+  langs:
+  - csharp
+  - vb
+  name: ItemId
+  nameWithType: WebViewSystemIntegrationEventRequest.ItemId
+  fullName: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.ItemId
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: ItemId
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 209
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Optional item id for menu/tray events.
+  example: []
+  syntax:
+    content: public string? ItemId { get; init; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property ItemId As String
+  overload: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.ItemId*
+- uid: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.Context
+  commentId: P:Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.Context
+  id: Context
+  parent: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest
+  langs:
+  - csharp
+  - vb
+  name: Context
+  nameWithType: WebViewSystemIntegrationEventRequest.Context
+  fullName: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.Context
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Context
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 211
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Optional context payload for diagnostics and UI reaction.
+  example: []
+  syntax:
+    content: public string? Context { get; init; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property Context As String
+  overload: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.Context*
+- uid: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.Metadata
+  commentId: P:Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.Metadata
+  id: Metadata
+  parent: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest
+  langs:
+  - csharp
+  - vb
+  name: Metadata
+  nameWithType: WebViewSystemIntegrationEventRequest.Metadata
+  fullName: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.Metadata
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Metadata
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 215
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Optional bounded metadata envelope. Keys and values must satisfy runtime schema limits.
+  example: []
+  syntax:
+    content: public IReadOnlyDictionary<string, string> Metadata { get; init; }
+    parameters: []
+    return:
+      type: System.Collections.Generic.IReadOnlyDictionary{System.String,System.String}
+    content.vb: Public Property Metadata As IReadOnlyDictionary(Of String, String)
+  overload: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.Metadata*
+references:
+- uid: Agibuild.Fulora.Shell
+  commentId: N:Agibuild.Fulora.Shell
+  href: Agibuild.html
+  name: Agibuild.Fulora.Shell
+  nameWithType: Agibuild.Fulora.Shell
+  fullName: Agibuild.Fulora.Shell
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  - name: .
+  - uid: Agibuild.Fulora.Shell
+    name: Shell
+    href: Agibuild.Fulora.Shell.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  - name: .
+  - uid: Agibuild.Fulora.Shell
+    name: Shell
+    href: Agibuild.Fulora.Shell.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.Source*
+  commentId: Overload:Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.Source
+  href: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.html#Agibuild_Fulora_Shell_WebViewSystemIntegrationEventRequest_Source
+  name: Source
+  nameWithType: WebViewSystemIntegrationEventRequest.Source
+  fullName: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.Source
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.OccurredAtUtc*
+  commentId: Overload:Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.OccurredAtUtc
+  href: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.html#Agibuild_Fulora_Shell_WebViewSystemIntegrationEventRequest_OccurredAtUtc
+  name: OccurredAtUtc
+  nameWithType: WebViewSystemIntegrationEventRequest.OccurredAtUtc
+  fullName: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.OccurredAtUtc
+- uid: System.DateTimeOffset
+  commentId: T:System.DateTimeOffset
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.datetimeoffset
+  name: DateTimeOffset
+  nameWithType: DateTimeOffset
+  fullName: System.DateTimeOffset
+- uid: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.Kind*
+  commentId: Overload:Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.Kind
+  href: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.html#Agibuild_Fulora_Shell_WebViewSystemIntegrationEventRequest_Kind
+  name: Kind
+  nameWithType: WebViewSystemIntegrationEventRequest.Kind
+  fullName: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.Kind
+- uid: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventKind
+  commentId: T:Agibuild.Fulora.Shell.WebViewSystemIntegrationEventKind
+  parent: Agibuild.Fulora.Shell
+  href: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventKind.html
+  name: WebViewSystemIntegrationEventKind
+  nameWithType: WebViewSystemIntegrationEventKind
+  fullName: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventKind
+- uid: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.ItemId*
+  commentId: Overload:Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.ItemId
+  href: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.html#Agibuild_Fulora_Shell_WebViewSystemIntegrationEventRequest_ItemId
+  name: ItemId
+  nameWithType: WebViewSystemIntegrationEventRequest.ItemId
+  fullName: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.ItemId
+- uid: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.Context*
+  commentId: Overload:Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.Context
+  href: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.html#Agibuild_Fulora_Shell_WebViewSystemIntegrationEventRequest_Context
+  name: Context
+  nameWithType: WebViewSystemIntegrationEventRequest.Context
+  fullName: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.Context
+- uid: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.Metadata*
+  commentId: Overload:Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.Metadata
+  href: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.html#Agibuild_Fulora_Shell_WebViewSystemIntegrationEventRequest_Metadata
+  name: Metadata
+  nameWithType: WebViewSystemIntegrationEventRequest.Metadata
+  fullName: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.Metadata
+- uid: System.Collections.Generic.IReadOnlyDictionary{System.String,System.String}
+  commentId: T:System.Collections.Generic.IReadOnlyDictionary{System.String,System.String}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IReadOnlyDictionary`2
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlydictionary-2
+  name: IReadOnlyDictionary<string, string>
+  nameWithType: IReadOnlyDictionary<string, string>
+  fullName: System.Collections.Generic.IReadOnlyDictionary<string, string>
+  nameWithType.vb: IReadOnlyDictionary(Of String, String)
+  fullName.vb: System.Collections.Generic.IReadOnlyDictionary(Of String, String)
+  name.vb: IReadOnlyDictionary(Of String, String)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyDictionary`2
+    name: IReadOnlyDictionary
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlydictionary-2
+  - name: <
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyDictionary`2
+    name: IReadOnlyDictionary
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlydictionary-2
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+- uid: System.Collections.Generic.IReadOnlyDictionary`2
+  commentId: T:System.Collections.Generic.IReadOnlyDictionary`2
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlydictionary-2
+  name: IReadOnlyDictionary<TKey, TValue>
+  nameWithType: IReadOnlyDictionary<TKey, TValue>
+  fullName: System.Collections.Generic.IReadOnlyDictionary<TKey, TValue>
+  nameWithType.vb: IReadOnlyDictionary(Of TKey, TValue)
+  fullName.vb: System.Collections.Generic.IReadOnlyDictionary(Of TKey, TValue)
+  name.vb: IReadOnlyDictionary(Of TKey, TValue)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyDictionary`2
+    name: IReadOnlyDictionary
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlydictionary-2
+  - name: <
+  - name: TKey
+  - name: ','
+  - name: " "
+  - name: TValue
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyDictionary`2
+    name: IReadOnlyDictionary
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlydictionary-2
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TKey
+  - name: ','
+  - name: " "
+  - name: TValue
+  - name: )
+- uid: System.Collections.Generic
+  commentId: N:System.Collections.Generic
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Collections.Generic
+  nameWithType: System.Collections.Generic
+  fullName: System.Collections.Generic
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic

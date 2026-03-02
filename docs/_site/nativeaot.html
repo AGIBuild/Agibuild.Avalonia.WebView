@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>NativeAOT Support | Agibuild.Fulora </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="NativeAOT Support | Agibuild.Fulora ">
+      
+      
+      <link rel="icon" href="favicon.ico">
+      <link rel="stylesheet" href="public/docfx.min.css">
+      <link rel="stylesheet" href="public/main.css">
+      <meta name="docfx:navrel" content="toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/AGIBuild/Agibuild.Fulora/blob/main/docs/nativeaot.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="index.html">
+            <img id="logo" class="svg" src="logo.svg" alt="Agibuild.Fulora">
+            Agibuild.Fulora
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+
+      <div class="content">
+        <div class="actionbar">
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+<h1 id="nativeaot-support">NativeAOT Support</h1>
+
+<h2 id="overview">Overview</h2>
+<p>Agibuild.Fulora supports NativeAOT publishing for improved startup time and smaller binaries.</p>
+<h2 id="requirements">Requirements</h2>
+<ul>
+<li>.NET 10+ SDK</li>
+<li>Platform-specific AOT toolchain</li>
+</ul>
+<h2 id="enabling-nativeaot">Enabling NativeAOT</h2>
+<p>Add to your <code>.csproj</code>:</p>
+<pre><code class="lang-xml">&lt;PropertyGroup&gt;
+  &lt;PublishAot&gt;true&lt;/PublishAot&gt;
+&lt;/PropertyGroup&gt;
+</code></pre>
+<p>Then publish for your target runtime:</p>
+<pre><code class="lang-bash">dotnet publish -r linux-x64
+dotnet publish -r win-x64
+dotnet publish -r osx-arm64
+</code></pre>
+<h2 id="compatibility-notes">Compatibility Notes</h2>
+<ul>
+<li>All bridge services use source-generated serialization (no reflection)</li>
+<li><code>IBridgeServiceRegistration</code> ensures AOT-safe service registration</li>
+<li>The Bridge.Generator emits trimmer-safe code</li>
+</ul>
+<h2 id="platform-support-matrix">Platform Support Matrix</h2>
+<table>
+<thead>
+<tr>
+<th>Platform</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Windows x64</td>
+<td>Supported</td>
+</tr>
+<tr>
+<td>macOS arm64</td>
+<td>Supported</td>
+</tr>
+<tr>
+<td>Linux x64</td>
+<td>Supported</td>
+</tr>
+<tr>
+<td>iOS</td>
+<td>Not yet tested</td>
+</tr>
+<tr>
+<td>Android</td>
+<td>Not supported (use Mono)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="known-limitations">Known Limitations</h2>
+<ul>
+<li>Dynamic assembly loading is not supported</li>
+<li>Reflection-based serialization will fail; use source-generated <code>JsonSerializer</code></li>
+<li>Some third-party libraries may not be AOT-compatible; verify dependencies before enabling</li>
+</ul>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/AGIBuild/Agibuild.Fulora/blob/main/docs/nativeaot.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          Agibuild.Fulora — Cross-platform Hybrid App Framework
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Fulora 兼容矩阵提案（Baseline / Extended） | Agibuild.Fulora </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Fulora 兼容矩阵提案（Baseline / Extended） | Agibuild.Fulora ">
+      
+      
+      <link rel="icon" href="favicon.ico">
+      <link rel="stylesheet" href="public/docfx.min.css">
+      <link rel="stylesheet" href="public/main.css">
+      <meta name="docfx:navrel" content="toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/AGIBuild/Agibuild.Fulora/blob/main/docs/agibuild_webview_compatibility_matrix_proposal.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="index.html">
+            <img id="logo" class="svg" src="logo.svg" alt="Agibuild.Fulora">
+            Agibuild.Fulora
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+
+      <div class="content">
+        <div class="actionbar">
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+<h1 id="fulora-兼容矩阵提案baseline--extended">Fulora 兼容矩阵提案（Baseline / Extended）</h1>
+
+<blockquote>
+<p>本文是“可验证、可测试、可验收”的兼容矩阵提案，用于替代“完全模拟官方 WebView”的不可验证目标。
+核心原则：任何“支持/一致”的声明都必须落到矩阵条目 + 明确语义 + 对应测试用例。</p>
+</blockquote>
+<hr>
+<h2 id="1-术语与范围">1. 术语与范围</h2>
+<h3 id="11-平台与模式">1.1 平台与模式</h3>
+<ul>
+<li><strong>Windows</strong>：WebView2</li>
+<li><strong>macOS/iOS</strong>：WKWebView</li>
+<li><strong>Android</strong>：Android WebView</li>
+<li><strong>Linux</strong>：仅 <code>WebDialog</code>（不提供嵌入式 Baseline）</li>
+</ul>
+<p>模式（Mode）：</p>
+<ul>
+<li><strong>Embedded</strong>：嵌入式控件（<code>IWebView</code>）</li>
+<li><strong>Dialog</strong>：弹窗模式（<code>IWebDialog</code>）</li>
+<li><strong>Auth</strong>：认证模式（<code>IWebAuthBroker</code>，通常基于 Dialog + 隔离策略）</li>
+</ul>
+<h3 id="12-支持等级">1.2 支持等级</h3>
+<ul>
+<li><strong>Baseline（必达）</strong>：库对外承诺的“默认可用能力”，必须有跨平台一致的契约语义与测试覆盖。</li>
+<li><strong>Extended（尽力）</strong>：可用但允许平台差异；仍需矩阵标注与差异条目（Platform Notes）。</li>
+<li><strong>Not Supported</strong>：明确不支持，不以“未来可能”模糊处理。</li>
+</ul>
+<h3 id="13-支持的可验证定义">1.3 “支持”的可验证定义</h3>
+<p>每个能力条目必须至少包含：</p>
+<ul>
+<li><strong>语义</strong>：成功/失败/取消/超时/线程语义、事件顺序等</li>
+<li><strong>覆盖</strong>：在哪些平台+模式支持（Embedded/Dialog/Auth）</li>
+<li><strong>验收</strong>：对应的测试类型与最小用例集合</li>
+</ul>
+<p>测试类型（用于矩阵标注）：</p>
+<ul>
+<li><strong>CT（Contract Test）</strong>：平台无关、基于 MockAdapter，验证契约语义/状态机/事件顺序</li>
+<li><strong>IT（Integration Test / Smoke）</strong>：平台最小冒烟，验证“能跑 + 能回调 + 不崩溃”</li>
+</ul>
+<hr>
+<h2 id="2-兼容矩阵提案-v1">2. 兼容矩阵（提案 v1）</h2>
+<p>标记说明：</p>
+<ul>
+<li>✅ 支持（Baseline/Extended 由列“Level”定义）</li>
+<li>⚠️ 支持但有平台差异（必须在“Platform Notes”中列差异条目）</li>
+<li>❌ 不支持</li>
+<li>N/A 不适用（例如 Linux Embedded）</li>
+</ul>
+<h3 id="21-core-webview-apiiwebview">2.1 Core WebView API（<code>IWebView</code>）</h3>
+<table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>Level</th>
+<th style="text-align: right;">Windows (Embedded)</th>
+<th style="text-align: right;">macOS/iOS (Embedded)</th>
+<th style="text-align: right;">Android (Embedded)</th>
+<th style="text-align: right;">Linux (Embedded)</th>
+<th style="text-align: right;">Dialog</th>
+<th>Test</th>
+<th>Platform Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Source</code> get/set</td>
+<td>Baseline</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">N/A</td>
+<td style="text-align: right;">✅</td>
+<td>CT+IT</td>
+<td>Source=last requested URI (not necessarily loaded)</td>
+</tr>
+<tr>
+<td><code>NavigateAsync(Uri)</code></td>
+<td>Baseline</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">N/A</td>
+<td style="text-align: right;">✅</td>
+<td>CT+IT</td>
+<td>Must emit Started/Completed exactly-once per NavigationId</td>
+</tr>
+<tr>
+<td><code>NavigateToStringAsync(string html)</code></td>
+<td>Baseline</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">N/A</td>
+<td style="text-align: right;">✅</td>
+<td>CT+IT</td>
+<td>Encoding/baseUri differences must be documented if any</td>
+</tr>
+<tr>
+<td><code>InvokeScriptAsync(string script)</code></td>
+<td>Baseline</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">N/A</td>
+<td style="text-align: right;">✅</td>
+<td>CT+IT</td>
+<td>Return value normalized to string? define per contract</td>
+</tr>
+<tr>
+<td><code>CanGoBack/CanGoForward</code></td>
+<td>Baseline</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">N/A</td>
+<td style="text-align: right;">✅</td>
+<td>CT+IT</td>
+<td>Update timing and event for capability change</td>
+</tr>
+<tr>
+<td><code>GoBack()/GoForward()</code></td>
+<td>Baseline</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">N/A</td>
+<td style="text-align: right;">✅</td>
+<td>CT+IT</td>
+<td>Sync API: UI-thread only; illegal call semantics fixed in contract</td>
+</tr>
+<tr>
+<td><code>Refresh()/Stop()</code></td>
+<td>Baseline</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">N/A</td>
+<td style="text-align: right;">✅</td>
+<td>CT+IT</td>
+<td>Stop cancels current navigation (Completed=Canceled/Superseded)</td>
+</tr>
+<tr>
+<td><code>TryGetCookieManager()</code></td>
+<td>Extended</td>
+<td style="text-align: right;">⚠️</td>
+<td style="text-align: right;">⚠️</td>
+<td style="text-align: right;">⚠️</td>
+<td style="text-align: right;">N/A</td>
+<td style="text-align: right;">⚠️</td>
+<td>CT+IT</td>
+<td>Platform storage model differs; must list supported ops</td>
+</tr>
+<tr>
+<td><code>TryGetCommandManager()</code></td>
+<td>Extended</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">N/A</td>
+<td style="text-align: right;">✅</td>
+<td>CT</td>
+<td>Copy/Cut/Paste/SelectAll/Undo/Redo via native editing commands</td>
+</tr>
+<tr>
+<td><code>CaptureScreenshotAsync()</code></td>
+<td>Extended</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">N/A</td>
+<td style="text-align: right;">✅</td>
+<td>CT</td>
+<td>Returns PNG bytes; all 5 platforms supported</td>
+</tr>
+<tr>
+<td><code>PrintToPdfAsync()</code></td>
+<td>Extended</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">❌</td>
+<td style="text-align: right;">❌</td>
+<td style="text-align: right;">❌</td>
+<td>CT</td>
+<td>Windows/macOS/iOS: PDF bytes; Android: <code>NotSupportedException</code>; GTK: not implemented (WebKitGTK lacks PDF export API)</td>
+</tr>
+<tr>
+<td><code>Rpc</code> (JS ↔ C# RPC)</td>
+<td>Extended</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">N/A</td>
+<td style="text-align: right;">✅</td>
+<td>CT</td>
+<td>JSON-RPC 2.0 over WebMessage bridge; requires bridge enabled</td>
+</tr>
+<tr>
+<td><code>INativeWebViewHandleProvider</code></td>
+<td>Extended</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">N/A</td>
+<td style="text-align: right;">✅</td>
+<td>IT</td>
+<td>Handle type differs per platform; document stability &amp; lifetime</td>
+</tr>
+</tbody>
+</table>
+<h4 id="211-macos-wkwebviewembeddedm0-验收标准ct--it-对齐">2.1.1 macOS WKWebView（Embedded）M0 验收标准（CT + IT 对齐）</h4>
+<ul>
+<li><strong>目标</strong>：在不要求消费方使用 <code>net10.0-macos</code> 的前提下，macOS 上默认启用 WKWebView 适配器；并且满足 v1 契约语义的关键不变量（导航拦截/取消、事件一致性、最小脚本/消息闭环）。</li>
+<li><strong>CT（Contract Tests）</strong>：以 <code>tests/Agibuild.Fulora.UnitTests/ContractSemanticsV1*.cs</code> 为准，覆盖 v1 语义（<code>NavigationCompleted</code> exactly-once、supersede/cancel、线程/事件顺序、脚本/消息语义等）。</li>
+<li><strong>IT（Integration Smoke - macOS）</strong>：在 <code>tests/Agibuild.Fulora.Integration.Tests</code> 的 UI 页签 <strong>macOS WK Smoke</strong> 中提供最小冒烟闭环，覆盖：
+<ul>
+<li><strong>Link click</strong>：DOM 点击链接触发主框架导航</li>
+<li><strong>302 redirect</strong>：重定向链路（若平台回调可见）要求同一链路复用 <code>CorrelationId</code></li>
+<li><strong><code>window.location</code></strong>：脚本触发导航</li>
+<li><strong>Cancel/deny</strong>：host 返回 deny（<code>IsAllowed=false</code>）时应取消导航并得到可观测的 Completed</li>
+<li><strong>Script</strong>：<code>InvokeScriptAsync</code> 最小返回值验证</li>
+<li><strong>WebMessage</strong>：最小 JS→C# 消息闭环（<code>WebMessageReceived</code> 可触发）</li>
+</ul>
+</li>
+<li><strong>IT 自动运行入口</strong>：桌面集成测试 App 支持 <code>--wk-smoke</code> 自动运行并以退出码表示成功/失败。</li>
+</ul>
+<h4 id="212-macos-wkwebviewembeddedm1-验收标准ct--it-对齐">2.1.2 macOS WKWebView（Embedded）M1 验收标准（CT + IT 对齐）</h4>
+<ul>
+<li><strong>目标</strong>：将 macOS adapter 从 M0 基线提升到生产就绪，覆盖 cookie 管理、new-window 回退、原生句柄访问、错误分类和 baseUrl 支持。</li>
+<li><strong>CT（Contract Tests）</strong>：新增 <code>ContractSemanticsV1CookieTests</code>、<code>ContractSemanticsV1NewWindowFallbackTests</code>、<code>ContractSemanticsV1ErrorCategorizationTests</code>、<code>ContractSemanticsV1BaseUrlTests</code>，覆盖：
+<ul>
+<li><code>TryGetCookieManager()</code> 在有/无 <code>ICookieAdapter</code> 时返回值</li>
+<li>Cookie CRUD（set/get/delete/clear）通过 mock 内存存储</li>
+<li>Cookie 操作在 dispose 后抛出 <code>ObjectDisposedException</code></li>
+<li><code>NewWindowRequested</code> 未处理时回退导航、<code>Handled=true</code> 时无回退、null URI 无动作</li>
+<li><code>WebViewNetworkException</code>/<code>WebViewSslException</code>/<code>WebViewTimeoutException</code> 类型保留</li>
+<li><code>NavigateToStringAsync(html, baseUrl)</code> 的 <code>Source</code> 和 <code>RequestUri</code> 语义</li>
+</ul>
+</li>
+<li><strong>IT（Integration Smoke - macOS）</strong>：扩展冒烟场景，覆盖：
+<ul>
+<li>Cookie set → 页面读取 <code>document.cookie</code> 验证</li>
+<li>Cookie get → 页面设置 cookie 后 <code>GetCookiesAsync</code> 验证</li>
+<li>Cookie delete/clear 验证</li>
+<li><code>TryGetWebViewHandle()</code> 返回非 null 且 descriptor=<code>&quot;WKWebView&quot;</code></li>
+<li>导航到无效主机 → <code>NavigationCompleted.Error</code> 为 <code>WebViewNetworkException</code></li>
+<li><code>NavigateToStringAsync(html, baseUrl)</code> 相对资源解析验证</li>
+</ul>
+</li>
+</ul>
+<h4 id="213-windows-webview2embeddedm0-验收标准ct--it-对齐">2.1.3 Windows WebView2（Embedded）M0 验收标准（CT + IT 对齐）</h4>
+<ul>
+<li><strong>目标</strong>：实现 Windows 平台 WebView2 适配器，覆盖全部 v1 契约语义（导航拦截/关联、脚本、消息桥接）及 M1 扩展能力（cookie 管理、错误分类、原生句柄、baseUrl 支持），实现与 macOS adapter 的完整对等。</li>
+<li><strong>CT（Contract Tests）</strong>：复用 M0/M1 全部 CT 用例（196 项），因 CT 为平台无关（MockAdapter），无需新增。</li>
+<li><strong>IT（Integration Smoke - Windows）</strong>：在 Windows 集成测试 App 中提供冒烟闭环，覆盖：
+<ul>
+<li><strong>Link click</strong>：DOM 点击链接触发主框架导航，验证 <code>NavigationStarted</code> + <code>NavigationCompleted</code> 同一 <code>NavigationId</code></li>
+<li><strong>302 redirect</strong>：重定向链路复用 <code>CorrelationId</code>，exactly-once completion</li>
+<li><strong><code>window.location</code></strong>：脚本触发导航，验证原生拦截 + 成功完成</li>
+<li><strong>Cancel/deny</strong>：handler 设置 <code>Cancel=true</code> → deny native step + <code>NavigationCompleted</code> status=<code>Canceled</code></li>
+<li><strong>Script</strong>：<code>InvokeScriptAsync</code> 执行 + <code>WebMessageReceived</code> 消息接收闭环</li>
+<li><strong>Cookie CRUD</strong>：通过 <code>ICookieManager</code> 的 set/get/delete 验证（backed by <code>CoreWebView2CookieManager</code>）</li>
+<li><strong>Error categorization</strong>：导航到不可达主机 → <code>WebViewNetworkException</code></li>
+<li><strong>Native handle</strong>：<code>TryGetWebViewHandle()</code> 返回非 null 且 descriptor=<code>&quot;WebView2&quot;</code></li>
+<li><strong>baseUrl</strong>：<code>NavigateToStringAsync(html, baseUrl)</code> 资源解析验证</li>
+</ul>
+</li>
+</ul>
+<h5 id="cookie-管理">Cookie 管理</h5>
+<table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>Windows/WebView2</th>
+<th>macOS/WKWebView</th>
+<th>其他平台</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ICookieManager.GetCookiesAsync</code></td>
+<td>✅ M0</td>
+<td>✅ M1</td>
+<td>❌ (null)</td>
+<td>Windows: <code>CoreWebView2CookieManager</code>; macOS: <code>WKHTTPCookieStore</code></td>
+</tr>
+<tr>
+<td><code>ICookieManager.SetCookieAsync</code></td>
+<td>✅ M0</td>
+<td>✅ M1</td>
+<td>❌ (null)</td>
+<td></td>
+</tr>
+<tr>
+<td><code>ICookieManager.DeleteCookieAsync</code></td>
+<td>✅ M0</td>
+<td>✅ M1</td>
+<td>❌ (null)</td>
+<td></td>
+</tr>
+<tr>
+<td><code>ICookieManager.ClearAllCookiesAsync</code></td>
+<td>✅ M0</td>
+<td>✅ M1</td>
+<td>❌ (null)</td>
+<td>Windows: <code>DeleteAllCookies</code> 同步+fire-and-forget</td>
+</tr>
+<tr>
+<td>Cookie 隔离模型</td>
+<td>基于 <code>CoreWebView2Profile</code></td>
+<td>基于 <code>defaultDataStore</code></td>
+<td>-</td>
+<td>平台差异：Windows 按 profile 隔离，macOS 共享 defaultDataStore</td>
+</tr>
+</tbody>
+</table>
+<h5 id="错误分类">错误分类</h5>
+<table>
+<thead>
+<tr>
+<th>错误类型</th>
+<th>Windows <code>CoreWebView2WebErrorStatus</code> 映射</th>
+<th>macOS <code>NSURLError</code> 映射</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>WebViewTimeoutException</code></td>
+<td><code>Timeout</code></td>
+<td><code>-1001</code> (NSURLErrorTimedOut)</td>
+</tr>
+<tr>
+<td><code>WebViewNetworkException</code></td>
+<td><code>ConnectionAborted</code>, <code>ConnectionReset</code>, <code>Disconnected</code>, <code>CannotConnect</code>, <code>HostNameNotResolved</code></td>
+<td><code>-1003</code>, <code>-1004</code>, <code>-1005</code>, <code>-1009</code></td>
+</tr>
+<tr>
+<td><code>WebViewSslException</code></td>
+<td><code>CertificateCommonNameIsIncorrect</code>, <code>CertificateExpired</code>, <code>ClientCertificateContainsErrors</code>, <code>CertificateRevoked</code>, <code>CertificateIsInvalid</code></td>
+<td><code>-1201</code> ~ <code>-1204</code></td>
+</tr>
+<tr>
+<td><code>WebViewNavigationException</code> (base)</td>
+<td>其他所有非成功状态</td>
+<td>其他所有</td>
+</tr>
+</tbody>
+</table>
+<h3 id="22-events契约语义优先">2.2 Events（契约语义优先）</h3>
+<table>
+<thead>
+<tr>
+<th>Event</th>
+<th>Level</th>
+<th style="text-align: right;">Windows</th>
+<th style="text-align: right;">macOS/iOS</th>
+<th style="text-align: right;">Android</th>
+<th style="text-align: right;">Linux (Dialog)</th>
+<th>Test</th>
+<th>Contract Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>NavigationStarted</code></td>
+<td>Baseline</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td>CT+IT</td>
+<td>Always on UI thread; Cancel prevents any main-frame navigation (including redirects)</td>
+</tr>
+<tr>
+<td><code>NavigationCompleted</code></td>
+<td>Baseline</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td>CT+IT</td>
+<td>Exactly-once per NavigationId; includes Status (Success/Failure/Canceled/Superseded)</td>
+</tr>
+<tr>
+<td><code>NewWindowRequested</code></td>
+<td>Extended</td>
+<td style="text-align: right;">⚠️</td>
+<td style="text-align: right;">⚠️</td>
+<td style="text-align: right;">⚠️</td>
+<td style="text-align: right;">⚠️</td>
+<td>IT</td>
+<td>Popup policy differs; must document mapping rules</td>
+</tr>
+<tr>
+<td><code>WebMessageReceived</code></td>
+<td>Baseline</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td>CT+IT</td>
+<td>Only when bridge enabled + policy passes; otherwise never fires</td>
+</tr>
+<tr>
+<td><code>WebResourceRequested</code></td>
+<td>Extended</td>
+<td style="text-align: right;">⚠️</td>
+<td style="text-align: right;">⚠️</td>
+<td style="text-align: right;">⚠️</td>
+<td style="text-align: right;">⚠️</td>
+<td>IT</td>
+<td>Interception capability differs; baseline only guarantees “observe” if supported</td>
+</tr>
+<tr>
+<td><code>EnvironmentRequested</code></td>
+<td>Extended</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td>CT</td>
+<td>Allows customizing environment/options before init</td>
+</tr>
+</tbody>
+</table>
+<h3 id="23-environment--optionsiwebviewenvironmentoptions">2.3 Environment / Options（<code>IWebViewEnvironmentOptions</code>）</h3>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Level</th>
+<th style="text-align: right;">Windows</th>
+<th style="text-align: right;">macOS/iOS</th>
+<th style="text-align: right;">Android</th>
+<th style="text-align: right;">Linux (Dialog)</th>
+<th>Test</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>EnableDevTools</code></td>
+<td>Extended</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">⚠️</td>
+<td style="text-align: right;">⚠️</td>
+<td style="text-align: right;">✅</td>
+<td>IT</td>
+<td>Platform-specific behavior; macOS: <code>OpenDevTools()</code>/<code>CloseDevTools()</code> are no-ops (WKWebView has no public API), Web Inspector accessible via right-click → Inspect Element when enabled; GTK: functional via WebKitGTK inspector</td>
+</tr>
+<tr>
+<td><code>IAsyncPreloadScriptAdapter</code></td>
+<td>Extended</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">❌</td>
+<td style="text-align: right;">❌</td>
+<td style="text-align: right;">❌</td>
+<td>CT</td>
+<td>Windows-only (WebView2 <code>AddScriptToExecuteOnDocumentCreatedAsync</code>); other platforms fall back to sync <code>IPreloadScriptAdapter</code> wrapped in <code>Task.FromResult</code></td>
+</tr>
+<tr>
+<td><code>ContextMenuRequested</code></td>
+<td>Extended</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">⚠️</td>
+<td style="text-align: right;">⚠️</td>
+<td style="text-align: right;">✅</td>
+<td>IT</td>
+<td>GTK: wired via WebKitGTK <code>context-menu</code> signal; macOS: no-op (WKWebView lacks public context menu interception API); Android: event declared but not raised</td>
+</tr>
+<tr>
+<td>UserAgent override</td>
+<td>Extended</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">⚠️</td>
+<td style="text-align: right;">⚠️</td>
+<td style="text-align: right;">❌</td>
+<td>IT</td>
+<td>Some platforms restrict UA; document exact effect</td>
+</tr>
+<tr>
+<td>Persistent storage profile / user data dir</td>
+<td>Extended</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">⚠️</td>
+<td style="text-align: right;">⚠️</td>
+<td style="text-align: right;">❌</td>
+<td>IT</td>
+<td>Windows WebView2 supports explicit user data folder</td>
+</tr>
+<tr>
+<td>Private/Ephemeral mode</td>
+<td>Extended</td>
+<td style="text-align: right;">⚠️</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">⚠️</td>
+<td style="text-align: right;">✅</td>
+<td>IT</td>
+<td>AuthFlow prefers ephemeral by default</td>
+</tr>
+</tbody>
+</table>
+<h3 id="24-webmessage-bridgejs--c">2.4 WebMessage Bridge（JS ↔ C#）</h3>
+<table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>Level</th>
+<th style="text-align: right;">Windows</th>
+<th style="text-align: right;">macOS/iOS</th>
+<th style="text-align: right;">Android</th>
+<th style="text-align: right;">Linux (Dialog)</th>
+<th>Test</th>
+<th>Contract Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Bridge disabled by default</td>
+<td>Baseline</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td>CT</td>
+<td>Default must not emit <code>WebMessageReceived</code></td>
+</tr>
+<tr>
+<td>Enable bridge explicitly</td>
+<td>Baseline</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td>CT+IT</td>
+<td>Requires explicit opt-in before use</td>
+</tr>
+<tr>
+<td>Origin allowlist policy</td>
+<td>Baseline</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td>CT</td>
+<td>Non-allowlisted origin must be dropped + observable</td>
+</tr>
+<tr>
+<td>Protocol/version check</td>
+<td>Baseline</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td>CT</td>
+<td>Unknown protocol version must be rejected</td>
+</tr>
+<tr>
+<td>Channel isolation per WebView instance</td>
+<td>Baseline</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td>CT</td>
+<td>Message must bind to instance/channel</td>
+</tr>
+</tbody>
+</table>
+<h3 id="25-bridge-v2-capabilities">2.5 Bridge V2 Capabilities</h3>
+<table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>Level</th>
+<th style="text-align: right;">Windows</th>
+<th style="text-align: right;">macOS/iOS</th>
+<th style="text-align: right;">Android</th>
+<th style="text-align: right;">Linux (Dialog)</th>
+<th>Test</th>
+<th>Contract Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Binary payload (<code>byte[]</code> ↔ <code>Uint8Array</code>)</td>
+<td>Baseline</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td>CT+IT</td>
+<td>Base64 transport; <code>_encodeBinaryPayload</code> / <code>_decodeBinaryResult</code> round-trip</td>
+</tr>
+<tr>
+<td>CancellationToken (<code>AbortSignal</code>)</td>
+<td>Baseline</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td>CT+IT</td>
+<td><code>$/cancelRequest</code> → <code>-32800</code>; handler CTS cancellation propagation</td>
+</tr>
+<tr>
+<td>IAsyncEnumerable streaming</td>
+<td>Baseline</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td>CT+IT</td>
+<td>Pull-based <code>$/enumerator/next</code> + <code>$/enumerator/abort</code>; token-gated</td>
+</tr>
+<tr>
+<td>Method overloads (<code>$N</code> suffix)</td>
+<td>Baseline</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td>CT+IT</td>
+<td>Fewest-param keeps original name; others get <code>$N</code> suffix by param count</td>
+</tr>
+<tr>
+<td>Generic interface rejection (<code>AGBR006</code>)</td>
+<td>Baseline</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td>CT</td>
+<td>Open generic <code>[JsExport]</code> reports deterministic diagnostic</td>
+</tr>
+</tbody>
+</table>
+<h3 id="26-shell-activationideeplinkregistrationservice">2.6 Shell Activation（<code>IDeepLinkRegistrationService</code>）</h3>
+<table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>Level</th>
+<th style="text-align: right;">Windows</th>
+<th style="text-align: right;">macOS/iOS</th>
+<th style="text-align: right;">Android</th>
+<th style="text-align: right;">Linux</th>
+<th>Test</th>
+<th>Contract Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Deep-link route registration</td>
+<td>Baseline</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td>CT</td>
+<td>Typed declaration accepted/rejected deterministically</td>
+</tr>
+<tr>
+<td>Activation normalization</td>
+<td>Baseline</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td>CT</td>
+<td>Equivalent URI variants normalize to same canonical route</td>
+</tr>
+<tr>
+<td>Activation policy admission</td>
+<td>Baseline</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td>CT</td>
+<td>Policy deny blocks dispatch deterministically</td>
+</tr>
+<tr>
+<td>Activation idempotency</td>
+<td>Baseline</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td>CT</td>
+<td>Duplicate within replay window suppressed</td>
+</tr>
+<tr>
+<td>Orchestration dispatch</td>
+<td>Baseline</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td>CT+IT</td>
+<td>Primary receives exactly once; no-primary returns failure</td>
+</tr>
+<tr>
+<td>Platform entrypoint mapping</td>
+<td>Extended</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td>IT</td>
+<td>OS protocol handler → runtime ingress; descriptor per platform</td>
+</tr>
+<tr>
+<td>Activation diagnostics</td>
+<td>Extended</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td>CT+IT</td>
+<td>Structured events with correlation ID, event type, outcome</td>
+</tr>
+</tbody>
+</table>
+<h3 id="27-spa-asset-hot-update">2.7 SPA Asset Hot Update</h3>
+<table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>Level</th>
+<th style="text-align: right;">Windows</th>
+<th style="text-align: right;">macOS/iOS</th>
+<th style="text-align: right;">Android</th>
+<th style="text-align: right;">Linux</th>
+<th>Test</th>
+<th>Contract Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Signed package install</td>
+<td>Baseline</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td>CT+IT</td>
+<td>RSA signature verification before extraction; rejected on mismatch</td>
+</tr>
+<tr>
+<td>Version activation</td>
+<td>Baseline</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td>CT+IT</td>
+<td>Atomic pointer swap; SpaHostingService serves active version</td>
+</tr>
+<tr>
+<td>Rollback to previous</td>
+<td>Baseline</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td>CT+IT</td>
+<td>Restores previous activation pointer; fails gracefully if missing</td>
+</tr>
+<tr>
+<td>Path traversal protection</td>
+<td>Baseline</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td>CT</td>
+<td>External asset paths validated against root boundary</td>
+</tr>
+</tbody>
+</table>
+<h3 id="28-webdialogiwebdialog">2.8 WebDialog（<code>IWebDialog</code>）</h3>
+<table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>Level</th>
+<th style="text-align: right;">Windows</th>
+<th style="text-align: right;">macOS/iOS</th>
+<th style="text-align: right;">Android</th>
+<th style="text-align: right;">Linux</th>
+<th>Test</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Show()/Close()</code></td>
+<td>Baseline</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td>IT</td>
+<td>Ownership model differs; contract defines minimal guarantees</td>
+</tr>
+<tr>
+<td><code>Show(owner)</code></td>
+<td>Baseline</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td>IT</td>
+<td>Owner handle mapping must be documented</td>
+</tr>
+<tr>
+<td><code>Title</code></td>
+<td>Extended</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">⚠️</td>
+<td style="text-align: right;">⚠️</td>
+<td style="text-align: right;">⚠️</td>
+<td>IT</td>
+<td>Some platforms may not support native title</td>
+</tr>
+<tr>
+<td><code>CanUserResize</code></td>
+<td>Extended</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">⚠️</td>
+<td style="text-align: right;">⚠️</td>
+<td style="text-align: right;">⚠️</td>
+<td>IT</td>
+<td>Best-effort mapping</td>
+</tr>
+<tr>
+<td><code>Resize/Move</code></td>
+<td>Extended</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">⚠️</td>
+<td style="text-align: right;">⚠️</td>
+<td style="text-align: right;">⚠️</td>
+<td>IT</td>
+<td>Not guaranteed; return false when not supported</td>
+</tr>
+<tr>
+<td><code>Closing</code> event</td>
+<td>Baseline</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td>IT</td>
+<td>Must fire once; order vs Close() specified in contract</td>
+</tr>
+</tbody>
+</table>
+<h3 id="29-authflowiwebauthbroker">2.9 AuthFlow（<code>IWebAuthBroker</code>）</h3>
+<table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>Level</th>
+<th style="text-align: right;">Windows</th>
+<th style="text-align: right;">macOS/iOS</th>
+<th style="text-align: right;">Android</th>
+<th style="text-align: right;">Linux</th>
+<th>Test</th>
+<th>Contract Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AuthenticateAsync(owner, options)</code></td>
+<td>Baseline</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td>CT+IT</td>
+<td>CallbackUri required; strict match rules</td>
+</tr>
+<tr>
+<td>Ephemeral session default</td>
+<td>Baseline</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td>CT+IT</td>
+<td>Default isolates cookies/storage from embedded webviews</td>
+</tr>
+<tr>
+<td>Timeout &amp; user-cancel result</td>
+<td>Baseline</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td style="text-align: right;">✅</td>
+<td>CT</td>
+<td>Must produce distinct result codes</td>
+</tr>
+<tr>
+<td>Shared session (opt-in)</td>
+<td>Extended</td>
+<td style="text-align: right;">⚠️</td>
+<td style="text-align: right;">⚠️</td>
+<td style="text-align: right;">⚠️</td>
+<td style="text-align: right;">⚠️</td>
+<td>IT</td>
+<td>Platform-dependent; explicitly marked</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="3-平台差异条目模板">3. 平台差异条目（模板）</h2>
+<p>任何 ⚠️ 条目都必须落到差异条目（可用于 issue/规范/测试豁免说明）：</p>
+<ul>
+<li><strong>Capability</strong>：</li>
+<li><strong>Platforms impacted</strong>：</li>
+<li><strong>Observed limitation</strong>：</li>
+<li><strong>User-visible behavior</strong>：</li>
+<li><strong>Security implications</strong>：</li>
+<li><strong>Test impact</strong>：哪些 CT/IT 用例需要条件化或替换为平台冒烟</li>
+<li><strong>Decision</strong>：Baseline/Extended/Not Supported（必须二选一/三选一）</li>
+</ul>
+<hr>
+<h2 id="4-验收与发布门禁提案">4. 验收与发布门禁（提案）</h2>
+<ul>
+<li><p><strong>Baseline 发布门禁</strong></p>
+<ul>
+<li>所有 Baseline 条目必须有 <strong>CT</strong> 覆盖</li>
+<li>每个平台至少通过一组 <strong>IT 冒烟</strong>（创建、导航、脚本、消息、关闭）</li>
+<li>关键不变量：事件在 UI 线程；<code>NavigationCompleted</code> exactly-once；Cancel 行为一致</li>
+</ul>
+</li>
+<li><p><strong>Extended 发布门禁</strong></p>
+<ul>
+<li>必须在矩阵中明确标注 ⚠️ 并提供差异条目</li>
+<li>不允许“默默失败”；需要可观测（日志/错误码/返回 false）</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="5-下一步用于落地的产出物">5. 下一步（用于落地的产出物）</h2>
+<ul>
+<li>输出 <strong>契约语义规范 v1</strong>：线程模型、生命周期状态机、事件顺序、取消/超时/失败语义</li>
+<li>输出 <strong>Contract Tests 清单 v1</strong>：对齐本矩阵 Baseline 条目逐条给出最小用例</li>
+<li>输出 <strong>平台 IT 冒烟清单 v1</strong>：每个平台最小可运行闭环</li>
+</ul>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/AGIBuild/Agibuild.Fulora/blob/main/docs/agibuild_webview_compatibility_matrix_proposal.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          Agibuild.Fulora — Cross-platform Hybrid App Framework
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

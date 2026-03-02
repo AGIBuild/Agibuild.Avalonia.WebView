@@ -1,0 +1,870 @@
+### YamlMime:ManagedReference
+items:
+- uid: Agibuild.Fulora.BridgeEventCollector
+  commentId: T:Agibuild.Fulora.BridgeEventCollector
+  id: BridgeEventCollector
+  parent: Agibuild.Fulora
+  children:
+  - Agibuild.Fulora.BridgeEventCollector.#ctor(System.Int32)
+  - Agibuild.Fulora.BridgeEventCollector.Capacity
+  - Agibuild.Fulora.BridgeEventCollector.Clear
+  - Agibuild.Fulora.BridgeEventCollector.Count
+  - Agibuild.Fulora.BridgeEventCollector.DroppedCount
+  - Agibuild.Fulora.BridgeEventCollector.GetEvents
+  - Agibuild.Fulora.BridgeEventCollector.Subscribe(System.Action{Agibuild.Fulora.BridgeDevToolsEvent})
+  langs:
+  - csharp
+  - vb
+  name: BridgeEventCollector
+  nameWithType: BridgeEventCollector
+  fullName: Agibuild.Fulora.BridgeEventCollector
+  type: Class
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/BridgeEventCollector.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: BridgeEventCollector
+    path: ../src/Agibuild.Fulora.Runtime/BridgeEventCollector.cs
+    startLine: 8
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: >-
+    Thread-safe bounded ring buffer that collects <xref href="Agibuild.Fulora.BridgeDevToolsEvent" data-throw-if-not-resolved="false"></xref> instances.
+
+    When the buffer is full, the oldest events are dropped.
+  example: []
+  syntax:
+    content: 'public sealed class BridgeEventCollector : IBridgeEventCollector'
+    content.vb: Public NotInheritable Class BridgeEventCollector Implements IBridgeEventCollector
+  inheritance:
+  - System.Object
+  implements:
+  - Agibuild.Fulora.IBridgeEventCollector
+  inheritedMembers:
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.GetHashCode
+  - System.Object.GetType
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.ToString
+- uid: Agibuild.Fulora.BridgeEventCollector.#ctor(System.Int32)
+  commentId: M:Agibuild.Fulora.BridgeEventCollector.#ctor(System.Int32)
+  id: '#ctor(System.Int32)'
+  parent: Agibuild.Fulora.BridgeEventCollector
+  langs:
+  - csharp
+  - vb
+  name: BridgeEventCollector(int)
+  nameWithType: BridgeEventCollector.BridgeEventCollector(int)
+  fullName: Agibuild.Fulora.BridgeEventCollector.BridgeEventCollector(int)
+  type: Constructor
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/BridgeEventCollector.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: .ctor
+    path: ../src/Agibuild.Fulora.Runtime/BridgeEventCollector.cs
+    startLine: 18
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  syntax:
+    content: public BridgeEventCollector(int capacity = 500)
+    parameters:
+    - id: capacity
+      type: System.Int32
+    content.vb: Public Sub New(capacity As Integer = 500)
+  overload: Agibuild.Fulora.BridgeEventCollector.#ctor*
+  nameWithType.vb: BridgeEventCollector.New(Integer)
+  fullName.vb: Agibuild.Fulora.BridgeEventCollector.New(Integer)
+  name.vb: New(Integer)
+- uid: Agibuild.Fulora.BridgeEventCollector.Capacity
+  commentId: P:Agibuild.Fulora.BridgeEventCollector.Capacity
+  id: Capacity
+  parent: Agibuild.Fulora.BridgeEventCollector
+  langs:
+  - csharp
+  - vb
+  name: Capacity
+  nameWithType: BridgeEventCollector.Capacity
+  fullName: Agibuild.Fulora.BridgeEventCollector.Capacity
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/BridgeEventCollector.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Capacity
+    path: ../src/Agibuild.Fulora.Runtime/BridgeEventCollector.cs
+    startLine: 24
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Maximum number of events the buffer can hold.
+  example: []
+  syntax:
+    content: public int Capacity { get; }
+    parameters: []
+    return:
+      type: System.Int32
+    content.vb: Public ReadOnly Property Capacity As Integer
+  overload: Agibuild.Fulora.BridgeEventCollector.Capacity*
+  implements:
+  - Agibuild.Fulora.IBridgeEventCollector.Capacity
+- uid: Agibuild.Fulora.BridgeEventCollector.Count
+  commentId: P:Agibuild.Fulora.BridgeEventCollector.Count
+  id: Count
+  parent: Agibuild.Fulora.BridgeEventCollector
+  langs:
+  - csharp
+  - vb
+  name: Count
+  nameWithType: BridgeEventCollector.Count
+  fullName: Agibuild.Fulora.BridgeEventCollector.Count
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/BridgeEventCollector.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Count
+    path: ../src/Agibuild.Fulora.Runtime/BridgeEventCollector.cs
+    startLine: 26
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Current number of events in the buffer.
+  example: []
+  syntax:
+    content: public int Count { get; }
+    parameters: []
+    return:
+      type: System.Int32
+    content.vb: Public ReadOnly Property Count As Integer
+  overload: Agibuild.Fulora.BridgeEventCollector.Count*
+  implements:
+  - Agibuild.Fulora.IBridgeEventCollector.Count
+- uid: Agibuild.Fulora.BridgeEventCollector.DroppedCount
+  commentId: P:Agibuild.Fulora.BridgeEventCollector.DroppedCount
+  id: DroppedCount
+  parent: Agibuild.Fulora.BridgeEventCollector
+  langs:
+  - csharp
+  - vb
+  name: DroppedCount
+  nameWithType: BridgeEventCollector.DroppedCount
+  fullName: Agibuild.Fulora.BridgeEventCollector.DroppedCount
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/BridgeEventCollector.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: DroppedCount
+    path: ../src/Agibuild.Fulora.Runtime/BridgeEventCollector.cs
+    startLine: 31
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Number of events dropped due to buffer overflow.
+  example: []
+  syntax:
+    content: public long DroppedCount { get; }
+    parameters: []
+    return:
+      type: System.Int64
+    content.vb: Public ReadOnly Property DroppedCount As Long
+  overload: Agibuild.Fulora.BridgeEventCollector.DroppedCount*
+  implements:
+  - Agibuild.Fulora.IBridgeEventCollector.DroppedCount
+- uid: Agibuild.Fulora.BridgeEventCollector.GetEvents
+  commentId: M:Agibuild.Fulora.BridgeEventCollector.GetEvents
+  id: GetEvents
+  parent: Agibuild.Fulora.BridgeEventCollector
+  langs:
+  - csharp
+  - vb
+  name: GetEvents()
+  nameWithType: BridgeEventCollector.GetEvents()
+  fullName: Agibuild.Fulora.BridgeEventCollector.GetEvents()
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/BridgeEventCollector.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: GetEvents
+    path: ../src/Agibuild.Fulora.Runtime/BridgeEventCollector.cs
+    startLine: 63
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Returns a snapshot of all buffered events, oldest first.
+  example: []
+  syntax:
+    content: public IReadOnlyList<BridgeDevToolsEvent> GetEvents()
+    return:
+      type: System.Collections.Generic.IReadOnlyList{Agibuild.Fulora.BridgeDevToolsEvent}
+    content.vb: Public Function GetEvents() As IReadOnlyList(Of BridgeDevToolsEvent)
+  overload: Agibuild.Fulora.BridgeEventCollector.GetEvents*
+  implements:
+  - Agibuild.Fulora.IBridgeEventCollector.GetEvents
+- uid: Agibuild.Fulora.BridgeEventCollector.Clear
+  commentId: M:Agibuild.Fulora.BridgeEventCollector.Clear
+  id: Clear
+  parent: Agibuild.Fulora.BridgeEventCollector
+  langs:
+  - csharp
+  - vb
+  name: Clear()
+  nameWithType: BridgeEventCollector.Clear()
+  fullName: Agibuild.Fulora.BridgeEventCollector.Clear()
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/BridgeEventCollector.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Clear
+    path: ../src/Agibuild.Fulora.Runtime/BridgeEventCollector.cs
+    startLine: 74
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Clears all buffered events and resets the dropped count.
+  example: []
+  syntax:
+    content: public void Clear()
+    content.vb: Public Sub Clear()
+  overload: Agibuild.Fulora.BridgeEventCollector.Clear*
+  implements:
+  - Agibuild.Fulora.IBridgeEventCollector.Clear
+- uid: Agibuild.Fulora.BridgeEventCollector.Subscribe(System.Action{Agibuild.Fulora.BridgeDevToolsEvent})
+  commentId: M:Agibuild.Fulora.BridgeEventCollector.Subscribe(System.Action{Agibuild.Fulora.BridgeDevToolsEvent})
+  id: Subscribe(System.Action{Agibuild.Fulora.BridgeDevToolsEvent})
+  parent: Agibuild.Fulora.BridgeEventCollector
+  langs:
+  - csharp
+  - vb
+  name: Subscribe(Action<BridgeDevToolsEvent>)
+  nameWithType: BridgeEventCollector.Subscribe(Action<BridgeDevToolsEvent>)
+  fullName: Agibuild.Fulora.BridgeEventCollector.Subscribe(System.Action<Agibuild.Fulora.BridgeDevToolsEvent>)
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/BridgeEventCollector.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Subscribe
+    path: ../src/Agibuild.Fulora.Runtime/BridgeEventCollector.cs
+    startLine: 85
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: >-
+    Registers a callback invoked whenever a new event is added.
+
+    Returns a disposable that unregisters the callback.
+  example: []
+  syntax:
+    content: public IDisposable Subscribe(Action<BridgeDevToolsEvent> onEvent)
+    parameters:
+    - id: onEvent
+      type: System.Action{Agibuild.Fulora.BridgeDevToolsEvent}
+    return:
+      type: System.IDisposable
+    content.vb: Public Function Subscribe(onEvent As Action(Of BridgeDevToolsEvent)) As IDisposable
+  overload: Agibuild.Fulora.BridgeEventCollector.Subscribe*
+  implements:
+  - Agibuild.Fulora.IBridgeEventCollector.Subscribe(System.Action{Agibuild.Fulora.BridgeDevToolsEvent})
+  nameWithType.vb: BridgeEventCollector.Subscribe(Action(Of BridgeDevToolsEvent))
+  fullName.vb: Agibuild.Fulora.BridgeEventCollector.Subscribe(System.Action(Of Agibuild.Fulora.BridgeDevToolsEvent))
+  name.vb: Subscribe(Action(Of BridgeDevToolsEvent))
+references:
+- uid: Agibuild.Fulora.BridgeDevToolsEvent
+  commentId: T:Agibuild.Fulora.BridgeDevToolsEvent
+  href: Agibuild.Fulora.BridgeDevToolsEvent.html
+  name: BridgeDevToolsEvent
+  nameWithType: BridgeDevToolsEvent
+  fullName: Agibuild.Fulora.BridgeDevToolsEvent
+- uid: Agibuild.Fulora
+  commentId: N:Agibuild.Fulora
+  href: Agibuild.html
+  name: Agibuild.Fulora
+  nameWithType: Agibuild.Fulora
+  fullName: Agibuild.Fulora
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: Agibuild.Fulora.IBridgeEventCollector
+  commentId: T:Agibuild.Fulora.IBridgeEventCollector
+  parent: Agibuild.Fulora
+  href: Agibuild.Fulora.IBridgeEventCollector.html
+  name: IBridgeEventCollector
+  nameWithType: IBridgeEventCollector
+  fullName: Agibuild.Fulora.IBridgeEventCollector
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: Agibuild.Fulora.BridgeEventCollector.#ctor*
+  commentId: Overload:Agibuild.Fulora.BridgeEventCollector.#ctor
+  href: Agibuild.Fulora.BridgeEventCollector.html#Agibuild_Fulora_BridgeEventCollector__ctor_System_Int32_
+  name: BridgeEventCollector
+  nameWithType: BridgeEventCollector.BridgeEventCollector
+  fullName: Agibuild.Fulora.BridgeEventCollector.BridgeEventCollector
+  nameWithType.vb: BridgeEventCollector.New
+  fullName.vb: Agibuild.Fulora.BridgeEventCollector.New
+  name.vb: New
+- uid: System.Int32
+  commentId: T:System.Int32
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int32
+  name: int
+  nameWithType: int
+  fullName: int
+  nameWithType.vb: Integer
+  fullName.vb: Integer
+  name.vb: Integer
+- uid: Agibuild.Fulora.BridgeEventCollector.Capacity*
+  commentId: Overload:Agibuild.Fulora.BridgeEventCollector.Capacity
+  href: Agibuild.Fulora.BridgeEventCollector.html#Agibuild_Fulora_BridgeEventCollector_Capacity
+  name: Capacity
+  nameWithType: BridgeEventCollector.Capacity
+  fullName: Agibuild.Fulora.BridgeEventCollector.Capacity
+- uid: Agibuild.Fulora.IBridgeEventCollector.Capacity
+  commentId: P:Agibuild.Fulora.IBridgeEventCollector.Capacity
+  parent: Agibuild.Fulora.IBridgeEventCollector
+  href: Agibuild.Fulora.IBridgeEventCollector.html#Agibuild_Fulora_IBridgeEventCollector_Capacity
+  name: Capacity
+  nameWithType: IBridgeEventCollector.Capacity
+  fullName: Agibuild.Fulora.IBridgeEventCollector.Capacity
+- uid: Agibuild.Fulora.BridgeEventCollector.Count*
+  commentId: Overload:Agibuild.Fulora.BridgeEventCollector.Count
+  href: Agibuild.Fulora.BridgeEventCollector.html#Agibuild_Fulora_BridgeEventCollector_Count
+  name: Count
+  nameWithType: BridgeEventCollector.Count
+  fullName: Agibuild.Fulora.BridgeEventCollector.Count
+- uid: Agibuild.Fulora.IBridgeEventCollector.Count
+  commentId: P:Agibuild.Fulora.IBridgeEventCollector.Count
+  parent: Agibuild.Fulora.IBridgeEventCollector
+  href: Agibuild.Fulora.IBridgeEventCollector.html#Agibuild_Fulora_IBridgeEventCollector_Count
+  name: Count
+  nameWithType: IBridgeEventCollector.Count
+  fullName: Agibuild.Fulora.IBridgeEventCollector.Count
+- uid: Agibuild.Fulora.BridgeEventCollector.DroppedCount*
+  commentId: Overload:Agibuild.Fulora.BridgeEventCollector.DroppedCount
+  href: Agibuild.Fulora.BridgeEventCollector.html#Agibuild_Fulora_BridgeEventCollector_DroppedCount
+  name: DroppedCount
+  nameWithType: BridgeEventCollector.DroppedCount
+  fullName: Agibuild.Fulora.BridgeEventCollector.DroppedCount
+- uid: Agibuild.Fulora.IBridgeEventCollector.DroppedCount
+  commentId: P:Agibuild.Fulora.IBridgeEventCollector.DroppedCount
+  parent: Agibuild.Fulora.IBridgeEventCollector
+  href: Agibuild.Fulora.IBridgeEventCollector.html#Agibuild_Fulora_IBridgeEventCollector_DroppedCount
+  name: DroppedCount
+  nameWithType: IBridgeEventCollector.DroppedCount
+  fullName: Agibuild.Fulora.IBridgeEventCollector.DroppedCount
+- uid: System.Int64
+  commentId: T:System.Int64
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int64
+  name: long
+  nameWithType: long
+  fullName: long
+  nameWithType.vb: Long
+  fullName.vb: Long
+  name.vb: Long
+- uid: Agibuild.Fulora.BridgeEventCollector.GetEvents*
+  commentId: Overload:Agibuild.Fulora.BridgeEventCollector.GetEvents
+  href: Agibuild.Fulora.BridgeEventCollector.html#Agibuild_Fulora_BridgeEventCollector_GetEvents
+  name: GetEvents
+  nameWithType: BridgeEventCollector.GetEvents
+  fullName: Agibuild.Fulora.BridgeEventCollector.GetEvents
+- uid: Agibuild.Fulora.IBridgeEventCollector.GetEvents
+  commentId: M:Agibuild.Fulora.IBridgeEventCollector.GetEvents
+  parent: Agibuild.Fulora.IBridgeEventCollector
+  href: Agibuild.Fulora.IBridgeEventCollector.html#Agibuild_Fulora_IBridgeEventCollector_GetEvents
+  name: GetEvents()
+  nameWithType: IBridgeEventCollector.GetEvents()
+  fullName: Agibuild.Fulora.IBridgeEventCollector.GetEvents()
+  spec.csharp:
+  - uid: Agibuild.Fulora.IBridgeEventCollector.GetEvents
+    name: GetEvents
+    href: Agibuild.Fulora.IBridgeEventCollector.html#Agibuild_Fulora_IBridgeEventCollector_GetEvents
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: Agibuild.Fulora.IBridgeEventCollector.GetEvents
+    name: GetEvents
+    href: Agibuild.Fulora.IBridgeEventCollector.html#Agibuild_Fulora_IBridgeEventCollector_GetEvents
+  - name: (
+  - name: )
+- uid: System.Collections.Generic.IReadOnlyList{Agibuild.Fulora.BridgeDevToolsEvent}
+  commentId: T:System.Collections.Generic.IReadOnlyList{Agibuild.Fulora.BridgeDevToolsEvent}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IReadOnlyList`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<BridgeDevToolsEvent>
+  nameWithType: IReadOnlyList<BridgeDevToolsEvent>
+  fullName: System.Collections.Generic.IReadOnlyList<Agibuild.Fulora.BridgeDevToolsEvent>
+  nameWithType.vb: IReadOnlyList(Of BridgeDevToolsEvent)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of Agibuild.Fulora.BridgeDevToolsEvent)
+  name.vb: IReadOnlyList(Of BridgeDevToolsEvent)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: Agibuild.Fulora.BridgeDevToolsEvent
+    name: BridgeDevToolsEvent
+    href: Agibuild.Fulora.BridgeDevToolsEvent.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: Agibuild.Fulora.BridgeDevToolsEvent
+    name: BridgeDevToolsEvent
+    href: Agibuild.Fulora.BridgeDevToolsEvent.html
+  - name: )
+- uid: System.Collections.Generic.IReadOnlyList`1
+  commentId: T:System.Collections.Generic.IReadOnlyList`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<T>
+  nameWithType: IReadOnlyList<T>
+  fullName: System.Collections.Generic.IReadOnlyList<T>
+  nameWithType.vb: IReadOnlyList(Of T)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of T)
+  name.vb: IReadOnlyList(Of T)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System.Collections.Generic
+  commentId: N:System.Collections.Generic
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Collections.Generic
+  nameWithType: System.Collections.Generic
+  fullName: System.Collections.Generic
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+- uid: Agibuild.Fulora.BridgeEventCollector.Clear*
+  commentId: Overload:Agibuild.Fulora.BridgeEventCollector.Clear
+  href: Agibuild.Fulora.BridgeEventCollector.html#Agibuild_Fulora_BridgeEventCollector_Clear
+  name: Clear
+  nameWithType: BridgeEventCollector.Clear
+  fullName: Agibuild.Fulora.BridgeEventCollector.Clear
+- uid: Agibuild.Fulora.IBridgeEventCollector.Clear
+  commentId: M:Agibuild.Fulora.IBridgeEventCollector.Clear
+  parent: Agibuild.Fulora.IBridgeEventCollector
+  href: Agibuild.Fulora.IBridgeEventCollector.html#Agibuild_Fulora_IBridgeEventCollector_Clear
+  name: Clear()
+  nameWithType: IBridgeEventCollector.Clear()
+  fullName: Agibuild.Fulora.IBridgeEventCollector.Clear()
+  spec.csharp:
+  - uid: Agibuild.Fulora.IBridgeEventCollector.Clear
+    name: Clear
+    href: Agibuild.Fulora.IBridgeEventCollector.html#Agibuild_Fulora_IBridgeEventCollector_Clear
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: Agibuild.Fulora.IBridgeEventCollector.Clear
+    name: Clear
+    href: Agibuild.Fulora.IBridgeEventCollector.html#Agibuild_Fulora_IBridgeEventCollector_Clear
+  - name: (
+  - name: )
+- uid: Agibuild.Fulora.BridgeEventCollector.Subscribe*
+  commentId: Overload:Agibuild.Fulora.BridgeEventCollector.Subscribe
+  href: Agibuild.Fulora.BridgeEventCollector.html#Agibuild_Fulora_BridgeEventCollector_Subscribe_System_Action_Agibuild_Fulora_BridgeDevToolsEvent__
+  name: Subscribe
+  nameWithType: BridgeEventCollector.Subscribe
+  fullName: Agibuild.Fulora.BridgeEventCollector.Subscribe
+- uid: Agibuild.Fulora.IBridgeEventCollector.Subscribe(System.Action{Agibuild.Fulora.BridgeDevToolsEvent})
+  commentId: M:Agibuild.Fulora.IBridgeEventCollector.Subscribe(System.Action{Agibuild.Fulora.BridgeDevToolsEvent})
+  parent: Agibuild.Fulora.IBridgeEventCollector
+  isExternal: true
+  href: Agibuild.Fulora.IBridgeEventCollector.html#Agibuild_Fulora_IBridgeEventCollector_Subscribe_System_Action_Agibuild_Fulora_BridgeDevToolsEvent__
+  name: Subscribe(Action<BridgeDevToolsEvent>)
+  nameWithType: IBridgeEventCollector.Subscribe(Action<BridgeDevToolsEvent>)
+  fullName: Agibuild.Fulora.IBridgeEventCollector.Subscribe(System.Action<Agibuild.Fulora.BridgeDevToolsEvent>)
+  nameWithType.vb: IBridgeEventCollector.Subscribe(Action(Of BridgeDevToolsEvent))
+  fullName.vb: Agibuild.Fulora.IBridgeEventCollector.Subscribe(System.Action(Of Agibuild.Fulora.BridgeDevToolsEvent))
+  name.vb: Subscribe(Action(Of BridgeDevToolsEvent))
+  spec.csharp:
+  - uid: Agibuild.Fulora.IBridgeEventCollector.Subscribe(System.Action{Agibuild.Fulora.BridgeDevToolsEvent})
+    name: Subscribe
+    href: Agibuild.Fulora.IBridgeEventCollector.html#Agibuild_Fulora_IBridgeEventCollector_Subscribe_System_Action_Agibuild_Fulora_BridgeDevToolsEvent__
+  - name: (
+  - uid: System.Action`1
+    name: Action
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.action-1
+  - name: <
+  - uid: Agibuild.Fulora.BridgeDevToolsEvent
+    name: BridgeDevToolsEvent
+    href: Agibuild.Fulora.BridgeDevToolsEvent.html
+  - name: '>'
+  - name: )
+  spec.vb:
+  - uid: Agibuild.Fulora.IBridgeEventCollector.Subscribe(System.Action{Agibuild.Fulora.BridgeDevToolsEvent})
+    name: Subscribe
+    href: Agibuild.Fulora.IBridgeEventCollector.html#Agibuild_Fulora_IBridgeEventCollector_Subscribe_System_Action_Agibuild_Fulora_BridgeDevToolsEvent__
+  - name: (
+  - uid: System.Action`1
+    name: Action
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.action-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: Agibuild.Fulora.BridgeDevToolsEvent
+    name: BridgeDevToolsEvent
+    href: Agibuild.Fulora.BridgeDevToolsEvent.html
+  - name: )
+  - name: )
+- uid: System.Action{Agibuild.Fulora.BridgeDevToolsEvent}
+  commentId: T:System.Action{Agibuild.Fulora.BridgeDevToolsEvent}
+  parent: System
+  definition: System.Action`1
+  href: https://learn.microsoft.com/dotnet/api/system.action-1
+  name: Action<BridgeDevToolsEvent>
+  nameWithType: Action<BridgeDevToolsEvent>
+  fullName: System.Action<Agibuild.Fulora.BridgeDevToolsEvent>
+  nameWithType.vb: Action(Of BridgeDevToolsEvent)
+  fullName.vb: System.Action(Of Agibuild.Fulora.BridgeDevToolsEvent)
+  name.vb: Action(Of BridgeDevToolsEvent)
+  spec.csharp:
+  - uid: System.Action`1
+    name: Action
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.action-1
+  - name: <
+  - uid: Agibuild.Fulora.BridgeDevToolsEvent
+    name: BridgeDevToolsEvent
+    href: Agibuild.Fulora.BridgeDevToolsEvent.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Action`1
+    name: Action
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.action-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: Agibuild.Fulora.BridgeDevToolsEvent
+    name: BridgeDevToolsEvent
+    href: Agibuild.Fulora.BridgeDevToolsEvent.html
+  - name: )
+- uid: System.IDisposable
+  commentId: T:System.IDisposable
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.idisposable
+  name: IDisposable
+  nameWithType: IDisposable
+  fullName: System.IDisposable
+- uid: System.Action`1
+  commentId: T:System.Action`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.action-1
+  name: Action<T>
+  nameWithType: Action<T>
+  fullName: System.Action<T>
+  nameWithType.vb: Action(Of T)
+  fullName.vb: System.Action(Of T)
+  name.vb: Action(Of T)
+  spec.csharp:
+  - uid: System.Action`1
+    name: Action
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.action-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Action`1
+    name: Action
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.action-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )

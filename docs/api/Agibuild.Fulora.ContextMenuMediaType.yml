@@ -1,0 +1,176 @@
+### YamlMime:ManagedReference
+items:
+- uid: Agibuild.Fulora.ContextMenuMediaType
+  commentId: T:Agibuild.Fulora.ContextMenuMediaType
+  id: ContextMenuMediaType
+  parent: Agibuild.Fulora
+  children:
+  - Agibuild.Fulora.ContextMenuMediaType.Audio
+  - Agibuild.Fulora.ContextMenuMediaType.Image
+  - Agibuild.Fulora.ContextMenuMediaType.None
+  - Agibuild.Fulora.ContextMenuMediaType.Video
+  langs:
+  - csharp
+  - vb
+  name: ContextMenuMediaType
+  nameWithType: ContextMenuMediaType
+  fullName: Agibuild.Fulora.ContextMenuMediaType
+  type: Enum
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/WebViewContracts.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: ContextMenuMediaType
+    path: ../src/Agibuild.Fulora.Core/WebViewContracts.cs
+    startLine: 536
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Media type at the context menu hit-test location.
+  example: []
+  syntax:
+    content: public enum ContextMenuMediaType
+    content.vb: Public Enum ContextMenuMediaType
+- uid: Agibuild.Fulora.ContextMenuMediaType.None
+  commentId: F:Agibuild.Fulora.ContextMenuMediaType.None
+  id: None
+  parent: Agibuild.Fulora.ContextMenuMediaType
+  langs:
+  - csharp
+  - vb
+  name: None
+  nameWithType: ContextMenuMediaType.None
+  fullName: Agibuild.Fulora.ContextMenuMediaType.None
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/WebViewContracts.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: None
+    path: ../src/Agibuild.Fulora.Core/WebViewContracts.cs
+    startLine: 539
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: No media element at the location.
+  example: []
+  syntax:
+    content: None = 0
+    return:
+      type: Agibuild.Fulora.ContextMenuMediaType
+- uid: Agibuild.Fulora.ContextMenuMediaType.Image
+  commentId: F:Agibuild.Fulora.ContextMenuMediaType.Image
+  id: Image
+  parent: Agibuild.Fulora.ContextMenuMediaType
+  langs:
+  - csharp
+  - vb
+  name: Image
+  nameWithType: ContextMenuMediaType.Image
+  fullName: Agibuild.Fulora.ContextMenuMediaType.Image
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/WebViewContracts.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Image
+    path: ../src/Agibuild.Fulora.Core/WebViewContracts.cs
+    startLine: 541
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: An image element.
+  example: []
+  syntax:
+    content: Image = 1
+    return:
+      type: Agibuild.Fulora.ContextMenuMediaType
+- uid: Agibuild.Fulora.ContextMenuMediaType.Video
+  commentId: F:Agibuild.Fulora.ContextMenuMediaType.Video
+  id: Video
+  parent: Agibuild.Fulora.ContextMenuMediaType
+  langs:
+  - csharp
+  - vb
+  name: Video
+  nameWithType: ContextMenuMediaType.Video
+  fullName: Agibuild.Fulora.ContextMenuMediaType.Video
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/WebViewContracts.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Video
+    path: ../src/Agibuild.Fulora.Core/WebViewContracts.cs
+    startLine: 543
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: A video element.
+  example: []
+  syntax:
+    content: Video = 2
+    return:
+      type: Agibuild.Fulora.ContextMenuMediaType
+- uid: Agibuild.Fulora.ContextMenuMediaType.Audio
+  commentId: F:Agibuild.Fulora.ContextMenuMediaType.Audio
+  id: Audio
+  parent: Agibuild.Fulora.ContextMenuMediaType
+  langs:
+  - csharp
+  - vb
+  name: Audio
+  nameWithType: ContextMenuMediaType.Audio
+  fullName: Agibuild.Fulora.ContextMenuMediaType.Audio
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/WebViewContracts.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Audio
+    path: ../src/Agibuild.Fulora.Core/WebViewContracts.cs
+    startLine: 545
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: An audio element.
+  example: []
+  syntax:
+    content: Audio = 3
+    return:
+      type: Agibuild.Fulora.ContextMenuMediaType
+references:
+- uid: Agibuild.Fulora
+  commentId: N:Agibuild.Fulora
+  href: Agibuild.html
+  name: Agibuild.Fulora
+  nameWithType: Agibuild.Fulora
+  fullName: Agibuild.Fulora
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+- uid: Agibuild.Fulora.ContextMenuMediaType
+  commentId: T:Agibuild.Fulora.ContextMenuMediaType
+  parent: Agibuild.Fulora
+  href: Agibuild.Fulora.ContextMenuMediaType.html
+  name: ContextMenuMediaType
+  nameWithType: ContextMenuMediaType
+  fullName: Agibuild.Fulora.ContextMenuMediaType

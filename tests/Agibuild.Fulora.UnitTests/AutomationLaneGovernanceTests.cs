@@ -341,7 +341,8 @@ public sealed class AutomationLaneGovernanceTests
             "WebViewPermissionKind.Other", "ResolveMenuPruningStage",
             "DrainSystemIntegrationEvents(", "PublishSystemIntegrationEvent(",
             "platform.source", "platform.pruningStage",
-            "KeyDown +=", "KeyDown -=", "WebViewHostCapabilityCallOutcome"
+            "KeyDown +=", "KeyDown -=", "WebViewHostCapabilityCallOutcome",
+            "Bridge.Expose<IThemeService>", "ThemeService", "AvaloniaThemeProvider"
         };
         foreach (var marker in appShellPresetMarkers)
             AssertSourceContains(appShellPreset, marker, TemplateMetadataSchema, appShellPresetPath);
@@ -387,6 +388,22 @@ public sealed class AutomationLaneGovernanceTests
         AssertFileExists(Path.Combine(vueTemplateWebPath, "package.json"), TemplateMetadataSchema);
         Assert.DoesNotContain("DesktopHostService.DrainSystemIntegrationEvents", desktopMainWindow, StringComparison.Ordinal);
         Assert.DoesNotContain("PublishSystemIntegrationEvent", desktopMainWindow, StringComparison.Ordinal);
+
+        var reactPackageJson = File.ReadAllText(Path.Combine(reactTemplateWebPath, "package.json"));
+        var vuePackageJson = File.ReadAllText(Path.Combine(vueTemplateWebPath, "package.json"));
+        AssertSourceContains(reactPackageJson, "\"@agibuild/bridge\"", TemplateMetadataSchema, Path.Combine(reactTemplateWebPath, "package.json"));
+        AssertSourceContains(vuePackageJson, "\"@agibuild/bridge\"", TemplateMetadataSchema, Path.Combine(vueTemplateWebPath, "package.json"));
+
+        AssertFileExists(Path.Combine(reactTemplateWebPath, "src", "bridge", "client.ts"), TemplateMetadataSchema);
+        AssertFileExists(Path.Combine(reactTemplateWebPath, "src", "bridge", "services.ts"), TemplateMetadataSchema);
+        AssertFileExists(Path.Combine(reactTemplateWebPath, "src", "hooks", "useBridge.ts"), TemplateMetadataSchema);
+        AssertFileExists(Path.Combine(vueTemplateWebPath, "src", "bridge", "client.ts"), TemplateMetadataSchema);
+        AssertFileExists(Path.Combine(vueTemplateWebPath, "src", "bridge", "services.ts"), TemplateMetadataSchema);
+        AssertFileExists(Path.Combine(vueTemplateWebPath, "src", "composables", "useBridge.ts"), TemplateMetadataSchema);
+
+        var reactClient = File.ReadAllText(Path.Combine(reactTemplateWebPath, "src", "bridge", "client.ts"));
+        AssertSourceContains(reactClient, "withLogging", TemplateMetadataSchema, Path.Combine(reactTemplateWebPath, "src", "bridge", "client.ts"));
+        AssertSourceContains(reactClient, "withErrorNormalization", TemplateMetadataSchema, Path.Combine(reactTemplateWebPath, "src", "bridge", "client.ts"));
     }
 
     [Fact]

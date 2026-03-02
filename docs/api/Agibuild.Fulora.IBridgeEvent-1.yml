@@ -1,0 +1,70 @@
+### YamlMime:ManagedReference
+items:
+- uid: Agibuild.Fulora.IBridgeEvent`1
+  commentId: T:Agibuild.Fulora.IBridgeEvent`1
+  id: IBridgeEvent`1
+  parent: Agibuild.Fulora
+  children: []
+  langs:
+  - csharp
+  - vb
+  name: IBridgeEvent<T>
+  nameWithType: IBridgeEvent<T>
+  fullName: Agibuild.Fulora.IBridgeEvent<T>
+  type: Interface
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/IBridgeService.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: IBridgeEvent
+    path: ../src/Agibuild.Fulora.Core/IBridgeService.cs
+    startLine: 8
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: >-
+    Marker interface for typed event channels on <xref href="Agibuild.Fulora.JsExportAttribute" data-throw-if-not-resolved="false"></xref> interfaces.
+
+    Properties of this type on a [JsExport] interface are automatically wired as push event channels
+
+    from C# to JavaScript by the source generator.
+  example: []
+  syntax:
+    content: public interface IBridgeEvent<T>
+    typeParameters:
+    - id: T
+      description: The event payload type.
+    content.vb: Public Interface IBridgeEvent(Of T)
+  nameWithType.vb: IBridgeEvent(Of T)
+  fullName.vb: Agibuild.Fulora.IBridgeEvent(Of T)
+  name.vb: IBridgeEvent(Of T)
+references:
+- uid: Agibuild.Fulora.JsExportAttribute
+  commentId: T:Agibuild.Fulora.JsExportAttribute
+  href: Agibuild.Fulora.JsExportAttribute.html
+  name: JsExportAttribute
+  nameWithType: JsExportAttribute
+  fullName: Agibuild.Fulora.JsExportAttribute
+- uid: Agibuild.Fulora
+  commentId: N:Agibuild.Fulora
+  href: Agibuild.html
+  name: Agibuild.Fulora
+  nameWithType: Agibuild.Fulora
+  fullName: Agibuild.Fulora
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html

@@ -1,0 +1,350 @@
+### YamlMime:ManagedReference
+items:
+- uid: Agibuild.Fulora.WebViewPermissionKind
+  commentId: T:Agibuild.Fulora.WebViewPermissionKind
+  id: WebViewPermissionKind
+  parent: Agibuild.Fulora
+  children:
+  - Agibuild.Fulora.WebViewPermissionKind.Camera
+  - Agibuild.Fulora.WebViewPermissionKind.ClipboardRead
+  - Agibuild.Fulora.WebViewPermissionKind.ClipboardWrite
+  - Agibuild.Fulora.WebViewPermissionKind.Geolocation
+  - Agibuild.Fulora.WebViewPermissionKind.Microphone
+  - Agibuild.Fulora.WebViewPermissionKind.Midi
+  - Agibuild.Fulora.WebViewPermissionKind.Notifications
+  - Agibuild.Fulora.WebViewPermissionKind.Other
+  - Agibuild.Fulora.WebViewPermissionKind.Sensors
+  - Agibuild.Fulora.WebViewPermissionKind.Unknown
+  langs:
+  - csharp
+  - vb
+  name: WebViewPermissionKind
+  nameWithType: WebViewPermissionKind
+  fullName: Agibuild.Fulora.WebViewPermissionKind
+  type: Enum
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/WebViewContracts.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: WebViewPermissionKind
+    path: ../src/Agibuild.Fulora.Core/WebViewContracts.cs
+    startLine: 902
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: The type of permission being requested by web content.
+  example: []
+  syntax:
+    content: public enum WebViewPermissionKind
+    content.vb: Public Enum WebViewPermissionKind
+- uid: Agibuild.Fulora.WebViewPermissionKind.Unknown
+  commentId: F:Agibuild.Fulora.WebViewPermissionKind.Unknown
+  id: Unknown
+  parent: Agibuild.Fulora.WebViewPermissionKind
+  langs:
+  - csharp
+  - vb
+  name: Unknown
+  nameWithType: WebViewPermissionKind.Unknown
+  fullName: Agibuild.Fulora.WebViewPermissionKind.Unknown
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/WebViewContracts.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Unknown
+    path: ../src/Agibuild.Fulora.Core/WebViewContracts.cs
+    startLine: 905
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Unknown permission kind.
+  example: []
+  syntax:
+    content: Unknown = 0
+    return:
+      type: Agibuild.Fulora.WebViewPermissionKind
+- uid: Agibuild.Fulora.WebViewPermissionKind.Camera
+  commentId: F:Agibuild.Fulora.WebViewPermissionKind.Camera
+  id: Camera
+  parent: Agibuild.Fulora.WebViewPermissionKind
+  langs:
+  - csharp
+  - vb
+  name: Camera
+  nameWithType: WebViewPermissionKind.Camera
+  fullName: Agibuild.Fulora.WebViewPermissionKind.Camera
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/WebViewContracts.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Camera
+    path: ../src/Agibuild.Fulora.Core/WebViewContracts.cs
+    startLine: 907
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Camera access.
+  example: []
+  syntax:
+    content: Camera = 1
+    return:
+      type: Agibuild.Fulora.WebViewPermissionKind
+- uid: Agibuild.Fulora.WebViewPermissionKind.Microphone
+  commentId: F:Agibuild.Fulora.WebViewPermissionKind.Microphone
+  id: Microphone
+  parent: Agibuild.Fulora.WebViewPermissionKind
+  langs:
+  - csharp
+  - vb
+  name: Microphone
+  nameWithType: WebViewPermissionKind.Microphone
+  fullName: Agibuild.Fulora.WebViewPermissionKind.Microphone
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/WebViewContracts.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Microphone
+    path: ../src/Agibuild.Fulora.Core/WebViewContracts.cs
+    startLine: 909
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Microphone access.
+  example: []
+  syntax:
+    content: Microphone = 2
+    return:
+      type: Agibuild.Fulora.WebViewPermissionKind
+- uid: Agibuild.Fulora.WebViewPermissionKind.Geolocation
+  commentId: F:Agibuild.Fulora.WebViewPermissionKind.Geolocation
+  id: Geolocation
+  parent: Agibuild.Fulora.WebViewPermissionKind
+  langs:
+  - csharp
+  - vb
+  name: Geolocation
+  nameWithType: WebViewPermissionKind.Geolocation
+  fullName: Agibuild.Fulora.WebViewPermissionKind.Geolocation
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/WebViewContracts.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Geolocation
+    path: ../src/Agibuild.Fulora.Core/WebViewContracts.cs
+    startLine: 911
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Geolocation access.
+  example: []
+  syntax:
+    content: Geolocation = 3
+    return:
+      type: Agibuild.Fulora.WebViewPermissionKind
+- uid: Agibuild.Fulora.WebViewPermissionKind.Notifications
+  commentId: F:Agibuild.Fulora.WebViewPermissionKind.Notifications
+  id: Notifications
+  parent: Agibuild.Fulora.WebViewPermissionKind
+  langs:
+  - csharp
+  - vb
+  name: Notifications
+  nameWithType: WebViewPermissionKind.Notifications
+  fullName: Agibuild.Fulora.WebViewPermissionKind.Notifications
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/WebViewContracts.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Notifications
+    path: ../src/Agibuild.Fulora.Core/WebViewContracts.cs
+    startLine: 913
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Notifications.
+  example: []
+  syntax:
+    content: Notifications = 4
+    return:
+      type: Agibuild.Fulora.WebViewPermissionKind
+- uid: Agibuild.Fulora.WebViewPermissionKind.ClipboardRead
+  commentId: F:Agibuild.Fulora.WebViewPermissionKind.ClipboardRead
+  id: ClipboardRead
+  parent: Agibuild.Fulora.WebViewPermissionKind
+  langs:
+  - csharp
+  - vb
+  name: ClipboardRead
+  nameWithType: WebViewPermissionKind.ClipboardRead
+  fullName: Agibuild.Fulora.WebViewPermissionKind.ClipboardRead
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/WebViewContracts.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: ClipboardRead
+    path: ../src/Agibuild.Fulora.Core/WebViewContracts.cs
+    startLine: 915
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Clipboard read.
+  example: []
+  syntax:
+    content: ClipboardRead = 5
+    return:
+      type: Agibuild.Fulora.WebViewPermissionKind
+- uid: Agibuild.Fulora.WebViewPermissionKind.ClipboardWrite
+  commentId: F:Agibuild.Fulora.WebViewPermissionKind.ClipboardWrite
+  id: ClipboardWrite
+  parent: Agibuild.Fulora.WebViewPermissionKind
+  langs:
+  - csharp
+  - vb
+  name: ClipboardWrite
+  nameWithType: WebViewPermissionKind.ClipboardWrite
+  fullName: Agibuild.Fulora.WebViewPermissionKind.ClipboardWrite
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/WebViewContracts.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: ClipboardWrite
+    path: ../src/Agibuild.Fulora.Core/WebViewContracts.cs
+    startLine: 917
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Clipboard write.
+  example: []
+  syntax:
+    content: ClipboardWrite = 6
+    return:
+      type: Agibuild.Fulora.WebViewPermissionKind
+- uid: Agibuild.Fulora.WebViewPermissionKind.Midi
+  commentId: F:Agibuild.Fulora.WebViewPermissionKind.Midi
+  id: Midi
+  parent: Agibuild.Fulora.WebViewPermissionKind
+  langs:
+  - csharp
+  - vb
+  name: Midi
+  nameWithType: WebViewPermissionKind.Midi
+  fullName: Agibuild.Fulora.WebViewPermissionKind.Midi
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/WebViewContracts.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Midi
+    path: ../src/Agibuild.Fulora.Core/WebViewContracts.cs
+    startLine: 919
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: MIDI access.
+  example: []
+  syntax:
+    content: Midi = 7
+    return:
+      type: Agibuild.Fulora.WebViewPermissionKind
+- uid: Agibuild.Fulora.WebViewPermissionKind.Sensors
+  commentId: F:Agibuild.Fulora.WebViewPermissionKind.Sensors
+  id: Sensors
+  parent: Agibuild.Fulora.WebViewPermissionKind
+  langs:
+  - csharp
+  - vb
+  name: Sensors
+  nameWithType: WebViewPermissionKind.Sensors
+  fullName: Agibuild.Fulora.WebViewPermissionKind.Sensors
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/WebViewContracts.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Sensors
+    path: ../src/Agibuild.Fulora.Core/WebViewContracts.cs
+    startLine: 921
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Sensors access.
+  example: []
+  syntax:
+    content: Sensors = 8
+    return:
+      type: Agibuild.Fulora.WebViewPermissionKind
+- uid: Agibuild.Fulora.WebViewPermissionKind.Other
+  commentId: F:Agibuild.Fulora.WebViewPermissionKind.Other
+  id: Other
+  parent: Agibuild.Fulora.WebViewPermissionKind
+  langs:
+  - csharp
+  - vb
+  name: Other
+  nameWithType: WebViewPermissionKind.Other
+  fullName: Agibuild.Fulora.WebViewPermissionKind.Other
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/WebViewContracts.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Other
+    path: ../src/Agibuild.Fulora.Core/WebViewContracts.cs
+    startLine: 923
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Other / platform-specific permission.
+  example: []
+  syntax:
+    content: Other = 9
+    return:
+      type: Agibuild.Fulora.WebViewPermissionKind
+references:
+- uid: Agibuild.Fulora
+  commentId: N:Agibuild.Fulora
+  href: Agibuild.html
+  name: Agibuild.Fulora
+  nameWithType: Agibuild.Fulora
+  fullName: Agibuild.Fulora
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+- uid: Agibuild.Fulora.WebViewPermissionKind
+  commentId: T:Agibuild.Fulora.WebViewPermissionKind
+  parent: Agibuild.Fulora
+  href: Agibuild.Fulora.WebViewPermissionKind.html
+  name: WebViewPermissionKind
+  nameWithType: WebViewPermissionKind
+  fullName: Agibuild.Fulora.WebViewPermissionKind

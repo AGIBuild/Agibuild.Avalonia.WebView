@@ -227,6 +227,8 @@ public sealed class AvaloniaWebDialog : IWebDialog
     /// <inheritdoc />
     public IWebViewRpcService? Rpc => _webView.Rpc;
     /// <inheritdoc />
+    public IBridgeTracer? BridgeTracer { get => _webView.BridgeTracer; set => _webView.BridgeTracer = value; }
+    /// <inheritdoc />
     public IBridgeService Bridge => _webView.Bridge;
     /// <inheritdoc />
     public Task OpenDevToolsAsync() => _webView.OpenDevToolsAsync();

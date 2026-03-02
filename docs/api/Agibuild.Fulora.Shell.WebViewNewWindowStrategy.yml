@@ -1,0 +1,184 @@
+### YamlMime:ManagedReference
+items:
+- uid: Agibuild.Fulora.Shell.WebViewNewWindowStrategy
+  commentId: T:Agibuild.Fulora.Shell.WebViewNewWindowStrategy
+  id: WebViewNewWindowStrategy
+  parent: Agibuild.Fulora.Shell
+  children:
+  - Agibuild.Fulora.Shell.WebViewNewWindowStrategy.Delegate
+  - Agibuild.Fulora.Shell.WebViewNewWindowStrategy.ExternalBrowser
+  - Agibuild.Fulora.Shell.WebViewNewWindowStrategy.InPlace
+  - Agibuild.Fulora.Shell.WebViewNewWindowStrategy.ManagedWindow
+  langs:
+  - csharp
+  - vb
+  name: WebViewNewWindowStrategy
+  nameWithType: WebViewNewWindowStrategy
+  fullName: Agibuild.Fulora.Shell.WebViewNewWindowStrategy
+  type: Enum
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewShellExperience.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: WebViewNewWindowStrategy
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewShellExperience.cs
+    startLine: 37
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Strategy result for handling a new-window request.
+  example: []
+  syntax:
+    content: public enum WebViewNewWindowStrategy
+    content.vb: Public Enum WebViewNewWindowStrategy
+- uid: Agibuild.Fulora.Shell.WebViewNewWindowStrategy.InPlace
+  commentId: F:Agibuild.Fulora.Shell.WebViewNewWindowStrategy.InPlace
+  id: InPlace
+  parent: Agibuild.Fulora.Shell.WebViewNewWindowStrategy
+  langs:
+  - csharp
+  - vb
+  name: InPlace
+  nameWithType: WebViewNewWindowStrategy.InPlace
+  fullName: Agibuild.Fulora.Shell.WebViewNewWindowStrategy.InPlace
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewShellExperience.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: InPlace
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewShellExperience.cs
+    startLine: 40
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Navigate inside current WebView.
+  example: []
+  syntax:
+    content: InPlace = 0
+    return:
+      type: Agibuild.Fulora.Shell.WebViewNewWindowStrategy
+- uid: Agibuild.Fulora.Shell.WebViewNewWindowStrategy.ManagedWindow
+  commentId: F:Agibuild.Fulora.Shell.WebViewNewWindowStrategy.ManagedWindow
+  id: ManagedWindow
+  parent: Agibuild.Fulora.Shell.WebViewNewWindowStrategy
+  langs:
+  - csharp
+  - vb
+  name: ManagedWindow
+  nameWithType: WebViewNewWindowStrategy.ManagedWindow
+  fullName: Agibuild.Fulora.Shell.WebViewNewWindowStrategy.ManagedWindow
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewShellExperience.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: ManagedWindow
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewShellExperience.cs
+    startLine: 42
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Create and route to a managed child window.
+  example: []
+  syntax:
+    content: ManagedWindow = 1
+    return:
+      type: Agibuild.Fulora.Shell.WebViewNewWindowStrategy
+- uid: Agibuild.Fulora.Shell.WebViewNewWindowStrategy.ExternalBrowser
+  commentId: F:Agibuild.Fulora.Shell.WebViewNewWindowStrategy.ExternalBrowser
+  id: ExternalBrowser
+  parent: Agibuild.Fulora.Shell.WebViewNewWindowStrategy
+  langs:
+  - csharp
+  - vb
+  name: ExternalBrowser
+  nameWithType: WebViewNewWindowStrategy.ExternalBrowser
+  fullName: Agibuild.Fulora.Shell.WebViewNewWindowStrategy.ExternalBrowser
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewShellExperience.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: ExternalBrowser
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewShellExperience.cs
+    startLine: 44
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Open in external browser.
+  example: []
+  syntax:
+    content: ExternalBrowser = 2
+    return:
+      type: Agibuild.Fulora.Shell.WebViewNewWindowStrategy
+- uid: Agibuild.Fulora.Shell.WebViewNewWindowStrategy.Delegate
+  commentId: F:Agibuild.Fulora.Shell.WebViewNewWindowStrategy.Delegate
+  id: Delegate
+  parent: Agibuild.Fulora.Shell.WebViewNewWindowStrategy
+  langs:
+  - csharp
+  - vb
+  name: Delegate
+  nameWithType: WebViewNewWindowStrategy.Delegate
+  fullName: Agibuild.Fulora.Shell.WebViewNewWindowStrategy.Delegate
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewShellExperience.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Delegate
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewShellExperience.cs
+    startLine: 46
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Delegate decision to host callback.
+  example: []
+  syntax:
+    content: Delegate = 3
+    return:
+      type: Agibuild.Fulora.Shell.WebViewNewWindowStrategy
+references:
+- uid: Agibuild.Fulora.Shell
+  commentId: N:Agibuild.Fulora.Shell
+  href: Agibuild.html
+  name: Agibuild.Fulora.Shell
+  nameWithType: Agibuild.Fulora.Shell
+  fullName: Agibuild.Fulora.Shell
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  - name: .
+  - uid: Agibuild.Fulora.Shell
+    name: Shell
+    href: Agibuild.Fulora.Shell.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  - name: .
+  - uid: Agibuild.Fulora.Shell
+    name: Shell
+    href: Agibuild.Fulora.Shell.html
+- uid: Agibuild.Fulora.Shell.WebViewNewWindowStrategy
+  commentId: T:Agibuild.Fulora.Shell.WebViewNewWindowStrategy
+  parent: Agibuild.Fulora.Shell
+  href: Agibuild.Fulora.Shell.WebViewNewWindowStrategy.html
+  name: WebViewNewWindowStrategy
+  nameWithType: WebViewNewWindowStrategy
+  fullName: Agibuild.Fulora.Shell.WebViewNewWindowStrategy

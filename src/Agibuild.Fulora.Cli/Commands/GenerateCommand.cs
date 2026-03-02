@@ -1,102 +1,129 @@
 using System.CommandLine;
-using System.Diagnostics;
 
 namespace Agibuild.Fulora.Cli.Commands;
 
 internal static class GenerateCommand
 {
-    internal static Command Create()
+    public static Command Create()
+    {
+        var group = new Command("generate") { Description = "Code generation commands" };
+        group.Aliases.Add("gen");
+        group.Subcommands.Add(CreateTypesSubcommand());
+        return group;
+    }
+
+    private static Command CreateTypesSubcommand()
     {
         var projectOpt = new Option<string?>("--project", "-p")
         {
-            Description = "Path to the Bridge .csproj file (auto-detected if omitted)"
+            Description = "Path to the Bridge .csproj (auto-detected if omitted)"
         };
-
-        var typesCmd = new Command("types", "Generate TypeScript declarations from C# bridge interfaces")
+        var outputOpt = new Option<string?>("--output", "-o")
         {
-            projectOpt
+            Description = "Output directory for .d.ts files (default: auto-detected web project)"
         };
 
-        typesCmd.SetAction(async (parseResult, ct) =>
+        var command = new Command("types") { Description = "Generate TypeScript declarations from C# bridge interfaces" };
+        command.Options.Add(projectOpt);
+        command.Options.Add(outputOpt);
+
+        command.SetAction(async (parseResult, ct) =>
         {
             var project = parseResult.GetValue(projectOpt);
-            var csproj = project ?? DetectBridgeProject();
-            if (csproj is null)
+            var output = parseResult.GetValue(outputOpt);
+
+            var bridgeProject = project ?? DetectBridgeProject();
+            if (bridgeProject is null)
             {
-                Console.Error.WriteLine("Could not find a Bridge project. Use --project to specify one.");
-                return;
+                Console.Error.WriteLine("Could not find a Bridge .csproj. Use --project to specify one.");
+                return 1;
             }
 
-            Console.WriteLine($"Building {Path.GetFileName(csproj)} to generate TypeScript types...");
+            Console.WriteLine($"Building {Path.GetFileName(bridgeProject)} to generate TypeScript declarations...");
 
-            var psi = new ProcessStartInfo("dotnet", $"build \"{csproj}\" --no-restore")
+            var exitCode = await NewCommand.RunProcessAsync("dotnet", $"build \"{bridgeProject}\" -v q", ct: ct);
+            if (exitCode != 0)
             {
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-            };
-
-            using var process = Process.Start(psi);
-            if (process is null)
-            {
-                Console.Error.WriteLine("Failed to start dotnet build.");
-                return;
+                Console.Error.WriteLine($"Build failed with exit code {exitCode}.");
+                return exitCode;
             }
 
-            var stdout = await process.StandardOutput.ReadToEndAsync(ct);
-            var stderr = await process.StandardError.ReadToEndAsync(ct);
-            await process.WaitForExitAsync(ct);
-
-            if (process.ExitCode != 0)
+            var declFile = FindGeneratedDeclarations(bridgeProject);
+            if (declFile is null)
             {
-                Console.Error.WriteLine("Build failed:");
-                if (!string.IsNullOrWhiteSpace(stderr)) Console.Error.Write(stderr);
-                return;
+                Console.Error.WriteLine("No BridgeTypeScriptDeclarations found in build output.");
+                Console.Error.WriteLine("Ensure the project references Agibuild.Fulora.Bridge.Generator.");
+                return 1;
             }
 
-            // After successful build, find generated .d.ts files and copy to web project
-            var fullCsproj = Path.GetFullPath(csproj);
-            var bridgeDir = Path.GetDirectoryName(fullCsproj)!;
-            var solutionDir = Path.GetDirectoryName(bridgeDir);
-            if (!string.IsNullOrEmpty(solutionDir))
+            var outDir = output ?? DetectWebTypesDirectory(bridgeProject);
+            if (outDir is null)
             {
-                var webProjects = Directory.GetDirectories(solutionDir, "*.Web", SearchOption.TopDirectoryOnly);
-                if (webProjects.Length == 1)
-                {
-                    var outputDir = Path.Combine(bridgeDir, "bin", "Debug");
-                    if (Directory.Exists(outputDir))
-                    {
-                        var dtsFiles = Directory.GetFiles(outputDir, "*.d.ts", SearchOption.AllDirectories);
-                        foreach (var dts in dtsFiles)
-                        {
-                            var dest = Path.Combine(webProjects[0], Path.GetFileName(dts));
-                            File.Copy(dts, dest, overwrite: true);
-                            Console.WriteLine($"  Copied {Path.GetFileName(dts)} -> {Path.GetRelativePath(Directory.GetCurrentDirectory(), dest)}");
-                        }
-                    }
-                    // Bridge.Generator default output is project directory; also check there
-                    var projectDtsFiles = Directory.GetFiles(bridgeDir, "*.d.ts", SearchOption.TopDirectoryOnly);
-                    foreach (var dts in projectDtsFiles)
-                    {
-                        var dest = Path.Combine(webProjects[0], Path.GetFileName(dts));
-                        File.Copy(dts, dest, overwrite: true);
-                        Console.WriteLine($"  Copied {Path.GetFileName(dts)} -> {Path.GetRelativePath(Directory.GetCurrentDirectory(), dest)}");
-                    }
-                }
+                Console.Error.WriteLine("Could not detect web project types directory. Use --output to specify.");
+                return 1;
             }
 
-            Console.WriteLine("TypeScript type generation complete.");
-            Console.WriteLine("Hint: Types are emitted by the Bridge.Generator at compile time.");
+            Directory.CreateDirectory(outDir);
+            var destPath = Path.Combine(outDir, "bridge.d.ts");
+            File.Copy(declFile, destPath, overwrite: true);
+
+            Console.WriteLine($"TypeScript declarations written to {destPath}");
+            return 0;
         });
 
-        var cmd = new Command("generate", "Code generation commands") { typesCmd };
-        return cmd;
+        return command;
     }
 
     private static string? DetectBridgeProject()
     {
-        var dir = Directory.GetCurrentDirectory();
-        var bridgeProjects = Directory.GetFiles(dir, "*.Bridge.csproj", SearchOption.AllDirectories);
-        return bridgeProjects.Length == 1 ? bridgeProjects[0] : null;
+        var cwd = Directory.GetCurrentDirectory();
+        var candidates = Directory.GetFiles(cwd, "*.Bridge.csproj", SearchOption.AllDirectories)
+            .Concat(Directory.GetFiles(cwd, "*Bridge*.csproj", SearchOption.AllDirectories))
+            .Distinct()
+            .ToArray();
+
+        return candidates.Length switch
+        {
+            1 => candidates[0],
+            > 1 => candidates.FirstOrDefault(p => p.Contains("Bridge", StringComparison.OrdinalIgnoreCase)),
+            _ => null,
+        };
+    }
+
+    private static string? FindGeneratedDeclarations(string bridgeProject)
+    {
+        var projectDir = Path.GetDirectoryName(bridgeProject)!;
+        var objDir = Path.Combine(projectDir, "obj");
+
+        if (!Directory.Exists(objDir))
+            return null;
+
+        return Directory.GetFiles(objDir, "BridgeTypeScriptDeclarations.g.cs", SearchOption.AllDirectories)
+            .FirstOrDefault();
+    }
+
+    private static string? DetectWebTypesDirectory(string bridgeProject)
+    {
+        var solutionDir = Path.GetDirectoryName(bridgeProject);
+        if (solutionDir is null) return null;
+
+        var parent = Directory.GetParent(solutionDir)?.FullName;
+        if (parent is null) return null;
+
+        var webDirs = Directory.GetDirectories(parent)
+            .Where(d =>
+            {
+                var name = Path.GetFileName(d);
+                return name.Contains("Web", StringComparison.OrdinalIgnoreCase) ||
+                       name.Contains("Vite", StringComparison.OrdinalIgnoreCase);
+            })
+            .ToArray();
+
+        if (webDirs.Length == 0)
+            return null;
+
+        var webDir = webDirs[0];
+        var srcBridge = Path.Combine(webDir, "src", "bridge");
+        return Directory.Exists(srcBridge) ? srcBridge : Path.Combine(webDir, "src", "types");
     }
 }

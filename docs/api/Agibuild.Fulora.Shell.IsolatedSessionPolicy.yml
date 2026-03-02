@@ -1,0 +1,373 @@
+### YamlMime:ManagedReference
+items:
+- uid: Agibuild.Fulora.Shell.IsolatedSessionPolicy
+  commentId: T:Agibuild.Fulora.Shell.IsolatedSessionPolicy
+  id: IsolatedSessionPolicy
+  parent: Agibuild.Fulora.Shell
+  children:
+  - Agibuild.Fulora.Shell.IsolatedSessionPolicy.Resolve(Agibuild.Fulora.Shell.WebViewShellSessionContext)
+  langs:
+  - csharp
+  - vb
+  name: IsolatedSessionPolicy
+  nameWithType: IsolatedSessionPolicy
+  fullName: Agibuild.Fulora.Shell.IsolatedSessionPolicy
+  type: Class
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewShellExperience.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: IsolatedSessionPolicy
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewShellExperience.cs
+    startLine: 514
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Session policy that always resolves to an isolated scope.
+  example: []
+  syntax:
+    content: 'public sealed class IsolatedSessionPolicy : IWebViewShellSessionPolicy'
+    content.vb: Public NotInheritable Class IsolatedSessionPolicy Implements IWebViewShellSessionPolicy
+  inheritance:
+  - System.Object
+  implements:
+  - Agibuild.Fulora.Shell.IWebViewShellSessionPolicy
+  inheritedMembers:
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.GetHashCode
+  - System.Object.GetType
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.ToString
+- uid: Agibuild.Fulora.Shell.IsolatedSessionPolicy.Resolve(Agibuild.Fulora.Shell.WebViewShellSessionContext)
+  commentId: M:Agibuild.Fulora.Shell.IsolatedSessionPolicy.Resolve(Agibuild.Fulora.Shell.WebViewShellSessionContext)
+  id: Resolve(Agibuild.Fulora.Shell.WebViewShellSessionContext)
+  parent: Agibuild.Fulora.Shell.IsolatedSessionPolicy
+  langs:
+  - csharp
+  - vb
+  name: Resolve(WebViewShellSessionContext)
+  nameWithType: IsolatedSessionPolicy.Resolve(WebViewShellSessionContext)
+  fullName: Agibuild.Fulora.Shell.IsolatedSessionPolicy.Resolve(Agibuild.Fulora.Shell.WebViewShellSessionContext)
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewShellExperience.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Resolve
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewShellExperience.cs
+    startLine: 517
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Resolves a session decision from shell context.
+  example: []
+  syntax:
+    content: public WebViewShellSessionDecision Resolve(WebViewShellSessionContext context)
+    parameters:
+    - id: context
+      type: Agibuild.Fulora.Shell.WebViewShellSessionContext
+    return:
+      type: Agibuild.Fulora.Shell.WebViewShellSessionDecision
+    content.vb: Public Function Resolve(context As WebViewShellSessionContext) As WebViewShellSessionDecision
+  overload: Agibuild.Fulora.Shell.IsolatedSessionPolicy.Resolve*
+  implements:
+  - Agibuild.Fulora.Shell.IWebViewShellSessionPolicy.Resolve(Agibuild.Fulora.Shell.WebViewShellSessionContext)
+references:
+- uid: Agibuild.Fulora.Shell
+  commentId: N:Agibuild.Fulora.Shell
+  href: Agibuild.html
+  name: Agibuild.Fulora.Shell
+  nameWithType: Agibuild.Fulora.Shell
+  fullName: Agibuild.Fulora.Shell
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  - name: .
+  - uid: Agibuild.Fulora.Shell
+    name: Shell
+    href: Agibuild.Fulora.Shell.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  - name: .
+  - uid: Agibuild.Fulora.Shell
+    name: Shell
+    href: Agibuild.Fulora.Shell.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: Agibuild.Fulora.Shell.IWebViewShellSessionPolicy
+  commentId: T:Agibuild.Fulora.Shell.IWebViewShellSessionPolicy
+  parent: Agibuild.Fulora.Shell
+  href: Agibuild.Fulora.Shell.IWebViewShellSessionPolicy.html
+  name: IWebViewShellSessionPolicy
+  nameWithType: IWebViewShellSessionPolicy
+  fullName: Agibuild.Fulora.Shell.IWebViewShellSessionPolicy
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: Agibuild.Fulora.Shell.IsolatedSessionPolicy.Resolve*
+  commentId: Overload:Agibuild.Fulora.Shell.IsolatedSessionPolicy.Resolve
+  href: Agibuild.Fulora.Shell.IsolatedSessionPolicy.html#Agibuild_Fulora_Shell_IsolatedSessionPolicy_Resolve_Agibuild_Fulora_Shell_WebViewShellSessionContext_
+  name: Resolve
+  nameWithType: IsolatedSessionPolicy.Resolve
+  fullName: Agibuild.Fulora.Shell.IsolatedSessionPolicy.Resolve
+- uid: Agibuild.Fulora.Shell.IWebViewShellSessionPolicy.Resolve(Agibuild.Fulora.Shell.WebViewShellSessionContext)
+  commentId: M:Agibuild.Fulora.Shell.IWebViewShellSessionPolicy.Resolve(Agibuild.Fulora.Shell.WebViewShellSessionContext)
+  parent: Agibuild.Fulora.Shell.IWebViewShellSessionPolicy
+  href: Agibuild.Fulora.Shell.IWebViewShellSessionPolicy.html#Agibuild_Fulora_Shell_IWebViewShellSessionPolicy_Resolve_Agibuild_Fulora_Shell_WebViewShellSessionContext_
+  name: Resolve(WebViewShellSessionContext)
+  nameWithType: IWebViewShellSessionPolicy.Resolve(WebViewShellSessionContext)
+  fullName: Agibuild.Fulora.Shell.IWebViewShellSessionPolicy.Resolve(Agibuild.Fulora.Shell.WebViewShellSessionContext)
+  spec.csharp:
+  - uid: Agibuild.Fulora.Shell.IWebViewShellSessionPolicy.Resolve(Agibuild.Fulora.Shell.WebViewShellSessionContext)
+    name: Resolve
+    href: Agibuild.Fulora.Shell.IWebViewShellSessionPolicy.html#Agibuild_Fulora_Shell_IWebViewShellSessionPolicy_Resolve_Agibuild_Fulora_Shell_WebViewShellSessionContext_
+  - name: (
+  - uid: Agibuild.Fulora.Shell.WebViewShellSessionContext
+    name: WebViewShellSessionContext
+    href: Agibuild.Fulora.Shell.WebViewShellSessionContext.html
+  - name: )
+  spec.vb:
+  - uid: Agibuild.Fulora.Shell.IWebViewShellSessionPolicy.Resolve(Agibuild.Fulora.Shell.WebViewShellSessionContext)
+    name: Resolve
+    href: Agibuild.Fulora.Shell.IWebViewShellSessionPolicy.html#Agibuild_Fulora_Shell_IWebViewShellSessionPolicy_Resolve_Agibuild_Fulora_Shell_WebViewShellSessionContext_
+  - name: (
+  - uid: Agibuild.Fulora.Shell.WebViewShellSessionContext
+    name: WebViewShellSessionContext
+    href: Agibuild.Fulora.Shell.WebViewShellSessionContext.html
+  - name: )
+- uid: Agibuild.Fulora.Shell.WebViewShellSessionContext
+  commentId: T:Agibuild.Fulora.Shell.WebViewShellSessionContext
+  parent: Agibuild.Fulora.Shell
+  href: Agibuild.Fulora.Shell.WebViewShellSessionContext.html
+  name: WebViewShellSessionContext
+  nameWithType: WebViewShellSessionContext
+  fullName: Agibuild.Fulora.Shell.WebViewShellSessionContext
+- uid: Agibuild.Fulora.Shell.WebViewShellSessionDecision
+  commentId: T:Agibuild.Fulora.Shell.WebViewShellSessionDecision
+  parent: Agibuild.Fulora.Shell
+  href: Agibuild.Fulora.Shell.WebViewShellSessionDecision.html
+  name: WebViewShellSessionDecision
+  nameWithType: WebViewShellSessionDecision
+  fullName: Agibuild.Fulora.Shell.WebViewShellSessionDecision

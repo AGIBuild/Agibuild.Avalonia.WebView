@@ -1,0 +1,176 @@
+### YamlMime:ManagedReference
+items:
+- uid: Agibuild.Fulora.WebAuthStatus
+  commentId: T:Agibuild.Fulora.WebAuthStatus
+  id: WebAuthStatus
+  parent: Agibuild.Fulora
+  children:
+  - Agibuild.Fulora.WebAuthStatus.Error
+  - Agibuild.Fulora.WebAuthStatus.Success
+  - Agibuild.Fulora.WebAuthStatus.Timeout
+  - Agibuild.Fulora.WebAuthStatus.UserCancel
+  langs:
+  - csharp
+  - vb
+  name: WebAuthStatus
+  nameWithType: WebAuthStatus
+  fullName: Agibuild.Fulora.WebAuthStatus
+  type: Enum
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/WebViewContracts.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: WebAuthStatus
+    path: ../src/Agibuild.Fulora.Core/WebViewContracts.cs
+    startLine: 23
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Result status for a web authentication operation.
+  example: []
+  syntax:
+    content: public enum WebAuthStatus
+    content.vb: Public Enum WebAuthStatus
+- uid: Agibuild.Fulora.WebAuthStatus.Success
+  commentId: F:Agibuild.Fulora.WebAuthStatus.Success
+  id: Success
+  parent: Agibuild.Fulora.WebAuthStatus
+  langs:
+  - csharp
+  - vb
+  name: Success
+  nameWithType: WebAuthStatus.Success
+  fullName: Agibuild.Fulora.WebAuthStatus.Success
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/WebViewContracts.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Success
+    path: ../src/Agibuild.Fulora.Core/WebViewContracts.cs
+    startLine: 26
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Authentication succeeded.
+  example: []
+  syntax:
+    content: Success = 0
+    return:
+      type: Agibuild.Fulora.WebAuthStatus
+- uid: Agibuild.Fulora.WebAuthStatus.UserCancel
+  commentId: F:Agibuild.Fulora.WebAuthStatus.UserCancel
+  id: UserCancel
+  parent: Agibuild.Fulora.WebAuthStatus
+  langs:
+  - csharp
+  - vb
+  name: UserCancel
+  nameWithType: WebAuthStatus.UserCancel
+  fullName: Agibuild.Fulora.WebAuthStatus.UserCancel
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/WebViewContracts.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: UserCancel
+    path: ../src/Agibuild.Fulora.Core/WebViewContracts.cs
+    startLine: 28
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Authentication was canceled by the user.
+  example: []
+  syntax:
+    content: UserCancel = 1
+    return:
+      type: Agibuild.Fulora.WebAuthStatus
+- uid: Agibuild.Fulora.WebAuthStatus.Timeout
+  commentId: F:Agibuild.Fulora.WebAuthStatus.Timeout
+  id: Timeout
+  parent: Agibuild.Fulora.WebAuthStatus
+  langs:
+  - csharp
+  - vb
+  name: Timeout
+  nameWithType: WebAuthStatus.Timeout
+  fullName: Agibuild.Fulora.WebAuthStatus.Timeout
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/WebViewContracts.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Timeout
+    path: ../src/Agibuild.Fulora.Core/WebViewContracts.cs
+    startLine: 30
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Authentication timed out.
+  example: []
+  syntax:
+    content: Timeout = 2
+    return:
+      type: Agibuild.Fulora.WebAuthStatus
+- uid: Agibuild.Fulora.WebAuthStatus.Error
+  commentId: F:Agibuild.Fulora.WebAuthStatus.Error
+  id: Error
+  parent: Agibuild.Fulora.WebAuthStatus
+  langs:
+  - csharp
+  - vb
+  name: Error
+  nameWithType: WebAuthStatus.Error
+  fullName: Agibuild.Fulora.WebAuthStatus.Error
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/WebViewContracts.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Error
+    path: ../src/Agibuild.Fulora.Core/WebViewContracts.cs
+    startLine: 32
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Authentication failed due to an error.
+  example: []
+  syntax:
+    content: Error = 3
+    return:
+      type: Agibuild.Fulora.WebAuthStatus
+references:
+- uid: Agibuild.Fulora
+  commentId: N:Agibuild.Fulora
+  href: Agibuild.html
+  name: Agibuild.Fulora
+  nameWithType: Agibuild.Fulora
+  fullName: Agibuild.Fulora
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+- uid: Agibuild.Fulora.WebAuthStatus
+  commentId: T:Agibuild.Fulora.WebAuthStatus
+  parent: Agibuild.Fulora
+  href: Agibuild.Fulora.WebAuthStatus.html
+  name: WebAuthStatus
+  nameWithType: WebAuthStatus
+  fullName: Agibuild.Fulora.WebAuthStatus

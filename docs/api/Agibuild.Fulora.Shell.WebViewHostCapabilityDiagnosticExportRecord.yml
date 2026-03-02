@@ -1,0 +1,849 @@
+### YamlMime:ManagedReference
+items:
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord
+  commentId: T:Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord
+  id: WebViewHostCapabilityDiagnosticExportRecord
+  parent: Agibuild.Fulora.Shell
+  children:
+  - Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.#ctor(System.Int32,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.Boolean,System.String,System.String,System.Int64)
+  - Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.CorrelationId
+  - Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.DenyReason
+  - Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.DurationMilliseconds
+  - Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.FailureCategory
+  - Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.Operation
+  - Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.Outcome
+  - Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.ParentWindowId
+  - Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.RequestUri
+  - Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.RootWindowId
+  - Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.SchemaVersion
+  - Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.TargetWindowId
+  - Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.WasAuthorized
+  langs:
+  - csharp
+  - vb
+  name: WebViewHostCapabilityDiagnosticExportRecord
+  nameWithType: WebViewHostCapabilityDiagnosticExportRecord
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord
+  type: Class
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: WebViewHostCapabilityDiagnosticExportRecord
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 408
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Stable export payload for host capability diagnostics.
+  example: []
+  syntax:
+    content: public sealed class WebViewHostCapabilityDiagnosticExportRecord
+    content.vb: Public NotInheritable Class WebViewHostCapabilityDiagnosticExportRecord
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.GetHashCode
+  - System.Object.GetType
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.ToString
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.#ctor(System.Int32,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.Boolean,System.String,System.String,System.Int64)
+  commentId: M:Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.#ctor(System.Int32,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.Boolean,System.String,System.String,System.Int64)
+  id: '#ctor(System.Int32,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.Boolean,System.String,System.String,System.Int64)'
+  parent: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord
+  langs:
+  - csharp
+  - vb
+  name: WebViewHostCapabilityDiagnosticExportRecord(int, string, string, string?, string?, string, string?, string, bool, string?, string?, long)
+  nameWithType: WebViewHostCapabilityDiagnosticExportRecord.WebViewHostCapabilityDiagnosticExportRecord(int, string, string, string?, string?, string, string?, string, bool, string?, string?, long)
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.WebViewHostCapabilityDiagnosticExportRecord(int, string, string, string?, string?, string, string?, string, bool, string?, string?, long)
+  type: Constructor
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: .ctor
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 411
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Create export record.
+  example: []
+  syntax:
+    content: public WebViewHostCapabilityDiagnosticExportRecord(int schemaVersion, string correlationId, string rootWindowId, string? parentWindowId, string? targetWindowId, string operation, string? requestUri, string outcome, bool wasAuthorized, string? denyReason, string? failureCategory, long durationMilliseconds)
+    parameters:
+    - id: schemaVersion
+      type: System.Int32
+    - id: correlationId
+      type: System.String
+    - id: rootWindowId
+      type: System.String
+    - id: parentWindowId
+      type: System.String
+    - id: targetWindowId
+      type: System.String
+    - id: operation
+      type: System.String
+    - id: requestUri
+      type: System.String
+    - id: outcome
+      type: System.String
+    - id: wasAuthorized
+      type: System.Boolean
+    - id: denyReason
+      type: System.String
+    - id: failureCategory
+      type: System.String
+    - id: durationMilliseconds
+      type: System.Int64
+    content.vb: Public Sub New(schemaVersion As Integer, correlationId As String, rootWindowId As String, parentWindowId As String, targetWindowId As String, operation As String, requestUri As String, outcome As String, wasAuthorized As Boolean, denyReason As String, failureCategory As String, durationMilliseconds As Long)
+  overload: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.#ctor*
+  nameWithType.vb: WebViewHostCapabilityDiagnosticExportRecord.New(Integer, String, String, String, String, String, String, String, Boolean, String, String, Long)
+  fullName.vb: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.New(Integer, String, String, String, String, String, String, String, Boolean, String, String, Long)
+  name.vb: New(Integer, String, String, String, String, String, String, String, Boolean, String, String, Long)
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.SchemaVersion
+  commentId: P:Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.SchemaVersion
+  id: SchemaVersion
+  parent: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord
+  langs:
+  - csharp
+  - vb
+  name: SchemaVersion
+  nameWithType: WebViewHostCapabilityDiagnosticExportRecord.SchemaVersion
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.SchemaVersion
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: SchemaVersion
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 440
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Diagnostic schema version.
+  example: []
+  syntax:
+    content: public int SchemaVersion { get; }
+    parameters: []
+    return:
+      type: System.Int32
+    content.vb: Public ReadOnly Property SchemaVersion As Integer
+  overload: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.SchemaVersion*
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.CorrelationId
+  commentId: P:Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.CorrelationId
+  id: CorrelationId
+  parent: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord
+  langs:
+  - csharp
+  - vb
+  name: CorrelationId
+  nameWithType: WebViewHostCapabilityDiagnosticExportRecord.CorrelationId
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.CorrelationId
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: CorrelationId
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 442
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Correlation id as canonical guid string.
+  example: []
+  syntax:
+    content: public string CorrelationId { get; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public ReadOnly Property CorrelationId As String
+  overload: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.CorrelationId*
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.RootWindowId
+  commentId: P:Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.RootWindowId
+  id: RootWindowId
+  parent: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord
+  langs:
+  - csharp
+  - vb
+  name: RootWindowId
+  nameWithType: WebViewHostCapabilityDiagnosticExportRecord.RootWindowId
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.RootWindowId
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: RootWindowId
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 444
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Root window id as canonical guid string.
+  example: []
+  syntax:
+    content: public string RootWindowId { get; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public ReadOnly Property RootWindowId As String
+  overload: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.RootWindowId*
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.ParentWindowId
+  commentId: P:Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.ParentWindowId
+  id: ParentWindowId
+  parent: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord
+  langs:
+  - csharp
+  - vb
+  name: ParentWindowId
+  nameWithType: WebViewHostCapabilityDiagnosticExportRecord.ParentWindowId
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.ParentWindowId
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: ParentWindowId
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 446
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Optional parent window id as canonical guid string.
+  example: []
+  syntax:
+    content: public string? ParentWindowId { get; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public ReadOnly Property ParentWindowId As String
+  overload: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.ParentWindowId*
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.TargetWindowId
+  commentId: P:Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.TargetWindowId
+  id: TargetWindowId
+  parent: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord
+  langs:
+  - csharp
+  - vb
+  name: TargetWindowId
+  nameWithType: WebViewHostCapabilityDiagnosticExportRecord.TargetWindowId
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.TargetWindowId
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: TargetWindowId
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 448
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Optional target window id as canonical guid string.
+  example: []
+  syntax:
+    content: public string? TargetWindowId { get; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public ReadOnly Property TargetWindowId As String
+  overload: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.TargetWindowId*
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.Operation
+  commentId: P:Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.Operation
+  id: Operation
+  parent: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord
+  langs:
+  - csharp
+  - vb
+  name: Operation
+  nameWithType: WebViewHostCapabilityDiagnosticExportRecord.Operation
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.Operation
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Operation
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 450
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Operation token in kebab-case.
+  example: []
+  syntax:
+    content: public string Operation { get; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public ReadOnly Property Operation As String
+  overload: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.Operation*
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.RequestUri
+  commentId: P:Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.RequestUri
+  id: RequestUri
+  parent: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord
+  langs:
+  - csharp
+  - vb
+  name: RequestUri
+  nameWithType: WebViewHostCapabilityDiagnosticExportRecord.RequestUri
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.RequestUri
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: RequestUri
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 452
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Optional request URI.
+  example: []
+  syntax:
+    content: public string? RequestUri { get; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public ReadOnly Property RequestUri As String
+  overload: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.RequestUri*
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.Outcome
+  commentId: P:Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.Outcome
+  id: Outcome
+  parent: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord
+  langs:
+  - csharp
+  - vb
+  name: Outcome
+  nameWithType: WebViewHostCapabilityDiagnosticExportRecord.Outcome
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.Outcome
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Outcome
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 454
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Outcome token in kebab-case.
+  example: []
+  syntax:
+    content: public string Outcome { get; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public ReadOnly Property Outcome As String
+  overload: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.Outcome*
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.WasAuthorized
+  commentId: P:Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.WasAuthorized
+  id: WasAuthorized
+  parent: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord
+  langs:
+  - csharp
+  - vb
+  name: WasAuthorized
+  nameWithType: WebViewHostCapabilityDiagnosticExportRecord.WasAuthorized
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.WasAuthorized
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: WasAuthorized
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 456
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Whether authorization passed.
+  example: []
+  syntax:
+    content: public bool WasAuthorized { get; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public ReadOnly Property WasAuthorized As Boolean
+  overload: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.WasAuthorized*
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.DenyReason
+  commentId: P:Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.DenyReason
+  id: DenyReason
+  parent: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord
+  langs:
+  - csharp
+  - vb
+  name: DenyReason
+  nameWithType: WebViewHostCapabilityDiagnosticExportRecord.DenyReason
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.DenyReason
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: DenyReason
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 458
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Deny reason when outcome is deny.
+  example: []
+  syntax:
+    content: public string? DenyReason { get; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public ReadOnly Property DenyReason As String
+  overload: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.DenyReason*
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.FailureCategory
+  commentId: P:Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.FailureCategory
+  id: FailureCategory
+  parent: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord
+  langs:
+  - csharp
+  - vb
+  name: FailureCategory
+  nameWithType: WebViewHostCapabilityDiagnosticExportRecord.FailureCategory
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.FailureCategory
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: FailureCategory
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 460
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Failure category when outcome is failure.
+  example: []
+  syntax:
+    content: public string? FailureCategory { get; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public ReadOnly Property FailureCategory As String
+  overload: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.FailureCategory*
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.DurationMilliseconds
+  commentId: P:Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.DurationMilliseconds
+  id: DurationMilliseconds
+  parent: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord
+  langs:
+  - csharp
+  - vb
+  name: DurationMilliseconds
+  nameWithType: WebViewHostCapabilityDiagnosticExportRecord.DurationMilliseconds
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.DurationMilliseconds
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: DurationMilliseconds
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 462
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Elapsed duration in milliseconds.
+  example: []
+  syntax:
+    content: public long DurationMilliseconds { get; }
+    parameters: []
+    return:
+      type: System.Int64
+    content.vb: Public ReadOnly Property DurationMilliseconds As Long
+  overload: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.DurationMilliseconds*
+references:
+- uid: Agibuild.Fulora.Shell
+  commentId: N:Agibuild.Fulora.Shell
+  href: Agibuild.html
+  name: Agibuild.Fulora.Shell
+  nameWithType: Agibuild.Fulora.Shell
+  fullName: Agibuild.Fulora.Shell
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  - name: .
+  - uid: Agibuild.Fulora.Shell
+    name: Shell
+    href: Agibuild.Fulora.Shell.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  - name: .
+  - uid: Agibuild.Fulora.Shell
+    name: Shell
+    href: Agibuild.Fulora.Shell.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.#ctor*
+  commentId: Overload:Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.#ctor
+  href: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.html#Agibuild_Fulora_Shell_WebViewHostCapabilityDiagnosticExportRecord__ctor_System_Int32_System_String_System_String_System_String_System_String_System_String_System_String_System_String_System_Boolean_System_String_System_String_System_Int64_
+  name: WebViewHostCapabilityDiagnosticExportRecord
+  nameWithType: WebViewHostCapabilityDiagnosticExportRecord.WebViewHostCapabilityDiagnosticExportRecord
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.WebViewHostCapabilityDiagnosticExportRecord
+  nameWithType.vb: WebViewHostCapabilityDiagnosticExportRecord.New
+  fullName.vb: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.New
+  name.vb: New
+- uid: System.Int32
+  commentId: T:System.Int32
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int32
+  name: int
+  nameWithType: int
+  fullName: int
+  nameWithType.vb: Integer
+  fullName.vb: Integer
+  name.vb: Integer
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: System.Int64
+  commentId: T:System.Int64
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int64
+  name: long
+  nameWithType: long
+  fullName: long
+  nameWithType.vb: Long
+  fullName.vb: Long
+  name.vb: Long
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.SchemaVersion*
+  commentId: Overload:Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.SchemaVersion
+  href: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.html#Agibuild_Fulora_Shell_WebViewHostCapabilityDiagnosticExportRecord_SchemaVersion
+  name: SchemaVersion
+  nameWithType: WebViewHostCapabilityDiagnosticExportRecord.SchemaVersion
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.SchemaVersion
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.CorrelationId*
+  commentId: Overload:Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.CorrelationId
+  href: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.html#Agibuild_Fulora_Shell_WebViewHostCapabilityDiagnosticExportRecord_CorrelationId
+  name: CorrelationId
+  nameWithType: WebViewHostCapabilityDiagnosticExportRecord.CorrelationId
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.CorrelationId
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.RootWindowId*
+  commentId: Overload:Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.RootWindowId
+  href: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.html#Agibuild_Fulora_Shell_WebViewHostCapabilityDiagnosticExportRecord_RootWindowId
+  name: RootWindowId
+  nameWithType: WebViewHostCapabilityDiagnosticExportRecord.RootWindowId
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.RootWindowId
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.ParentWindowId*
+  commentId: Overload:Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.ParentWindowId
+  href: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.html#Agibuild_Fulora_Shell_WebViewHostCapabilityDiagnosticExportRecord_ParentWindowId
+  name: ParentWindowId
+  nameWithType: WebViewHostCapabilityDiagnosticExportRecord.ParentWindowId
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.ParentWindowId
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.TargetWindowId*
+  commentId: Overload:Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.TargetWindowId
+  href: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.html#Agibuild_Fulora_Shell_WebViewHostCapabilityDiagnosticExportRecord_TargetWindowId
+  name: TargetWindowId
+  nameWithType: WebViewHostCapabilityDiagnosticExportRecord.TargetWindowId
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.TargetWindowId
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.Operation*
+  commentId: Overload:Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.Operation
+  href: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.html#Agibuild_Fulora_Shell_WebViewHostCapabilityDiagnosticExportRecord_Operation
+  name: Operation
+  nameWithType: WebViewHostCapabilityDiagnosticExportRecord.Operation
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.Operation
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.RequestUri*
+  commentId: Overload:Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.RequestUri
+  href: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.html#Agibuild_Fulora_Shell_WebViewHostCapabilityDiagnosticExportRecord_RequestUri
+  name: RequestUri
+  nameWithType: WebViewHostCapabilityDiagnosticExportRecord.RequestUri
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.RequestUri
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.Outcome*
+  commentId: Overload:Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.Outcome
+  href: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.html#Agibuild_Fulora_Shell_WebViewHostCapabilityDiagnosticExportRecord_Outcome
+  name: Outcome
+  nameWithType: WebViewHostCapabilityDiagnosticExportRecord.Outcome
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.Outcome
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.WasAuthorized*
+  commentId: Overload:Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.WasAuthorized
+  href: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.html#Agibuild_Fulora_Shell_WebViewHostCapabilityDiagnosticExportRecord_WasAuthorized
+  name: WasAuthorized
+  nameWithType: WebViewHostCapabilityDiagnosticExportRecord.WasAuthorized
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.WasAuthorized
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.DenyReason*
+  commentId: Overload:Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.DenyReason
+  href: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.html#Agibuild_Fulora_Shell_WebViewHostCapabilityDiagnosticExportRecord_DenyReason
+  name: DenyReason
+  nameWithType: WebViewHostCapabilityDiagnosticExportRecord.DenyReason
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.DenyReason
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.FailureCategory*
+  commentId: Overload:Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.FailureCategory
+  href: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.html#Agibuild_Fulora_Shell_WebViewHostCapabilityDiagnosticExportRecord_FailureCategory
+  name: FailureCategory
+  nameWithType: WebViewHostCapabilityDiagnosticExportRecord.FailureCategory
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.FailureCategory
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.DurationMilliseconds*
+  commentId: Overload:Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.DurationMilliseconds
+  href: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.html#Agibuild_Fulora_Shell_WebViewHostCapabilityDiagnosticExportRecord_DurationMilliseconds
+  name: DurationMilliseconds
+  nameWithType: WebViewHostCapabilityDiagnosticExportRecord.DurationMilliseconds
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.DurationMilliseconds

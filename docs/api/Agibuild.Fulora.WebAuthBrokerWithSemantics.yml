@@ -1,0 +1,520 @@
+### YamlMime:ManagedReference
+items:
+- uid: Agibuild.Fulora.WebAuthBrokerWithSemantics
+  commentId: T:Agibuild.Fulora.WebAuthBrokerWithSemantics
+  id: WebAuthBrokerWithSemantics
+  parent: Agibuild.Fulora
+  children:
+  - Agibuild.Fulora.WebAuthBrokerWithSemantics.#ctor(Agibuild.Fulora.IWebAuthBroker)
+  - Agibuild.Fulora.WebAuthBrokerWithSemantics.AuthenticateAsync(Agibuild.Fulora.ITopLevelWindow,Agibuild.Fulora.AuthOptions)
+  langs:
+  - csharp
+  - vb
+  name: WebAuthBrokerWithSemantics
+  nameWithType: WebAuthBrokerWithSemantics
+  fullName: Agibuild.Fulora.WebAuthBrokerWithSemantics
+  type: Class
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebAuthBrokerWithSemantics.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: WebAuthBrokerWithSemantics
+    path: ../src/Agibuild.Fulora.Runtime/WebAuthBrokerWithSemantics.cs
+    startLine: 5
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Decorates an <xref href="Agibuild.Fulora.IWebAuthBroker" data-throw-if-not-resolved="false"></xref> to enforce v1 baseline contract semantics.
+  example: []
+  syntax:
+    content: 'public sealed class WebAuthBrokerWithSemantics : IWebAuthBroker'
+    content.vb: Public NotInheritable Class WebAuthBrokerWithSemantics Implements IWebAuthBroker
+  inheritance:
+  - System.Object
+  implements:
+  - Agibuild.Fulora.IWebAuthBroker
+  inheritedMembers:
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.GetHashCode
+  - System.Object.GetType
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.ToString
+- uid: Agibuild.Fulora.WebAuthBrokerWithSemantics.#ctor(Agibuild.Fulora.IWebAuthBroker)
+  commentId: M:Agibuild.Fulora.WebAuthBrokerWithSemantics.#ctor(Agibuild.Fulora.IWebAuthBroker)
+  id: '#ctor(Agibuild.Fulora.IWebAuthBroker)'
+  parent: Agibuild.Fulora.WebAuthBrokerWithSemantics
+  langs:
+  - csharp
+  - vb
+  name: WebAuthBrokerWithSemantics(IWebAuthBroker)
+  nameWithType: WebAuthBrokerWithSemantics.WebAuthBrokerWithSemantics(IWebAuthBroker)
+  fullName: Agibuild.Fulora.WebAuthBrokerWithSemantics.WebAuthBrokerWithSemantics(Agibuild.Fulora.IWebAuthBroker)
+  type: Constructor
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebAuthBrokerWithSemantics.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: .ctor
+    path: ../src/Agibuild.Fulora.Runtime/WebAuthBrokerWithSemantics.cs
+    startLine: 10
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  example: []
+  syntax:
+    content: public WebAuthBrokerWithSemantics(IWebAuthBroker inner)
+    parameters:
+    - id: inner
+      type: Agibuild.Fulora.IWebAuthBroker
+    content.vb: Public Sub New(inner As IWebAuthBroker)
+  overload: Agibuild.Fulora.WebAuthBrokerWithSemantics.#ctor*
+  nameWithType.vb: WebAuthBrokerWithSemantics.New(IWebAuthBroker)
+  fullName.vb: Agibuild.Fulora.WebAuthBrokerWithSemantics.New(Agibuild.Fulora.IWebAuthBroker)
+  name.vb: New(IWebAuthBroker)
+- uid: Agibuild.Fulora.WebAuthBrokerWithSemantics.AuthenticateAsync(Agibuild.Fulora.ITopLevelWindow,Agibuild.Fulora.AuthOptions)
+  commentId: M:Agibuild.Fulora.WebAuthBrokerWithSemantics.AuthenticateAsync(Agibuild.Fulora.ITopLevelWindow,Agibuild.Fulora.AuthOptions)
+  id: AuthenticateAsync(Agibuild.Fulora.ITopLevelWindow,Agibuild.Fulora.AuthOptions)
+  parent: Agibuild.Fulora.WebAuthBrokerWithSemantics
+  langs:
+  - csharp
+  - vb
+  name: AuthenticateAsync(ITopLevelWindow, AuthOptions)
+  nameWithType: WebAuthBrokerWithSemantics.AuthenticateAsync(ITopLevelWindow, AuthOptions)
+  fullName: Agibuild.Fulora.WebAuthBrokerWithSemantics.AuthenticateAsync(Agibuild.Fulora.ITopLevelWindow, Agibuild.Fulora.AuthOptions)
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebAuthBrokerWithSemantics.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: AuthenticateAsync
+    path: ../src/Agibuild.Fulora.Runtime/WebAuthBrokerWithSemantics.cs
+    startLine: 16
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Starts an authentication flow and returns the result.
+  example: []
+  syntax:
+    content: public Task<WebAuthResult> AuthenticateAsync(ITopLevelWindow owner, AuthOptions options)
+    parameters:
+    - id: owner
+      type: Agibuild.Fulora.ITopLevelWindow
+      description: Owner top-level window.
+    - id: options
+      type: Agibuild.Fulora.AuthOptions
+      description: Authentication options.
+    return:
+      type: System.Threading.Tasks.Task{Agibuild.Fulora.WebAuthResult}
+    content.vb: Public Function AuthenticateAsync(owner As ITopLevelWindow, options As AuthOptions) As Task(Of WebAuthResult)
+  overload: Agibuild.Fulora.WebAuthBrokerWithSemantics.AuthenticateAsync*
+  implements:
+  - Agibuild.Fulora.IWebAuthBroker.AuthenticateAsync(Agibuild.Fulora.ITopLevelWindow,Agibuild.Fulora.AuthOptions)
+references:
+- uid: Agibuild.Fulora.IWebAuthBroker
+  commentId: T:Agibuild.Fulora.IWebAuthBroker
+  parent: Agibuild.Fulora
+  href: Agibuild.Fulora.IWebAuthBroker.html
+  name: IWebAuthBroker
+  nameWithType: IWebAuthBroker
+  fullName: Agibuild.Fulora.IWebAuthBroker
+- uid: Agibuild.Fulora
+  commentId: N:Agibuild.Fulora
+  href: Agibuild.html
+  name: Agibuild.Fulora
+  nameWithType: Agibuild.Fulora
+  fullName: Agibuild.Fulora
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: Agibuild.Fulora.WebAuthBrokerWithSemantics.#ctor*
+  commentId: Overload:Agibuild.Fulora.WebAuthBrokerWithSemantics.#ctor
+  href: Agibuild.Fulora.WebAuthBrokerWithSemantics.html#Agibuild_Fulora_WebAuthBrokerWithSemantics__ctor_Agibuild_Fulora_IWebAuthBroker_
+  name: WebAuthBrokerWithSemantics
+  nameWithType: WebAuthBrokerWithSemantics.WebAuthBrokerWithSemantics
+  fullName: Agibuild.Fulora.WebAuthBrokerWithSemantics.WebAuthBrokerWithSemantics
+  nameWithType.vb: WebAuthBrokerWithSemantics.New
+  fullName.vb: Agibuild.Fulora.WebAuthBrokerWithSemantics.New
+  name.vb: New
+- uid: Agibuild.Fulora.WebAuthBrokerWithSemantics.AuthenticateAsync*
+  commentId: Overload:Agibuild.Fulora.WebAuthBrokerWithSemantics.AuthenticateAsync
+  href: Agibuild.Fulora.WebAuthBrokerWithSemantics.html#Agibuild_Fulora_WebAuthBrokerWithSemantics_AuthenticateAsync_Agibuild_Fulora_ITopLevelWindow_Agibuild_Fulora_AuthOptions_
+  name: AuthenticateAsync
+  nameWithType: WebAuthBrokerWithSemantics.AuthenticateAsync
+  fullName: Agibuild.Fulora.WebAuthBrokerWithSemantics.AuthenticateAsync
+- uid: Agibuild.Fulora.IWebAuthBroker.AuthenticateAsync(Agibuild.Fulora.ITopLevelWindow,Agibuild.Fulora.AuthOptions)
+  commentId: M:Agibuild.Fulora.IWebAuthBroker.AuthenticateAsync(Agibuild.Fulora.ITopLevelWindow,Agibuild.Fulora.AuthOptions)
+  parent: Agibuild.Fulora.IWebAuthBroker
+  href: Agibuild.Fulora.IWebAuthBroker.html#Agibuild_Fulora_IWebAuthBroker_AuthenticateAsync_Agibuild_Fulora_ITopLevelWindow_Agibuild_Fulora_AuthOptions_
+  name: AuthenticateAsync(ITopLevelWindow, AuthOptions)
+  nameWithType: IWebAuthBroker.AuthenticateAsync(ITopLevelWindow, AuthOptions)
+  fullName: Agibuild.Fulora.IWebAuthBroker.AuthenticateAsync(Agibuild.Fulora.ITopLevelWindow, Agibuild.Fulora.AuthOptions)
+  spec.csharp:
+  - uid: Agibuild.Fulora.IWebAuthBroker.AuthenticateAsync(Agibuild.Fulora.ITopLevelWindow,Agibuild.Fulora.AuthOptions)
+    name: AuthenticateAsync
+    href: Agibuild.Fulora.IWebAuthBroker.html#Agibuild_Fulora_IWebAuthBroker_AuthenticateAsync_Agibuild_Fulora_ITopLevelWindow_Agibuild_Fulora_AuthOptions_
+  - name: (
+  - uid: Agibuild.Fulora.ITopLevelWindow
+    name: ITopLevelWindow
+    href: Agibuild.Fulora.ITopLevelWindow.html
+  - name: ','
+  - name: " "
+  - uid: Agibuild.Fulora.AuthOptions
+    name: AuthOptions
+    href: Agibuild.Fulora.AuthOptions.html
+  - name: )
+  spec.vb:
+  - uid: Agibuild.Fulora.IWebAuthBroker.AuthenticateAsync(Agibuild.Fulora.ITopLevelWindow,Agibuild.Fulora.AuthOptions)
+    name: AuthenticateAsync
+    href: Agibuild.Fulora.IWebAuthBroker.html#Agibuild_Fulora_IWebAuthBroker_AuthenticateAsync_Agibuild_Fulora_ITopLevelWindow_Agibuild_Fulora_AuthOptions_
+  - name: (
+  - uid: Agibuild.Fulora.ITopLevelWindow
+    name: ITopLevelWindow
+    href: Agibuild.Fulora.ITopLevelWindow.html
+  - name: ','
+  - name: " "
+  - uid: Agibuild.Fulora.AuthOptions
+    name: AuthOptions
+    href: Agibuild.Fulora.AuthOptions.html
+  - name: )
+- uid: Agibuild.Fulora.ITopLevelWindow
+  commentId: T:Agibuild.Fulora.ITopLevelWindow
+  parent: Agibuild.Fulora
+  href: Agibuild.Fulora.ITopLevelWindow.html
+  name: ITopLevelWindow
+  nameWithType: ITopLevelWindow
+  fullName: Agibuild.Fulora.ITopLevelWindow
+- uid: Agibuild.Fulora.AuthOptions
+  commentId: T:Agibuild.Fulora.AuthOptions
+  parent: Agibuild.Fulora
+  href: Agibuild.Fulora.AuthOptions.html
+  name: AuthOptions
+  nameWithType: AuthOptions
+  fullName: Agibuild.Fulora.AuthOptions
+- uid: System.Threading.Tasks.Task{Agibuild.Fulora.WebAuthResult}
+  commentId: T:System.Threading.Tasks.Task{Agibuild.Fulora.WebAuthResult}
+  parent: System.Threading.Tasks
+  definition: System.Threading.Tasks.Task`1
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<WebAuthResult>
+  nameWithType: Task<WebAuthResult>
+  fullName: System.Threading.Tasks.Task<Agibuild.Fulora.WebAuthResult>
+  nameWithType.vb: Task(Of WebAuthResult)
+  fullName.vb: System.Threading.Tasks.Task(Of Agibuild.Fulora.WebAuthResult)
+  name.vb: Task(Of WebAuthResult)
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - uid: Agibuild.Fulora.WebAuthResult
+    name: WebAuthResult
+    href: Agibuild.Fulora.WebAuthResult.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: Agibuild.Fulora.WebAuthResult
+    name: WebAuthResult
+    href: Agibuild.Fulora.WebAuthResult.html
+  - name: )
+- uid: System.Threading.Tasks.Task`1
+  commentId: T:System.Threading.Tasks.Task`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<TResult>
+  nameWithType: Task<TResult>
+  fullName: System.Threading.Tasks.Task<TResult>
+  nameWithType.vb: Task(Of TResult)
+  fullName.vb: System.Threading.Tasks.Task(Of TResult)
+  name.vb: Task(Of TResult)
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - name: TResult
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TResult
+  - name: )
+- uid: System.Threading.Tasks
+  commentId: N:System.Threading.Tasks
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Threading.Tasks
+  nameWithType: System.Threading.Tasks
+  fullName: System.Threading.Tasks
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  - name: .
+  - uid: System.Threading.Tasks
+    name: Tasks
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  - name: .
+  - uid: System.Threading.Tasks
+    name: Tasks
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks

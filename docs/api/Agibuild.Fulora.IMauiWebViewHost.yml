@@ -1,0 +1,321 @@
+### YamlMime:ManagedReference
+items:
+- uid: Agibuild.Fulora.IMauiWebViewHost
+  commentId: T:Agibuild.Fulora.IMauiWebViewHost
+  id: IMauiWebViewHost
+  parent: Agibuild.Fulora
+  children:
+  - Agibuild.Fulora.IMauiWebViewHost.Bridge
+  - Agibuild.Fulora.IMauiWebViewHost.InitializeAsync(Agibuild.Fulora.MauiWebViewHostOptions,System.Threading.CancellationToken)
+  - Agibuild.Fulora.IMauiWebViewHost.NavigateAsync(System.Uri,System.Threading.CancellationToken)
+  - Agibuild.Fulora.IMauiWebViewHost.WebView
+  langs:
+  - csharp
+  - vb
+  name: IMauiWebViewHost
+  nameWithType: IMauiWebViewHost
+  fullName: Agibuild.Fulora.IMauiWebViewHost
+  type: Interface
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/IMauiWebViewHost.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: IMauiWebViewHost
+    path: ../src/Agibuild.Fulora.Core/IMauiWebViewHost.cs
+    startLine: 5
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Contract for hosting an Agibuild.Fulora WebView in a .NET MAUI application.
+  example: []
+  syntax:
+    content: public interface IMauiWebViewHost
+    content.vb: Public Interface IMauiWebViewHost
+- uid: Agibuild.Fulora.IMauiWebViewHost.WebView
+  commentId: P:Agibuild.Fulora.IMauiWebViewHost.WebView
+  id: WebView
+  parent: Agibuild.Fulora.IMauiWebViewHost
+  langs:
+  - csharp
+  - vb
+  name: WebView
+  nameWithType: IMauiWebViewHost.WebView
+  fullName: Agibuild.Fulora.IMauiWebViewHost.WebView
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/IMauiWebViewHost.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: WebView
+    path: ../src/Agibuild.Fulora.Core/IMauiWebViewHost.cs
+    startLine: 7
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: IWebView WebView { get; }
+    parameters: []
+    return:
+      type: Agibuild.Fulora.IWebView
+    content.vb: ReadOnly Property WebView As IWebView
+  overload: Agibuild.Fulora.IMauiWebViewHost.WebView*
+- uid: Agibuild.Fulora.IMauiWebViewHost.Bridge
+  commentId: P:Agibuild.Fulora.IMauiWebViewHost.Bridge
+  id: Bridge
+  parent: Agibuild.Fulora.IMauiWebViewHost
+  langs:
+  - csharp
+  - vb
+  name: Bridge
+  nameWithType: IMauiWebViewHost.Bridge
+  fullName: Agibuild.Fulora.IMauiWebViewHost.Bridge
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/IMauiWebViewHost.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Bridge
+    path: ../src/Agibuild.Fulora.Core/IMauiWebViewHost.cs
+    startLine: 8
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: IBridgeService Bridge { get; }
+    parameters: []
+    return:
+      type: Agibuild.Fulora.IBridgeService
+    content.vb: ReadOnly Property Bridge As IBridgeService
+  overload: Agibuild.Fulora.IMauiWebViewHost.Bridge*
+- uid: Agibuild.Fulora.IMauiWebViewHost.InitializeAsync(Agibuild.Fulora.MauiWebViewHostOptions,System.Threading.CancellationToken)
+  commentId: M:Agibuild.Fulora.IMauiWebViewHost.InitializeAsync(Agibuild.Fulora.MauiWebViewHostOptions,System.Threading.CancellationToken)
+  id: InitializeAsync(Agibuild.Fulora.MauiWebViewHostOptions,System.Threading.CancellationToken)
+  parent: Agibuild.Fulora.IMauiWebViewHost
+  langs:
+  - csharp
+  - vb
+  name: InitializeAsync(MauiWebViewHostOptions, CancellationToken)
+  nameWithType: IMauiWebViewHost.InitializeAsync(MauiWebViewHostOptions, CancellationToken)
+  fullName: Agibuild.Fulora.IMauiWebViewHost.InitializeAsync(Agibuild.Fulora.MauiWebViewHostOptions, System.Threading.CancellationToken)
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/IMauiWebViewHost.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: InitializeAsync
+    path: ../src/Agibuild.Fulora.Core/IMauiWebViewHost.cs
+    startLine: 9
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: Task InitializeAsync(MauiWebViewHostOptions options, CancellationToken ct = default)
+    parameters:
+    - id: options
+      type: Agibuild.Fulora.MauiWebViewHostOptions
+    - id: ct
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task
+    content.vb: Function InitializeAsync(options As MauiWebViewHostOptions, ct As CancellationToken = Nothing) As Task
+  overload: Agibuild.Fulora.IMauiWebViewHost.InitializeAsync*
+- uid: Agibuild.Fulora.IMauiWebViewHost.NavigateAsync(System.Uri,System.Threading.CancellationToken)
+  commentId: M:Agibuild.Fulora.IMauiWebViewHost.NavigateAsync(System.Uri,System.Threading.CancellationToken)
+  id: NavigateAsync(System.Uri,System.Threading.CancellationToken)
+  parent: Agibuild.Fulora.IMauiWebViewHost
+  langs:
+  - csharp
+  - vb
+  name: NavigateAsync(Uri, CancellationToken)
+  nameWithType: IMauiWebViewHost.NavigateAsync(Uri, CancellationToken)
+  fullName: Agibuild.Fulora.IMauiWebViewHost.NavigateAsync(System.Uri, System.Threading.CancellationToken)
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/IMauiWebViewHost.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: NavigateAsync
+    path: ../src/Agibuild.Fulora.Core/IMauiWebViewHost.cs
+    startLine: 10
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: Task NavigateAsync(Uri uri, CancellationToken ct = default)
+    parameters:
+    - id: uri
+      type: System.Uri
+    - id: ct
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task
+    content.vb: Function NavigateAsync(uri As Uri, ct As CancellationToken = Nothing) As Task
+  overload: Agibuild.Fulora.IMauiWebViewHost.NavigateAsync*
+references:
+- uid: Agibuild.Fulora
+  commentId: N:Agibuild.Fulora
+  href: Agibuild.html
+  name: Agibuild.Fulora
+  nameWithType: Agibuild.Fulora
+  fullName: Agibuild.Fulora
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+- uid: Agibuild.Fulora.IMauiWebViewHost.WebView*
+  commentId: Overload:Agibuild.Fulora.IMauiWebViewHost.WebView
+  href: Agibuild.Fulora.IMauiWebViewHost.html#Agibuild_Fulora_IMauiWebViewHost_WebView
+  name: WebView
+  nameWithType: IMauiWebViewHost.WebView
+  fullName: Agibuild.Fulora.IMauiWebViewHost.WebView
+- uid: Agibuild.Fulora.IWebView
+  commentId: T:Agibuild.Fulora.IWebView
+  parent: Agibuild.Fulora
+  href: Agibuild.Fulora.IWebView.html
+  name: IWebView
+  nameWithType: IWebView
+  fullName: Agibuild.Fulora.IWebView
+- uid: Agibuild.Fulora.IMauiWebViewHost.Bridge*
+  commentId: Overload:Agibuild.Fulora.IMauiWebViewHost.Bridge
+  href: Agibuild.Fulora.IMauiWebViewHost.html#Agibuild_Fulora_IMauiWebViewHost_Bridge
+  name: Bridge
+  nameWithType: IMauiWebViewHost.Bridge
+  fullName: Agibuild.Fulora.IMauiWebViewHost.Bridge
+- uid: Agibuild.Fulora.IBridgeService
+  commentId: T:Agibuild.Fulora.IBridgeService
+  parent: Agibuild.Fulora
+  href: Agibuild.Fulora.IBridgeService.html
+  name: IBridgeService
+  nameWithType: IBridgeService
+  fullName: Agibuild.Fulora.IBridgeService
+- uid: Agibuild.Fulora.IMauiWebViewHost.InitializeAsync*
+  commentId: Overload:Agibuild.Fulora.IMauiWebViewHost.InitializeAsync
+  href: Agibuild.Fulora.IMauiWebViewHost.html#Agibuild_Fulora_IMauiWebViewHost_InitializeAsync_Agibuild_Fulora_MauiWebViewHostOptions_System_Threading_CancellationToken_
+  name: InitializeAsync
+  nameWithType: IMauiWebViewHost.InitializeAsync
+  fullName: Agibuild.Fulora.IMauiWebViewHost.InitializeAsync
+- uid: Agibuild.Fulora.MauiWebViewHostOptions
+  commentId: T:Agibuild.Fulora.MauiWebViewHostOptions
+  parent: Agibuild.Fulora
+  href: Agibuild.Fulora.MauiWebViewHostOptions.html
+  name: MauiWebViewHostOptions
+  nameWithType: MauiWebViewHostOptions
+  fullName: Agibuild.Fulora.MauiWebViewHostOptions
+- uid: System.Threading.CancellationToken
+  commentId: T:System.Threading.CancellationToken
+  parent: System.Threading
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  name: CancellationToken
+  nameWithType: CancellationToken
+  fullName: System.Threading.CancellationToken
+- uid: System.Threading.Tasks.Task
+  commentId: T:System.Threading.Tasks.Task
+  parent: System.Threading.Tasks
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task
+  name: Task
+  nameWithType: Task
+  fullName: System.Threading.Tasks.Task
+- uid: System.Threading
+  commentId: N:System.Threading
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Threading
+  nameWithType: System.Threading
+  fullName: System.Threading
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+- uid: System.Threading.Tasks
+  commentId: N:System.Threading.Tasks
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Threading.Tasks
+  nameWithType: System.Threading.Tasks
+  fullName: System.Threading.Tasks
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  - name: .
+  - uid: System.Threading.Tasks
+    name: Tasks
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  - name: .
+  - uid: System.Threading.Tasks
+    name: Tasks
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks
+- uid: Agibuild.Fulora.IMauiWebViewHost.NavigateAsync*
+  commentId: Overload:Agibuild.Fulora.IMauiWebViewHost.NavigateAsync
+  href: Agibuild.Fulora.IMauiWebViewHost.html#Agibuild_Fulora_IMauiWebViewHost_NavigateAsync_System_Uri_System_Threading_CancellationToken_
+  name: NavigateAsync
+  nameWithType: IMauiWebViewHost.NavigateAsync
+  fullName: Agibuild.Fulora.IMauiWebViewHost.NavigateAsync
+- uid: System.Uri
+  commentId: T:System.Uri
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.uri
+  name: Uri
+  nameWithType: Uri
+  fullName: System.Uri
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System

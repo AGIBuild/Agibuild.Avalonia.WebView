@@ -1,0 +1,126 @@
+### YamlMime:ManagedReference
+items:
+- uid: Agibuild.Fulora.Shell.DeepLinkPlatformSupport
+  commentId: T:Agibuild.Fulora.Shell.DeepLinkPlatformSupport
+  id: DeepLinkPlatformSupport
+  parent: Agibuild.Fulora.Shell
+  children:
+  - Agibuild.Fulora.Shell.DeepLinkPlatformSupport.NotSupported
+  - Agibuild.Fulora.Shell.DeepLinkPlatformSupport.Supported
+  langs:
+  - csharp
+  - vb
+  name: DeepLinkPlatformSupport
+  nameWithType: DeepLinkPlatformSupport
+  fullName: Agibuild.Fulora.Shell.DeepLinkPlatformSupport
+  type: Enum
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/DeepLinkPlatformEntrypoint.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: DeepLinkPlatformSupport
+    path: ../src/Agibuild.Fulora.Runtime/Shell/DeepLinkPlatformEntrypoint.cs
+    startLine: 5
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Platform support status for deep-link native registration.
+  example: []
+  syntax:
+    content: public enum DeepLinkPlatformSupport
+    content.vb: Public Enum DeepLinkPlatformSupport
+- uid: Agibuild.Fulora.Shell.DeepLinkPlatformSupport.Supported
+  commentId: F:Agibuild.Fulora.Shell.DeepLinkPlatformSupport.Supported
+  id: Supported
+  parent: Agibuild.Fulora.Shell.DeepLinkPlatformSupport
+  langs:
+  - csharp
+  - vb
+  name: Supported
+  nameWithType: DeepLinkPlatformSupport.Supported
+  fullName: Agibuild.Fulora.Shell.DeepLinkPlatformSupport.Supported
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/DeepLinkPlatformEntrypoint.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Supported
+    path: ../src/Agibuild.Fulora.Runtime/Shell/DeepLinkPlatformEntrypoint.cs
+    startLine: 8
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Platform supports deep-link activation via protocol handler.
+  example: []
+  syntax:
+    content: Supported = 0
+    return:
+      type: Agibuild.Fulora.Shell.DeepLinkPlatformSupport
+- uid: Agibuild.Fulora.Shell.DeepLinkPlatformSupport.NotSupported
+  commentId: F:Agibuild.Fulora.Shell.DeepLinkPlatformSupport.NotSupported
+  id: NotSupported
+  parent: Agibuild.Fulora.Shell.DeepLinkPlatformSupport
+  langs:
+  - csharp
+  - vb
+  name: NotSupported
+  nameWithType: DeepLinkPlatformSupport.NotSupported
+  fullName: Agibuild.Fulora.Shell.DeepLinkPlatformSupport.NotSupported
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/DeepLinkPlatformEntrypoint.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: NotSupported
+    path: ../src/Agibuild.Fulora.Runtime/Shell/DeepLinkPlatformEntrypoint.cs
+    startLine: 10
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Platform does not support deep-link activation natively.
+  example: []
+  syntax:
+    content: NotSupported = 1
+    return:
+      type: Agibuild.Fulora.Shell.DeepLinkPlatformSupport
+references:
+- uid: Agibuild.Fulora.Shell
+  commentId: N:Agibuild.Fulora.Shell
+  href: Agibuild.html
+  name: Agibuild.Fulora.Shell
+  nameWithType: Agibuild.Fulora.Shell
+  fullName: Agibuild.Fulora.Shell
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  - name: .
+  - uid: Agibuild.Fulora.Shell
+    name: Shell
+    href: Agibuild.Fulora.Shell.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  - name: .
+  - uid: Agibuild.Fulora.Shell
+    name: Shell
+    href: Agibuild.Fulora.Shell.html
+- uid: Agibuild.Fulora.Shell.DeepLinkPlatformSupport
+  commentId: T:Agibuild.Fulora.Shell.DeepLinkPlatformSupport
+  parent: Agibuild.Fulora.Shell
+  href: Agibuild.Fulora.Shell.DeepLinkPlatformSupport.html
+  name: DeepLinkPlatformSupport
+  nameWithType: DeepLinkPlatformSupport
+  fullName: Agibuild.Fulora.Shell.DeepLinkPlatformSupport

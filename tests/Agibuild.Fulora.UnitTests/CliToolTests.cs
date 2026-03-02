@@ -93,7 +93,7 @@ public class CliToolTests
 
         var content = File.ReadAllText(csproj);
         Assert.Contains("PackAsTool", content);
-        Assert.Contains("agibuild", content);
+        Assert.Contains("fulora", content);
         Assert.Contains("System.CommandLine", content);
     }
 }

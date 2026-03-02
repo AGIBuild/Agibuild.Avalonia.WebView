@@ -1,3 +1,4 @@
+using Agibuild.Fulora.Shell;
 using Avalonia.Input;
 
 namespace Agibuild.Fulora;
@@ -37,6 +38,8 @@ public readonly record struct WebViewShortcutBinding(
 
 /// <summary>
 /// Routes keyboard shortcuts to WebView command and DevTools actions.
+/// When a <see cref="GlobalShortcutService"/> is provided, window-local bindings
+/// take priority over global shortcuts for the same key combination.
 /// </summary>
 public sealed class WebViewShortcutRouter
 {
@@ -44,15 +47,20 @@ public sealed class WebViewShortcutRouter
         KeyModifiers.Control | KeyModifiers.Shift | KeyModifiers.Alt | KeyModifiers.Meta;
 
     private readonly IWebView _webView;
+    private readonly GlobalShortcutService? _globalShortcutService;
     private readonly Dictionary<ShortcutChord, WebViewShortcutAction> _bindings = [];
 
     /// <summary>
-    /// Creates a shortcut router with optional custom bindings.
+    /// Creates a shortcut router with optional custom bindings and optional global shortcut service.
     /// When bindings are omitted, default shell bindings are used.
     /// </summary>
-    public WebViewShortcutRouter(IWebView webView, IEnumerable<WebViewShortcutBinding>? bindings = null)
+    public WebViewShortcutRouter(
+        IWebView webView,
+        IEnumerable<WebViewShortcutBinding>? bindings = null,
+        GlobalShortcutService? globalShortcutService = null)
     {
         _webView = webView ?? throw new ArgumentNullException(nameof(webView));
+        _globalShortcutService = globalShortcutService;
 
         foreach (var binding in bindings ?? CreateDefaultShellBindings())
         {
@@ -97,10 +105,22 @@ public sealed class WebViewShortcutRouter
     /// </summary>
     public async Task<bool> TryExecuteAsync(Key key, KeyModifiers modifiers)
     {
-        if (!_bindings.TryGetValue(new ShortcutChord(key, NormalizeModifiers(modifiers)), out var action))
+        var normalized = NormalizeModifiers(modifiers);
+        if (!_bindings.TryGetValue(new ShortcutChord(key, normalized), out var action))
             return false;
 
-        return await ExecuteActionAsync(action).ConfigureAwait(false);
+        var result = await ExecuteActionAsync(action).ConfigureAwait(false);
+
+        if (result && _globalShortcutService is not null)
+        {
+            var sk = ShortcutKeyMapper.ToShortcutKey(key);
+            var sm = ShortcutKeyMapper.ToShortcutModifiers(normalized);
+            var globalId = _globalShortcutService.FindIdByChord(sk, sm);
+            if (globalId is not null)
+                _globalShortcutService.SuppressNextActivation(globalId);
+        }
+
+        return result;
     }
 
     private async Task<bool> ExecuteActionAsync(WebViewShortcutAction action)
@@ -138,6 +158,12 @@ public sealed class WebViewShortcutRouter
             _ => throw new ArgumentOutOfRangeException(nameof(command), command, "Unsupported WebView command.")
         };
     }
+
+    /// <summary>
+    /// Returns whether a window-local binding exists for the given key combination.
+    /// </summary>
+    internal bool HasLocalBinding(Key key, KeyModifiers modifiers)
+        => _bindings.ContainsKey(new ShortcutChord(key, NormalizeModifiers(modifiers)));
 
     private static KeyModifiers NormalizeModifiers(KeyModifiers modifiers)
         => modifiers & SupportedModifierMask;

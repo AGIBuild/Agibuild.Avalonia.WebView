@@ -1,0 +1,120 @@
+### YamlMime:ManagedReference
+items:
+- uid: Agibuild.Fulora.Shell.IWebViewSessionPermissionProfileResolver
+  commentId: T:Agibuild.Fulora.Shell.IWebViewSessionPermissionProfileResolver
+  id: IWebViewSessionPermissionProfileResolver
+  parent: Agibuild.Fulora.Shell
+  children:
+  - Agibuild.Fulora.Shell.IWebViewSessionPermissionProfileResolver.Resolve(Agibuild.Fulora.Shell.WebViewSessionPermissionProfileContext,Agibuild.Fulora.Shell.WebViewSessionPermissionProfile)
+  langs:
+  - csharp
+  - vb
+  name: IWebViewSessionPermissionProfileResolver
+  nameWithType: IWebViewSessionPermissionProfileResolver
+  fullName: Agibuild.Fulora.Shell.IWebViewSessionPermissionProfileResolver
+  type: Interface
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewSessionPermissionProfiles.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: IWebViewSessionPermissionProfileResolver
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewSessionPermissionProfiles.cs
+    startLine: 139
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Resolver for session-permission profile.
+  example: []
+  syntax:
+    content: public interface IWebViewSessionPermissionProfileResolver
+    content.vb: Public Interface IWebViewSessionPermissionProfileResolver
+- uid: Agibuild.Fulora.Shell.IWebViewSessionPermissionProfileResolver.Resolve(Agibuild.Fulora.Shell.WebViewSessionPermissionProfileContext,Agibuild.Fulora.Shell.WebViewSessionPermissionProfile)
+  commentId: M:Agibuild.Fulora.Shell.IWebViewSessionPermissionProfileResolver.Resolve(Agibuild.Fulora.Shell.WebViewSessionPermissionProfileContext,Agibuild.Fulora.Shell.WebViewSessionPermissionProfile)
+  id: Resolve(Agibuild.Fulora.Shell.WebViewSessionPermissionProfileContext,Agibuild.Fulora.Shell.WebViewSessionPermissionProfile)
+  parent: Agibuild.Fulora.Shell.IWebViewSessionPermissionProfileResolver
+  langs:
+  - csharp
+  - vb
+  name: Resolve(WebViewSessionPermissionProfileContext, WebViewSessionPermissionProfile?)
+  nameWithType: IWebViewSessionPermissionProfileResolver.Resolve(WebViewSessionPermissionProfileContext, WebViewSessionPermissionProfile?)
+  fullName: Agibuild.Fulora.Shell.IWebViewSessionPermissionProfileResolver.Resolve(Agibuild.Fulora.Shell.WebViewSessionPermissionProfileContext, Agibuild.Fulora.Shell.WebViewSessionPermissionProfile?)
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewSessionPermissionProfiles.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Resolve
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewSessionPermissionProfiles.cs
+    startLine: 144
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Resolves profile using current context and optional parent profile.
+  example: []
+  syntax:
+    content: WebViewSessionPermissionProfile Resolve(WebViewSessionPermissionProfileContext context, WebViewSessionPermissionProfile? parentProfile)
+    parameters:
+    - id: context
+      type: Agibuild.Fulora.Shell.WebViewSessionPermissionProfileContext
+    - id: parentProfile
+      type: Agibuild.Fulora.Shell.WebViewSessionPermissionProfile
+    return:
+      type: Agibuild.Fulora.Shell.WebViewSessionPermissionProfile
+    content.vb: Function Resolve(context As WebViewSessionPermissionProfileContext, parentProfile As WebViewSessionPermissionProfile) As WebViewSessionPermissionProfile
+  overload: Agibuild.Fulora.Shell.IWebViewSessionPermissionProfileResolver.Resolve*
+  nameWithType.vb: IWebViewSessionPermissionProfileResolver.Resolve(WebViewSessionPermissionProfileContext, WebViewSessionPermissionProfile)
+  fullName.vb: Agibuild.Fulora.Shell.IWebViewSessionPermissionProfileResolver.Resolve(Agibuild.Fulora.Shell.WebViewSessionPermissionProfileContext, Agibuild.Fulora.Shell.WebViewSessionPermissionProfile)
+  name.vb: Resolve(WebViewSessionPermissionProfileContext, WebViewSessionPermissionProfile)
+references:
+- uid: Agibuild.Fulora.Shell
+  commentId: N:Agibuild.Fulora.Shell
+  href: Agibuild.html
+  name: Agibuild.Fulora.Shell
+  nameWithType: Agibuild.Fulora.Shell
+  fullName: Agibuild.Fulora.Shell
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  - name: .
+  - uid: Agibuild.Fulora.Shell
+    name: Shell
+    href: Agibuild.Fulora.Shell.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  - name: .
+  - uid: Agibuild.Fulora.Shell
+    name: Shell
+    href: Agibuild.Fulora.Shell.html
+- uid: Agibuild.Fulora.Shell.IWebViewSessionPermissionProfileResolver.Resolve*
+  commentId: Overload:Agibuild.Fulora.Shell.IWebViewSessionPermissionProfileResolver.Resolve
+  href: Agibuild.Fulora.Shell.IWebViewSessionPermissionProfileResolver.html#Agibuild_Fulora_Shell_IWebViewSessionPermissionProfileResolver_Resolve_Agibuild_Fulora_Shell_WebViewSessionPermissionProfileContext_Agibuild_Fulora_Shell_WebViewSessionPermissionProfile_
+  name: Resolve
+  nameWithType: IWebViewSessionPermissionProfileResolver.Resolve
+  fullName: Agibuild.Fulora.Shell.IWebViewSessionPermissionProfileResolver.Resolve
+- uid: Agibuild.Fulora.Shell.WebViewSessionPermissionProfileContext
+  commentId: T:Agibuild.Fulora.Shell.WebViewSessionPermissionProfileContext
+  parent: Agibuild.Fulora.Shell
+  href: Agibuild.Fulora.Shell.WebViewSessionPermissionProfileContext.html
+  name: WebViewSessionPermissionProfileContext
+  nameWithType: WebViewSessionPermissionProfileContext
+  fullName: Agibuild.Fulora.Shell.WebViewSessionPermissionProfileContext
+- uid: Agibuild.Fulora.Shell.WebViewSessionPermissionProfile
+  commentId: T:Agibuild.Fulora.Shell.WebViewSessionPermissionProfile
+  parent: Agibuild.Fulora.Shell
+  href: Agibuild.Fulora.Shell.WebViewSessionPermissionProfile.html
+  name: WebViewSessionPermissionProfile
+  nameWithType: WebViewSessionPermissionProfile
+  fullName: Agibuild.Fulora.Shell.WebViewSessionPermissionProfile

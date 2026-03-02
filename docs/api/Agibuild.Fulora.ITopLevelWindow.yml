@@ -1,0 +1,98 @@
+### YamlMime:ManagedReference
+items:
+- uid: Agibuild.Fulora.ITopLevelWindow
+  commentId: T:Agibuild.Fulora.ITopLevelWindow
+  id: ITopLevelWindow
+  parent: Agibuild.Fulora
+  children:
+  - Agibuild.Fulora.ITopLevelWindow.PlatformHandle
+  langs:
+  - csharp
+  - vb
+  name: ITopLevelWindow
+  nameWithType: ITopLevelWindow
+  fullName: Agibuild.Fulora.ITopLevelWindow
+  type: Interface
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/WebViewContracts.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: ITopLevelWindow
+    path: ../src/Agibuild.Fulora.Core/WebViewContracts.cs
+    startLine: 622
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Abstraction for a top-level window that can serve as an owner for dialogs.
+  example: []
+  syntax:
+    content: public interface ITopLevelWindow
+    content.vb: Public Interface ITopLevelWindow
+- uid: Agibuild.Fulora.ITopLevelWindow.PlatformHandle
+  commentId: P:Agibuild.Fulora.ITopLevelWindow.PlatformHandle
+  id: PlatformHandle
+  parent: Agibuild.Fulora.ITopLevelWindow
+  langs:
+  - csharp
+  - vb
+  name: PlatformHandle
+  nameWithType: ITopLevelWindow.PlatformHandle
+  fullName: Agibuild.Fulora.ITopLevelWindow.PlatformHandle
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/WebViewContracts.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: PlatformHandle
+    path: ../src/Agibuild.Fulora.Core/WebViewContracts.cs
+    startLine: 625
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: The underlying platform handle for the window.
+  example: []
+  syntax:
+    content: INativeHandle? PlatformHandle { get; }
+    parameters: []
+    return:
+      type: Agibuild.Fulora.INativeHandle
+    content.vb: ReadOnly Property PlatformHandle As INativeHandle
+  overload: Agibuild.Fulora.ITopLevelWindow.PlatformHandle*
+references:
+- uid: Agibuild.Fulora
+  commentId: N:Agibuild.Fulora
+  href: Agibuild.html
+  name: Agibuild.Fulora
+  nameWithType: Agibuild.Fulora
+  fullName: Agibuild.Fulora
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+- uid: Agibuild.Fulora.ITopLevelWindow.PlatformHandle*
+  commentId: Overload:Agibuild.Fulora.ITopLevelWindow.PlatformHandle
+  href: Agibuild.Fulora.ITopLevelWindow.html#Agibuild_Fulora_ITopLevelWindow_PlatformHandle
+  name: PlatformHandle
+  nameWithType: ITopLevelWindow.PlatformHandle
+  fullName: Agibuild.Fulora.ITopLevelWindow.PlatformHandle
+- uid: Agibuild.Fulora.INativeHandle
+  commentId: T:Agibuild.Fulora.INativeHandle
+  parent: Agibuild.Fulora
+  href: Agibuild.Fulora.INativeHandle.html
+  name: INativeHandle
+  nameWithType: INativeHandle
+  fullName: Agibuild.Fulora.INativeHandle

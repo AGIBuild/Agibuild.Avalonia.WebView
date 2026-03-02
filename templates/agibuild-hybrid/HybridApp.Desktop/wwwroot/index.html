@@ -82,6 +82,7 @@
     </div>
 
     <script>
+        // ─── Bridge readiness ──────────────────────────────────────────────
         async function waitForBridge(ms = 3000) {
             const start = Date.now();
             while (!window.agWebView?.rpc && Date.now() - start < ms)
@@ -89,6 +90,13 @@
             return !!window.agWebView?.rpc;
         }
 
+        /** Typed RPC wrapper — calls ServiceName.MethodName via the bridge. */
+        async function bridgeInvoke(method, params) {
+            if (!window.agWebView?.rpc) throw new Error('Bridge not available');
+            return window.agWebView.rpc.invoke(method, params);
+        }
+
+        // ─── Strategy / scenario helpers ───────────────────────────────────
         const showAboutScenarioMap = {
             whitelistDenied: 0,
             policyDenied: 1,
@@ -107,15 +115,12 @@
         }
 
         function readOutcomeLabel(result) {
-            if (result.outcome === 0) {
-                return 'allow';
-            }
-            if (result.outcome === 1) {
-                return 'deny';
-            }
+            if (result.outcome === 0) return 'allow';
+            if (result.outcome === 1) return 'deny';
             return 'failure';
         }
 
+        // ─── Greeter service demo (typed bridge call) ──────────────────────
         async function greet() {
             const name = document.getElementById('nameInput').value || 'World';
             const el = document.getElementById('result');
@@ -126,7 +131,7 @@
             }
 
             try {
-                const result = await window.agWebView.rpc.invoke('GreeterService.Greet', { name });
+                const result = await bridgeInvoke('GreeterService.Greet', { name });
                 el.textContent = result;
             } catch (err) {
                 el.textContent = 'Error: ' + err.message;
@@ -141,7 +146,7 @@
             }
 
             try {
-                const result = await window.agWebView.rpc.invoke('DesktopHostService.ReadClipboardText', {});
+                const result = await bridgeInvoke('DesktopHostService.ReadClipboardText', {});
                 if (result.outcome === 0) {
                     el.textContent = 'Clipboard: ' + (result.clipboardText ?? '(empty)');
                 } else if (result.outcome === 1) {
@@ -163,7 +168,7 @@
             }
 
             try {
-                const result = await window.agWebView.rpc.invoke('DesktopHostService.WriteClipboardText', { text: name });
+                const result = await bridgeInvoke('DesktopHostService.WriteClipboardText', { text: name });
                 if (result.outcome === 0) {
                     el.textContent = 'Clipboard updated via typed host capability';
                 } else if (result.outcome === 1) {
@@ -193,7 +198,7 @@
             };
 
             try {
-                const result = await window.agWebView.rpc.invoke('DesktopHostService.ApplyMenuModel', { model });
+                const result = await bridgeInvoke('DesktopHostService.ApplyMenuModel', { model });
                 if (result.outcome === 0) {
                     const profile = result.profileIdentity ?? 'unknown-profile';
                     const state = result.profilePermissionState ?? 'unknown-state';
@@ -229,7 +234,7 @@
             };
 
             try {
-                const result = await window.agWebView.rpc.invoke('DesktopHostService.UpdateTrayState', { state });
+                const result = await bridgeInvoke('DesktopHostService.UpdateTrayState', { state });
                 if (result.outcome === 0) {
                     el.textContent = 'Tray visibility: ' + (result.isVisible ? 'visible' : 'hidden');
                     await drainSystemIntegrationEvents('Tray event');
@@ -251,7 +256,7 @@
             }
 
             try {
-                const result = await window.agWebView.rpc.invoke('DesktopHostService.ExecuteSystemAction', { action: 2 });
+                const result = await bridgeInvoke('DesktopHostService.ExecuteSystemAction', { action: 2 });
                 if (result.outcome === 0) {
                     el.textContent = 'System action executed: focus main window';
                 } else if (result.outcome === 1) {
@@ -272,7 +277,7 @@
             }
 
             try {
-                const result = await window.agWebView.rpc.invoke('DesktopHostService.DrainSystemIntegrationEvents', {});
+                const result = await bridgeInvoke('DesktopHostService.DrainSystemIntegrationEvents', {});
                 if (result.outcome !== 0) {
                     el.textContent = 'Event drain failed: ' + (result.error ?? result.denyReason ?? 'unknown');
                     return;
@@ -308,8 +313,8 @@
             }
 
             try {
-                const result = await window.agWebView.rpc.invoke('DesktopHostService.ExecuteSystemAction', { action: 3 });
-                const modeResult = await window.agWebView.rpc.invoke('DesktopHostService.GetSystemIntegrationStrategy', {});
+                const result = await bridgeInvoke('DesktopHostService.ExecuteSystemAction', { action: 3 });
+                const modeResult = await bridgeInvoke('DesktopHostService.GetSystemIntegrationStrategy', {});
                 const mode = showAboutScenarioNameMap[modeResult.showAboutScenario] ?? 'unknown';
                 if (result.outcome === 0) {
                     el.textContent = 'ShowAbout action executed';
@@ -334,7 +339,7 @@
             }
 
             try {
-                const result = await window.agWebView.rpc.invoke('DesktopHostService.GetSystemIntegrationStrategy', {});
+                const result = await bridgeInvoke('DesktopHostService.GetSystemIntegrationStrategy', {});
                 if (result.outcome !== 0) {
                     el.textContent = 'Read strategy failed: ' + (result.error ?? result.denyReason ?? 'unknown');
                     updateStrategyPanel('unknown', 'readStrategy', readOutcomeLabel(result), result.error ?? result.denyReason ?? 'unknown');
@@ -363,7 +368,7 @@
             }
 
             try {
-                const result = await window.agWebView.rpc.invoke('DesktopHostService.SetShowAboutScenario', { scenario });
+                const result = await bridgeInvoke('DesktopHostService.SetShowAboutScenario', { scenario });
                 if (result.outcome === 0) {
                     const currentMode = showAboutScenarioNameMap[result.showAboutScenario] ?? mode;
                     el.textContent = 'ShowAbout scenario switched to: ' + currentMode;
@@ -394,8 +399,8 @@
             const checks = [];
             const runShowAboutCase = async (id, mode, expectedOutcome, expectedReason) => {
                 const scenarioCode = showAboutScenarioMap[mode];
-                const switched = await window.agWebView.rpc.invoke('DesktopHostService.SetShowAboutScenario', { scenario: scenarioCode });
-                const action = await window.agWebView.rpc.invoke('DesktopHostService.ExecuteSystemAction', { action: 3 });
+                const switched = await bridgeInvoke('DesktopHostService.SetShowAboutScenario', { scenario: scenarioCode });
+                const action = await bridgeInvoke('DesktopHostService.ExecuteSystemAction', { action: 3 });
                 const passed =
                     switched.outcome === 0 &&
                     action.outcome === expectedOutcome &&

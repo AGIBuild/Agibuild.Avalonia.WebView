@@ -1,0 +1,110 @@
+### YamlMime:ManagedReference
+items:
+- uid: Agibuild.Fulora.IWebMessagePolicy
+  commentId: T:Agibuild.Fulora.IWebMessagePolicy
+  id: IWebMessagePolicy
+  parent: Agibuild.Fulora
+  children:
+  - Agibuild.Fulora.IWebMessagePolicy.Evaluate(Agibuild.Fulora.WebMessageEnvelope@)
+  langs:
+  - csharp
+  - vb
+  name: IWebMessagePolicy
+  nameWithType: IWebMessagePolicy
+  fullName: Agibuild.Fulora.IWebMessagePolicy
+  type: Interface
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/WebViewContracts.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: IWebMessagePolicy
+    path: ../src/Agibuild.Fulora.Core/WebViewContracts.cs
+    startLine: 380
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Evaluates incoming WebMessage envelopes to determine whether they should be processed or dropped.
+  example: []
+  syntax:
+    content: public interface IWebMessagePolicy
+    content.vb: Public Interface IWebMessagePolicy
+- uid: Agibuild.Fulora.IWebMessagePolicy.Evaluate(Agibuild.Fulora.WebMessageEnvelope@)
+  commentId: M:Agibuild.Fulora.IWebMessagePolicy.Evaluate(Agibuild.Fulora.WebMessageEnvelope@)
+  id: Evaluate(Agibuild.Fulora.WebMessageEnvelope@)
+  parent: Agibuild.Fulora.IWebMessagePolicy
+  langs:
+  - csharp
+  - vb
+  name: Evaluate(in WebMessageEnvelope)
+  nameWithType: IWebMessagePolicy.Evaluate(in WebMessageEnvelope)
+  fullName: Agibuild.Fulora.IWebMessagePolicy.Evaluate(in Agibuild.Fulora.WebMessageEnvelope)
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/WebViewContracts.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Evaluate
+    path: ../src/Agibuild.Fulora.Core/WebViewContracts.cs
+    startLine: 383
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Evaluates an envelope and returns the decision.
+  example: []
+  syntax:
+    content: WebMessagePolicyDecision Evaluate(in WebMessageEnvelope envelope)
+    parameters:
+    - id: envelope
+      type: Agibuild.Fulora.WebMessageEnvelope
+    return:
+      type: Agibuild.Fulora.WebMessagePolicyDecision
+    content.vb: Function Evaluate(envelope As WebMessageEnvelope) As WebMessagePolicyDecision
+  overload: Agibuild.Fulora.IWebMessagePolicy.Evaluate*
+  nameWithType.vb: IWebMessagePolicy.Evaluate(WebMessageEnvelope)
+  fullName.vb: Agibuild.Fulora.IWebMessagePolicy.Evaluate(Agibuild.Fulora.WebMessageEnvelope)
+  name.vb: Evaluate(WebMessageEnvelope)
+references:
+- uid: Agibuild.Fulora
+  commentId: N:Agibuild.Fulora
+  href: Agibuild.html
+  name: Agibuild.Fulora
+  nameWithType: Agibuild.Fulora
+  fullName: Agibuild.Fulora
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+- uid: Agibuild.Fulora.IWebMessagePolicy.Evaluate*
+  commentId: Overload:Agibuild.Fulora.IWebMessagePolicy.Evaluate
+  href: Agibuild.Fulora.IWebMessagePolicy.html#Agibuild_Fulora_IWebMessagePolicy_Evaluate_Agibuild_Fulora_WebMessageEnvelope__
+  name: Evaluate
+  nameWithType: IWebMessagePolicy.Evaluate
+  fullName: Agibuild.Fulora.IWebMessagePolicy.Evaluate
+- uid: Agibuild.Fulora.WebMessageEnvelope
+  commentId: T:Agibuild.Fulora.WebMessageEnvelope
+  parent: Agibuild.Fulora
+  href: Agibuild.Fulora.WebMessageEnvelope.html
+  name: WebMessageEnvelope
+  nameWithType: WebMessageEnvelope
+  fullName: Agibuild.Fulora.WebMessageEnvelope
+- uid: Agibuild.Fulora.WebMessagePolicyDecision
+  commentId: T:Agibuild.Fulora.WebMessagePolicyDecision
+  parent: Agibuild.Fulora
+  href: Agibuild.Fulora.WebMessagePolicyDecision.html
+  name: WebMessagePolicyDecision
+  nameWithType: WebMessagePolicyDecision
+  fullName: Agibuild.Fulora.WebMessagePolicyDecision

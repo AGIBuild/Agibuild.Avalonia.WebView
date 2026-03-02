@@ -1,0 +1,4042 @@
+### YamlMime:ManagedReference
+items:
+- uid: Agibuild.Fulora.WebViewCore
+  commentId: T:Agibuild.Fulora.WebViewCore
+  id: WebViewCore
+  parent: Agibuild.Fulora
+  children:
+  - Agibuild.Fulora.WebViewCore.AdapterCreated
+  - Agibuild.Fulora.WebViewCore.AdapterDestroyed
+  - Agibuild.Fulora.WebViewCore.AddPreloadScriptAsync(System.String)
+  - Agibuild.Fulora.WebViewCore.Bridge
+  - Agibuild.Fulora.WebViewCore.BridgeTracer
+  - Agibuild.Fulora.WebViewCore.CanGoBack
+  - Agibuild.Fulora.WebViewCore.CanGoForward
+  - Agibuild.Fulora.WebViewCore.CaptureScreenshotAsync
+  - Agibuild.Fulora.WebViewCore.ChannelId
+  - Agibuild.Fulora.WebViewCore.CloseDevToolsAsync
+  - Agibuild.Fulora.WebViewCore.ContextMenuRequested
+  - Agibuild.Fulora.WebViewCore.CreateDefault(Agibuild.Fulora.IWebViewDispatcher)
+  - Agibuild.Fulora.WebViewCore.CreateDefault(Agibuild.Fulora.IWebViewDispatcher,Microsoft.Extensions.Logging.ILogger{Agibuild.Fulora.WebViewCore})
+  - Agibuild.Fulora.WebViewCore.DisableWebMessageBridge
+  - Agibuild.Fulora.WebViewCore.Dispose
+  - Agibuild.Fulora.WebViewCore.DownloadRequested
+  - Agibuild.Fulora.WebViewCore.EnableSpaHosting(Agibuild.Fulora.SpaHostingOptions)
+  - Agibuild.Fulora.WebViewCore.EnableWebMessageBridge(Agibuild.Fulora.WebMessageBridgeOptions)
+  - Agibuild.Fulora.WebViewCore.EnvironmentRequested
+  - Agibuild.Fulora.WebViewCore.FindInPageAsync(System.String,Agibuild.Fulora.FindInPageOptions)
+  - Agibuild.Fulora.WebViewCore.GetZoomFactorAsync
+  - Agibuild.Fulora.WebViewCore.GoBackAsync
+  - Agibuild.Fulora.WebViewCore.GoForwardAsync
+  - Agibuild.Fulora.WebViewCore.InvokeScriptAsync(System.String)
+  - Agibuild.Fulora.WebViewCore.IsDevToolsOpenAsync
+  - Agibuild.Fulora.WebViewCore.IsLoading
+  - Agibuild.Fulora.WebViewCore.NavigateAsync(System.Uri)
+  - Agibuild.Fulora.WebViewCore.NavigateToStringAsync(System.String)
+  - Agibuild.Fulora.WebViewCore.NavigateToStringAsync(System.String,System.Uri)
+  - Agibuild.Fulora.WebViewCore.NavigationCompleted
+  - Agibuild.Fulora.WebViewCore.NavigationStarted
+  - Agibuild.Fulora.WebViewCore.NewWindowRequested
+  - Agibuild.Fulora.WebViewCore.OpenDevToolsAsync
+  - Agibuild.Fulora.WebViewCore.PermissionRequested
+  - Agibuild.Fulora.WebViewCore.PrintToPdfAsync(Agibuild.Fulora.PdfPrintOptions)
+  - Agibuild.Fulora.WebViewCore.RefreshAsync
+  - Agibuild.Fulora.WebViewCore.RemovePreloadScriptAsync(System.String)
+  - Agibuild.Fulora.WebViewCore.Rpc
+  - Agibuild.Fulora.WebViewCore.SetCustomUserAgent(System.String)
+  - Agibuild.Fulora.WebViewCore.SetZoomFactorAsync(System.Double)
+  - Agibuild.Fulora.WebViewCore.Source
+  - Agibuild.Fulora.WebViewCore.StopAsync
+  - Agibuild.Fulora.WebViewCore.StopFindInPageAsync(System.Boolean)
+  - Agibuild.Fulora.WebViewCore.TryGetCommandManager
+  - Agibuild.Fulora.WebViewCore.TryGetCookieManager
+  - Agibuild.Fulora.WebViewCore.TryGetWebViewHandle
+  - Agibuild.Fulora.WebViewCore.TryGetWebViewHandleAsync
+  - Agibuild.Fulora.WebViewCore.WebMessageReceived
+  - Agibuild.Fulora.WebViewCore.WebResourceRequested
+  - Agibuild.Fulora.WebViewCore.ZoomFactorChanged
+  langs:
+  - csharp
+  - vb
+  name: WebViewCore
+  nameWithType: WebViewCore
+  fullName: Agibuild.Fulora.WebViewCore
+  type: Class
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: WebViewCore
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 9
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Core runtime implementation of <xref href="Agibuild.Fulora.IWebView" data-throw-if-not-resolved="false"></xref> over a platform adapter.
+  example: []
+  syntax:
+    content: 'public sealed class WebViewCore : IWebView, IDisposable'
+    content.vb: Public NotInheritable Class WebViewCore Implements IWebView, IDisposable
+  inheritance:
+  - System.Object
+  implements:
+  - Agibuild.Fulora.IWebView
+  - System.IDisposable
+  inheritedMembers:
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.GetHashCode
+  - System.Object.GetType
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.ToString
+- uid: Agibuild.Fulora.WebViewCore.CreateDefault(Agibuild.Fulora.IWebViewDispatcher)
+  commentId: M:Agibuild.Fulora.WebViewCore.CreateDefault(Agibuild.Fulora.IWebViewDispatcher)
+  id: CreateDefault(Agibuild.Fulora.IWebViewDispatcher)
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: CreateDefault(IWebViewDispatcher)
+  nameWithType: WebViewCore.CreateDefault(IWebViewDispatcher)
+  fullName: Agibuild.Fulora.WebViewCore.CreateDefault(Agibuild.Fulora.IWebViewDispatcher)
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: CreateDefault
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 25
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: >-
+    Creates a new <xref href="Agibuild.Fulora.IWebView" data-throw-if-not-resolved="false"></xref> using the default platform adapter for the current OS.
+
+    This is the recommended entry-point; callers never need to reference the internal adapter types.
+  example: []
+  syntax:
+    content: public static IWebView CreateDefault(IWebViewDispatcher dispatcher)
+    parameters:
+    - id: dispatcher
+      type: Agibuild.Fulora.IWebViewDispatcher
+    return:
+      type: Agibuild.Fulora.IWebView
+    content.vb: Public Shared Function CreateDefault(dispatcher As IWebViewDispatcher) As IWebView
+  overload: Agibuild.Fulora.WebViewCore.CreateDefault*
+- uid: Agibuild.Fulora.WebViewCore.CreateDefault(Agibuild.Fulora.IWebViewDispatcher,Microsoft.Extensions.Logging.ILogger{Agibuild.Fulora.WebViewCore})
+  commentId: M:Agibuild.Fulora.WebViewCore.CreateDefault(Agibuild.Fulora.IWebViewDispatcher,Microsoft.Extensions.Logging.ILogger{Agibuild.Fulora.WebViewCore})
+  id: CreateDefault(Agibuild.Fulora.IWebViewDispatcher,Microsoft.Extensions.Logging.ILogger{Agibuild.Fulora.WebViewCore})
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: CreateDefault(IWebViewDispatcher, ILogger<WebViewCore>)
+  nameWithType: WebViewCore.CreateDefault(IWebViewDispatcher, ILogger<WebViewCore>)
+  fullName: Agibuild.Fulora.WebViewCore.CreateDefault(Agibuild.Fulora.IWebViewDispatcher, Microsoft.Extensions.Logging.ILogger<Agibuild.Fulora.WebViewCore>)
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: CreateDefault
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 30
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  example: []
+  syntax:
+    content: public static IWebView CreateDefault(IWebViewDispatcher dispatcher, ILogger<WebViewCore> logger)
+    parameters:
+    - id: dispatcher
+      type: Agibuild.Fulora.IWebViewDispatcher
+    - id: logger
+      type: Microsoft.Extensions.Logging.ILogger{Agibuild.Fulora.WebViewCore}
+    return:
+      type: Agibuild.Fulora.IWebView
+    content.vb: Public Shared Function CreateDefault(dispatcher As IWebViewDispatcher, logger As ILogger(Of WebViewCore)) As IWebView
+  overload: Agibuild.Fulora.WebViewCore.CreateDefault*
+  nameWithType.vb: WebViewCore.CreateDefault(IWebViewDispatcher, ILogger(Of WebViewCore))
+  fullName.vb: Agibuild.Fulora.WebViewCore.CreateDefault(Agibuild.Fulora.IWebViewDispatcher, Microsoft.Extensions.Logging.ILogger(Of Agibuild.Fulora.WebViewCore))
+  name.vb: CreateDefault(IWebViewDispatcher, ILogger(Of WebViewCore))
+- uid: Agibuild.Fulora.WebViewCore.Source
+  commentId: P:Agibuild.Fulora.WebViewCore.Source
+  id: Source
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: Source
+  nameWithType: WebViewCore.Source
+  fullName: Agibuild.Fulora.WebViewCore.Source
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Source
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 227
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Gets or sets the current navigation URI.
+  example: []
+  syntax:
+    content: public Uri Source { get; set; }
+    parameters: []
+    return:
+      type: System.Uri
+    content.vb: Public Property Source As Uri
+  overload: Agibuild.Fulora.WebViewCore.Source*
+  implements:
+  - Agibuild.Fulora.IWebView.Source
+- uid: Agibuild.Fulora.WebViewCore.CanGoBack
+  commentId: P:Agibuild.Fulora.WebViewCore.CanGoBack
+  id: CanGoBack
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: CanGoBack
+  nameWithType: WebViewCore.CanGoBack
+  fullName: Agibuild.Fulora.WebViewCore.CanGoBack
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: CanGoBack
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 249
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Gets whether the WebView can navigate back in history.
+  example: []
+  syntax:
+    content: public bool CanGoBack { get; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public ReadOnly Property CanGoBack As Boolean
+  overload: Agibuild.Fulora.WebViewCore.CanGoBack*
+  implements:
+  - Agibuild.Fulora.IWebView.CanGoBack
+- uid: Agibuild.Fulora.WebViewCore.CanGoForward
+  commentId: P:Agibuild.Fulora.WebViewCore.CanGoForward
+  id: CanGoForward
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: CanGoForward
+  nameWithType: WebViewCore.CanGoForward
+  fullName: Agibuild.Fulora.WebViewCore.CanGoForward
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: CanGoForward
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 252
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Gets whether the WebView can navigate forward in history.
+  example: []
+  syntax:
+    content: public bool CanGoForward { get; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public ReadOnly Property CanGoForward As Boolean
+  overload: Agibuild.Fulora.WebViewCore.CanGoForward*
+  implements:
+  - Agibuild.Fulora.IWebView.CanGoForward
+- uid: Agibuild.Fulora.WebViewCore.IsLoading
+  commentId: P:Agibuild.Fulora.WebViewCore.IsLoading
+  id: IsLoading
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: IsLoading
+  nameWithType: WebViewCore.IsLoading
+  fullName: Agibuild.Fulora.WebViewCore.IsLoading
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: IsLoading
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 255
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Gets whether a navigation is currently in progress.
+  example: []
+  syntax:
+    content: public bool IsLoading { get; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public ReadOnly Property IsLoading As Boolean
+  overload: Agibuild.Fulora.WebViewCore.IsLoading*
+  implements:
+  - Agibuild.Fulora.IWebView.IsLoading
+- uid: Agibuild.Fulora.WebViewCore.ChannelId
+  commentId: P:Agibuild.Fulora.WebViewCore.ChannelId
+  id: ChannelId
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: ChannelId
+  nameWithType: WebViewCore.ChannelId
+  fullName: Agibuild.Fulora.WebViewCore.ChannelId
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: ChannelId
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 258
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Gets the channel id used to isolate WebMessage traffic.
+  example: []
+  syntax:
+    content: public Guid ChannelId { get; }
+    parameters: []
+    return:
+      type: System.Guid
+    content.vb: Public ReadOnly Property ChannelId As Guid
+  overload: Agibuild.Fulora.WebViewCore.ChannelId*
+  implements:
+  - Agibuild.Fulora.IWebView.ChannelId
+- uid: Agibuild.Fulora.WebViewCore.NavigationStarted
+  commentId: E:Agibuild.Fulora.WebViewCore.NavigationStarted
+  id: NavigationStarted
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: NavigationStarted
+  nameWithType: WebViewCore.NavigationStarted
+  fullName: Agibuild.Fulora.WebViewCore.NavigationStarted
+  type: Event
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: NavigationStarted
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 261
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Raised when a navigation starts. Handlers may cancel the navigation.
+  example: []
+  syntax:
+    content: public event EventHandler<NavigationStartingEventArgs>? NavigationStarted
+    return:
+      type: System.EventHandler{Agibuild.Fulora.NavigationStartingEventArgs}
+    content.vb: Public Event NavigationStarted As EventHandler(Of NavigationStartingEventArgs)
+  implements:
+  - Agibuild.Fulora.IWebView.NavigationStarted
+- uid: Agibuild.Fulora.WebViewCore.NavigationCompleted
+  commentId: E:Agibuild.Fulora.WebViewCore.NavigationCompleted
+  id: NavigationCompleted
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: NavigationCompleted
+  nameWithType: WebViewCore.NavigationCompleted
+  fullName: Agibuild.Fulora.WebViewCore.NavigationCompleted
+  type: Event
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: NavigationCompleted
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 263
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Raised when a navigation completes (success, failure, canceled, superseded).
+  example: []
+  syntax:
+    content: public event EventHandler<NavigationCompletedEventArgs>? NavigationCompleted
+    return:
+      type: System.EventHandler{Agibuild.Fulora.NavigationCompletedEventArgs}
+    content.vb: Public Event NavigationCompleted As EventHandler(Of NavigationCompletedEventArgs)
+  implements:
+  - Agibuild.Fulora.IWebView.NavigationCompleted
+- uid: Agibuild.Fulora.WebViewCore.NewWindowRequested
+  commentId: E:Agibuild.Fulora.WebViewCore.NewWindowRequested
+  id: NewWindowRequested
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: NewWindowRequested
+  nameWithType: WebViewCore.NewWindowRequested
+  fullName: Agibuild.Fulora.WebViewCore.NewWindowRequested
+  type: Event
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: NewWindowRequested
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 265
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Raised when content requests opening a new window.
+  example: []
+  syntax:
+    content: public event EventHandler<NewWindowRequestedEventArgs>? NewWindowRequested
+    return:
+      type: System.EventHandler{Agibuild.Fulora.NewWindowRequestedEventArgs}
+    content.vb: Public Event NewWindowRequested As EventHandler(Of NewWindowRequestedEventArgs)
+  implements:
+  - Agibuild.Fulora.IWebView.NewWindowRequested
+- uid: Agibuild.Fulora.WebViewCore.WebMessageReceived
+  commentId: E:Agibuild.Fulora.WebViewCore.WebMessageReceived
+  id: WebMessageReceived
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: WebMessageReceived
+  nameWithType: WebViewCore.WebMessageReceived
+  fullName: Agibuild.Fulora.WebViewCore.WebMessageReceived
+  type: Event
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: WebMessageReceived
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 267
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Raised when a WebMessage is received from the page.
+  example: []
+  syntax:
+    content: public event EventHandler<WebMessageReceivedEventArgs>? WebMessageReceived
+    return:
+      type: System.EventHandler{Agibuild.Fulora.WebMessageReceivedEventArgs}
+    content.vb: Public Event WebMessageReceived As EventHandler(Of WebMessageReceivedEventArgs)
+  implements:
+  - Agibuild.Fulora.IWebView.WebMessageReceived
+- uid: Agibuild.Fulora.WebViewCore.WebResourceRequested
+  commentId: E:Agibuild.Fulora.WebViewCore.WebResourceRequested
+  id: WebResourceRequested
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: WebResourceRequested
+  nameWithType: WebViewCore.WebResourceRequested
+  fullName: Agibuild.Fulora.WebViewCore.WebResourceRequested
+  type: Event
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: WebResourceRequested
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 269
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Raised when a custom-scheme request is intercepted.
+  example: []
+  syntax:
+    content: public event EventHandler<WebResourceRequestedEventArgs>? WebResourceRequested
+    return:
+      type: System.EventHandler{Agibuild.Fulora.WebResourceRequestedEventArgs}
+    content.vb: Public Event WebResourceRequested As EventHandler(Of WebResourceRequestedEventArgs)
+  implements:
+  - Agibuild.Fulora.IWebView.WebResourceRequested
+- uid: Agibuild.Fulora.WebViewCore.EnvironmentRequested
+  commentId: E:Agibuild.Fulora.WebViewCore.EnvironmentRequested
+  id: EnvironmentRequested
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: EnvironmentRequested
+  nameWithType: WebViewCore.EnvironmentRequested
+  fullName: Agibuild.Fulora.WebViewCore.EnvironmentRequested
+  type: Event
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: EnvironmentRequested
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 271
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Raised when the environment is requested (placeholder).
+  example: []
+  syntax:
+    content: public event EventHandler<EnvironmentRequestedEventArgs>? EnvironmentRequested
+    return:
+      type: System.EventHandler{Agibuild.Fulora.EnvironmentRequestedEventArgs}
+    content.vb: Public Event EnvironmentRequested As EventHandler(Of EnvironmentRequestedEventArgs)
+  implements:
+  - Agibuild.Fulora.IWebView.EnvironmentRequested
+- uid: Agibuild.Fulora.WebViewCore.DownloadRequested
+  commentId: E:Agibuild.Fulora.WebViewCore.DownloadRequested
+  id: DownloadRequested
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: DownloadRequested
+  nameWithType: WebViewCore.DownloadRequested
+  fullName: Agibuild.Fulora.WebViewCore.DownloadRequested
+  type: Event
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: DownloadRequested
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 273
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Raised when a file download is initiated. The handler can set <code>DownloadPath</code> or <code>Cancel</code>.
+  example: []
+  syntax:
+    content: public event EventHandler<DownloadRequestedEventArgs>? DownloadRequested
+    return:
+      type: System.EventHandler{Agibuild.Fulora.DownloadRequestedEventArgs}
+    content.vb: Public Event DownloadRequested As EventHandler(Of DownloadRequestedEventArgs)
+  implements:
+  - Agibuild.Fulora.IWebView.DownloadRequested
+- uid: Agibuild.Fulora.WebViewCore.PermissionRequested
+  commentId: E:Agibuild.Fulora.WebViewCore.PermissionRequested
+  id: PermissionRequested
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: PermissionRequested
+  nameWithType: WebViewCore.PermissionRequested
+  fullName: Agibuild.Fulora.WebViewCore.PermissionRequested
+  type: Event
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: PermissionRequested
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 275
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Raised when web content requests a permission (camera, mic, geolocation, etc.).
+  example: []
+  syntax:
+    content: public event EventHandler<PermissionRequestedEventArgs>? PermissionRequested
+    return:
+      type: System.EventHandler{Agibuild.Fulora.PermissionRequestedEventArgs}
+    content.vb: Public Event PermissionRequested As EventHandler(Of PermissionRequestedEventArgs)
+  implements:
+  - Agibuild.Fulora.IWebView.PermissionRequested
+- uid: Agibuild.Fulora.WebViewCore.AdapterCreated
+  commentId: E:Agibuild.Fulora.WebViewCore.AdapterCreated
+  id: AdapterCreated
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: AdapterCreated
+  nameWithType: WebViewCore.AdapterCreated
+  fullName: Agibuild.Fulora.WebViewCore.AdapterCreated
+  type: Event
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: AdapterCreated
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 277
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Raised after the native adapter is attached and ready. The event args carry the typed platform handle.
+  example: []
+  syntax:
+    content: public event EventHandler<AdapterCreatedEventArgs>? AdapterCreated
+    return:
+      type: System.EventHandler{Agibuild.Fulora.AdapterCreatedEventArgs}
+    content.vb: Public Event AdapterCreated As EventHandler(Of AdapterCreatedEventArgs)
+  implements:
+  - Agibuild.Fulora.IWebView.AdapterCreated
+- uid: Agibuild.Fulora.WebViewCore.AdapterDestroyed
+  commentId: E:Agibuild.Fulora.WebViewCore.AdapterDestroyed
+  id: AdapterDestroyed
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: AdapterDestroyed
+  nameWithType: WebViewCore.AdapterDestroyed
+  fullName: Agibuild.Fulora.WebViewCore.AdapterDestroyed
+  type: Event
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: AdapterDestroyed
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 279
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Raised before the native adapter is detached/destroyed. After this event, <xref href="Agibuild.Fulora.INativeWebViewHandleProvider.TryGetWebViewHandle" data-throw-if-not-resolved="false"></xref> returns <code>null</code>.
+  example: []
+  syntax:
+    content: public event EventHandler? AdapterDestroyed
+    return:
+      type: System.EventHandler
+    content.vb: Public Event AdapterDestroyed As EventHandler
+  implements:
+  - Agibuild.Fulora.IWebView.AdapterDestroyed
+- uid: Agibuild.Fulora.WebViewCore.Dispose
+  commentId: M:Agibuild.Fulora.WebViewCore.Dispose
+  id: Dispose
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: Dispose()
+  nameWithType: WebViewCore.Dispose()
+  fullName: Agibuild.Fulora.WebViewCore.Dispose()
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Dispose
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 282
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+  example: []
+  syntax:
+    content: public void Dispose()
+    content.vb: Public Sub Dispose()
+  overload: Agibuild.Fulora.WebViewCore.Dispose*
+  implements:
+  - System.IDisposable.Dispose
+- uid: Agibuild.Fulora.WebViewCore.NavigateAsync(System.Uri)
+  commentId: M:Agibuild.Fulora.WebViewCore.NavigateAsync(System.Uri)
+  id: NavigateAsync(System.Uri)
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: NavigateAsync(Uri)
+  nameWithType: WebViewCore.NavigateAsync(Uri)
+  fullName: Agibuild.Fulora.WebViewCore.NavigateAsync(System.Uri)
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: NavigateAsync
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 331
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Navigates to the specified URI.
+  example: []
+  syntax:
+    content: public Task NavigateAsync(Uri uri)
+    parameters:
+    - id: uri
+      type: System.Uri
+      description: The target URI.
+    return:
+      type: System.Threading.Tasks.Task
+    content.vb: Public Function NavigateAsync(uri As Uri) As Task
+  overload: Agibuild.Fulora.WebViewCore.NavigateAsync*
+  implements:
+  - Agibuild.Fulora.IWebView.NavigateAsync(System.Uri)
+- uid: Agibuild.Fulora.WebViewCore.NavigateToStringAsync(System.String)
+  commentId: M:Agibuild.Fulora.WebViewCore.NavigateToStringAsync(System.String)
+  id: NavigateToStringAsync(System.String)
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: NavigateToStringAsync(string)
+  nameWithType: WebViewCore.NavigateToStringAsync(string)
+  fullName: Agibuild.Fulora.WebViewCore.NavigateToStringAsync(string)
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: NavigateToStringAsync
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 342
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Navigates to a string of HTML.
+  example: []
+  syntax:
+    content: public Task NavigateToStringAsync(string html)
+    parameters:
+    - id: html
+      type: System.String
+      description: The HTML content.
+    return:
+      type: System.Threading.Tasks.Task
+    content.vb: Public Function NavigateToStringAsync(html As String) As Task
+  overload: Agibuild.Fulora.WebViewCore.NavigateToStringAsync*
+  implements:
+  - Agibuild.Fulora.IWebView.NavigateToStringAsync(System.String)
+  nameWithType.vb: WebViewCore.NavigateToStringAsync(String)
+  fullName.vb: Agibuild.Fulora.WebViewCore.NavigateToStringAsync(String)
+  name.vb: NavigateToStringAsync(String)
+- uid: Agibuild.Fulora.WebViewCore.NavigateToStringAsync(System.String,System.Uri)
+  commentId: M:Agibuild.Fulora.WebViewCore.NavigateToStringAsync(System.String,System.Uri)
+  id: NavigateToStringAsync(System.String,System.Uri)
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: NavigateToStringAsync(string, Uri?)
+  nameWithType: WebViewCore.NavigateToStringAsync(string, Uri?)
+  fullName: Agibuild.Fulora.WebViewCore.NavigateToStringAsync(string, System.Uri?)
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: NavigateToStringAsync
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 346
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Navigates to a string of HTML with an optional base URL.
+  example: []
+  syntax:
+    content: public Task NavigateToStringAsync(string html, Uri? baseUrl)
+    parameters:
+    - id: html
+      type: System.String
+      description: The HTML content.
+    - id: baseUrl
+      type: System.Uri
+      description: Optional base URI for relative URL resolution.
+    return:
+      type: System.Threading.Tasks.Task
+    content.vb: Public Function NavigateToStringAsync(html As String, baseUrl As Uri) As Task
+  overload: Agibuild.Fulora.WebViewCore.NavigateToStringAsync*
+  implements:
+  - Agibuild.Fulora.IWebView.NavigateToStringAsync(System.String,System.Uri)
+  nameWithType.vb: WebViewCore.NavigateToStringAsync(String, Uri)
+  fullName.vb: Agibuild.Fulora.WebViewCore.NavigateToStringAsync(String, System.Uri)
+  name.vb: NavigateToStringAsync(String, Uri)
+- uid: Agibuild.Fulora.WebViewCore.InvokeScriptAsync(System.String)
+  commentId: M:Agibuild.Fulora.WebViewCore.InvokeScriptAsync(System.String)
+  id: InvokeScriptAsync(System.String)
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: InvokeScriptAsync(string)
+  nameWithType: WebViewCore.InvokeScriptAsync(string)
+  fullName: Agibuild.Fulora.WebViewCore.InvokeScriptAsync(string)
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: InvokeScriptAsync
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 358
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Executes JavaScript in the context of the current document.
+  example: []
+  syntax:
+    content: public Task<string?> InvokeScriptAsync(string script)
+    parameters:
+    - id: script
+      type: System.String
+      description: The JavaScript source.
+    return:
+      type: System.Threading.Tasks.Task{System.String}
+    content.vb: Public Function InvokeScriptAsync(script As String) As Task(Of String)
+  overload: Agibuild.Fulora.WebViewCore.InvokeScriptAsync*
+  implements:
+  - Agibuild.Fulora.IWebView.InvokeScriptAsync(System.String)
+  nameWithType.vb: WebViewCore.InvokeScriptAsync(String)
+  fullName.vb: Agibuild.Fulora.WebViewCore.InvokeScriptAsync(String)
+  name.vb: InvokeScriptAsync(String)
+- uid: Agibuild.Fulora.WebViewCore.GoBackAsync
+  commentId: M:Agibuild.Fulora.WebViewCore.GoBackAsync
+  id: GoBackAsync
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: GoBackAsync()
+  nameWithType: WebViewCore.GoBackAsync()
+  fullName: Agibuild.Fulora.WebViewCore.GoBackAsync()
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: GoBackAsync
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 389
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Attempts to navigate back.
+  example: []
+  syntax:
+    content: public Task<bool> GoBackAsync()
+    return:
+      type: System.Threading.Tasks.Task{System.Boolean}
+    content.vb: Public Function GoBackAsync() As Task(Of Boolean)
+  overload: Agibuild.Fulora.WebViewCore.GoBackAsync*
+  implements:
+  - Agibuild.Fulora.IWebView.GoBackAsync
+- uid: Agibuild.Fulora.WebViewCore.GoForwardAsync
+  commentId: M:Agibuild.Fulora.WebViewCore.GoForwardAsync
+  id: GoForwardAsync
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: GoForwardAsync()
+  nameWithType: WebViewCore.GoForwardAsync()
+  fullName: Agibuild.Fulora.WebViewCore.GoForwardAsync()
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: GoForwardAsync
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 423
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Attempts to navigate forward.
+  example: []
+  syntax:
+    content: public Task<bool> GoForwardAsync()
+    return:
+      type: System.Threading.Tasks.Task{System.Boolean}
+    content.vb: Public Function GoForwardAsync() As Task(Of Boolean)
+  overload: Agibuild.Fulora.WebViewCore.GoForwardAsync*
+  implements:
+  - Agibuild.Fulora.IWebView.GoForwardAsync
+- uid: Agibuild.Fulora.WebViewCore.RefreshAsync
+  commentId: M:Agibuild.Fulora.WebViewCore.RefreshAsync
+  id: RefreshAsync
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: RefreshAsync()
+  nameWithType: WebViewCore.RefreshAsync()
+  fullName: Agibuild.Fulora.WebViewCore.RefreshAsync()
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: RefreshAsync
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 457
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Reloads the current page.
+  example: []
+  syntax:
+    content: public Task<bool> RefreshAsync()
+    return:
+      type: System.Threading.Tasks.Task{System.Boolean}
+    content.vb: Public Function RefreshAsync() As Task(Of Boolean)
+  overload: Agibuild.Fulora.WebViewCore.RefreshAsync*
+  implements:
+  - Agibuild.Fulora.IWebView.RefreshAsync
+- uid: Agibuild.Fulora.WebViewCore.StopAsync
+  commentId: M:Agibuild.Fulora.WebViewCore.StopAsync
+  id: StopAsync
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: StopAsync()
+  nameWithType: WebViewCore.StopAsync()
+  fullName: Agibuild.Fulora.WebViewCore.StopAsync()
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: StopAsync
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 485
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Stops an active navigation, if any.
+  example: []
+  syntax:
+    content: public Task<bool> StopAsync()
+    return:
+      type: System.Threading.Tasks.Task{System.Boolean}
+    content.vb: Public Function StopAsync() As Task(Of Boolean)
+  overload: Agibuild.Fulora.WebViewCore.StopAsync*
+  implements:
+  - Agibuild.Fulora.IWebView.StopAsync
+- uid: Agibuild.Fulora.WebViewCore.TryGetCookieManager
+  commentId: M:Agibuild.Fulora.WebViewCore.TryGetCookieManager
+  id: TryGetCookieManager
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: TryGetCookieManager()
+  nameWithType: WebViewCore.TryGetCookieManager()
+  fullName: Agibuild.Fulora.WebViewCore.TryGetCookieManager()
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: TryGetCookieManager
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 598
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Gets the cookie manager if supported by the adapter; otherwise null.
+  example: []
+  syntax:
+    content: public ICookieManager? TryGetCookieManager()
+    return:
+      type: Agibuild.Fulora.ICookieManager
+    content.vb: Public Function TryGetCookieManager() As ICookieManager
+  overload: Agibuild.Fulora.WebViewCore.TryGetCookieManager*
+  implements:
+  - Agibuild.Fulora.IWebView.TryGetCookieManager
+- uid: Agibuild.Fulora.WebViewCore.TryGetCommandManager
+  commentId: M:Agibuild.Fulora.WebViewCore.TryGetCommandManager
+  id: TryGetCommandManager
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: TryGetCommandManager()
+  nameWithType: WebViewCore.TryGetCommandManager()
+  fullName: Agibuild.Fulora.WebViewCore.TryGetCommandManager()
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: TryGetCommandManager
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 601
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Gets the command manager if supported by the adapter; otherwise null.
+  example: []
+  syntax:
+    content: public ICommandManager? TryGetCommandManager()
+    return:
+      type: Agibuild.Fulora.ICommandManager
+    content.vb: Public Function TryGetCommandManager() As ICommandManager
+  overload: Agibuild.Fulora.WebViewCore.TryGetCommandManager*
+  implements:
+  - Agibuild.Fulora.IWebView.TryGetCommandManager
+- uid: Agibuild.Fulora.WebViewCore.Rpc
+  commentId: P:Agibuild.Fulora.WebViewCore.Rpc
+  id: Rpc
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: Rpc
+  nameWithType: WebViewCore.Rpc
+  fullName: Agibuild.Fulora.WebViewCore.Rpc
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Rpc
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 604
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: >-
+    Gets the RPC service for bidirectional JS ↔ C# method calls.
+
+    Returns <code>null</code> until the WebMessage bridge is enabled.
+  example: []
+  syntax:
+    content: public IWebViewRpcService? Rpc { get; }
+    parameters: []
+    return:
+      type: Agibuild.Fulora.IWebViewRpcService
+    content.vb: Public ReadOnly Property Rpc As IWebViewRpcService
+  overload: Agibuild.Fulora.WebViewCore.Rpc*
+  implements:
+  - Agibuild.Fulora.IWebView.Rpc
+- uid: Agibuild.Fulora.WebViewCore.OpenDevToolsAsync
+  commentId: M:Agibuild.Fulora.WebViewCore.OpenDevToolsAsync
+  id: OpenDevToolsAsync
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: OpenDevToolsAsync()
+  nameWithType: WebViewCore.OpenDevToolsAsync()
+  fullName: Agibuild.Fulora.WebViewCore.OpenDevToolsAsync()
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: OpenDevToolsAsync
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 609
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: >-
+    Opens the browser developer tools (inspector) at runtime.
+
+    No-op if the platform adapter does not support runtime DevTools toggling.
+  example: []
+  syntax:
+    content: public Task OpenDevToolsAsync()
+    return:
+      type: System.Threading.Tasks.Task
+    content.vb: Public Function OpenDevToolsAsync() As Task
+  overload: Agibuild.Fulora.WebViewCore.OpenDevToolsAsync*
+  implements:
+  - Agibuild.Fulora.IWebView.OpenDevToolsAsync
+- uid: Agibuild.Fulora.WebViewCore.CloseDevToolsAsync
+  commentId: M:Agibuild.Fulora.WebViewCore.CloseDevToolsAsync
+  id: CloseDevToolsAsync
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: CloseDevToolsAsync()
+  nameWithType: WebViewCore.CloseDevToolsAsync()
+  fullName: Agibuild.Fulora.WebViewCore.CloseDevToolsAsync()
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: CloseDevToolsAsync
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 624
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: >-
+    Closes the browser developer tools.
+
+    No-op if the platform adapter does not support runtime DevTools toggling.
+  example: []
+  syntax:
+    content: public Task CloseDevToolsAsync()
+    return:
+      type: System.Threading.Tasks.Task
+    content.vb: Public Function CloseDevToolsAsync() As Task
+  overload: Agibuild.Fulora.WebViewCore.CloseDevToolsAsync*
+  implements:
+  - Agibuild.Fulora.IWebView.CloseDevToolsAsync
+- uid: Agibuild.Fulora.WebViewCore.IsDevToolsOpenAsync
+  commentId: M:Agibuild.Fulora.WebViewCore.IsDevToolsOpenAsync
+  id: IsDevToolsOpenAsync
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: IsDevToolsOpenAsync()
+  nameWithType: WebViewCore.IsDevToolsOpenAsync()
+  fullName: Agibuild.Fulora.WebViewCore.IsDevToolsOpenAsync()
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: IsDevToolsOpenAsync
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 637
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: >-
+    Returns whether developer tools are currently open.
+
+    Always returns false if the platform adapter does not support this check.
+  example: []
+  syntax:
+    content: public Task<bool> IsDevToolsOpenAsync()
+    return:
+      type: System.Threading.Tasks.Task{System.Boolean}
+    content.vb: Public Function IsDevToolsOpenAsync() As Task(Of Boolean)
+  overload: Agibuild.Fulora.WebViewCore.IsDevToolsOpenAsync*
+  implements:
+  - Agibuild.Fulora.IWebView.IsDevToolsOpenAsync
+- uid: Agibuild.Fulora.WebViewCore.BridgeTracer
+  commentId: P:Agibuild.Fulora.WebViewCore.BridgeTracer
+  id: BridgeTracer
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: BridgeTracer
+  nameWithType: WebViewCore.BridgeTracer
+  fullName: Agibuild.Fulora.WebViewCore.BridgeTracer
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: BridgeTracer
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 649
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: >-
+    Sets the bridge tracer for observability. Must be set before the first access to
+
+    <xref href="Agibuild.Fulora.IWebView.Bridge" data-throw-if-not-resolved="false"></xref>; changes after the bridge is created are silently ignored.
+  example: []
+  syntax:
+    content: public IBridgeTracer? BridgeTracer { get; set; }
+    parameters: []
+    return:
+      type: Agibuild.Fulora.IBridgeTracer
+    content.vb: Public Property BridgeTracer As IBridgeTracer
+  overload: Agibuild.Fulora.WebViewCore.BridgeTracer*
+  implements:
+  - Agibuild.Fulora.IWebView.BridgeTracer
+- uid: Agibuild.Fulora.WebViewCore.Bridge
+  commentId: P:Agibuild.Fulora.WebViewCore.Bridge
+  id: Bridge
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: Bridge
+  nameWithType: WebViewCore.Bridge
+  fullName: Agibuild.Fulora.WebViewCore.Bridge
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Bridge
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 664
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: >-
+    Gets the type-safe bridge service for exposing C# services to JS (<xref href="Agibuild.Fulora.JsExportAttribute" data-throw-if-not-resolved="false"></xref>)
+
+    and importing JS services into C# (<xref href="Agibuild.Fulora.JsImportAttribute" data-throw-if-not-resolved="false"></xref>).
+
+    <p>
+
+    Accessing this property auto-enables the WebMessage bridge if it is not already enabled.
+
+    </p>
+  example: []
+  syntax:
+    content: public IBridgeService Bridge { get; }
+    parameters: []
+    return:
+      type: Agibuild.Fulora.IBridgeService
+    content.vb: Public ReadOnly Property Bridge As IBridgeService
+  overload: Agibuild.Fulora.WebViewCore.Bridge*
+  implements:
+  - Agibuild.Fulora.IWebView.Bridge
+- uid: Agibuild.Fulora.WebViewCore.CaptureScreenshotAsync
+  commentId: M:Agibuild.Fulora.WebViewCore.CaptureScreenshotAsync
+  id: CaptureScreenshotAsync
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: CaptureScreenshotAsync()
+  nameWithType: WebViewCore.CaptureScreenshotAsync()
+  fullName: Agibuild.Fulora.WebViewCore.CaptureScreenshotAsync()
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: CaptureScreenshotAsync
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 692
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: >-
+    Captures a screenshot of the current viewport as a PNG byte array.
+
+    Throws <xref href="System.NotSupportedException" data-throw-if-not-resolved="false"></xref> if the adapter does not support screenshots.
+  example: []
+  syntax:
+    content: public Task<byte[]> CaptureScreenshotAsync()
+    return:
+      type: System.Threading.Tasks.Task{System.Byte[]}
+    content.vb: Public Function CaptureScreenshotAsync() As Task(Of Byte())
+  overload: Agibuild.Fulora.WebViewCore.CaptureScreenshotAsync*
+  implements:
+  - Agibuild.Fulora.IWebView.CaptureScreenshotAsync
+- uid: Agibuild.Fulora.WebViewCore.PrintToPdfAsync(Agibuild.Fulora.PdfPrintOptions)
+  commentId: M:Agibuild.Fulora.WebViewCore.PrintToPdfAsync(Agibuild.Fulora.PdfPrintOptions)
+  id: PrintToPdfAsync(Agibuild.Fulora.PdfPrintOptions)
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: PrintToPdfAsync(PdfPrintOptions?)
+  nameWithType: WebViewCore.PrintToPdfAsync(PdfPrintOptions?)
+  fullName: Agibuild.Fulora.WebViewCore.PrintToPdfAsync(Agibuild.Fulora.PdfPrintOptions?)
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: PrintToPdfAsync
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 704
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: >-
+    Prints the current page to a PDF byte array.
+
+    Throws <xref href="System.NotSupportedException" data-throw-if-not-resolved="false"></xref> if the adapter does not support printing.
+  example: []
+  syntax:
+    content: public Task<byte[]> PrintToPdfAsync(PdfPrintOptions? options = null)
+    parameters:
+    - id: options
+      type: Agibuild.Fulora.PdfPrintOptions
+    return:
+      type: System.Threading.Tasks.Task{System.Byte[]}
+    content.vb: Public Function PrintToPdfAsync(options As PdfPrintOptions = Nothing) As Task(Of Byte())
+  overload: Agibuild.Fulora.WebViewCore.PrintToPdfAsync*
+  implements:
+  - Agibuild.Fulora.IWebView.PrintToPdfAsync(Agibuild.Fulora.PdfPrintOptions)
+  nameWithType.vb: WebViewCore.PrintToPdfAsync(PdfPrintOptions)
+  fullName.vb: Agibuild.Fulora.WebViewCore.PrintToPdfAsync(Agibuild.Fulora.PdfPrintOptions)
+  name.vb: PrintToPdfAsync(PdfPrintOptions)
+- uid: Agibuild.Fulora.WebViewCore.ZoomFactorChanged
+  commentId: E:Agibuild.Fulora.WebViewCore.ZoomFactorChanged
+  id: ZoomFactorChanged
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: ZoomFactorChanged
+  nameWithType: WebViewCore.ZoomFactorChanged
+  fullName: Agibuild.Fulora.WebViewCore.ZoomFactorChanged
+  type: Event
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: ZoomFactorChanged
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 721
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Raised when the zoom factor changes.
+  example: []
+  syntax:
+    content: public event EventHandler<double>? ZoomFactorChanged
+    return:
+      type: System.EventHandler{System.Double}
+    content.vb: Public Event ZoomFactorChanged As EventHandler(Of Double)
+- uid: Agibuild.Fulora.WebViewCore.GetZoomFactorAsync
+  commentId: M:Agibuild.Fulora.WebViewCore.GetZoomFactorAsync
+  id: GetZoomFactorAsync
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: GetZoomFactorAsync()
+  nameWithType: WebViewCore.GetZoomFactorAsync()
+  fullName: Agibuild.Fulora.WebViewCore.GetZoomFactorAsync()
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: GetZoomFactorAsync
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 727
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: >-
+    Gets or sets the zoom factor (1.0 = 100%). Clamped to [0.25, 5.0].
+
+    Returns 1.0 if the adapter does not support zoom.
+  example: []
+  syntax:
+    content: public Task<double> GetZoomFactorAsync()
+    return:
+      type: System.Threading.Tasks.Task{System.Double}
+    content.vb: Public Function GetZoomFactorAsync() As Task(Of Double)
+  overload: Agibuild.Fulora.WebViewCore.GetZoomFactorAsync*
+  implements:
+  - Agibuild.Fulora.IWebView.GetZoomFactorAsync
+- uid: Agibuild.Fulora.WebViewCore.SetZoomFactorAsync(System.Double)
+  commentId: M:Agibuild.Fulora.WebViewCore.SetZoomFactorAsync(System.Double)
+  id: SetZoomFactorAsync(System.Double)
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: SetZoomFactorAsync(double)
+  nameWithType: WebViewCore.SetZoomFactorAsync(double)
+  fullName: Agibuild.Fulora.WebViewCore.SetZoomFactorAsync(double)
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: SetZoomFactorAsync
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 737
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Sets the zoom factor. 1.0 = 100%.
+  example: []
+  syntax:
+    content: public Task SetZoomFactorAsync(double zoomFactor)
+    parameters:
+    - id: zoomFactor
+      type: System.Double
+      description: The zoom factor to set.
+    return:
+      type: System.Threading.Tasks.Task
+    content.vb: Public Function SetZoomFactorAsync(zoomFactor As Double) As Task
+  overload: Agibuild.Fulora.WebViewCore.SetZoomFactorAsync*
+  implements:
+  - Agibuild.Fulora.IWebView.SetZoomFactorAsync(System.Double)
+  nameWithType.vb: WebViewCore.SetZoomFactorAsync(Double)
+  fullName.vb: Agibuild.Fulora.WebViewCore.SetZoomFactorAsync(Double)
+  name.vb: SetZoomFactorAsync(Double)
+- uid: Agibuild.Fulora.WebViewCore.ContextMenuRequested
+  commentId: E:Agibuild.Fulora.WebViewCore.ContextMenuRequested
+  id: ContextMenuRequested
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: ContextMenuRequested
+  nameWithType: WebViewCore.ContextMenuRequested
+  fullName: Agibuild.Fulora.WebViewCore.ContextMenuRequested
+  type: Event
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: ContextMenuRequested
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 755
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Raised when the user triggers a context menu (right-click, long-press).
+  example: []
+  syntax:
+    content: public event EventHandler<ContextMenuRequestedEventArgs>? ContextMenuRequested
+    return:
+      type: System.EventHandler{Agibuild.Fulora.ContextMenuRequestedEventArgs}
+    content.vb: Public Event ContextMenuRequested As EventHandler(Of ContextMenuRequestedEventArgs)
+  implements:
+  - Agibuild.Fulora.IWebView.ContextMenuRequested
+- uid: Agibuild.Fulora.WebViewCore.FindInPageAsync(System.String,Agibuild.Fulora.FindInPageOptions)
+  commentId: M:Agibuild.Fulora.WebViewCore.FindInPageAsync(System.String,Agibuild.Fulora.FindInPageOptions)
+  id: FindInPageAsync(System.String,Agibuild.Fulora.FindInPageOptions)
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: FindInPageAsync(string, FindInPageOptions?)
+  nameWithType: WebViewCore.FindInPageAsync(string, FindInPageOptions?)
+  fullName: Agibuild.Fulora.WebViewCore.FindInPageAsync(string, Agibuild.Fulora.FindInPageOptions?)
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: FindInPageAsync
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 771
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Searches the current page for the given text.
+  example: []
+  syntax:
+    content: public Task<FindInPageResult> FindInPageAsync(string text, FindInPageOptions? options = null)
+    parameters:
+    - id: text
+      type: System.String
+      description: The search text. Must not be null or empty.
+    - id: options
+      type: Agibuild.Fulora.FindInPageOptions
+      description: Optional search options (case sensitivity, direction).
+    return:
+      type: System.Threading.Tasks.Task{Agibuild.Fulora.FindInPageResult}
+      description: A <xref href="Agibuild.Fulora.FindInPageResult" data-throw-if-not-resolved="false"></xref> with match count and active index.
+    content.vb: Public Function FindInPageAsync(text As String, options As FindInPageOptions = Nothing) As Task(Of FindInPageResult)
+  overload: Agibuild.Fulora.WebViewCore.FindInPageAsync*
+  exceptions:
+  - type: System.NotSupportedException
+    commentId: T:System.NotSupportedException
+    description: The adapter does not implement <xref href="Agibuild.Fulora.Adapters.Abstractions.IFindInPageAdapter" data-throw-if-not-resolved="false"></xref>.
+  - type: System.ArgumentException
+    commentId: T:System.ArgumentException
+    description: <code class="paramref">text</code> is null or empty.
+  implements:
+  - Agibuild.Fulora.IWebView.FindInPageAsync(System.String,Agibuild.Fulora.FindInPageOptions)
+  nameWithType.vb: WebViewCore.FindInPageAsync(String, FindInPageOptions)
+  fullName.vb: Agibuild.Fulora.WebViewCore.FindInPageAsync(String, Agibuild.Fulora.FindInPageOptions)
+  name.vb: FindInPageAsync(String, FindInPageOptions)
+- uid: Agibuild.Fulora.WebViewCore.StopFindInPageAsync(System.Boolean)
+  commentId: M:Agibuild.Fulora.WebViewCore.StopFindInPageAsync(System.Boolean)
+  id: StopFindInPageAsync(System.Boolean)
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: StopFindInPageAsync(bool)
+  nameWithType: WebViewCore.StopFindInPageAsync(bool)
+  fullName: Agibuild.Fulora.WebViewCore.StopFindInPageAsync(bool)
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: StopFindInPageAsync
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 789
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Clears find-in-page highlights and resets search state.
+  example: []
+  syntax:
+    content: public Task StopFindInPageAsync(bool clearHighlights = true)
+    parameters:
+    - id: clearHighlights
+      type: System.Boolean
+      description: 'Whether to remove visual highlights. Default: true.'
+    return:
+      type: System.Threading.Tasks.Task
+    content.vb: Public Function StopFindInPageAsync(clearHighlights As Boolean = True) As Task
+  overload: Agibuild.Fulora.WebViewCore.StopFindInPageAsync*
+  exceptions:
+  - type: System.NotSupportedException
+    commentId: T:System.NotSupportedException
+    description: The adapter does not implement <xref href="Agibuild.Fulora.Adapters.Abstractions.IFindInPageAdapter" data-throw-if-not-resolved="false"></xref>.
+  implements:
+  - Agibuild.Fulora.IWebView.StopFindInPageAsync(System.Boolean)
+  nameWithType.vb: WebViewCore.StopFindInPageAsync(Boolean)
+  fullName.vb: Agibuild.Fulora.WebViewCore.StopFindInPageAsync(Boolean)
+  name.vb: StopFindInPageAsync(Boolean)
+- uid: Agibuild.Fulora.WebViewCore.AddPreloadScriptAsync(System.String)
+  commentId: M:Agibuild.Fulora.WebViewCore.AddPreloadScriptAsync(System.String)
+  id: AddPreloadScriptAsync(System.String)
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: AddPreloadScriptAsync(string)
+  nameWithType: WebViewCore.AddPreloadScriptAsync(string)
+  fullName: Agibuild.Fulora.WebViewCore.AddPreloadScriptAsync(string)
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: AddPreloadScriptAsync
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 807
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Registers a JavaScript snippet to run at document start on every page load.
+  example: []
+  syntax:
+    content: public Task<string> AddPreloadScriptAsync(string javaScript)
+    parameters:
+    - id: javaScript
+      type: System.String
+      description: The script to inject.
+    return:
+      type: System.Threading.Tasks.Task{System.String}
+      description: An opaque script ID that can be passed to <xref href="Agibuild.Fulora.WebViewCore.RemovePreloadScriptAsync(System.String)" data-throw-if-not-resolved="false"></xref>.
+    content.vb: Public Function AddPreloadScriptAsync(javaScript As String) As Task(Of String)
+  overload: Agibuild.Fulora.WebViewCore.AddPreloadScriptAsync*
+  exceptions:
+  - type: System.NotSupportedException
+    commentId: T:System.NotSupportedException
+    description: The adapter does not implement <xref href="Agibuild.Fulora.Adapters.Abstractions.IPreloadScriptAdapter" data-throw-if-not-resolved="false"></xref>.
+  implements:
+  - Agibuild.Fulora.IWebView.AddPreloadScriptAsync(System.String)
+  nameWithType.vb: WebViewCore.AddPreloadScriptAsync(String)
+  fullName.vb: Agibuild.Fulora.WebViewCore.AddPreloadScriptAsync(String)
+  name.vb: AddPreloadScriptAsync(String)
+- uid: Agibuild.Fulora.WebViewCore.RemovePreloadScriptAsync(System.String)
+  commentId: M:Agibuild.Fulora.WebViewCore.RemovePreloadScriptAsync(System.String)
+  id: RemovePreloadScriptAsync(System.String)
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: RemovePreloadScriptAsync(string)
+  nameWithType: WebViewCore.RemovePreloadScriptAsync(string)
+  fullName: Agibuild.Fulora.WebViewCore.RemovePreloadScriptAsync(string)
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: RemovePreloadScriptAsync
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 828
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: Removes a previously registered preload script by its ID.
+  example: []
+  syntax:
+    content: public Task RemovePreloadScriptAsync(string scriptId)
+    parameters:
+    - id: scriptId
+      type: System.String
+      description: The ID returned by <xref href="Agibuild.Fulora.WebViewCore.AddPreloadScriptAsync(System.String)" data-throw-if-not-resolved="false"></xref>.
+    return:
+      type: System.Threading.Tasks.Task
+    content.vb: Public Function RemovePreloadScriptAsync(scriptId As String) As Task
+  overload: Agibuild.Fulora.WebViewCore.RemovePreloadScriptAsync*
+  exceptions:
+  - type: System.NotSupportedException
+    commentId: T:System.NotSupportedException
+    description: The adapter does not implement <xref href="Agibuild.Fulora.Adapters.Abstractions.IPreloadScriptAdapter" data-throw-if-not-resolved="false"></xref>.
+  implements:
+  - Agibuild.Fulora.IWebView.RemovePreloadScriptAsync(System.String)
+  nameWithType.vb: WebViewCore.RemovePreloadScriptAsync(String)
+  fullName.vb: Agibuild.Fulora.WebViewCore.RemovePreloadScriptAsync(String)
+  name.vb: RemovePreloadScriptAsync(String)
+- uid: Agibuild.Fulora.WebViewCore.TryGetWebViewHandleAsync
+  commentId: M:Agibuild.Fulora.WebViewCore.TryGetWebViewHandleAsync
+  id: TryGetWebViewHandleAsync
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: TryGetWebViewHandleAsync()
+  nameWithType: WebViewCore.TryGetWebViewHandleAsync()
+  fullName: Agibuild.Fulora.WebViewCore.TryGetWebViewHandleAsync()
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: TryGetWebViewHandleAsync
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 849
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: >-
+    Asynchronously retrieves the native platform WebView handle.
+
+    This is the primary any-thread API surface and always marshals adapter access to the UI thread.
+  example: []
+  syntax:
+    content: public Task<INativeHandle?> TryGetWebViewHandleAsync()
+    return:
+      type: System.Threading.Tasks.Task{Agibuild.Fulora.INativeHandle}
+    content.vb: Public Function TryGetWebViewHandleAsync() As Task(Of INativeHandle)
+  overload: Agibuild.Fulora.WebViewCore.TryGetWebViewHandleAsync*
+  implements:
+  - Agibuild.Fulora.IWebView.TryGetWebViewHandleAsync
+- uid: Agibuild.Fulora.WebViewCore.TryGetWebViewHandle
+  commentId: M:Agibuild.Fulora.WebViewCore.TryGetWebViewHandle
+  id: TryGetWebViewHandle
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: TryGetWebViewHandle()
+  nameWithType: WebViewCore.TryGetWebViewHandle()
+  fullName: Agibuild.Fulora.WebViewCore.TryGetWebViewHandle()
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: TryGetWebViewHandle
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 873
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: >-
+    Compatibility wrapper around <xref href="Agibuild.Fulora.WebViewCore.TryGetWebViewHandleAsync" data-throw-if-not-resolved="false"></xref> for synchronous call sites.
+
+    Prefer using <xref href="Agibuild.Fulora.WebViewCore.TryGetWebViewHandleAsync" data-throw-if-not-resolved="false"></xref> to avoid blocking.
+  example: []
+  syntax:
+    content: public INativeHandle? TryGetWebViewHandle()
+    return:
+      type: Agibuild.Fulora.INativeHandle
+    content.vb: Public Function TryGetWebViewHandle() As INativeHandle
+  overload: Agibuild.Fulora.WebViewCore.TryGetWebViewHandle*
+- uid: Agibuild.Fulora.WebViewCore.SetCustomUserAgent(System.String)
+  commentId: M:Agibuild.Fulora.WebViewCore.SetCustomUserAgent(System.String)
+  id: SetCustomUserAgent(System.String)
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: SetCustomUserAgent(string?)
+  nameWithType: WebViewCore.SetCustomUserAgent(string?)
+  fullName: Agibuild.Fulora.WebViewCore.SetCustomUserAgent(string?)
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: SetCustomUserAgent
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 882
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: >-
+    Sets the custom User-Agent string at runtime.
+
+    Pass <code>null</code> to revert to the platform default.
+  example: []
+  syntax:
+    content: public void SetCustomUserAgent(string? userAgent)
+    parameters:
+    - id: userAgent
+      type: System.String
+    content.vb: Public Sub SetCustomUserAgent(userAgent As String)
+  overload: Agibuild.Fulora.WebViewCore.SetCustomUserAgent*
+  nameWithType.vb: WebViewCore.SetCustomUserAgent(String)
+  fullName.vb: Agibuild.Fulora.WebViewCore.SetCustomUserAgent(String)
+  name.vb: SetCustomUserAgent(String)
+- uid: Agibuild.Fulora.WebViewCore.EnableWebMessageBridge(Agibuild.Fulora.WebMessageBridgeOptions)
+  commentId: M:Agibuild.Fulora.WebViewCore.EnableWebMessageBridge(Agibuild.Fulora.WebMessageBridgeOptions)
+  id: EnableWebMessageBridge(Agibuild.Fulora.WebMessageBridgeOptions)
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: EnableWebMessageBridge(WebMessageBridgeOptions)
+  nameWithType: WebViewCore.EnableWebMessageBridge(WebMessageBridgeOptions)
+  fullName: Agibuild.Fulora.WebViewCore.EnableWebMessageBridge(Agibuild.Fulora.WebMessageBridgeOptions)
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: EnableWebMessageBridge
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 902
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  example: []
+  syntax:
+    content: public void EnableWebMessageBridge(WebMessageBridgeOptions options)
+    parameters:
+    - id: options
+      type: Agibuild.Fulora.WebMessageBridgeOptions
+    content.vb: Public Sub EnableWebMessageBridge(options As WebMessageBridgeOptions)
+  overload: Agibuild.Fulora.WebViewCore.EnableWebMessageBridge*
+- uid: Agibuild.Fulora.WebViewCore.DisableWebMessageBridge
+  commentId: M:Agibuild.Fulora.WebViewCore.DisableWebMessageBridge
+  id: DisableWebMessageBridge
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: DisableWebMessageBridge()
+  nameWithType: WebViewCore.DisableWebMessageBridge()
+  fullName: Agibuild.Fulora.WebViewCore.DisableWebMessageBridge()
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: DisableWebMessageBridge
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 921
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  example: []
+  syntax:
+    content: public void DisableWebMessageBridge()
+    content.vb: Public Sub DisableWebMessageBridge()
+  overload: Agibuild.Fulora.WebViewCore.DisableWebMessageBridge*
+- uid: Agibuild.Fulora.WebViewCore.EnableSpaHosting(Agibuild.Fulora.SpaHostingOptions)
+  commentId: M:Agibuild.Fulora.WebViewCore.EnableSpaHosting(Agibuild.Fulora.SpaHostingOptions)
+  id: EnableSpaHosting(Agibuild.Fulora.SpaHostingOptions)
+  parent: Agibuild.Fulora.WebViewCore
+  langs:
+  - csharp
+  - vb
+  name: EnableSpaHosting(SpaHostingOptions)
+  nameWithType: WebViewCore.EnableSpaHosting(SpaHostingOptions)
+  fullName: Agibuild.Fulora.WebViewCore.EnableSpaHosting(Agibuild.Fulora.SpaHostingOptions)
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/WebViewCore.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: EnableSpaHosting
+    path: ../src/Agibuild.Fulora.Runtime/WebViewCore.cs
+    startLine: 940
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora
+  summary: >-
+    Enables SPA hosting. Registers the custom scheme, subscribes to WebResourceRequested,
+
+    and optionally auto-enables the bridge.
+  example: []
+  syntax:
+    content: public void EnableSpaHosting(SpaHostingOptions options)
+    parameters:
+    - id: options
+      type: Agibuild.Fulora.SpaHostingOptions
+    content.vb: Public Sub EnableSpaHosting(options As SpaHostingOptions)
+  overload: Agibuild.Fulora.WebViewCore.EnableSpaHosting*
+references:
+- uid: Agibuild.Fulora.IWebView
+  commentId: T:Agibuild.Fulora.IWebView
+  parent: Agibuild.Fulora
+  href: Agibuild.Fulora.IWebView.html
+  name: IWebView
+  nameWithType: IWebView
+  fullName: Agibuild.Fulora.IWebView
+- uid: Agibuild.Fulora
+  commentId: N:Agibuild.Fulora
+  href: Agibuild.html
+  name: Agibuild.Fulora
+  nameWithType: Agibuild.Fulora
+  fullName: Agibuild.Fulora
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.IDisposable
+  commentId: T:System.IDisposable
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.idisposable
+  name: IDisposable
+  nameWithType: IDisposable
+  fullName: System.IDisposable
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: Agibuild.Fulora.WebViewCore.CreateDefault*
+  commentId: Overload:Agibuild.Fulora.WebViewCore.CreateDefault
+  href: Agibuild.Fulora.WebViewCore.html#Agibuild_Fulora_WebViewCore_CreateDefault_Agibuild_Fulora_IWebViewDispatcher_
+  name: CreateDefault
+  nameWithType: WebViewCore.CreateDefault
+  fullName: Agibuild.Fulora.WebViewCore.CreateDefault
+- uid: Agibuild.Fulora.IWebViewDispatcher
+  commentId: T:Agibuild.Fulora.IWebViewDispatcher
+  parent: Agibuild.Fulora
+  href: Agibuild.Fulora.IWebViewDispatcher.html
+  name: IWebViewDispatcher
+  nameWithType: IWebViewDispatcher
+  fullName: Agibuild.Fulora.IWebViewDispatcher
+- uid: Microsoft.Extensions.Logging.ILogger{Agibuild.Fulora.WebViewCore}
+  commentId: T:Microsoft.Extensions.Logging.ILogger{Agibuild.Fulora.WebViewCore}
+  parent: Microsoft.Extensions.Logging
+  definition: Microsoft.Extensions.Logging.ILogger`1
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<WebViewCore>
+  nameWithType: ILogger<WebViewCore>
+  fullName: Microsoft.Extensions.Logging.ILogger<Agibuild.Fulora.WebViewCore>
+  nameWithType.vb: ILogger(Of WebViewCore)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of Agibuild.Fulora.WebViewCore)
+  name.vb: ILogger(Of WebViewCore)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - uid: Agibuild.Fulora.WebViewCore
+    name: WebViewCore
+    href: Agibuild.Fulora.WebViewCore.html
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: Agibuild.Fulora.WebViewCore
+    name: WebViewCore
+    href: Agibuild.Fulora.WebViewCore.html
+  - name: )
+- uid: Microsoft.Extensions.Logging.ILogger`1
+  commentId: T:Microsoft.Extensions.Logging.ILogger`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<TCategoryName>
+  nameWithType: ILogger<TCategoryName>
+  fullName: Microsoft.Extensions.Logging.ILogger<TCategoryName>
+  nameWithType.vb: ILogger(Of TCategoryName)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of TCategoryName)
+  name.vb: ILogger(Of TCategoryName)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - name: TCategoryName
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TCategoryName
+  - name: )
+- uid: Microsoft.Extensions.Logging
+  commentId: N:Microsoft.Extensions.Logging
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft
+  name: Microsoft.Extensions.Logging
+  nameWithType: Microsoft.Extensions.Logging
+  fullName: Microsoft.Extensions.Logging
+  spec.csharp:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+  spec.vb:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+- uid: Agibuild.Fulora.WebViewCore.Source*
+  commentId: Overload:Agibuild.Fulora.WebViewCore.Source
+  href: Agibuild.Fulora.WebViewCore.html#Agibuild_Fulora_WebViewCore_Source
+  name: Source
+  nameWithType: WebViewCore.Source
+  fullName: Agibuild.Fulora.WebViewCore.Source
+- uid: Agibuild.Fulora.IWebView.Source
+  commentId: P:Agibuild.Fulora.IWebView.Source
+  parent: Agibuild.Fulora.IWebView
+  href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_Source
+  name: Source
+  nameWithType: IWebView.Source
+  fullName: Agibuild.Fulora.IWebView.Source
+- uid: System.Uri
+  commentId: T:System.Uri
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.uri
+  name: Uri
+  nameWithType: Uri
+  fullName: System.Uri
+- uid: Agibuild.Fulora.WebViewCore.CanGoBack*
+  commentId: Overload:Agibuild.Fulora.WebViewCore.CanGoBack
+  href: Agibuild.Fulora.WebViewCore.html#Agibuild_Fulora_WebViewCore_CanGoBack
+  name: CanGoBack
+  nameWithType: WebViewCore.CanGoBack
+  fullName: Agibuild.Fulora.WebViewCore.CanGoBack
+- uid: Agibuild.Fulora.IWebView.CanGoBack
+  commentId: P:Agibuild.Fulora.IWebView.CanGoBack
+  parent: Agibuild.Fulora.IWebView
+  href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_CanGoBack
+  name: CanGoBack
+  nameWithType: IWebView.CanGoBack
+  fullName: Agibuild.Fulora.IWebView.CanGoBack
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: Agibuild.Fulora.WebViewCore.CanGoForward*
+  commentId: Overload:Agibuild.Fulora.WebViewCore.CanGoForward
+  href: Agibuild.Fulora.WebViewCore.html#Agibuild_Fulora_WebViewCore_CanGoForward
+  name: CanGoForward
+  nameWithType: WebViewCore.CanGoForward
+  fullName: Agibuild.Fulora.WebViewCore.CanGoForward
+- uid: Agibuild.Fulora.IWebView.CanGoForward
+  commentId: P:Agibuild.Fulora.IWebView.CanGoForward
+  parent: Agibuild.Fulora.IWebView
+  href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_CanGoForward
+  name: CanGoForward
+  nameWithType: IWebView.CanGoForward
+  fullName: Agibuild.Fulora.IWebView.CanGoForward
+- uid: Agibuild.Fulora.WebViewCore.IsLoading*
+  commentId: Overload:Agibuild.Fulora.WebViewCore.IsLoading
+  href: Agibuild.Fulora.WebViewCore.html#Agibuild_Fulora_WebViewCore_IsLoading
+  name: IsLoading
+  nameWithType: WebViewCore.IsLoading
+  fullName: Agibuild.Fulora.WebViewCore.IsLoading
+- uid: Agibuild.Fulora.IWebView.IsLoading
+  commentId: P:Agibuild.Fulora.IWebView.IsLoading
+  parent: Agibuild.Fulora.IWebView
+  href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_IsLoading
+  name: IsLoading
+  nameWithType: IWebView.IsLoading
+  fullName: Agibuild.Fulora.IWebView.IsLoading
+- uid: Agibuild.Fulora.WebViewCore.ChannelId*
+  commentId: Overload:Agibuild.Fulora.WebViewCore.ChannelId
+  href: Agibuild.Fulora.WebViewCore.html#Agibuild_Fulora_WebViewCore_ChannelId
+  name: ChannelId
+  nameWithType: WebViewCore.ChannelId
+  fullName: Agibuild.Fulora.WebViewCore.ChannelId
+- uid: Agibuild.Fulora.IWebView.ChannelId
+  commentId: P:Agibuild.Fulora.IWebView.ChannelId
+  parent: Agibuild.Fulora.IWebView
+  href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_ChannelId
+  name: ChannelId
+  nameWithType: IWebView.ChannelId
+  fullName: Agibuild.Fulora.IWebView.ChannelId
+- uid: System.Guid
+  commentId: T:System.Guid
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.guid
+  name: Guid
+  nameWithType: Guid
+  fullName: System.Guid
+- uid: Agibuild.Fulora.IWebView.NavigationStarted
+  commentId: E:Agibuild.Fulora.IWebView.NavigationStarted
+  parent: Agibuild.Fulora.IWebView
+  href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_NavigationStarted
+  name: NavigationStarted
+  nameWithType: IWebView.NavigationStarted
+  fullName: Agibuild.Fulora.IWebView.NavigationStarted
+- uid: System.EventHandler{Agibuild.Fulora.NavigationStartingEventArgs}
+  commentId: T:System.EventHandler{Agibuild.Fulora.NavigationStartingEventArgs}
+  parent: System
+  definition: System.EventHandler`1
+  href: https://learn.microsoft.com/dotnet/api/system.eventhandler-1
+  name: EventHandler<NavigationStartingEventArgs>
+  nameWithType: EventHandler<NavigationStartingEventArgs>
+  fullName: System.EventHandler<Agibuild.Fulora.NavigationStartingEventArgs>
+  nameWithType.vb: EventHandler(Of NavigationStartingEventArgs)
+  fullName.vb: System.EventHandler(Of Agibuild.Fulora.NavigationStartingEventArgs)
+  name.vb: EventHandler(Of NavigationStartingEventArgs)
+  spec.csharp:
+  - uid: System.EventHandler`1
+    name: EventHandler
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.eventhandler-1
+  - name: <
+  - uid: Agibuild.Fulora.NavigationStartingEventArgs
+    name: NavigationStartingEventArgs
+    href: Agibuild.Fulora.NavigationStartingEventArgs.html
+  - name: '>'
+  spec.vb:
+  - uid: System.EventHandler`1
+    name: EventHandler
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.eventhandler-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: Agibuild.Fulora.NavigationStartingEventArgs
+    name: NavigationStartingEventArgs
+    href: Agibuild.Fulora.NavigationStartingEventArgs.html
+  - name: )
+- uid: System.EventHandler`1
+  commentId: T:System.EventHandler`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.eventhandler-1
+  name: EventHandler<TEventArgs>
+  nameWithType: EventHandler<TEventArgs>
+  fullName: System.EventHandler<TEventArgs>
+  nameWithType.vb: EventHandler(Of TEventArgs)
+  fullName.vb: System.EventHandler(Of TEventArgs)
+  name.vb: EventHandler(Of TEventArgs)
+  spec.csharp:
+  - uid: System.EventHandler`1
+    name: EventHandler
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.eventhandler-1
+  - name: <
+  - name: TEventArgs
+  - name: '>'
+  spec.vb:
+  - uid: System.EventHandler`1
+    name: EventHandler
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.eventhandler-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TEventArgs
+  - name: )
+- uid: Agibuild.Fulora.IWebView.NavigationCompleted
+  commentId: E:Agibuild.Fulora.IWebView.NavigationCompleted
+  parent: Agibuild.Fulora.IWebView
+  href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_NavigationCompleted
+  name: NavigationCompleted
+  nameWithType: IWebView.NavigationCompleted
+  fullName: Agibuild.Fulora.IWebView.NavigationCompleted
+- uid: System.EventHandler{Agibuild.Fulora.NavigationCompletedEventArgs}
+  commentId: T:System.EventHandler{Agibuild.Fulora.NavigationCompletedEventArgs}
+  parent: System
+  definition: System.EventHandler`1
+  href: https://learn.microsoft.com/dotnet/api/system.eventhandler-1
+  name: EventHandler<NavigationCompletedEventArgs>
+  nameWithType: EventHandler<NavigationCompletedEventArgs>
+  fullName: System.EventHandler<Agibuild.Fulora.NavigationCompletedEventArgs>
+  nameWithType.vb: EventHandler(Of NavigationCompletedEventArgs)
+  fullName.vb: System.EventHandler(Of Agibuild.Fulora.NavigationCompletedEventArgs)
+  name.vb: EventHandler(Of NavigationCompletedEventArgs)
+  spec.csharp:
+  - uid: System.EventHandler`1
+    name: EventHandler
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.eventhandler-1
+  - name: <
+  - uid: Agibuild.Fulora.NavigationCompletedEventArgs
+    name: NavigationCompletedEventArgs
+    href: Agibuild.Fulora.NavigationCompletedEventArgs.html
+  - name: '>'
+  spec.vb:
+  - uid: System.EventHandler`1
+    name: EventHandler
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.eventhandler-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: Agibuild.Fulora.NavigationCompletedEventArgs
+    name: NavigationCompletedEventArgs
+    href: Agibuild.Fulora.NavigationCompletedEventArgs.html
+  - name: )
+- uid: Agibuild.Fulora.IWebView.NewWindowRequested
+  commentId: E:Agibuild.Fulora.IWebView.NewWindowRequested
+  parent: Agibuild.Fulora.IWebView
+  href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_NewWindowRequested
+  name: NewWindowRequested
+  nameWithType: IWebView.NewWindowRequested
+  fullName: Agibuild.Fulora.IWebView.NewWindowRequested
+- uid: System.EventHandler{Agibuild.Fulora.NewWindowRequestedEventArgs}
+  commentId: T:System.EventHandler{Agibuild.Fulora.NewWindowRequestedEventArgs}
+  parent: System
+  definition: System.EventHandler`1
+  href: https://learn.microsoft.com/dotnet/api/system.eventhandler-1
+  name: EventHandler<NewWindowRequestedEventArgs>
+  nameWithType: EventHandler<NewWindowRequestedEventArgs>
+  fullName: System.EventHandler<Agibuild.Fulora.NewWindowRequestedEventArgs>
+  nameWithType.vb: EventHandler(Of NewWindowRequestedEventArgs)
+  fullName.vb: System.EventHandler(Of Agibuild.Fulora.NewWindowRequestedEventArgs)
+  name.vb: EventHandler(Of NewWindowRequestedEventArgs)
+  spec.csharp:
+  - uid: System.EventHandler`1
+    name: EventHandler
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.eventhandler-1
+  - name: <
+  - uid: Agibuild.Fulora.NewWindowRequestedEventArgs
+    name: NewWindowRequestedEventArgs
+    href: Agibuild.Fulora.NewWindowRequestedEventArgs.html
+  - name: '>'
+  spec.vb:
+  - uid: System.EventHandler`1
+    name: EventHandler
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.eventhandler-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: Agibuild.Fulora.NewWindowRequestedEventArgs
+    name: NewWindowRequestedEventArgs
+    href: Agibuild.Fulora.NewWindowRequestedEventArgs.html
+  - name: )
+- uid: Agibuild.Fulora.IWebView.WebMessageReceived
+  commentId: E:Agibuild.Fulora.IWebView.WebMessageReceived
+  parent: Agibuild.Fulora.IWebView
+  href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_WebMessageReceived
+  name: WebMessageReceived
+  nameWithType: IWebView.WebMessageReceived
+  fullName: Agibuild.Fulora.IWebView.WebMessageReceived
+- uid: System.EventHandler{Agibuild.Fulora.WebMessageReceivedEventArgs}
+  commentId: T:System.EventHandler{Agibuild.Fulora.WebMessageReceivedEventArgs}
+  parent: System
+  definition: System.EventHandler`1
+  href: https://learn.microsoft.com/dotnet/api/system.eventhandler-1
+  name: EventHandler<WebMessageReceivedEventArgs>
+  nameWithType: EventHandler<WebMessageReceivedEventArgs>
+  fullName: System.EventHandler<Agibuild.Fulora.WebMessageReceivedEventArgs>
+  nameWithType.vb: EventHandler(Of WebMessageReceivedEventArgs)
+  fullName.vb: System.EventHandler(Of Agibuild.Fulora.WebMessageReceivedEventArgs)
+  name.vb: EventHandler(Of WebMessageReceivedEventArgs)
+  spec.csharp:
+  - uid: System.EventHandler`1
+    name: EventHandler
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.eventhandler-1
+  - name: <
+  - uid: Agibuild.Fulora.WebMessageReceivedEventArgs
+    name: WebMessageReceivedEventArgs
+    href: Agibuild.Fulora.WebMessageReceivedEventArgs.html
+  - name: '>'
+  spec.vb:
+  - uid: System.EventHandler`1
+    name: EventHandler
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.eventhandler-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: Agibuild.Fulora.WebMessageReceivedEventArgs
+    name: WebMessageReceivedEventArgs
+    href: Agibuild.Fulora.WebMessageReceivedEventArgs.html
+  - name: )
+- uid: Agibuild.Fulora.IWebView.WebResourceRequested
+  commentId: E:Agibuild.Fulora.IWebView.WebResourceRequested
+  parent: Agibuild.Fulora.IWebView
+  href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_WebResourceRequested
+  name: WebResourceRequested
+  nameWithType: IWebView.WebResourceRequested
+  fullName: Agibuild.Fulora.IWebView.WebResourceRequested
+- uid: System.EventHandler{Agibuild.Fulora.WebResourceRequestedEventArgs}
+  commentId: T:System.EventHandler{Agibuild.Fulora.WebResourceRequestedEventArgs}
+  parent: System
+  definition: System.EventHandler`1
+  href: https://learn.microsoft.com/dotnet/api/system.eventhandler-1
+  name: EventHandler<WebResourceRequestedEventArgs>
+  nameWithType: EventHandler<WebResourceRequestedEventArgs>
+  fullName: System.EventHandler<Agibuild.Fulora.WebResourceRequestedEventArgs>
+  nameWithType.vb: EventHandler(Of WebResourceRequestedEventArgs)
+  fullName.vb: System.EventHandler(Of Agibuild.Fulora.WebResourceRequestedEventArgs)
+  name.vb: EventHandler(Of WebResourceRequestedEventArgs)
+  spec.csharp:
+  - uid: System.EventHandler`1
+    name: EventHandler
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.eventhandler-1
+  - name: <
+  - uid: Agibuild.Fulora.WebResourceRequestedEventArgs
+    name: WebResourceRequestedEventArgs
+    href: Agibuild.Fulora.WebResourceRequestedEventArgs.html
+  - name: '>'
+  spec.vb:
+  - uid: System.EventHandler`1
+    name: EventHandler
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.eventhandler-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: Agibuild.Fulora.WebResourceRequestedEventArgs
+    name: WebResourceRequestedEventArgs
+    href: Agibuild.Fulora.WebResourceRequestedEventArgs.html
+  - name: )
+- uid: Agibuild.Fulora.IWebView.EnvironmentRequested
+  commentId: E:Agibuild.Fulora.IWebView.EnvironmentRequested
+  parent: Agibuild.Fulora.IWebView
+  href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_EnvironmentRequested
+  name: EnvironmentRequested
+  nameWithType: IWebView.EnvironmentRequested
+  fullName: Agibuild.Fulora.IWebView.EnvironmentRequested
+- uid: System.EventHandler{Agibuild.Fulora.EnvironmentRequestedEventArgs}
+  commentId: T:System.EventHandler{Agibuild.Fulora.EnvironmentRequestedEventArgs}
+  parent: System
+  definition: System.EventHandler`1
+  href: https://learn.microsoft.com/dotnet/api/system.eventhandler-1
+  name: EventHandler<EnvironmentRequestedEventArgs>
+  nameWithType: EventHandler<EnvironmentRequestedEventArgs>
+  fullName: System.EventHandler<Agibuild.Fulora.EnvironmentRequestedEventArgs>
+  nameWithType.vb: EventHandler(Of EnvironmentRequestedEventArgs)
+  fullName.vb: System.EventHandler(Of Agibuild.Fulora.EnvironmentRequestedEventArgs)
+  name.vb: EventHandler(Of EnvironmentRequestedEventArgs)
+  spec.csharp:
+  - uid: System.EventHandler`1
+    name: EventHandler
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.eventhandler-1
+  - name: <
+  - uid: Agibuild.Fulora.EnvironmentRequestedEventArgs
+    name: EnvironmentRequestedEventArgs
+    href: Agibuild.Fulora.EnvironmentRequestedEventArgs.html
+  - name: '>'
+  spec.vb:
+  - uid: System.EventHandler`1
+    name: EventHandler
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.eventhandler-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: Agibuild.Fulora.EnvironmentRequestedEventArgs
+    name: EnvironmentRequestedEventArgs
+    href: Agibuild.Fulora.EnvironmentRequestedEventArgs.html
+  - name: )
+- uid: Agibuild.Fulora.IWebView.DownloadRequested
+  commentId: E:Agibuild.Fulora.IWebView.DownloadRequested
+  parent: Agibuild.Fulora.IWebView
+  href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_DownloadRequested
+  name: DownloadRequested
+  nameWithType: IWebView.DownloadRequested
+  fullName: Agibuild.Fulora.IWebView.DownloadRequested
+- uid: System.EventHandler{Agibuild.Fulora.DownloadRequestedEventArgs}
+  commentId: T:System.EventHandler{Agibuild.Fulora.DownloadRequestedEventArgs}
+  parent: System
+  definition: System.EventHandler`1
+  href: https://learn.microsoft.com/dotnet/api/system.eventhandler-1
+  name: EventHandler<DownloadRequestedEventArgs>
+  nameWithType: EventHandler<DownloadRequestedEventArgs>
+  fullName: System.EventHandler<Agibuild.Fulora.DownloadRequestedEventArgs>
+  nameWithType.vb: EventHandler(Of DownloadRequestedEventArgs)
+  fullName.vb: System.EventHandler(Of Agibuild.Fulora.DownloadRequestedEventArgs)
+  name.vb: EventHandler(Of DownloadRequestedEventArgs)
+  spec.csharp:
+  - uid: System.EventHandler`1
+    name: EventHandler
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.eventhandler-1
+  - name: <
+  - uid: Agibuild.Fulora.DownloadRequestedEventArgs
+    name: DownloadRequestedEventArgs
+    href: Agibuild.Fulora.DownloadRequestedEventArgs.html
+  - name: '>'
+  spec.vb:
+  - uid: System.EventHandler`1
+    name: EventHandler
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.eventhandler-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: Agibuild.Fulora.DownloadRequestedEventArgs
+    name: DownloadRequestedEventArgs
+    href: Agibuild.Fulora.DownloadRequestedEventArgs.html
+  - name: )
+- uid: Agibuild.Fulora.IWebView.PermissionRequested
+  commentId: E:Agibuild.Fulora.IWebView.PermissionRequested
+  parent: Agibuild.Fulora.IWebView
+  href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_PermissionRequested
+  name: PermissionRequested
+  nameWithType: IWebView.PermissionRequested
+  fullName: Agibuild.Fulora.IWebView.PermissionRequested
+- uid: System.EventHandler{Agibuild.Fulora.PermissionRequestedEventArgs}
+  commentId: T:System.EventHandler{Agibuild.Fulora.PermissionRequestedEventArgs}
+  parent: System
+  definition: System.EventHandler`1
+  href: https://learn.microsoft.com/dotnet/api/system.eventhandler-1
+  name: EventHandler<PermissionRequestedEventArgs>
+  nameWithType: EventHandler<PermissionRequestedEventArgs>
+  fullName: System.EventHandler<Agibuild.Fulora.PermissionRequestedEventArgs>
+  nameWithType.vb: EventHandler(Of PermissionRequestedEventArgs)
+  fullName.vb: System.EventHandler(Of Agibuild.Fulora.PermissionRequestedEventArgs)
+  name.vb: EventHandler(Of PermissionRequestedEventArgs)
+  spec.csharp:
+  - uid: System.EventHandler`1
+    name: EventHandler
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.eventhandler-1
+  - name: <
+  - uid: Agibuild.Fulora.PermissionRequestedEventArgs
+    name: PermissionRequestedEventArgs
+    href: Agibuild.Fulora.PermissionRequestedEventArgs.html
+  - name: '>'
+  spec.vb:
+  - uid: System.EventHandler`1
+    name: EventHandler
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.eventhandler-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: Agibuild.Fulora.PermissionRequestedEventArgs
+    name: PermissionRequestedEventArgs
+    href: Agibuild.Fulora.PermissionRequestedEventArgs.html
+  - name: )
+- uid: Agibuild.Fulora.IWebView.AdapterCreated
+  commentId: E:Agibuild.Fulora.IWebView.AdapterCreated
+  parent: Agibuild.Fulora.IWebView
+  href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_AdapterCreated
+  name: AdapterCreated
+  nameWithType: IWebView.AdapterCreated
+  fullName: Agibuild.Fulora.IWebView.AdapterCreated
+- uid: System.EventHandler{Agibuild.Fulora.AdapterCreatedEventArgs}
+  commentId: T:System.EventHandler{Agibuild.Fulora.AdapterCreatedEventArgs}
+  parent: System
+  definition: System.EventHandler`1
+  href: https://learn.microsoft.com/dotnet/api/system.eventhandler-1
+  name: EventHandler<AdapterCreatedEventArgs>
+  nameWithType: EventHandler<AdapterCreatedEventArgs>
+  fullName: System.EventHandler<Agibuild.Fulora.AdapterCreatedEventArgs>
+  nameWithType.vb: EventHandler(Of AdapterCreatedEventArgs)
+  fullName.vb: System.EventHandler(Of Agibuild.Fulora.AdapterCreatedEventArgs)
+  name.vb: EventHandler(Of AdapterCreatedEventArgs)
+  spec.csharp:
+  - uid: System.EventHandler`1
+    name: EventHandler
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.eventhandler-1
+  - name: <
+  - uid: Agibuild.Fulora.AdapterCreatedEventArgs
+    name: AdapterCreatedEventArgs
+    href: Agibuild.Fulora.AdapterCreatedEventArgs.html
+  - name: '>'
+  spec.vb:
+  - uid: System.EventHandler`1
+    name: EventHandler
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.eventhandler-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: Agibuild.Fulora.AdapterCreatedEventArgs
+    name: AdapterCreatedEventArgs
+    href: Agibuild.Fulora.AdapterCreatedEventArgs.html
+  - name: )
+- uid: Agibuild.Fulora.INativeWebViewHandleProvider.TryGetWebViewHandle
+  commentId: M:Agibuild.Fulora.INativeWebViewHandleProvider.TryGetWebViewHandle
+  href: Agibuild.Fulora.INativeWebViewHandleProvider.html#Agibuild_Fulora_INativeWebViewHandleProvider_TryGetWebViewHandle
+  name: TryGetWebViewHandle()
+  nameWithType: INativeWebViewHandleProvider.TryGetWebViewHandle()
+  fullName: Agibuild.Fulora.INativeWebViewHandleProvider.TryGetWebViewHandle()
+  spec.csharp:
+  - uid: Agibuild.Fulora.INativeWebViewHandleProvider.TryGetWebViewHandle
+    name: TryGetWebViewHandle
+    href: Agibuild.Fulora.INativeWebViewHandleProvider.html#Agibuild_Fulora_INativeWebViewHandleProvider_TryGetWebViewHandle
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: Agibuild.Fulora.INativeWebViewHandleProvider.TryGetWebViewHandle
+    name: TryGetWebViewHandle
+    href: Agibuild.Fulora.INativeWebViewHandleProvider.html#Agibuild_Fulora_INativeWebViewHandleProvider_TryGetWebViewHandle
+  - name: (
+  - name: )
+- uid: Agibuild.Fulora.IWebView.AdapterDestroyed
+  commentId: E:Agibuild.Fulora.IWebView.AdapterDestroyed
+  parent: Agibuild.Fulora.IWebView
+  href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_AdapterDestroyed
+  name: AdapterDestroyed
+  nameWithType: IWebView.AdapterDestroyed
+  fullName: Agibuild.Fulora.IWebView.AdapterDestroyed
+- uid: System.EventHandler
+  commentId: T:System.EventHandler
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.eventhandler
+  name: EventHandler
+  nameWithType: EventHandler
+  fullName: System.EventHandler
+- uid: Agibuild.Fulora.WebViewCore.Dispose*
+  commentId: Overload:Agibuild.Fulora.WebViewCore.Dispose
+  href: Agibuild.Fulora.WebViewCore.html#Agibuild_Fulora_WebViewCore_Dispose
+  name: Dispose
+  nameWithType: WebViewCore.Dispose
+  fullName: Agibuild.Fulora.WebViewCore.Dispose
+- uid: System.IDisposable.Dispose
+  commentId: M:System.IDisposable.Dispose
+  parent: System.IDisposable
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.idisposable.dispose
+  name: Dispose()
+  nameWithType: IDisposable.Dispose()
+  fullName: System.IDisposable.Dispose()
+  spec.csharp:
+  - uid: System.IDisposable.Dispose
+    name: Dispose
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.idisposable.dispose
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.IDisposable.Dispose
+    name: Dispose
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.idisposable.dispose
+  - name: (
+  - name: )
+- uid: Agibuild.Fulora.WebViewCore.NavigateAsync*
+  commentId: Overload:Agibuild.Fulora.WebViewCore.NavigateAsync
+  href: Agibuild.Fulora.WebViewCore.html#Agibuild_Fulora_WebViewCore_NavigateAsync_System_Uri_
+  name: NavigateAsync
+  nameWithType: WebViewCore.NavigateAsync
+  fullName: Agibuild.Fulora.WebViewCore.NavigateAsync
+- uid: Agibuild.Fulora.IWebView.NavigateAsync(System.Uri)
+  commentId: M:Agibuild.Fulora.IWebView.NavigateAsync(System.Uri)
+  parent: Agibuild.Fulora.IWebView
+  isExternal: true
+  href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_NavigateAsync_System_Uri_
+  name: NavigateAsync(Uri)
+  nameWithType: IWebView.NavigateAsync(Uri)
+  fullName: Agibuild.Fulora.IWebView.NavigateAsync(System.Uri)
+  spec.csharp:
+  - uid: Agibuild.Fulora.IWebView.NavigateAsync(System.Uri)
+    name: NavigateAsync
+    href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_NavigateAsync_System_Uri_
+  - name: (
+  - uid: System.Uri
+    name: Uri
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.uri
+  - name: )
+  spec.vb:
+  - uid: Agibuild.Fulora.IWebView.NavigateAsync(System.Uri)
+    name: NavigateAsync
+    href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_NavigateAsync_System_Uri_
+  - name: (
+  - uid: System.Uri
+    name: Uri
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.uri
+  - name: )
+- uid: System.Threading.Tasks.Task
+  commentId: T:System.Threading.Tasks.Task
+  parent: System.Threading.Tasks
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task
+  name: Task
+  nameWithType: Task
+  fullName: System.Threading.Tasks.Task
+- uid: System.Threading.Tasks
+  commentId: N:System.Threading.Tasks
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Threading.Tasks
+  nameWithType: System.Threading.Tasks
+  fullName: System.Threading.Tasks
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  - name: .
+  - uid: System.Threading.Tasks
+    name: Tasks
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  - name: .
+  - uid: System.Threading.Tasks
+    name: Tasks
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks
+- uid: Agibuild.Fulora.WebViewCore.NavigateToStringAsync*
+  commentId: Overload:Agibuild.Fulora.WebViewCore.NavigateToStringAsync
+  href: Agibuild.Fulora.WebViewCore.html#Agibuild_Fulora_WebViewCore_NavigateToStringAsync_System_String_
+  name: NavigateToStringAsync
+  nameWithType: WebViewCore.NavigateToStringAsync
+  fullName: Agibuild.Fulora.WebViewCore.NavigateToStringAsync
+- uid: Agibuild.Fulora.IWebView.NavigateToStringAsync(System.String)
+  commentId: M:Agibuild.Fulora.IWebView.NavigateToStringAsync(System.String)
+  parent: Agibuild.Fulora.IWebView
+  isExternal: true
+  href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_NavigateToStringAsync_System_String_
+  name: NavigateToStringAsync(string)
+  nameWithType: IWebView.NavigateToStringAsync(string)
+  fullName: Agibuild.Fulora.IWebView.NavigateToStringAsync(string)
+  nameWithType.vb: IWebView.NavigateToStringAsync(String)
+  fullName.vb: Agibuild.Fulora.IWebView.NavigateToStringAsync(String)
+  name.vb: NavigateToStringAsync(String)
+  spec.csharp:
+  - uid: Agibuild.Fulora.IWebView.NavigateToStringAsync(System.String)
+    name: NavigateToStringAsync
+    href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_NavigateToStringAsync_System_String_
+  - name: (
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+  spec.vb:
+  - uid: Agibuild.Fulora.IWebView.NavigateToStringAsync(System.String)
+    name: NavigateToStringAsync
+    href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_NavigateToStringAsync_System_String_
+  - name: (
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: Agibuild.Fulora.IWebView.NavigateToStringAsync(System.String,System.Uri)
+  commentId: M:Agibuild.Fulora.IWebView.NavigateToStringAsync(System.String,System.Uri)
+  parent: Agibuild.Fulora.IWebView
+  isExternal: true
+  href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_NavigateToStringAsync_System_String_System_Uri_
+  name: NavigateToStringAsync(string, Uri)
+  nameWithType: IWebView.NavigateToStringAsync(string, Uri)
+  fullName: Agibuild.Fulora.IWebView.NavigateToStringAsync(string, System.Uri)
+  nameWithType.vb: IWebView.NavigateToStringAsync(String, Uri)
+  fullName.vb: Agibuild.Fulora.IWebView.NavigateToStringAsync(String, System.Uri)
+  name.vb: NavigateToStringAsync(String, Uri)
+  spec.csharp:
+  - uid: Agibuild.Fulora.IWebView.NavigateToStringAsync(System.String,System.Uri)
+    name: NavigateToStringAsync
+    href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_NavigateToStringAsync_System_String_System_Uri_
+  - name: (
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.Uri
+    name: Uri
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.uri
+  - name: )
+  spec.vb:
+  - uid: Agibuild.Fulora.IWebView.NavigateToStringAsync(System.String,System.Uri)
+    name: NavigateToStringAsync
+    href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_NavigateToStringAsync_System_String_System_Uri_
+  - name: (
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.Uri
+    name: Uri
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.uri
+  - name: )
+- uid: Agibuild.Fulora.WebViewCore.InvokeScriptAsync*
+  commentId: Overload:Agibuild.Fulora.WebViewCore.InvokeScriptAsync
+  href: Agibuild.Fulora.WebViewCore.html#Agibuild_Fulora_WebViewCore_InvokeScriptAsync_System_String_
+  name: InvokeScriptAsync
+  nameWithType: WebViewCore.InvokeScriptAsync
+  fullName: Agibuild.Fulora.WebViewCore.InvokeScriptAsync
+- uid: Agibuild.Fulora.IWebView.InvokeScriptAsync(System.String)
+  commentId: M:Agibuild.Fulora.IWebView.InvokeScriptAsync(System.String)
+  parent: Agibuild.Fulora.IWebView
+  isExternal: true
+  href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_InvokeScriptAsync_System_String_
+  name: InvokeScriptAsync(string)
+  nameWithType: IWebView.InvokeScriptAsync(string)
+  fullName: Agibuild.Fulora.IWebView.InvokeScriptAsync(string)
+  nameWithType.vb: IWebView.InvokeScriptAsync(String)
+  fullName.vb: Agibuild.Fulora.IWebView.InvokeScriptAsync(String)
+  name.vb: InvokeScriptAsync(String)
+  spec.csharp:
+  - uid: Agibuild.Fulora.IWebView.InvokeScriptAsync(System.String)
+    name: InvokeScriptAsync
+    href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_InvokeScriptAsync_System_String_
+  - name: (
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+  spec.vb:
+  - uid: Agibuild.Fulora.IWebView.InvokeScriptAsync(System.String)
+    name: InvokeScriptAsync
+    href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_InvokeScriptAsync_System_String_
+  - name: (
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+- uid: System.Threading.Tasks.Task{System.String}
+  commentId: T:System.Threading.Tasks.Task{System.String}
+  parent: System.Threading.Tasks
+  definition: System.Threading.Tasks.Task`1
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<string>
+  nameWithType: Task<string>
+  fullName: System.Threading.Tasks.Task<string>
+  nameWithType.vb: Task(Of String)
+  fullName.vb: System.Threading.Tasks.Task(Of String)
+  name.vb: Task(Of String)
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+- uid: System.Threading.Tasks.Task`1
+  commentId: T:System.Threading.Tasks.Task`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<TResult>
+  nameWithType: Task<TResult>
+  fullName: System.Threading.Tasks.Task<TResult>
+  nameWithType.vb: Task(Of TResult)
+  fullName.vb: System.Threading.Tasks.Task(Of TResult)
+  name.vb: Task(Of TResult)
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - name: TResult
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TResult
+  - name: )
+- uid: Agibuild.Fulora.WebViewCore.GoBackAsync*
+  commentId: Overload:Agibuild.Fulora.WebViewCore.GoBackAsync
+  href: Agibuild.Fulora.WebViewCore.html#Agibuild_Fulora_WebViewCore_GoBackAsync
+  name: GoBackAsync
+  nameWithType: WebViewCore.GoBackAsync
+  fullName: Agibuild.Fulora.WebViewCore.GoBackAsync
+- uid: Agibuild.Fulora.IWebView.GoBackAsync
+  commentId: M:Agibuild.Fulora.IWebView.GoBackAsync
+  parent: Agibuild.Fulora.IWebView
+  href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_GoBackAsync
+  name: GoBackAsync()
+  nameWithType: IWebView.GoBackAsync()
+  fullName: Agibuild.Fulora.IWebView.GoBackAsync()
+  spec.csharp:
+  - uid: Agibuild.Fulora.IWebView.GoBackAsync
+    name: GoBackAsync
+    href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_GoBackAsync
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: Agibuild.Fulora.IWebView.GoBackAsync
+    name: GoBackAsync
+    href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_GoBackAsync
+  - name: (
+  - name: )
+- uid: System.Threading.Tasks.Task{System.Boolean}
+  commentId: T:System.Threading.Tasks.Task{System.Boolean}
+  parent: System.Threading.Tasks
+  definition: System.Threading.Tasks.Task`1
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<bool>
+  nameWithType: Task<bool>
+  fullName: System.Threading.Tasks.Task<bool>
+  nameWithType.vb: Task(Of Boolean)
+  fullName.vb: System.Threading.Tasks.Task(Of Boolean)
+  name.vb: Task(Of Boolean)
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - uid: System.Boolean
+    name: bool
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.boolean
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.Boolean
+    name: Boolean
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.boolean
+  - name: )
+- uid: Agibuild.Fulora.WebViewCore.GoForwardAsync*
+  commentId: Overload:Agibuild.Fulora.WebViewCore.GoForwardAsync
+  href: Agibuild.Fulora.WebViewCore.html#Agibuild_Fulora_WebViewCore_GoForwardAsync
+  name: GoForwardAsync
+  nameWithType: WebViewCore.GoForwardAsync
+  fullName: Agibuild.Fulora.WebViewCore.GoForwardAsync
+- uid: Agibuild.Fulora.IWebView.GoForwardAsync
+  commentId: M:Agibuild.Fulora.IWebView.GoForwardAsync
+  parent: Agibuild.Fulora.IWebView
+  href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_GoForwardAsync
+  name: GoForwardAsync()
+  nameWithType: IWebView.GoForwardAsync()
+  fullName: Agibuild.Fulora.IWebView.GoForwardAsync()
+  spec.csharp:
+  - uid: Agibuild.Fulora.IWebView.GoForwardAsync
+    name: GoForwardAsync
+    href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_GoForwardAsync
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: Agibuild.Fulora.IWebView.GoForwardAsync
+    name: GoForwardAsync
+    href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_GoForwardAsync
+  - name: (
+  - name: )
+- uid: Agibuild.Fulora.WebViewCore.RefreshAsync*
+  commentId: Overload:Agibuild.Fulora.WebViewCore.RefreshAsync
+  href: Agibuild.Fulora.WebViewCore.html#Agibuild_Fulora_WebViewCore_RefreshAsync
+  name: RefreshAsync
+  nameWithType: WebViewCore.RefreshAsync
+  fullName: Agibuild.Fulora.WebViewCore.RefreshAsync
+- uid: Agibuild.Fulora.IWebView.RefreshAsync
+  commentId: M:Agibuild.Fulora.IWebView.RefreshAsync
+  parent: Agibuild.Fulora.IWebView
+  href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_RefreshAsync
+  name: RefreshAsync()
+  nameWithType: IWebView.RefreshAsync()
+  fullName: Agibuild.Fulora.IWebView.RefreshAsync()
+  spec.csharp:
+  - uid: Agibuild.Fulora.IWebView.RefreshAsync
+    name: RefreshAsync
+    href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_RefreshAsync
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: Agibuild.Fulora.IWebView.RefreshAsync
+    name: RefreshAsync
+    href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_RefreshAsync
+  - name: (
+  - name: )
+- uid: Agibuild.Fulora.WebViewCore.StopAsync*
+  commentId: Overload:Agibuild.Fulora.WebViewCore.StopAsync
+  href: Agibuild.Fulora.WebViewCore.html#Agibuild_Fulora_WebViewCore_StopAsync
+  name: StopAsync
+  nameWithType: WebViewCore.StopAsync
+  fullName: Agibuild.Fulora.WebViewCore.StopAsync
+- uid: Agibuild.Fulora.IWebView.StopAsync
+  commentId: M:Agibuild.Fulora.IWebView.StopAsync
+  parent: Agibuild.Fulora.IWebView
+  href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_StopAsync
+  name: StopAsync()
+  nameWithType: IWebView.StopAsync()
+  fullName: Agibuild.Fulora.IWebView.StopAsync()
+  spec.csharp:
+  - uid: Agibuild.Fulora.IWebView.StopAsync
+    name: StopAsync
+    href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_StopAsync
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: Agibuild.Fulora.IWebView.StopAsync
+    name: StopAsync
+    href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_StopAsync
+  - name: (
+  - name: )
+- uid: Agibuild.Fulora.WebViewCore.TryGetCookieManager*
+  commentId: Overload:Agibuild.Fulora.WebViewCore.TryGetCookieManager
+  href: Agibuild.Fulora.WebViewCore.html#Agibuild_Fulora_WebViewCore_TryGetCookieManager
+  name: TryGetCookieManager
+  nameWithType: WebViewCore.TryGetCookieManager
+  fullName: Agibuild.Fulora.WebViewCore.TryGetCookieManager
+- uid: Agibuild.Fulora.IWebView.TryGetCookieManager
+  commentId: M:Agibuild.Fulora.IWebView.TryGetCookieManager
+  parent: Agibuild.Fulora.IWebView
+  href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_TryGetCookieManager
+  name: TryGetCookieManager()
+  nameWithType: IWebView.TryGetCookieManager()
+  fullName: Agibuild.Fulora.IWebView.TryGetCookieManager()
+  spec.csharp:
+  - uid: Agibuild.Fulora.IWebView.TryGetCookieManager
+    name: TryGetCookieManager
+    href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_TryGetCookieManager
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: Agibuild.Fulora.IWebView.TryGetCookieManager
+    name: TryGetCookieManager
+    href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_TryGetCookieManager
+  - name: (
+  - name: )
+- uid: Agibuild.Fulora.ICookieManager
+  commentId: T:Agibuild.Fulora.ICookieManager
+  parent: Agibuild.Fulora
+  href: Agibuild.Fulora.ICookieManager.html
+  name: ICookieManager
+  nameWithType: ICookieManager
+  fullName: Agibuild.Fulora.ICookieManager
+- uid: Agibuild.Fulora.WebViewCore.TryGetCommandManager*
+  commentId: Overload:Agibuild.Fulora.WebViewCore.TryGetCommandManager
+  href: Agibuild.Fulora.WebViewCore.html#Agibuild_Fulora_WebViewCore_TryGetCommandManager
+  name: TryGetCommandManager
+  nameWithType: WebViewCore.TryGetCommandManager
+  fullName: Agibuild.Fulora.WebViewCore.TryGetCommandManager
+- uid: Agibuild.Fulora.IWebView.TryGetCommandManager
+  commentId: M:Agibuild.Fulora.IWebView.TryGetCommandManager
+  parent: Agibuild.Fulora.IWebView
+  href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_TryGetCommandManager
+  name: TryGetCommandManager()
+  nameWithType: IWebView.TryGetCommandManager()
+  fullName: Agibuild.Fulora.IWebView.TryGetCommandManager()
+  spec.csharp:
+  - uid: Agibuild.Fulora.IWebView.TryGetCommandManager
+    name: TryGetCommandManager
+    href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_TryGetCommandManager
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: Agibuild.Fulora.IWebView.TryGetCommandManager
+    name: TryGetCommandManager
+    href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_TryGetCommandManager
+  - name: (
+  - name: )
+- uid: Agibuild.Fulora.ICommandManager
+  commentId: T:Agibuild.Fulora.ICommandManager
+  parent: Agibuild.Fulora
+  href: Agibuild.Fulora.ICommandManager.html
+  name: ICommandManager
+  nameWithType: ICommandManager
+  fullName: Agibuild.Fulora.ICommandManager
+- uid: Agibuild.Fulora.WebViewCore.Rpc*
+  commentId: Overload:Agibuild.Fulora.WebViewCore.Rpc
+  href: Agibuild.Fulora.WebViewCore.html#Agibuild_Fulora_WebViewCore_Rpc
+  name: Rpc
+  nameWithType: WebViewCore.Rpc
+  fullName: Agibuild.Fulora.WebViewCore.Rpc
+- uid: Agibuild.Fulora.IWebView.Rpc
+  commentId: P:Agibuild.Fulora.IWebView.Rpc
+  parent: Agibuild.Fulora.IWebView
+  href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_Rpc
+  name: Rpc
+  nameWithType: IWebView.Rpc
+  fullName: Agibuild.Fulora.IWebView.Rpc
+- uid: Agibuild.Fulora.IWebViewRpcService
+  commentId: T:Agibuild.Fulora.IWebViewRpcService
+  parent: Agibuild.Fulora
+  href: Agibuild.Fulora.IWebViewRpcService.html
+  name: IWebViewRpcService
+  nameWithType: IWebViewRpcService
+  fullName: Agibuild.Fulora.IWebViewRpcService
+- uid: Agibuild.Fulora.WebViewCore.OpenDevToolsAsync*
+  commentId: Overload:Agibuild.Fulora.WebViewCore.OpenDevToolsAsync
+  href: Agibuild.Fulora.WebViewCore.html#Agibuild_Fulora_WebViewCore_OpenDevToolsAsync
+  name: OpenDevToolsAsync
+  nameWithType: WebViewCore.OpenDevToolsAsync
+  fullName: Agibuild.Fulora.WebViewCore.OpenDevToolsAsync
+- uid: Agibuild.Fulora.IWebView.OpenDevToolsAsync
+  commentId: M:Agibuild.Fulora.IWebView.OpenDevToolsAsync
+  parent: Agibuild.Fulora.IWebView
+  href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_OpenDevToolsAsync
+  name: OpenDevToolsAsync()
+  nameWithType: IWebView.OpenDevToolsAsync()
+  fullName: Agibuild.Fulora.IWebView.OpenDevToolsAsync()
+  spec.csharp:
+  - uid: Agibuild.Fulora.IWebView.OpenDevToolsAsync
+    name: OpenDevToolsAsync
+    href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_OpenDevToolsAsync
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: Agibuild.Fulora.IWebView.OpenDevToolsAsync
+    name: OpenDevToolsAsync
+    href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_OpenDevToolsAsync
+  - name: (
+  - name: )
+- uid: Agibuild.Fulora.WebViewCore.CloseDevToolsAsync*
+  commentId: Overload:Agibuild.Fulora.WebViewCore.CloseDevToolsAsync
+  href: Agibuild.Fulora.WebViewCore.html#Agibuild_Fulora_WebViewCore_CloseDevToolsAsync
+  name: CloseDevToolsAsync
+  nameWithType: WebViewCore.CloseDevToolsAsync
+  fullName: Agibuild.Fulora.WebViewCore.CloseDevToolsAsync
+- uid: Agibuild.Fulora.IWebView.CloseDevToolsAsync
+  commentId: M:Agibuild.Fulora.IWebView.CloseDevToolsAsync
+  parent: Agibuild.Fulora.IWebView
+  href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_CloseDevToolsAsync
+  name: CloseDevToolsAsync()
+  nameWithType: IWebView.CloseDevToolsAsync()
+  fullName: Agibuild.Fulora.IWebView.CloseDevToolsAsync()
+  spec.csharp:
+  - uid: Agibuild.Fulora.IWebView.CloseDevToolsAsync
+    name: CloseDevToolsAsync
+    href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_CloseDevToolsAsync
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: Agibuild.Fulora.IWebView.CloseDevToolsAsync
+    name: CloseDevToolsAsync
+    href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_CloseDevToolsAsync
+  - name: (
+  - name: )
+- uid: Agibuild.Fulora.WebViewCore.IsDevToolsOpenAsync*
+  commentId: Overload:Agibuild.Fulora.WebViewCore.IsDevToolsOpenAsync
+  href: Agibuild.Fulora.WebViewCore.html#Agibuild_Fulora_WebViewCore_IsDevToolsOpenAsync
+  name: IsDevToolsOpenAsync
+  nameWithType: WebViewCore.IsDevToolsOpenAsync
+  fullName: Agibuild.Fulora.WebViewCore.IsDevToolsOpenAsync
+- uid: Agibuild.Fulora.IWebView.IsDevToolsOpenAsync
+  commentId: M:Agibuild.Fulora.IWebView.IsDevToolsOpenAsync
+  parent: Agibuild.Fulora.IWebView
+  href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_IsDevToolsOpenAsync
+  name: IsDevToolsOpenAsync()
+  nameWithType: IWebView.IsDevToolsOpenAsync()
+  fullName: Agibuild.Fulora.IWebView.IsDevToolsOpenAsync()
+  spec.csharp:
+  - uid: Agibuild.Fulora.IWebView.IsDevToolsOpenAsync
+    name: IsDevToolsOpenAsync
+    href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_IsDevToolsOpenAsync
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: Agibuild.Fulora.IWebView.IsDevToolsOpenAsync
+    name: IsDevToolsOpenAsync
+    href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_IsDevToolsOpenAsync
+  - name: (
+  - name: )
+- uid: Agibuild.Fulora.IWebView.Bridge
+  commentId: P:Agibuild.Fulora.IWebView.Bridge
+  parent: Agibuild.Fulora.IWebView
+  href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_Bridge
+  name: Bridge
+  nameWithType: IWebView.Bridge
+  fullName: Agibuild.Fulora.IWebView.Bridge
+- uid: Agibuild.Fulora.WebViewCore.BridgeTracer*
+  commentId: Overload:Agibuild.Fulora.WebViewCore.BridgeTracer
+  href: Agibuild.Fulora.WebViewCore.html#Agibuild_Fulora_WebViewCore_BridgeTracer
+  name: BridgeTracer
+  nameWithType: WebViewCore.BridgeTracer
+  fullName: Agibuild.Fulora.WebViewCore.BridgeTracer
+- uid: Agibuild.Fulora.IWebView.BridgeTracer
+  commentId: P:Agibuild.Fulora.IWebView.BridgeTracer
+  parent: Agibuild.Fulora.IWebView
+  href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_BridgeTracer
+  name: BridgeTracer
+  nameWithType: IWebView.BridgeTracer
+  fullName: Agibuild.Fulora.IWebView.BridgeTracer
+- uid: Agibuild.Fulora.IBridgeTracer
+  commentId: T:Agibuild.Fulora.IBridgeTracer
+  parent: Agibuild.Fulora
+  href: Agibuild.Fulora.IBridgeTracer.html
+  name: IBridgeTracer
+  nameWithType: IBridgeTracer
+  fullName: Agibuild.Fulora.IBridgeTracer
+- uid: Agibuild.Fulora.JsExportAttribute
+  commentId: T:Agibuild.Fulora.JsExportAttribute
+  href: Agibuild.Fulora.JsExportAttribute.html
+  name: JsExportAttribute
+  nameWithType: JsExportAttribute
+  fullName: Agibuild.Fulora.JsExportAttribute
+- uid: Agibuild.Fulora.JsImportAttribute
+  commentId: T:Agibuild.Fulora.JsImportAttribute
+  href: Agibuild.Fulora.JsImportAttribute.html
+  name: JsImportAttribute
+  nameWithType: JsImportAttribute
+  fullName: Agibuild.Fulora.JsImportAttribute
+- uid: Agibuild.Fulora.WebViewCore.Bridge*
+  commentId: Overload:Agibuild.Fulora.WebViewCore.Bridge
+  href: Agibuild.Fulora.WebViewCore.html#Agibuild_Fulora_WebViewCore_Bridge
+  name: Bridge
+  nameWithType: WebViewCore.Bridge
+  fullName: Agibuild.Fulora.WebViewCore.Bridge
+- uid: Agibuild.Fulora.IBridgeService
+  commentId: T:Agibuild.Fulora.IBridgeService
+  parent: Agibuild.Fulora
+  href: Agibuild.Fulora.IBridgeService.html
+  name: IBridgeService
+  nameWithType: IBridgeService
+  fullName: Agibuild.Fulora.IBridgeService
+- uid: System.NotSupportedException
+  commentId: T:System.NotSupportedException
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.notsupportedexception
+  name: NotSupportedException
+  nameWithType: NotSupportedException
+  fullName: System.NotSupportedException
+- uid: Agibuild.Fulora.WebViewCore.CaptureScreenshotAsync*
+  commentId: Overload:Agibuild.Fulora.WebViewCore.CaptureScreenshotAsync
+  href: Agibuild.Fulora.WebViewCore.html#Agibuild_Fulora_WebViewCore_CaptureScreenshotAsync
+  name: CaptureScreenshotAsync
+  nameWithType: WebViewCore.CaptureScreenshotAsync
+  fullName: Agibuild.Fulora.WebViewCore.CaptureScreenshotAsync
+- uid: Agibuild.Fulora.IWebView.CaptureScreenshotAsync
+  commentId: M:Agibuild.Fulora.IWebView.CaptureScreenshotAsync
+  parent: Agibuild.Fulora.IWebView
+  href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_CaptureScreenshotAsync
+  name: CaptureScreenshotAsync()
+  nameWithType: IWebView.CaptureScreenshotAsync()
+  fullName: Agibuild.Fulora.IWebView.CaptureScreenshotAsync()
+  spec.csharp:
+  - uid: Agibuild.Fulora.IWebView.CaptureScreenshotAsync
+    name: CaptureScreenshotAsync
+    href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_CaptureScreenshotAsync
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: Agibuild.Fulora.IWebView.CaptureScreenshotAsync
+    name: CaptureScreenshotAsync
+    href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_CaptureScreenshotAsync
+  - name: (
+  - name: )
+- uid: System.Threading.Tasks.Task{System.Byte[]}
+  commentId: T:System.Threading.Tasks.Task{System.Byte[]}
+  parent: System.Threading.Tasks
+  definition: System.Threading.Tasks.Task`1
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<byte[]>
+  nameWithType: Task<byte[]>
+  fullName: System.Threading.Tasks.Task<byte[]>
+  nameWithType.vb: Task(Of Byte())
+  fullName.vb: System.Threading.Tasks.Task(Of Byte())
+  name.vb: Task(Of Byte())
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - uid: System.Byte
+    name: byte
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.byte
+  - name: '['
+  - name: ']'
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.Byte
+    name: Byte
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.byte
+  - name: (
+  - name: )
+  - name: )
+- uid: Agibuild.Fulora.WebViewCore.PrintToPdfAsync*
+  commentId: Overload:Agibuild.Fulora.WebViewCore.PrintToPdfAsync
+  href: Agibuild.Fulora.WebViewCore.html#Agibuild_Fulora_WebViewCore_PrintToPdfAsync_Agibuild_Fulora_PdfPrintOptions_
+  name: PrintToPdfAsync
+  nameWithType: WebViewCore.PrintToPdfAsync
+  fullName: Agibuild.Fulora.WebViewCore.PrintToPdfAsync
+- uid: Agibuild.Fulora.IWebView.PrintToPdfAsync(Agibuild.Fulora.PdfPrintOptions)
+  commentId: M:Agibuild.Fulora.IWebView.PrintToPdfAsync(Agibuild.Fulora.PdfPrintOptions)
+  parent: Agibuild.Fulora.IWebView
+  href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_PrintToPdfAsync_Agibuild_Fulora_PdfPrintOptions_
+  name: PrintToPdfAsync(PdfPrintOptions)
+  nameWithType: IWebView.PrintToPdfAsync(PdfPrintOptions)
+  fullName: Agibuild.Fulora.IWebView.PrintToPdfAsync(Agibuild.Fulora.PdfPrintOptions)
+  spec.csharp:
+  - uid: Agibuild.Fulora.IWebView.PrintToPdfAsync(Agibuild.Fulora.PdfPrintOptions)
+    name: PrintToPdfAsync
+    href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_PrintToPdfAsync_Agibuild_Fulora_PdfPrintOptions_
+  - name: (
+  - uid: Agibuild.Fulora.PdfPrintOptions
+    name: PdfPrintOptions
+    href: Agibuild.Fulora.PdfPrintOptions.html
+  - name: )
+  spec.vb:
+  - uid: Agibuild.Fulora.IWebView.PrintToPdfAsync(Agibuild.Fulora.PdfPrintOptions)
+    name: PrintToPdfAsync
+    href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_PrintToPdfAsync_Agibuild_Fulora_PdfPrintOptions_
+  - name: (
+  - uid: Agibuild.Fulora.PdfPrintOptions
+    name: PdfPrintOptions
+    href: Agibuild.Fulora.PdfPrintOptions.html
+  - name: )
+- uid: Agibuild.Fulora.PdfPrintOptions
+  commentId: T:Agibuild.Fulora.PdfPrintOptions
+  parent: Agibuild.Fulora
+  href: Agibuild.Fulora.PdfPrintOptions.html
+  name: PdfPrintOptions
+  nameWithType: PdfPrintOptions
+  fullName: Agibuild.Fulora.PdfPrintOptions
+- uid: System.EventHandler{System.Double}
+  commentId: T:System.EventHandler{System.Double}
+  parent: System
+  definition: System.EventHandler`1
+  href: https://learn.microsoft.com/dotnet/api/system.eventhandler-1
+  name: EventHandler<double>
+  nameWithType: EventHandler<double>
+  fullName: System.EventHandler<double>
+  nameWithType.vb: EventHandler(Of Double)
+  fullName.vb: System.EventHandler(Of Double)
+  name.vb: EventHandler(Of Double)
+  spec.csharp:
+  - uid: System.EventHandler`1
+    name: EventHandler
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.eventhandler-1
+  - name: <
+  - uid: System.Double
+    name: double
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.double
+  - name: '>'
+  spec.vb:
+  - uid: System.EventHandler`1
+    name: EventHandler
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.eventhandler-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.Double
+    name: Double
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.double
+  - name: )
+- uid: Agibuild.Fulora.WebViewCore.GetZoomFactorAsync*
+  commentId: Overload:Agibuild.Fulora.WebViewCore.GetZoomFactorAsync
+  href: Agibuild.Fulora.WebViewCore.html#Agibuild_Fulora_WebViewCore_GetZoomFactorAsync
+  name: GetZoomFactorAsync
+  nameWithType: WebViewCore.GetZoomFactorAsync
+  fullName: Agibuild.Fulora.WebViewCore.GetZoomFactorAsync
+- uid: Agibuild.Fulora.IWebView.GetZoomFactorAsync
+  commentId: M:Agibuild.Fulora.IWebView.GetZoomFactorAsync
+  parent: Agibuild.Fulora.IWebView
+  href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_GetZoomFactorAsync
+  name: GetZoomFactorAsync()
+  nameWithType: IWebView.GetZoomFactorAsync()
+  fullName: Agibuild.Fulora.IWebView.GetZoomFactorAsync()
+  spec.csharp:
+  - uid: Agibuild.Fulora.IWebView.GetZoomFactorAsync
+    name: GetZoomFactorAsync
+    href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_GetZoomFactorAsync
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: Agibuild.Fulora.IWebView.GetZoomFactorAsync
+    name: GetZoomFactorAsync
+    href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_GetZoomFactorAsync
+  - name: (
+  - name: )
+- uid: System.Threading.Tasks.Task{System.Double}
+  commentId: T:System.Threading.Tasks.Task{System.Double}
+  parent: System.Threading.Tasks
+  definition: System.Threading.Tasks.Task`1
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<double>
+  nameWithType: Task<double>
+  fullName: System.Threading.Tasks.Task<double>
+  nameWithType.vb: Task(Of Double)
+  fullName.vb: System.Threading.Tasks.Task(Of Double)
+  name.vb: Task(Of Double)
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - uid: System.Double
+    name: double
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.double
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.Double
+    name: Double
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.double
+  - name: )
+- uid: Agibuild.Fulora.WebViewCore.SetZoomFactorAsync*
+  commentId: Overload:Agibuild.Fulora.WebViewCore.SetZoomFactorAsync
+  href: Agibuild.Fulora.WebViewCore.html#Agibuild_Fulora_WebViewCore_SetZoomFactorAsync_System_Double_
+  name: SetZoomFactorAsync
+  nameWithType: WebViewCore.SetZoomFactorAsync
+  fullName: Agibuild.Fulora.WebViewCore.SetZoomFactorAsync
+- uid: Agibuild.Fulora.IWebView.SetZoomFactorAsync(System.Double)
+  commentId: M:Agibuild.Fulora.IWebView.SetZoomFactorAsync(System.Double)
+  parent: Agibuild.Fulora.IWebView
+  isExternal: true
+  href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_SetZoomFactorAsync_System_Double_
+  name: SetZoomFactorAsync(double)
+  nameWithType: IWebView.SetZoomFactorAsync(double)
+  fullName: Agibuild.Fulora.IWebView.SetZoomFactorAsync(double)
+  nameWithType.vb: IWebView.SetZoomFactorAsync(Double)
+  fullName.vb: Agibuild.Fulora.IWebView.SetZoomFactorAsync(Double)
+  name.vb: SetZoomFactorAsync(Double)
+  spec.csharp:
+  - uid: Agibuild.Fulora.IWebView.SetZoomFactorAsync(System.Double)
+    name: SetZoomFactorAsync
+    href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_SetZoomFactorAsync_System_Double_
+  - name: (
+  - uid: System.Double
+    name: double
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.double
+  - name: )
+  spec.vb:
+  - uid: Agibuild.Fulora.IWebView.SetZoomFactorAsync(System.Double)
+    name: SetZoomFactorAsync
+    href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_SetZoomFactorAsync_System_Double_
+  - name: (
+  - uid: System.Double
+    name: Double
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.double
+  - name: )
+- uid: System.Double
+  commentId: T:System.Double
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.double
+  name: double
+  nameWithType: double
+  fullName: double
+  nameWithType.vb: Double
+  fullName.vb: Double
+  name.vb: Double
+- uid: Agibuild.Fulora.IWebView.ContextMenuRequested
+  commentId: E:Agibuild.Fulora.IWebView.ContextMenuRequested
+  parent: Agibuild.Fulora.IWebView
+  href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_ContextMenuRequested
+  name: ContextMenuRequested
+  nameWithType: IWebView.ContextMenuRequested
+  fullName: Agibuild.Fulora.IWebView.ContextMenuRequested
+- uid: System.EventHandler{Agibuild.Fulora.ContextMenuRequestedEventArgs}
+  commentId: T:System.EventHandler{Agibuild.Fulora.ContextMenuRequestedEventArgs}
+  parent: System
+  definition: System.EventHandler`1
+  href: https://learn.microsoft.com/dotnet/api/system.eventhandler-1
+  name: EventHandler<ContextMenuRequestedEventArgs>
+  nameWithType: EventHandler<ContextMenuRequestedEventArgs>
+  fullName: System.EventHandler<Agibuild.Fulora.ContextMenuRequestedEventArgs>
+  nameWithType.vb: EventHandler(Of ContextMenuRequestedEventArgs)
+  fullName.vb: System.EventHandler(Of Agibuild.Fulora.ContextMenuRequestedEventArgs)
+  name.vb: EventHandler(Of ContextMenuRequestedEventArgs)
+  spec.csharp:
+  - uid: System.EventHandler`1
+    name: EventHandler
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.eventhandler-1
+  - name: <
+  - uid: Agibuild.Fulora.ContextMenuRequestedEventArgs
+    name: ContextMenuRequestedEventArgs
+    href: Agibuild.Fulora.ContextMenuRequestedEventArgs.html
+  - name: '>'
+  spec.vb:
+  - uid: System.EventHandler`1
+    name: EventHandler
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.eventhandler-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: Agibuild.Fulora.ContextMenuRequestedEventArgs
+    name: ContextMenuRequestedEventArgs
+    href: Agibuild.Fulora.ContextMenuRequestedEventArgs.html
+  - name: )
+- uid: Agibuild.Fulora.FindInPageResult
+  commentId: T:Agibuild.Fulora.FindInPageResult
+  href: Agibuild.Fulora.FindInPageResult.html
+  name: FindInPageResult
+  nameWithType: FindInPageResult
+  fullName: Agibuild.Fulora.FindInPageResult
+- uid: Agibuild.Fulora.Adapters.Abstractions.IFindInPageAdapter
+  commentId: T:Agibuild.Fulora.Adapters.Abstractions.IFindInPageAdapter
+  name: IFindInPageAdapter
+  nameWithType: IFindInPageAdapter
+  fullName: Agibuild.Fulora.Adapters.Abstractions.IFindInPageAdapter
+- uid: System.ArgumentException
+  commentId: T:System.ArgumentException
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.argumentexception
+  name: ArgumentException
+  nameWithType: ArgumentException
+  fullName: System.ArgumentException
+- uid: Agibuild.Fulora.WebViewCore.FindInPageAsync*
+  commentId: Overload:Agibuild.Fulora.WebViewCore.FindInPageAsync
+  href: Agibuild.Fulora.WebViewCore.html#Agibuild_Fulora_WebViewCore_FindInPageAsync_System_String_Agibuild_Fulora_FindInPageOptions_
+  name: FindInPageAsync
+  nameWithType: WebViewCore.FindInPageAsync
+  fullName: Agibuild.Fulora.WebViewCore.FindInPageAsync
+- uid: Agibuild.Fulora.IWebView.FindInPageAsync(System.String,Agibuild.Fulora.FindInPageOptions)
+  commentId: M:Agibuild.Fulora.IWebView.FindInPageAsync(System.String,Agibuild.Fulora.FindInPageOptions)
+  parent: Agibuild.Fulora.IWebView
+  isExternal: true
+  href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_FindInPageAsync_System_String_Agibuild_Fulora_FindInPageOptions_
+  name: FindInPageAsync(string, FindInPageOptions)
+  nameWithType: IWebView.FindInPageAsync(string, FindInPageOptions)
+  fullName: Agibuild.Fulora.IWebView.FindInPageAsync(string, Agibuild.Fulora.FindInPageOptions)
+  nameWithType.vb: IWebView.FindInPageAsync(String, FindInPageOptions)
+  fullName.vb: Agibuild.Fulora.IWebView.FindInPageAsync(String, Agibuild.Fulora.FindInPageOptions)
+  name.vb: FindInPageAsync(String, FindInPageOptions)
+  spec.csharp:
+  - uid: Agibuild.Fulora.IWebView.FindInPageAsync(System.String,Agibuild.Fulora.FindInPageOptions)
+    name: FindInPageAsync
+    href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_FindInPageAsync_System_String_Agibuild_Fulora_FindInPageOptions_
+  - name: (
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: Agibuild.Fulora.FindInPageOptions
+    name: FindInPageOptions
+    href: Agibuild.Fulora.FindInPageOptions.html
+  - name: )
+  spec.vb:
+  - uid: Agibuild.Fulora.IWebView.FindInPageAsync(System.String,Agibuild.Fulora.FindInPageOptions)
+    name: FindInPageAsync
+    href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_FindInPageAsync_System_String_Agibuild_Fulora_FindInPageOptions_
+  - name: (
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: Agibuild.Fulora.FindInPageOptions
+    name: FindInPageOptions
+    href: Agibuild.Fulora.FindInPageOptions.html
+  - name: )
+- uid: Agibuild.Fulora.FindInPageOptions
+  commentId: T:Agibuild.Fulora.FindInPageOptions
+  parent: Agibuild.Fulora
+  href: Agibuild.Fulora.FindInPageOptions.html
+  name: FindInPageOptions
+  nameWithType: FindInPageOptions
+  fullName: Agibuild.Fulora.FindInPageOptions
+- uid: System.Threading.Tasks.Task{Agibuild.Fulora.FindInPageResult}
+  commentId: T:System.Threading.Tasks.Task{Agibuild.Fulora.FindInPageResult}
+  parent: System.Threading.Tasks
+  definition: System.Threading.Tasks.Task`1
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<FindInPageResult>
+  nameWithType: Task<FindInPageResult>
+  fullName: System.Threading.Tasks.Task<Agibuild.Fulora.FindInPageResult>
+  nameWithType.vb: Task(Of FindInPageResult)
+  fullName.vb: System.Threading.Tasks.Task(Of Agibuild.Fulora.FindInPageResult)
+  name.vb: Task(Of FindInPageResult)
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - uid: Agibuild.Fulora.FindInPageResult
+    name: FindInPageResult
+    href: Agibuild.Fulora.FindInPageResult.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: Agibuild.Fulora.FindInPageResult
+    name: FindInPageResult
+    href: Agibuild.Fulora.FindInPageResult.html
+  - name: )
+- uid: Agibuild.Fulora.WebViewCore.StopFindInPageAsync*
+  commentId: Overload:Agibuild.Fulora.WebViewCore.StopFindInPageAsync
+  href: Agibuild.Fulora.WebViewCore.html#Agibuild_Fulora_WebViewCore_StopFindInPageAsync_System_Boolean_
+  name: StopFindInPageAsync
+  nameWithType: WebViewCore.StopFindInPageAsync
+  fullName: Agibuild.Fulora.WebViewCore.StopFindInPageAsync
+- uid: Agibuild.Fulora.IWebView.StopFindInPageAsync(System.Boolean)
+  commentId: M:Agibuild.Fulora.IWebView.StopFindInPageAsync(System.Boolean)
+  parent: Agibuild.Fulora.IWebView
+  isExternal: true
+  href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_StopFindInPageAsync_System_Boolean_
+  name: StopFindInPageAsync(bool)
+  nameWithType: IWebView.StopFindInPageAsync(bool)
+  fullName: Agibuild.Fulora.IWebView.StopFindInPageAsync(bool)
+  nameWithType.vb: IWebView.StopFindInPageAsync(Boolean)
+  fullName.vb: Agibuild.Fulora.IWebView.StopFindInPageAsync(Boolean)
+  name.vb: StopFindInPageAsync(Boolean)
+  spec.csharp:
+  - uid: Agibuild.Fulora.IWebView.StopFindInPageAsync(System.Boolean)
+    name: StopFindInPageAsync
+    href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_StopFindInPageAsync_System_Boolean_
+  - name: (
+  - uid: System.Boolean
+    name: bool
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.boolean
+  - name: )
+  spec.vb:
+  - uid: Agibuild.Fulora.IWebView.StopFindInPageAsync(System.Boolean)
+    name: StopFindInPageAsync
+    href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_StopFindInPageAsync_System_Boolean_
+  - name: (
+  - uid: System.Boolean
+    name: Boolean
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.boolean
+  - name: )
+- uid: Agibuild.Fulora.WebViewCore.RemovePreloadScriptAsync(System.String)
+  commentId: M:Agibuild.Fulora.WebViewCore.RemovePreloadScriptAsync(System.String)
+  isExternal: true
+  href: Agibuild.Fulora.WebViewCore.html#Agibuild_Fulora_WebViewCore_RemovePreloadScriptAsync_System_String_
+  name: RemovePreloadScriptAsync(string)
+  nameWithType: WebViewCore.RemovePreloadScriptAsync(string)
+  fullName: Agibuild.Fulora.WebViewCore.RemovePreloadScriptAsync(string)
+  nameWithType.vb: WebViewCore.RemovePreloadScriptAsync(String)
+  fullName.vb: Agibuild.Fulora.WebViewCore.RemovePreloadScriptAsync(String)
+  name.vb: RemovePreloadScriptAsync(String)
+  spec.csharp:
+  - uid: Agibuild.Fulora.WebViewCore.RemovePreloadScriptAsync(System.String)
+    name: RemovePreloadScriptAsync
+    href: Agibuild.Fulora.WebViewCore.html#Agibuild_Fulora_WebViewCore_RemovePreloadScriptAsync_System_String_
+  - name: (
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+  spec.vb:
+  - uid: Agibuild.Fulora.WebViewCore.RemovePreloadScriptAsync(System.String)
+    name: RemovePreloadScriptAsync
+    href: Agibuild.Fulora.WebViewCore.html#Agibuild_Fulora_WebViewCore_RemovePreloadScriptAsync_System_String_
+  - name: (
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+- uid: Agibuild.Fulora.Adapters.Abstractions.IPreloadScriptAdapter
+  commentId: T:Agibuild.Fulora.Adapters.Abstractions.IPreloadScriptAdapter
+  name: IPreloadScriptAdapter
+  nameWithType: IPreloadScriptAdapter
+  fullName: Agibuild.Fulora.Adapters.Abstractions.IPreloadScriptAdapter
+- uid: Agibuild.Fulora.WebViewCore.AddPreloadScriptAsync*
+  commentId: Overload:Agibuild.Fulora.WebViewCore.AddPreloadScriptAsync
+  href: Agibuild.Fulora.WebViewCore.html#Agibuild_Fulora_WebViewCore_AddPreloadScriptAsync_System_String_
+  name: AddPreloadScriptAsync
+  nameWithType: WebViewCore.AddPreloadScriptAsync
+  fullName: Agibuild.Fulora.WebViewCore.AddPreloadScriptAsync
+- uid: Agibuild.Fulora.IWebView.AddPreloadScriptAsync(System.String)
+  commentId: M:Agibuild.Fulora.IWebView.AddPreloadScriptAsync(System.String)
+  parent: Agibuild.Fulora.IWebView
+  isExternal: true
+  href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_AddPreloadScriptAsync_System_String_
+  name: AddPreloadScriptAsync(string)
+  nameWithType: IWebView.AddPreloadScriptAsync(string)
+  fullName: Agibuild.Fulora.IWebView.AddPreloadScriptAsync(string)
+  nameWithType.vb: IWebView.AddPreloadScriptAsync(String)
+  fullName.vb: Agibuild.Fulora.IWebView.AddPreloadScriptAsync(String)
+  name.vb: AddPreloadScriptAsync(String)
+  spec.csharp:
+  - uid: Agibuild.Fulora.IWebView.AddPreloadScriptAsync(System.String)
+    name: AddPreloadScriptAsync
+    href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_AddPreloadScriptAsync_System_String_
+  - name: (
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+  spec.vb:
+  - uid: Agibuild.Fulora.IWebView.AddPreloadScriptAsync(System.String)
+    name: AddPreloadScriptAsync
+    href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_AddPreloadScriptAsync_System_String_
+  - name: (
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+- uid: Agibuild.Fulora.WebViewCore.AddPreloadScriptAsync(System.String)
+  commentId: M:Agibuild.Fulora.WebViewCore.AddPreloadScriptAsync(System.String)
+  isExternal: true
+  href: Agibuild.Fulora.WebViewCore.html#Agibuild_Fulora_WebViewCore_AddPreloadScriptAsync_System_String_
+  name: AddPreloadScriptAsync(string)
+  nameWithType: WebViewCore.AddPreloadScriptAsync(string)
+  fullName: Agibuild.Fulora.WebViewCore.AddPreloadScriptAsync(string)
+  nameWithType.vb: WebViewCore.AddPreloadScriptAsync(String)
+  fullName.vb: Agibuild.Fulora.WebViewCore.AddPreloadScriptAsync(String)
+  name.vb: AddPreloadScriptAsync(String)
+  spec.csharp:
+  - uid: Agibuild.Fulora.WebViewCore.AddPreloadScriptAsync(System.String)
+    name: AddPreloadScriptAsync
+    href: Agibuild.Fulora.WebViewCore.html#Agibuild_Fulora_WebViewCore_AddPreloadScriptAsync_System_String_
+  - name: (
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+  spec.vb:
+  - uid: Agibuild.Fulora.WebViewCore.AddPreloadScriptAsync(System.String)
+    name: AddPreloadScriptAsync
+    href: Agibuild.Fulora.WebViewCore.html#Agibuild_Fulora_WebViewCore_AddPreloadScriptAsync_System_String_
+  - name: (
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+- uid: Agibuild.Fulora.WebViewCore.RemovePreloadScriptAsync*
+  commentId: Overload:Agibuild.Fulora.WebViewCore.RemovePreloadScriptAsync
+  href: Agibuild.Fulora.WebViewCore.html#Agibuild_Fulora_WebViewCore_RemovePreloadScriptAsync_System_String_
+  name: RemovePreloadScriptAsync
+  nameWithType: WebViewCore.RemovePreloadScriptAsync
+  fullName: Agibuild.Fulora.WebViewCore.RemovePreloadScriptAsync
+- uid: Agibuild.Fulora.IWebView.RemovePreloadScriptAsync(System.String)
+  commentId: M:Agibuild.Fulora.IWebView.RemovePreloadScriptAsync(System.String)
+  parent: Agibuild.Fulora.IWebView
+  isExternal: true
+  href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_RemovePreloadScriptAsync_System_String_
+  name: RemovePreloadScriptAsync(string)
+  nameWithType: IWebView.RemovePreloadScriptAsync(string)
+  fullName: Agibuild.Fulora.IWebView.RemovePreloadScriptAsync(string)
+  nameWithType.vb: IWebView.RemovePreloadScriptAsync(String)
+  fullName.vb: Agibuild.Fulora.IWebView.RemovePreloadScriptAsync(String)
+  name.vb: RemovePreloadScriptAsync(String)
+  spec.csharp:
+  - uid: Agibuild.Fulora.IWebView.RemovePreloadScriptAsync(System.String)
+    name: RemovePreloadScriptAsync
+    href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_RemovePreloadScriptAsync_System_String_
+  - name: (
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+  spec.vb:
+  - uid: Agibuild.Fulora.IWebView.RemovePreloadScriptAsync(System.String)
+    name: RemovePreloadScriptAsync
+    href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_RemovePreloadScriptAsync_System_String_
+  - name: (
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+- uid: Agibuild.Fulora.WebViewCore.TryGetWebViewHandleAsync*
+  commentId: Overload:Agibuild.Fulora.WebViewCore.TryGetWebViewHandleAsync
+  href: Agibuild.Fulora.WebViewCore.html#Agibuild_Fulora_WebViewCore_TryGetWebViewHandleAsync
+  name: TryGetWebViewHandleAsync
+  nameWithType: WebViewCore.TryGetWebViewHandleAsync
+  fullName: Agibuild.Fulora.WebViewCore.TryGetWebViewHandleAsync
+- uid: Agibuild.Fulora.IWebView.TryGetWebViewHandleAsync
+  commentId: M:Agibuild.Fulora.IWebView.TryGetWebViewHandleAsync
+  parent: Agibuild.Fulora.IWebView
+  href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_TryGetWebViewHandleAsync
+  name: TryGetWebViewHandleAsync()
+  nameWithType: IWebView.TryGetWebViewHandleAsync()
+  fullName: Agibuild.Fulora.IWebView.TryGetWebViewHandleAsync()
+  spec.csharp:
+  - uid: Agibuild.Fulora.IWebView.TryGetWebViewHandleAsync
+    name: TryGetWebViewHandleAsync
+    href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_TryGetWebViewHandleAsync
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: Agibuild.Fulora.IWebView.TryGetWebViewHandleAsync
+    name: TryGetWebViewHandleAsync
+    href: Agibuild.Fulora.IWebView.html#Agibuild_Fulora_IWebView_TryGetWebViewHandleAsync
+  - name: (
+  - name: )
+- uid: System.Threading.Tasks.Task{Agibuild.Fulora.INativeHandle}
+  commentId: T:System.Threading.Tasks.Task{Agibuild.Fulora.INativeHandle}
+  parent: System.Threading.Tasks
+  definition: System.Threading.Tasks.Task`1
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<INativeHandle>
+  nameWithType: Task<INativeHandle>
+  fullName: System.Threading.Tasks.Task<Agibuild.Fulora.INativeHandle>
+  nameWithType.vb: Task(Of INativeHandle)
+  fullName.vb: System.Threading.Tasks.Task(Of Agibuild.Fulora.INativeHandle)
+  name.vb: Task(Of INativeHandle)
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - uid: Agibuild.Fulora.INativeHandle
+    name: INativeHandle
+    href: Agibuild.Fulora.INativeHandle.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: Agibuild.Fulora.INativeHandle
+    name: INativeHandle
+    href: Agibuild.Fulora.INativeHandle.html
+  - name: )
+- uid: Agibuild.Fulora.WebViewCore.TryGetWebViewHandleAsync
+  commentId: M:Agibuild.Fulora.WebViewCore.TryGetWebViewHandleAsync
+  href: Agibuild.Fulora.WebViewCore.html#Agibuild_Fulora_WebViewCore_TryGetWebViewHandleAsync
+  name: TryGetWebViewHandleAsync()
+  nameWithType: WebViewCore.TryGetWebViewHandleAsync()
+  fullName: Agibuild.Fulora.WebViewCore.TryGetWebViewHandleAsync()
+  spec.csharp:
+  - uid: Agibuild.Fulora.WebViewCore.TryGetWebViewHandleAsync
+    name: TryGetWebViewHandleAsync
+    href: Agibuild.Fulora.WebViewCore.html#Agibuild_Fulora_WebViewCore_TryGetWebViewHandleAsync
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: Agibuild.Fulora.WebViewCore.TryGetWebViewHandleAsync
+    name: TryGetWebViewHandleAsync
+    href: Agibuild.Fulora.WebViewCore.html#Agibuild_Fulora_WebViewCore_TryGetWebViewHandleAsync
+  - name: (
+  - name: )
+- uid: Agibuild.Fulora.WebViewCore.TryGetWebViewHandle*
+  commentId: Overload:Agibuild.Fulora.WebViewCore.TryGetWebViewHandle
+  href: Agibuild.Fulora.WebViewCore.html#Agibuild_Fulora_WebViewCore_TryGetWebViewHandle
+  name: TryGetWebViewHandle
+  nameWithType: WebViewCore.TryGetWebViewHandle
+  fullName: Agibuild.Fulora.WebViewCore.TryGetWebViewHandle
+- uid: Agibuild.Fulora.INativeHandle
+  commentId: T:Agibuild.Fulora.INativeHandle
+  parent: Agibuild.Fulora
+  href: Agibuild.Fulora.INativeHandle.html
+  name: INativeHandle
+  nameWithType: INativeHandle
+  fullName: Agibuild.Fulora.INativeHandle
+- uid: Agibuild.Fulora.WebViewCore.SetCustomUserAgent*
+  commentId: Overload:Agibuild.Fulora.WebViewCore.SetCustomUserAgent
+  href: Agibuild.Fulora.WebViewCore.html#Agibuild_Fulora_WebViewCore_SetCustomUserAgent_System_String_
+  name: SetCustomUserAgent
+  nameWithType: WebViewCore.SetCustomUserAgent
+  fullName: Agibuild.Fulora.WebViewCore.SetCustomUserAgent
+- uid: Agibuild.Fulora.WebViewCore.EnableWebMessageBridge*
+  commentId: Overload:Agibuild.Fulora.WebViewCore.EnableWebMessageBridge
+  href: Agibuild.Fulora.WebViewCore.html#Agibuild_Fulora_WebViewCore_EnableWebMessageBridge_Agibuild_Fulora_WebMessageBridgeOptions_
+  name: EnableWebMessageBridge
+  nameWithType: WebViewCore.EnableWebMessageBridge
+  fullName: Agibuild.Fulora.WebViewCore.EnableWebMessageBridge
+- uid: Agibuild.Fulora.WebMessageBridgeOptions
+  commentId: T:Agibuild.Fulora.WebMessageBridgeOptions
+  parent: Agibuild.Fulora
+  href: Agibuild.Fulora.WebMessageBridgeOptions.html
+  name: WebMessageBridgeOptions
+  nameWithType: WebMessageBridgeOptions
+  fullName: Agibuild.Fulora.WebMessageBridgeOptions
+- uid: Agibuild.Fulora.WebViewCore.DisableWebMessageBridge*
+  commentId: Overload:Agibuild.Fulora.WebViewCore.DisableWebMessageBridge
+  href: Agibuild.Fulora.WebViewCore.html#Agibuild_Fulora_WebViewCore_DisableWebMessageBridge
+  name: DisableWebMessageBridge
+  nameWithType: WebViewCore.DisableWebMessageBridge
+  fullName: Agibuild.Fulora.WebViewCore.DisableWebMessageBridge
+- uid: Agibuild.Fulora.WebViewCore.EnableSpaHosting*
+  commentId: Overload:Agibuild.Fulora.WebViewCore.EnableSpaHosting
+  href: Agibuild.Fulora.WebViewCore.html#Agibuild_Fulora_WebViewCore_EnableSpaHosting_Agibuild_Fulora_SpaHostingOptions_
+  name: EnableSpaHosting
+  nameWithType: WebViewCore.EnableSpaHosting
+  fullName: Agibuild.Fulora.WebViewCore.EnableSpaHosting
+- uid: Agibuild.Fulora.SpaHostingOptions
+  commentId: T:Agibuild.Fulora.SpaHostingOptions
+  parent: Agibuild.Fulora
+  href: Agibuild.Fulora.SpaHostingOptions.html
+  name: SpaHostingOptions
+  nameWithType: SpaHostingOptions
+  fullName: Agibuild.Fulora.SpaHostingOptions

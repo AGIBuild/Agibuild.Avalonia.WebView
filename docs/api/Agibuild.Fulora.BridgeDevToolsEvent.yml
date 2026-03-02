@@ -1,0 +1,886 @@
+### YamlMime:ManagedReference
+items:
+- uid: Agibuild.Fulora.BridgeDevToolsEvent
+  commentId: T:Agibuild.Fulora.BridgeDevToolsEvent
+  id: BridgeDevToolsEvent
+  parent: Agibuild.Fulora
+  children:
+  - Agibuild.Fulora.BridgeDevToolsEvent.Direction
+  - Agibuild.Fulora.BridgeDevToolsEvent.ElapsedMs
+  - Agibuild.Fulora.BridgeDevToolsEvent.ErrorMessage
+  - Agibuild.Fulora.BridgeDevToolsEvent.Id
+  - Agibuild.Fulora.BridgeDevToolsEvent.MethodName
+  - Agibuild.Fulora.BridgeDevToolsEvent.ParamsJson
+  - Agibuild.Fulora.BridgeDevToolsEvent.Phase
+  - Agibuild.Fulora.BridgeDevToolsEvent.ResultJson
+  - Agibuild.Fulora.BridgeDevToolsEvent.ServiceName
+  - Agibuild.Fulora.BridgeDevToolsEvent.Timestamp
+  - Agibuild.Fulora.BridgeDevToolsEvent.Truncated
+  langs:
+  - csharp
+  - vb
+  name: BridgeDevToolsEvent
+  nameWithType: BridgeDevToolsEvent
+  fullName: Agibuild.Fulora.BridgeDevToolsEvent
+  type: Class
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/BridgeDevToolsEvent.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: BridgeDevToolsEvent
+    path: ../src/Agibuild.Fulora.Core/BridgeDevToolsEvent.cs
+    startLine: 7
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Represents a single bridge call event captured for the DevTools panel.
+  example: []
+  syntax:
+    content: 'public sealed record BridgeDevToolsEvent : IEquatable<BridgeDevToolsEvent>'
+    content.vb: Public NotInheritable Class BridgeDevToolsEvent Implements IEquatable(Of BridgeDevToolsEvent)
+  inheritance:
+  - System.Object
+  implements:
+  - System.IEquatable{Agibuild.Fulora.BridgeDevToolsEvent}
+  inheritedMembers:
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.GetHashCode
+  - System.Object.GetType
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.ToString
+- uid: Agibuild.Fulora.BridgeDevToolsEvent.Id
+  commentId: P:Agibuild.Fulora.BridgeDevToolsEvent.Id
+  id: Id
+  parent: Agibuild.Fulora.BridgeDevToolsEvent
+  langs:
+  - csharp
+  - vb
+  name: Id
+  nameWithType: BridgeDevToolsEvent.Id
+  fullName: Agibuild.Fulora.BridgeDevToolsEvent.Id
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/BridgeDevToolsEvent.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Id
+    path: ../src/Agibuild.Fulora.Core/BridgeDevToolsEvent.cs
+    startLine: 10
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Monotonically increasing event ID within the collector session.
+  example: []
+  syntax:
+    content: public long Id { get; init; }
+    parameters: []
+    return:
+      type: System.Int64
+    content.vb: Public Property Id As Long
+  overload: Agibuild.Fulora.BridgeDevToolsEvent.Id*
+- uid: Agibuild.Fulora.BridgeDevToolsEvent.Timestamp
+  commentId: P:Agibuild.Fulora.BridgeDevToolsEvent.Timestamp
+  id: Timestamp
+  parent: Agibuild.Fulora.BridgeDevToolsEvent
+  langs:
+  - csharp
+  - vb
+  name: Timestamp
+  nameWithType: BridgeDevToolsEvent.Timestamp
+  fullName: Agibuild.Fulora.BridgeDevToolsEvent.Timestamp
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/BridgeDevToolsEvent.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Timestamp
+    path: ../src/Agibuild.Fulora.Core/BridgeDevToolsEvent.cs
+    startLine: 13
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: UTC timestamp when the event was recorded.
+  example: []
+  syntax:
+    content: public DateTimeOffset Timestamp { get; init; }
+    parameters: []
+    return:
+      type: System.DateTimeOffset
+    content.vb: Public Property Timestamp As DateTimeOffset
+  overload: Agibuild.Fulora.BridgeDevToolsEvent.Timestamp*
+- uid: Agibuild.Fulora.BridgeDevToolsEvent.Direction
+  commentId: P:Agibuild.Fulora.BridgeDevToolsEvent.Direction
+  id: Direction
+  parent: Agibuild.Fulora.BridgeDevToolsEvent
+  langs:
+  - csharp
+  - vb
+  name: Direction
+  nameWithType: BridgeDevToolsEvent.Direction
+  fullName: Agibuild.Fulora.BridgeDevToolsEvent.Direction
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/BridgeDevToolsEvent.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Direction
+    path: ../src/Agibuild.Fulora.Core/BridgeDevToolsEvent.cs
+    startLine: 16
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: 'Call direction: Export (JS→C#) or Import (C#→JS).'
+  example: []
+  syntax:
+    content: >-
+      [JsonConverter(typeof(JsonStringEnumConverter))]
+
+      public BridgeCallDirection Direction { get; init; }
+    parameters: []
+    return:
+      type: Agibuild.Fulora.BridgeCallDirection
+    content.vb: >-
+      <JsonConverter(GetType(JsonStringEnumConverter))>
+
+      Public Property Direction As BridgeCallDirection
+  overload: Agibuild.Fulora.BridgeDevToolsEvent.Direction*
+  attributes:
+  - type: System.Text.Json.Serialization.JsonConverterAttribute
+    ctor: System.Text.Json.Serialization.JsonConverterAttribute.#ctor(System.Type)
+    arguments:
+    - type: System.Type
+      value: System.Text.Json.Serialization.JsonStringEnumConverter
+- uid: Agibuild.Fulora.BridgeDevToolsEvent.Phase
+  commentId: P:Agibuild.Fulora.BridgeDevToolsEvent.Phase
+  id: Phase
+  parent: Agibuild.Fulora.BridgeDevToolsEvent
+  langs:
+  - csharp
+  - vb
+  name: Phase
+  nameWithType: BridgeDevToolsEvent.Phase
+  fullName: Agibuild.Fulora.BridgeDevToolsEvent.Phase
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/BridgeDevToolsEvent.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Phase
+    path: ../src/Agibuild.Fulora.Core/BridgeDevToolsEvent.cs
+    startLine: 20
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Bridge lifecycle phase.
+  example: []
+  syntax:
+    content: >-
+      [JsonConverter(typeof(JsonStringEnumConverter))]
+
+      public BridgeCallPhase Phase { get; init; }
+    parameters: []
+    return:
+      type: Agibuild.Fulora.BridgeCallPhase
+    content.vb: >-
+      <JsonConverter(GetType(JsonStringEnumConverter))>
+
+      Public Property Phase As BridgeCallPhase
+  overload: Agibuild.Fulora.BridgeDevToolsEvent.Phase*
+  attributes:
+  - type: System.Text.Json.Serialization.JsonConverterAttribute
+    ctor: System.Text.Json.Serialization.JsonConverterAttribute.#ctor(System.Type)
+    arguments:
+    - type: System.Type
+      value: System.Text.Json.Serialization.JsonStringEnumConverter
+- uid: Agibuild.Fulora.BridgeDevToolsEvent.ServiceName
+  commentId: P:Agibuild.Fulora.BridgeDevToolsEvent.ServiceName
+  id: ServiceName
+  parent: Agibuild.Fulora.BridgeDevToolsEvent
+  langs:
+  - csharp
+  - vb
+  name: ServiceName
+  nameWithType: BridgeDevToolsEvent.ServiceName
+  fullName: Agibuild.Fulora.BridgeDevToolsEvent.ServiceName
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/BridgeDevToolsEvent.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: ServiceName
+    path: ../src/Agibuild.Fulora.Core/BridgeDevToolsEvent.cs
+    startLine: 24
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Service name (e.g. "AppService").
+  example: []
+  syntax:
+    content: public string ServiceName { get; init; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property ServiceName As String
+  overload: Agibuild.Fulora.BridgeDevToolsEvent.ServiceName*
+- uid: Agibuild.Fulora.BridgeDevToolsEvent.MethodName
+  commentId: P:Agibuild.Fulora.BridgeDevToolsEvent.MethodName
+  id: MethodName
+  parent: Agibuild.Fulora.BridgeDevToolsEvent
+  langs:
+  - csharp
+  - vb
+  name: MethodName
+  nameWithType: BridgeDevToolsEvent.MethodName
+  fullName: Agibuild.Fulora.BridgeDevToolsEvent.MethodName
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/BridgeDevToolsEvent.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: MethodName
+    path: ../src/Agibuild.Fulora.Core/BridgeDevToolsEvent.cs
+    startLine: 27
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Method name (e.g. "getCurrentUser").
+  example: []
+  syntax:
+    content: public string MethodName { get; init; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property MethodName As String
+  overload: Agibuild.Fulora.BridgeDevToolsEvent.MethodName*
+- uid: Agibuild.Fulora.BridgeDevToolsEvent.ParamsJson
+  commentId: P:Agibuild.Fulora.BridgeDevToolsEvent.ParamsJson
+  id: ParamsJson
+  parent: Agibuild.Fulora.BridgeDevToolsEvent
+  langs:
+  - csharp
+  - vb
+  name: ParamsJson
+  nameWithType: BridgeDevToolsEvent.ParamsJson
+  fullName: Agibuild.Fulora.BridgeDevToolsEvent.ParamsJson
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/BridgeDevToolsEvent.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: ParamsJson
+    path: ../src/Agibuild.Fulora.Core/BridgeDevToolsEvent.cs
+    startLine: 30
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Serialized params JSON (truncated if larger than threshold).
+  example: []
+  syntax:
+    content: public string? ParamsJson { get; init; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property ParamsJson As String
+  overload: Agibuild.Fulora.BridgeDevToolsEvent.ParamsJson*
+- uid: Agibuild.Fulora.BridgeDevToolsEvent.ResultJson
+  commentId: P:Agibuild.Fulora.BridgeDevToolsEvent.ResultJson
+  id: ResultJson
+  parent: Agibuild.Fulora.BridgeDevToolsEvent
+  langs:
+  - csharp
+  - vb
+  name: ResultJson
+  nameWithType: BridgeDevToolsEvent.ResultJson
+  fullName: Agibuild.Fulora.BridgeDevToolsEvent.ResultJson
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/BridgeDevToolsEvent.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: ResultJson
+    path: ../src/Agibuild.Fulora.Core/BridgeDevToolsEvent.cs
+    startLine: 33
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Result type name or serialized result (truncated).
+  example: []
+  syntax:
+    content: public string? ResultJson { get; init; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property ResultJson As String
+  overload: Agibuild.Fulora.BridgeDevToolsEvent.ResultJson*
+- uid: Agibuild.Fulora.BridgeDevToolsEvent.ErrorMessage
+  commentId: P:Agibuild.Fulora.BridgeDevToolsEvent.ErrorMessage
+  id: ErrorMessage
+  parent: Agibuild.Fulora.BridgeDevToolsEvent
+  langs:
+  - csharp
+  - vb
+  name: ErrorMessage
+  nameWithType: BridgeDevToolsEvent.ErrorMessage
+  fullName: Agibuild.Fulora.BridgeDevToolsEvent.ErrorMessage
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/BridgeDevToolsEvent.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: ErrorMessage
+    path: ../src/Agibuild.Fulora.Core/BridgeDevToolsEvent.cs
+    startLine: 36
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Error message if the call failed.
+  example: []
+  syntax:
+    content: public string? ErrorMessage { get; init; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property ErrorMessage As String
+  overload: Agibuild.Fulora.BridgeDevToolsEvent.ErrorMessage*
+- uid: Agibuild.Fulora.BridgeDevToolsEvent.ElapsedMs
+  commentId: P:Agibuild.Fulora.BridgeDevToolsEvent.ElapsedMs
+  id: ElapsedMs
+  parent: Agibuild.Fulora.BridgeDevToolsEvent
+  langs:
+  - csharp
+  - vb
+  name: ElapsedMs
+  nameWithType: BridgeDevToolsEvent.ElapsedMs
+  fullName: Agibuild.Fulora.BridgeDevToolsEvent.ElapsedMs
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/BridgeDevToolsEvent.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: ElapsedMs
+    path: ../src/Agibuild.Fulora.Core/BridgeDevToolsEvent.cs
+    startLine: 39
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Elapsed time in milliseconds (only for End/Error phases).
+  example: []
+  syntax:
+    content: public long? ElapsedMs { get; init; }
+    parameters: []
+    return:
+      type: System.Nullable{System.Int64}
+    content.vb: Public Property ElapsedMs As Long?
+  overload: Agibuild.Fulora.BridgeDevToolsEvent.ElapsedMs*
+- uid: Agibuild.Fulora.BridgeDevToolsEvent.Truncated
+  commentId: P:Agibuild.Fulora.BridgeDevToolsEvent.Truncated
+  id: Truncated
+  parent: Agibuild.Fulora.BridgeDevToolsEvent
+  langs:
+  - csharp
+  - vb
+  name: Truncated
+  nameWithType: BridgeDevToolsEvent.Truncated
+  fullName: Agibuild.Fulora.BridgeDevToolsEvent.Truncated
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/BridgeDevToolsEvent.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Truncated
+    path: ../src/Agibuild.Fulora.Core/BridgeDevToolsEvent.cs
+    startLine: 42
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: True if the payload was truncated to fit the buffer threshold.
+  example: []
+  syntax:
+    content: public bool Truncated { get; init; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property Truncated As Boolean
+  overload: Agibuild.Fulora.BridgeDevToolsEvent.Truncated*
+references:
+- uid: Agibuild.Fulora
+  commentId: N:Agibuild.Fulora
+  href: Agibuild.html
+  name: Agibuild.Fulora
+  nameWithType: Agibuild.Fulora
+  fullName: Agibuild.Fulora
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.IEquatable{Agibuild.Fulora.BridgeDevToolsEvent}
+  commentId: T:System.IEquatable{Agibuild.Fulora.BridgeDevToolsEvent}
+  parent: System
+  definition: System.IEquatable`1
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  name: IEquatable<BridgeDevToolsEvent>
+  nameWithType: IEquatable<BridgeDevToolsEvent>
+  fullName: System.IEquatable<Agibuild.Fulora.BridgeDevToolsEvent>
+  nameWithType.vb: IEquatable(Of BridgeDevToolsEvent)
+  fullName.vb: System.IEquatable(Of Agibuild.Fulora.BridgeDevToolsEvent)
+  name.vb: IEquatable(Of BridgeDevToolsEvent)
+  spec.csharp:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: <
+  - uid: Agibuild.Fulora.BridgeDevToolsEvent
+    name: BridgeDevToolsEvent
+    href: Agibuild.Fulora.BridgeDevToolsEvent.html
+  - name: '>'
+  spec.vb:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: Agibuild.Fulora.BridgeDevToolsEvent
+    name: BridgeDevToolsEvent
+    href: Agibuild.Fulora.BridgeDevToolsEvent.html
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: System.IEquatable`1
+  commentId: T:System.IEquatable`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  name: IEquatable<T>
+  nameWithType: IEquatable<T>
+  fullName: System.IEquatable<T>
+  nameWithType.vb: IEquatable(Of T)
+  fullName.vb: System.IEquatable(Of T)
+  name.vb: IEquatable(Of T)
+  spec.csharp:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: Agibuild.Fulora.BridgeDevToolsEvent.Id*
+  commentId: Overload:Agibuild.Fulora.BridgeDevToolsEvent.Id
+  href: Agibuild.Fulora.BridgeDevToolsEvent.html#Agibuild_Fulora_BridgeDevToolsEvent_Id
+  name: Id
+  nameWithType: BridgeDevToolsEvent.Id
+  fullName: Agibuild.Fulora.BridgeDevToolsEvent.Id
+- uid: System.Int64
+  commentId: T:System.Int64
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int64
+  name: long
+  nameWithType: long
+  fullName: long
+  nameWithType.vb: Long
+  fullName.vb: Long
+  name.vb: Long
+- uid: Agibuild.Fulora.BridgeDevToolsEvent.Timestamp*
+  commentId: Overload:Agibuild.Fulora.BridgeDevToolsEvent.Timestamp
+  href: Agibuild.Fulora.BridgeDevToolsEvent.html#Agibuild_Fulora_BridgeDevToolsEvent_Timestamp
+  name: Timestamp
+  nameWithType: BridgeDevToolsEvent.Timestamp
+  fullName: Agibuild.Fulora.BridgeDevToolsEvent.Timestamp
+- uid: System.DateTimeOffset
+  commentId: T:System.DateTimeOffset
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.datetimeoffset
+  name: DateTimeOffset
+  nameWithType: DateTimeOffset
+  fullName: System.DateTimeOffset
+- uid: Agibuild.Fulora.BridgeDevToolsEvent.Direction*
+  commentId: Overload:Agibuild.Fulora.BridgeDevToolsEvent.Direction
+  href: Agibuild.Fulora.BridgeDevToolsEvent.html#Agibuild_Fulora_BridgeDevToolsEvent_Direction
+  name: Direction
+  nameWithType: BridgeDevToolsEvent.Direction
+  fullName: Agibuild.Fulora.BridgeDevToolsEvent.Direction
+- uid: Agibuild.Fulora.BridgeCallDirection
+  commentId: T:Agibuild.Fulora.BridgeCallDirection
+  parent: Agibuild.Fulora
+  href: Agibuild.Fulora.BridgeCallDirection.html
+  name: BridgeCallDirection
+  nameWithType: BridgeCallDirection
+  fullName: Agibuild.Fulora.BridgeCallDirection
+- uid: Agibuild.Fulora.BridgeDevToolsEvent.Phase*
+  commentId: Overload:Agibuild.Fulora.BridgeDevToolsEvent.Phase
+  href: Agibuild.Fulora.BridgeDevToolsEvent.html#Agibuild_Fulora_BridgeDevToolsEvent_Phase
+  name: Phase
+  nameWithType: BridgeDevToolsEvent.Phase
+  fullName: Agibuild.Fulora.BridgeDevToolsEvent.Phase
+- uid: Agibuild.Fulora.BridgeCallPhase
+  commentId: T:Agibuild.Fulora.BridgeCallPhase
+  parent: Agibuild.Fulora
+  href: Agibuild.Fulora.BridgeCallPhase.html
+  name: BridgeCallPhase
+  nameWithType: BridgeCallPhase
+  fullName: Agibuild.Fulora.BridgeCallPhase
+- uid: Agibuild.Fulora.BridgeDevToolsEvent.ServiceName*
+  commentId: Overload:Agibuild.Fulora.BridgeDevToolsEvent.ServiceName
+  href: Agibuild.Fulora.BridgeDevToolsEvent.html#Agibuild_Fulora_BridgeDevToolsEvent_ServiceName
+  name: ServiceName
+  nameWithType: BridgeDevToolsEvent.ServiceName
+  fullName: Agibuild.Fulora.BridgeDevToolsEvent.ServiceName
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: Agibuild.Fulora.BridgeDevToolsEvent.MethodName*
+  commentId: Overload:Agibuild.Fulora.BridgeDevToolsEvent.MethodName
+  href: Agibuild.Fulora.BridgeDevToolsEvent.html#Agibuild_Fulora_BridgeDevToolsEvent_MethodName
+  name: MethodName
+  nameWithType: BridgeDevToolsEvent.MethodName
+  fullName: Agibuild.Fulora.BridgeDevToolsEvent.MethodName
+- uid: Agibuild.Fulora.BridgeDevToolsEvent.ParamsJson*
+  commentId: Overload:Agibuild.Fulora.BridgeDevToolsEvent.ParamsJson
+  href: Agibuild.Fulora.BridgeDevToolsEvent.html#Agibuild_Fulora_BridgeDevToolsEvent_ParamsJson
+  name: ParamsJson
+  nameWithType: BridgeDevToolsEvent.ParamsJson
+  fullName: Agibuild.Fulora.BridgeDevToolsEvent.ParamsJson
+- uid: Agibuild.Fulora.BridgeDevToolsEvent.ResultJson*
+  commentId: Overload:Agibuild.Fulora.BridgeDevToolsEvent.ResultJson
+  href: Agibuild.Fulora.BridgeDevToolsEvent.html#Agibuild_Fulora_BridgeDevToolsEvent_ResultJson
+  name: ResultJson
+  nameWithType: BridgeDevToolsEvent.ResultJson
+  fullName: Agibuild.Fulora.BridgeDevToolsEvent.ResultJson
+- uid: Agibuild.Fulora.BridgeDevToolsEvent.ErrorMessage*
+  commentId: Overload:Agibuild.Fulora.BridgeDevToolsEvent.ErrorMessage
+  href: Agibuild.Fulora.BridgeDevToolsEvent.html#Agibuild_Fulora_BridgeDevToolsEvent_ErrorMessage
+  name: ErrorMessage
+  nameWithType: BridgeDevToolsEvent.ErrorMessage
+  fullName: Agibuild.Fulora.BridgeDevToolsEvent.ErrorMessage
+- uid: Agibuild.Fulora.BridgeDevToolsEvent.ElapsedMs*
+  commentId: Overload:Agibuild.Fulora.BridgeDevToolsEvent.ElapsedMs
+  href: Agibuild.Fulora.BridgeDevToolsEvent.html#Agibuild_Fulora_BridgeDevToolsEvent_ElapsedMs
+  name: ElapsedMs
+  nameWithType: BridgeDevToolsEvent.ElapsedMs
+  fullName: Agibuild.Fulora.BridgeDevToolsEvent.ElapsedMs
+- uid: System.Nullable{System.Int64}
+  commentId: T:System.Nullable{System.Int64}
+  parent: System
+  definition: System.Nullable`1
+  href: https://learn.microsoft.com/dotnet/api/system.int64
+  name: long?
+  nameWithType: long?
+  fullName: long?
+  nameWithType.vb: Long?
+  fullName.vb: Long?
+  name.vb: Long?
+  spec.csharp:
+  - uid: System.Int64
+    name: long
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.int64
+  - name: '?'
+  spec.vb:
+  - uid: System.Int64
+    name: Long
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.int64
+  - name: '?'
+- uid: System.Nullable`1
+  commentId: T:System.Nullable`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.nullable-1
+  name: Nullable<T>
+  nameWithType: Nullable<T>
+  fullName: System.Nullable<T>
+  nameWithType.vb: Nullable(Of T)
+  fullName.vb: System.Nullable(Of T)
+  name.vb: Nullable(Of T)
+  spec.csharp:
+  - uid: System.Nullable`1
+    name: Nullable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.nullable-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Nullable`1
+    name: Nullable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.nullable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: Agibuild.Fulora.BridgeDevToolsEvent.Truncated*
+  commentId: Overload:Agibuild.Fulora.BridgeDevToolsEvent.Truncated
+  href: Agibuild.Fulora.BridgeDevToolsEvent.html#Agibuild_Fulora_BridgeDevToolsEvent_Truncated
+  name: Truncated
+  nameWithType: BridgeDevToolsEvent.Truncated
+  fullName: Agibuild.Fulora.BridgeDevToolsEvent.Truncated
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean

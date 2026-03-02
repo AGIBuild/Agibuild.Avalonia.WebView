@@ -157,6 +157,12 @@ public interface IWebView : IDisposable
     IWebViewRpcService? Rpc { get; }
 
     /// <summary>
+    /// Sets the bridge tracer for observability. Must be set before the first access to
+    /// <see cref="Bridge"/>; changes after the bridge is created are silently ignored.
+    /// </summary>
+    IBridgeTracer? BridgeTracer { get; set; }
+
+    /// <summary>
     /// Gets the type-safe bridge service for exposing C# services to JS (<see cref="JsExportAttribute"/>)
     /// and importing JS services into C# (<see cref="JsImportAttribute"/>).
     /// <para>

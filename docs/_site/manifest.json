@@ -1,0 +1,3484 @@
+{
+  "source_base_path": "/Users/hongwei.xi/projects/Agibuild.Avalonia.WebView/docs",
+  "xrefmap": "xrefmap.yml",
+  "files": [
+    {
+      "type": "Resource",
+      "output": {
+        "resource": {
+          "relative_path": "index.json"
+        }
+      }
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "API_SURFACE_REVIEW.md",
+      "output": {
+        ".html": {
+          "relative_path": "API_SURFACE_REVIEW.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "MIGRATION_GUIDE.md",
+      "output": {
+        ".html": {
+          "relative_path": "MIGRATION_GUIDE.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "agibuild_webview_compatibility_matrix_proposal.md",
+      "output": {
+        ".html": {
+          "relative_path": "agibuild_webview_compatibility_matrix_proposal.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "agibuild_webview_contract_semantics_v1.md",
+      "output": {
+        ".html": {
+          "relative_path": "agibuild_webview_contract_semantics_v1.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "agibuild_webview_contract_tests_v1.md",
+      "output": {
+        ".html": {
+          "relative_path": "agibuild_webview_contract_tests_v1.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "agibuild_webview_design_doc.md",
+      "output": {
+        ".html": {
+          "relative_path": "agibuild_webview_design_doc.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.AdapterCreatedEventArgs.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.AdapterCreatedEventArgs.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.AdapterCreatedEventArgs",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.AdapterCreatedEventArgs.yml\" sourcestartlinenumber=\"1\">Event args for the <xref href=\"Agibuild.Fulora.IWebView.AdapterCreated\" data-throw-if-not-resolved=\"false\"></xref> event, carrying the typed native platform handle.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.AotCompatibilityAttribute.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.AotCompatibilityAttribute.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.AotCompatibilityAttribute",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.AppBuilderExtensions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.AppBuilderExtensions.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.AppBuilderExtensions",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.AppBuilderExtensions.yml\" sourcestartlinenumber=\"1\">Avalonia <xref href=\"Avalonia.AppBuilder\" data-throw-if-not-resolved=\"false\"></xref> extensions for the Agibuild WebView.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.AuthOptions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.AuthOptions.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.AuthOptions",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.AuthOptions.yml\" sourcestartlinenumber=\"1\">Options for <xref href=\"Agibuild.Fulora.IWebAuthBroker.AuthenticateAsync(Agibuild.Fulora.ITopLevelWindow%2cAgibuild.Fulora.AuthOptions)\" data-throw-if-not-resolved=\"false\"></xref>.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.AvaloniaWebDialog.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.AvaloniaWebDialog.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.AvaloniaWebDialog",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.AvaloniaWebDialog.yml\" sourcestartlinenumber=\"1\">Production implementation of <xref href=\"Agibuild.Fulora.IWebDialog\" data-throw-if-not-resolved=\"false\"></xref> backed by an Avalonia <xref href=\"Avalonia.Controls.Window\" data-throw-if-not-resolved=\"false\"></xref>\ncontaining a <xref href=\"Agibuild.Fulora.WebView\" data-throw-if-not-resolved=\"false\"></xref> control. The WebView control handles all native platform\nadapter creation, NativeControlHost lifecycle, and attachment automatically.</p>\n<p>\nUsage:\n<pre><code class=\"lang-csharp\">var dialog = new AvaloniaWebDialog();\ndialog.Title = \"Sign In\";\ndialog.Show();\nawait dialog.NavigateAsync(new Uri(\"https://example.com\"));</code></pre>\n\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.AvaloniaWebDialogFactory.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.AvaloniaWebDialogFactory.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.AvaloniaWebDialogFactory",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.AvaloniaWebDialogFactory.yml\" sourcestartlinenumber=\"1\">Production implementation of <xref href=\"Agibuild.Fulora.IWebDialogFactory\" data-throw-if-not-resolved=\"false\"></xref> that creates\n<xref href=\"Agibuild.Fulora.AvaloniaWebDialog\" data-throw-if-not-resolved=\"false\"></xref> instances backed by Avalonia <code>Window</code> + <code>WebView</code>.</p>\n<p>\nRegister via DI or instantiate directly:\n<pre><code class=\"lang-csharp\">var factory = new AvaloniaWebDialogFactory();\nusing var dialog = factory.Create();\ndialog.Show();\nawait dialog.NavigateAsync(new Uri(\"https://example.com\"));</code></pre>\n\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.BridgeCallContext.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.BridgeCallContext.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.BridgeCallContext",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.BridgeCallContext.yml\" sourcestartlinenumber=\"1\">Context object passed through the bridge middleware pipeline.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.BridgeCallDelegate.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.BridgeCallDelegate.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.BridgeCallDelegate",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.BridgeCallDelegate.yml\" sourcestartlinenumber=\"1\">Delegate representing the next step in the middleware pipeline (or the terminal handler).</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.BridgeCallDirection.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.BridgeCallDirection.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.BridgeCallDirection",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.BridgeCallDirection.yml\" sourcestartlinenumber=\"1\">Direction of a bridge call.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.BridgeCallPhase.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.BridgeCallPhase.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.BridgeCallPhase",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.BridgeCallPhase.yml\" sourcestartlinenumber=\"1\">Phase of a bridge call lifecycle.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.BridgeDevToolsEvent.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.BridgeDevToolsEvent.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.BridgeDevToolsEvent",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.BridgeDevToolsEvent.yml\" sourcestartlinenumber=\"1\">Represents a single bridge call event captured for the DevTools panel.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.BridgeDevToolsOverlay.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.BridgeDevToolsOverlay.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.BridgeDevToolsOverlay",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.BridgeDevToolsOverlay.yml\" sourcestartlinenumber=\"1\">An Avalonia panel that hosts the Bridge DevTools overlay, displaying real-time\nbridge call logs, payloads, latency metrics, and error details.</p>\n<p>\nPlace this in a <xref href=\"Avalonia.Controls.Grid\" data-throw-if-not-resolved=\"false\"></xref> alongside the main <xref href=\"Agibuild.Fulora.WebView\" data-throw-if-not-resolved=\"false\"></xref>\nand call <xref href=\"Agibuild.Fulora.BridgeDevToolsOverlay.Attach(Agibuild.Fulora.WebView%2cAgibuild.Fulora.IBridgeTracer)\" data-throw-if-not-resolved=\"false\"></xref> to wire it up:\n<pre><code class=\"lang-csharp\">&lt;Grid&gt;\n  &lt;agw:WebView x:Name=\"WebView\" /&gt;\n  &lt;agw:BridgeDevToolsOverlay x:Name=\"DevToolsOverlay\"\n    VerticalAlignment=\"Bottom\" Height=\"300\" IsVisible=\"False\" /&gt;\n&lt;/Grid&gt;</code></pre>\n\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.BridgeDevToolsService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.BridgeDevToolsService.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.BridgeDevToolsService",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.BridgeDevToolsService.yml\" sourcestartlinenumber=\"1\">Provides the Bridge DevTools overlay for debugging bridge calls.\nServes the overlay HTML and pushes events to the WebView in real-time.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.BridgeEvent-1.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.BridgeEvent-1.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.BridgeEvent<T>",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.BridgeEvent-1.yml\" sourcestartlinenumber=\"1\">Runtime implementation of <xref href=\"Agibuild.Fulora.IBridgeEvent%601\" data-throw-if-not-resolved=\"false\"></xref> that allows C# code to push events to JavaScript.</p>\n<p>\nDeclare properties as <xref href=\"Agibuild.Fulora.IBridgeEvent%601\" data-throw-if-not-resolved=\"false\"></xref> on the interface, and use <xref href=\"Agibuild.Fulora.BridgeEvent%601\" data-throw-if-not-resolved=\"false\"></xref>\nin the implementation to emit events:\n<pre><code class=\"lang-csharp\">private readonly BridgeEvent&lt;Notification&gt; _onNew = new();\npublic IBridgeEvent&lt;Notification&gt; OnNew =&gt; _onNew;\n// Push: _onNew.Emit(new Notification(...));</code></pre>\n\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.BridgeEventCollector.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.BridgeEventCollector.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.BridgeEventCollector",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.BridgeEventCollector.yml\" sourcestartlinenumber=\"1\">Thread-safe bounded ring buffer that collects <xref href=\"Agibuild.Fulora.BridgeDevToolsEvent\" data-throw-if-not-resolved=\"false\"></xref> instances.\nWhen the buffer is full, the oldest events are dropped.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.BridgeImportProxy.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.BridgeImportProxy.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.BridgeImportProxy",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.BridgeImportProxy.yml\" sourcestartlinenumber=\"1\"><xref href=\"System.Reflection.DispatchProxy\" data-throw-if-not-resolved=\"false\"></xref> implementation for <xref href=\"Agibuild.Fulora.JsImportAttribute\" data-throw-if-not-resolved=\"false\"></xref> interfaces.\nRoutes every method call to the RPC service.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.BridgeOptions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.BridgeOptions.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.BridgeOptions",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.BridgeOptions.yml\" sourcestartlinenumber=\"1\">Per-service options for <xref href=\"Agibuild.Fulora.IBridgeService.Expose%60%601(%60%600%2cAgibuild.Fulora.BridgeOptions)\" data-throw-if-not-resolved=\"false\"></xref>.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.BridgePluginExtensions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.BridgePluginExtensions.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.BridgePluginExtensions",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.BridgePluginExtensions.yml\" sourcestartlinenumber=\"1\">Extension methods for registering bridge plugins.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.BridgePluginServiceDescriptor.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.BridgePluginServiceDescriptor.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.BridgePluginServiceDescriptor",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.BridgePluginServiceDescriptor.yml\" sourcestartlinenumber=\"1\">Describes a single bridge service provided by a plugin.\nUse <xref href=\"Agibuild.Fulora.BridgePluginServiceDescriptor.Create%60%601(System.Func%7bSystem.IServiceProvider%2c%60%600%7d%2cAgibuild.Fulora.BridgeOptions)\" data-throw-if-not-resolved=\"false\"></xref> to create descriptors with compile-time type safety.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.BridgeProxyAttribute.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.BridgeProxyAttribute.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.BridgeProxyAttribute",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.BridgeProxyAttribute.yml\" sourcestartlinenumber=\"1\">Assembly-level attribute linking a <xref href=\"Agibuild.Fulora.JsImportAttribute\" data-throw-if-not-resolved=\"false\"></xref> interface to its\nsource-generated proxy implementation class.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.BridgeRegistrationAttribute.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.BridgeRegistrationAttribute.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.BridgeRegistrationAttribute",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.BridgeRegistrationAttribute.yml\" sourcestartlinenumber=\"1\">Assembly-level attribute linking a <xref href=\"Agibuild.Fulora.JsExportAttribute\" data-throw-if-not-resolved=\"false\"></xref> interface to its\nsource-generated <xref href=\"Agibuild.Fulora.IBridgeServiceRegistration%601\" data-throw-if-not-resolved=\"false\"></xref> implementation.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.BridgeTelemetryTracer.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.BridgeTelemetryTracer.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.BridgeTelemetryTracer",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.BridgeTelemetryTracer.yml\" sourcestartlinenumber=\"1\">An <xref href=\"Agibuild.Fulora.IBridgeTracer\" data-throw-if-not-resolved=\"false\"></xref> that auto-collects bridge call metrics via\n<xref href=\"Agibuild.Fulora.ITelemetryProvider\" data-throw-if-not-resolved=\"false\"></xref>. Tracks latency on call end and errors on call error.\nOptionally delegates to an inner tracer.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.CompositeTelemetryProvider.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.CompositeTelemetryProvider.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.CompositeTelemetryProvider",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.CompositeTelemetryProvider.yml\" sourcestartlinenumber=\"1\">A telemetry provider that forwards all calls to multiple inner providers.\nExceptions from one provider do not affect others.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.ConsoleTelemetryProvider.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.ConsoleTelemetryProvider.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.ConsoleTelemetryProvider",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.ConsoleTelemetryProvider.yml\" sourcestartlinenumber=\"1\">Telemetry provider that writes events to stdout (useful for development/debugging).\nServes as a reference implementation for custom providers.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.ContextMenuMediaType.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.ContextMenuMediaType.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.ContextMenuMediaType",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.ContextMenuMediaType.yml\" sourcestartlinenumber=\"1\">Media type at the context menu hit-test location.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.ContextMenuRequestedEventArgs.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.ContextMenuRequestedEventArgs.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.ContextMenuRequestedEventArgs",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.ContextMenuRequestedEventArgs.yml\" sourcestartlinenumber=\"1\">Event args for context menu interception.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.CustomSchemeRegistration.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.CustomSchemeRegistration.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.CustomSchemeRegistration",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.CustomSchemeRegistration.yml\" sourcestartlinenumber=\"1\">Describes a custom URI scheme to register with the WebView.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.DevToolsPanelTracer.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.DevToolsPanelTracer.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.DevToolsPanelTracer",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.DevToolsPanelTracer.yml\" sourcestartlinenumber=\"1\">An <xref href=\"Agibuild.Fulora.IBridgeTracer\" data-throw-if-not-resolved=\"false\"></xref> that records all bridge events into a\n<xref href=\"Agibuild.Fulora.BridgeEventCollector\" data-throw-if-not-resolved=\"false\"></xref> for the DevTools debug overlay.\nOptionally delegates to an inner tracer so that logging/other tracing is preserved.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.DownloadRequestedEventArgs.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.DownloadRequestedEventArgs.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.DownloadRequestedEventArgs",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.DownloadRequestedEventArgs.yml\" sourcestartlinenumber=\"1\">Raised when a file download is initiated by the web content.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.EnvironmentRequestedEventArgs.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.EnvironmentRequestedEventArgs.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.EnvironmentRequestedEventArgs",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.EnvironmentRequestedEventArgs.yml\" sourcestartlinenumber=\"1\">Placeholder — environment requested event is not yet implemented.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.FindInPageOptions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.FindInPageOptions.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.FindInPageOptions",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.FindInPageOptions.yml\" sourcestartlinenumber=\"1\">Options for <xref href=\"Agibuild.Fulora.IWebView.FindInPageAsync(System.String%2cAgibuild.Fulora.FindInPageOptions)\" data-throw-if-not-resolved=\"false\"></xref>.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.FindInPageResult.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.FindInPageResult.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.FindInPageResult",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.FindInPageResult.yml\" sourcestartlinenumber=\"1\">Result of an in-page text search.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.GlobalShortcutBinding.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.GlobalShortcutBinding.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.GlobalShortcutBinding",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.GlobalShortcutBinding.yml\" sourcestartlinenumber=\"1\">Binding definition for a global shortcut: a user-defined ID with a key + modifier combination.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.GlobalShortcutResult.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.GlobalShortcutResult.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.GlobalShortcutResult",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.GlobalShortcutResult.yml\" sourcestartlinenumber=\"1\">Result of a global shortcut operation.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.GlobalShortcutResultStatus.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.GlobalShortcutResultStatus.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.GlobalShortcutResultStatus",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.GlobalShortcutResultStatus.yml\" sourcestartlinenumber=\"1\">Outcome of a global shortcut registration or unregistration operation.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.GlobalShortcutService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.GlobalShortcutService.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.GlobalShortcutService",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.GlobalShortcutService.yml\" sourcestartlinenumber=\"1\">Manages OS-level global hotkey registration with policy governance and lifecycle management.\nDelegates actual OS calls to an <xref href=\"Agibuild.Fulora.IGlobalShortcutPlatformProvider\" data-throw-if-not-resolved=\"false\"></xref>.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.GlobalShortcutTriggeredEvent.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.GlobalShortcutTriggeredEvent.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.GlobalShortcutTriggeredEvent",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.GlobalShortcutTriggeredEvent.yml\" sourcestartlinenumber=\"1\">Event payload pushed to JS when a registered global shortcut is triggered.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.IAndroidWebViewPlatformHandle.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.IAndroidWebViewPlatformHandle.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.IAndroidWebViewPlatformHandle",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.IAndroidWebViewPlatformHandle.yml\" sourcestartlinenumber=\"1\">Typed platform handle for Android WebView.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.IAppleWKWebViewPlatformHandle.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.IAppleWKWebViewPlatformHandle.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.IAppleWKWebViewPlatformHandle",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.IAppleWKWebViewPlatformHandle.yml\" sourcestartlinenumber=\"1\">Typed platform handle for Apple WKWebView (macOS and iOS).</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.IBridgeEvent-1.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.IBridgeEvent-1.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.IBridgeEvent<T>",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.IBridgeEvent-1.yml\" sourcestartlinenumber=\"1\">Marker interface for typed event channels on <xref href=\"Agibuild.Fulora.JsExportAttribute\" data-throw-if-not-resolved=\"false\"></xref> interfaces.\nProperties of this type on a [JsExport] interface are automatically wired as push event channels\nfrom C# to JavaScript by the source generator.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.IBridgeEventCollector.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.IBridgeEventCollector.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.IBridgeEventCollector",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.IBridgeEventCollector.yml\" sourcestartlinenumber=\"1\">Collects bridge call events in a bounded buffer for DevTools consumption.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.IBridgeMiddleware.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.IBridgeMiddleware.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.IBridgeMiddleware",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.IBridgeMiddleware.yml\" sourcestartlinenumber=\"1\">ASP.NET Core–style middleware for intercepting bridge RPC calls (logging, auth, error transform, etc.).</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.IBridgePlugin.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.IBridgePlugin.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.IBridgePlugin",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.IBridgePlugin.yml\" sourcestartlinenumber=\"1\">Marker interface for bridge plugins. Implementations provide a static manifest of\nbridge services that can be registered in one call via <xref href=\"Agibuild.Fulora.BridgePluginExtensions.UsePlugin%60%601(Agibuild.Fulora.IBridgeService%2cSystem.IServiceProvider)\" data-throw-if-not-resolved=\"false\"></xref>.</p>\n<p>\nUses C# static abstract members for NativeAOT-safe compile-time discovery.\nThe implementing class is never instantiated — it acts purely as a manifest.\n</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.IBridgeService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.IBridgeService.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.IBridgeService",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.IBridgeService.yml\" sourcestartlinenumber=\"1\">Type-safe bridge service for exposing C# services to JavaScript and importing JS services into C#.</p>\n<p>\nUse <xref href=\"Agibuild.Fulora.IBridgeService.Expose%60%601(%60%600%2cAgibuild.Fulora.BridgeOptions)\" data-throw-if-not-resolved=\"false\"></xref> with <xref href=\"Agibuild.Fulora.JsExportAttribute\" data-throw-if-not-resolved=\"false\"></xref> interfaces to register\nC# implementations callable from JS.\n</p>\n<p>\nUse <xref href=\"Agibuild.Fulora.IBridgeService.GetProxy%60%601\" data-throw-if-not-resolved=\"false\"></xref> with <xref href=\"Agibuild.Fulora.JsImportAttribute\" data-throw-if-not-resolved=\"false\"></xref> interfaces to obtain\na typed C# proxy that calls JS methods.\n</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.IBridgeServiceRegistration-1.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.IBridgeServiceRegistration-1.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.IBridgeServiceRegistration<T>",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.IBridgeServiceRegistration-1.yml\" sourcestartlinenumber=\"1\">Implemented by source-generated registration classes for <xref href=\"Agibuild.Fulora.JsExportAttribute\" data-throw-if-not-resolved=\"false\"></xref> interfaces.\nProvides reflection-free handler registration, JS stub generation, and method metadata.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.IBridgeTracer.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.IBridgeTracer.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.IBridgeTracer",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.IBridgeTracer.yml\" sourcestartlinenumber=\"1\">Optional tracer for Bridge method calls. Implement this interface to observe\nall RPC traffic for debugging, performance monitoring, or visualization.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.ICommandManager.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.ICommandManager.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.ICommandManager",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.ICommandManager.yml\" sourcestartlinenumber=\"1\">Provides programmatic access to standard editing commands on a WebView.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.IConfigProvider.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.IConfigProvider.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.IConfigProvider",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.IConfigProvider.yml\" sourcestartlinenumber=\"1\">Provides remote configuration and feature flag values.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.ICookieManager.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.ICookieManager.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.ICookieManager",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.ICookieManager.yml\" sourcestartlinenumber=\"1\">Cookie management for the WebView instance.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.IDialogHost.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.IDialogHost.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.IDialogHost",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.IDialogHost.yml\" sourcestartlinenumber=\"1\">Abstraction for the dialog window host (platform window management).\nKept host-framework-neutral to enable unit testing with mocks.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.IGlobalShortcutPlatformProvider.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.IGlobalShortcutPlatformProvider.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.IGlobalShortcutPlatformProvider",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.IGlobalShortcutPlatformProvider.yml\" sourcestartlinenumber=\"1\">Platform abstraction for OS-level global hotkey registration.\nEach platform provides its own implementation (Windows RegisterHotKey, macOS CGEvent, etc.).</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.IGlobalShortcutService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.IGlobalShortcutService.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.IGlobalShortcutService",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.IGlobalShortcutService.yml\" sourcestartlinenumber=\"1\">Provides OS-level global hotkey registration, lifecycle management, and activation event dispatch.\nRegistered via <code>Bridge.Expose&lt;IGlobalShortcutService&gt;(impl)</code>.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.IGtkWebViewPlatformHandle.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.IGtkWebViewPlatformHandle.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.IGtkWebViewPlatformHandle",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.IGtkWebViewPlatformHandle.yml\" sourcestartlinenumber=\"1\">Typed platform handle for GTK WebKitWebView (Linux).</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.IMauiWebViewHost.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.IMauiWebViewHost.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.IMauiWebViewHost",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.IMauiWebViewHost.yml\" sourcestartlinenumber=\"1\">Contract for hosting an Agibuild.Fulora WebView in a .NET MAUI application.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.INativeHandle.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.INativeHandle.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.INativeHandle",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.INativeHandle.yml\" sourcestartlinenumber=\"1\">Provides access to the native WebView handle for adapter-specific interop scenarios.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.INativeWebViewHandleProvider.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.INativeWebViewHandleProvider.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.INativeWebViewHandleProvider",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.INativeWebViewHandleProvider.yml\" sourcestartlinenumber=\"1\">Provides access to the native WebView handle for adapter-specific interop scenarios.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.IPlatformThemeProvider.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.IPlatformThemeProvider.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.IPlatformThemeProvider",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.IPlatformThemeProvider.yml\" sourcestartlinenumber=\"1\">Abstracts OS-specific theme detection. Implement per platform for accent color,\nhigh-contrast detection, and theme change notifications.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.ITelemetryProvider.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.ITelemetryProvider.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.ITelemetryProvider",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.ITelemetryProvider.yml\" sourcestartlinenumber=\"1\">Provides telemetry and crash reporting capabilities.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.IThemeService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.IThemeService.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.IThemeService",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.IThemeService.yml\" sourcestartlinenumber=\"1\">Provides OS theme information and real-time theme change notifications.\nRegistered via <code>Bridge.Expose&lt;IThemeService&gt;(impl)</code>.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.ITopLevelWindow.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.ITopLevelWindow.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.ITopLevelWindow",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.ITopLevelWindow.yml\" sourcestartlinenumber=\"1\">Abstraction for a top-level window that can serve as an owner for dialogs.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.IWebAuthBroker.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.IWebAuthBroker.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.IWebAuthBroker",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.IWebAuthBroker.yml\" sourcestartlinenumber=\"1\">Web authentication broker used for platform-specific auth flows (e.g. OAuth via external browser or embedded WebView).</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.IWebDialog.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.IWebDialog.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.IWebDialog",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.IWebDialog.yml\" sourcestartlinenumber=\"1\">Dialog-style WebView contract for displaying web content in a separate top-level window.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.IWebDialogFactory.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.IWebDialogFactory.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.IWebDialogFactory",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.IWebDialogFactory.yml\" sourcestartlinenumber=\"1\">Factory for creating <xref href=\"Agibuild.Fulora.IWebDialog\" data-throw-if-not-resolved=\"false\"></xref> instances.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.IWebMessageDropDiagnosticsSink.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.IWebMessageDropDiagnosticsSink.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.IWebMessageDropDiagnosticsSink",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.IWebMessageDropDiagnosticsSink.yml\" sourcestartlinenumber=\"1\">Sink for dropped WebMessage diagnostics.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.IWebMessagePolicy.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.IWebMessagePolicy.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.IWebMessagePolicy",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.IWebMessagePolicy.yml\" sourcestartlinenumber=\"1\">Evaluates incoming WebMessage envelopes to determine whether they should be processed or dropped.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.IWebView.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.IWebView.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.IWebView",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.IWebView.yml\" sourcestartlinenumber=\"1\">Public WebView contract surface for navigation, scripting, events, and feature adapters.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.IWebViewDispatcher.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.IWebViewDispatcher.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.IWebViewDispatcher",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.IWebViewDispatcher.yml\" sourcestartlinenumber=\"1\">Dispatcher abstraction used by WebViewCore to marshal work to the UI thread.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.IWebViewEnvironmentOptions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.IWebViewEnvironmentOptions.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.IWebViewEnvironmentOptions",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.IWebViewEnvironmentOptions.yml\" sourcestartlinenumber=\"1\">Options applied to the WebView runtime environment (devtools, user agent, storage, custom schemes, preload scripts).</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.IWebViewMessageBus.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.IWebViewMessageBus.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.IWebViewMessageBus",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.IWebViewMessageBus.yml\" sourcestartlinenumber=\"1\">Message bus for cross-WebView communication. Allows publishing and subscribing to topics\nacross multiple WebView instances, with the host runtime acting as mediator.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.IWebViewRpcService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.IWebViewRpcService.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.IWebViewRpcService",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.IWebViewRpcService.yml\" sourcestartlinenumber=\"1\">Bidirectional JSON-RPC 2.0 service for JS ↔ C# method calls over the WebMessage bridge.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.IWindowsWebView2PlatformHandle.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.IWindowsWebView2PlatformHandle.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.IWindowsWebView2PlatformHandle",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.IWindowsWebView2PlatformHandle.yml\" sourcestartlinenumber=\"1\">Typed platform handle for Windows WebView2. Cast from <xref href=\"Agibuild.Fulora.INativeHandle\" data-throw-if-not-resolved=\"false\"></xref> returned by <xref href=\"Agibuild.Fulora.INativeWebViewHandleProvider\" data-throw-if-not-resolved=\"false\"></xref>.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.JsExportAttribute.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.JsExportAttribute.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.JsExportAttribute",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.JsExportAttribute.yml\" sourcestartlinenumber=\"1\">Marks an interface whose C# implementation is exposed to JavaScript.\nThe Source Generator (or RuntimeBridgeService) registers RPC handlers for each method,\nmaking them callable from JS via <code>window.agWebView.bridge.{ServiceName}.{methodName}()</code>.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.JsImportAttribute.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.JsImportAttribute.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.JsImportAttribute",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.JsImportAttribute.yml\" sourcestartlinenumber=\"1\">Marks an interface whose methods are implemented in JavaScript.\nThe Source Generator (or RuntimeBridgeService) creates a C# proxy that forwards\neach call to JS via <code>rpc.InvokeAsync(&quot;{ServiceName}.{methodName}&quot;, params)</code>.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.JsonFileConfigProvider.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.JsonFileConfigProvider.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.JsonFileConfigProvider",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.JsonFileConfigProvider.yml\" sourcestartlinenumber=\"1\">An <xref href=\"Agibuild.Fulora.IConfigProvider\" data-throw-if-not-resolved=\"false\"></xref> that reads configuration from a local JSON file.\nSupports refresh to reload the file. Thread-safe.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.LoggingBridgeTracer.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.LoggingBridgeTracer.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.LoggingBridgeTracer",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.LoggingBridgeTracer.yml\" sourcestartlinenumber=\"1\">Default tracer that logs all bridge calls via <xref href=\"Microsoft.Extensions.Logging.ILogger\" data-throw-if-not-resolved=\"false\"></xref>.\nAttach to <xref href=\"Agibuild.Fulora.RuntimeBridgeService\" data-throw-if-not-resolved=\"false\"></xref> for structured call tracing.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.MauiWebViewHostOptions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.MauiWebViewHostOptions.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.MauiWebViewHostOptions",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.MauiWebViewHostOptions.yml\" sourcestartlinenumber=\"1\">Options for configuring a MAUI WebView host.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.MockBridgeService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.MockBridgeService.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.MockBridgeService",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.MockBridgeService.yml\" sourcestartlinenumber=\"1\">A mock implementation of <xref href=\"Agibuild.Fulora.IBridgeService\" data-throw-if-not-resolved=\"false\"></xref> for unit testing.\nAllows testing ViewModels and services that depend on Bridge without a real WebView.</p>\n<p>\nDeliverable 1.5: MockBridge for consumer unit testing.\n</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.NavigationCompletedEventArgs.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.NavigationCompletedEventArgs.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.NavigationCompletedEventArgs",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.NavigationCompletedEventArgs.yml\" sourcestartlinenumber=\"1\">Event args raised when a navigation completes.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.NavigationCompletedStatus.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.NavigationCompletedStatus.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.NavigationCompletedStatus",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.NavigationCompletedStatus.yml\" sourcestartlinenumber=\"1\">Status of a navigation completion.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.NavigationStartingEventArgs.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.NavigationStartingEventArgs.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.NavigationStartingEventArgs",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.NavigationStartingEventArgs.yml\" sourcestartlinenumber=\"1\">Event args raised when a navigation starts.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.NewWindowRequestedEventArgs.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.NewWindowRequestedEventArgs.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.NewWindowRequestedEventArgs",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.NewWindowRequestedEventArgs.yml\" sourcestartlinenumber=\"1\">Event args raised when content requests opening a new window.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.NullBridgeTracer.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.NullBridgeTracer.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.NullBridgeTracer",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.NullBridgeTracer.yml\" sourcestartlinenumber=\"1\">A no-op tracer that discards all events. Used when no tracing is configured.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.NullTelemetryProvider.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.NullTelemetryProvider.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.NullTelemetryProvider",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.NullTelemetryProvider.yml\" sourcestartlinenumber=\"1\">A no-op telemetry provider that discards all events.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.PdfPrintOptions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.PdfPrintOptions.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.PdfPrintOptions",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.PdfPrintOptions.yml\" sourcestartlinenumber=\"1\">Options for PDF printing.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.PermissionRequestedEventArgs.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.PermissionRequestedEventArgs.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.PermissionRequestedEventArgs",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.PermissionRequestedEventArgs.yml\" sourcestartlinenumber=\"1\">Raised when web content requests a permission (camera, microphone, geolocation, etc.).</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.PermissionState.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.PermissionState.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.PermissionState",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.PermissionState.yml\" sourcestartlinenumber=\"1\">The decision for a permission request.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.RateLimit.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.RateLimit.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.RateLimit",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.RateLimit.yml\" sourcestartlinenumber=\"1\">Defines a sliding-window rate limit: at most <xref href=\"Agibuild.Fulora.RateLimit.MaxCalls\" data-throw-if-not-resolved=\"false\"></xref> calls per <xref href=\"Agibuild.Fulora.RateLimit.Window\" data-throw-if-not-resolved=\"false\"></xref>.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.RemoteConfigProvider.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.RemoteConfigProvider.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.RemoteConfigProvider",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.RemoteConfigProvider.yml\" sourcestartlinenumber=\"1\">Config provider that fetches from a remote HTTP endpoint and merges with a local fallback.\nRemote values override local values.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.ScriptResultHelper.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.ScriptResultHelper.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.ScriptResultHelper",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.ScriptResultHelper.yml\" sourcestartlinenumber=\"1\">Utility for normalizing JavaScript execution results returned by browser engines.\nWebView2's <code>ExecuteScriptAsync</code> returns JSON-encoded strings\n(e.g. <code>&quot;null&quot;</code> for null/undefined, <code>&quot;&quot;hello&quot;&quot;</code> for <code>&quot;hello&quot;</code>).\nThis helper decodes such values to raw strings expected by the V1 adapter contract.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.ServiceWorkerCacheStrategy.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.ServiceWorkerCacheStrategy.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.ServiceWorkerCacheStrategy",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.ServiceWorkerOptions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.ServiceWorkerOptions.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.ServiceWorkerOptions",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.ServiceWorkerRegistrar.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.ServiceWorkerRegistrar.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.ServiceWorkerRegistrar",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.ServiceWorkerRegistrar.yml\" sourcestartlinenumber=\"1\">Generates and injects service worker registration and implementation scripts\nfor offline support in WebView-hosted SPAs.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.AvaloniaHostCapabilityProvider.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.AvaloniaHostCapabilityProvider.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.AvaloniaHostCapabilityProvider",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.AvaloniaHostCapabilityProvider.yml\" sourcestartlinenumber=\"1\">Avalonia-based implementation of <xref href=\"Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider\" data-throw-if-not-resolved=\"false\"></xref> that binds\ntray and menu operations to Avalonia <code>TrayIcon</code> and <code>NativeMenu</code> controls.\nNon-tray/menu operations are delegated to an inner provider.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.AvaloniaThemeProvider.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.AvaloniaThemeProvider.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.AvaloniaThemeProvider",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.AvaloniaThemeProvider.yml\" sourcestartlinenumber=\"1\">Avalonia-based <xref href=\"Agibuild.Fulora.IPlatformThemeProvider\" data-throw-if-not-resolved=\"false\"></xref> that detects dark/light mode\nvia <xref href=\"Avalonia.Application.ActualThemeVariant\" data-throw-if-not-resolved=\"false\"></xref> and dispatches change events.\nAccent color and high-contrast are delegated to platform-specific detection.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.DeepLinkActivationEnvelope.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.DeepLinkActivationEnvelope.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.DeepLinkActivationEnvelope",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.DeepLinkActivationEnvelope.yml\" sourcestartlinenumber=\"1\">Canonical deep-link activation envelope normalized from platform-specific payloads.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.DeepLinkActivationIngressResult.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.DeepLinkActivationIngressResult.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.DeepLinkActivationIngressResult",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.DeepLinkActivationIngressResult.yml\" sourcestartlinenumber=\"1\">Result of attempting to ingest a deep-link activation.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.DeepLinkActivationIngressStatus.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.DeepLinkActivationIngressStatus.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.DeepLinkActivationIngressStatus",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.DeepLinkActivationIngressStatus.yml\" sourcestartlinenumber=\"1\">Status of a deep-link activation ingress attempt.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.DeepLinkActivationSource.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.DeepLinkActivationSource.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.DeepLinkActivationSource",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.DeepLinkActivationSource.yml\" sourcestartlinenumber=\"1\">Source of a deep-link activation event.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.DeepLinkAdmissionDecision.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.DeepLinkAdmissionDecision.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.DeepLinkAdmissionDecision",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.DeepLinkAdmissionDecision.yml\" sourcestartlinenumber=\"1\">Policy decision for deep-link activation admission.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.DeepLinkDiagnosticEventArgs.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.DeepLinkDiagnosticEventArgs.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.DeepLinkDiagnosticEventArgs",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.DeepLinkDiagnosticEventArgs.yml\" sourcestartlinenumber=\"1\">Structured diagnostic event for deep-link registration and activation lifecycle.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType.yml\" sourcestartlinenumber=\"1\">Diagnostic event type for deep-link activation lifecycle.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.DeepLinkPlatformEntryDescriptor.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.DeepLinkPlatformEntryDescriptor.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.DeepLinkPlatformEntryDescriptor",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.DeepLinkPlatformEntryDescriptor.yml\" sourcestartlinenumber=\"1\">Describes a platform's deep-link activation entry mapping.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.DeepLinkPlatformEntrypoint.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.DeepLinkPlatformEntrypoint.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.DeepLinkPlatformEntrypoint",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.DeepLinkPlatformEntrypoint.yml\" sourcestartlinenumber=\"1\">Static helper for platform entrypoints to ingest deep-link activation\ninto <xref href=\"Agibuild.Fulora.Shell.IDeepLinkRegistrationService\" data-throw-if-not-resolved=\"false\"></xref>.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.DeepLinkPlatformSupport.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.DeepLinkPlatformSupport.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.DeepLinkPlatformSupport",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.DeepLinkPlatformSupport.yml\" sourcestartlinenumber=\"1\">Platform support status for deep-link native registration.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.DeepLinkRegistrationResult.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.DeepLinkRegistrationResult.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.DeepLinkRegistrationResult",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.DeepLinkRegistrationResult.yml\" sourcestartlinenumber=\"1\">Result of a deep-link route registration attempt.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.DeepLinkRegistrationService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.DeepLinkRegistrationService.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.DeepLinkRegistrationService",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.DeepLinkRegistrationService.yml\" sourcestartlinenumber=\"1\">Default implementation of <xref href=\"Agibuild.Fulora.Shell.IDeepLinkRegistrationService\" data-throw-if-not-resolved=\"false\"></xref>.\nProvides route registration, URI normalization, policy admission, idempotency enforcement,\nand dispatch to <xref href=\"Agibuild.Fulora.Shell.WebViewShellActivationCoordinator\" data-throw-if-not-resolved=\"false\"></xref>.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.DeepLinkRegistrationStatus.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.DeepLinkRegistrationStatus.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.DeepLinkRegistrationStatus",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.DeepLinkRegistrationStatus.yml\" sourcestartlinenumber=\"1\">Status of a deep-link registration validation.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.DeepLinkRouteDeclaration.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.DeepLinkRouteDeclaration.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.DeepLinkRouteDeclaration",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.DeepLinkRouteDeclaration.yml\" sourcestartlinenumber=\"1\">Declaration of a supported deep-link scheme and route pattern for an app identity.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.DelegateCommandPolicy.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.DelegateCommandPolicy.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.DelegateCommandPolicy",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.DelegateCommandPolicy.yml\" sourcestartlinenumber=\"1\">Command policy that delegates decision logic to host callback.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.DelegateDevToolsPolicy.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.DelegateDevToolsPolicy.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.DelegateDevToolsPolicy",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.DelegateDevToolsPolicy.yml\" sourcestartlinenumber=\"1\">DevTools policy that delegates decision logic to host callback.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.DelegateDownloadPolicy.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.DelegateDownloadPolicy.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.DelegateDownloadPolicy",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.DelegateDownloadPolicy.yml\" sourcestartlinenumber=\"1\">Download policy that delegates handling to a host callback.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.DelegateMenuPruningPolicy.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.DelegateMenuPruningPolicy.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.DelegateMenuPruningPolicy",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.DelegateMenuPruningPolicy.yml\" sourcestartlinenumber=\"1\">Menu pruning policy that delegates decision logic to host callback.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.DelegateNewWindowPolicy.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.DelegateNewWindowPolicy.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.DelegateNewWindowPolicy",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.DelegateNewWindowPolicy.yml\" sourcestartlinenumber=\"1\">New-window policy that delegates handling to a host-provided callback.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.DelegatePermissionPolicy.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.DelegatePermissionPolicy.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.DelegatePermissionPolicy",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.DelegatePermissionPolicy.yml\" sourcestartlinenumber=\"1\">Permission policy that delegates handling to a host callback.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.DelegateSessionPermissionProfileResolver.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.DelegateSessionPermissionProfileResolver.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.DelegateSessionPermissionProfileResolver",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.DelegateSessionPermissionProfileResolver.yml\" sourcestartlinenumber=\"1\">Delegate-based session-permission profile resolver.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.DelegateSessionPolicy.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.DelegateSessionPolicy.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.DelegateSessionPolicy",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.DelegateSessionPolicy.yml\" sourcestartlinenumber=\"1\">Session policy that delegates resolution to a host callback.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.FallbackThemeProvider.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.FallbackThemeProvider.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.FallbackThemeProvider",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.FallbackThemeProvider.yml\" sourcestartlinenumber=\"1\">Fallback <xref href=\"Agibuild.Fulora.IPlatformThemeProvider\" data-throw-if-not-resolved=\"false\"></xref> that returns safe defaults.\nUsed on platforms where OS theme APIs are unavailable (e.g., headless, unsupported Linux variants).</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.GlobalShortcutPlatformProviderFactory.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.GlobalShortcutPlatformProviderFactory.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.GlobalShortcutPlatformProviderFactory",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.GlobalShortcutPlatformProviderFactory.yml\" sourcestartlinenumber=\"1\">Factory selecting the correct <xref href=\"Agibuild.Fulora.IGlobalShortcutPlatformProvider\" data-throw-if-not-resolved=\"false\"></xref> for the current platform.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.IDeepLinkAdmissionPolicy.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.IDeepLinkAdmissionPolicy.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.IDeepLinkAdmissionPolicy",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.IDeepLinkAdmissionPolicy.yml\" sourcestartlinenumber=\"1\">Policy interface for deep-link activation admission.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.IDeepLinkRegistrationService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.IDeepLinkRegistrationService.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.IDeepLinkRegistrationService",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.IDeepLinkRegistrationService.yml\" sourcestartlinenumber=\"1\">Host-facing service for deep-link route registration and native activation ingress.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.ITrayIconResolver.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.ITrayIconResolver.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.ITrayIconResolver",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.ITrayIconResolver.yml\" sourcestartlinenumber=\"1\">Resolves a tray icon path to an Avalonia <xref href=\"Avalonia.Controls.WindowIcon\" data-throw-if-not-resolved=\"false\"></xref>.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.IWebViewDownloadPolicy.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.IWebViewDownloadPolicy.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.IWebViewDownloadPolicy",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.IWebViewDownloadPolicy.yml\" sourcestartlinenumber=\"1\">Policy for handling <xref href=\"Agibuild.Fulora.IWebView.DownloadRequested\" data-throw-if-not-resolved=\"false\"></xref>.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.IWebViewHostCapabilityPolicy.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.IWebViewHostCapabilityPolicy.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.IWebViewHostCapabilityPolicy",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.IWebViewHostCapabilityPolicy.yml\" sourcestartlinenumber=\"1\">Host capability authorization policy.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.yml\" sourcestartlinenumber=\"1\">Host capability provider implementation.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.IWebViewNewWindowPolicy.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.IWebViewNewWindowPolicy.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.IWebViewNewWindowPolicy",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.IWebViewNewWindowPolicy.yml\" sourcestartlinenumber=\"1\">Policy for handling <xref href=\"Agibuild.Fulora.IWebView.NewWindowRequested\" data-throw-if-not-resolved=\"false\"></xref> in a host-controlled way.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.IWebViewPermissionPolicy.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.IWebViewPermissionPolicy.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.IWebViewPermissionPolicy",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.IWebViewPermissionPolicy.yml\" sourcestartlinenumber=\"1\">Policy for handling <xref href=\"Agibuild.Fulora.IWebView.PermissionRequested\" data-throw-if-not-resolved=\"false\"></xref>.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.IWebViewSessionPermissionProfileResolver.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.IWebViewSessionPermissionProfileResolver.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.IWebViewSessionPermissionProfileResolver",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.IWebViewSessionPermissionProfileResolver.yml\" sourcestartlinenumber=\"1\">Resolver for session-permission profile.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.IWebViewShellCommandPolicy.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.IWebViewShellCommandPolicy.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.IWebViewShellCommandPolicy",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.IWebViewShellCommandPolicy.yml\" sourcestartlinenumber=\"1\">Policy for governing command execution in shell experience.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.IWebViewShellDevToolsPolicy.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.IWebViewShellDevToolsPolicy.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.IWebViewShellDevToolsPolicy",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.IWebViewShellDevToolsPolicy.yml\" sourcestartlinenumber=\"1\">Policy for governing DevTools operations in shell experience.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.IWebViewShellMenuPruningPolicy.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.IWebViewShellMenuPruningPolicy.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.IWebViewShellMenuPruningPolicy",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.IWebViewShellMenuPruningPolicy.yml\" sourcestartlinenumber=\"1\">Policy for pruning menu model state in shell governance pipeline.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.IWebViewShellSessionPolicy.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.IWebViewShellSessionPolicy.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.IWebViewShellSessionPolicy",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.IWebViewShellSessionPolicy.yml\" sourcestartlinenumber=\"1\">Policy for resolving shell session scope.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.IsolatedSessionPolicy.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.IsolatedSessionPolicy.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.IsolatedSessionPolicy",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.IsolatedSessionPolicy.yml\" sourcestartlinenumber=\"1\">Session policy that always resolves to an isolated scope.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.MenuInteractionEventArgs.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.MenuInteractionEventArgs.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.MenuInteractionEventArgs",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.MenuInteractionEventArgs.yml\" sourcestartlinenumber=\"1\">Event args for menu item interaction events.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.NavigateInPlaceNewWindowPolicy.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.NavigateInPlaceNewWindowPolicy.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.NavigateInPlaceNewWindowPolicy",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.NavigateInPlaceNewWindowPolicy.yml\" sourcestartlinenumber=\"1\">New-window policy that preserves the v1 fallback behavior (navigate in-place when unhandled).</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.NullGlobalShortcutProvider.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.NullGlobalShortcutProvider.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.NullGlobalShortcutProvider",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.NullGlobalShortcutProvider.yml\" sourcestartlinenumber=\"1\">No-op provider for platforms that do not support global shortcuts (Wayland, mobile, etc.).</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.SharedSessionPolicy.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.SharedSessionPolicy.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.SharedSessionPolicy",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.SharedSessionPolicy.yml\" sourcestartlinenumber=\"1\">Session policy that always resolves to a shared scope.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.SharpHookGlobalShortcutProvider.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.SharpHookGlobalShortcutProvider.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.SharpHookGlobalShortcutProvider",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.SharpHookGlobalShortcutProvider.yml\" sourcestartlinenumber=\"1\">Cross-platform global shortcut provider using SharpHook (libuiohook).\nSupports Windows, macOS (requires Accessibility permission), and Linux X11.\nThe hook is started lazily on first registration and stopped on last unregistration/dispose.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.ThemeService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.ThemeService.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.ThemeService",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.ThemeService.yml\" sourcestartlinenumber=\"1\">Bridge service implementation that exposes OS theme information to JavaScript.\nUses <xref href=\"Agibuild.Fulora.IPlatformThemeProvider\" data-throw-if-not-resolved=\"false\"></xref> for OS-specific detection and\n<xref href=\"Agibuild.Fulora.BridgeEvent%601\" data-throw-if-not-resolved=\"false\"></xref> for push-based theme change notifications.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.TrayInteractionEventArgs.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.TrayInteractionEventArgs.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.TrayInteractionEventArgs",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.TrayInteractionEventArgs.yml\" sourcestartlinenumber=\"1\">Event args for tray interaction events.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewFileDialogResult.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewFileDialogResult.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewFileDialogResult",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewFileDialogResult.yml\" sourcestartlinenumber=\"1\">Result of file dialog operations.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewHostCapabilityBridge.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewHostCapabilityBridge.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewHostCapabilityBridge",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewHostCapabilityBridge.yml\" sourcestartlinenumber=\"1\">Runtime host capability bridge with policy-first deterministic execution semantics.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewHostCapabilityBridgeOptions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewHostCapabilityBridgeOptions.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewHostCapabilityBridgeOptions",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewHostCapabilityBridgeOptions.yml\" sourcestartlinenumber=\"1\">Options for host capability bridge boundary validation.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewHostCapabilityCallOutcome.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewHostCapabilityCallOutcome.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewHostCapabilityCallOutcome",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewHostCapabilityCallOutcome.yml\" sourcestartlinenumber=\"1\">Deterministic outcome model for host capability calls.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewHostCapabilityCallResult-1.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewHostCapabilityCallResult-1.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewHostCapabilityCallResult<T>",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewHostCapabilityCallResult-1.yml\" sourcestartlinenumber=\"1\">Typed result envelope for host capability calls.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewHostCapabilityDecision",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewHostCapabilityDecision.yml\" sourcestartlinenumber=\"1\">Authorization decision for a capability request.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewHostCapabilityDecisionKind.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewHostCapabilityDecisionKind.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewHostCapabilityDecisionKind",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewHostCapabilityDecisionKind.yml\" sourcestartlinenumber=\"1\">Authorization decision kind for a capability request.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticEventArgs.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticEventArgs.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticEventArgs",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticEventArgs.yml\" sourcestartlinenumber=\"1\">Structured diagnostic payload for a completed host capability call.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewHostCapabilityDiagnosticExportRecord.yml\" sourcestartlinenumber=\"1\">Stable export payload for host capability diagnostics.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewHostCapabilityOperation.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewHostCapabilityOperation.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewHostCapabilityOperation",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewHostCapabilityOperation.yml\" sourcestartlinenumber=\"1\">Typed host capability operations available through the shell bridge.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.yml\" sourcestartlinenumber=\"1\">Request context for host capability authorization.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewManagedWindowCreateContext.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewManagedWindowCreateContext.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewManagedWindowCreateContext",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewManagedWindowCreateContext.yml\" sourcestartlinenumber=\"1\">Input payload for creating a managed shell window.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewManagedWindowLifecycleEventArgs.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewManagedWindowLifecycleEventArgs.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewManagedWindowLifecycleEventArgs",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewManagedWindowLifecycleEventArgs.yml\" sourcestartlinenumber=\"1\">Lifecycle event payload for managed windows.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewManagedWindowLifecycleState.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewManagedWindowLifecycleState.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewManagedWindowLifecycleState",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewManagedWindowLifecycleState.yml\" sourcestartlinenumber=\"1\">Lifecycle states for runtime-managed windows.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewMenuItemModel.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewMenuItemModel.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewMenuItemModel",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewMenuItemModel.yml\" sourcestartlinenumber=\"1\">Typed menu item model.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewMenuModelRequest.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewMenuModelRequest.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewMenuModelRequest",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewMenuModelRequest.yml\" sourcestartlinenumber=\"1\">Typed menu model payload for host app-shell integration.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewMenuPruningDecision.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewMenuPruningDecision.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewMenuPruningDecision",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewMenuPruningDecision.yml\" sourcestartlinenumber=\"1\">Decision returned by <xref href=\"Agibuild.Fulora.Shell.IWebViewShellMenuPruningPolicy\" data-throw-if-not-resolved=\"false\"></xref>.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewMenuPruningPolicyContext.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewMenuPruningPolicyContext.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewMenuPruningPolicyContext",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewMenuPruningPolicyContext.yml\" sourcestartlinenumber=\"1\">Context for menu pruning policy evaluation.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewNewWindowPolicyContext.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewNewWindowPolicyContext.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewNewWindowPolicyContext",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewNewWindowPolicyContext.yml\" sourcestartlinenumber=\"1\">Context for new-window policy evaluation.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewNewWindowStrategy.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewNewWindowStrategy.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewNewWindowStrategy",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewNewWindowStrategy.yml\" sourcestartlinenumber=\"1\">Strategy result for handling a new-window request.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewNewWindowStrategyDecision.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewNewWindowStrategyDecision.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewNewWindowStrategyDecision",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewNewWindowStrategyDecision.yml\" sourcestartlinenumber=\"1\">Strategy decision returned by <xref href=\"Agibuild.Fulora.Shell.IWebViewNewWindowPolicy\" data-throw-if-not-resolved=\"false\"></xref>.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewNotificationRequest.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewNotificationRequest.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewNotificationRequest",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewNotificationRequest.yml\" sourcestartlinenumber=\"1\">Request payload for host notification.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewOpenFileDialogRequest.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewOpenFileDialogRequest.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewOpenFileDialogRequest",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewOpenFileDialogRequest.yml\" sourcestartlinenumber=\"1\">Request payload for open-file dialog.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewPermissionProfileDecision",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.yml\" sourcestartlinenumber=\"1\">Typed permission decision under profile governance.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewSaveFileDialogRequest.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewSaveFileDialogRequest.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewSaveFileDialogRequest",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewSaveFileDialogRequest.yml\" sourcestartlinenumber=\"1\">Request payload for save-file dialog.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewSessionPermissionProfile.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewSessionPermissionProfile.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewSessionPermissionProfile",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewSessionPermissionProfile.yml\" sourcestartlinenumber=\"1\">Resolved profile model that governs session and permission behavior.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewSessionPermissionProfileContext.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewSessionPermissionProfileContext.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewSessionPermissionProfileContext",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewSessionPermissionProfileContext.yml\" sourcestartlinenumber=\"1\">Input context for resolving session-permission profiles.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewSessionPermissionProfileDiagnosticEventArgs.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewSessionPermissionProfileDiagnosticEventArgs.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewSessionPermissionProfileDiagnosticEventArgs",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewSessionPermissionProfileDiagnosticEventArgs.yml\" sourcestartlinenumber=\"1\">Diagnostic payload for session-permission profile evaluation.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewShellActivationCoordinator.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewShellActivationCoordinator.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewShellActivationCoordinator",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewShellActivationCoordinator.yml\" sourcestartlinenumber=\"1\">Deterministic in-process single-instance activation coordinator.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewShellActivationForwardResult.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewShellActivationForwardResult.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewShellActivationForwardResult",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewShellActivationForwardResult.yml\" sourcestartlinenumber=\"1\">Forward result for activation dispatch.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewShellActivationForwardStatus.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewShellActivationForwardStatus.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewShellActivationForwardStatus",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewShellActivationForwardStatus.yml\" sourcestartlinenumber=\"1\">Forward status for secondary-instance activation dispatch.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewShellActivationRegistration.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewShellActivationRegistration.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewShellActivationRegistration",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewShellActivationRegistration.yml\" sourcestartlinenumber=\"1\">Registration handle returned by <xref href=\"Agibuild.Fulora.Shell.WebViewShellActivationCoordinator.Register(System.String%2cSystem.Func%7bAgibuild.Fulora.Shell.WebViewShellActivationRequest%2cSystem.Threading.CancellationToken%2cSystem.Threading.Tasks.Task%7d)\" data-throw-if-not-resolved=\"false\"></xref>.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewShellActivationRequest.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewShellActivationRequest.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewShellActivationRequest",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewShellActivationRequest.yml\" sourcestartlinenumber=\"1\">Activation request payload forwarded from secondary instance to current primary owner.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewShellCommandDecision.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewShellCommandDecision.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewShellCommandDecision",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewShellCommandDecision.yml\" sourcestartlinenumber=\"1\">Decision returned by <xref href=\"Agibuild.Fulora.Shell.IWebViewShellCommandPolicy\" data-throw-if-not-resolved=\"false\"></xref>.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewShellCommandPolicyContext.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewShellCommandPolicyContext.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewShellCommandPolicyContext",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewShellCommandPolicyContext.yml\" sourcestartlinenumber=\"1\">Context for shell command policy evaluation.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewShellDevToolsAction.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewShellDevToolsAction.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewShellDevToolsAction",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewShellDevToolsAction.yml\" sourcestartlinenumber=\"1\">DevTools operation kinds governed by shell policy.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewShellDevToolsDecision.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewShellDevToolsDecision.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewShellDevToolsDecision",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewShellDevToolsDecision.yml\" sourcestartlinenumber=\"1\">Decision returned by <xref href=\"Agibuild.Fulora.Shell.IWebViewShellDevToolsPolicy\" data-throw-if-not-resolved=\"false\"></xref>.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewShellDevToolsPolicyContext.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewShellDevToolsPolicyContext.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewShellDevToolsPolicyContext",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewShellDevToolsPolicyContext.yml\" sourcestartlinenumber=\"1\">Context for DevTools policy evaluation.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewShellExperience.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewShellExperience.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewShellExperience",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewShellExperience.yml\" sourcestartlinenumber=\"1\">Opt-in runtime helper that wires common host policies (new window, downloads, permissions)\nonto an <xref href=\"Agibuild.Fulora.IWebView\" data-throw-if-not-resolved=\"false\"></xref> instance.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewShellExperienceOptions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewShellExperienceOptions.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewShellExperienceOptions",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewShellExperienceOptions.yml\" sourcestartlinenumber=\"1\">Options for <xref href=\"Agibuild.Fulora.Shell.WebViewShellExperience\" data-throw-if-not-resolved=\"false\"></xref>. All features are opt-in.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewShellPolicyDomain.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewShellPolicyDomain.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewShellPolicyDomain",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewShellPolicyDomain.yml\" sourcestartlinenumber=\"1\">Shell policy execution domains.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewShellPolicyErrorEventArgs.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewShellPolicyErrorEventArgs.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewShellPolicyErrorEventArgs",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewShellPolicyErrorEventArgs.yml\" sourcestartlinenumber=\"1\">Error payload raised when a shell policy handler fails.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewShellSessionContext.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewShellSessionContext.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewShellSessionContext",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewShellSessionContext.yml\" sourcestartlinenumber=\"1\">Input context for resolving shell session policy.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewShellSessionDecision.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewShellSessionDecision.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewShellSessionDecision",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewShellSessionDecision.yml\" sourcestartlinenumber=\"1\">Session resolution result produced by <xref href=\"Agibuild.Fulora.Shell.IWebViewShellSessionPolicy\" data-throw-if-not-resolved=\"false\"></xref>.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewShellSessionScope.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewShellSessionScope.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewShellSessionScope",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewShellSessionScope.yml\" sourcestartlinenumber=\"1\">Session scope used by shell policy.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewSystemAction.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewSystemAction.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewSystemAction",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewSystemAction.yml\" sourcestartlinenumber=\"1\">Supported typed system actions.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewSystemActionRequest.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewSystemActionRequest.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewSystemActionRequest",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewSystemActionRequest.yml\" sourcestartlinenumber=\"1\">Typed request payload for host system action execution.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewSystemIntegrationEventKind.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewSystemIntegrationEventKind.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewSystemIntegrationEventKind",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewSystemIntegrationEventKind.yml\" sourcestartlinenumber=\"1\">Typed system integration event kinds emitted from host to web pipeline.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewSystemIntegrationEventRequest.yml\" sourcestartlinenumber=\"1\">Typed inbound system integration event payload.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.WebViewTrayStateRequest.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.WebViewTrayStateRequest.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell.WebViewTrayStateRequest",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.Shell.WebViewTrayStateRequest.yml\" sourcestartlinenumber=\"1\">Typed tray state payload for host app-shell integration.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.Shell.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.Shell.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.Shell",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.ShortcutKey.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.ShortcutKey.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.ShortcutKey",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.ShortcutKey.yml\" sourcestartlinenumber=\"1\">Virtual key codes for global shortcut registration.\nSubset of commonly used keys across all platforms.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.ShortcutModifiers.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.ShortcutModifiers.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.ShortcutModifiers",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.ShortcutModifiers.yml\" sourcestartlinenumber=\"1\">Modifier key flags for global shortcut registration.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.SpaAssetHotUpdateResult.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.SpaAssetHotUpdateResult.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.SpaAssetHotUpdateResult",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.SpaAssetHotUpdateResult.yml\" sourcestartlinenumber=\"1\">Result for signed SPA asset package operations.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.SpaAssetHotUpdateService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.SpaAssetHotUpdateService.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.SpaAssetHotUpdateService",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.SpaAssetHotUpdateService.yml\" sourcestartlinenumber=\"1\">Signed package installer + activation/rollback orchestrator for SPA assets.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.SpaHostingExtensions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.SpaHostingExtensions.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.SpaHostingExtensions",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.SpaHostingExtensions.yml\" sourcestartlinenumber=\"1\">Extension methods for configuring SPA hosting.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.SpaHostingOptions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.SpaHostingOptions.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.SpaHostingOptions",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.SpaHostingOptions.yml\" sourcestartlinenumber=\"1\">Configures SPA hosting within the WebView. Supports serving embedded resources\n(production) or proxying to a dev server (development) via a custom <code>app://</code> scheme.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.ThemeChangedEvent.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.ThemeChangedEvent.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.ThemeChangedEvent",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.ThemeChangedEvent.yml\" sourcestartlinenumber=\"1\">Event payload pushed to JS when the OS theme changes.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.ThemeInfo.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.ThemeInfo.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.ThemeInfo",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.ThemeInfo.yml\" sourcestartlinenumber=\"1\">Snapshot of the current OS theme state.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.WebAuthBroker.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.WebAuthBroker.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.WebAuthBroker",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.WebAuthBroker.yml\" sourcestartlinenumber=\"1\">Concrete implementation of <xref href=\"Agibuild.Fulora.IWebAuthBroker\" data-throw-if-not-resolved=\"false\"></xref> that opens a <xref href=\"Agibuild.Fulora.IWebDialog\" data-throw-if-not-resolved=\"false\"></xref>\nto perform the OAuth authentication flow.</p>\n<p>\nFlow:\n1. Create an ephemeral WebDialog via <xref href=\"Agibuild.Fulora.IWebDialogFactory\" data-throw-if-not-resolved=\"false\"></xref>.\n2. Navigate to <xref href=\"Agibuild.Fulora.AuthOptions.AuthorizeUri\" data-throw-if-not-resolved=\"false\"></xref>.\n3. Listen for <xref href=\"Agibuild.Fulora.IWebView.NavigationStarted\" data-throw-if-not-resolved=\"false\"></xref> to detect the callback URI.\n4. On match: close dialog, return <xref href=\"Agibuild.Fulora.WebAuthResult\" data-throw-if-not-resolved=\"false\"></xref> with Success.\n5. On user close: return UserCancel.\n6. On timeout: return Timeout.\n</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.WebAuthBrokerWithSemantics.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.WebAuthBrokerWithSemantics.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.WebAuthBrokerWithSemantics",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.WebAuthBrokerWithSemantics.yml\" sourcestartlinenumber=\"1\">Decorates an <xref href=\"Agibuild.Fulora.IWebAuthBroker\" data-throw-if-not-resolved=\"false\"></xref> to enforce v1 baseline contract semantics.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.WebAuthCallbackMatcher.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.WebAuthCallbackMatcher.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.WebAuthCallbackMatcher",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.WebAuthCallbackMatcher.yml\" sourcestartlinenumber=\"1\">Helpers for matching web authentication callback URIs.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.WebAuthResult.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.WebAuthResult.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.WebAuthResult",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.WebAuthResult.yml\" sourcestartlinenumber=\"1\">Result returned by <xref href=\"Agibuild.Fulora.IWebAuthBroker.AuthenticateAsync(Agibuild.Fulora.ITopLevelWindow%2cAgibuild.Fulora.AuthOptions)\" data-throw-if-not-resolved=\"false\"></xref>.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.WebAuthStatus.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.WebAuthStatus.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.WebAuthStatus",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.WebAuthStatus.yml\" sourcestartlinenumber=\"1\">Result status for a web authentication operation.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.WebDialog.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.WebDialog.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.WebDialog",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.WebDialog.yml\" sourcestartlinenumber=\"1\">Runtime implementation of <xref href=\"Agibuild.Fulora.IWebDialog\" data-throw-if-not-resolved=\"false\"></xref>.\nWraps a <xref href=\"Agibuild.Fulora.WebViewCore\" data-throw-if-not-resolved=\"false\"></xref> and delegates window management to a <xref href=\"Agibuild.Fulora.IDialogHost\" data-throw-if-not-resolved=\"false\"></xref>.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.WebMessageBridgeOptions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.WebMessageBridgeOptions.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.WebMessageBridgeOptions",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.WebMessageBridgeOptions.yml\" sourcestartlinenumber=\"1\">Configuration options for enabling the web message bridge.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.WebMessageDropDiagnostic.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.WebMessageDropDiagnostic.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.WebMessageDropDiagnostic",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.WebMessageDropDiagnostic.yml\" sourcestartlinenumber=\"1\">Diagnostic payload describing a dropped WebMessage.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.WebMessageDropReason.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.WebMessageDropReason.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.WebMessageDropReason",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.WebMessageDropReason.yml\" sourcestartlinenumber=\"1\">Reason why an incoming WebMessage was dropped.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.WebMessageEnvelope.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.WebMessageEnvelope.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.WebMessageEnvelope",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.WebMessageEnvelope.yml\" sourcestartlinenumber=\"1\">Envelope for a WebMessage bridge message.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.WebMessagePolicyDecision.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.WebMessagePolicyDecision.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.WebMessagePolicyDecision",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.WebMessagePolicyDecision.yml\" sourcestartlinenumber=\"1\">Result of evaluating a <xref href=\"Agibuild.Fulora.WebMessageEnvelope\" data-throw-if-not-resolved=\"false\"></xref> against an <xref href=\"Agibuild.Fulora.IWebMessagePolicy\" data-throw-if-not-resolved=\"false\"></xref>.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.WebMessageReceivedEventArgs.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.WebMessageReceivedEventArgs.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.WebMessageReceivedEventArgs",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.WebMessageReceivedEventArgs.yml\" sourcestartlinenumber=\"1\">Event args raised when a WebMessage is received from the page.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.WebResourceRequestedEventArgs.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.WebResourceRequestedEventArgs.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.WebResourceRequestedEventArgs",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.WebResourceRequestedEventArgs.yml\" sourcestartlinenumber=\"1\">Raised when a registered custom-scheme request is intercepted.\nThe handler can supply a response body, content type, and status code.\nCustom schemes must be registered via <xref href=\"Agibuild.Fulora.IWebViewEnvironmentOptions.CustomSchemes\" data-throw-if-not-resolved=\"false\"></xref>\nbefore the WebView is created.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.WebView.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.WebView.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.WebView",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.WebView.yml\" sourcestartlinenumber=\"1\">An Avalonia control that embeds a platform-native WebView.</p>\n<p>\nUsage in XAML:\n<pre><code class=\"lang-csharp\">&lt;agw:WebView Source=\"https://example.com\" /&gt;</code></pre>\n\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.WebViewCommand.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.WebViewCommand.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.WebViewCommand",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.WebViewCommand.yml\" sourcestartlinenumber=\"1\">Standard editing commands supported by WebView.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.WebViewCookie.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.WebViewCookie.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.WebViewCookie",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.WebViewCookie.yml\" sourcestartlinenumber=\"1\">Represents a cookie associated with a WebView instance.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.WebViewCore.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.WebViewCore.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.WebViewCore",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.WebViewCore.yml\" sourcestartlinenumber=\"1\">Core runtime implementation of <xref href=\"Agibuild.Fulora.IWebView\" data-throw-if-not-resolved=\"false\"></xref> over a platform adapter.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.WebViewEnvironment.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.WebViewEnvironment.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.WebViewEnvironment",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.WebViewEnvironment.yml\" sourcestartlinenumber=\"1\">Global configuration for the Agibuild WebView components.</p>\n<p>\nCall <xref href=\"Agibuild.Fulora.WebViewEnvironment.Initialize(Microsoft.Extensions.Logging.ILoggerFactory)\" data-throw-if-not-resolved=\"false\"></xref> once at application startup\nso that all WebView controls automatically receive shared services.\n</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.WebViewEnvironmentOptions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.WebViewEnvironmentOptions.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.WebViewEnvironmentOptions",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.WebViewEnvironmentOptions.yml\" sourcestartlinenumber=\"1\">Default implementation of <xref href=\"Agibuild.Fulora.IWebViewEnvironmentOptions\" data-throw-if-not-resolved=\"false\"></xref>.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.WebViewMessage.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.WebViewMessage.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.WebViewMessage",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.WebViewMessage.yml\" sourcestartlinenumber=\"1\">A message delivered through the WebView message bus.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.WebViewMessageBus.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.WebViewMessageBus.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.WebViewMessageBus",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.WebViewMessageBus.yml\" sourcestartlinenumber=\"1\">Thread-safe implementation of <xref href=\"Agibuild.Fulora.IWebViewMessageBus\" data-throw-if-not-resolved=\"false\"></xref> for cross-WebView communication.\nUses <xref href=\"System.Collections.Concurrent.ConcurrentDictionary%602\" data-throw-if-not-resolved=\"false\"></xref> for topic→subscribers and dispatches to all matching handlers.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.WebViewNavigationException.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.WebViewNavigationException.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.WebViewNavigationException",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.WebViewNavigationException.yml\" sourcestartlinenumber=\"1\">Base exception for navigation failures with correlation metadata.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.WebViewNetworkException.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.WebViewNetworkException.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.WebViewNetworkException",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.WebViewNetworkException.yml\" sourcestartlinenumber=\"1\">Navigation failed due to a network connectivity issue (DNS, unreachable host, connection lost, no internet).</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.WebViewOperationFailure.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.WebViewOperationFailure.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.WebViewOperationFailure",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.WebViewOperationFailure.yml\" sourcestartlinenumber=\"1\">Helpers to annotate exceptions with <xref href=\"Agibuild.Fulora.WebViewOperationFailureCategory\" data-throw-if-not-resolved=\"false\"></xref> for governance and diagnostics.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.WebViewOperationFailureCategory.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.WebViewOperationFailureCategory.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.WebViewOperationFailureCategory",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.WebViewOperationFailureCategory.yml\" sourcestartlinenumber=\"1\">Categorizes operational failures to enable consistent error handling across adapters.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.WebViewPermissionKind.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.WebViewPermissionKind.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.WebViewPermissionKind",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.WebViewPermissionKind.yml\" sourcestartlinenumber=\"1\">The type of permission being requested by web content.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.WebViewRpcException.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.WebViewRpcException.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.WebViewRpcException",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.WebViewRpcException.yml\" sourcestartlinenumber=\"1\">Exception thrown when an RPC call fails.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.WebViewScriptException.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.WebViewScriptException.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.WebViewScriptException",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.WebViewScriptException.yml\" sourcestartlinenumber=\"1\">Exception thrown when script execution fails.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.WebViewServiceCollectionExtensions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.WebViewServiceCollectionExtensions.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.WebViewServiceCollectionExtensions",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.WebViewServiceCollectionExtensions.yml\" sourcestartlinenumber=\"1\">Extension methods for registering Avalonia WebDialog and WebAuthBroker services.</p>\n<p>\nCall <code>services.AddWebViewDialogServices()</code> to register:\n<ul><li><xref href=\"Agibuild.Fulora.IWebDialogFactory\" data-throw-if-not-resolved=\"false\"></xref> → <xref href=\"Agibuild.Fulora.AvaloniaWebDialogFactory\" data-throw-if-not-resolved=\"false\"></xref> (singleton)</li><li><xref href=\"Agibuild.Fulora.IWebAuthBroker\" data-throw-if-not-resolved=\"false\"></xref> → <xref href=\"Agibuild.Fulora.WebAuthBroker\" data-throw-if-not-resolved=\"false\"></xref> (transient)</li></ul>\n\n<p>\nNote: Call <code>services.AddWebView()</code> first if you also need\nthe base <xref href=\"Agibuild.Fulora.IWebView\" data-throw-if-not-resolved=\"false\"></xref> factory and dispatcher registrations.\n</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.WebViewShortcutAction.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.WebViewShortcutAction.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.WebViewShortcutAction",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.WebViewShortcutAction.yml\" sourcestartlinenumber=\"1\">Routed action payload for a keyboard shortcut.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.WebViewShortcutActionKind.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.WebViewShortcutActionKind.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.WebViewShortcutActionKind",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.WebViewShortcutActionKind.yml\" sourcestartlinenumber=\"1\">Action type routed from a keyboard shortcut.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.WebViewShortcutBinding.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.WebViewShortcutBinding.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.WebViewShortcutBinding",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.WebViewShortcutBinding.yml\" sourcestartlinenumber=\"1\">Shortcut binding from key + modifiers to a routed action.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.WebViewShortcutRouter.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.WebViewShortcutRouter.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.WebViewShortcutRouter",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.WebViewShortcutRouter.yml\" sourcestartlinenumber=\"1\">Routes keyboard shortcuts to WebView command and DevTools actions.\nWhen a <xref href=\"Agibuild.Fulora.GlobalShortcutService\" data-throw-if-not-resolved=\"false\"></xref> is provided, window-local bindings\ntake priority over global shortcuts for the same key combination.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.WebViewSslException.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.WebViewSslException.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.WebViewSslException",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.WebViewSslException.yml\" sourcestartlinenumber=\"1\">Navigation failed due to a TLS/certificate issue.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.WebViewTimeoutException.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.WebViewTimeoutException.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora.WebViewTimeoutException",
+      "Summary": "<p sourcefile=\"api/Agibuild.Fulora.WebViewTimeoutException.yml\" sourcestartlinenumber=\"1\">Navigation failed due to a request timeout.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Agibuild.Fulora.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Agibuild.Fulora.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "Agibuild.Fulora",
+      "Summary": null
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "api/toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/toc.html"
+        },
+        ".json": {
+          "relative_path": "api/toc.json"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/architecture.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/architecture.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/bridge-guide.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/bridge-guide.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/getting-started.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/getting-started.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/spa-hosting.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/spa-hosting.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "articles/toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "articles/toc.html"
+        },
+        ".json": {
+          "relative_path": "articles/toc.json"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "bridge-devtools-panel.md",
+      "output": {
+        ".html": {
+          "relative_path": "bridge-devtools-panel.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "index.md",
+      "output": {
+        ".html": {
+          "relative_path": "index.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "nativeaot.md",
+      "output": {
+        ".html": {
+          "relative_path": "nativeaot.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "plugin-authoring-guide.md",
+      "output": {
+        ".html": {
+          "relative_path": "plugin-authoring-guide.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "release-checklist.md",
+      "output": {
+        ".html": {
+          "relative_path": "release-checklist.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "toc.html"
+        },
+        ".json": {
+          "relative_path": "toc.json"
+        }
+      },
+      "version": ""
+    }
+  ],
+  "groups": [
+    {
+      "xrefmap": "xrefmap.yml"
+    }
+  ]
+}

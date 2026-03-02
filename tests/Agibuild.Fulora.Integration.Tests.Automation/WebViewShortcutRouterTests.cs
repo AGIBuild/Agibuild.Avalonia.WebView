@@ -114,6 +114,7 @@ public sealed class WebViewShortcutRouterTests
         public Task<INativeHandle?> TryGetWebViewHandleAsync() => Task.FromResult<INativeHandle?>(null);
         public IWebViewRpcService? Rpc => null;
         public IBridgeService Bridge => throw new NotSupportedException();
+        public IBridgeTracer? BridgeTracer { get; set; }
         public Task<byte[]> CaptureScreenshotAsync() => Task.FromException<byte[]>(new NotSupportedException());
         public Task<byte[]> PrintToPdfAsync(PdfPrintOptions? options = null) => Task.FromException<byte[]>(new NotSupportedException());
         public Task<double> GetZoomFactorAsync() => Task.FromResult(1.0);

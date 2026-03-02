@@ -1,0 +1,429 @@
+### YamlMime:ManagedReference
+items:
+- uid: Agibuild.Fulora.IThemeService
+  commentId: T:Agibuild.Fulora.IThemeService
+  id: IThemeService
+  parent: Agibuild.Fulora
+  children:
+  - Agibuild.Fulora.IThemeService.GetAccentColor
+  - Agibuild.Fulora.IThemeService.GetCurrentTheme
+  - Agibuild.Fulora.IThemeService.GetHighContrastMode
+  - Agibuild.Fulora.IThemeService.ThemeChanged
+  langs:
+  - csharp
+  - vb
+  name: IThemeService
+  nameWithType: IThemeService
+  fullName: Agibuild.Fulora.IThemeService
+  type: Interface
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/IThemeService.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: IThemeService
+    path: ../src/Agibuild.Fulora.Core/IThemeService.cs
+    startLine: 6
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: >-
+    Provides OS theme information and real-time theme change notifications.
+
+    Registered via <code>Bridge.Expose&lt;IThemeService&gt;(impl)</code>.
+  example: []
+  syntax:
+    content: public interface IThemeService
+    content.vb: Public Interface IThemeService
+- uid: Agibuild.Fulora.IThemeService.GetCurrentTheme
+  commentId: M:Agibuild.Fulora.IThemeService.GetCurrentTheme
+  id: GetCurrentTheme
+  parent: Agibuild.Fulora.IThemeService
+  langs:
+  - csharp
+  - vb
+  name: GetCurrentTheme()
+  nameWithType: IThemeService.GetCurrentTheme()
+  fullName: Agibuild.Fulora.IThemeService.GetCurrentTheme()
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/IThemeService.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: GetCurrentTheme
+    path: ../src/Agibuild.Fulora.Core/IThemeService.cs
+    startLine: 12
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Returns the current OS theme info (mode, accent color, high-contrast state).
+  example: []
+  syntax:
+    content: Task<ThemeInfo> GetCurrentTheme()
+    return:
+      type: System.Threading.Tasks.Task{Agibuild.Fulora.ThemeInfo}
+    content.vb: Function GetCurrentTheme() As Task(Of ThemeInfo)
+  overload: Agibuild.Fulora.IThemeService.GetCurrentTheme*
+- uid: Agibuild.Fulora.IThemeService.GetAccentColor
+  commentId: M:Agibuild.Fulora.IThemeService.GetAccentColor
+  id: GetAccentColor
+  parent: Agibuild.Fulora.IThemeService
+  langs:
+  - csharp
+  - vb
+  name: GetAccentColor()
+  nameWithType: IThemeService.GetAccentColor()
+  fullName: Agibuild.Fulora.IThemeService.GetAccentColor()
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/IThemeService.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: GetAccentColor
+    path: ../src/Agibuild.Fulora.Core/IThemeService.cs
+    startLine: 17
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Returns the OS accent color as a hex string (<code>"#RRGGBB"</code>), or <code>null</code> on unsupported platforms.
+  example: []
+  syntax:
+    content: Task<string?> GetAccentColor()
+    return:
+      type: System.Threading.Tasks.Task{System.String}
+    content.vb: Function GetAccentColor() As Task(Of String)
+  overload: Agibuild.Fulora.IThemeService.GetAccentColor*
+- uid: Agibuild.Fulora.IThemeService.GetHighContrastMode
+  commentId: M:Agibuild.Fulora.IThemeService.GetHighContrastMode
+  id: GetHighContrastMode
+  parent: Agibuild.Fulora.IThemeService
+  langs:
+  - csharp
+  - vb
+  name: GetHighContrastMode()
+  nameWithType: IThemeService.GetHighContrastMode()
+  fullName: Agibuild.Fulora.IThemeService.GetHighContrastMode()
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/IThemeService.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: GetHighContrastMode
+    path: ../src/Agibuild.Fulora.Core/IThemeService.cs
+    startLine: 22
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Returns <code>true</code> if the OS is in high-contrast mode.
+  example: []
+  syntax:
+    content: Task<bool> GetHighContrastMode()
+    return:
+      type: System.Threading.Tasks.Task{System.Boolean}
+    content.vb: Function GetHighContrastMode() As Task(Of Boolean)
+  overload: Agibuild.Fulora.IThemeService.GetHighContrastMode*
+- uid: Agibuild.Fulora.IThemeService.ThemeChanged
+  commentId: P:Agibuild.Fulora.IThemeService.ThemeChanged
+  id: ThemeChanged
+  parent: Agibuild.Fulora.IThemeService
+  langs:
+  - csharp
+  - vb
+  name: ThemeChanged
+  nameWithType: IThemeService.ThemeChanged
+  fullName: Agibuild.Fulora.IThemeService.ThemeChanged
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/IThemeService.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: ThemeChanged
+    path: ../src/Agibuild.Fulora.Core/IThemeService.cs
+    startLine: 27
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Push event fired when the OS theme changes (dark/light, accent color, high-contrast).
+  example: []
+  syntax:
+    content: IBridgeEvent<ThemeChangedEvent> ThemeChanged { get; }
+    parameters: []
+    return:
+      type: Agibuild.Fulora.IBridgeEvent{Agibuild.Fulora.ThemeChangedEvent}
+    content.vb: ReadOnly Property ThemeChanged As IBridgeEvent(Of ThemeChangedEvent)
+  overload: Agibuild.Fulora.IThemeService.ThemeChanged*
+references:
+- uid: Agibuild.Fulora
+  commentId: N:Agibuild.Fulora
+  href: Agibuild.html
+  name: Agibuild.Fulora
+  nameWithType: Agibuild.Fulora
+  fullName: Agibuild.Fulora
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+- uid: Agibuild.Fulora.IThemeService.GetCurrentTheme*
+  commentId: Overload:Agibuild.Fulora.IThemeService.GetCurrentTheme
+  href: Agibuild.Fulora.IThemeService.html#Agibuild_Fulora_IThemeService_GetCurrentTheme
+  name: GetCurrentTheme
+  nameWithType: IThemeService.GetCurrentTheme
+  fullName: Agibuild.Fulora.IThemeService.GetCurrentTheme
+- uid: System.Threading.Tasks.Task{Agibuild.Fulora.ThemeInfo}
+  commentId: T:System.Threading.Tasks.Task{Agibuild.Fulora.ThemeInfo}
+  parent: System.Threading.Tasks
+  definition: System.Threading.Tasks.Task`1
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<ThemeInfo>
+  nameWithType: Task<ThemeInfo>
+  fullName: System.Threading.Tasks.Task<Agibuild.Fulora.ThemeInfo>
+  nameWithType.vb: Task(Of ThemeInfo)
+  fullName.vb: System.Threading.Tasks.Task(Of Agibuild.Fulora.ThemeInfo)
+  name.vb: Task(Of ThemeInfo)
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - uid: Agibuild.Fulora.ThemeInfo
+    name: ThemeInfo
+    href: Agibuild.Fulora.ThemeInfo.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: Agibuild.Fulora.ThemeInfo
+    name: ThemeInfo
+    href: Agibuild.Fulora.ThemeInfo.html
+  - name: )
+- uid: System.Threading.Tasks.Task`1
+  commentId: T:System.Threading.Tasks.Task`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<TResult>
+  nameWithType: Task<TResult>
+  fullName: System.Threading.Tasks.Task<TResult>
+  nameWithType.vb: Task(Of TResult)
+  fullName.vb: System.Threading.Tasks.Task(Of TResult)
+  name.vb: Task(Of TResult)
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - name: TResult
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TResult
+  - name: )
+- uid: System.Threading.Tasks
+  commentId: N:System.Threading.Tasks
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Threading.Tasks
+  nameWithType: System.Threading.Tasks
+  fullName: System.Threading.Tasks
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  - name: .
+  - uid: System.Threading.Tasks
+    name: Tasks
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  - name: .
+  - uid: System.Threading.Tasks
+    name: Tasks
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks
+- uid: Agibuild.Fulora.IThemeService.GetAccentColor*
+  commentId: Overload:Agibuild.Fulora.IThemeService.GetAccentColor
+  href: Agibuild.Fulora.IThemeService.html#Agibuild_Fulora_IThemeService_GetAccentColor
+  name: GetAccentColor
+  nameWithType: IThemeService.GetAccentColor
+  fullName: Agibuild.Fulora.IThemeService.GetAccentColor
+- uid: System.Threading.Tasks.Task{System.String}
+  commentId: T:System.Threading.Tasks.Task{System.String}
+  parent: System.Threading.Tasks
+  definition: System.Threading.Tasks.Task`1
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<string>
+  nameWithType: Task<string>
+  fullName: System.Threading.Tasks.Task<string>
+  nameWithType.vb: Task(Of String)
+  fullName.vb: System.Threading.Tasks.Task(Of String)
+  name.vb: Task(Of String)
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+- uid: Agibuild.Fulora.IThemeService.GetHighContrastMode*
+  commentId: Overload:Agibuild.Fulora.IThemeService.GetHighContrastMode
+  href: Agibuild.Fulora.IThemeService.html#Agibuild_Fulora_IThemeService_GetHighContrastMode
+  name: GetHighContrastMode
+  nameWithType: IThemeService.GetHighContrastMode
+  fullName: Agibuild.Fulora.IThemeService.GetHighContrastMode
+- uid: System.Threading.Tasks.Task{System.Boolean}
+  commentId: T:System.Threading.Tasks.Task{System.Boolean}
+  parent: System.Threading.Tasks
+  definition: System.Threading.Tasks.Task`1
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  name: Task<bool>
+  nameWithType: Task<bool>
+  fullName: System.Threading.Tasks.Task<bool>
+  nameWithType.vb: Task(Of Boolean)
+  fullName.vb: System.Threading.Tasks.Task(Of Boolean)
+  name.vb: Task(Of Boolean)
+  spec.csharp:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: <
+  - uid: System.Boolean
+    name: bool
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.boolean
+  - name: '>'
+  spec.vb:
+  - uid: System.Threading.Tasks.Task`1
+    name: Task
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.Boolean
+    name: Boolean
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.boolean
+  - name: )
+- uid: Agibuild.Fulora.IThemeService.ThemeChanged*
+  commentId: Overload:Agibuild.Fulora.IThemeService.ThemeChanged
+  href: Agibuild.Fulora.IThemeService.html#Agibuild_Fulora_IThemeService_ThemeChanged
+  name: ThemeChanged
+  nameWithType: IThemeService.ThemeChanged
+  fullName: Agibuild.Fulora.IThemeService.ThemeChanged
+- uid: Agibuild.Fulora.IBridgeEvent{Agibuild.Fulora.ThemeChangedEvent}
+  commentId: T:Agibuild.Fulora.IBridgeEvent{Agibuild.Fulora.ThemeChangedEvent}
+  parent: Agibuild.Fulora
+  definition: Agibuild.Fulora.IBridgeEvent`1
+  href: Agibuild.Fulora.IBridgeEvent-1.html
+  name: IBridgeEvent<ThemeChangedEvent>
+  nameWithType: IBridgeEvent<ThemeChangedEvent>
+  fullName: Agibuild.Fulora.IBridgeEvent<Agibuild.Fulora.ThemeChangedEvent>
+  nameWithType.vb: IBridgeEvent(Of ThemeChangedEvent)
+  fullName.vb: Agibuild.Fulora.IBridgeEvent(Of Agibuild.Fulora.ThemeChangedEvent)
+  name.vb: IBridgeEvent(Of ThemeChangedEvent)
+  spec.csharp:
+  - uid: Agibuild.Fulora.IBridgeEvent`1
+    name: IBridgeEvent
+    href: Agibuild.Fulora.IBridgeEvent-1.html
+  - name: <
+  - uid: Agibuild.Fulora.ThemeChangedEvent
+    name: ThemeChangedEvent
+    href: Agibuild.Fulora.ThemeChangedEvent.html
+  - name: '>'
+  spec.vb:
+  - uid: Agibuild.Fulora.IBridgeEvent`1
+    name: IBridgeEvent
+    href: Agibuild.Fulora.IBridgeEvent-1.html
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: Agibuild.Fulora.ThemeChangedEvent
+    name: ThemeChangedEvent
+    href: Agibuild.Fulora.ThemeChangedEvent.html
+  - name: )
+- uid: Agibuild.Fulora.IBridgeEvent`1
+  commentId: T:Agibuild.Fulora.IBridgeEvent`1
+  href: Agibuild.Fulora.IBridgeEvent-1.html
+  name: IBridgeEvent<T>
+  nameWithType: IBridgeEvent<T>
+  fullName: Agibuild.Fulora.IBridgeEvent<T>
+  nameWithType.vb: IBridgeEvent(Of T)
+  fullName.vb: Agibuild.Fulora.IBridgeEvent(Of T)
+  name.vb: IBridgeEvent(Of T)
+  spec.csharp:
+  - uid: Agibuild.Fulora.IBridgeEvent`1
+    name: IBridgeEvent
+    href: Agibuild.Fulora.IBridgeEvent-1.html
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: Agibuild.Fulora.IBridgeEvent`1
+    name: IBridgeEvent
+    href: Agibuild.Fulora.IBridgeEvent-1.html
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )

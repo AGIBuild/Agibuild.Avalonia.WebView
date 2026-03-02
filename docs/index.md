@@ -17,6 +17,14 @@ Use this page as the entry point based on what you want to do next.
 - **Check product direction and phases**: [Roadmap](../openspec/ROADMAP.md)
 - **Review goals and positioning**: [Project Vision & Goals](../openspec/PROJECT.md)
 
+## Developer Resources
+
+- **[CLI Reference](cli.md)** — `fulora new`, `dev`, `generate types`, `add service`
+- **[Bridge DevTools Panel](bridge-devtools-panel.md)** — In-app debug overlay for bridge call inspection
+- **[Plugin Authoring Guide](plugin-authoring-guide.md)** — Create and publish bridge plugins (NuGet + npm)
+- **[Documentation Site Deployment](docs-site-deploy.md)** — How the docs site is built and deployed
+- **[Release Checklist](release-checklist.md)** — Steps for publishing a new release
+
 ## Features
 
 - **Type-Safe Bridge**: `[JsExport]` / `[JsImport]` attributes with Roslyn Source Generator for AOT-compatible C# ↔ JS interop

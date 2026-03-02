@@ -1,0 +1,531 @@
+### YamlMime:ManagedReference
+items:
+- uid: Agibuild.Fulora.WebMessageDropDiagnostic
+  commentId: T:Agibuild.Fulora.WebMessageDropDiagnostic
+  id: WebMessageDropDiagnostic
+  parent: Agibuild.Fulora
+  children:
+  - Agibuild.Fulora.WebMessageDropDiagnostic.#ctor(Agibuild.Fulora.WebMessageDropReason,System.String,System.Guid)
+  - Agibuild.Fulora.WebMessageDropDiagnostic.ChannelId
+  - Agibuild.Fulora.WebMessageDropDiagnostic.Origin
+  - Agibuild.Fulora.WebMessageDropDiagnostic.Reason
+  langs:
+  - csharp
+  - vb
+  name: WebMessageDropDiagnostic
+  nameWithType: WebMessageDropDiagnostic
+  fullName: Agibuild.Fulora.WebMessageDropDiagnostic
+  type: Struct
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/WebViewContracts.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: WebMessageDropDiagnostic
+    path: ../src/Agibuild.Fulora.Core/WebViewContracts.cs
+    startLine: 392
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Diagnostic payload describing a dropped WebMessage.
+  example: []
+  syntax:
+    content: 'public readonly record struct WebMessageDropDiagnostic : IEquatable<WebMessageDropDiagnostic>'
+    content.vb: Public Structure WebMessageDropDiagnostic Implements IEquatable(Of WebMessageDropDiagnostic)
+  implements:
+  - System.IEquatable{Agibuild.Fulora.WebMessageDropDiagnostic}
+  inheritedMembers:
+  - System.ValueType.Equals(System.Object)
+  - System.ValueType.GetHashCode
+  - System.ValueType.ToString
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.GetType
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+- uid: Agibuild.Fulora.WebMessageDropDiagnostic.#ctor(Agibuild.Fulora.WebMessageDropReason,System.String,System.Guid)
+  commentId: M:Agibuild.Fulora.WebMessageDropDiagnostic.#ctor(Agibuild.Fulora.WebMessageDropReason,System.String,System.Guid)
+  id: '#ctor(Agibuild.Fulora.WebMessageDropReason,System.String,System.Guid)'
+  parent: Agibuild.Fulora.WebMessageDropDiagnostic
+  langs:
+  - csharp
+  - vb
+  name: WebMessageDropDiagnostic(WebMessageDropReason, string, Guid)
+  nameWithType: WebMessageDropDiagnostic.WebMessageDropDiagnostic(WebMessageDropReason, string, Guid)
+  fullName: Agibuild.Fulora.WebMessageDropDiagnostic.WebMessageDropDiagnostic(Agibuild.Fulora.WebMessageDropReason, string, System.Guid)
+  type: Constructor
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/WebViewContracts.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: .ctor
+    path: ../src/Agibuild.Fulora.Core/WebViewContracts.cs
+    startLine: 392
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Diagnostic payload describing a dropped WebMessage.
+  example: []
+  syntax:
+    content: public WebMessageDropDiagnostic(WebMessageDropReason Reason, string Origin, Guid ChannelId)
+    parameters:
+    - id: Reason
+      type: Agibuild.Fulora.WebMessageDropReason
+      description: Drop reason.
+    - id: Origin
+      type: System.String
+      description: Message origin.
+    - id: ChannelId
+      type: System.Guid
+      description: Message channel id.
+    content.vb: Public Sub New(Reason As WebMessageDropReason, Origin As String, ChannelId As Guid)
+  overload: Agibuild.Fulora.WebMessageDropDiagnostic.#ctor*
+  nameWithType.vb: WebMessageDropDiagnostic.New(WebMessageDropReason, String, Guid)
+  fullName.vb: Agibuild.Fulora.WebMessageDropDiagnostic.New(Agibuild.Fulora.WebMessageDropReason, String, System.Guid)
+  name.vb: New(WebMessageDropReason, String, Guid)
+- uid: Agibuild.Fulora.WebMessageDropDiagnostic.Reason
+  commentId: P:Agibuild.Fulora.WebMessageDropDiagnostic.Reason
+  id: Reason
+  parent: Agibuild.Fulora.WebMessageDropDiagnostic
+  langs:
+  - csharp
+  - vb
+  name: Reason
+  nameWithType: WebMessageDropDiagnostic.Reason
+  fullName: Agibuild.Fulora.WebMessageDropDiagnostic.Reason
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/WebViewContracts.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Reason
+    path: ../src/Agibuild.Fulora.Core/WebViewContracts.cs
+    startLine: 392
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Drop reason.
+  example: []
+  syntax:
+    content: public WebMessageDropReason Reason { get; init; }
+    parameters: []
+    return:
+      type: Agibuild.Fulora.WebMessageDropReason
+    content.vb: Public Property Reason As WebMessageDropReason
+  overload: Agibuild.Fulora.WebMessageDropDiagnostic.Reason*
+- uid: Agibuild.Fulora.WebMessageDropDiagnostic.Origin
+  commentId: P:Agibuild.Fulora.WebMessageDropDiagnostic.Origin
+  id: Origin
+  parent: Agibuild.Fulora.WebMessageDropDiagnostic
+  langs:
+  - csharp
+  - vb
+  name: Origin
+  nameWithType: WebMessageDropDiagnostic.Origin
+  fullName: Agibuild.Fulora.WebMessageDropDiagnostic.Origin
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/WebViewContracts.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Origin
+    path: ../src/Agibuild.Fulora.Core/WebViewContracts.cs
+    startLine: 392
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Message origin.
+  example: []
+  syntax:
+    content: public string Origin { get; init; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property Origin As String
+  overload: Agibuild.Fulora.WebMessageDropDiagnostic.Origin*
+- uid: Agibuild.Fulora.WebMessageDropDiagnostic.ChannelId
+  commentId: P:Agibuild.Fulora.WebMessageDropDiagnostic.ChannelId
+  id: ChannelId
+  parent: Agibuild.Fulora.WebMessageDropDiagnostic
+  langs:
+  - csharp
+  - vb
+  name: ChannelId
+  nameWithType: WebMessageDropDiagnostic.ChannelId
+  fullName: Agibuild.Fulora.WebMessageDropDiagnostic.ChannelId
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/WebViewContracts.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: ChannelId
+    path: ../src/Agibuild.Fulora.Core/WebViewContracts.cs
+    startLine: 392
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Message channel id.
+  example: []
+  syntax:
+    content: public Guid ChannelId { get; init; }
+    parameters: []
+    return:
+      type: System.Guid
+    content.vb: Public Property ChannelId As Guid
+  overload: Agibuild.Fulora.WebMessageDropDiagnostic.ChannelId*
+references:
+- uid: Agibuild.Fulora
+  commentId: N:Agibuild.Fulora
+  href: Agibuild.html
+  name: Agibuild.Fulora
+  nameWithType: Agibuild.Fulora
+  fullName: Agibuild.Fulora
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+- uid: System.IEquatable{Agibuild.Fulora.WebMessageDropDiagnostic}
+  commentId: T:System.IEquatable{Agibuild.Fulora.WebMessageDropDiagnostic}
+  parent: System
+  definition: System.IEquatable`1
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  name: IEquatable<WebMessageDropDiagnostic>
+  nameWithType: IEquatable<WebMessageDropDiagnostic>
+  fullName: System.IEquatable<Agibuild.Fulora.WebMessageDropDiagnostic>
+  nameWithType.vb: IEquatable(Of WebMessageDropDiagnostic)
+  fullName.vb: System.IEquatable(Of Agibuild.Fulora.WebMessageDropDiagnostic)
+  name.vb: IEquatable(Of WebMessageDropDiagnostic)
+  spec.csharp:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: <
+  - uid: Agibuild.Fulora.WebMessageDropDiagnostic
+    name: WebMessageDropDiagnostic
+    href: Agibuild.Fulora.WebMessageDropDiagnostic.html
+  - name: '>'
+  spec.vb:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: Agibuild.Fulora.WebMessageDropDiagnostic
+    name: WebMessageDropDiagnostic
+    href: Agibuild.Fulora.WebMessageDropDiagnostic.html
+  - name: )
+- uid: System.ValueType.Equals(System.Object)
+  commentId: M:System.ValueType.Equals(System.Object)
+  parent: System.ValueType
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.valuetype.equals
+  name: Equals(object)
+  nameWithType: ValueType.Equals(object)
+  fullName: System.ValueType.Equals(object)
+  nameWithType.vb: ValueType.Equals(Object)
+  fullName.vb: System.ValueType.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.ValueType.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetype.equals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.ValueType.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetype.equals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.ValueType.GetHashCode
+  commentId: M:System.ValueType.GetHashCode
+  parent: System.ValueType
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.valuetype.gethashcode
+  name: GetHashCode()
+  nameWithType: ValueType.GetHashCode()
+  fullName: System.ValueType.GetHashCode()
+  spec.csharp:
+  - uid: System.ValueType.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetype.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.ValueType.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetype.gethashcode
+  - name: (
+  - name: )
+- uid: System.ValueType.ToString
+  commentId: M:System.ValueType.ToString
+  parent: System.ValueType
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.valuetype.tostring
+  name: ToString()
+  nameWithType: ValueType.ToString()
+  fullName: System.ValueType.ToString()
+  spec.csharp:
+  - uid: System.ValueType.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetype.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.ValueType.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetype.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.IEquatable`1
+  commentId: T:System.IEquatable`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  name: IEquatable<T>
+  nameWithType: IEquatable<T>
+  fullName: System.IEquatable<T>
+  nameWithType.vb: IEquatable(Of T)
+  fullName.vb: System.IEquatable(Of T)
+  name.vb: IEquatable(Of T)
+  spec.csharp:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: System.ValueType
+  commentId: T:System.ValueType
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.valuetype
+  name: ValueType
+  nameWithType: ValueType
+  fullName: System.ValueType
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: Agibuild.Fulora.WebMessageDropDiagnostic.#ctor*
+  commentId: Overload:Agibuild.Fulora.WebMessageDropDiagnostic.#ctor
+  href: Agibuild.Fulora.WebMessageDropDiagnostic.html#Agibuild_Fulora_WebMessageDropDiagnostic__ctor_Agibuild_Fulora_WebMessageDropReason_System_String_System_Guid_
+  name: WebMessageDropDiagnostic
+  nameWithType: WebMessageDropDiagnostic.WebMessageDropDiagnostic
+  fullName: Agibuild.Fulora.WebMessageDropDiagnostic.WebMessageDropDiagnostic
+  nameWithType.vb: WebMessageDropDiagnostic.New
+  fullName.vb: Agibuild.Fulora.WebMessageDropDiagnostic.New
+  name.vb: New
+- uid: Agibuild.Fulora.WebMessageDropReason
+  commentId: T:Agibuild.Fulora.WebMessageDropReason
+  parent: Agibuild.Fulora
+  href: Agibuild.Fulora.WebMessageDropReason.html
+  name: WebMessageDropReason
+  nameWithType: WebMessageDropReason
+  fullName: Agibuild.Fulora.WebMessageDropReason
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: System.Guid
+  commentId: T:System.Guid
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.guid
+  name: Guid
+  nameWithType: Guid
+  fullName: System.Guid
+- uid: Agibuild.Fulora.WebMessageDropDiagnostic.Reason*
+  commentId: Overload:Agibuild.Fulora.WebMessageDropDiagnostic.Reason
+  href: Agibuild.Fulora.WebMessageDropDiagnostic.html#Agibuild_Fulora_WebMessageDropDiagnostic_Reason
+  name: Reason
+  nameWithType: WebMessageDropDiagnostic.Reason
+  fullName: Agibuild.Fulora.WebMessageDropDiagnostic.Reason
+- uid: Agibuild.Fulora.WebMessageDropDiagnostic.Origin*
+  commentId: Overload:Agibuild.Fulora.WebMessageDropDiagnostic.Origin
+  href: Agibuild.Fulora.WebMessageDropDiagnostic.html#Agibuild_Fulora_WebMessageDropDiagnostic_Origin
+  name: Origin
+  nameWithType: WebMessageDropDiagnostic.Origin
+  fullName: Agibuild.Fulora.WebMessageDropDiagnostic.Origin
+- uid: Agibuild.Fulora.WebMessageDropDiagnostic.ChannelId*
+  commentId: Overload:Agibuild.Fulora.WebMessageDropDiagnostic.ChannelId
+  href: Agibuild.Fulora.WebMessageDropDiagnostic.html#Agibuild_Fulora_WebMessageDropDiagnostic_ChannelId
+  name: ChannelId
+  nameWithType: WebMessageDropDiagnostic.ChannelId
+  fullName: Agibuild.Fulora.WebMessageDropDiagnostic.ChannelId

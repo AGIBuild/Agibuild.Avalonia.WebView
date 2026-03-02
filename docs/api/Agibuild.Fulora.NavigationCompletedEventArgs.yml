@@ -1,0 +1,574 @@
+### YamlMime:ManagedReference
+items:
+- uid: Agibuild.Fulora.NavigationCompletedEventArgs
+  commentId: T:Agibuild.Fulora.NavigationCompletedEventArgs
+  id: NavigationCompletedEventArgs
+  parent: Agibuild.Fulora
+  children:
+  - Agibuild.Fulora.NavigationCompletedEventArgs.#ctor
+  - Agibuild.Fulora.NavigationCompletedEventArgs.#ctor(System.Guid,System.Uri,Agibuild.Fulora.NavigationCompletedStatus,System.Exception)
+  - Agibuild.Fulora.NavigationCompletedEventArgs.Error
+  - Agibuild.Fulora.NavigationCompletedEventArgs.NavigationId
+  - Agibuild.Fulora.NavigationCompletedEventArgs.RequestUri
+  - Agibuild.Fulora.NavigationCompletedEventArgs.Status
+  langs:
+  - csharp
+  - vb
+  name: NavigationCompletedEventArgs
+  nameWithType: NavigationCompletedEventArgs
+  fullName: Agibuild.Fulora.NavigationCompletedEventArgs
+  type: Class
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/WebViewContracts.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: NavigationCompletedEventArgs
+    path: ../src/Agibuild.Fulora.Core/WebViewContracts.cs
+    startLine: 694
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Event args raised when a navigation completes.
+  example: []
+  syntax:
+    content: 'public sealed class NavigationCompletedEventArgs : EventArgs'
+    content.vb: Public NotInheritable Class NavigationCompletedEventArgs Inherits EventArgs
+  inheritance:
+  - System.Object
+  - System.EventArgs
+  inheritedMembers:
+  - System.EventArgs.Empty
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.GetHashCode
+  - System.Object.GetType
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.ToString
+- uid: Agibuild.Fulora.NavigationCompletedEventArgs.#ctor
+  commentId: M:Agibuild.Fulora.NavigationCompletedEventArgs.#ctor
+  id: '#ctor'
+  parent: Agibuild.Fulora.NavigationCompletedEventArgs
+  langs:
+  - csharp
+  - vb
+  name: NavigationCompletedEventArgs()
+  nameWithType: NavigationCompletedEventArgs.NavigationCompletedEventArgs()
+  fullName: Agibuild.Fulora.NavigationCompletedEventArgs.NavigationCompletedEventArgs()
+  type: Constructor
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/WebViewContracts.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: .ctor
+    path: ../src/Agibuild.Fulora.Core/WebViewContracts.cs
+    startLine: 697
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Creates default event args.
+  example: []
+  syntax:
+    content: public NavigationCompletedEventArgs()
+    content.vb: Public Sub New()
+  overload: Agibuild.Fulora.NavigationCompletedEventArgs.#ctor*
+  nameWithType.vb: NavigationCompletedEventArgs.New()
+  fullName.vb: Agibuild.Fulora.NavigationCompletedEventArgs.New()
+  name.vb: New()
+- uid: Agibuild.Fulora.NavigationCompletedEventArgs.#ctor(System.Guid,System.Uri,Agibuild.Fulora.NavigationCompletedStatus,System.Exception)
+  commentId: M:Agibuild.Fulora.NavigationCompletedEventArgs.#ctor(System.Guid,System.Uri,Agibuild.Fulora.NavigationCompletedStatus,System.Exception)
+  id: '#ctor(System.Guid,System.Uri,Agibuild.Fulora.NavigationCompletedStatus,System.Exception)'
+  parent: Agibuild.Fulora.NavigationCompletedEventArgs
+  langs:
+  - csharp
+  - vb
+  name: NavigationCompletedEventArgs(Guid, Uri, NavigationCompletedStatus, Exception?)
+  nameWithType: NavigationCompletedEventArgs.NavigationCompletedEventArgs(Guid, Uri, NavigationCompletedStatus, Exception?)
+  fullName: Agibuild.Fulora.NavigationCompletedEventArgs.NavigationCompletedEventArgs(System.Guid, System.Uri, Agibuild.Fulora.NavigationCompletedStatus, System.Exception?)
+  type: Constructor
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/WebViewContracts.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: .ctor
+    path: ../src/Agibuild.Fulora.Core/WebViewContracts.cs
+    startLine: 710
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Creates event args for a completed navigation.
+  example: []
+  syntax:
+    content: public NavigationCompletedEventArgs(Guid navigationId, Uri requestUri, NavigationCompletedStatus status, Exception? error)
+    parameters:
+    - id: navigationId
+      type: System.Guid
+      description: Navigation correlation id.
+    - id: requestUri
+      type: System.Uri
+      description: The request URI.
+    - id: status
+      type: Agibuild.Fulora.NavigationCompletedStatus
+      description: Completion status.
+    - id: error
+      type: System.Exception
+      description: Failure exception when <code class="paramref">status</code> is <xref href="Agibuild.Fulora.NavigationCompletedStatus.Failure" data-throw-if-not-resolved="false"></xref>.
+    content.vb: Public Sub New(navigationId As Guid, requestUri As Uri, status As NavigationCompletedStatus, [error] As Exception)
+  overload: Agibuild.Fulora.NavigationCompletedEventArgs.#ctor*
+  nameWithType.vb: NavigationCompletedEventArgs.New(Guid, Uri, NavigationCompletedStatus, Exception)
+  fullName.vb: Agibuild.Fulora.NavigationCompletedEventArgs.New(System.Guid, System.Uri, Agibuild.Fulora.NavigationCompletedStatus, System.Exception)
+  name.vb: New(Guid, Uri, NavigationCompletedStatus, Exception)
+- uid: Agibuild.Fulora.NavigationCompletedEventArgs.NavigationId
+  commentId: P:Agibuild.Fulora.NavigationCompletedEventArgs.NavigationId
+  id: NavigationId
+  parent: Agibuild.Fulora.NavigationCompletedEventArgs
+  langs:
+  - csharp
+  - vb
+  name: NavigationId
+  nameWithType: NavigationCompletedEventArgs.NavigationId
+  fullName: Agibuild.Fulora.NavigationCompletedEventArgs.NavigationId
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/WebViewContracts.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: NavigationId
+    path: ../src/Agibuild.Fulora.Core/WebViewContracts.cs
+    startLine: 733
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Navigation correlation id.
+  example: []
+  syntax:
+    content: public Guid NavigationId { get; }
+    parameters: []
+    return:
+      type: System.Guid
+    content.vb: Public ReadOnly Property NavigationId As Guid
+  overload: Agibuild.Fulora.NavigationCompletedEventArgs.NavigationId*
+- uid: Agibuild.Fulora.NavigationCompletedEventArgs.RequestUri
+  commentId: P:Agibuild.Fulora.NavigationCompletedEventArgs.RequestUri
+  id: RequestUri
+  parent: Agibuild.Fulora.NavigationCompletedEventArgs
+  langs:
+  - csharp
+  - vb
+  name: RequestUri
+  nameWithType: NavigationCompletedEventArgs.RequestUri
+  fullName: Agibuild.Fulora.NavigationCompletedEventArgs.RequestUri
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/WebViewContracts.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: RequestUri
+    path: ../src/Agibuild.Fulora.Core/WebViewContracts.cs
+    startLine: 735
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: The requested URI.
+  example: []
+  syntax:
+    content: public Uri RequestUri { get; }
+    parameters: []
+    return:
+      type: System.Uri
+    content.vb: Public ReadOnly Property RequestUri As Uri
+  overload: Agibuild.Fulora.NavigationCompletedEventArgs.RequestUri*
+- uid: Agibuild.Fulora.NavigationCompletedEventArgs.Status
+  commentId: P:Agibuild.Fulora.NavigationCompletedEventArgs.Status
+  id: Status
+  parent: Agibuild.Fulora.NavigationCompletedEventArgs
+  langs:
+  - csharp
+  - vb
+  name: Status
+  nameWithType: NavigationCompletedEventArgs.Status
+  fullName: Agibuild.Fulora.NavigationCompletedEventArgs.Status
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/WebViewContracts.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Status
+    path: ../src/Agibuild.Fulora.Core/WebViewContracts.cs
+    startLine: 737
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Completion status.
+  example: []
+  syntax:
+    content: public NavigationCompletedStatus Status { get; }
+    parameters: []
+    return:
+      type: Agibuild.Fulora.NavigationCompletedStatus
+    content.vb: Public ReadOnly Property Status As NavigationCompletedStatus
+  overload: Agibuild.Fulora.NavigationCompletedEventArgs.Status*
+- uid: Agibuild.Fulora.NavigationCompletedEventArgs.Error
+  commentId: P:Agibuild.Fulora.NavigationCompletedEventArgs.Error
+  id: Error
+  parent: Agibuild.Fulora.NavigationCompletedEventArgs
+  langs:
+  - csharp
+  - vb
+  name: Error
+  nameWithType: NavigationCompletedEventArgs.Error
+  fullName: Agibuild.Fulora.NavigationCompletedEventArgs.Error
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/WebViewContracts.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Error
+    path: ../src/Agibuild.Fulora.Core/WebViewContracts.cs
+    startLine: 739
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Failure exception when <xref href="Agibuild.Fulora.NavigationCompletedEventArgs.Status" data-throw-if-not-resolved="false"></xref> is <xref href="Agibuild.Fulora.NavigationCompletedStatus.Failure" data-throw-if-not-resolved="false"></xref>.
+  example: []
+  syntax:
+    content: public Exception? Error { get; }
+    parameters: []
+    return:
+      type: System.Exception
+    content.vb: Public ReadOnly Property [Error] As Exception
+  overload: Agibuild.Fulora.NavigationCompletedEventArgs.Error*
+references:
+- uid: Agibuild.Fulora
+  commentId: N:Agibuild.Fulora
+  href: Agibuild.html
+  name: Agibuild.Fulora
+  nameWithType: Agibuild.Fulora
+  fullName: Agibuild.Fulora
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.EventArgs
+  commentId: T:System.EventArgs
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.eventargs
+  name: EventArgs
+  nameWithType: EventArgs
+  fullName: System.EventArgs
+- uid: System.EventArgs.Empty
+  commentId: F:System.EventArgs.Empty
+  parent: System.EventArgs
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.eventargs.empty
+  name: Empty
+  nameWithType: EventArgs.Empty
+  fullName: System.EventArgs.Empty
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: Agibuild.Fulora.NavigationCompletedEventArgs.#ctor*
+  commentId: Overload:Agibuild.Fulora.NavigationCompletedEventArgs.#ctor
+  href: Agibuild.Fulora.NavigationCompletedEventArgs.html#Agibuild_Fulora_NavigationCompletedEventArgs__ctor
+  name: NavigationCompletedEventArgs
+  nameWithType: NavigationCompletedEventArgs.NavigationCompletedEventArgs
+  fullName: Agibuild.Fulora.NavigationCompletedEventArgs.NavigationCompletedEventArgs
+  nameWithType.vb: NavigationCompletedEventArgs.New
+  fullName.vb: Agibuild.Fulora.NavigationCompletedEventArgs.New
+  name.vb: New
+- uid: Agibuild.Fulora.NavigationCompletedStatus.Failure
+  commentId: F:Agibuild.Fulora.NavigationCompletedStatus.Failure
+  href: Agibuild.Fulora.NavigationCompletedStatus.html#Agibuild_Fulora_NavigationCompletedStatus_Failure
+  name: Failure
+  nameWithType: NavigationCompletedStatus.Failure
+  fullName: Agibuild.Fulora.NavigationCompletedStatus.Failure
+- uid: System.Guid
+  commentId: T:System.Guid
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.guid
+  name: Guid
+  nameWithType: Guid
+  fullName: System.Guid
+- uid: System.Uri
+  commentId: T:System.Uri
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.uri
+  name: Uri
+  nameWithType: Uri
+  fullName: System.Uri
+- uid: Agibuild.Fulora.NavigationCompletedStatus
+  commentId: T:Agibuild.Fulora.NavigationCompletedStatus
+  parent: Agibuild.Fulora
+  href: Agibuild.Fulora.NavigationCompletedStatus.html
+  name: NavigationCompletedStatus
+  nameWithType: NavigationCompletedStatus
+  fullName: Agibuild.Fulora.NavigationCompletedStatus
+- uid: System.Exception
+  commentId: T:System.Exception
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.exception
+  name: Exception
+  nameWithType: Exception
+  fullName: System.Exception
+- uid: Agibuild.Fulora.NavigationCompletedEventArgs.NavigationId*
+  commentId: Overload:Agibuild.Fulora.NavigationCompletedEventArgs.NavigationId
+  href: Agibuild.Fulora.NavigationCompletedEventArgs.html#Agibuild_Fulora_NavigationCompletedEventArgs_NavigationId
+  name: NavigationId
+  nameWithType: NavigationCompletedEventArgs.NavigationId
+  fullName: Agibuild.Fulora.NavigationCompletedEventArgs.NavigationId
+- uid: Agibuild.Fulora.NavigationCompletedEventArgs.RequestUri*
+  commentId: Overload:Agibuild.Fulora.NavigationCompletedEventArgs.RequestUri
+  href: Agibuild.Fulora.NavigationCompletedEventArgs.html#Agibuild_Fulora_NavigationCompletedEventArgs_RequestUri
+  name: RequestUri
+  nameWithType: NavigationCompletedEventArgs.RequestUri
+  fullName: Agibuild.Fulora.NavigationCompletedEventArgs.RequestUri
+- uid: Agibuild.Fulora.NavigationCompletedEventArgs.Status*
+  commentId: Overload:Agibuild.Fulora.NavigationCompletedEventArgs.Status
+  href: Agibuild.Fulora.NavigationCompletedEventArgs.html#Agibuild_Fulora_NavigationCompletedEventArgs_Status
+  name: Status
+  nameWithType: NavigationCompletedEventArgs.Status
+  fullName: Agibuild.Fulora.NavigationCompletedEventArgs.Status
+- uid: Agibuild.Fulora.NavigationCompletedEventArgs.Status
+  commentId: P:Agibuild.Fulora.NavigationCompletedEventArgs.Status
+  href: Agibuild.Fulora.NavigationCompletedEventArgs.html#Agibuild_Fulora_NavigationCompletedEventArgs_Status
+  name: Status
+  nameWithType: NavigationCompletedEventArgs.Status
+  fullName: Agibuild.Fulora.NavigationCompletedEventArgs.Status
+- uid: Agibuild.Fulora.NavigationCompletedEventArgs.Error*
+  commentId: Overload:Agibuild.Fulora.NavigationCompletedEventArgs.Error
+  href: Agibuild.Fulora.NavigationCompletedEventArgs.html#Agibuild_Fulora_NavigationCompletedEventArgs_Error
+  name: Error
+  nameWithType: NavigationCompletedEventArgs.Error
+  fullName: Agibuild.Fulora.NavigationCompletedEventArgs.Error

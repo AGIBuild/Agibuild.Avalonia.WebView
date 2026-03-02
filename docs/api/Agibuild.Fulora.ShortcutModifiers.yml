@@ -1,0 +1,215 @@
+### YamlMime:ManagedReference
+items:
+- uid: Agibuild.Fulora.ShortcutModifiers
+  commentId: T:Agibuild.Fulora.ShortcutModifiers
+  id: ShortcutModifiers
+  parent: Agibuild.Fulora
+  children:
+  - Agibuild.Fulora.ShortcutModifiers.Alt
+  - Agibuild.Fulora.ShortcutModifiers.Ctrl
+  - Agibuild.Fulora.ShortcutModifiers.Meta
+  - Agibuild.Fulora.ShortcutModifiers.None
+  - Agibuild.Fulora.ShortcutModifiers.Shift
+  langs:
+  - csharp
+  - vb
+  name: ShortcutModifiers
+  nameWithType: ShortcutModifiers
+  fullName: Agibuild.Fulora.ShortcutModifiers
+  type: Enum
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: ShortcutModifiers
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 63
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Modifier key flags for global shortcut registration.
+  example: []
+  syntax:
+    content: >-
+      [Flags]
+
+      public enum ShortcutModifiers
+    content.vb: >-
+      <Flags>
+
+      Public Enum ShortcutModifiers
+  attributes:
+  - type: System.FlagsAttribute
+    ctor: System.FlagsAttribute.#ctor
+    arguments: []
+- uid: Agibuild.Fulora.ShortcutModifiers.None
+  commentId: F:Agibuild.Fulora.ShortcutModifiers.None
+  id: None
+  parent: Agibuild.Fulora.ShortcutModifiers
+  langs:
+  - csharp
+  - vb
+  name: None
+  nameWithType: ShortcutModifiers.None
+  fullName: Agibuild.Fulora.ShortcutModifiers.None
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: None
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 67
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: No modifier keys.
+  example: []
+  syntax:
+    content: None = 0
+    return:
+      type: Agibuild.Fulora.ShortcutModifiers
+- uid: Agibuild.Fulora.ShortcutModifiers.Ctrl
+  commentId: F:Agibuild.Fulora.ShortcutModifiers.Ctrl
+  id: Ctrl
+  parent: Agibuild.Fulora.ShortcutModifiers
+  langs:
+  - csharp
+  - vb
+  name: Ctrl
+  nameWithType: ShortcutModifiers.Ctrl
+  fullName: Agibuild.Fulora.ShortcutModifiers.Ctrl
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Ctrl
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 69
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Ctrl key (Control on macOS).
+  example: []
+  syntax:
+    content: Ctrl = 1
+    return:
+      type: Agibuild.Fulora.ShortcutModifiers
+- uid: Agibuild.Fulora.ShortcutModifiers.Alt
+  commentId: F:Agibuild.Fulora.ShortcutModifiers.Alt
+  id: Alt
+  parent: Agibuild.Fulora.ShortcutModifiers
+  langs:
+  - csharp
+  - vb
+  name: Alt
+  nameWithType: ShortcutModifiers.Alt
+  fullName: Agibuild.Fulora.ShortcutModifiers.Alt
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Alt
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 71
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Alt key (Option on macOS).
+  example: []
+  syntax:
+    content: Alt = 2
+    return:
+      type: Agibuild.Fulora.ShortcutModifiers
+- uid: Agibuild.Fulora.ShortcutModifiers.Shift
+  commentId: F:Agibuild.Fulora.ShortcutModifiers.Shift
+  id: Shift
+  parent: Agibuild.Fulora.ShortcutModifiers
+  langs:
+  - csharp
+  - vb
+  name: Shift
+  nameWithType: ShortcutModifiers.Shift
+  fullName: Agibuild.Fulora.ShortcutModifiers.Shift
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Shift
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 73
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Shift key.
+  example: []
+  syntax:
+    content: Shift = 4
+    return:
+      type: Agibuild.Fulora.ShortcutModifiers
+- uid: Agibuild.Fulora.ShortcutModifiers.Meta
+  commentId: F:Agibuild.Fulora.ShortcutModifiers.Meta
+  id: Meta
+  parent: Agibuild.Fulora.ShortcutModifiers
+  langs:
+  - csharp
+  - vb
+  name: Meta
+  nameWithType: ShortcutModifiers.Meta
+  fullName: Agibuild.Fulora.ShortcutModifiers.Meta
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Meta
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 75
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Meta key (Cmd on macOS, Win on Windows, Super on Linux).
+  example: []
+  syntax:
+    content: Meta = 8
+    return:
+      type: Agibuild.Fulora.ShortcutModifiers
+references:
+- uid: Agibuild.Fulora
+  commentId: N:Agibuild.Fulora
+  href: Agibuild.html
+  name: Agibuild.Fulora
+  nameWithType: Agibuild.Fulora
+  fullName: Agibuild.Fulora
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+- uid: Agibuild.Fulora.ShortcutModifiers
+  commentId: T:Agibuild.Fulora.ShortcutModifiers
+  parent: Agibuild.Fulora
+  href: Agibuild.Fulora.ShortcutModifiers.html
+  name: ShortcutModifiers
+  nameWithType: ShortcutModifiers
+  fullName: Agibuild.Fulora.ShortcutModifiers

@@ -1,0 +1,881 @@
+### YamlMime:ManagedReference
+items:
+- uid: Agibuild.Fulora.NullTelemetryProvider
+  commentId: T:Agibuild.Fulora.NullTelemetryProvider
+  id: NullTelemetryProvider
+  parent: Agibuild.Fulora
+  children:
+  - Agibuild.Fulora.NullTelemetryProvider.Flush
+  - Agibuild.Fulora.NullTelemetryProvider.Instance
+  - Agibuild.Fulora.NullTelemetryProvider.TrackEvent(System.String,System.Collections.Generic.IDictionary{System.String,System.String})
+  - Agibuild.Fulora.NullTelemetryProvider.TrackException(System.Exception,System.Collections.Generic.IDictionary{System.String,System.String})
+  - Agibuild.Fulora.NullTelemetryProvider.TrackMetric(System.String,System.Double,System.Collections.Generic.IDictionary{System.String,System.String})
+  langs:
+  - csharp
+  - vb
+  name: NullTelemetryProvider
+  nameWithType: NullTelemetryProvider
+  fullName: Agibuild.Fulora.NullTelemetryProvider
+  type: Class
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ITelemetryProvider.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: NullTelemetryProvider
+    path: ../src/Agibuild.Fulora.Core/ITelemetryProvider.cs
+    startLine: 23
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: A no-op telemetry provider that discards all events.
+  example: []
+  syntax:
+    content: 'public sealed class NullTelemetryProvider : ITelemetryProvider'
+    content.vb: Public NotInheritable Class NullTelemetryProvider Implements ITelemetryProvider
+  inheritance:
+  - System.Object
+  implements:
+  - Agibuild.Fulora.ITelemetryProvider
+  inheritedMembers:
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.GetHashCode
+  - System.Object.GetType
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.ToString
+- uid: Agibuild.Fulora.NullTelemetryProvider.Instance
+  commentId: F:Agibuild.Fulora.NullTelemetryProvider.Instance
+  id: Instance
+  parent: Agibuild.Fulora.NullTelemetryProvider
+  langs:
+  - csharp
+  - vb
+  name: Instance
+  nameWithType: NullTelemetryProvider.Instance
+  fullName: Agibuild.Fulora.NullTelemetryProvider.Instance
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ITelemetryProvider.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Instance
+    path: ../src/Agibuild.Fulora.Core/ITelemetryProvider.cs
+    startLine: 26
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Singleton instance.
+  example: []
+  syntax:
+    content: public static readonly NullTelemetryProvider Instance
+    return:
+      type: Agibuild.Fulora.NullTelemetryProvider
+    content.vb: Public Shared ReadOnly Instance As NullTelemetryProvider
+- uid: Agibuild.Fulora.NullTelemetryProvider.TrackEvent(System.String,System.Collections.Generic.IDictionary{System.String,System.String})
+  commentId: M:Agibuild.Fulora.NullTelemetryProvider.TrackEvent(System.String,System.Collections.Generic.IDictionary{System.String,System.String})
+  id: TrackEvent(System.String,System.Collections.Generic.IDictionary{System.String,System.String})
+  parent: Agibuild.Fulora.NullTelemetryProvider
+  langs:
+  - csharp
+  - vb
+  name: TrackEvent(string, IDictionary<string, string>?)
+  nameWithType: NullTelemetryProvider.TrackEvent(string, IDictionary<string, string>?)
+  fullName: Agibuild.Fulora.NullTelemetryProvider.TrackEvent(string, System.Collections.Generic.IDictionary<string, string>?)
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ITelemetryProvider.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: TrackEvent
+    path: ../src/Agibuild.Fulora.Core/ITelemetryProvider.cs
+    startLine: 29
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Tracks a named event with optional properties.
+  example: []
+  syntax:
+    content: public void TrackEvent(string name, IDictionary<string, string>? properties = null)
+    parameters:
+    - id: name
+      type: System.String
+    - id: properties
+      type: System.Collections.Generic.IDictionary{System.String,System.String}
+    content.vb: Public Sub TrackEvent(name As String, properties As IDictionary(Of String, String) = Nothing)
+  overload: Agibuild.Fulora.NullTelemetryProvider.TrackEvent*
+  implements:
+  - Agibuild.Fulora.ITelemetryProvider.TrackEvent(System.String,System.Collections.Generic.IDictionary{System.String,System.String})
+  nameWithType.vb: NullTelemetryProvider.TrackEvent(String, IDictionary(Of String, String))
+  fullName.vb: Agibuild.Fulora.NullTelemetryProvider.TrackEvent(String, System.Collections.Generic.IDictionary(Of String, String))
+  name.vb: TrackEvent(String, IDictionary(Of String, String))
+- uid: Agibuild.Fulora.NullTelemetryProvider.TrackMetric(System.String,System.Double,System.Collections.Generic.IDictionary{System.String,System.String})
+  commentId: M:Agibuild.Fulora.NullTelemetryProvider.TrackMetric(System.String,System.Double,System.Collections.Generic.IDictionary{System.String,System.String})
+  id: TrackMetric(System.String,System.Double,System.Collections.Generic.IDictionary{System.String,System.String})
+  parent: Agibuild.Fulora.NullTelemetryProvider
+  langs:
+  - csharp
+  - vb
+  name: TrackMetric(string, double, IDictionary<string, string>?)
+  nameWithType: NullTelemetryProvider.TrackMetric(string, double, IDictionary<string, string>?)
+  fullName: Agibuild.Fulora.NullTelemetryProvider.TrackMetric(string, double, System.Collections.Generic.IDictionary<string, string>?)
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ITelemetryProvider.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: TrackMetric
+    path: ../src/Agibuild.Fulora.Core/ITelemetryProvider.cs
+    startLine: 32
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Tracks a metric with optional dimensions.
+  example: []
+  syntax:
+    content: public void TrackMetric(string name, double value, IDictionary<string, string>? dimensions = null)
+    parameters:
+    - id: name
+      type: System.String
+    - id: value
+      type: System.Double
+    - id: dimensions
+      type: System.Collections.Generic.IDictionary{System.String,System.String}
+    content.vb: Public Sub TrackMetric(name As String, value As Double, dimensions As IDictionary(Of String, String) = Nothing)
+  overload: Agibuild.Fulora.NullTelemetryProvider.TrackMetric*
+  implements:
+  - Agibuild.Fulora.ITelemetryProvider.TrackMetric(System.String,System.Double,System.Collections.Generic.IDictionary{System.String,System.String})
+  nameWithType.vb: NullTelemetryProvider.TrackMetric(String, Double, IDictionary(Of String, String))
+  fullName.vb: Agibuild.Fulora.NullTelemetryProvider.TrackMetric(String, Double, System.Collections.Generic.IDictionary(Of String, String))
+  name.vb: TrackMetric(String, Double, IDictionary(Of String, String))
+- uid: Agibuild.Fulora.NullTelemetryProvider.TrackException(System.Exception,System.Collections.Generic.IDictionary{System.String,System.String})
+  commentId: M:Agibuild.Fulora.NullTelemetryProvider.TrackException(System.Exception,System.Collections.Generic.IDictionary{System.String,System.String})
+  id: TrackException(System.Exception,System.Collections.Generic.IDictionary{System.String,System.String})
+  parent: Agibuild.Fulora.NullTelemetryProvider
+  langs:
+  - csharp
+  - vb
+  name: TrackException(Exception, IDictionary<string, string>?)
+  nameWithType: NullTelemetryProvider.TrackException(Exception, IDictionary<string, string>?)
+  fullName: Agibuild.Fulora.NullTelemetryProvider.TrackException(System.Exception, System.Collections.Generic.IDictionary<string, string>?)
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ITelemetryProvider.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: TrackException
+    path: ../src/Agibuild.Fulora.Core/ITelemetryProvider.cs
+    startLine: 35
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Tracks an exception with optional properties.
+  example: []
+  syntax:
+    content: public void TrackException(Exception exception, IDictionary<string, string>? properties = null)
+    parameters:
+    - id: exception
+      type: System.Exception
+    - id: properties
+      type: System.Collections.Generic.IDictionary{System.String,System.String}
+    content.vb: Public Sub TrackException(exception As Exception, properties As IDictionary(Of String, String) = Nothing)
+  overload: Agibuild.Fulora.NullTelemetryProvider.TrackException*
+  implements:
+  - Agibuild.Fulora.ITelemetryProvider.TrackException(System.Exception,System.Collections.Generic.IDictionary{System.String,System.String})
+  nameWithType.vb: NullTelemetryProvider.TrackException(Exception, IDictionary(Of String, String))
+  fullName.vb: Agibuild.Fulora.NullTelemetryProvider.TrackException(System.Exception, System.Collections.Generic.IDictionary(Of String, String))
+  name.vb: TrackException(Exception, IDictionary(Of String, String))
+- uid: Agibuild.Fulora.NullTelemetryProvider.Flush
+  commentId: M:Agibuild.Fulora.NullTelemetryProvider.Flush
+  id: Flush
+  parent: Agibuild.Fulora.NullTelemetryProvider
+  langs:
+  - csharp
+  - vb
+  name: Flush()
+  nameWithType: NullTelemetryProvider.Flush()
+  fullName: Agibuild.Fulora.NullTelemetryProvider.Flush()
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ITelemetryProvider.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Flush
+    path: ../src/Agibuild.Fulora.Core/ITelemetryProvider.cs
+    startLine: 38
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Flushes any buffered telemetry.
+  example: []
+  syntax:
+    content: public void Flush()
+    content.vb: Public Sub Flush()
+  overload: Agibuild.Fulora.NullTelemetryProvider.Flush*
+  implements:
+  - Agibuild.Fulora.ITelemetryProvider.Flush
+references:
+- uid: Agibuild.Fulora
+  commentId: N:Agibuild.Fulora
+  href: Agibuild.html
+  name: Agibuild.Fulora
+  nameWithType: Agibuild.Fulora
+  fullName: Agibuild.Fulora
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: Agibuild.Fulora.ITelemetryProvider
+  commentId: T:Agibuild.Fulora.ITelemetryProvider
+  parent: Agibuild.Fulora
+  href: Agibuild.Fulora.ITelemetryProvider.html
+  name: ITelemetryProvider
+  nameWithType: ITelemetryProvider
+  fullName: Agibuild.Fulora.ITelemetryProvider
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: Agibuild.Fulora.NullTelemetryProvider
+  commentId: T:Agibuild.Fulora.NullTelemetryProvider
+  parent: Agibuild.Fulora
+  href: Agibuild.Fulora.NullTelemetryProvider.html
+  name: NullTelemetryProvider
+  nameWithType: NullTelemetryProvider
+  fullName: Agibuild.Fulora.NullTelemetryProvider
+- uid: Agibuild.Fulora.NullTelemetryProvider.TrackEvent*
+  commentId: Overload:Agibuild.Fulora.NullTelemetryProvider.TrackEvent
+  href: Agibuild.Fulora.NullTelemetryProvider.html#Agibuild_Fulora_NullTelemetryProvider_TrackEvent_System_String_System_Collections_Generic_IDictionary_System_String_System_String__
+  name: TrackEvent
+  nameWithType: NullTelemetryProvider.TrackEvent
+  fullName: Agibuild.Fulora.NullTelemetryProvider.TrackEvent
+- uid: Agibuild.Fulora.ITelemetryProvider.TrackEvent(System.String,System.Collections.Generic.IDictionary{System.String,System.String})
+  commentId: M:Agibuild.Fulora.ITelemetryProvider.TrackEvent(System.String,System.Collections.Generic.IDictionary{System.String,System.String})
+  parent: Agibuild.Fulora.ITelemetryProvider
+  isExternal: true
+  href: Agibuild.Fulora.ITelemetryProvider.html#Agibuild_Fulora_ITelemetryProvider_TrackEvent_System_String_System_Collections_Generic_IDictionary_System_String_System_String__
+  name: TrackEvent(string, IDictionary<string, string>)
+  nameWithType: ITelemetryProvider.TrackEvent(string, IDictionary<string, string>)
+  fullName: Agibuild.Fulora.ITelemetryProvider.TrackEvent(string, System.Collections.Generic.IDictionary<string, string>)
+  nameWithType.vb: ITelemetryProvider.TrackEvent(String, IDictionary(Of String, String))
+  fullName.vb: Agibuild.Fulora.ITelemetryProvider.TrackEvent(String, System.Collections.Generic.IDictionary(Of String, String))
+  name.vb: TrackEvent(String, IDictionary(Of String, String))
+  spec.csharp:
+  - uid: Agibuild.Fulora.ITelemetryProvider.TrackEvent(System.String,System.Collections.Generic.IDictionary{System.String,System.String})
+    name: TrackEvent
+    href: Agibuild.Fulora.ITelemetryProvider.html#Agibuild_Fulora_ITelemetryProvider_TrackEvent_System_String_System_Collections_Generic_IDictionary_System_String_System_String__
+  - name: (
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.Collections.Generic.IDictionary`2
+    name: IDictionary
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.idictionary-2
+  - name: <
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: '>'
+  - name: )
+  spec.vb:
+  - uid: Agibuild.Fulora.ITelemetryProvider.TrackEvent(System.String,System.Collections.Generic.IDictionary{System.String,System.String})
+    name: TrackEvent
+    href: Agibuild.Fulora.ITelemetryProvider.html#Agibuild_Fulora_ITelemetryProvider_TrackEvent_System_String_System_Collections_Generic_IDictionary_System_String_System_String__
+  - name: (
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.Collections.Generic.IDictionary`2
+    name: IDictionary
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.idictionary-2
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+  - name: )
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: System.Collections.Generic.IDictionary{System.String,System.String}
+  commentId: T:System.Collections.Generic.IDictionary{System.String,System.String}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IDictionary`2
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.idictionary-2
+  name: IDictionary<string, string>
+  nameWithType: IDictionary<string, string>
+  fullName: System.Collections.Generic.IDictionary<string, string>
+  nameWithType.vb: IDictionary(Of String, String)
+  fullName.vb: System.Collections.Generic.IDictionary(Of String, String)
+  name.vb: IDictionary(Of String, String)
+  spec.csharp:
+  - uid: System.Collections.Generic.IDictionary`2
+    name: IDictionary
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.idictionary-2
+  - name: <
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IDictionary`2
+    name: IDictionary
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.idictionary-2
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+- uid: System.Collections.Generic.IDictionary`2
+  commentId: T:System.Collections.Generic.IDictionary`2
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.idictionary-2
+  name: IDictionary<TKey, TValue>
+  nameWithType: IDictionary<TKey, TValue>
+  fullName: System.Collections.Generic.IDictionary<TKey, TValue>
+  nameWithType.vb: IDictionary(Of TKey, TValue)
+  fullName.vb: System.Collections.Generic.IDictionary(Of TKey, TValue)
+  name.vb: IDictionary(Of TKey, TValue)
+  spec.csharp:
+  - uid: System.Collections.Generic.IDictionary`2
+    name: IDictionary
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.idictionary-2
+  - name: <
+  - name: TKey
+  - name: ','
+  - name: " "
+  - name: TValue
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IDictionary`2
+    name: IDictionary
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.idictionary-2
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TKey
+  - name: ','
+  - name: " "
+  - name: TValue
+  - name: )
+- uid: System.Collections.Generic
+  commentId: N:System.Collections.Generic
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Collections.Generic
+  nameWithType: System.Collections.Generic
+  fullName: System.Collections.Generic
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+- uid: Agibuild.Fulora.NullTelemetryProvider.TrackMetric*
+  commentId: Overload:Agibuild.Fulora.NullTelemetryProvider.TrackMetric
+  href: Agibuild.Fulora.NullTelemetryProvider.html#Agibuild_Fulora_NullTelemetryProvider_TrackMetric_System_String_System_Double_System_Collections_Generic_IDictionary_System_String_System_String__
+  name: TrackMetric
+  nameWithType: NullTelemetryProvider.TrackMetric
+  fullName: Agibuild.Fulora.NullTelemetryProvider.TrackMetric
+- uid: Agibuild.Fulora.ITelemetryProvider.TrackMetric(System.String,System.Double,System.Collections.Generic.IDictionary{System.String,System.String})
+  commentId: M:Agibuild.Fulora.ITelemetryProvider.TrackMetric(System.String,System.Double,System.Collections.Generic.IDictionary{System.String,System.String})
+  parent: Agibuild.Fulora.ITelemetryProvider
+  isExternal: true
+  href: Agibuild.Fulora.ITelemetryProvider.html#Agibuild_Fulora_ITelemetryProvider_TrackMetric_System_String_System_Double_System_Collections_Generic_IDictionary_System_String_System_String__
+  name: TrackMetric(string, double, IDictionary<string, string>)
+  nameWithType: ITelemetryProvider.TrackMetric(string, double, IDictionary<string, string>)
+  fullName: Agibuild.Fulora.ITelemetryProvider.TrackMetric(string, double, System.Collections.Generic.IDictionary<string, string>)
+  nameWithType.vb: ITelemetryProvider.TrackMetric(String, Double, IDictionary(Of String, String))
+  fullName.vb: Agibuild.Fulora.ITelemetryProvider.TrackMetric(String, Double, System.Collections.Generic.IDictionary(Of String, String))
+  name.vb: TrackMetric(String, Double, IDictionary(Of String, String))
+  spec.csharp:
+  - uid: Agibuild.Fulora.ITelemetryProvider.TrackMetric(System.String,System.Double,System.Collections.Generic.IDictionary{System.String,System.String})
+    name: TrackMetric
+    href: Agibuild.Fulora.ITelemetryProvider.html#Agibuild_Fulora_ITelemetryProvider_TrackMetric_System_String_System_Double_System_Collections_Generic_IDictionary_System_String_System_String__
+  - name: (
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.Double
+    name: double
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.double
+  - name: ','
+  - name: " "
+  - uid: System.Collections.Generic.IDictionary`2
+    name: IDictionary
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.idictionary-2
+  - name: <
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: '>'
+  - name: )
+  spec.vb:
+  - uid: Agibuild.Fulora.ITelemetryProvider.TrackMetric(System.String,System.Double,System.Collections.Generic.IDictionary{System.String,System.String})
+    name: TrackMetric
+    href: Agibuild.Fulora.ITelemetryProvider.html#Agibuild_Fulora_ITelemetryProvider_TrackMetric_System_String_System_Double_System_Collections_Generic_IDictionary_System_String_System_String__
+  - name: (
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.Double
+    name: Double
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.double
+  - name: ','
+  - name: " "
+  - uid: System.Collections.Generic.IDictionary`2
+    name: IDictionary
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.idictionary-2
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+  - name: )
+- uid: System.Double
+  commentId: T:System.Double
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.double
+  name: double
+  nameWithType: double
+  fullName: double
+  nameWithType.vb: Double
+  fullName.vb: Double
+  name.vb: Double
+- uid: Agibuild.Fulora.NullTelemetryProvider.TrackException*
+  commentId: Overload:Agibuild.Fulora.NullTelemetryProvider.TrackException
+  href: Agibuild.Fulora.NullTelemetryProvider.html#Agibuild_Fulora_NullTelemetryProvider_TrackException_System_Exception_System_Collections_Generic_IDictionary_System_String_System_String__
+  name: TrackException
+  nameWithType: NullTelemetryProvider.TrackException
+  fullName: Agibuild.Fulora.NullTelemetryProvider.TrackException
+- uid: Agibuild.Fulora.ITelemetryProvider.TrackException(System.Exception,System.Collections.Generic.IDictionary{System.String,System.String})
+  commentId: M:Agibuild.Fulora.ITelemetryProvider.TrackException(System.Exception,System.Collections.Generic.IDictionary{System.String,System.String})
+  parent: Agibuild.Fulora.ITelemetryProvider
+  isExternal: true
+  href: Agibuild.Fulora.ITelemetryProvider.html#Agibuild_Fulora_ITelemetryProvider_TrackException_System_Exception_System_Collections_Generic_IDictionary_System_String_System_String__
+  name: TrackException(Exception, IDictionary<string, string>)
+  nameWithType: ITelemetryProvider.TrackException(Exception, IDictionary<string, string>)
+  fullName: Agibuild.Fulora.ITelemetryProvider.TrackException(System.Exception, System.Collections.Generic.IDictionary<string, string>)
+  nameWithType.vb: ITelemetryProvider.TrackException(Exception, IDictionary(Of String, String))
+  fullName.vb: Agibuild.Fulora.ITelemetryProvider.TrackException(System.Exception, System.Collections.Generic.IDictionary(Of String, String))
+  name.vb: TrackException(Exception, IDictionary(Of String, String))
+  spec.csharp:
+  - uid: Agibuild.Fulora.ITelemetryProvider.TrackException(System.Exception,System.Collections.Generic.IDictionary{System.String,System.String})
+    name: TrackException
+    href: Agibuild.Fulora.ITelemetryProvider.html#Agibuild_Fulora_ITelemetryProvider_TrackException_System_Exception_System_Collections_Generic_IDictionary_System_String_System_String__
+  - name: (
+  - uid: System.Exception
+    name: Exception
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.exception
+  - name: ','
+  - name: " "
+  - uid: System.Collections.Generic.IDictionary`2
+    name: IDictionary
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.idictionary-2
+  - name: <
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: '>'
+  - name: )
+  spec.vb:
+  - uid: Agibuild.Fulora.ITelemetryProvider.TrackException(System.Exception,System.Collections.Generic.IDictionary{System.String,System.String})
+    name: TrackException
+    href: Agibuild.Fulora.ITelemetryProvider.html#Agibuild_Fulora_ITelemetryProvider_TrackException_System_Exception_System_Collections_Generic_IDictionary_System_String_System_String__
+  - name: (
+  - uid: System.Exception
+    name: Exception
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.exception
+  - name: ','
+  - name: " "
+  - uid: System.Collections.Generic.IDictionary`2
+    name: IDictionary
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.idictionary-2
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: ','
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+  - name: )
+- uid: System.Exception
+  commentId: T:System.Exception
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.exception
+  name: Exception
+  nameWithType: Exception
+  fullName: System.Exception
+- uid: Agibuild.Fulora.NullTelemetryProvider.Flush*
+  commentId: Overload:Agibuild.Fulora.NullTelemetryProvider.Flush
+  href: Agibuild.Fulora.NullTelemetryProvider.html#Agibuild_Fulora_NullTelemetryProvider_Flush
+  name: Flush
+  nameWithType: NullTelemetryProvider.Flush
+  fullName: Agibuild.Fulora.NullTelemetryProvider.Flush
+- uid: Agibuild.Fulora.ITelemetryProvider.Flush
+  commentId: M:Agibuild.Fulora.ITelemetryProvider.Flush
+  parent: Agibuild.Fulora.ITelemetryProvider
+  href: Agibuild.Fulora.ITelemetryProvider.html#Agibuild_Fulora_ITelemetryProvider_Flush
+  name: Flush()
+  nameWithType: ITelemetryProvider.Flush()
+  fullName: Agibuild.Fulora.ITelemetryProvider.Flush()
+  spec.csharp:
+  - uid: Agibuild.Fulora.ITelemetryProvider.Flush
+    name: Flush
+    href: Agibuild.Fulora.ITelemetryProvider.html#Agibuild_Fulora_ITelemetryProvider_Flush
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: Agibuild.Fulora.ITelemetryProvider.Flush
+    name: Flush
+    href: Agibuild.Fulora.ITelemetryProvider.html#Agibuild_Fulora_ITelemetryProvider_Flush
+  - name: (
+  - name: )

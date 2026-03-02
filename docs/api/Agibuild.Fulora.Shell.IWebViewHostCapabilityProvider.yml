@@ -1,0 +1,484 @@
+### YamlMime:ManagedReference
+items:
+- uid: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider
+  commentId: T:Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider
+  id: IWebViewHostCapabilityProvider
+  parent: Agibuild.Fulora.Shell
+  children:
+  - Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ApplyMenuModel(Agibuild.Fulora.Shell.WebViewMenuModelRequest)
+  - Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ExecuteSystemAction(Agibuild.Fulora.Shell.WebViewSystemActionRequest)
+  - Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.OpenExternal(System.Uri)
+  - Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ReadClipboardText
+  - Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ShowNotification(Agibuild.Fulora.Shell.WebViewNotificationRequest)
+  - Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ShowOpenFileDialog(Agibuild.Fulora.Shell.WebViewOpenFileDialogRequest)
+  - Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ShowSaveFileDialog(Agibuild.Fulora.Shell.WebViewSaveFileDialogRequest)
+  - Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.UpdateTrayState(Agibuild.Fulora.Shell.WebViewTrayStateRequest)
+  - Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.WriteClipboardText(System.String)
+  langs:
+  - csharp
+  - vb
+  name: IWebViewHostCapabilityProvider
+  nameWithType: IWebViewHostCapabilityProvider
+  fullName: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider
+  type: Interface
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: IWebViewHostCapabilityProvider
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 241
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Host capability provider implementation.
+  example: []
+  syntax:
+    content: public interface IWebViewHostCapabilityProvider
+    content.vb: Public Interface IWebViewHostCapabilityProvider
+- uid: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ReadClipboardText
+  commentId: M:Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ReadClipboardText
+  id: ReadClipboardText
+  parent: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider
+  langs:
+  - csharp
+  - vb
+  name: ReadClipboardText()
+  nameWithType: IWebViewHostCapabilityProvider.ReadClipboardText()
+  fullName: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ReadClipboardText()
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: ReadClipboardText
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 244
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Reads text from host clipboard.
+  example: []
+  syntax:
+    content: string? ReadClipboardText()
+    return:
+      type: System.String
+    content.vb: Function ReadClipboardText() As String
+  overload: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ReadClipboardText*
+- uid: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.WriteClipboardText(System.String)
+  commentId: M:Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.WriteClipboardText(System.String)
+  id: WriteClipboardText(System.String)
+  parent: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider
+  langs:
+  - csharp
+  - vb
+  name: WriteClipboardText(string)
+  nameWithType: IWebViewHostCapabilityProvider.WriteClipboardText(string)
+  fullName: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.WriteClipboardText(string)
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: WriteClipboardText
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 246
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Writes text to host clipboard.
+  example: []
+  syntax:
+    content: void WriteClipboardText(string text)
+    parameters:
+    - id: text
+      type: System.String
+    content.vb: Sub WriteClipboardText(text As String)
+  overload: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.WriteClipboardText*
+  nameWithType.vb: IWebViewHostCapabilityProvider.WriteClipboardText(String)
+  fullName.vb: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.WriteClipboardText(String)
+  name.vb: WriteClipboardText(String)
+- uid: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ShowOpenFileDialog(Agibuild.Fulora.Shell.WebViewOpenFileDialogRequest)
+  commentId: M:Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ShowOpenFileDialog(Agibuild.Fulora.Shell.WebViewOpenFileDialogRequest)
+  id: ShowOpenFileDialog(Agibuild.Fulora.Shell.WebViewOpenFileDialogRequest)
+  parent: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider
+  langs:
+  - csharp
+  - vb
+  name: ShowOpenFileDialog(WebViewOpenFileDialogRequest)
+  nameWithType: IWebViewHostCapabilityProvider.ShowOpenFileDialog(WebViewOpenFileDialogRequest)
+  fullName: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ShowOpenFileDialog(Agibuild.Fulora.Shell.WebViewOpenFileDialogRequest)
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: ShowOpenFileDialog
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 248
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Shows open-file dialog.
+  example: []
+  syntax:
+    content: WebViewFileDialogResult ShowOpenFileDialog(WebViewOpenFileDialogRequest request)
+    parameters:
+    - id: request
+      type: Agibuild.Fulora.Shell.WebViewOpenFileDialogRequest
+    return:
+      type: Agibuild.Fulora.Shell.WebViewFileDialogResult
+    content.vb: Function ShowOpenFileDialog(request As WebViewOpenFileDialogRequest) As WebViewFileDialogResult
+  overload: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ShowOpenFileDialog*
+- uid: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ShowSaveFileDialog(Agibuild.Fulora.Shell.WebViewSaveFileDialogRequest)
+  commentId: M:Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ShowSaveFileDialog(Agibuild.Fulora.Shell.WebViewSaveFileDialogRequest)
+  id: ShowSaveFileDialog(Agibuild.Fulora.Shell.WebViewSaveFileDialogRequest)
+  parent: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider
+  langs:
+  - csharp
+  - vb
+  name: ShowSaveFileDialog(WebViewSaveFileDialogRequest)
+  nameWithType: IWebViewHostCapabilityProvider.ShowSaveFileDialog(WebViewSaveFileDialogRequest)
+  fullName: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ShowSaveFileDialog(Agibuild.Fulora.Shell.WebViewSaveFileDialogRequest)
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: ShowSaveFileDialog
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 250
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Shows save-file dialog.
+  example: []
+  syntax:
+    content: WebViewFileDialogResult ShowSaveFileDialog(WebViewSaveFileDialogRequest request)
+    parameters:
+    - id: request
+      type: Agibuild.Fulora.Shell.WebViewSaveFileDialogRequest
+    return:
+      type: Agibuild.Fulora.Shell.WebViewFileDialogResult
+    content.vb: Function ShowSaveFileDialog(request As WebViewSaveFileDialogRequest) As WebViewFileDialogResult
+  overload: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ShowSaveFileDialog*
+- uid: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.OpenExternal(System.Uri)
+  commentId: M:Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.OpenExternal(System.Uri)
+  id: OpenExternal(System.Uri)
+  parent: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider
+  langs:
+  - csharp
+  - vb
+  name: OpenExternal(Uri)
+  nameWithType: IWebViewHostCapabilityProvider.OpenExternal(Uri)
+  fullName: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.OpenExternal(System.Uri)
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: OpenExternal
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 252
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Opens URI using external host app/browser.
+  example: []
+  syntax:
+    content: void OpenExternal(Uri uri)
+    parameters:
+    - id: uri
+      type: System.Uri
+    content.vb: Sub OpenExternal(uri As Uri)
+  overload: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.OpenExternal*
+- uid: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ShowNotification(Agibuild.Fulora.Shell.WebViewNotificationRequest)
+  commentId: M:Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ShowNotification(Agibuild.Fulora.Shell.WebViewNotificationRequest)
+  id: ShowNotification(Agibuild.Fulora.Shell.WebViewNotificationRequest)
+  parent: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider
+  langs:
+  - csharp
+  - vb
+  name: ShowNotification(WebViewNotificationRequest)
+  nameWithType: IWebViewHostCapabilityProvider.ShowNotification(WebViewNotificationRequest)
+  fullName: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ShowNotification(Agibuild.Fulora.Shell.WebViewNotificationRequest)
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: ShowNotification
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 254
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Shows host notification.
+  example: []
+  syntax:
+    content: void ShowNotification(WebViewNotificationRequest request)
+    parameters:
+    - id: request
+      type: Agibuild.Fulora.Shell.WebViewNotificationRequest
+    content.vb: Sub ShowNotification(request As WebViewNotificationRequest)
+  overload: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ShowNotification*
+- uid: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ApplyMenuModel(Agibuild.Fulora.Shell.WebViewMenuModelRequest)
+  commentId: M:Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ApplyMenuModel(Agibuild.Fulora.Shell.WebViewMenuModelRequest)
+  id: ApplyMenuModel(Agibuild.Fulora.Shell.WebViewMenuModelRequest)
+  parent: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider
+  langs:
+  - csharp
+  - vb
+  name: ApplyMenuModel(WebViewMenuModelRequest)
+  nameWithType: IWebViewHostCapabilityProvider.ApplyMenuModel(WebViewMenuModelRequest)
+  fullName: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ApplyMenuModel(Agibuild.Fulora.Shell.WebViewMenuModelRequest)
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: ApplyMenuModel
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 256
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Applies host app menu model.
+  example: []
+  syntax:
+    content: void ApplyMenuModel(WebViewMenuModelRequest request)
+    parameters:
+    - id: request
+      type: Agibuild.Fulora.Shell.WebViewMenuModelRequest
+    content.vb: Sub ApplyMenuModel(request As WebViewMenuModelRequest)
+  overload: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ApplyMenuModel*
+- uid: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.UpdateTrayState(Agibuild.Fulora.Shell.WebViewTrayStateRequest)
+  commentId: M:Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.UpdateTrayState(Agibuild.Fulora.Shell.WebViewTrayStateRequest)
+  id: UpdateTrayState(Agibuild.Fulora.Shell.WebViewTrayStateRequest)
+  parent: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider
+  langs:
+  - csharp
+  - vb
+  name: UpdateTrayState(WebViewTrayStateRequest)
+  nameWithType: IWebViewHostCapabilityProvider.UpdateTrayState(WebViewTrayStateRequest)
+  fullName: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.UpdateTrayState(Agibuild.Fulora.Shell.WebViewTrayStateRequest)
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: UpdateTrayState
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 258
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Updates host tray state.
+  example: []
+  syntax:
+    content: void UpdateTrayState(WebViewTrayStateRequest request)
+    parameters:
+    - id: request
+      type: Agibuild.Fulora.Shell.WebViewTrayStateRequest
+    content.vb: Sub UpdateTrayState(request As WebViewTrayStateRequest)
+  overload: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.UpdateTrayState*
+- uid: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ExecuteSystemAction(Agibuild.Fulora.Shell.WebViewSystemActionRequest)
+  commentId: M:Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ExecuteSystemAction(Agibuild.Fulora.Shell.WebViewSystemActionRequest)
+  id: ExecuteSystemAction(Agibuild.Fulora.Shell.WebViewSystemActionRequest)
+  parent: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider
+  langs:
+  - csharp
+  - vb
+  name: ExecuteSystemAction(WebViewSystemActionRequest)
+  nameWithType: IWebViewHostCapabilityProvider.ExecuteSystemAction(WebViewSystemActionRequest)
+  fullName: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ExecuteSystemAction(Agibuild.Fulora.Shell.WebViewSystemActionRequest)
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: ExecuteSystemAction
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 260
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Executes host system action.
+  example: []
+  syntax:
+    content: void ExecuteSystemAction(WebViewSystemActionRequest request)
+    parameters:
+    - id: request
+      type: Agibuild.Fulora.Shell.WebViewSystemActionRequest
+    content.vb: Sub ExecuteSystemAction(request As WebViewSystemActionRequest)
+  overload: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ExecuteSystemAction*
+references:
+- uid: Agibuild.Fulora.Shell
+  commentId: N:Agibuild.Fulora.Shell
+  href: Agibuild.html
+  name: Agibuild.Fulora.Shell
+  nameWithType: Agibuild.Fulora.Shell
+  fullName: Agibuild.Fulora.Shell
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  - name: .
+  - uid: Agibuild.Fulora.Shell
+    name: Shell
+    href: Agibuild.Fulora.Shell.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  - name: .
+  - uid: Agibuild.Fulora.Shell
+    name: Shell
+    href: Agibuild.Fulora.Shell.html
+- uid: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ReadClipboardText*
+  commentId: Overload:Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ReadClipboardText
+  href: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.html#Agibuild_Fulora_Shell_IWebViewHostCapabilityProvider_ReadClipboardText
+  name: ReadClipboardText
+  nameWithType: IWebViewHostCapabilityProvider.ReadClipboardText
+  fullName: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ReadClipboardText
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.WriteClipboardText*
+  commentId: Overload:Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.WriteClipboardText
+  href: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.html#Agibuild_Fulora_Shell_IWebViewHostCapabilityProvider_WriteClipboardText_System_String_
+  name: WriteClipboardText
+  nameWithType: IWebViewHostCapabilityProvider.WriteClipboardText
+  fullName: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.WriteClipboardText
+- uid: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ShowOpenFileDialog*
+  commentId: Overload:Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ShowOpenFileDialog
+  href: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.html#Agibuild_Fulora_Shell_IWebViewHostCapabilityProvider_ShowOpenFileDialog_Agibuild_Fulora_Shell_WebViewOpenFileDialogRequest_
+  name: ShowOpenFileDialog
+  nameWithType: IWebViewHostCapabilityProvider.ShowOpenFileDialog
+  fullName: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ShowOpenFileDialog
+- uid: Agibuild.Fulora.Shell.WebViewOpenFileDialogRequest
+  commentId: T:Agibuild.Fulora.Shell.WebViewOpenFileDialogRequest
+  parent: Agibuild.Fulora.Shell
+  href: Agibuild.Fulora.Shell.WebViewOpenFileDialogRequest.html
+  name: WebViewOpenFileDialogRequest
+  nameWithType: WebViewOpenFileDialogRequest
+  fullName: Agibuild.Fulora.Shell.WebViewOpenFileDialogRequest
+- uid: Agibuild.Fulora.Shell.WebViewFileDialogResult
+  commentId: T:Agibuild.Fulora.Shell.WebViewFileDialogResult
+  parent: Agibuild.Fulora.Shell
+  href: Agibuild.Fulora.Shell.WebViewFileDialogResult.html
+  name: WebViewFileDialogResult
+  nameWithType: WebViewFileDialogResult
+  fullName: Agibuild.Fulora.Shell.WebViewFileDialogResult
+- uid: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ShowSaveFileDialog*
+  commentId: Overload:Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ShowSaveFileDialog
+  href: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.html#Agibuild_Fulora_Shell_IWebViewHostCapabilityProvider_ShowSaveFileDialog_Agibuild_Fulora_Shell_WebViewSaveFileDialogRequest_
+  name: ShowSaveFileDialog
+  nameWithType: IWebViewHostCapabilityProvider.ShowSaveFileDialog
+  fullName: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ShowSaveFileDialog
+- uid: Agibuild.Fulora.Shell.WebViewSaveFileDialogRequest
+  commentId: T:Agibuild.Fulora.Shell.WebViewSaveFileDialogRequest
+  parent: Agibuild.Fulora.Shell
+  href: Agibuild.Fulora.Shell.WebViewSaveFileDialogRequest.html
+  name: WebViewSaveFileDialogRequest
+  nameWithType: WebViewSaveFileDialogRequest
+  fullName: Agibuild.Fulora.Shell.WebViewSaveFileDialogRequest
+- uid: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.OpenExternal*
+  commentId: Overload:Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.OpenExternal
+  href: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.html#Agibuild_Fulora_Shell_IWebViewHostCapabilityProvider_OpenExternal_System_Uri_
+  name: OpenExternal
+  nameWithType: IWebViewHostCapabilityProvider.OpenExternal
+  fullName: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.OpenExternal
+- uid: System.Uri
+  commentId: T:System.Uri
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.uri
+  name: Uri
+  nameWithType: Uri
+  fullName: System.Uri
+- uid: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ShowNotification*
+  commentId: Overload:Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ShowNotification
+  href: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.html#Agibuild_Fulora_Shell_IWebViewHostCapabilityProvider_ShowNotification_Agibuild_Fulora_Shell_WebViewNotificationRequest_
+  name: ShowNotification
+  nameWithType: IWebViewHostCapabilityProvider.ShowNotification
+  fullName: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ShowNotification
+- uid: Agibuild.Fulora.Shell.WebViewNotificationRequest
+  commentId: T:Agibuild.Fulora.Shell.WebViewNotificationRequest
+  parent: Agibuild.Fulora.Shell
+  href: Agibuild.Fulora.Shell.WebViewNotificationRequest.html
+  name: WebViewNotificationRequest
+  nameWithType: WebViewNotificationRequest
+  fullName: Agibuild.Fulora.Shell.WebViewNotificationRequest
+- uid: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ApplyMenuModel*
+  commentId: Overload:Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ApplyMenuModel
+  href: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.html#Agibuild_Fulora_Shell_IWebViewHostCapabilityProvider_ApplyMenuModel_Agibuild_Fulora_Shell_WebViewMenuModelRequest_
+  name: ApplyMenuModel
+  nameWithType: IWebViewHostCapabilityProvider.ApplyMenuModel
+  fullName: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ApplyMenuModel
+- uid: Agibuild.Fulora.Shell.WebViewMenuModelRequest
+  commentId: T:Agibuild.Fulora.Shell.WebViewMenuModelRequest
+  parent: Agibuild.Fulora.Shell
+  href: Agibuild.Fulora.Shell.WebViewMenuModelRequest.html
+  name: WebViewMenuModelRequest
+  nameWithType: WebViewMenuModelRequest
+  fullName: Agibuild.Fulora.Shell.WebViewMenuModelRequest
+- uid: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.UpdateTrayState*
+  commentId: Overload:Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.UpdateTrayState
+  href: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.html#Agibuild_Fulora_Shell_IWebViewHostCapabilityProvider_UpdateTrayState_Agibuild_Fulora_Shell_WebViewTrayStateRequest_
+  name: UpdateTrayState
+  nameWithType: IWebViewHostCapabilityProvider.UpdateTrayState
+  fullName: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.UpdateTrayState
+- uid: Agibuild.Fulora.Shell.WebViewTrayStateRequest
+  commentId: T:Agibuild.Fulora.Shell.WebViewTrayStateRequest
+  parent: Agibuild.Fulora.Shell
+  href: Agibuild.Fulora.Shell.WebViewTrayStateRequest.html
+  name: WebViewTrayStateRequest
+  nameWithType: WebViewTrayStateRequest
+  fullName: Agibuild.Fulora.Shell.WebViewTrayStateRequest
+- uid: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ExecuteSystemAction*
+  commentId: Overload:Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ExecuteSystemAction
+  href: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.html#Agibuild_Fulora_Shell_IWebViewHostCapabilityProvider_ExecuteSystemAction_Agibuild_Fulora_Shell_WebViewSystemActionRequest_
+  name: ExecuteSystemAction
+  nameWithType: IWebViewHostCapabilityProvider.ExecuteSystemAction
+  fullName: Agibuild.Fulora.Shell.IWebViewHostCapabilityProvider.ExecuteSystemAction
+- uid: Agibuild.Fulora.Shell.WebViewSystemActionRequest
+  commentId: T:Agibuild.Fulora.Shell.WebViewSystemActionRequest
+  parent: Agibuild.Fulora.Shell
+  href: Agibuild.Fulora.Shell.WebViewSystemActionRequest.html
+  name: WebViewSystemActionRequest
+  nameWithType: WebViewSystemActionRequest
+  fullName: Agibuild.Fulora.Shell.WebViewSystemActionRequest

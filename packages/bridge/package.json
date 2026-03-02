@@ -1,6 +1,6 @@
 {
   "name": "@agibuild/bridge",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Typed bridge client runtime for Agibuild.Fulora — call C# services from JavaScript with full type safety.",
   "type": "module",
   "main": "./dist/index.js",
@@ -16,6 +16,7 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
+    "test": "node --experimental-strip-types --no-warnings --test src/middleware.test.ts && node --experimental-strip-types --no-warnings --test src/integration.test.ts",
     "prepare": "npm run build"
   },
   "repository": {

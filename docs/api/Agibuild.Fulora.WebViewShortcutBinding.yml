@@ -1,0 +1,539 @@
+### YamlMime:ManagedReference
+items:
+- uid: Agibuild.Fulora.WebViewShortcutBinding
+  commentId: T:Agibuild.Fulora.WebViewShortcutBinding
+  id: WebViewShortcutBinding
+  parent: Agibuild.Fulora
+  children:
+  - Agibuild.Fulora.WebViewShortcutBinding.#ctor(Avalonia.Input.Key,Avalonia.Input.KeyModifiers,Agibuild.Fulora.WebViewShortcutAction)
+  - Agibuild.Fulora.WebViewShortcutBinding.Action
+  - Agibuild.Fulora.WebViewShortcutBinding.Key
+  - Agibuild.Fulora.WebViewShortcutBinding.Modifiers
+  langs:
+  - csharp
+  - vb
+  name: WebViewShortcutBinding
+  nameWithType: WebViewShortcutBinding
+  fullName: Agibuild.Fulora.WebViewShortcutBinding
+  type: Struct
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Avalonia/WebViewShortcutRouter.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: WebViewShortcutBinding
+    path: ../src/Agibuild.Fulora.Avalonia/WebViewShortcutRouter.cs
+    startLine: 33
+  assemblies:
+  - Agibuild.Fulora
+  namespace: Agibuild.Fulora
+  summary: Shortcut binding from key + modifiers to a routed action.
+  example: []
+  syntax:
+    content: 'public readonly record struct WebViewShortcutBinding : IEquatable<WebViewShortcutBinding>'
+    content.vb: Public Structure WebViewShortcutBinding Implements IEquatable(Of WebViewShortcutBinding)
+  implements:
+  - System.IEquatable{Agibuild.Fulora.WebViewShortcutBinding}
+  inheritedMembers:
+  - System.ValueType.Equals(System.Object)
+  - System.ValueType.GetHashCode
+  - System.ValueType.ToString
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.GetType
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+- uid: Agibuild.Fulora.WebViewShortcutBinding.#ctor(Avalonia.Input.Key,Avalonia.Input.KeyModifiers,Agibuild.Fulora.WebViewShortcutAction)
+  commentId: M:Agibuild.Fulora.WebViewShortcutBinding.#ctor(Avalonia.Input.Key,Avalonia.Input.KeyModifiers,Agibuild.Fulora.WebViewShortcutAction)
+  id: '#ctor(Avalonia.Input.Key,Avalonia.Input.KeyModifiers,Agibuild.Fulora.WebViewShortcutAction)'
+  parent: Agibuild.Fulora.WebViewShortcutBinding
+  langs:
+  - csharp
+  - vb
+  name: WebViewShortcutBinding(Key, KeyModifiers, WebViewShortcutAction)
+  nameWithType: WebViewShortcutBinding.WebViewShortcutBinding(Key, KeyModifiers, WebViewShortcutAction)
+  fullName: Agibuild.Fulora.WebViewShortcutBinding.WebViewShortcutBinding(Avalonia.Input.Key, Avalonia.Input.KeyModifiers, Agibuild.Fulora.WebViewShortcutAction)
+  type: Constructor
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Avalonia/WebViewShortcutRouter.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: .ctor
+    path: ../src/Agibuild.Fulora.Avalonia/WebViewShortcutRouter.cs
+    startLine: 33
+  assemblies:
+  - Agibuild.Fulora
+  namespace: Agibuild.Fulora
+  summary: Shortcut binding from key + modifiers to a routed action.
+  example: []
+  syntax:
+    content: public WebViewShortcutBinding(Key Key, KeyModifiers Modifiers, WebViewShortcutAction Action)
+    parameters:
+    - id: Key
+      type: Avalonia.Input.Key
+    - id: Modifiers
+      type: Avalonia.Input.KeyModifiers
+    - id: Action
+      type: Agibuild.Fulora.WebViewShortcutAction
+    content.vb: Public Sub New(Key As Key, Modifiers As KeyModifiers, Action As WebViewShortcutAction)
+  overload: Agibuild.Fulora.WebViewShortcutBinding.#ctor*
+  nameWithType.vb: WebViewShortcutBinding.New(Key, KeyModifiers, WebViewShortcutAction)
+  fullName.vb: Agibuild.Fulora.WebViewShortcutBinding.New(Avalonia.Input.Key, Avalonia.Input.KeyModifiers, Agibuild.Fulora.WebViewShortcutAction)
+  name.vb: New(Key, KeyModifiers, WebViewShortcutAction)
+- uid: Agibuild.Fulora.WebViewShortcutBinding.Key
+  commentId: P:Agibuild.Fulora.WebViewShortcutBinding.Key
+  id: Key
+  parent: Agibuild.Fulora.WebViewShortcutBinding
+  langs:
+  - csharp
+  - vb
+  name: Key
+  nameWithType: WebViewShortcutBinding.Key
+  fullName: Agibuild.Fulora.WebViewShortcutBinding.Key
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Avalonia/WebViewShortcutRouter.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Key
+    path: ../src/Agibuild.Fulora.Avalonia/WebViewShortcutRouter.cs
+    startLine: 34
+  assemblies:
+  - Agibuild.Fulora
+  namespace: Agibuild.Fulora
+  syntax:
+    content: public Key Key { get; init; }
+    parameters: []
+    return:
+      type: Avalonia.Input.Key
+    content.vb: Public Property Key As Key
+  overload: Agibuild.Fulora.WebViewShortcutBinding.Key*
+- uid: Agibuild.Fulora.WebViewShortcutBinding.Modifiers
+  commentId: P:Agibuild.Fulora.WebViewShortcutBinding.Modifiers
+  id: Modifiers
+  parent: Agibuild.Fulora.WebViewShortcutBinding
+  langs:
+  - csharp
+  - vb
+  name: Modifiers
+  nameWithType: WebViewShortcutBinding.Modifiers
+  fullName: Agibuild.Fulora.WebViewShortcutBinding.Modifiers
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Avalonia/WebViewShortcutRouter.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Modifiers
+    path: ../src/Agibuild.Fulora.Avalonia/WebViewShortcutRouter.cs
+    startLine: 35
+  assemblies:
+  - Agibuild.Fulora
+  namespace: Agibuild.Fulora
+  syntax:
+    content: public KeyModifiers Modifiers { get; init; }
+    parameters: []
+    return:
+      type: Avalonia.Input.KeyModifiers
+    content.vb: Public Property Modifiers As KeyModifiers
+  overload: Agibuild.Fulora.WebViewShortcutBinding.Modifiers*
+- uid: Agibuild.Fulora.WebViewShortcutBinding.Action
+  commentId: P:Agibuild.Fulora.WebViewShortcutBinding.Action
+  id: Action
+  parent: Agibuild.Fulora.WebViewShortcutBinding
+  langs:
+  - csharp
+  - vb
+  name: Action
+  nameWithType: WebViewShortcutBinding.Action
+  fullName: Agibuild.Fulora.WebViewShortcutBinding.Action
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Avalonia/WebViewShortcutRouter.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Action
+    path: ../src/Agibuild.Fulora.Avalonia/WebViewShortcutRouter.cs
+    startLine: 36
+  assemblies:
+  - Agibuild.Fulora
+  namespace: Agibuild.Fulora
+  syntax:
+    content: public WebViewShortcutAction Action { get; init; }
+    parameters: []
+    return:
+      type: Agibuild.Fulora.WebViewShortcutAction
+    content.vb: Public Property Action As WebViewShortcutAction
+  overload: Agibuild.Fulora.WebViewShortcutBinding.Action*
+references:
+- uid: Agibuild.Fulora
+  commentId: N:Agibuild.Fulora
+  href: Agibuild.html
+  name: Agibuild.Fulora
+  nameWithType: Agibuild.Fulora
+  fullName: Agibuild.Fulora
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+- uid: System.IEquatable{Agibuild.Fulora.WebViewShortcutBinding}
+  commentId: T:System.IEquatable{Agibuild.Fulora.WebViewShortcutBinding}
+  parent: System
+  definition: System.IEquatable`1
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  name: IEquatable<WebViewShortcutBinding>
+  nameWithType: IEquatable<WebViewShortcutBinding>
+  fullName: System.IEquatable<Agibuild.Fulora.WebViewShortcutBinding>
+  nameWithType.vb: IEquatable(Of WebViewShortcutBinding)
+  fullName.vb: System.IEquatable(Of Agibuild.Fulora.WebViewShortcutBinding)
+  name.vb: IEquatable(Of WebViewShortcutBinding)
+  spec.csharp:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: <
+  - uid: Agibuild.Fulora.WebViewShortcutBinding
+    name: WebViewShortcutBinding
+    href: Agibuild.Fulora.WebViewShortcutBinding.html
+  - name: '>'
+  spec.vb:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: Agibuild.Fulora.WebViewShortcutBinding
+    name: WebViewShortcutBinding
+    href: Agibuild.Fulora.WebViewShortcutBinding.html
+  - name: )
+- uid: System.ValueType.Equals(System.Object)
+  commentId: M:System.ValueType.Equals(System.Object)
+  parent: System.ValueType
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.valuetype.equals
+  name: Equals(object)
+  nameWithType: ValueType.Equals(object)
+  fullName: System.ValueType.Equals(object)
+  nameWithType.vb: ValueType.Equals(Object)
+  fullName.vb: System.ValueType.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.ValueType.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetype.equals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.ValueType.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetype.equals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.ValueType.GetHashCode
+  commentId: M:System.ValueType.GetHashCode
+  parent: System.ValueType
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.valuetype.gethashcode
+  name: GetHashCode()
+  nameWithType: ValueType.GetHashCode()
+  fullName: System.ValueType.GetHashCode()
+  spec.csharp:
+  - uid: System.ValueType.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetype.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.ValueType.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetype.gethashcode
+  - name: (
+  - name: )
+- uid: System.ValueType.ToString
+  commentId: M:System.ValueType.ToString
+  parent: System.ValueType
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.valuetype.tostring
+  name: ToString()
+  nameWithType: ValueType.ToString()
+  fullName: System.ValueType.ToString()
+  spec.csharp:
+  - uid: System.ValueType.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetype.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.ValueType.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetype.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.IEquatable`1
+  commentId: T:System.IEquatable`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  name: IEquatable<T>
+  nameWithType: IEquatable<T>
+  fullName: System.IEquatable<T>
+  nameWithType.vb: IEquatable(Of T)
+  fullName.vb: System.IEquatable(Of T)
+  name.vb: IEquatable(Of T)
+  spec.csharp:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: System.ValueType
+  commentId: T:System.ValueType
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.valuetype
+  name: ValueType
+  nameWithType: ValueType
+  fullName: System.ValueType
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: Agibuild.Fulora.WebViewShortcutBinding.#ctor*
+  commentId: Overload:Agibuild.Fulora.WebViewShortcutBinding.#ctor
+  href: Agibuild.Fulora.WebViewShortcutBinding.html#Agibuild_Fulora_WebViewShortcutBinding__ctor_Avalonia_Input_Key_Avalonia_Input_KeyModifiers_Agibuild_Fulora_WebViewShortcutAction_
+  name: WebViewShortcutBinding
+  nameWithType: WebViewShortcutBinding.WebViewShortcutBinding
+  fullName: Agibuild.Fulora.WebViewShortcutBinding.WebViewShortcutBinding
+  nameWithType.vb: WebViewShortcutBinding.New
+  fullName.vb: Agibuild.Fulora.WebViewShortcutBinding.New
+  name.vb: New
+- uid: Avalonia.Input.Key
+  commentId: T:Avalonia.Input.Key
+  parent: Avalonia.Input
+  isExternal: true
+  name: Key
+  nameWithType: Key
+  fullName: Avalonia.Input.Key
+- uid: Avalonia.Input.KeyModifiers
+  commentId: T:Avalonia.Input.KeyModifiers
+  parent: Avalonia.Input
+  isExternal: true
+  name: KeyModifiers
+  nameWithType: KeyModifiers
+  fullName: Avalonia.Input.KeyModifiers
+- uid: Agibuild.Fulora.WebViewShortcutAction
+  commentId: T:Agibuild.Fulora.WebViewShortcutAction
+  parent: Agibuild.Fulora
+  href: Agibuild.Fulora.WebViewShortcutAction.html
+  name: WebViewShortcutAction
+  nameWithType: WebViewShortcutAction
+  fullName: Agibuild.Fulora.WebViewShortcutAction
+- uid: Avalonia.Input
+  commentId: N:Avalonia.Input
+  isExternal: true
+  name: Avalonia.Input
+  nameWithType: Avalonia.Input
+  fullName: Avalonia.Input
+  spec.csharp:
+  - uid: Avalonia
+    name: Avalonia
+    isExternal: true
+  - name: .
+  - uid: Avalonia.Input
+    name: Input
+    isExternal: true
+  spec.vb:
+  - uid: Avalonia
+    name: Avalonia
+    isExternal: true
+  - name: .
+  - uid: Avalonia.Input
+    name: Input
+    isExternal: true
+- uid: Agibuild.Fulora.WebViewShortcutBinding.Key*
+  commentId: Overload:Agibuild.Fulora.WebViewShortcutBinding.Key
+  href: Agibuild.Fulora.WebViewShortcutBinding.html#Agibuild_Fulora_WebViewShortcutBinding_Key
+  name: Key
+  nameWithType: WebViewShortcutBinding.Key
+  fullName: Agibuild.Fulora.WebViewShortcutBinding.Key
+- uid: Agibuild.Fulora.WebViewShortcutBinding.Modifiers*
+  commentId: Overload:Agibuild.Fulora.WebViewShortcutBinding.Modifiers
+  href: Agibuild.Fulora.WebViewShortcutBinding.html#Agibuild_Fulora_WebViewShortcutBinding_Modifiers
+  name: Modifiers
+  nameWithType: WebViewShortcutBinding.Modifiers
+  fullName: Agibuild.Fulora.WebViewShortcutBinding.Modifiers
+- uid: Agibuild.Fulora.WebViewShortcutBinding.Action*
+  commentId: Overload:Agibuild.Fulora.WebViewShortcutBinding.Action
+  href: Agibuild.Fulora.WebViewShortcutBinding.html#Agibuild_Fulora_WebViewShortcutBinding_Action
+  name: Action
+  nameWithType: WebViewShortcutBinding.Action
+  fullName: Agibuild.Fulora.WebViewShortcutBinding.Action

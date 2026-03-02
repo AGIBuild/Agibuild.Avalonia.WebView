@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Migration Guide: Electron → Agibuild.Fulora | Agibuild.Fulora </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Migration Guide: Electron → Agibuild.Fulora | Agibuild.Fulora ">
+      
+      
+      <link rel="icon" href="favicon.ico">
+      <link rel="stylesheet" href="public/docfx.min.css">
+      <link rel="stylesheet" href="public/main.css">
+      <meta name="docfx:navrel" content="toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/AGIBuild/Agibuild.Fulora/blob/main/docs/MIGRATION_GUIDE.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="index.html">
+            <img id="logo" class="svg" src="logo.svg" alt="Agibuild.Fulora">
+            Agibuild.Fulora
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+
+      <div class="content">
+        <div class="actionbar">
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+<h1 id="migration-guide-electron--agibuildfulora">Migration Guide: Electron → Agibuild.Fulora</h1>
+
+<p>This guide helps teams migrate from Electron to Agibuild.Fulora for building cross-platform desktop applications with web UI.</p>
+<hr>
+<h2 id="architecture-comparison">Architecture Comparison</h2>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Electron</th>
+<th>Agibuild.Fulora</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Runtime</td>
+<td>Bundled Chromium + Node.js</td>
+<td>Platform-native WebView (WebView2, WKWebView, WebKitGTK)</td>
+</tr>
+<tr>
+<td>App size</td>
+<td>150–250 MB</td>
+<td>5–15 MB (uses OS WebView)</td>
+</tr>
+<tr>
+<td>Host language</td>
+<td>JavaScript/TypeScript (main process)</td>
+<td>C# (.NET)</td>
+</tr>
+<tr>
+<td>UI framework</td>
+<td>Any web framework</td>
+<td>Any web framework</td>
+</tr>
+<tr>
+<td>IPC mechanism</td>
+<td><code>ipcMain</code> / <code>ipcRenderer</code></td>
+<td>Type-safe Bridge (<code>[JsExport]</code> / <code>[JsImport]</code>)</td>
+</tr>
+<tr>
+<td>Packaging</td>
+<td>electron-builder / electron-forge</td>
+<td>NuGet + <code>dotnet publish</code></td>
+</tr>
+<tr>
+<td>Auto-update</td>
+<td>electron-updater</td>
+<td>SPA Asset Hot Update (web layer) + OS package manager (native layer)</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="step-by-step-migration">Step-by-Step Migration</h2>
+<h3 id="1-set-up-the-fulora-project">1. Set Up the Fulora Project</h3>
+<pre><code class="lang-bash">dotnet new agibuild-hybrid -n MyApp
+cd MyApp
+</code></pre>
+<p>This creates:</p>
+<ul>
+<li><code>MyApp/</code> — C# host application (Avalonia + Fulora)</li>
+<li><code>MyApp.Web.Vite.React/</code> — React + Vite frontend (replaceable with your existing web app)</li>
+</ul>
+<h3 id="2-migrate-your-web-frontend">2. Migrate Your Web Frontend</h3>
+<p>Copy your existing web application into the <code>MyApp.Web.Vite.React/</code> directory (or replace it entirely with your framework of choice).</p>
+<p><strong>Key change</strong>: Replace Electron's <code>preload.js</code> with the Fulora bridge client:</p>
+<pre><code class="lang-bash">npm install @agibuild/bridge
+</code></pre>
+<h3 id="3-replace-ipc-with-bridge-services">3. Replace IPC with Bridge Services</h3>
+<p><strong>Electron (before):</strong></p>
+<pre><code class="lang-typescript">// preload.js
+const { contextBridge, ipcRenderer } = require('electron');
+contextBridge.exposeInMainWorld('api', {
+  readFile: (path) =&gt; ipcRenderer.invoke('read-file', path),
+  saveFile: (path, data) =&gt; ipcRenderer.invoke('save-file', path, data),
+});
+
+// main.js
+ipcMain.handle('read-file', async (event, path) =&gt; {
+  return fs.readFileSync(path, 'utf-8');
+});
+</code></pre>
+<p><strong>Fulora (after):</strong></p>
+<pre><code class="lang-csharp">// C# — Define and implement the service
+[JsExport]
+public interface IFileService
+{
+    Task&lt;string&gt; ReadFile(string path);
+    Task SaveFile(string path, string data);
+}
+
+public class FileService : IFileService
+{
+    public Task&lt;string&gt; ReadFile(string path) =&gt; File.ReadAllTextAsync(path);
+    public Task SaveFile(string path, string data) =&gt; File.WriteAllTextAsync(path, data);
+}
+
+// Register in host setup
+webView.Bridge.Expose&lt;IFileService&gt;(new FileService());
+</code></pre>
+<pre><code class="lang-typescript">// TypeScript — Consume the service (auto-generated types)
+import { bridgeClient } from '@agibuild/bridge';
+import type { IFileService } from './bridge'; // auto-generated .d.ts
+
+const fileService = bridgeClient.getService&lt;IFileService&gt;('FileService');
+const content = await fileService.readFile('/path/to/file');
+</code></pre>
+<h3 id="4-replace-window-management">4. Replace Window Management</h3>
+<p><strong>Electron:</strong></p>
+<pre><code class="lang-javascript">const win = new BrowserWindow({ width: 800, height: 600 });
+win.loadURL('https://example.com');
+</code></pre>
+<p><strong>Fulora:</strong></p>
+<pre><code class="lang-csharp">var dialog = webViewEnvironment.CreateWebDialog();
+dialog.Resize(800, 600);
+await dialog.NavigateAsync(new Uri(&quot;https://example.com&quot;));
+dialog.Show();
+</code></pre>
+<h3 id="5-replace-menu-and-context-menu">5. Replace Menu and Context Menu</h3>
+<p><strong>Electron:</strong></p>
+<pre><code class="lang-javascript">const menu = Menu.buildFromTemplate([...]);
+Menu.setApplicationMenu(menu);
+</code></pre>
+<p><strong>Fulora:</strong></p>
+<pre><code class="lang-csharp">webView.ContextMenuRequested += (sender, args) =&gt;
+{
+    // Handle context menu with Avalonia's native menu system
+};
+</code></pre>
+<h3 id="6-replace-auto-update">6. Replace Auto-Update</h3>
+<p><strong>Electron</strong> bundles the entire Chromium runtime in updates (~100 MB per update).</p>
+<p><strong>Fulora</strong> separates concerns:</p>
+<ul>
+<li><strong>Web layer</strong>: Use <code>SpaAssetHotUpdateService</code> for atomic, signed SPA updates (typically &lt; 5 MB)</li>
+<li><strong>Native layer</strong>: Use OS package managers (MSI/MSIX, DMG, deb/rpm) for .NET runtime updates</li>
+</ul>
+<h3 id="7-build-and-package">7. Build and Package</h3>
+<pre><code class="lang-bash"># Build the web frontend
+cd MyApp.Web.Vite.React
+npm run build
+
+# Build and publish the .NET app
+cd ../MyApp
+dotnet publish -c Release
+</code></pre>
+<hr>
+<h2 id="ipc--bridge-mapping-reference">IPC → Bridge Mapping Reference</h2>
+<table>
+<thead>
+<tr>
+<th>Electron Pattern</th>
+<th>Fulora Equivalent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ipcMain.handle(channel, handler)</code></td>
+<td><code>[JsExport] interface</code> + <code>Bridge.Expose&lt;T&gt;()</code></td>
+</tr>
+<tr>
+<td><code>ipcRenderer.invoke(channel, ...args)</code></td>
+<td><code>bridgeClient.getService&lt;T&gt;(name).method(params)</code></td>
+</tr>
+<tr>
+<td><code>ipcRenderer.send(channel, ...args)</code></td>
+<td><code>bridgeClient.invoke(method, params)</code></td>
+</tr>
+<tr>
+<td><code>ipcMain.on(channel, handler)</code></td>
+<td><code>Rpc.Handle(method, handler)</code></td>
+</tr>
+<tr>
+<td><code>webContents.send(channel, ...args)</code></td>
+<td><code>Rpc.InvokeAsync(method, args)</code> (C# → JS)</td>
+</tr>
+<tr>
+<td><code>contextBridge.exposeInMainWorld</code></td>
+<td>Automatic via <code>@agibuild/bridge</code> client</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="feature-mapping">Feature Mapping</h2>
+<table>
+<thead>
+<tr>
+<th>Electron Feature</th>
+<th>Fulora Feature</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>BrowserWindow</code></td>
+<td><code>WebView</code> (Avalonia control)</td>
+<td>Embedded in Avalonia window</td>
+</tr>
+<tr>
+<td><code>BrowserWindow</code> (separate)</td>
+<td><code>IWebDialog</code></td>
+<td>Standalone dialog windows</td>
+</tr>
+<tr>
+<td><code>webContents.executeJavaScript</code></td>
+<td><code>InvokeScriptAsync</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>webContents.setZoomFactor</code></td>
+<td><code>SetZoomFactorAsync</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>webContents.findInPage</code></td>
+<td><code>FindInPageAsync</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>webContents.print/printToPDF</code></td>
+<td><code>PrintToPdfAsync</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>webContents.capturePage</code></td>
+<td><code>CaptureScreenshotAsync</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>session.cookies</code></td>
+<td><code>TryGetCookieManager()</code></td>
+<td>Experimental (AGWV001)</td>
+</tr>
+<tr>
+<td><code>protocol.registerSchemeAsPrivileged</code></td>
+<td><code>EnableSpaHosting()</code></td>
+<td>Built-in <code>app://</code> scheme</td>
+</tr>
+<tr>
+<td><code>autoUpdater</code></td>
+<td><code>SpaAssetHotUpdateService</code></td>
+<td>Web layer only</td>
+</tr>
+<tr>
+<td><code>app.setAsDefaultProtocolClient</code></td>
+<td><code>IDeepLinkRegistrationService</code></td>
+<td>OS-level URI scheme registration</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="key-advantages-after-migration">Key Advantages After Migration</h2>
+<ol>
+<li><strong>90% smaller app size</strong> — No bundled Chromium; uses the OS-provided WebView</li>
+<li><strong>Type-safe IPC</strong> — Compile-time verified C# ↔ JS contracts via source generators</li>
+<li><strong>Native .NET ecosystem</strong> — Full access to NuGet packages, Entity Framework, ML.NET, etc.</li>
+<li><strong>Platform-native feel</strong> — Avalonia UI toolkit with native rendering</li>
+<li><strong>Faster updates</strong> — SPA hot updates without replacing the entire app binary</li>
+<li><strong>Better security</strong> — OS-managed WebView with automatic security patches</li>
+</ol>
+<hr>
+<h2 id="common-pitfalls">Common Pitfalls</h2>
+<ol>
+<li><p><strong>Node.js APIs</strong>: Fulora runs C# on the host side, not Node.js. Replace <code>fs</code>, <code>path</code>, <code>child_process</code> with .NET equivalents (<code>System.IO</code>, <code>System.Diagnostics.Process</code>).</p>
+</li>
+<li><p><strong>Synchronous IPC</strong>: Electron's <code>ipcRenderer.sendSync</code> has no equivalent. All Fulora bridge calls are async. Refactor synchronous IPC patterns to async/await.</p>
+</li>
+<li><p><strong>Preload scripts</strong>: Replace Electron's <code>preload.js</code> with Fulora's <code>AddPreloadScriptAsync</code> for document-start injection, or use the bridge client which handles initialization automatically.</p>
+</li>
+<li><p><strong>Native modules</strong>: Electron native modules (<code>.node</code> files) must be replaced with .NET P/Invoke or NuGet packages.</p>
+</li>
+<li><p><strong>Multi-window</strong>: Electron creates separate <code>BrowserWindow</code> instances. Fulora uses <code>IWebDialog</code> for additional windows or multiple <code>WebView</code> controls within Avalonia windows.</p>
+</li>
+</ol>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/AGIBuild/Agibuild.Fulora/blob/main/docs/MIGRATION_GUIDE.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          Agibuild.Fulora — Cross-platform Hybrid App Framework
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

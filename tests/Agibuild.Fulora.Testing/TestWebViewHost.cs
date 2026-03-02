@@ -36,6 +36,7 @@ public sealed class TestWebViewHost : IWebView
     public ICommandManager? TryGetCommandManager() => null;
     public Task<INativeHandle?> TryGetWebViewHandleAsync() => Task.FromResult<INativeHandle?>(null);
     public IWebViewRpcService? Rpc => null;
+    public IBridgeTracer? BridgeTracer { get; set; }
     public IBridgeService Bridge => throw new NotSupportedException("TestWebViewHost does not support Bridge. Use WebViewCore with MockWebViewAdapter instead.");
     public Task OpenDevToolsAsync() => Task.CompletedTask;
     public Task CloseDevToolsAsync() => Task.CompletedTask;

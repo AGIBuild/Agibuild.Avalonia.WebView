@@ -1,0 +1,569 @@
+### YamlMime:ManagedReference
+items:
+- uid: Agibuild.Fulora.Shell.DeepLinkRegistrationResult
+  commentId: T:Agibuild.Fulora.Shell.DeepLinkRegistrationResult
+  id: DeepLinkRegistrationResult
+  parent: Agibuild.Fulora.Shell
+  children:
+  - Agibuild.Fulora.Shell.DeepLinkRegistrationResult.#ctor(Agibuild.Fulora.Shell.DeepLinkRegistrationStatus,System.String)
+  - Agibuild.Fulora.Shell.DeepLinkRegistrationResult.Accepted
+  - Agibuild.Fulora.Shell.DeepLinkRegistrationResult.Reason
+  - Agibuild.Fulora.Shell.DeepLinkRegistrationResult.Rejected(System.String)
+  - Agibuild.Fulora.Shell.DeepLinkRegistrationResult.Status
+  langs:
+  - csharp
+  - vb
+  name: DeepLinkRegistrationResult
+  nameWithType: DeepLinkRegistrationResult
+  fullName: Agibuild.Fulora.Shell.DeepLinkRegistrationResult
+  type: Class
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: DeepLinkRegistrationResult
+    path: ../src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+    startLine: 117
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Result of a deep-link route registration attempt.
+  example: []
+  syntax:
+    content: 'public sealed record DeepLinkRegistrationResult : IEquatable<DeepLinkRegistrationResult>'
+    content.vb: Public NotInheritable Class DeepLinkRegistrationResult Implements IEquatable(Of DeepLinkRegistrationResult)
+  inheritance:
+  - System.Object
+  implements:
+  - System.IEquatable{Agibuild.Fulora.Shell.DeepLinkRegistrationResult}
+  inheritedMembers:
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.GetHashCode
+  - System.Object.GetType
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.ToString
+- uid: Agibuild.Fulora.Shell.DeepLinkRegistrationResult.#ctor(Agibuild.Fulora.Shell.DeepLinkRegistrationStatus,System.String)
+  commentId: M:Agibuild.Fulora.Shell.DeepLinkRegistrationResult.#ctor(Agibuild.Fulora.Shell.DeepLinkRegistrationStatus,System.String)
+  id: '#ctor(Agibuild.Fulora.Shell.DeepLinkRegistrationStatus,System.String)'
+  parent: Agibuild.Fulora.Shell.DeepLinkRegistrationResult
+  langs:
+  - csharp
+  - vb
+  name: DeepLinkRegistrationResult(DeepLinkRegistrationStatus, string?)
+  nameWithType: DeepLinkRegistrationResult.DeepLinkRegistrationResult(DeepLinkRegistrationStatus, string?)
+  fullName: Agibuild.Fulora.Shell.DeepLinkRegistrationResult.DeepLinkRegistrationResult(Agibuild.Fulora.Shell.DeepLinkRegistrationStatus, string?)
+  type: Constructor
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: .ctor
+    path: ../src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+    startLine: 117
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Result of a deep-link route registration attempt.
+  example: []
+  syntax:
+    content: public DeepLinkRegistrationResult(DeepLinkRegistrationStatus Status, string? Reason = null)
+    parameters:
+    - id: Status
+      type: Agibuild.Fulora.Shell.DeepLinkRegistrationStatus
+    - id: Reason
+      type: System.String
+    content.vb: Public Sub New(Status As DeepLinkRegistrationStatus, Reason As String = Nothing)
+  overload: Agibuild.Fulora.Shell.DeepLinkRegistrationResult.#ctor*
+  nameWithType.vb: DeepLinkRegistrationResult.New(DeepLinkRegistrationStatus, String)
+  fullName.vb: Agibuild.Fulora.Shell.DeepLinkRegistrationResult.New(Agibuild.Fulora.Shell.DeepLinkRegistrationStatus, String)
+  name.vb: New(DeepLinkRegistrationStatus, String)
+- uid: Agibuild.Fulora.Shell.DeepLinkRegistrationResult.Status
+  commentId: P:Agibuild.Fulora.Shell.DeepLinkRegistrationResult.Status
+  id: Status
+  parent: Agibuild.Fulora.Shell.DeepLinkRegistrationResult
+  langs:
+  - csharp
+  - vb
+  name: Status
+  nameWithType: DeepLinkRegistrationResult.Status
+  fullName: Agibuild.Fulora.Shell.DeepLinkRegistrationResult.Status
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Status
+    path: ../src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+    startLine: 118
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  syntax:
+    content: public DeepLinkRegistrationStatus Status { get; init; }
+    parameters: []
+    return:
+      type: Agibuild.Fulora.Shell.DeepLinkRegistrationStatus
+    content.vb: Public Property Status As DeepLinkRegistrationStatus
+  overload: Agibuild.Fulora.Shell.DeepLinkRegistrationResult.Status*
+- uid: Agibuild.Fulora.Shell.DeepLinkRegistrationResult.Reason
+  commentId: P:Agibuild.Fulora.Shell.DeepLinkRegistrationResult.Reason
+  id: Reason
+  parent: Agibuild.Fulora.Shell.DeepLinkRegistrationResult
+  langs:
+  - csharp
+  - vb
+  name: Reason
+  nameWithType: DeepLinkRegistrationResult.Reason
+  fullName: Agibuild.Fulora.Shell.DeepLinkRegistrationResult.Reason
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Reason
+    path: ../src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+    startLine: 119
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  syntax:
+    content: public string? Reason { get; init; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property Reason As String
+  overload: Agibuild.Fulora.Shell.DeepLinkRegistrationResult.Reason*
+- uid: Agibuild.Fulora.Shell.DeepLinkRegistrationResult.Accepted
+  commentId: M:Agibuild.Fulora.Shell.DeepLinkRegistrationResult.Accepted
+  id: Accepted
+  parent: Agibuild.Fulora.Shell.DeepLinkRegistrationResult
+  langs:
+  - csharp
+  - vb
+  name: Accepted()
+  nameWithType: DeepLinkRegistrationResult.Accepted()
+  fullName: Agibuild.Fulora.Shell.DeepLinkRegistrationResult.Accepted()
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Accepted
+    path: ../src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+    startLine: 122
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Creates an accepted registration result.
+  example: []
+  syntax:
+    content: public static DeepLinkRegistrationResult Accepted()
+    return:
+      type: Agibuild.Fulora.Shell.DeepLinkRegistrationResult
+    content.vb: Public Shared Function Accepted() As DeepLinkRegistrationResult
+  overload: Agibuild.Fulora.Shell.DeepLinkRegistrationResult.Accepted*
+- uid: Agibuild.Fulora.Shell.DeepLinkRegistrationResult.Rejected(System.String)
+  commentId: M:Agibuild.Fulora.Shell.DeepLinkRegistrationResult.Rejected(System.String)
+  id: Rejected(System.String)
+  parent: Agibuild.Fulora.Shell.DeepLinkRegistrationResult
+  langs:
+  - csharp
+  - vb
+  name: Rejected(string)
+  nameWithType: DeepLinkRegistrationResult.Rejected(string)
+  fullName: Agibuild.Fulora.Shell.DeepLinkRegistrationResult.Rejected(string)
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Rejected
+    path: ../src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+    startLine: 124
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Creates a rejected registration result with reason.
+  example: []
+  syntax:
+    content: public static DeepLinkRegistrationResult Rejected(string reason)
+    parameters:
+    - id: reason
+      type: System.String
+    return:
+      type: Agibuild.Fulora.Shell.DeepLinkRegistrationResult
+    content.vb: Public Shared Function Rejected(reason As String) As DeepLinkRegistrationResult
+  overload: Agibuild.Fulora.Shell.DeepLinkRegistrationResult.Rejected*
+  nameWithType.vb: DeepLinkRegistrationResult.Rejected(String)
+  fullName.vb: Agibuild.Fulora.Shell.DeepLinkRegistrationResult.Rejected(String)
+  name.vb: Rejected(String)
+references:
+- uid: Agibuild.Fulora.Shell
+  commentId: N:Agibuild.Fulora.Shell
+  href: Agibuild.html
+  name: Agibuild.Fulora.Shell
+  nameWithType: Agibuild.Fulora.Shell
+  fullName: Agibuild.Fulora.Shell
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  - name: .
+  - uid: Agibuild.Fulora.Shell
+    name: Shell
+    href: Agibuild.Fulora.Shell.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  - name: .
+  - uid: Agibuild.Fulora.Shell
+    name: Shell
+    href: Agibuild.Fulora.Shell.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.IEquatable{Agibuild.Fulora.Shell.DeepLinkRegistrationResult}
+  commentId: T:System.IEquatable{Agibuild.Fulora.Shell.DeepLinkRegistrationResult}
+  parent: System
+  definition: System.IEquatable`1
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  name: IEquatable<DeepLinkRegistrationResult>
+  nameWithType: IEquatable<DeepLinkRegistrationResult>
+  fullName: System.IEquatable<Agibuild.Fulora.Shell.DeepLinkRegistrationResult>
+  nameWithType.vb: IEquatable(Of DeepLinkRegistrationResult)
+  fullName.vb: System.IEquatable(Of Agibuild.Fulora.Shell.DeepLinkRegistrationResult)
+  name.vb: IEquatable(Of DeepLinkRegistrationResult)
+  spec.csharp:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: <
+  - uid: Agibuild.Fulora.Shell.DeepLinkRegistrationResult
+    name: DeepLinkRegistrationResult
+    href: Agibuild.Fulora.Shell.DeepLinkRegistrationResult.html
+  - name: '>'
+  spec.vb:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: Agibuild.Fulora.Shell.DeepLinkRegistrationResult
+    name: DeepLinkRegistrationResult
+    href: Agibuild.Fulora.Shell.DeepLinkRegistrationResult.html
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: System.IEquatable`1
+  commentId: T:System.IEquatable`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  name: IEquatable<T>
+  nameWithType: IEquatable<T>
+  fullName: System.IEquatable<T>
+  nameWithType.vb: IEquatable(Of T)
+  fullName.vb: System.IEquatable(Of T)
+  name.vb: IEquatable(Of T)
+  spec.csharp:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: Agibuild.Fulora.Shell.DeepLinkRegistrationResult.#ctor*
+  commentId: Overload:Agibuild.Fulora.Shell.DeepLinkRegistrationResult.#ctor
+  href: Agibuild.Fulora.Shell.DeepLinkRegistrationResult.html#Agibuild_Fulora_Shell_DeepLinkRegistrationResult__ctor_Agibuild_Fulora_Shell_DeepLinkRegistrationStatus_System_String_
+  name: DeepLinkRegistrationResult
+  nameWithType: DeepLinkRegistrationResult.DeepLinkRegistrationResult
+  fullName: Agibuild.Fulora.Shell.DeepLinkRegistrationResult.DeepLinkRegistrationResult
+  nameWithType.vb: DeepLinkRegistrationResult.New
+  fullName.vb: Agibuild.Fulora.Shell.DeepLinkRegistrationResult.New
+  name.vb: New
+- uid: Agibuild.Fulora.Shell.DeepLinkRegistrationStatus
+  commentId: T:Agibuild.Fulora.Shell.DeepLinkRegistrationStatus
+  parent: Agibuild.Fulora.Shell
+  href: Agibuild.Fulora.Shell.DeepLinkRegistrationStatus.html
+  name: DeepLinkRegistrationStatus
+  nameWithType: DeepLinkRegistrationStatus
+  fullName: Agibuild.Fulora.Shell.DeepLinkRegistrationStatus
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: Agibuild.Fulora.Shell.DeepLinkRegistrationResult.Status*
+  commentId: Overload:Agibuild.Fulora.Shell.DeepLinkRegistrationResult.Status
+  href: Agibuild.Fulora.Shell.DeepLinkRegistrationResult.html#Agibuild_Fulora_Shell_DeepLinkRegistrationResult_Status
+  name: Status
+  nameWithType: DeepLinkRegistrationResult.Status
+  fullName: Agibuild.Fulora.Shell.DeepLinkRegistrationResult.Status
+- uid: Agibuild.Fulora.Shell.DeepLinkRegistrationResult.Reason*
+  commentId: Overload:Agibuild.Fulora.Shell.DeepLinkRegistrationResult.Reason
+  href: Agibuild.Fulora.Shell.DeepLinkRegistrationResult.html#Agibuild_Fulora_Shell_DeepLinkRegistrationResult_Reason
+  name: Reason
+  nameWithType: DeepLinkRegistrationResult.Reason
+  fullName: Agibuild.Fulora.Shell.DeepLinkRegistrationResult.Reason
+- uid: Agibuild.Fulora.Shell.DeepLinkRegistrationResult.Accepted*
+  commentId: Overload:Agibuild.Fulora.Shell.DeepLinkRegistrationResult.Accepted
+  href: Agibuild.Fulora.Shell.DeepLinkRegistrationResult.html#Agibuild_Fulora_Shell_DeepLinkRegistrationResult_Accepted
+  name: Accepted
+  nameWithType: DeepLinkRegistrationResult.Accepted
+  fullName: Agibuild.Fulora.Shell.DeepLinkRegistrationResult.Accepted
+- uid: Agibuild.Fulora.Shell.DeepLinkRegistrationResult
+  commentId: T:Agibuild.Fulora.Shell.DeepLinkRegistrationResult
+  parent: Agibuild.Fulora.Shell
+  href: Agibuild.Fulora.Shell.DeepLinkRegistrationResult.html
+  name: DeepLinkRegistrationResult
+  nameWithType: DeepLinkRegistrationResult
+  fullName: Agibuild.Fulora.Shell.DeepLinkRegistrationResult
+- uid: Agibuild.Fulora.Shell.DeepLinkRegistrationResult.Rejected*
+  commentId: Overload:Agibuild.Fulora.Shell.DeepLinkRegistrationResult.Rejected
+  href: Agibuild.Fulora.Shell.DeepLinkRegistrationResult.html#Agibuild_Fulora_Shell_DeepLinkRegistrationResult_Rejected_System_String_
+  name: Rejected
+  nameWithType: DeepLinkRegistrationResult.Rejected
+  fullName: Agibuild.Fulora.Shell.DeepLinkRegistrationResult.Rejected

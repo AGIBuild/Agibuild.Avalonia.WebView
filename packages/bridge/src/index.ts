@@ -1,3 +1,25 @@
+export type {
+  BridgeCallContext,
+  BridgeMiddleware,
+  LoggingOptions,
+  RetryOptions,
+} from "./middleware.js";
+
+export {
+  BridgeError,
+  BridgeTimeoutError,
+  withLogging,
+  withTimeout,
+  withRetry,
+  withErrorNormalization,
+} from "./middleware.js";
+
+import {
+  type BridgeMiddleware,
+  createContext,
+  executeMiddlewareChain,
+} from "./middleware.js";
+
 export interface BridgeReadyOptions {
   timeoutMs?: number;
   pollIntervalMs?: number;
@@ -23,6 +45,7 @@ export interface BridgeClient {
   ready(options?: BridgeReadyOptions): Promise<void>;
   invoke<T>(method: string, params?: Record<string, unknown>): Promise<T>;
   getService<TService extends object>(serviceName: string): BridgeServiceContract<TService>;
+  use(middleware: BridgeMiddleware): void;
 }
 
 type BridgeRoot = {
@@ -51,6 +74,12 @@ function validateServiceParams(params: unknown): Record<string, unknown> | undef
 export function createBridgeClient(
   resolveRpc: () => BridgeRpc | null = () => getRpcFromWindow(window)
 ): BridgeClient {
+  const middlewares: BridgeMiddleware[] = [];
+
+  function use(middleware: BridgeMiddleware): void {
+    middlewares.push(middleware);
+  }
+
   async function ready(options: BridgeReadyOptions = {}): Promise<void> {
     const timeoutMs = options.timeoutMs ?? 3000;
     const pollIntervalMs = options.pollIntervalMs ?? 50;
@@ -70,7 +99,17 @@ export function createBridgeClient(
       throw new Error("Bridge not available.");
     }
 
-    return (await rpc.invoke(method, params)) as T;
+    if (middlewares.length === 0) {
+      return (await rpc.invoke(method, params)) as T;
+    }
+
+    const context = createContext(method, params);
+    const result = await executeMiddlewareChain(
+      middlewares,
+      context,
+      () => rpc.invoke(method, params)
+    );
+    return result as T;
   }
 
   function getService<TService extends object>(serviceName: string): BridgeServiceContract<TService> {
@@ -92,6 +131,7 @@ export function createBridgeClient(
     ready,
     invoke,
     getService,
+    use,
   };
 }
 

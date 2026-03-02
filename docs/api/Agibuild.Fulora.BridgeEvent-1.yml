@@ -1,0 +1,430 @@
+### YamlMime:ManagedReference
+items:
+- uid: Agibuild.Fulora.BridgeEvent`1
+  commentId: T:Agibuild.Fulora.BridgeEvent`1
+  id: BridgeEvent`1
+  parent: Agibuild.Fulora
+  children:
+  - Agibuild.Fulora.BridgeEvent`1.Emit(`0)
+  langs:
+  - csharp
+  - vb
+  name: BridgeEvent<T>
+  nameWithType: BridgeEvent<T>
+  fullName: Agibuild.Fulora.BridgeEvent<T>
+  type: Class
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/IBridgeService.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: BridgeEvent
+    path: ../src/Agibuild.Fulora.Core/IBridgeService.cs
+    startLine: 23
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: >-
+    Runtime implementation of <xref href="Agibuild.Fulora.IBridgeEvent%601" data-throw-if-not-resolved="false"></xref> that allows C# code to push events to JavaScript.
+
+    <p>
+
+    Declare properties as <xref href="Agibuild.Fulora.IBridgeEvent%601" data-throw-if-not-resolved="false"></xref> on the interface, and use <xref href="Agibuild.Fulora.BridgeEvent%601" data-throw-if-not-resolved="false"></xref>
+
+    in the implementation to emit events:
+
+    <pre><code class="lang-csharp">private readonly BridgeEvent&lt;Notification&gt; _onNew = new();
+
+    public IBridgeEvent&lt;Notification&gt; OnNew =&gt; _onNew;
+
+    // Push: _onNew.Emit(new Notification(...));</code></pre>
+
+    </p>
+  example: []
+  syntax:
+    content: 'public sealed class BridgeEvent<T> : IBridgeEvent<T>'
+    typeParameters:
+    - id: T
+      description: The event payload type.
+    content.vb: Public NotInheritable Class BridgeEvent(Of T) Implements IBridgeEvent(Of T)
+  inheritance:
+  - System.Object
+  implements:
+  - Agibuild.Fulora.IBridgeEvent{{T}}
+  inheritedMembers:
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.GetHashCode
+  - System.Object.GetType
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.ToString
+  nameWithType.vb: BridgeEvent(Of T)
+  fullName.vb: Agibuild.Fulora.BridgeEvent(Of T)
+  name.vb: BridgeEvent(Of T)
+- uid: Agibuild.Fulora.BridgeEvent`1.Emit(`0)
+  commentId: M:Agibuild.Fulora.BridgeEvent`1.Emit(`0)
+  id: Emit(`0)
+  parent: Agibuild.Fulora.BridgeEvent`1
+  langs:
+  - csharp
+  - vb
+  name: Emit(T)
+  nameWithType: BridgeEvent<T>.Emit(T)
+  fullName: Agibuild.Fulora.BridgeEvent<T>.Emit(T)
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/IBridgeService.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Emit
+    path: ../src/Agibuild.Fulora.Core/IBridgeService.cs
+    startLine: 32
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: >-
+    Pushes an event payload to all active JavaScript subscribers.
+
+    No-op if no subscribers are connected or the service has not been exposed.
+  example: []
+  syntax:
+    content: public void Emit(T payload)
+    parameters:
+    - id: payload
+      type: '{T}'
+    content.vb: Public Sub Emit(payload As T)
+  overload: Agibuild.Fulora.BridgeEvent`1.Emit*
+  nameWithType.vb: BridgeEvent(Of T).Emit(T)
+  fullName.vb: Agibuild.Fulora.BridgeEvent(Of T).Emit(T)
+references:
+- uid: Agibuild.Fulora.IBridgeEvent`1
+  commentId: T:Agibuild.Fulora.IBridgeEvent`1
+  href: Agibuild.Fulora.IBridgeEvent-1.html
+  name: IBridgeEvent<T>
+  nameWithType: IBridgeEvent<T>
+  fullName: Agibuild.Fulora.IBridgeEvent<T>
+  nameWithType.vb: IBridgeEvent(Of T)
+  fullName.vb: Agibuild.Fulora.IBridgeEvent(Of T)
+  name.vb: IBridgeEvent(Of T)
+  spec.csharp:
+  - uid: Agibuild.Fulora.IBridgeEvent`1
+    name: IBridgeEvent
+    href: Agibuild.Fulora.IBridgeEvent-1.html
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: Agibuild.Fulora.IBridgeEvent`1
+    name: IBridgeEvent
+    href: Agibuild.Fulora.IBridgeEvent-1.html
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: Agibuild.Fulora.BridgeEvent`1
+  commentId: T:Agibuild.Fulora.BridgeEvent`1
+  href: Agibuild.Fulora.BridgeEvent-1.html
+  name: BridgeEvent<T>
+  nameWithType: BridgeEvent<T>
+  fullName: Agibuild.Fulora.BridgeEvent<T>
+  nameWithType.vb: BridgeEvent(Of T)
+  fullName.vb: Agibuild.Fulora.BridgeEvent(Of T)
+  name.vb: BridgeEvent(Of T)
+  spec.csharp:
+  - uid: Agibuild.Fulora.BridgeEvent`1
+    name: BridgeEvent
+    href: Agibuild.Fulora.BridgeEvent-1.html
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: Agibuild.Fulora.BridgeEvent`1
+    name: BridgeEvent
+    href: Agibuild.Fulora.BridgeEvent-1.html
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: Agibuild.Fulora
+  commentId: N:Agibuild.Fulora
+  href: Agibuild.html
+  name: Agibuild.Fulora
+  nameWithType: Agibuild.Fulora
+  fullName: Agibuild.Fulora
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: Agibuild.Fulora.IBridgeEvent{{T}}
+  commentId: T:Agibuild.Fulora.IBridgeEvent{`0}
+  parent: Agibuild.Fulora
+  definition: Agibuild.Fulora.IBridgeEvent`1
+  href: Agibuild.Fulora.IBridgeEvent-1.html
+  name: IBridgeEvent<T>
+  nameWithType: IBridgeEvent<T>
+  fullName: Agibuild.Fulora.IBridgeEvent<T>
+  nameWithType.vb: IBridgeEvent(Of T)
+  fullName.vb: Agibuild.Fulora.IBridgeEvent(Of T)
+  name.vb: IBridgeEvent(Of T)
+  spec.csharp:
+  - uid: Agibuild.Fulora.IBridgeEvent`1
+    name: IBridgeEvent
+    href: Agibuild.Fulora.IBridgeEvent-1.html
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: Agibuild.Fulora.IBridgeEvent`1
+    name: IBridgeEvent
+    href: Agibuild.Fulora.IBridgeEvent-1.html
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: Agibuild.Fulora.BridgeEvent`1.Emit*
+  commentId: Overload:Agibuild.Fulora.BridgeEvent`1.Emit
+  href: Agibuild.Fulora.BridgeEvent-1.html#Agibuild_Fulora_BridgeEvent_1_Emit__0_
+  name: Emit
+  nameWithType: BridgeEvent<T>.Emit
+  fullName: Agibuild.Fulora.BridgeEvent<T>.Emit
+  nameWithType.vb: BridgeEvent(Of T).Emit
+  fullName.vb: Agibuild.Fulora.BridgeEvent(Of T).Emit
+- uid: '{T}'
+  commentId: '!:T'
+  definition: T
+  name: T
+  nameWithType: T
+  fullName: T
+- uid: T
+  name: T
+  nameWithType: T
+  fullName: T

@@ -1,0 +1,184 @@
+### YamlMime:ManagedReference
+items:
+- uid: Agibuild.Fulora.Shell.DeepLinkActivationIngressStatus
+  commentId: T:Agibuild.Fulora.Shell.DeepLinkActivationIngressStatus
+  id: DeepLinkActivationIngressStatus
+  parent: Agibuild.Fulora.Shell
+  children:
+  - Agibuild.Fulora.Shell.DeepLinkActivationIngressStatus.Dispatched
+  - Agibuild.Fulora.Shell.DeepLinkActivationIngressStatus.Duplicate
+  - Agibuild.Fulora.Shell.DeepLinkActivationIngressStatus.NoMatchingRoute
+  - Agibuild.Fulora.Shell.DeepLinkActivationIngressStatus.PolicyDenied
+  langs:
+  - csharp
+  - vb
+  name: DeepLinkActivationIngressStatus
+  nameWithType: DeepLinkActivationIngressStatus
+  fullName: Agibuild.Fulora.Shell.DeepLinkActivationIngressStatus
+  type: Enum
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: DeepLinkActivationIngressStatus
+    path: ../src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+    startLine: 130
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Status of a deep-link activation ingress attempt.
+  example: []
+  syntax:
+    content: public enum DeepLinkActivationIngressStatus
+    content.vb: Public Enum DeepLinkActivationIngressStatus
+- uid: Agibuild.Fulora.Shell.DeepLinkActivationIngressStatus.Dispatched
+  commentId: F:Agibuild.Fulora.Shell.DeepLinkActivationIngressStatus.Dispatched
+  id: Dispatched
+  parent: Agibuild.Fulora.Shell.DeepLinkActivationIngressStatus
+  langs:
+  - csharp
+  - vb
+  name: Dispatched
+  nameWithType: DeepLinkActivationIngressStatus.Dispatched
+  fullName: Agibuild.Fulora.Shell.DeepLinkActivationIngressStatus.Dispatched
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Dispatched
+    path: ../src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+    startLine: 133
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Activation dispatched to orchestration.
+  example: []
+  syntax:
+    content: Dispatched = 0
+    return:
+      type: Agibuild.Fulora.Shell.DeepLinkActivationIngressStatus
+- uid: Agibuild.Fulora.Shell.DeepLinkActivationIngressStatus.PolicyDenied
+  commentId: F:Agibuild.Fulora.Shell.DeepLinkActivationIngressStatus.PolicyDenied
+  id: PolicyDenied
+  parent: Agibuild.Fulora.Shell.DeepLinkActivationIngressStatus
+  langs:
+  - csharp
+  - vb
+  name: PolicyDenied
+  nameWithType: DeepLinkActivationIngressStatus.PolicyDenied
+  fullName: Agibuild.Fulora.Shell.DeepLinkActivationIngressStatus.PolicyDenied
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: PolicyDenied
+    path: ../src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+    startLine: 135
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Activation denied by policy.
+  example: []
+  syntax:
+    content: PolicyDenied = 1
+    return:
+      type: Agibuild.Fulora.Shell.DeepLinkActivationIngressStatus
+- uid: Agibuild.Fulora.Shell.DeepLinkActivationIngressStatus.Duplicate
+  commentId: F:Agibuild.Fulora.Shell.DeepLinkActivationIngressStatus.Duplicate
+  id: Duplicate
+  parent: Agibuild.Fulora.Shell.DeepLinkActivationIngressStatus
+  langs:
+  - csharp
+  - vb
+  name: Duplicate
+  nameWithType: DeepLinkActivationIngressStatus.Duplicate
+  fullName: Agibuild.Fulora.Shell.DeepLinkActivationIngressStatus.Duplicate
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Duplicate
+    path: ../src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+    startLine: 137
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Activation suppressed as duplicate within replay window.
+  example: []
+  syntax:
+    content: Duplicate = 2
+    return:
+      type: Agibuild.Fulora.Shell.DeepLinkActivationIngressStatus
+- uid: Agibuild.Fulora.Shell.DeepLinkActivationIngressStatus.NoMatchingRoute
+  commentId: F:Agibuild.Fulora.Shell.DeepLinkActivationIngressStatus.NoMatchingRoute
+  id: NoMatchingRoute
+  parent: Agibuild.Fulora.Shell.DeepLinkActivationIngressStatus
+  langs:
+  - csharp
+  - vb
+  name: NoMatchingRoute
+  nameWithType: DeepLinkActivationIngressStatus.NoMatchingRoute
+  fullName: Agibuild.Fulora.Shell.DeepLinkActivationIngressStatus.NoMatchingRoute
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: NoMatchingRoute
+    path: ../src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+    startLine: 139
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: 'Activation rejected: no matching route declaration.'
+  example: []
+  syntax:
+    content: NoMatchingRoute = 3
+    return:
+      type: Agibuild.Fulora.Shell.DeepLinkActivationIngressStatus
+references:
+- uid: Agibuild.Fulora.Shell
+  commentId: N:Agibuild.Fulora.Shell
+  href: Agibuild.html
+  name: Agibuild.Fulora.Shell
+  nameWithType: Agibuild.Fulora.Shell
+  fullName: Agibuild.Fulora.Shell
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  - name: .
+  - uid: Agibuild.Fulora.Shell
+    name: Shell
+    href: Agibuild.Fulora.Shell.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  - name: .
+  - uid: Agibuild.Fulora.Shell
+    name: Shell
+    href: Agibuild.Fulora.Shell.html
+- uid: Agibuild.Fulora.Shell.DeepLinkActivationIngressStatus
+  commentId: T:Agibuild.Fulora.Shell.DeepLinkActivationIngressStatus
+  parent: Agibuild.Fulora.Shell
+  href: Agibuild.Fulora.Shell.DeepLinkActivationIngressStatus.html
+  name: DeepLinkActivationIngressStatus
+  nameWithType: DeepLinkActivationIngressStatus
+  fullName: Agibuild.Fulora.Shell.DeepLinkActivationIngressStatus

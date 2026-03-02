@@ -1,0 +1,624 @@
+### YamlMime:ManagedReference
+items:
+- uid: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision
+  commentId: T:Agibuild.Fulora.Shell.WebViewPermissionProfileDecision
+  id: WebViewPermissionProfileDecision
+  parent: Agibuild.Fulora.Shell
+  children:
+  - Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.#ctor(Agibuild.Fulora.PermissionState,System.Boolean)
+  - Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.Allow
+  - Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.DefaultFallback
+  - Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.Deny
+  - Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.IsExplicit
+  - Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.State
+  langs:
+  - csharp
+  - vb
+  name: WebViewPermissionProfileDecision
+  nameWithType: WebViewPermissionProfileDecision
+  fullName: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision
+  type: Struct
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewSessionPermissionProfiles.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: WebViewPermissionProfileDecision
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewSessionPermissionProfiles.cs
+    startLine: 19
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Typed permission decision under profile governance.
+  example: []
+  syntax:
+    content: 'public readonly record struct WebViewPermissionProfileDecision : IEquatable<WebViewPermissionProfileDecision>'
+    content.vb: Public Structure WebViewPermissionProfileDecision Implements IEquatable(Of WebViewPermissionProfileDecision)
+  implements:
+  - System.IEquatable{Agibuild.Fulora.Shell.WebViewPermissionProfileDecision}
+  inheritedMembers:
+  - System.ValueType.Equals(System.Object)
+  - System.ValueType.GetHashCode
+  - System.ValueType.ToString
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.GetType
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+- uid: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.#ctor(Agibuild.Fulora.PermissionState,System.Boolean)
+  commentId: M:Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.#ctor(Agibuild.Fulora.PermissionState,System.Boolean)
+  id: '#ctor(Agibuild.Fulora.PermissionState,System.Boolean)'
+  parent: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision
+  langs:
+  - csharp
+  - vb
+  name: WebViewPermissionProfileDecision(PermissionState, bool)
+  nameWithType: WebViewPermissionProfileDecision.WebViewPermissionProfileDecision(PermissionState, bool)
+  fullName: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.WebViewPermissionProfileDecision(Agibuild.Fulora.PermissionState, bool)
+  type: Constructor
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewSessionPermissionProfiles.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: .ctor
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewSessionPermissionProfiles.cs
+    startLine: 19
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Typed permission decision under profile governance.
+  example: []
+  syntax:
+    content: public WebViewPermissionProfileDecision(PermissionState State, bool IsExplicit)
+    parameters:
+    - id: State
+      type: Agibuild.Fulora.PermissionState
+    - id: IsExplicit
+      type: System.Boolean
+    content.vb: Public Sub New(State As PermissionState, IsExplicit As Boolean)
+  overload: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.#ctor*
+  nameWithType.vb: WebViewPermissionProfileDecision.New(PermissionState, Boolean)
+  fullName.vb: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.New(Agibuild.Fulora.PermissionState, Boolean)
+  name.vb: New(PermissionState, Boolean)
+- uid: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.State
+  commentId: P:Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.State
+  id: State
+  parent: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision
+  langs:
+  - csharp
+  - vb
+  name: State
+  nameWithType: WebViewPermissionProfileDecision.State
+  fullName: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.State
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewSessionPermissionProfiles.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: State
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewSessionPermissionProfiles.cs
+    startLine: 19
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  syntax:
+    content: public PermissionState State { get; init; }
+    parameters: []
+    return:
+      type: Agibuild.Fulora.PermissionState
+    content.vb: Public Property State As PermissionState
+  overload: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.State*
+- uid: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.IsExplicit
+  commentId: P:Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.IsExplicit
+  id: IsExplicit
+  parent: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision
+  langs:
+  - csharp
+  - vb
+  name: IsExplicit
+  nameWithType: WebViewPermissionProfileDecision.IsExplicit
+  fullName: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.IsExplicit
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewSessionPermissionProfiles.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: IsExplicit
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewSessionPermissionProfiles.cs
+    startLine: 19
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  syntax:
+    content: public bool IsExplicit { get; init; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: Public Property IsExplicit As Boolean
+  overload: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.IsExplicit*
+- uid: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.DefaultFallback
+  commentId: M:Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.DefaultFallback
+  id: DefaultFallback
+  parent: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision
+  langs:
+  - csharp
+  - vb
+  name: DefaultFallback()
+  nameWithType: WebViewPermissionProfileDecision.DefaultFallback()
+  fullName: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.DefaultFallback()
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewSessionPermissionProfiles.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: DefaultFallback
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewSessionPermissionProfiles.cs
+    startLine: 22
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Use runtime fallback behavior.
+  example: []
+  syntax:
+    content: public static WebViewPermissionProfileDecision DefaultFallback()
+    return:
+      type: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision
+    content.vb: Public Shared Function DefaultFallback() As WebViewPermissionProfileDecision
+  overload: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.DefaultFallback*
+- uid: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.Allow
+  commentId: M:Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.Allow
+  id: Allow
+  parent: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision
+  langs:
+  - csharp
+  - vb
+  name: Allow()
+  nameWithType: WebViewPermissionProfileDecision.Allow()
+  fullName: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.Allow()
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewSessionPermissionProfiles.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Allow
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewSessionPermissionProfiles.cs
+    startLine: 26
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Explicitly allow permission request.
+  example: []
+  syntax:
+    content: public static WebViewPermissionProfileDecision Allow()
+    return:
+      type: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision
+    content.vb: Public Shared Function Allow() As WebViewPermissionProfileDecision
+  overload: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.Allow*
+- uid: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.Deny
+  commentId: M:Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.Deny
+  id: Deny
+  parent: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision
+  langs:
+  - csharp
+  - vb
+  name: Deny()
+  nameWithType: WebViewPermissionProfileDecision.Deny()
+  fullName: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.Deny()
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewSessionPermissionProfiles.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Deny
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewSessionPermissionProfiles.cs
+    startLine: 30
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Explicitly deny permission request.
+  example: []
+  syntax:
+    content: public static WebViewPermissionProfileDecision Deny()
+    return:
+      type: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision
+    content.vb: Public Shared Function Deny() As WebViewPermissionProfileDecision
+  overload: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.Deny*
+references:
+- uid: Agibuild.Fulora.Shell
+  commentId: N:Agibuild.Fulora.Shell
+  href: Agibuild.html
+  name: Agibuild.Fulora.Shell
+  nameWithType: Agibuild.Fulora.Shell
+  fullName: Agibuild.Fulora.Shell
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  - name: .
+  - uid: Agibuild.Fulora.Shell
+    name: Shell
+    href: Agibuild.Fulora.Shell.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  - name: .
+  - uid: Agibuild.Fulora.Shell
+    name: Shell
+    href: Agibuild.Fulora.Shell.html
+- uid: System.IEquatable{Agibuild.Fulora.Shell.WebViewPermissionProfileDecision}
+  commentId: T:System.IEquatable{Agibuild.Fulora.Shell.WebViewPermissionProfileDecision}
+  parent: System
+  definition: System.IEquatable`1
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  name: IEquatable<WebViewPermissionProfileDecision>
+  nameWithType: IEquatable<WebViewPermissionProfileDecision>
+  fullName: System.IEquatable<Agibuild.Fulora.Shell.WebViewPermissionProfileDecision>
+  nameWithType.vb: IEquatable(Of WebViewPermissionProfileDecision)
+  fullName.vb: System.IEquatable(Of Agibuild.Fulora.Shell.WebViewPermissionProfileDecision)
+  name.vb: IEquatable(Of WebViewPermissionProfileDecision)
+  spec.csharp:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: <
+  - uid: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision
+    name: WebViewPermissionProfileDecision
+    href: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.html
+  - name: '>'
+  spec.vb:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision
+    name: WebViewPermissionProfileDecision
+    href: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.html
+  - name: )
+- uid: System.ValueType.Equals(System.Object)
+  commentId: M:System.ValueType.Equals(System.Object)
+  parent: System.ValueType
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.valuetype.equals
+  name: Equals(object)
+  nameWithType: ValueType.Equals(object)
+  fullName: System.ValueType.Equals(object)
+  nameWithType.vb: ValueType.Equals(Object)
+  fullName.vb: System.ValueType.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.ValueType.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetype.equals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.ValueType.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetype.equals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.ValueType.GetHashCode
+  commentId: M:System.ValueType.GetHashCode
+  parent: System.ValueType
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.valuetype.gethashcode
+  name: GetHashCode()
+  nameWithType: ValueType.GetHashCode()
+  fullName: System.ValueType.GetHashCode()
+  spec.csharp:
+  - uid: System.ValueType.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetype.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.ValueType.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetype.gethashcode
+  - name: (
+  - name: )
+- uid: System.ValueType.ToString
+  commentId: M:System.ValueType.ToString
+  parent: System.ValueType
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.valuetype.tostring
+  name: ToString()
+  nameWithType: ValueType.ToString()
+  fullName: System.ValueType.ToString()
+  spec.csharp:
+  - uid: System.ValueType.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetype.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.ValueType.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetype.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.IEquatable`1
+  commentId: T:System.IEquatable`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  name: IEquatable<T>
+  nameWithType: IEquatable<T>
+  fullName: System.IEquatable<T>
+  nameWithType.vb: IEquatable(Of T)
+  fullName.vb: System.IEquatable(Of T)
+  name.vb: IEquatable(Of T)
+  spec.csharp:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: System.ValueType
+  commentId: T:System.ValueType
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.valuetype
+  name: ValueType
+  nameWithType: ValueType
+  fullName: System.ValueType
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.#ctor*
+  commentId: Overload:Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.#ctor
+  href: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.html#Agibuild_Fulora_Shell_WebViewPermissionProfileDecision__ctor_Agibuild_Fulora_PermissionState_System_Boolean_
+  name: WebViewPermissionProfileDecision
+  nameWithType: WebViewPermissionProfileDecision.WebViewPermissionProfileDecision
+  fullName: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.WebViewPermissionProfileDecision
+  nameWithType.vb: WebViewPermissionProfileDecision.New
+  fullName.vb: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.New
+  name.vb: New
+- uid: Agibuild.Fulora.PermissionState
+  commentId: T:Agibuild.Fulora.PermissionState
+  parent: Agibuild.Fulora
+  href: Agibuild.Fulora.PermissionState.html
+  name: PermissionState
+  nameWithType: PermissionState
+  fullName: Agibuild.Fulora.PermissionState
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: Agibuild.Fulora
+  commentId: N:Agibuild.Fulora
+  href: Agibuild.html
+  name: Agibuild.Fulora
+  nameWithType: Agibuild.Fulora
+  fullName: Agibuild.Fulora
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+- uid: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.State*
+  commentId: Overload:Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.State
+  href: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.html#Agibuild_Fulora_Shell_WebViewPermissionProfileDecision_State
+  name: State
+  nameWithType: WebViewPermissionProfileDecision.State
+  fullName: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.State
+- uid: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.IsExplicit*
+  commentId: Overload:Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.IsExplicit
+  href: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.html#Agibuild_Fulora_Shell_WebViewPermissionProfileDecision_IsExplicit
+  name: IsExplicit
+  nameWithType: WebViewPermissionProfileDecision.IsExplicit
+  fullName: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.IsExplicit
+- uid: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.DefaultFallback*
+  commentId: Overload:Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.DefaultFallback
+  href: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.html#Agibuild_Fulora_Shell_WebViewPermissionProfileDecision_DefaultFallback
+  name: DefaultFallback
+  nameWithType: WebViewPermissionProfileDecision.DefaultFallback
+  fullName: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.DefaultFallback
+- uid: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision
+  commentId: T:Agibuild.Fulora.Shell.WebViewPermissionProfileDecision
+  parent: Agibuild.Fulora.Shell
+  href: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.html
+  name: WebViewPermissionProfileDecision
+  nameWithType: WebViewPermissionProfileDecision
+  fullName: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision
+- uid: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.Allow*
+  commentId: Overload:Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.Allow
+  href: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.html#Agibuild_Fulora_Shell_WebViewPermissionProfileDecision_Allow
+  name: Allow
+  nameWithType: WebViewPermissionProfileDecision.Allow
+  fullName: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.Allow
+- uid: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.Deny*
+  commentId: Overload:Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.Deny
+  href: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.html#Agibuild_Fulora_Shell_WebViewPermissionProfileDecision_Deny
+  name: Deny
+  nameWithType: WebViewPermissionProfileDecision.Deny
+  fullName: Agibuild.Fulora.Shell.WebViewPermissionProfileDecision.Deny

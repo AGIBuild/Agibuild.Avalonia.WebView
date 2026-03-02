@@ -1,0 +1,234 @@
+### YamlMime:ManagedReference
+items:
+- uid: Agibuild.Fulora.IPlatformThemeProvider
+  commentId: T:Agibuild.Fulora.IPlatformThemeProvider
+  id: IPlatformThemeProvider
+  parent: Agibuild.Fulora
+  children:
+  - Agibuild.Fulora.IPlatformThemeProvider.GetAccentColor
+  - Agibuild.Fulora.IPlatformThemeProvider.GetIsHighContrast
+  - Agibuild.Fulora.IPlatformThemeProvider.GetThemeMode
+  - Agibuild.Fulora.IPlatformThemeProvider.ThemeChanged
+  langs:
+  - csharp
+  - vb
+  name: IPlatformThemeProvider
+  nameWithType: IPlatformThemeProvider
+  fullName: Agibuild.Fulora.IPlatformThemeProvider
+  type: Interface
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/IPlatformThemeProvider.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: IPlatformThemeProvider
+    path: ../src/Agibuild.Fulora.Core/IPlatformThemeProvider.cs
+    startLine: 8
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: >-
+    Abstracts OS-specific theme detection. Implement per platform for accent color,
+
+    high-contrast detection, and theme change notifications.
+  example: []
+  syntax:
+    content: public interface IPlatformThemeProvider
+    content.vb: Public Interface IPlatformThemeProvider
+- uid: Agibuild.Fulora.IPlatformThemeProvider.GetThemeMode
+  commentId: M:Agibuild.Fulora.IPlatformThemeProvider.GetThemeMode
+  id: GetThemeMode
+  parent: Agibuild.Fulora.IPlatformThemeProvider
+  langs:
+  - csharp
+  - vb
+  name: GetThemeMode()
+  nameWithType: IPlatformThemeProvider.GetThemeMode()
+  fullName: Agibuild.Fulora.IPlatformThemeProvider.GetThemeMode()
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/IPlatformThemeProvider.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: GetThemeMode
+    path: ../src/Agibuild.Fulora.Core/IPlatformThemeProvider.cs
+    startLine: 13
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: 'Returns the current theme mode: <code>"light"</code>, <code>"dark"</code>, or <code>"system"</code>.'
+  example: []
+  syntax:
+    content: string GetThemeMode()
+    return:
+      type: System.String
+    content.vb: Function GetThemeMode() As String
+  overload: Agibuild.Fulora.IPlatformThemeProvider.GetThemeMode*
+- uid: Agibuild.Fulora.IPlatformThemeProvider.GetAccentColor
+  commentId: M:Agibuild.Fulora.IPlatformThemeProvider.GetAccentColor
+  id: GetAccentColor
+  parent: Agibuild.Fulora.IPlatformThemeProvider
+  langs:
+  - csharp
+  - vb
+  name: GetAccentColor()
+  nameWithType: IPlatformThemeProvider.GetAccentColor()
+  fullName: Agibuild.Fulora.IPlatformThemeProvider.GetAccentColor()
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/IPlatformThemeProvider.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: GetAccentColor
+    path: ../src/Agibuild.Fulora.Core/IPlatformThemeProvider.cs
+    startLine: 18
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Returns the OS accent color as hex <code>"#RRGGBB"</code>, or <code>null</code> on unsupported platforms.
+  example: []
+  syntax:
+    content: string? GetAccentColor()
+    return:
+      type: System.String
+    content.vb: Function GetAccentColor() As String
+  overload: Agibuild.Fulora.IPlatformThemeProvider.GetAccentColor*
+- uid: Agibuild.Fulora.IPlatformThemeProvider.GetIsHighContrast
+  commentId: M:Agibuild.Fulora.IPlatformThemeProvider.GetIsHighContrast
+  id: GetIsHighContrast
+  parent: Agibuild.Fulora.IPlatformThemeProvider
+  langs:
+  - csharp
+  - vb
+  name: GetIsHighContrast()
+  nameWithType: IPlatformThemeProvider.GetIsHighContrast()
+  fullName: Agibuild.Fulora.IPlatformThemeProvider.GetIsHighContrast()
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/IPlatformThemeProvider.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: GetIsHighContrast
+    path: ../src/Agibuild.Fulora.Core/IPlatformThemeProvider.cs
+    startLine: 23
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Returns <code>true</code> if the OS is in high-contrast mode.
+  example: []
+  syntax:
+    content: bool GetIsHighContrast()
+    return:
+      type: System.Boolean
+    content.vb: Function GetIsHighContrast() As Boolean
+  overload: Agibuild.Fulora.IPlatformThemeProvider.GetIsHighContrast*
+- uid: Agibuild.Fulora.IPlatformThemeProvider.ThemeChanged
+  commentId: E:Agibuild.Fulora.IPlatformThemeProvider.ThemeChanged
+  id: ThemeChanged
+  parent: Agibuild.Fulora.IPlatformThemeProvider
+  langs:
+  - csharp
+  - vb
+  name: ThemeChanged
+  nameWithType: IPlatformThemeProvider.ThemeChanged
+  fullName: Agibuild.Fulora.IPlatformThemeProvider.ThemeChanged
+  type: Event
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/IPlatformThemeProvider.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: ThemeChanged
+    path: ../src/Agibuild.Fulora.Core/IPlatformThemeProvider.cs
+    startLine: 28
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Raised when the OS theme changes. Subscribers should re-query theme state.
+  example: []
+  syntax:
+    content: event EventHandler? ThemeChanged
+    return:
+      type: System.EventHandler
+    content.vb: Event ThemeChanged As EventHandler
+references:
+- uid: Agibuild.Fulora
+  commentId: N:Agibuild.Fulora
+  href: Agibuild.html
+  name: Agibuild.Fulora
+  nameWithType: Agibuild.Fulora
+  fullName: Agibuild.Fulora
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+- uid: Agibuild.Fulora.IPlatformThemeProvider.GetThemeMode*
+  commentId: Overload:Agibuild.Fulora.IPlatformThemeProvider.GetThemeMode
+  href: Agibuild.Fulora.IPlatformThemeProvider.html#Agibuild_Fulora_IPlatformThemeProvider_GetThemeMode
+  name: GetThemeMode
+  nameWithType: IPlatformThemeProvider.GetThemeMode
+  fullName: Agibuild.Fulora.IPlatformThemeProvider.GetThemeMode
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: Agibuild.Fulora.IPlatformThemeProvider.GetAccentColor*
+  commentId: Overload:Agibuild.Fulora.IPlatformThemeProvider.GetAccentColor
+  href: Agibuild.Fulora.IPlatformThemeProvider.html#Agibuild_Fulora_IPlatformThemeProvider_GetAccentColor
+  name: GetAccentColor
+  nameWithType: IPlatformThemeProvider.GetAccentColor
+  fullName: Agibuild.Fulora.IPlatformThemeProvider.GetAccentColor
+- uid: Agibuild.Fulora.IPlatformThemeProvider.GetIsHighContrast*
+  commentId: Overload:Agibuild.Fulora.IPlatformThemeProvider.GetIsHighContrast
+  href: Agibuild.Fulora.IPlatformThemeProvider.html#Agibuild_Fulora_IPlatformThemeProvider_GetIsHighContrast
+  name: GetIsHighContrast
+  nameWithType: IPlatformThemeProvider.GetIsHighContrast
+  fullName: Agibuild.Fulora.IPlatformThemeProvider.GetIsHighContrast
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: System.EventHandler
+  commentId: T:System.EventHandler
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.eventhandler
+  name: EventHandler
+  nameWithType: EventHandler
+  fullName: System.EventHandler

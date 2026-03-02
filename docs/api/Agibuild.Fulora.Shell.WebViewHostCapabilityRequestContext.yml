@@ -1,0 +1,651 @@
+### YamlMime:ManagedReference
+items:
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext
+  commentId: T:Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext
+  id: WebViewHostCapabilityRequestContext
+  parent: Agibuild.Fulora.Shell
+  children:
+  - Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.#ctor(System.Guid,System.Nullable{System.Guid},System.Nullable{System.Guid},Agibuild.Fulora.Shell.WebViewHostCapabilityOperation,System.Uri)
+  - Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.Operation
+  - Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.ParentWindowId
+  - Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.RequestUri
+  - Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.RootWindowId
+  - Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.TargetWindowId
+  langs:
+  - csharp
+  - vb
+  name: WebViewHostCapabilityRequestContext
+  nameWithType: WebViewHostCapabilityRequestContext
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext
+  type: Struct
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: WebViewHostCapabilityRequestContext
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 40
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Request context for host capability authorization.
+  example: []
+  syntax:
+    content: 'public readonly record struct WebViewHostCapabilityRequestContext : IEquatable<WebViewHostCapabilityRequestContext>'
+    content.vb: Public Structure WebViewHostCapabilityRequestContext Implements IEquatable(Of WebViewHostCapabilityRequestContext)
+  implements:
+  - System.IEquatable{Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext}
+  inheritedMembers:
+  - System.ValueType.Equals(System.Object)
+  - System.ValueType.GetHashCode
+  - System.ValueType.ToString
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.GetType
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.#ctor(System.Guid,System.Nullable{System.Guid},System.Nullable{System.Guid},Agibuild.Fulora.Shell.WebViewHostCapabilityOperation,System.Uri)
+  commentId: M:Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.#ctor(System.Guid,System.Nullable{System.Guid},System.Nullable{System.Guid},Agibuild.Fulora.Shell.WebViewHostCapabilityOperation,System.Uri)
+  id: '#ctor(System.Guid,System.Nullable{System.Guid},System.Nullable{System.Guid},Agibuild.Fulora.Shell.WebViewHostCapabilityOperation,System.Uri)'
+  parent: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext
+  langs:
+  - csharp
+  - vb
+  name: WebViewHostCapabilityRequestContext(Guid, Guid?, Guid?, WebViewHostCapabilityOperation, Uri?)
+  nameWithType: WebViewHostCapabilityRequestContext.WebViewHostCapabilityRequestContext(Guid, Guid?, Guid?, WebViewHostCapabilityOperation, Uri?)
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.WebViewHostCapabilityRequestContext(System.Guid, System.Guid?, System.Guid?, Agibuild.Fulora.Shell.WebViewHostCapabilityOperation, System.Uri?)
+  type: Constructor
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: .ctor
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 40
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Request context for host capability authorization.
+  example: []
+  syntax:
+    content: public WebViewHostCapabilityRequestContext(Guid RootWindowId, Guid? ParentWindowId, Guid? TargetWindowId, WebViewHostCapabilityOperation Operation, Uri? RequestUri = null)
+    parameters:
+    - id: RootWindowId
+      type: System.Guid
+    - id: ParentWindowId
+      type: System.Nullable{System.Guid}
+    - id: TargetWindowId
+      type: System.Nullable{System.Guid}
+    - id: Operation
+      type: Agibuild.Fulora.Shell.WebViewHostCapabilityOperation
+    - id: RequestUri
+      type: System.Uri
+    content.vb: Public Sub New(RootWindowId As Guid, ParentWindowId As Guid?, TargetWindowId As Guid?, Operation As WebViewHostCapabilityOperation, RequestUri As Uri = Nothing)
+  overload: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.#ctor*
+  nameWithType.vb: WebViewHostCapabilityRequestContext.New(Guid, Guid?, Guid?, WebViewHostCapabilityOperation, Uri)
+  fullName.vb: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.New(System.Guid, System.Guid?, System.Guid?, Agibuild.Fulora.Shell.WebViewHostCapabilityOperation, System.Uri)
+  name.vb: New(Guid, Guid?, Guid?, WebViewHostCapabilityOperation, Uri)
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.RootWindowId
+  commentId: P:Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.RootWindowId
+  id: RootWindowId
+  parent: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext
+  langs:
+  - csharp
+  - vb
+  name: RootWindowId
+  nameWithType: WebViewHostCapabilityRequestContext.RootWindowId
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.RootWindowId
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: RootWindowId
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 41
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  syntax:
+    content: public Guid RootWindowId { get; init; }
+    parameters: []
+    return:
+      type: System.Guid
+    content.vb: Public Property RootWindowId As Guid
+  overload: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.RootWindowId*
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.ParentWindowId
+  commentId: P:Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.ParentWindowId
+  id: ParentWindowId
+  parent: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext
+  langs:
+  - csharp
+  - vb
+  name: ParentWindowId
+  nameWithType: WebViewHostCapabilityRequestContext.ParentWindowId
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.ParentWindowId
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: ParentWindowId
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 42
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  syntax:
+    content: public Guid? ParentWindowId { get; init; }
+    parameters: []
+    return:
+      type: System.Nullable{System.Guid}
+    content.vb: Public Property ParentWindowId As Guid?
+  overload: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.ParentWindowId*
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.TargetWindowId
+  commentId: P:Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.TargetWindowId
+  id: TargetWindowId
+  parent: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext
+  langs:
+  - csharp
+  - vb
+  name: TargetWindowId
+  nameWithType: WebViewHostCapabilityRequestContext.TargetWindowId
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.TargetWindowId
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: TargetWindowId
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 43
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  syntax:
+    content: public Guid? TargetWindowId { get; init; }
+    parameters: []
+    return:
+      type: System.Nullable{System.Guid}
+    content.vb: Public Property TargetWindowId As Guid?
+  overload: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.TargetWindowId*
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.Operation
+  commentId: P:Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.Operation
+  id: Operation
+  parent: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext
+  langs:
+  - csharp
+  - vb
+  name: Operation
+  nameWithType: WebViewHostCapabilityRequestContext.Operation
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.Operation
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Operation
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 44
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  syntax:
+    content: public WebViewHostCapabilityOperation Operation { get; init; }
+    parameters: []
+    return:
+      type: Agibuild.Fulora.Shell.WebViewHostCapabilityOperation
+    content.vb: Public Property Operation As WebViewHostCapabilityOperation
+  overload: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.Operation*
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.RequestUri
+  commentId: P:Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.RequestUri
+  id: RequestUri
+  parent: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext
+  langs:
+  - csharp
+  - vb
+  name: RequestUri
+  nameWithType: WebViewHostCapabilityRequestContext.RequestUri
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.RequestUri
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: RequestUri
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 45
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  syntax:
+    content: public Uri? RequestUri { get; init; }
+    parameters: []
+    return:
+      type: System.Uri
+    content.vb: Public Property RequestUri As Uri
+  overload: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.RequestUri*
+references:
+- uid: Agibuild.Fulora.Shell
+  commentId: N:Agibuild.Fulora.Shell
+  href: Agibuild.html
+  name: Agibuild.Fulora.Shell
+  nameWithType: Agibuild.Fulora.Shell
+  fullName: Agibuild.Fulora.Shell
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  - name: .
+  - uid: Agibuild.Fulora.Shell
+    name: Shell
+    href: Agibuild.Fulora.Shell.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  - name: .
+  - uid: Agibuild.Fulora.Shell
+    name: Shell
+    href: Agibuild.Fulora.Shell.html
+- uid: System.IEquatable{Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext}
+  commentId: T:System.IEquatable{Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext}
+  parent: System
+  definition: System.IEquatable`1
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  name: IEquatable<WebViewHostCapabilityRequestContext>
+  nameWithType: IEquatable<WebViewHostCapabilityRequestContext>
+  fullName: System.IEquatable<Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext>
+  nameWithType.vb: IEquatable(Of WebViewHostCapabilityRequestContext)
+  fullName.vb: System.IEquatable(Of Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext)
+  name.vb: IEquatable(Of WebViewHostCapabilityRequestContext)
+  spec.csharp:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: <
+  - uid: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext
+    name: WebViewHostCapabilityRequestContext
+    href: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.html
+  - name: '>'
+  spec.vb:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext
+    name: WebViewHostCapabilityRequestContext
+    href: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.html
+  - name: )
+- uid: System.ValueType.Equals(System.Object)
+  commentId: M:System.ValueType.Equals(System.Object)
+  parent: System.ValueType
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.valuetype.equals
+  name: Equals(object)
+  nameWithType: ValueType.Equals(object)
+  fullName: System.ValueType.Equals(object)
+  nameWithType.vb: ValueType.Equals(Object)
+  fullName.vb: System.ValueType.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.ValueType.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetype.equals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.ValueType.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetype.equals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.ValueType.GetHashCode
+  commentId: M:System.ValueType.GetHashCode
+  parent: System.ValueType
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.valuetype.gethashcode
+  name: GetHashCode()
+  nameWithType: ValueType.GetHashCode()
+  fullName: System.ValueType.GetHashCode()
+  spec.csharp:
+  - uid: System.ValueType.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetype.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.ValueType.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetype.gethashcode
+  - name: (
+  - name: )
+- uid: System.ValueType.ToString
+  commentId: M:System.ValueType.ToString
+  parent: System.ValueType
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.valuetype.tostring
+  name: ToString()
+  nameWithType: ValueType.ToString()
+  fullName: System.ValueType.ToString()
+  spec.csharp:
+  - uid: System.ValueType.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetype.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.ValueType.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.valuetype.tostring
+  - name: (
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.IEquatable`1
+  commentId: T:System.IEquatable`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  name: IEquatable<T>
+  nameWithType: IEquatable<T>
+  fullName: System.IEquatable<T>
+  nameWithType.vb: IEquatable(Of T)
+  fullName.vb: System.IEquatable(Of T)
+  name.vb: IEquatable(Of T)
+  spec.csharp:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.IEquatable`1
+    name: IEquatable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iequatable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: System.ValueType
+  commentId: T:System.ValueType
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.valuetype
+  name: ValueType
+  nameWithType: ValueType
+  fullName: System.ValueType
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.#ctor*
+  commentId: Overload:Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.#ctor
+  href: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.html#Agibuild_Fulora_Shell_WebViewHostCapabilityRequestContext__ctor_System_Guid_System_Nullable_System_Guid__System_Nullable_System_Guid__Agibuild_Fulora_Shell_WebViewHostCapabilityOperation_System_Uri_
+  name: WebViewHostCapabilityRequestContext
+  nameWithType: WebViewHostCapabilityRequestContext.WebViewHostCapabilityRequestContext
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.WebViewHostCapabilityRequestContext
+  nameWithType.vb: WebViewHostCapabilityRequestContext.New
+  fullName.vb: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.New
+  name.vb: New
+- uid: System.Guid
+  commentId: T:System.Guid
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.guid
+  name: Guid
+  nameWithType: Guid
+  fullName: System.Guid
+- uid: System.Nullable{System.Guid}
+  commentId: T:System.Nullable{System.Guid}
+  parent: System
+  definition: System.Nullable`1
+  href: https://learn.microsoft.com/dotnet/api/system.guid
+  name: Guid?
+  nameWithType: Guid?
+  fullName: System.Guid?
+  spec.csharp:
+  - uid: System.Guid
+    name: Guid
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.guid
+  - name: '?'
+  spec.vb:
+  - uid: System.Guid
+    name: Guid
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.guid
+  - name: '?'
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityOperation
+  commentId: T:Agibuild.Fulora.Shell.WebViewHostCapabilityOperation
+  parent: Agibuild.Fulora.Shell
+  href: Agibuild.Fulora.Shell.WebViewHostCapabilityOperation.html
+  name: WebViewHostCapabilityOperation
+  nameWithType: WebViewHostCapabilityOperation
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityOperation
+- uid: System.Uri
+  commentId: T:System.Uri
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.uri
+  name: Uri
+  nameWithType: Uri
+  fullName: System.Uri
+- uid: System.Nullable`1
+  commentId: T:System.Nullable`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.nullable-1
+  name: Nullable<T>
+  nameWithType: Nullable<T>
+  fullName: System.Nullable<T>
+  nameWithType.vb: Nullable(Of T)
+  fullName.vb: System.Nullable(Of T)
+  name.vb: Nullable(Of T)
+  spec.csharp:
+  - uid: System.Nullable`1
+    name: Nullable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.nullable-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Nullable`1
+    name: Nullable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.nullable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.RootWindowId*
+  commentId: Overload:Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.RootWindowId
+  href: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.html#Agibuild_Fulora_Shell_WebViewHostCapabilityRequestContext_RootWindowId
+  name: RootWindowId
+  nameWithType: WebViewHostCapabilityRequestContext.RootWindowId
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.RootWindowId
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.ParentWindowId*
+  commentId: Overload:Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.ParentWindowId
+  href: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.html#Agibuild_Fulora_Shell_WebViewHostCapabilityRequestContext_ParentWindowId
+  name: ParentWindowId
+  nameWithType: WebViewHostCapabilityRequestContext.ParentWindowId
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.ParentWindowId
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.TargetWindowId*
+  commentId: Overload:Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.TargetWindowId
+  href: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.html#Agibuild_Fulora_Shell_WebViewHostCapabilityRequestContext_TargetWindowId
+  name: TargetWindowId
+  nameWithType: WebViewHostCapabilityRequestContext.TargetWindowId
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.TargetWindowId
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.Operation*
+  commentId: Overload:Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.Operation
+  href: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.html#Agibuild_Fulora_Shell_WebViewHostCapabilityRequestContext_Operation
+  name: Operation
+  nameWithType: WebViewHostCapabilityRequestContext.Operation
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.Operation
+- uid: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.RequestUri*
+  commentId: Overload:Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.RequestUri
+  href: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.html#Agibuild_Fulora_Shell_WebViewHostCapabilityRequestContext_RequestUri
+  name: RequestUri
+  nameWithType: WebViewHostCapabilityRequestContext.RequestUri
+  fullName: Agibuild.Fulora.Shell.WebViewHostCapabilityRequestContext.RequestUri

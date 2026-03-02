@@ -1,0 +1,126 @@
+### YamlMime:ManagedReference
+items:
+- uid: Agibuild.Fulora.Shell.WebViewShellActivationForwardStatus
+  commentId: T:Agibuild.Fulora.Shell.WebViewShellActivationForwardStatus
+  id: WebViewShellActivationForwardStatus
+  parent: Agibuild.Fulora.Shell
+  children:
+  - Agibuild.Fulora.Shell.WebViewShellActivationForwardStatus.Delivered
+  - Agibuild.Fulora.Shell.WebViewShellActivationForwardStatus.NoActivePrimary
+  langs:
+  - csharp
+  - vb
+  name: WebViewShellActivationForwardStatus
+  nameWithType: WebViewShellActivationForwardStatus
+  fullName: Agibuild.Fulora.Shell.WebViewShellActivationForwardStatus
+  type: Enum
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewShellActivationCoordinator.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: WebViewShellActivationForwardStatus
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewShellActivationCoordinator.cs
+    startLine: 48
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Forward status for secondary-instance activation dispatch.
+  example: []
+  syntax:
+    content: public enum WebViewShellActivationForwardStatus
+    content.vb: Public Enum WebViewShellActivationForwardStatus
+- uid: Agibuild.Fulora.Shell.WebViewShellActivationForwardStatus.Delivered
+  commentId: F:Agibuild.Fulora.Shell.WebViewShellActivationForwardStatus.Delivered
+  id: Delivered
+  parent: Agibuild.Fulora.Shell.WebViewShellActivationForwardStatus
+  langs:
+  - csharp
+  - vb
+  name: Delivered
+  nameWithType: WebViewShellActivationForwardStatus.Delivered
+  fullName: Agibuild.Fulora.Shell.WebViewShellActivationForwardStatus.Delivered
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewShellActivationCoordinator.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Delivered
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewShellActivationCoordinator.cs
+    startLine: 53
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Activation payload was delivered to active primary handler.
+  example: []
+  syntax:
+    content: Delivered = 0
+    return:
+      type: Agibuild.Fulora.Shell.WebViewShellActivationForwardStatus
+- uid: Agibuild.Fulora.Shell.WebViewShellActivationForwardStatus.NoActivePrimary
+  commentId: F:Agibuild.Fulora.Shell.WebViewShellActivationForwardStatus.NoActivePrimary
+  id: NoActivePrimary
+  parent: Agibuild.Fulora.Shell.WebViewShellActivationForwardStatus
+  langs:
+  - csharp
+  - vb
+  name: NoActivePrimary
+  nameWithType: WebViewShellActivationForwardStatus.NoActivePrimary
+  fullName: Agibuild.Fulora.Shell.WebViewShellActivationForwardStatus.NoActivePrimary
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewShellActivationCoordinator.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: NoActivePrimary
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewShellActivationCoordinator.cs
+    startLine: 57
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: No active primary owner exists for this app identity.
+  example: []
+  syntax:
+    content: NoActivePrimary = 1
+    return:
+      type: Agibuild.Fulora.Shell.WebViewShellActivationForwardStatus
+references:
+- uid: Agibuild.Fulora.Shell
+  commentId: N:Agibuild.Fulora.Shell
+  href: Agibuild.html
+  name: Agibuild.Fulora.Shell
+  nameWithType: Agibuild.Fulora.Shell
+  fullName: Agibuild.Fulora.Shell
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  - name: .
+  - uid: Agibuild.Fulora.Shell
+    name: Shell
+    href: Agibuild.Fulora.Shell.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  - name: .
+  - uid: Agibuild.Fulora.Shell
+    name: Shell
+    href: Agibuild.Fulora.Shell.html
+- uid: Agibuild.Fulora.Shell.WebViewShellActivationForwardStatus
+  commentId: T:Agibuild.Fulora.Shell.WebViewShellActivationForwardStatus
+  parent: Agibuild.Fulora.Shell
+  href: Agibuild.Fulora.Shell.WebViewShellActivationForwardStatus.html
+  name: WebViewShellActivationForwardStatus
+  nameWithType: WebViewShellActivationForwardStatus
+  fullName: Agibuild.Fulora.Shell.WebViewShellActivationForwardStatus

@@ -1,0 +1,2439 @@
+### YamlMime:ManagedReference
+items:
+- uid: Agibuild.Fulora.ShortcutKey
+  commentId: T:Agibuild.Fulora.ShortcutKey
+  id: ShortcutKey
+  parent: Agibuild.Fulora
+  children:
+  - Agibuild.Fulora.ShortcutKey.A
+  - Agibuild.Fulora.ShortcutKey.B
+  - Agibuild.Fulora.ShortcutKey.Backslash
+  - Agibuild.Fulora.ShortcutKey.Backspace
+  - Agibuild.Fulora.ShortcutKey.Backtick
+  - Agibuild.Fulora.ShortcutKey.BracketLeft
+  - Agibuild.Fulora.ShortcutKey.BracketRight
+  - Agibuild.Fulora.ShortcutKey.C
+  - Agibuild.Fulora.ShortcutKey.Comma
+  - Agibuild.Fulora.ShortcutKey.D
+  - Agibuild.Fulora.ShortcutKey.D0
+  - Agibuild.Fulora.ShortcutKey.D1
+  - Agibuild.Fulora.ShortcutKey.D2
+  - Agibuild.Fulora.ShortcutKey.D3
+  - Agibuild.Fulora.ShortcutKey.D4
+  - Agibuild.Fulora.ShortcutKey.D5
+  - Agibuild.Fulora.ShortcutKey.D6
+  - Agibuild.Fulora.ShortcutKey.D7
+  - Agibuild.Fulora.ShortcutKey.D8
+  - Agibuild.Fulora.ShortcutKey.D9
+  - Agibuild.Fulora.ShortcutKey.Delete
+  - Agibuild.Fulora.ShortcutKey.Down
+  - Agibuild.Fulora.ShortcutKey.E
+  - Agibuild.Fulora.ShortcutKey.End
+  - Agibuild.Fulora.ShortcutKey.Enter
+  - Agibuild.Fulora.ShortcutKey.Escape
+  - Agibuild.Fulora.ShortcutKey.F
+  - Agibuild.Fulora.ShortcutKey.F1
+  - Agibuild.Fulora.ShortcutKey.F10
+  - Agibuild.Fulora.ShortcutKey.F11
+  - Agibuild.Fulora.ShortcutKey.F12
+  - Agibuild.Fulora.ShortcutKey.F2
+  - Agibuild.Fulora.ShortcutKey.F3
+  - Agibuild.Fulora.ShortcutKey.F4
+  - Agibuild.Fulora.ShortcutKey.F5
+  - Agibuild.Fulora.ShortcutKey.F6
+  - Agibuild.Fulora.ShortcutKey.F7
+  - Agibuild.Fulora.ShortcutKey.F8
+  - Agibuild.Fulora.ShortcutKey.F9
+  - Agibuild.Fulora.ShortcutKey.G
+  - Agibuild.Fulora.ShortcutKey.H
+  - Agibuild.Fulora.ShortcutKey.Home
+  - Agibuild.Fulora.ShortcutKey.I
+  - Agibuild.Fulora.ShortcutKey.Insert
+  - Agibuild.Fulora.ShortcutKey.J
+  - Agibuild.Fulora.ShortcutKey.K
+  - Agibuild.Fulora.ShortcutKey.L
+  - Agibuild.Fulora.ShortcutKey.Left
+  - Agibuild.Fulora.ShortcutKey.M
+  - Agibuild.Fulora.ShortcutKey.Minus
+  - Agibuild.Fulora.ShortcutKey.N
+  - Agibuild.Fulora.ShortcutKey.None
+  - Agibuild.Fulora.ShortcutKey.NumPad0
+  - Agibuild.Fulora.ShortcutKey.NumPad1
+  - Agibuild.Fulora.ShortcutKey.NumPad2
+  - Agibuild.Fulora.ShortcutKey.NumPad3
+  - Agibuild.Fulora.ShortcutKey.NumPad4
+  - Agibuild.Fulora.ShortcutKey.NumPad5
+  - Agibuild.Fulora.ShortcutKey.NumPad6
+  - Agibuild.Fulora.ShortcutKey.NumPad7
+  - Agibuild.Fulora.ShortcutKey.NumPad8
+  - Agibuild.Fulora.ShortcutKey.NumPad9
+  - Agibuild.Fulora.ShortcutKey.O
+  - Agibuild.Fulora.ShortcutKey.P
+  - Agibuild.Fulora.ShortcutKey.PageDown
+  - Agibuild.Fulora.ShortcutKey.PageUp
+  - Agibuild.Fulora.ShortcutKey.Pause
+  - Agibuild.Fulora.ShortcutKey.Period
+  - Agibuild.Fulora.ShortcutKey.Plus
+  - Agibuild.Fulora.ShortcutKey.PrintScreen
+  - Agibuild.Fulora.ShortcutKey.Q
+  - Agibuild.Fulora.ShortcutKey.Quote
+  - Agibuild.Fulora.ShortcutKey.R
+  - Agibuild.Fulora.ShortcutKey.Right
+  - Agibuild.Fulora.ShortcutKey.S
+  - Agibuild.Fulora.ShortcutKey.ScrollLock
+  - Agibuild.Fulora.ShortcutKey.Semicolon
+  - Agibuild.Fulora.ShortcutKey.Slash
+  - Agibuild.Fulora.ShortcutKey.Space
+  - Agibuild.Fulora.ShortcutKey.T
+  - Agibuild.Fulora.ShortcutKey.Tab
+  - Agibuild.Fulora.ShortcutKey.U
+  - Agibuild.Fulora.ShortcutKey.Up
+  - Agibuild.Fulora.ShortcutKey.V
+  - Agibuild.Fulora.ShortcutKey.W
+  - Agibuild.Fulora.ShortcutKey.X
+  - Agibuild.Fulora.ShortcutKey.Y
+  - Agibuild.Fulora.ShortcutKey.Z
+  langs:
+  - csharp
+  - vb
+  name: ShortcutKey
+  nameWithType: ShortcutKey
+  fullName: Agibuild.Fulora.ShortcutKey
+  type: Enum
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: ShortcutKey
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 6
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: >-
+    Virtual key codes for global shortcut registration.
+
+    Subset of commonly used keys across all platforms.
+  example: []
+  syntax:
+    content: public enum ShortcutKey
+    content.vb: Public Enum ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.None
+  commentId: F:Agibuild.Fulora.ShortcutKey.None
+  id: None
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: None
+  nameWithType: ShortcutKey.None
+  fullName: Agibuild.Fulora.ShortcutKey.None
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: None
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 8
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: None = 0
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.A
+  commentId: F:Agibuild.Fulora.ShortcutKey.A
+  id: A
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: A
+  nameWithType: ShortcutKey.A
+  fullName: Agibuild.Fulora.ShortcutKey.A
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: A
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 11
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: A = 65
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.B
+  commentId: F:Agibuild.Fulora.ShortcutKey.B
+  id: B
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: B
+  nameWithType: ShortcutKey.B
+  fullName: Agibuild.Fulora.ShortcutKey.B
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: B
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 11
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: B = 66
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.C
+  commentId: F:Agibuild.Fulora.ShortcutKey.C
+  id: C
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: C
+  nameWithType: ShortcutKey.C
+  fullName: Agibuild.Fulora.ShortcutKey.C
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: C
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 11
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: C = 67
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.D
+  commentId: F:Agibuild.Fulora.ShortcutKey.D
+  id: D
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: D
+  nameWithType: ShortcutKey.D
+  fullName: Agibuild.Fulora.ShortcutKey.D
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: D
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 11
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: D = 68
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.E
+  commentId: F:Agibuild.Fulora.ShortcutKey.E
+  id: E
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: E
+  nameWithType: ShortcutKey.E
+  fullName: Agibuild.Fulora.ShortcutKey.E
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: E
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 11
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: E = 69
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.F
+  commentId: F:Agibuild.Fulora.ShortcutKey.F
+  id: F
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: F
+  nameWithType: ShortcutKey.F
+  fullName: Agibuild.Fulora.ShortcutKey.F
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: F
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 11
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: F = 70
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.G
+  commentId: F:Agibuild.Fulora.ShortcutKey.G
+  id: G
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: G
+  nameWithType: ShortcutKey.G
+  fullName: Agibuild.Fulora.ShortcutKey.G
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: G
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 11
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: G = 71
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.H
+  commentId: F:Agibuild.Fulora.ShortcutKey.H
+  id: H
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: H
+  nameWithType: ShortcutKey.H
+  fullName: Agibuild.Fulora.ShortcutKey.H
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: H
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 11
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: H = 72
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.I
+  commentId: F:Agibuild.Fulora.ShortcutKey.I
+  id: I
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: I
+  nameWithType: ShortcutKey.I
+  fullName: Agibuild.Fulora.ShortcutKey.I
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: I
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 11
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: I = 73
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.J
+  commentId: F:Agibuild.Fulora.ShortcutKey.J
+  id: J
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: J
+  nameWithType: ShortcutKey.J
+  fullName: Agibuild.Fulora.ShortcutKey.J
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: J
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 11
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: J = 74
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.K
+  commentId: F:Agibuild.Fulora.ShortcutKey.K
+  id: K
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: K
+  nameWithType: ShortcutKey.K
+  fullName: Agibuild.Fulora.ShortcutKey.K
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: K
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 11
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: K = 75
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.L
+  commentId: F:Agibuild.Fulora.ShortcutKey.L
+  id: L
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: L
+  nameWithType: ShortcutKey.L
+  fullName: Agibuild.Fulora.ShortcutKey.L
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: L
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 11
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: L = 76
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.M
+  commentId: F:Agibuild.Fulora.ShortcutKey.M
+  id: M
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: M
+  nameWithType: ShortcutKey.M
+  fullName: Agibuild.Fulora.ShortcutKey.M
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: M
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 11
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: M = 77
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.N
+  commentId: F:Agibuild.Fulora.ShortcutKey.N
+  id: N
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: N
+  nameWithType: ShortcutKey.N
+  fullName: Agibuild.Fulora.ShortcutKey.N
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: N
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 12
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: N = 78
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.O
+  commentId: F:Agibuild.Fulora.ShortcutKey.O
+  id: O
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: O
+  nameWithType: ShortcutKey.O
+  fullName: Agibuild.Fulora.ShortcutKey.O
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: O
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 12
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: O = 79
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.P
+  commentId: F:Agibuild.Fulora.ShortcutKey.P
+  id: P
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: P
+  nameWithType: ShortcutKey.P
+  fullName: Agibuild.Fulora.ShortcutKey.P
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: P
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 12
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: P = 80
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.Q
+  commentId: F:Agibuild.Fulora.ShortcutKey.Q
+  id: Q
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: Q
+  nameWithType: ShortcutKey.Q
+  fullName: Agibuild.Fulora.ShortcutKey.Q
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Q
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 12
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: Q = 81
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.R
+  commentId: F:Agibuild.Fulora.ShortcutKey.R
+  id: R
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: R
+  nameWithType: ShortcutKey.R
+  fullName: Agibuild.Fulora.ShortcutKey.R
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: R
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 12
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: R = 82
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.S
+  commentId: F:Agibuild.Fulora.ShortcutKey.S
+  id: S
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: S
+  nameWithType: ShortcutKey.S
+  fullName: Agibuild.Fulora.ShortcutKey.S
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: S
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 12
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: S = 83
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.T
+  commentId: F:Agibuild.Fulora.ShortcutKey.T
+  id: T
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: T
+  nameWithType: ShortcutKey.T
+  fullName: Agibuild.Fulora.ShortcutKey.T
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: T
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 12
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: T = 84
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.U
+  commentId: F:Agibuild.Fulora.ShortcutKey.U
+  id: U
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: U
+  nameWithType: ShortcutKey.U
+  fullName: Agibuild.Fulora.ShortcutKey.U
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: U
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 12
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: U = 85
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.V
+  commentId: F:Agibuild.Fulora.ShortcutKey.V
+  id: V
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: V
+  nameWithType: ShortcutKey.V
+  fullName: Agibuild.Fulora.ShortcutKey.V
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: V
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 12
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: V = 86
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.W
+  commentId: F:Agibuild.Fulora.ShortcutKey.W
+  id: W
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: W
+  nameWithType: ShortcutKey.W
+  fullName: Agibuild.Fulora.ShortcutKey.W
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: W
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 12
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: W = 87
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.X
+  commentId: F:Agibuild.Fulora.ShortcutKey.X
+  id: X
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: X
+  nameWithType: ShortcutKey.X
+  fullName: Agibuild.Fulora.ShortcutKey.X
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: X
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 12
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: X = 88
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.Y
+  commentId: F:Agibuild.Fulora.ShortcutKey.Y
+  id: Y
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: Y
+  nameWithType: ShortcutKey.Y
+  fullName: Agibuild.Fulora.ShortcutKey.Y
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Y
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 12
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: Y = 89
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.Z
+  commentId: F:Agibuild.Fulora.ShortcutKey.Z
+  id: Z
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: Z
+  nameWithType: ShortcutKey.Z
+  fullName: Agibuild.Fulora.ShortcutKey.Z
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Z
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 12
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: Z = 90
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.D0
+  commentId: F:Agibuild.Fulora.ShortcutKey.D0
+  id: D0
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: D0
+  nameWithType: ShortcutKey.D0
+  fullName: Agibuild.Fulora.ShortcutKey.D0
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: D0
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 15
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: D0 = 48
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.D1
+  commentId: F:Agibuild.Fulora.ShortcutKey.D1
+  id: D1
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: D1
+  nameWithType: ShortcutKey.D1
+  fullName: Agibuild.Fulora.ShortcutKey.D1
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: D1
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 15
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: D1 = 49
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.D2
+  commentId: F:Agibuild.Fulora.ShortcutKey.D2
+  id: D2
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: D2
+  nameWithType: ShortcutKey.D2
+  fullName: Agibuild.Fulora.ShortcutKey.D2
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: D2
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 15
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: D2 = 50
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.D3
+  commentId: F:Agibuild.Fulora.ShortcutKey.D3
+  id: D3
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: D3
+  nameWithType: ShortcutKey.D3
+  fullName: Agibuild.Fulora.ShortcutKey.D3
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: D3
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 15
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: D3 = 51
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.D4
+  commentId: F:Agibuild.Fulora.ShortcutKey.D4
+  id: D4
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: D4
+  nameWithType: ShortcutKey.D4
+  fullName: Agibuild.Fulora.ShortcutKey.D4
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: D4
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 15
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: D4 = 52
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.D5
+  commentId: F:Agibuild.Fulora.ShortcutKey.D5
+  id: D5
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: D5
+  nameWithType: ShortcutKey.D5
+  fullName: Agibuild.Fulora.ShortcutKey.D5
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: D5
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 15
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: D5 = 53
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.D6
+  commentId: F:Agibuild.Fulora.ShortcutKey.D6
+  id: D6
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: D6
+  nameWithType: ShortcutKey.D6
+  fullName: Agibuild.Fulora.ShortcutKey.D6
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: D6
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 15
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: D6 = 54
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.D7
+  commentId: F:Agibuild.Fulora.ShortcutKey.D7
+  id: D7
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: D7
+  nameWithType: ShortcutKey.D7
+  fullName: Agibuild.Fulora.ShortcutKey.D7
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: D7
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 15
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: D7 = 55
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.D8
+  commentId: F:Agibuild.Fulora.ShortcutKey.D8
+  id: D8
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: D8
+  nameWithType: ShortcutKey.D8
+  fullName: Agibuild.Fulora.ShortcutKey.D8
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: D8
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 15
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: D8 = 56
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.D9
+  commentId: F:Agibuild.Fulora.ShortcutKey.D9
+  id: D9
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: D9
+  nameWithType: ShortcutKey.D9
+  fullName: Agibuild.Fulora.ShortcutKey.D9
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: D9
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 15
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: D9 = 57
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.F1
+  commentId: F:Agibuild.Fulora.ShortcutKey.F1
+  id: F1
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: F1
+  nameWithType: ShortcutKey.F1
+  fullName: Agibuild.Fulora.ShortcutKey.F1
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: F1
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 18
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: F1 = 112
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.F2
+  commentId: F:Agibuild.Fulora.ShortcutKey.F2
+  id: F2
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: F2
+  nameWithType: ShortcutKey.F2
+  fullName: Agibuild.Fulora.ShortcutKey.F2
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: F2
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 18
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: F2 = 113
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.F3
+  commentId: F:Agibuild.Fulora.ShortcutKey.F3
+  id: F3
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: F3
+  nameWithType: ShortcutKey.F3
+  fullName: Agibuild.Fulora.ShortcutKey.F3
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: F3
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 18
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: F3 = 114
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.F4
+  commentId: F:Agibuild.Fulora.ShortcutKey.F4
+  id: F4
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: F4
+  nameWithType: ShortcutKey.F4
+  fullName: Agibuild.Fulora.ShortcutKey.F4
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: F4
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 18
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: F4 = 115
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.F5
+  commentId: F:Agibuild.Fulora.ShortcutKey.F5
+  id: F5
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: F5
+  nameWithType: ShortcutKey.F5
+  fullName: Agibuild.Fulora.ShortcutKey.F5
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: F5
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 18
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: F5 = 116
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.F6
+  commentId: F:Agibuild.Fulora.ShortcutKey.F6
+  id: F6
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: F6
+  nameWithType: ShortcutKey.F6
+  fullName: Agibuild.Fulora.ShortcutKey.F6
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: F6
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 18
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: F6 = 117
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.F7
+  commentId: F:Agibuild.Fulora.ShortcutKey.F7
+  id: F7
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: F7
+  nameWithType: ShortcutKey.F7
+  fullName: Agibuild.Fulora.ShortcutKey.F7
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: F7
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 18
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: F7 = 118
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.F8
+  commentId: F:Agibuild.Fulora.ShortcutKey.F8
+  id: F8
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: F8
+  nameWithType: ShortcutKey.F8
+  fullName: Agibuild.Fulora.ShortcutKey.F8
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: F8
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 18
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: F8 = 119
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.F9
+  commentId: F:Agibuild.Fulora.ShortcutKey.F9
+  id: F9
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: F9
+  nameWithType: ShortcutKey.F9
+  fullName: Agibuild.Fulora.ShortcutKey.F9
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: F9
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 18
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: F9 = 120
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.F10
+  commentId: F:Agibuild.Fulora.ShortcutKey.F10
+  id: F10
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: F10
+  nameWithType: ShortcutKey.F10
+  fullName: Agibuild.Fulora.ShortcutKey.F10
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: F10
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 18
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: F10 = 121
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.F11
+  commentId: F:Agibuild.Fulora.ShortcutKey.F11
+  id: F11
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: F11
+  nameWithType: ShortcutKey.F11
+  fullName: Agibuild.Fulora.ShortcutKey.F11
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: F11
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 18
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: F11 = 122
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.F12
+  commentId: F:Agibuild.Fulora.ShortcutKey.F12
+  id: F12
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: F12
+  nameWithType: ShortcutKey.F12
+  fullName: Agibuild.Fulora.ShortcutKey.F12
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: F12
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 18
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: F12 = 123
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.Escape
+  commentId: F:Agibuild.Fulora.ShortcutKey.Escape
+  id: Escape
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: Escape
+  nameWithType: ShortcutKey.Escape
+  fullName: Agibuild.Fulora.ShortcutKey.Escape
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Escape
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 21
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: Escape = 27
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.Space
+  commentId: F:Agibuild.Fulora.ShortcutKey.Space
+  id: Space
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: Space
+  nameWithType: ShortcutKey.Space
+  fullName: Agibuild.Fulora.ShortcutKey.Space
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Space
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 22
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: Space = 32
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.Enter
+  commentId: F:Agibuild.Fulora.ShortcutKey.Enter
+  id: Enter
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: Enter
+  nameWithType: ShortcutKey.Enter
+  fullName: Agibuild.Fulora.ShortcutKey.Enter
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Enter
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 23
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: Enter = 13
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.Tab
+  commentId: F:Agibuild.Fulora.ShortcutKey.Tab
+  id: Tab
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: Tab
+  nameWithType: ShortcutKey.Tab
+  fullName: Agibuild.Fulora.ShortcutKey.Tab
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Tab
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 24
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: Tab = 9
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.Backspace
+  commentId: F:Agibuild.Fulora.ShortcutKey.Backspace
+  id: Backspace
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: Backspace
+  nameWithType: ShortcutKey.Backspace
+  fullName: Agibuild.Fulora.ShortcutKey.Backspace
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Backspace
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 25
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: Backspace = 8
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.Delete
+  commentId: F:Agibuild.Fulora.ShortcutKey.Delete
+  id: Delete
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: Delete
+  nameWithType: ShortcutKey.Delete
+  fullName: Agibuild.Fulora.ShortcutKey.Delete
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Delete
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 26
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: Delete = 46
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.Insert
+  commentId: F:Agibuild.Fulora.ShortcutKey.Insert
+  id: Insert
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: Insert
+  nameWithType: ShortcutKey.Insert
+  fullName: Agibuild.Fulora.ShortcutKey.Insert
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Insert
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 27
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: Insert = 45
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.Home
+  commentId: F:Agibuild.Fulora.ShortcutKey.Home
+  id: Home
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: Home
+  nameWithType: ShortcutKey.Home
+  fullName: Agibuild.Fulora.ShortcutKey.Home
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Home
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 28
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: Home = 36
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.End
+  commentId: F:Agibuild.Fulora.ShortcutKey.End
+  id: End
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: End
+  nameWithType: ShortcutKey.End
+  fullName: Agibuild.Fulora.ShortcutKey.End
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: End
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 29
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: End = 35
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.PageUp
+  commentId: F:Agibuild.Fulora.ShortcutKey.PageUp
+  id: PageUp
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: PageUp
+  nameWithType: ShortcutKey.PageUp
+  fullName: Agibuild.Fulora.ShortcutKey.PageUp
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: PageUp
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 30
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: PageUp = 33
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.PageDown
+  commentId: F:Agibuild.Fulora.ShortcutKey.PageDown
+  id: PageDown
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: PageDown
+  nameWithType: ShortcutKey.PageDown
+  fullName: Agibuild.Fulora.ShortcutKey.PageDown
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: PageDown
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 31
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: PageDown = 34
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.Left
+  commentId: F:Agibuild.Fulora.ShortcutKey.Left
+  id: Left
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: Left
+  nameWithType: ShortcutKey.Left
+  fullName: Agibuild.Fulora.ShortcutKey.Left
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Left
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 32
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: Left = 37
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.Up
+  commentId: F:Agibuild.Fulora.ShortcutKey.Up
+  id: Up
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: Up
+  nameWithType: ShortcutKey.Up
+  fullName: Agibuild.Fulora.ShortcutKey.Up
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Up
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 33
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: Up = 38
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.Right
+  commentId: F:Agibuild.Fulora.ShortcutKey.Right
+  id: Right
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: Right
+  nameWithType: ShortcutKey.Right
+  fullName: Agibuild.Fulora.ShortcutKey.Right
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Right
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 34
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: Right = 39
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.Down
+  commentId: F:Agibuild.Fulora.ShortcutKey.Down
+  id: Down
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: Down
+  nameWithType: ShortcutKey.Down
+  fullName: Agibuild.Fulora.ShortcutKey.Down
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Down
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 35
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: Down = 40
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.Minus
+  commentId: F:Agibuild.Fulora.ShortcutKey.Minus
+  id: Minus
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: Minus
+  nameWithType: ShortcutKey.Minus
+  fullName: Agibuild.Fulora.ShortcutKey.Minus
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Minus
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 38
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: Minus = 189
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.Plus
+  commentId: F:Agibuild.Fulora.ShortcutKey.Plus
+  id: Plus
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: Plus
+  nameWithType: ShortcutKey.Plus
+  fullName: Agibuild.Fulora.ShortcutKey.Plus
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Plus
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 39
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: Plus = 187
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.Comma
+  commentId: F:Agibuild.Fulora.ShortcutKey.Comma
+  id: Comma
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: Comma
+  nameWithType: ShortcutKey.Comma
+  fullName: Agibuild.Fulora.ShortcutKey.Comma
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Comma
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 40
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: Comma = 188
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.Period
+  commentId: F:Agibuild.Fulora.ShortcutKey.Period
+  id: Period
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: Period
+  nameWithType: ShortcutKey.Period
+  fullName: Agibuild.Fulora.ShortcutKey.Period
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Period
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 41
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: Period = 190
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.Slash
+  commentId: F:Agibuild.Fulora.ShortcutKey.Slash
+  id: Slash
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: Slash
+  nameWithType: ShortcutKey.Slash
+  fullName: Agibuild.Fulora.ShortcutKey.Slash
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Slash
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 42
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: Slash = 191
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.Backslash
+  commentId: F:Agibuild.Fulora.ShortcutKey.Backslash
+  id: Backslash
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: Backslash
+  nameWithType: ShortcutKey.Backslash
+  fullName: Agibuild.Fulora.ShortcutKey.Backslash
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Backslash
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 43
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: Backslash = 220
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.Semicolon
+  commentId: F:Agibuild.Fulora.ShortcutKey.Semicolon
+  id: Semicolon
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: Semicolon
+  nameWithType: ShortcutKey.Semicolon
+  fullName: Agibuild.Fulora.ShortcutKey.Semicolon
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Semicolon
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 44
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: Semicolon = 186
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.Quote
+  commentId: F:Agibuild.Fulora.ShortcutKey.Quote
+  id: Quote
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: Quote
+  nameWithType: ShortcutKey.Quote
+  fullName: Agibuild.Fulora.ShortcutKey.Quote
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Quote
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 45
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: Quote = 222
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.BracketLeft
+  commentId: F:Agibuild.Fulora.ShortcutKey.BracketLeft
+  id: BracketLeft
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: BracketLeft
+  nameWithType: ShortcutKey.BracketLeft
+  fullName: Agibuild.Fulora.ShortcutKey.BracketLeft
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: BracketLeft
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 46
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: BracketLeft = 219
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.BracketRight
+  commentId: F:Agibuild.Fulora.ShortcutKey.BracketRight
+  id: BracketRight
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: BracketRight
+  nameWithType: ShortcutKey.BracketRight
+  fullName: Agibuild.Fulora.ShortcutKey.BracketRight
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: BracketRight
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 47
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: BracketRight = 221
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.Backtick
+  commentId: F:Agibuild.Fulora.ShortcutKey.Backtick
+  id: Backtick
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: Backtick
+  nameWithType: ShortcutKey.Backtick
+  fullName: Agibuild.Fulora.ShortcutKey.Backtick
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Backtick
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 48
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: Backtick = 192
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.NumPad0
+  commentId: F:Agibuild.Fulora.ShortcutKey.NumPad0
+  id: NumPad0
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: NumPad0
+  nameWithType: ShortcutKey.NumPad0
+  fullName: Agibuild.Fulora.ShortcutKey.NumPad0
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: NumPad0
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 51
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: NumPad0 = 96
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.NumPad1
+  commentId: F:Agibuild.Fulora.ShortcutKey.NumPad1
+  id: NumPad1
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: NumPad1
+  nameWithType: ShortcutKey.NumPad1
+  fullName: Agibuild.Fulora.ShortcutKey.NumPad1
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: NumPad1
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 51
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: NumPad1 = 97
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.NumPad2
+  commentId: F:Agibuild.Fulora.ShortcutKey.NumPad2
+  id: NumPad2
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: NumPad2
+  nameWithType: ShortcutKey.NumPad2
+  fullName: Agibuild.Fulora.ShortcutKey.NumPad2
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: NumPad2
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 51
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: NumPad2 = 98
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.NumPad3
+  commentId: F:Agibuild.Fulora.ShortcutKey.NumPad3
+  id: NumPad3
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: NumPad3
+  nameWithType: ShortcutKey.NumPad3
+  fullName: Agibuild.Fulora.ShortcutKey.NumPad3
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: NumPad3
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 51
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: NumPad3 = 99
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.NumPad4
+  commentId: F:Agibuild.Fulora.ShortcutKey.NumPad4
+  id: NumPad4
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: NumPad4
+  nameWithType: ShortcutKey.NumPad4
+  fullName: Agibuild.Fulora.ShortcutKey.NumPad4
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: NumPad4
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 51
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: NumPad4 = 100
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.NumPad5
+  commentId: F:Agibuild.Fulora.ShortcutKey.NumPad5
+  id: NumPad5
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: NumPad5
+  nameWithType: ShortcutKey.NumPad5
+  fullName: Agibuild.Fulora.ShortcutKey.NumPad5
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: NumPad5
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 52
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: NumPad5 = 101
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.NumPad6
+  commentId: F:Agibuild.Fulora.ShortcutKey.NumPad6
+  id: NumPad6
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: NumPad6
+  nameWithType: ShortcutKey.NumPad6
+  fullName: Agibuild.Fulora.ShortcutKey.NumPad6
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: NumPad6
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 52
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: NumPad6 = 102
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.NumPad7
+  commentId: F:Agibuild.Fulora.ShortcutKey.NumPad7
+  id: NumPad7
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: NumPad7
+  nameWithType: ShortcutKey.NumPad7
+  fullName: Agibuild.Fulora.ShortcutKey.NumPad7
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: NumPad7
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 52
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: NumPad7 = 103
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.NumPad8
+  commentId: F:Agibuild.Fulora.ShortcutKey.NumPad8
+  id: NumPad8
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: NumPad8
+  nameWithType: ShortcutKey.NumPad8
+  fullName: Agibuild.Fulora.ShortcutKey.NumPad8
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: NumPad8
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 52
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: NumPad8 = 104
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.NumPad9
+  commentId: F:Agibuild.Fulora.ShortcutKey.NumPad9
+  id: NumPad9
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: NumPad9
+  nameWithType: ShortcutKey.NumPad9
+  fullName: Agibuild.Fulora.ShortcutKey.NumPad9
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: NumPad9
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 52
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: NumPad9 = 105
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.PrintScreen
+  commentId: F:Agibuild.Fulora.ShortcutKey.PrintScreen
+  id: PrintScreen
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: PrintScreen
+  nameWithType: ShortcutKey.PrintScreen
+  fullName: Agibuild.Fulora.ShortcutKey.PrintScreen
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: PrintScreen
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 55
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: PrintScreen = 44
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.Pause
+  commentId: F:Agibuild.Fulora.ShortcutKey.Pause
+  id: Pause
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: Pause
+  nameWithType: ShortcutKey.Pause
+  fullName: Agibuild.Fulora.ShortcutKey.Pause
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Pause
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 56
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: Pause = 19
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+- uid: Agibuild.Fulora.ShortcutKey.ScrollLock
+  commentId: F:Agibuild.Fulora.ShortcutKey.ScrollLock
+  id: ScrollLock
+  parent: Agibuild.Fulora.ShortcutKey
+  langs:
+  - csharp
+  - vb
+  name: ScrollLock
+  nameWithType: ShortcutKey.ScrollLock
+  fullName: Agibuild.Fulora.ShortcutKey.ScrollLock
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ShortcutKey.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: ScrollLock
+    path: ../src/Agibuild.Fulora.Core/ShortcutKey.cs
+    startLine: 57
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: ScrollLock = 145
+    return:
+      type: Agibuild.Fulora.ShortcutKey
+references:
+- uid: Agibuild.Fulora
+  commentId: N:Agibuild.Fulora
+  href: Agibuild.html
+  name: Agibuild.Fulora
+  nameWithType: Agibuild.Fulora
+  fullName: Agibuild.Fulora
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+- uid: Agibuild.Fulora.ShortcutKey
+  commentId: T:Agibuild.Fulora.ShortcutKey
+  parent: Agibuild.Fulora
+  href: Agibuild.Fulora.ShortcutKey.html
+  name: ShortcutKey
+  nameWithType: ShortcutKey
+  fullName: Agibuild.Fulora.ShortcutKey

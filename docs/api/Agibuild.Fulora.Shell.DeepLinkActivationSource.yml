@@ -1,0 +1,155 @@
+### YamlMime:ManagedReference
+items:
+- uid: Agibuild.Fulora.Shell.DeepLinkActivationSource
+  commentId: T:Agibuild.Fulora.Shell.DeepLinkActivationSource
+  id: DeepLinkActivationSource
+  parent: Agibuild.Fulora.Shell
+  children:
+  - Agibuild.Fulora.Shell.DeepLinkActivationSource.HostInjected
+  - Agibuild.Fulora.Shell.DeepLinkActivationSource.ProtocolLaunch
+  - Agibuild.Fulora.Shell.DeepLinkActivationSource.SecondaryForward
+  langs:
+  - csharp
+  - vb
+  name: DeepLinkActivationSource
+  nameWithType: DeepLinkActivationSource
+  fullName: Agibuild.Fulora.Shell.DeepLinkActivationSource
+  type: Enum
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: DeepLinkActivationSource
+    path: ../src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+    startLine: 8
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Source of a deep-link activation event.
+  example: []
+  syntax:
+    content: public enum DeepLinkActivationSource
+    content.vb: Public Enum DeepLinkActivationSource
+- uid: Agibuild.Fulora.Shell.DeepLinkActivationSource.ProtocolLaunch
+  commentId: F:Agibuild.Fulora.Shell.DeepLinkActivationSource.ProtocolLaunch
+  id: ProtocolLaunch
+  parent: Agibuild.Fulora.Shell.DeepLinkActivationSource
+  langs:
+  - csharp
+  - vb
+  name: ProtocolLaunch
+  nameWithType: DeepLinkActivationSource.ProtocolLaunch
+  fullName: Agibuild.Fulora.Shell.DeepLinkActivationSource.ProtocolLaunch
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: ProtocolLaunch
+    path: ../src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+    startLine: 11
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Activation originated from OS protocol handler launch.
+  example: []
+  syntax:
+    content: ProtocolLaunch = 0
+    return:
+      type: Agibuild.Fulora.Shell.DeepLinkActivationSource
+- uid: Agibuild.Fulora.Shell.DeepLinkActivationSource.SecondaryForward
+  commentId: F:Agibuild.Fulora.Shell.DeepLinkActivationSource.SecondaryForward
+  id: SecondaryForward
+  parent: Agibuild.Fulora.Shell.DeepLinkActivationSource
+  langs:
+  - csharp
+  - vb
+  name: SecondaryForward
+  nameWithType: DeepLinkActivationSource.SecondaryForward
+  fullName: Agibuild.Fulora.Shell.DeepLinkActivationSource.SecondaryForward
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: SecondaryForward
+    path: ../src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+    startLine: 13
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Activation forwarded from secondary instance.
+  example: []
+  syntax:
+    content: SecondaryForward = 1
+    return:
+      type: Agibuild.Fulora.Shell.DeepLinkActivationSource
+- uid: Agibuild.Fulora.Shell.DeepLinkActivationSource.HostInjected
+  commentId: F:Agibuild.Fulora.Shell.DeepLinkActivationSource.HostInjected
+  id: HostInjected
+  parent: Agibuild.Fulora.Shell.DeepLinkActivationSource
+  langs:
+  - csharp
+  - vb
+  name: HostInjected
+  nameWithType: DeepLinkActivationSource.HostInjected
+  fullName: Agibuild.Fulora.Shell.DeepLinkActivationSource.HostInjected
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: HostInjected
+    path: ../src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+    startLine: 15
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Activation injected programmatically by host.
+  example: []
+  syntax:
+    content: HostInjected = 2
+    return:
+      type: Agibuild.Fulora.Shell.DeepLinkActivationSource
+references:
+- uid: Agibuild.Fulora.Shell
+  commentId: N:Agibuild.Fulora.Shell
+  href: Agibuild.html
+  name: Agibuild.Fulora.Shell
+  nameWithType: Agibuild.Fulora.Shell
+  fullName: Agibuild.Fulora.Shell
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  - name: .
+  - uid: Agibuild.Fulora.Shell
+    name: Shell
+    href: Agibuild.Fulora.Shell.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  - name: .
+  - uid: Agibuild.Fulora.Shell
+    name: Shell
+    href: Agibuild.Fulora.Shell.html
+- uid: Agibuild.Fulora.Shell.DeepLinkActivationSource
+  commentId: T:Agibuild.Fulora.Shell.DeepLinkActivationSource
+  parent: Agibuild.Fulora.Shell
+  href: Agibuild.Fulora.Shell.DeepLinkActivationSource.html
+  name: DeepLinkActivationSource
+  nameWithType: DeepLinkActivationSource
+  fullName: Agibuild.Fulora.Shell.DeepLinkActivationSource

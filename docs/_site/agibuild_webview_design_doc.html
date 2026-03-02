@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Fulora 设计文档 | Agibuild.Fulora </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Fulora 设计文档 | Agibuild.Fulora ">
+      
+      
+      <link rel="icon" href="favicon.ico">
+      <link rel="stylesheet" href="public/docfx.min.css">
+      <link rel="stylesheet" href="public/main.css">
+      <meta name="docfx:navrel" content="toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/AGIBuild/Agibuild.Fulora/blob/main/docs/agibuild_webview_design_doc.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="index.html">
+            <img id="logo" class="svg" src="logo.svg" alt="Agibuild.Fulora">
+            Agibuild.Fulora
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+
+      <div class="content">
+        <div class="actionbar">
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+<h1 id="fulora-设计文档">Fulora 设计文档</h1>
+
+<blockquote>
+<p><strong>项目愿景与目标</strong>: 参见 <a href="../openspec/PROJECT.md">PROJECT.md</a>
+<strong>交付路线图</strong>: 参见 <a href="../openspec/ROADMAP.md">ROADMAP.md</a></p>
+</blockquote>
+<hr>
+<h2 id="1-目标与设计原则">1. 目标与设计原则</h2>
+<h3 id="-目标">🎯 目标</h3>
+<p>构建一个跨平台混合应用框架（Hybrid App Framework），基于 Avalonia UI，使开发者能够以原生性能和体积，获得 Web-first 级别的开发效率：</p>
+<p><strong>核心目标</strong>（详见 <a href="../openspec/PROJECT.md#31-core-goals-must-achieve">PROJECT.md §3.1</a>）：</p>
+<ul>
+<li><strong>G1 — Type-Safe Bidirectional Bridge</strong>: 源码生成器驱动的 C# ↔ JS 类型安全通信</li>
+<li><strong>G2 — First-Class SPA Hosting</strong>: 开箱即用的前端应用托管（<code>app://</code> 协议）</li>
+<li><strong>G3 — Secure by Default</strong>: 基于能力的安全模型，Web 内容只能调用显式暴露的方法</li>
+<li><strong>G4 — Contract-Driven Testability</strong>: 所有功能可通过 MockAdapter 测试，无需真实浏览器</li>
+</ul>
+<p><strong>已达成基础目标</strong>（Phase 0）：</p>
+<ul>
+<li>5 平台原生 WebView 适配器（Windows/macOS/iOS/Android/Linux）</li>
+<li>完整导航控制（拦截、取消、重定向关联）</li>
+<li>WebMessage 桥接 + 策略（Origin、Channel、Protocol 检查）</li>
+<li>丰富功能集：Cookies、Commands、Screenshot、PDF、RPC、Zoom、Find、Preload、ContextMenu、Download、Permission、WebResource</li>
+<li>1113 单元测试 + 180 集成测试，95%+ 行覆盖率</li>
+</ul>
+<h3 id="-设计原则">🧠 设计原则</h3>
+<ol>
+<li><strong>契约优先</strong>：先定义接口和契约，无平台依赖，写测试驱动契约行为。</li>
+<li><strong>跨平台隔离与适配器模式</strong>：通过适配器抽象层隔离平台差异，使用 DI 容器注入平台实现。</li>
+<li><strong>可测试 &amp; Mockable</strong>：所有公开 API 均基于接口，事件与回调提供模拟触发机制。</li>
+<li><strong>安全即架构</strong>：安全不是配置项，而是通过 Bridge 暴露面 + Policy 管道在架构层面保证。</li>
+<li><strong>渐进式采用</strong>：从简单 WebView 控件到完整 Hybrid 框架，每一步都是可选的增量。</li>
+</ol>
+<hr>
+<h2 id="2-核心模块架构分层">2. 核心模块架构（分层）</h2>
+<pre><code>Agibuild.WebView
+│
+├── Core
+│   ├─ IWebView
+│   ├─ IWebDialog
+│   ├─ IWebAuthBroker
+│   ├─ IWebViewEnvironmentOptions
+│   └─ NativeInterop
+│
+├── PlatformAdapters
+│   ├─ WindowsWebView2Adapter
+│   ├─ WKWebViewAdapter
+│   ├─ AndroidWebViewAdapter
+│   └─ GtkWebViewAdapter
+│
+├── Runtime（语义层）
+│   ├─ WebViewCore（唯一契约语义实现者）
+│   └─ AdapterHost（native 导航拦截回调入口）
+│
+├── Services
+│   ├─ ScriptInvoker
+│   ├─ MessageSerializer
+│   ├─ NavigationManager
+│   └─ CookieManager
+│
+└── Tests
+    ├─ ContractTests
+    ├─ MockAdapters
+    └─ IntegrationSpecs
+</code></pre>
+<h3 id="21-系统架构图full-control-navigation">2.1 系统架构图（Full-control navigation）</h3>
+<p>该图展示了“对网页内部任何导航都可拦截/可取消”的关键交互点：adapter 在 native 引擎触发“即将导航”时，<strong>必须先回调 Runtime</strong>；Runtime 统一触发对外 <code>IWebView.NavigationStarted</code> 并返回 allow/deny。</p>
+<pre><code class="lang-mermaid">flowchart TD
+UserCode[UserCode] --&gt; IWebView[IWebView_PublicAPI]
+IWebView --&gt; Runtime[Runtime_WebViewCore]
+Runtime --&gt; Dispatcher[IWebViewDispatcher]
+Runtime --&gt; Adapter[IWebViewAdapter_Platform]
+Adapter --&gt; Native[NativeWebView_Engine]
+
+Native --&gt; Adapter
+Adapter --&gt;|&quot;OnNativeNavigationStartingAsync(info)&quot;| Runtime
+Runtime --&gt;|&quot;NavigationStarted/Completed&quot;| UserCode
+
+Adapter --&gt;|&quot;NavigationCompleted(NavigationId)&quot;| Runtime
+Runtime --&gt;|&quot;WebMessagePolicy(ChannelId)&quot;| Runtime
+Adapter --&gt;|&quot;WebMessageReceived(Origin,ChannelId,Protocol)&quot;| Runtime
+</code></pre>
+<p>关键约束（v1）：</p>
+<ul>
+<li><code>IWebView.NavigationStarted</code> 是对外唯一契约 Started（可取消、携带 <code>NavigationId</code>）。</li>
+<li>adapter 不暴露“Started 事件”作为契约入口；它只通过 <code>IWebViewAdapterHost</code> 回调询问是否允许导航，并用 host 下发的 <code>NavigationId</code> 上报 <code>NavigationCompleted</code>。</li>
+<li>Redirect 使用 <code>CorrelationId</code> 关联为同一 <code>NavigationId</code>，并允许对外多次 <code>NavigationStarted</code>（同一 id，不同 <code>RequestUri</code>）以支持逐跳拦截。</li>
+</ul>
+<hr>
+<h2 id="3-公共契约层核心-api--接口">3. 公共契约层（核心 API &amp; 接口）</h2>
+<h3 id="31-iwebview--主浏览器控件合同">3.1 IWebView — 主浏览器控件合同</h3>
+<pre><code class="lang-csharp">public interface IWebView
+{
+    Uri Source { get; set; }
+    bool CanGoBack { get; }
+    bool CanGoForward { get; }
+
+    Task NavigateAsync(Uri uri);
+    Task NavigateToStringAsync(string html);
+
+    Task&lt;string?&gt; InvokeScriptAsync(string script);
+
+    bool GoBack();
+    bool GoForward();
+    bool Refresh();
+    bool Stop();
+
+    ICookieManager? TryGetCookieManager();
+    ICommandManager? TryGetCommandManager();
+
+    event EventHandler&lt;NavigationStartingEventArgs&gt; NavigationStarted;
+    event EventHandler&lt;NavigationCompletedEventArgs&gt; NavigationCompleted;
+    event EventHandler&lt;NewWindowRequestedEventArgs&gt; NewWindowRequested;
+    event EventHandler&lt;WebMessageReceivedEventArgs&gt; WebMessageReceived;
+    event EventHandler&lt;WebResourceRequestedEventArgs&gt; WebResourceRequested;
+    event EventHandler&lt;EnvironmentRequestedEventArgs&gt; EnvironmentRequested;
+}
+</code></pre>
+<h3 id="32-iwebdialog--弹窗-web-模式">3.2 IWebDialog — 弹窗 Web 模式</h3>
+<pre><code class="lang-csharp">public interface IWebDialog : IWebView
+{
+    string? Title { get; set; }
+    bool CanUserResize { get; set; }
+
+    void Show();
+    bool Show(IPlatformHandle owner);
+    void Close();
+
+    bool Resize(int width, int height);
+    bool Move(int x, int y);
+
+    event EventHandler Closing;
+}
+</code></pre>
+<h3 id="33-iwebauthbroker--web-认证流程">3.3 IWebAuthBroker — Web 认证流程</h3>
+<pre><code class="lang-csharp">public interface IWebAuthBroker
+{
+    Task&lt;WebAuthResult&gt; AuthenticateAsync(
+        ITopLevelWindow owner,
+        AuthOptions options);
+}
+</code></pre>
+<h3 id="34-iwebviewenvironmentoptions">3.4 IWebViewEnvironmentOptions</h3>
+<pre><code class="lang-csharp">public interface IWebViewEnvironmentOptions
+{
+    bool EnableDevTools { get; set; }
+    // platform-specific options
+}
+</code></pre>
+<h3 id="35-inativewebviewhandleprovider">3.5 INativeWebViewHandleProvider</h3>
+<pre><code class="lang-csharp">public interface INativeWebViewHandleProvider
+{
+    IPlatformHandle? TryGetWebViewHandle();
+}
+</code></pre>
+<hr>
+<h2 id="4-事件契约与参数定义">4. 事件契约与参数定义</h2>
+<pre><code class="lang-csharp">public class NavigationStartingEventArgs : EventArgs
+{
+    public Uri RequestUri { get; }
+    public bool Cancel { get; set; }
+}
+</code></pre>
+<p>其他事件如 <code>NavigationCompletedEventArgs</code>、<code>WebMessageReceivedEventArgs</code>、<code>WebResourceRequestedEventArgs</code> 都严格契合官方。</p>
+<hr>
+<h2 id="5-platform-adapters-抽象与实现">5. Platform Adapters 抽象与实现</h2>
+<h3 id="51-适配器接口">5.1 适配器接口</h3>
+<pre><code class="lang-csharp">public interface IWebViewAdapter
+{
+    void Initialize(IWebViewAdapterHost host);
+    Task NavigateAsync(Guid navigationId, Uri uri);
+    Task NavigateToStringAsync(Guid navigationId, string html);
+
+    bool GoBack(Guid navigationId);
+    bool GoForward(Guid navigationId);
+    bool Refresh(Guid navigationId);
+    bool Stop();
+}
+</code></pre>
+<h3 id="511-设计要点消除双-started-源的歧义">5.1.1 设计要点：消除双 Started 源的歧义</h3>
+<ul>
+<li><code>IWebView.NavigationStarted</code> 是对外唯一契约事件（可取消、可关联 NavigationId）。</li>
+<li>adapter 不直接暴露“Started 事件”作为契约入口；相反，adapter 在 native 引擎触发“即将导航”时通过 <code>IWebViewAdapterHost</code> 回调 Runtime，让 Runtime 统一触发 <code>IWebView.NavigationStarted</code> 并做 allow/deny 决策。</li>
+</ul>
+<p>这样可以实现“网页内部触发的任何跳转都可拦截”，同时避免“adapter 层 started 钩子”与 <code>IWebView.NavigationStarted</code> 两套 Started 造成歧义与语义分叉。</p>
+<h3 id="52-windows-webview2-示例">5.2 Windows WebView2 示例</h3>
+<ul>
+<li>实现 <code>IWebViewAdapter</code></li>
+<li>处理 WebView2-specific 环境选项（ProfileName / UserDataFolder）</li>
+</ul>
+<hr>
+<h2 id="6-测试设计tdd">6. 测试设计（TDD）</h2>
+<h3 id="61-contract-tests">6.1 Contract Tests</h3>
+<ul>
+<li><code>NavigateAsync(null)</code> 抛出异常</li>
+<li><code>NavigationStarted</code> 触发且 Cancel 可阻止导航</li>
+<li><code>InvokeScriptAsync</code> 在 MockAdapter 下返回预设结果</li>
+</ul>
+<h3 id="62-mock-adapters">6.2 Mock Adapters</h3>
+<pre><code class="lang-csharp">public class MockWebViewAdapter : IWebViewAdapter
+{
+    public Guid? LastNavigationId { get; private set; }
+    public Uri? LastNavigation { get; private set; }
+
+    public Task NavigateAsync(Guid navigationId, Uri uri)
+    {
+        LastNavigationId = navigationId;
+        LastNavigation = uri;
+        return Task.CompletedTask;
+    }
+}
+</code></pre>
+<h3 id="63-event-stub-tests">6.3 Event Stub Tests</h3>
+<pre><code class="lang-csharp">[Test]
+public void WebView_OnWebMessageReceived_ShouldPassMessage()
+{
+    var webView = new WebViewCore(new MockAdapter(), new TestDispatcher());
+    string received = &quot;&quot;;
+    webView.WebMessageReceived += (_, e) =&gt; received = e.Body;
+
+    webView.MockTriggerWebMessage(&quot;{ foo: 42 }&quot;);
+    Assert.AreEqual(&quot;{ foo: 42 }&quot;, received);
+}
+</code></pre>
+<hr>
+<h2 id="7-高级能力与扩展">7. 高级能力与扩展</h2>
+<ul>
+<li>环境定制（DevTools、隐私模式、UA定制、离线存储设置）</li>
+<li>Web 资源请求拦截与缓存</li>
+<li>JS 通信桥（JSON ↔ C#）</li>
+</ul>
+<hr>
+<h2 id="8-弹窗与-auth-流">8. 弹窗与 Auth 流</h2>
+<h3 id="81-webdialog-流程">8.1 WebDialog 流程</h3>
+<ul>
+<li>类似 NativeWebDialog，提供窗口控制，适配多平台。</li>
+</ul>
+<h3 id="82-webauthenticationbroker">8.2 WebAuthenticationBroker</h3>
+<ul>
+<li>支持 AuthenticateAsync</li>
+<li>CallbackUri 处理</li>
+<li>可自定义 NativeWebDialog 工厂</li>
+</ul>
+<hr>
+<h2 id="9-faq-设计约定--限制说明">9. FAQ 设计约定 &amp; 限制说明</h2>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>约定</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>支持 Linux 嵌入式 WebView?</td>
+<td>不支持 fallback Dialog</td>
+</tr>
+<tr>
+<td>是否支持离屏渲染？</td>
+<td>官方不支持，不作为必需</td>
+</tr>
+<tr>
+<td>Native 互操作？</td>
+<td>提供统一抽象句柄接口</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="10-路线图">10. 路线图</h2>
+<p>完整路线图参见 <a href="../openspec/ROADMAP.md">ROADMAP.md</a>。概要：</p>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Focus</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Phase 0</strong>: Foundation</td>
+<td>跨平台适配器 + 契约语义 + 丰富功能集</td>
+<td>✅ Done</td>
+</tr>
+<tr>
+<td><strong>Phase 1</strong>: Type-Safe Bridge</td>
+<td>源码生成器 + C# ↔ JS 类型安全桥接 + TS 类型生成</td>
+<td>🔜 Next</td>
+</tr>
+<tr>
+<td><strong>Phase 2</strong>: SPA Hosting</td>
+<td><code>app://</code> 协议 + 嵌入式资源 + HMR 代理 + 前端集成</td>
+<td>Planned</td>
+</tr>
+<tr>
+<td><strong>Phase 3</strong>: Polish &amp; GA</td>
+<td>项目模板 + 文档 + 性能基准 + 1.0 发布</td>
+<td>Planned</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><strong>总结</strong></p>
+<p>本项目已从一个&quot;WebView 控件&quot;演进为一个&quot;跨平台 Hybrid App 框架&quot;。Phase 0 建立了契约驱动、可测试、5 平台统一的基础设施；后续 Phase 1-3 将在此基础上构建类型安全桥接、SPA 托管和开发者工具链，最终实现&quot;Web-first 的开发效率 + Native 的性能和体积&quot;这一核心价值主张。</p>
+<p>详细目标定义参见 <a href="../openspec/PROJECT.md">PROJECT.md</a>。</p>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/AGIBuild/Agibuild.Fulora/blob/main/docs/agibuild_webview_design_doc.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          Agibuild.Fulora — Cross-platform Hybrid App Framework
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

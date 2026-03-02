@@ -1,0 +1,126 @@
+### YamlMime:ManagedReference
+items:
+- uid: Agibuild.Fulora.Shell.WebViewShellSessionScope
+  commentId: T:Agibuild.Fulora.Shell.WebViewShellSessionScope
+  id: WebViewShellSessionScope
+  parent: Agibuild.Fulora.Shell
+  children:
+  - Agibuild.Fulora.Shell.WebViewShellSessionScope.Isolated
+  - Agibuild.Fulora.Shell.WebViewShellSessionScope.Shared
+  langs:
+  - csharp
+  - vb
+  name: WebViewShellSessionScope
+  nameWithType: WebViewShellSessionScope
+  fullName: Agibuild.Fulora.Shell.WebViewShellSessionScope
+  type: Enum
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewShellExperience.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: WebViewShellSessionScope
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewShellExperience.cs
+    startLine: 192
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Session scope used by shell policy.
+  example: []
+  syntax:
+    content: public enum WebViewShellSessionScope
+    content.vb: Public Enum WebViewShellSessionScope
+- uid: Agibuild.Fulora.Shell.WebViewShellSessionScope.Shared
+  commentId: F:Agibuild.Fulora.Shell.WebViewShellSessionScope.Shared
+  id: Shared
+  parent: Agibuild.Fulora.Shell.WebViewShellSessionScope
+  langs:
+  - csharp
+  - vb
+  name: Shared
+  nameWithType: WebViewShellSessionScope.Shared
+  fullName: Agibuild.Fulora.Shell.WebViewShellSessionScope.Shared
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewShellExperience.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Shared
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewShellExperience.cs
+    startLine: 195
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Share session state across windows in same scope.
+  example: []
+  syntax:
+    content: Shared = 0
+    return:
+      type: Agibuild.Fulora.Shell.WebViewShellSessionScope
+- uid: Agibuild.Fulora.Shell.WebViewShellSessionScope.Isolated
+  commentId: F:Agibuild.Fulora.Shell.WebViewShellSessionScope.Isolated
+  id: Isolated
+  parent: Agibuild.Fulora.Shell.WebViewShellSessionScope
+  langs:
+  - csharp
+  - vb
+  name: Isolated
+  nameWithType: WebViewShellSessionScope.Isolated
+  fullName: Agibuild.Fulora.Shell.WebViewShellSessionScope.Isolated
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewShellExperience.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Isolated
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewShellExperience.cs
+    startLine: 197
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Use isolated session state.
+  example: []
+  syntax:
+    content: Isolated = 1
+    return:
+      type: Agibuild.Fulora.Shell.WebViewShellSessionScope
+references:
+- uid: Agibuild.Fulora.Shell
+  commentId: N:Agibuild.Fulora.Shell
+  href: Agibuild.html
+  name: Agibuild.Fulora.Shell
+  nameWithType: Agibuild.Fulora.Shell
+  fullName: Agibuild.Fulora.Shell
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  - name: .
+  - uid: Agibuild.Fulora.Shell
+    name: Shell
+    href: Agibuild.Fulora.Shell.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  - name: .
+  - uid: Agibuild.Fulora.Shell
+    name: Shell
+    href: Agibuild.Fulora.Shell.html
+- uid: Agibuild.Fulora.Shell.WebViewShellSessionScope
+  commentId: T:Agibuild.Fulora.Shell.WebViewShellSessionScope
+  parent: Agibuild.Fulora.Shell
+  href: Agibuild.Fulora.Shell.WebViewShellSessionScope.html
+  name: WebViewShellSessionScope
+  nameWithType: WebViewShellSessionScope
+  fullName: Agibuild.Fulora.Shell.WebViewShellSessionScope

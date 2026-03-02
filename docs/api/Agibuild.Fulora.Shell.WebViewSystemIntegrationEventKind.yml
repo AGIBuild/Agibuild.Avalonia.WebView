@@ -1,0 +1,126 @@
+### YamlMime:ManagedReference
+items:
+- uid: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventKind
+  commentId: T:Agibuild.Fulora.Shell.WebViewSystemIntegrationEventKind
+  id: WebViewSystemIntegrationEventKind
+  parent: Agibuild.Fulora.Shell
+  children:
+  - Agibuild.Fulora.Shell.WebViewSystemIntegrationEventKind.MenuItemInvoked
+  - Agibuild.Fulora.Shell.WebViewSystemIntegrationEventKind.TrayInteracted
+  langs:
+  - csharp
+  - vb
+  name: WebViewSystemIntegrationEventKind
+  nameWithType: WebViewSystemIntegrationEventKind
+  fullName: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventKind
+  type: Enum
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: WebViewSystemIntegrationEventKind
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 189
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Typed system integration event kinds emitted from host to web pipeline.
+  example: []
+  syntax:
+    content: public enum WebViewSystemIntegrationEventKind
+    content.vb: Public Enum WebViewSystemIntegrationEventKind
+- uid: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventKind.TrayInteracted
+  commentId: F:Agibuild.Fulora.Shell.WebViewSystemIntegrationEventKind.TrayInteracted
+  id: TrayInteracted
+  parent: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventKind
+  langs:
+  - csharp
+  - vb
+  name: TrayInteracted
+  nameWithType: WebViewSystemIntegrationEventKind.TrayInteracted
+  fullName: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventKind.TrayInteracted
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: TrayInteracted
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 192
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Tray icon was interacted with.
+  example: []
+  syntax:
+    content: TrayInteracted = 0
+    return:
+      type: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventKind
+- uid: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventKind.MenuItemInvoked
+  commentId: F:Agibuild.Fulora.Shell.WebViewSystemIntegrationEventKind.MenuItemInvoked
+  id: MenuItemInvoked
+  parent: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventKind
+  langs:
+  - csharp
+  - vb
+  name: MenuItemInvoked
+  nameWithType: WebViewSystemIntegrationEventKind.MenuItemInvoked
+  fullName: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventKind.MenuItemInvoked
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: MenuItemInvoked
+    path: ../src/Agibuild.Fulora.Runtime/Shell/WebViewHostCapabilityBridge.cs
+    startLine: 194
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Menu item was invoked.
+  example: []
+  syntax:
+    content: MenuItemInvoked = 1
+    return:
+      type: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventKind
+references:
+- uid: Agibuild.Fulora.Shell
+  commentId: N:Agibuild.Fulora.Shell
+  href: Agibuild.html
+  name: Agibuild.Fulora.Shell
+  nameWithType: Agibuild.Fulora.Shell
+  fullName: Agibuild.Fulora.Shell
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  - name: .
+  - uid: Agibuild.Fulora.Shell
+    name: Shell
+    href: Agibuild.Fulora.Shell.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  - name: .
+  - uid: Agibuild.Fulora.Shell
+    name: Shell
+    href: Agibuild.Fulora.Shell.html
+- uid: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventKind
+  commentId: T:Agibuild.Fulora.Shell.WebViewSystemIntegrationEventKind
+  parent: Agibuild.Fulora.Shell
+  href: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventKind.html
+  name: WebViewSystemIntegrationEventKind
+  nameWithType: WebViewSystemIntegrationEventKind
+  fullName: Agibuild.Fulora.Shell.WebViewSystemIntegrationEventKind

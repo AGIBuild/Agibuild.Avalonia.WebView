@@ -4,6 +4,11 @@
         x:Class="HybridApp.Desktop.MainWindow"
         Title="HybridApp" Width="1200" Height="800">
 
-    <wv:WebView x:Name="WebView" />
+    <Grid RowDefinitions="*,Auto">
+        <wv:WebView x:Name="WebView" Grid.Row="0" />
+        <!-- Bridge DevTools overlay: toggle with Ctrl+Shift+D (Cmd+Shift+D on macOS) -->
+        <wv:BridgeDevToolsOverlay x:Name="DevToolsOverlay" Grid.Row="1"
+            Height="300" IsVisible="False" />
+    </Grid>
 
 </Window>

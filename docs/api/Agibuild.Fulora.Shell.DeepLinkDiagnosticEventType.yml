@@ -1,0 +1,242 @@
+### YamlMime:ManagedReference
+items:
+- uid: Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType
+  commentId: T:Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType
+  id: DeepLinkDiagnosticEventType
+  parent: Agibuild.Fulora.Shell
+  children:
+  - Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType.ActivationNormalized
+  - Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType.Dispatched
+  - Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType.DuplicateSuppressed
+  - Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType.NoMatchingRoute
+  - Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType.PolicyDenied
+  - Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType.RegistrationAttempt
+  langs:
+  - csharp
+  - vb
+  name: DeepLinkDiagnosticEventType
+  nameWithType: DeepLinkDiagnosticEventType
+  fullName: Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType
+  type: Enum
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: DeepLinkDiagnosticEventType
+    path: ../src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+    startLine: 184
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Diagnostic event type for deep-link activation lifecycle.
+  example: []
+  syntax:
+    content: public enum DeepLinkDiagnosticEventType
+    content.vb: Public Enum DeepLinkDiagnosticEventType
+- uid: Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType.RegistrationAttempt
+  commentId: F:Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType.RegistrationAttempt
+  id: RegistrationAttempt
+  parent: Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType
+  langs:
+  - csharp
+  - vb
+  name: RegistrationAttempt
+  nameWithType: DeepLinkDiagnosticEventType.RegistrationAttempt
+  fullName: Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType.RegistrationAttempt
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: RegistrationAttempt
+    path: ../src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+    startLine: 187
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Route registration attempted.
+  example: []
+  syntax:
+    content: RegistrationAttempt = 0
+    return:
+      type: Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType
+- uid: Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType.ActivationNormalized
+  commentId: F:Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType.ActivationNormalized
+  id: ActivationNormalized
+  parent: Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType
+  langs:
+  - csharp
+  - vb
+  name: ActivationNormalized
+  nameWithType: DeepLinkDiagnosticEventType.ActivationNormalized
+  fullName: Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType.ActivationNormalized
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: ActivationNormalized
+    path: ../src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+    startLine: 189
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Activation normalized and route matched.
+  example: []
+  syntax:
+    content: ActivationNormalized = 1
+    return:
+      type: Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType
+- uid: Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType.PolicyDenied
+  commentId: F:Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType.PolicyDenied
+  id: PolicyDenied
+  parent: Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType
+  langs:
+  - csharp
+  - vb
+  name: PolicyDenied
+  nameWithType: DeepLinkDiagnosticEventType.PolicyDenied
+  fullName: Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType.PolicyDenied
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: PolicyDenied
+    path: ../src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+    startLine: 191
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Activation denied by policy.
+  example: []
+  syntax:
+    content: PolicyDenied = 2
+    return:
+      type: Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType
+- uid: Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType.DuplicateSuppressed
+  commentId: F:Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType.DuplicateSuppressed
+  id: DuplicateSuppressed
+  parent: Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType
+  langs:
+  - csharp
+  - vb
+  name: DuplicateSuppressed
+  nameWithType: DeepLinkDiagnosticEventType.DuplicateSuppressed
+  fullName: Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType.DuplicateSuppressed
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: DuplicateSuppressed
+    path: ../src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+    startLine: 193
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Activation suppressed as duplicate.
+  example: []
+  syntax:
+    content: DuplicateSuppressed = 3
+    return:
+      type: Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType
+- uid: Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType.Dispatched
+  commentId: F:Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType.Dispatched
+  id: Dispatched
+  parent: Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType
+  langs:
+  - csharp
+  - vb
+  name: Dispatched
+  nameWithType: DeepLinkDiagnosticEventType.Dispatched
+  fullName: Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType.Dispatched
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Dispatched
+    path: ../src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+    startLine: 195
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: Activation dispatched to orchestration.
+  example: []
+  syntax:
+    content: Dispatched = 4
+    return:
+      type: Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType
+- uid: Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType.NoMatchingRoute
+  commentId: F:Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType.NoMatchingRoute
+  id: NoMatchingRoute
+  parent: Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType
+  langs:
+  - csharp
+  - vb
+  name: NoMatchingRoute
+  nameWithType: DeepLinkDiagnosticEventType.NoMatchingRoute
+  fullName: Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType.NoMatchingRoute
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: NoMatchingRoute
+    path: ../src/Agibuild.Fulora.Runtime/Shell/DeepLinkRegistration.cs
+    startLine: 197
+  assemblies:
+  - Agibuild.Fulora.Runtime
+  namespace: Agibuild.Fulora.Shell
+  summary: No matching route for activation.
+  example: []
+  syntax:
+    content: NoMatchingRoute = 5
+    return:
+      type: Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType
+references:
+- uid: Agibuild.Fulora.Shell
+  commentId: N:Agibuild.Fulora.Shell
+  href: Agibuild.html
+  name: Agibuild.Fulora.Shell
+  nameWithType: Agibuild.Fulora.Shell
+  fullName: Agibuild.Fulora.Shell
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  - name: .
+  - uid: Agibuild.Fulora.Shell
+    name: Shell
+    href: Agibuild.Fulora.Shell.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  - name: .
+  - uid: Agibuild.Fulora.Shell
+    name: Shell
+    href: Agibuild.Fulora.Shell.html
+- uid: Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType
+  commentId: T:Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType
+  parent: Agibuild.Fulora.Shell
+  href: Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType.html
+  name: DeepLinkDiagnosticEventType
+  nameWithType: DeepLinkDiagnosticEventType
+  fullName: Agibuild.Fulora.Shell.DeepLinkDiagnosticEventType

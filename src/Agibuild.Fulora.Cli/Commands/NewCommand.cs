@@ -5,62 +5,69 @@ namespace Agibuild.Fulora.Cli.Commands;
 
 internal static class NewCommand
 {
-    internal static Command Create()
+    public static Command Create()
     {
         var nameArg = new Argument<string>("name") { Description = "Project name" };
         var frontendOpt = new Option<string>("--frontend", "-f")
         {
-            Description = "Frontend framework (react, vue, svelte)",
-            Required = true
+            Description = "Frontend framework: react, vue, or vanilla",
+            Required = true,
         };
-        frontendOpt.AcceptOnlyFromAmong("react", "vue", "svelte");
+        frontendOpt.AcceptOnlyFromAmong("react", "vue", "vanilla");
 
-        var cmd = new Command("new", "Create a new Agibuild.Fulora hybrid project")
-        {
-            nameArg,
-            frontendOpt
-        };
+        var presetOpt = new Option<string?>("--preset") { Description = "Template preset (e.g. app-shell)" };
 
-        cmd.SetAction(async (parseResult, ct) =>
+        var command = new Command("new") { Description = "Create a new Agibuild.Fulora hybrid app project" };
+        command.Arguments.Add(nameArg);
+        command.Options.Add(frontendOpt);
+        command.Options.Add(presetOpt);
+
+        command.SetAction(async (parseResult, ct) =>
         {
             var name = parseResult.GetValue(nameArg);
             var frontend = parseResult.GetValue(frontendOpt);
+            var preset = parseResult.GetValue(presetOpt);
 
             Console.WriteLine($"Creating project '{name}' with {frontend} frontend...");
 
-            var psi = new ProcessStartInfo("dotnet",
-                $"new agibuild-hybrid -n {name} --framework {frontend}")
-            {
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-            };
+            var dotnetArgs = $"new agibuild-hybrid -n {name} --framework {frontend}";
+            if (!string.IsNullOrWhiteSpace(preset))
+                dotnetArgs += $" --preset {preset}";
 
-            using var process = Process.Start(psi);
-            if (process is null)
+            var exitCode = await RunProcessAsync("dotnet", dotnetArgs, ct: ct);
+            if (exitCode != 0)
             {
-                Console.Error.WriteLine("Failed to start dotnet new.");
-                return;
+                Console.Error.WriteLine($"dotnet new failed with exit code {exitCode}.");
+                Console.Error.WriteLine("Ensure the template is installed: dotnet new install Agibuild.Fulora.Templates");
+                return exitCode;
             }
 
-            var stdout = await process.StandardOutput.ReadToEndAsync(ct);
-            var stderr = await process.StandardError.ReadToEndAsync(ct);
-            await process.WaitForExitAsync(ct);
-
-            if (!string.IsNullOrWhiteSpace(stdout)) Console.Write(stdout);
-            if (!string.IsNullOrWhiteSpace(stderr)) Console.Error.Write(stderr);
-
-            if (process.ExitCode != 0)
-            {
-                Console.Error.WriteLine($"dotnet new failed with exit code {process.ExitCode}.");
-                return;
-            }
-
-            Console.WriteLine($"Project '{name}' created successfully.");
+            Console.WriteLine();
+            Console.WriteLine($"Project '{name}' created successfully!");
+            Console.WriteLine();
+            Console.WriteLine("Next steps:");
             Console.WriteLine($"  cd {name}");
-            Console.WriteLine("  agibuild dev");
+            Console.WriteLine("  fulora dev");
+            return 0;
         });
 
-        return cmd;
+        return command;
+    }
+
+    internal static async Task<int> RunProcessAsync(
+        string fileName, string arguments, string? workingDirectory = null, CancellationToken ct = default)
+    {
+        var psi = new ProcessStartInfo(fileName, arguments)
+        {
+            UseShellExecute = false,
+            WorkingDirectory = workingDirectory ?? Directory.GetCurrentDirectory(),
+        };
+
+        using var process = Process.Start(psi);
+        if (process is null)
+            return -1;
+
+        await process.WaitForExitAsync(ct);
+        return process.ExitCode;
     }
 }

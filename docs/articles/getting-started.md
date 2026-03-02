@@ -24,13 +24,22 @@ This guide follows the current product direction (Roadmap Phase 5: Framework Pos
 Use this path for most teams. It matches the recommended architecture with minimal host glue.
 
 ```bash
-# Install template (once)
+# Install CLI and template (once)
+dotnet tool install -g Agibuild.Fulora.Cli
 dotnet new install Agibuild.Fulora.Templates
 
-# Create app
-dotnet new agibuild-hybrid -n MyApp
+# Create app (interactive frontend selection)
+fulora new MyApp --frontend react
 
-# Run desktop host
+# Start dev servers (Vite + Avalonia together)
+cd MyApp
+fulora dev
+```
+
+Or use `dotnet new` directly:
+
+```bash
+dotnet new agibuild-hybrid -n MyApp
 cd MyApp
 dotnet run --project MyApp.Desktop
 ```

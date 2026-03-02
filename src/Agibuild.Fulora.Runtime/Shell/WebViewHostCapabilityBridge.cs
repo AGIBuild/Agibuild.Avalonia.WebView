@@ -30,7 +30,9 @@ public enum WebViewHostCapabilityOperation
     /// <summary>Dispatch tray interaction event to web pipeline.</summary>
     TrayInteractionEventDispatch = 9,
     /// <summary>Dispatch menu interaction event to web pipeline.</summary>
-    MenuInteractionEventDispatch = 10
+    MenuInteractionEventDispatch = 10,
+    /// <summary>Register a global keyboard shortcut at the OS level.</summary>
+    GlobalShortcutRegister = 11
 }
 
 /// <summary>

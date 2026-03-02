@@ -108,6 +108,8 @@ public sealed class WebDialog : IWebDialog
     /// <inheritdoc />
     public IWebViewRpcService? Rpc => _core.Rpc;
     /// <inheritdoc />
+    public IBridgeTracer? BridgeTracer { get => _core.BridgeTracer; set => _core.BridgeTracer = value; }
+    /// <inheritdoc />
     public IBridgeService Bridge => _core.Bridge;
     /// <inheritdoc />
     public Task OpenDevToolsAsync() => _core.OpenDevToolsAsync();

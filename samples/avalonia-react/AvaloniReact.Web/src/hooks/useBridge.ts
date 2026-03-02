@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { bridgeClient } from '@agibuild/bridge';
+import { bridge as bridgeClient } from '../bridge/client';
 
 /** Returns true once the Agibuild WebView Bridge is ready. */
 export function useBridgeReady(): boolean {

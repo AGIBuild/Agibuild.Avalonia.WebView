@@ -1,0 +1,1068 @@
+### YamlMime:ManagedReference
+items:
+- uid: Agibuild.Fulora.MockBridgeService
+  commentId: T:Agibuild.Fulora.MockBridgeService
+  id: MockBridgeService
+  parent: Agibuild.Fulora
+  children:
+  - Agibuild.Fulora.MockBridgeService.Dispose
+  - Agibuild.Fulora.MockBridgeService.Expose``1(``0,Agibuild.Fulora.BridgeOptions)
+  - Agibuild.Fulora.MockBridgeService.ExposedCount
+  - Agibuild.Fulora.MockBridgeService.GetExposedImplementation``1
+  - Agibuild.Fulora.MockBridgeService.GetProxy``1
+  - Agibuild.Fulora.MockBridgeService.Remove``1
+  - Agibuild.Fulora.MockBridgeService.Reset
+  - Agibuild.Fulora.MockBridgeService.SetupProxy``1(``0)
+  - Agibuild.Fulora.MockBridgeService.WasExposed``1
+  langs:
+  - csharp
+  - vb
+  name: MockBridgeService
+  nameWithType: MockBridgeService
+  fullName: Agibuild.Fulora.MockBridgeService
+  type: Class
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/MockBridgeService.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: MockBridgeService
+    path: ../src/Agibuild.Fulora.Core/MockBridgeService.cs
+    startLine: 24
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: >-
+    A mock implementation of <xref href="Agibuild.Fulora.IBridgeService" data-throw-if-not-resolved="false"></xref> for unit testing.
+
+    Allows testing ViewModels and services that depend on Bridge without a real WebView.
+
+    <p>
+
+    Deliverable 1.5: MockBridge for consumer unit testing.
+
+    </p>
+  example:
+  - >-
+    <pre><code class="lang-csharp">var mock = new MockBridgeService();
+
+    mock.SetupExpose&lt;IAppService&gt;(); // Records that Expose was called
+
+    var proxy = mock.SetupProxy&lt;IUiController&gt;(new FakeUiController());
+
+
+    var vm = new MyViewModel(mock);
+
+    await vm.Initialize();
+
+
+    Assert.True(mock.WasExposed&lt;IAppService&gt;());</code></pre>
+  syntax:
+    content: 'public sealed class MockBridgeService : IBridgeService'
+    content.vb: Public NotInheritable Class MockBridgeService Implements IBridgeService
+  inheritance:
+  - System.Object
+  implements:
+  - Agibuild.Fulora.IBridgeService
+  inheritedMembers:
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.GetHashCode
+  - System.Object.GetType
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.ToString
+  extensionMethods:
+  - Agibuild.Fulora.IBridgeService.Agibuild.Fulora.BridgePluginExtensions.UsePlugin``1(System.IServiceProvider)
+- uid: Agibuild.Fulora.MockBridgeService.Expose``1(``0,Agibuild.Fulora.BridgeOptions)
+  commentId: M:Agibuild.Fulora.MockBridgeService.Expose``1(``0,Agibuild.Fulora.BridgeOptions)
+  id: Expose``1(``0,Agibuild.Fulora.BridgeOptions)
+  parent: Agibuild.Fulora.MockBridgeService
+  langs:
+  - csharp
+  - vb
+  name: Expose<T>(T, BridgeOptions?)
+  nameWithType: MockBridgeService.Expose<T>(T, BridgeOptions?)
+  fullName: Agibuild.Fulora.MockBridgeService.Expose<T>(T, Agibuild.Fulora.BridgeOptions?)
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/MockBridgeService.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Expose
+    path: ../src/Agibuild.Fulora.Core/MockBridgeService.cs
+    startLine: 34
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: >-
+    Registers a service as if <xref href="Agibuild.Fulora.MockBridgeService.Expose%60%601(%60%600%2cAgibuild.Fulora.BridgeOptions)" data-throw-if-not-resolved="false"></xref> was called.
+
+    The implementation is recorded for later assertions.
+  example: []
+  syntax:
+    content: 'public void Expose<T>(T implementation, BridgeOptions? options = null) where T : class'
+    parameters:
+    - id: implementation
+      type: '{T}'
+    - id: options
+      type: Agibuild.Fulora.BridgeOptions
+    typeParameters:
+    - id: T
+    content.vb: Public Sub Expose(Of T As Class)(implementation As T, options As BridgeOptions = Nothing)
+  overload: Agibuild.Fulora.MockBridgeService.Expose*
+  implements:
+  - Agibuild.Fulora.IBridgeService.Expose``1({T},Agibuild.Fulora.BridgeOptions)
+  nameWithType.vb: MockBridgeService.Expose(Of T)(T, BridgeOptions)
+  fullName.vb: Agibuild.Fulora.MockBridgeService.Expose(Of T)(T, Agibuild.Fulora.BridgeOptions)
+  name.vb: Expose(Of T)(T, BridgeOptions)
+- uid: Agibuild.Fulora.MockBridgeService.GetProxy``1
+  commentId: M:Agibuild.Fulora.MockBridgeService.GetProxy``1
+  id: GetProxy``1
+  parent: Agibuild.Fulora.MockBridgeService
+  langs:
+  - csharp
+  - vb
+  name: GetProxy<T>()
+  nameWithType: MockBridgeService.GetProxy<T>()
+  fullName: Agibuild.Fulora.MockBridgeService.GetProxy<T>()
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/MockBridgeService.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: GetProxy
+    path: ../src/Agibuild.Fulora.Core/MockBridgeService.cs
+    startLine: 44
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Returns a proxy for the given interface. Must have been set up via <xref href="Agibuild.Fulora.MockBridgeService.SetupProxy%60%601(%60%600)" data-throw-if-not-resolved="false"></xref> first.
+  example: []
+  syntax:
+    content: 'public T GetProxy<T>() where T : class'
+    typeParameters:
+    - id: T
+    return:
+      type: '{T}'
+    content.vb: Public Function GetProxy(Of T As Class)() As T
+  overload: Agibuild.Fulora.MockBridgeService.GetProxy*
+  implements:
+  - Agibuild.Fulora.IBridgeService.GetProxy``1
+  nameWithType.vb: MockBridgeService.GetProxy(Of T)()
+  fullName.vb: Agibuild.Fulora.MockBridgeService.GetProxy(Of T)()
+  name.vb: GetProxy(Of T)()
+- uid: Agibuild.Fulora.MockBridgeService.Remove``1
+  commentId: M:Agibuild.Fulora.MockBridgeService.Remove``1
+  id: Remove``1
+  parent: Agibuild.Fulora.MockBridgeService
+  langs:
+  - csharp
+  - vb
+  name: Remove<T>()
+  nameWithType: MockBridgeService.Remove<T>()
+  fullName: Agibuild.Fulora.MockBridgeService.Remove<T>()
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/MockBridgeService.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Remove
+    path: ../src/Agibuild.Fulora.Core/MockBridgeService.cs
+    startLine: 56
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Removes an exposed service.
+  example: []
+  syntax:
+    content: 'public void Remove<T>() where T : class'
+    typeParameters:
+    - id: T
+    content.vb: Public Sub Remove(Of T As Class)()
+  overload: Agibuild.Fulora.MockBridgeService.Remove*
+  implements:
+  - Agibuild.Fulora.IBridgeService.Remove``1
+  nameWithType.vb: MockBridgeService.Remove(Of T)()
+  fullName.vb: Agibuild.Fulora.MockBridgeService.Remove(Of T)()
+  name.vb: Remove(Of T)()
+- uid: Agibuild.Fulora.MockBridgeService.SetupProxy``1(``0)
+  commentId: M:Agibuild.Fulora.MockBridgeService.SetupProxy``1(``0)
+  id: SetupProxy``1(``0)
+  parent: Agibuild.Fulora.MockBridgeService
+  langs:
+  - csharp
+  - vb
+  name: SetupProxy<T>(T)
+  nameWithType: MockBridgeService.SetupProxy<T>(T)
+  fullName: Agibuild.Fulora.MockBridgeService.SetupProxy<T>(T)
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/MockBridgeService.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: SetupProxy
+    path: ../src/Agibuild.Fulora.Core/MockBridgeService.cs
+    startLine: 67
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Configures a mock proxy that will be returned by <xref href="Agibuild.Fulora.MockBridgeService.GetProxy%60%601" data-throw-if-not-resolved="false"></xref>.
+  example: []
+  syntax:
+    content: 'public void SetupProxy<T>(T proxy) where T : class'
+    parameters:
+    - id: proxy
+      type: '{T}'
+    typeParameters:
+    - id: T
+    content.vb: Public Sub SetupProxy(Of T As Class)(proxy As T)
+  overload: Agibuild.Fulora.MockBridgeService.SetupProxy*
+  nameWithType.vb: MockBridgeService.SetupProxy(Of T)(T)
+  fullName.vb: Agibuild.Fulora.MockBridgeService.SetupProxy(Of T)(T)
+  name.vb: SetupProxy(Of T)(T)
+- uid: Agibuild.Fulora.MockBridgeService.WasExposed``1
+  commentId: M:Agibuild.Fulora.MockBridgeService.WasExposed``1
+  id: WasExposed``1
+  parent: Agibuild.Fulora.MockBridgeService
+  langs:
+  - csharp
+  - vb
+  name: WasExposed<T>()
+  nameWithType: MockBridgeService.WasExposed<T>()
+  fullName: Agibuild.Fulora.MockBridgeService.WasExposed<T>()
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/MockBridgeService.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: WasExposed
+    path: ../src/Agibuild.Fulora.Core/MockBridgeService.cs
+    startLine: 76
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Returns whether <xref href="Agibuild.Fulora.MockBridgeService.Expose%60%601(%60%600%2cAgibuild.Fulora.BridgeOptions)" data-throw-if-not-resolved="false"></xref> was called for the given interface.
+  example: []
+  syntax:
+    content: 'public bool WasExposed<T>() where T : class'
+    typeParameters:
+    - id: T
+    return:
+      type: System.Boolean
+    content.vb: Public Function WasExposed(Of T As Class)() As Boolean
+  overload: Agibuild.Fulora.MockBridgeService.WasExposed*
+  nameWithType.vb: MockBridgeService.WasExposed(Of T)()
+  fullName.vb: Agibuild.Fulora.MockBridgeService.WasExposed(Of T)()
+  name.vb: WasExposed(Of T)()
+- uid: Agibuild.Fulora.MockBridgeService.GetExposedImplementation``1
+  commentId: M:Agibuild.Fulora.MockBridgeService.GetExposedImplementation``1
+  id: GetExposedImplementation``1
+  parent: Agibuild.Fulora.MockBridgeService
+  langs:
+  - csharp
+  - vb
+  name: GetExposedImplementation<T>()
+  nameWithType: MockBridgeService.GetExposedImplementation<T>()
+  fullName: Agibuild.Fulora.MockBridgeService.GetExposedImplementation<T>()
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/MockBridgeService.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: GetExposedImplementation
+    path: ../src/Agibuild.Fulora.Core/MockBridgeService.cs
+    startLine: 79
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Returns the implementation passed to <xref href="Agibuild.Fulora.MockBridgeService.Expose%60%601(%60%600%2cAgibuild.Fulora.BridgeOptions)" data-throw-if-not-resolved="false"></xref>, or null.
+  example: []
+  syntax:
+    content: 'public T? GetExposedImplementation<T>() where T : class'
+    typeParameters:
+    - id: T
+    return:
+      type: '{T}'
+    content.vb: Public Function GetExposedImplementation(Of T As Class)() As T
+  overload: Agibuild.Fulora.MockBridgeService.GetExposedImplementation*
+  nameWithType.vb: MockBridgeService.GetExposedImplementation(Of T)()
+  fullName.vb: Agibuild.Fulora.MockBridgeService.GetExposedImplementation(Of T)()
+  name.vb: GetExposedImplementation(Of T)()
+- uid: Agibuild.Fulora.MockBridgeService.ExposedCount
+  commentId: P:Agibuild.Fulora.MockBridgeService.ExposedCount
+  id: ExposedCount
+  parent: Agibuild.Fulora.MockBridgeService
+  langs:
+  - csharp
+  - vb
+  name: ExposedCount
+  nameWithType: MockBridgeService.ExposedCount
+  fullName: Agibuild.Fulora.MockBridgeService.ExposedCount
+  type: Property
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/MockBridgeService.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: ExposedCount
+    path: ../src/Agibuild.Fulora.Core/MockBridgeService.cs
+    startLine: 83
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Returns the number of services exposed.
+  example: []
+  syntax:
+    content: public int ExposedCount { get; }
+    parameters: []
+    return:
+      type: System.Int32
+    content.vb: Public ReadOnly Property ExposedCount As Integer
+  overload: Agibuild.Fulora.MockBridgeService.ExposedCount*
+- uid: Agibuild.Fulora.MockBridgeService.Reset
+  commentId: M:Agibuild.Fulora.MockBridgeService.Reset
+  id: Reset
+  parent: Agibuild.Fulora.MockBridgeService
+  langs:
+  - csharp
+  - vb
+  name: Reset()
+  nameWithType: MockBridgeService.Reset()
+  fullName: Agibuild.Fulora.MockBridgeService.Reset()
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/MockBridgeService.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Reset
+    path: ../src/Agibuild.Fulora.Core/MockBridgeService.cs
+    startLine: 86
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Resets all state.
+  example: []
+  syntax:
+    content: public void Reset()
+    content.vb: Public Sub Reset()
+  overload: Agibuild.Fulora.MockBridgeService.Reset*
+- uid: Agibuild.Fulora.MockBridgeService.Dispose
+  commentId: M:Agibuild.Fulora.MockBridgeService.Dispose
+  id: Dispose
+  parent: Agibuild.Fulora.MockBridgeService
+  langs:
+  - csharp
+  - vb
+  name: Dispose()
+  nameWithType: MockBridgeService.Dispose()
+  fullName: Agibuild.Fulora.MockBridgeService.Dispose()
+  type: Method
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/MockBridgeService.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: Dispose
+    path: ../src/Agibuild.Fulora.Core/MockBridgeService.cs
+    startLine: 98
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  summary: Marks the mock as disposed. Subsequent operations throw.
+  example: []
+  syntax:
+    content: public void Dispose()
+    content.vb: Public Sub Dispose()
+  overload: Agibuild.Fulora.MockBridgeService.Dispose*
+references:
+- uid: Agibuild.Fulora.IBridgeService
+  commentId: T:Agibuild.Fulora.IBridgeService
+  parent: Agibuild.Fulora
+  href: Agibuild.Fulora.IBridgeService.html
+  name: IBridgeService
+  nameWithType: IBridgeService
+  fullName: Agibuild.Fulora.IBridgeService
+- uid: Agibuild.Fulora
+  commentId: N:Agibuild.Fulora
+  href: Agibuild.html
+  name: Agibuild.Fulora
+  nameWithType: Agibuild.Fulora
+  fullName: Agibuild.Fulora
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: Agibuild.Fulora.IBridgeService.Agibuild.Fulora.BridgePluginExtensions.UsePlugin``1(System.IServiceProvider)
+  commentId: M:Agibuild.Fulora.BridgePluginExtensions.UsePlugin``1(Agibuild.Fulora.IBridgeService,System.IServiceProvider)
+  parent: Agibuild.Fulora.BridgePluginExtensions
+  definition: Agibuild.Fulora.BridgePluginExtensions.UsePlugin``1(Agibuild.Fulora.IBridgeService,System.IServiceProvider)
+  href: Agibuild.Fulora.BridgePluginExtensions.html#Agibuild_Fulora_BridgePluginExtensions_UsePlugin__1_Agibuild_Fulora_IBridgeService_System_IServiceProvider_
+  name: UsePlugin<TPlugin>(IBridgeService, IServiceProvider)
+  nameWithType: BridgePluginExtensions.UsePlugin<TPlugin>(IBridgeService, IServiceProvider)
+  fullName: Agibuild.Fulora.BridgePluginExtensions.UsePlugin<TPlugin>(Agibuild.Fulora.IBridgeService, System.IServiceProvider)
+  nameWithType.vb: BridgePluginExtensions.UsePlugin(Of TPlugin)(IBridgeService, IServiceProvider)
+  fullName.vb: Agibuild.Fulora.BridgePluginExtensions.UsePlugin(Of TPlugin)(Agibuild.Fulora.IBridgeService, System.IServiceProvider)
+  name.vb: UsePlugin(Of TPlugin)(IBridgeService, IServiceProvider)
+  spec.csharp:
+  - uid: Agibuild.Fulora.BridgePluginExtensions.UsePlugin``1(Agibuild.Fulora.IBridgeService,System.IServiceProvider)
+    name: UsePlugin
+    href: Agibuild.Fulora.BridgePluginExtensions.html#Agibuild_Fulora_BridgePluginExtensions_UsePlugin__1_Agibuild_Fulora_IBridgeService_System_IServiceProvider_
+  - name: <
+  - name: TPlugin
+  - name: '>'
+  - name: (
+  - uid: Agibuild.Fulora.IBridgeService
+    name: IBridgeService
+    href: Agibuild.Fulora.IBridgeService.html
+  - name: ','
+  - name: " "
+  - uid: System.IServiceProvider
+    name: IServiceProvider
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iserviceprovider
+  - name: )
+  spec.vb:
+  - uid: Agibuild.Fulora.BridgePluginExtensions.UsePlugin``1(Agibuild.Fulora.IBridgeService,System.IServiceProvider)
+    name: UsePlugin
+    href: Agibuild.Fulora.BridgePluginExtensions.html#Agibuild_Fulora_BridgePluginExtensions_UsePlugin__1_Agibuild_Fulora_IBridgeService_System_IServiceProvider_
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TPlugin
+  - name: )
+  - name: (
+  - uid: Agibuild.Fulora.IBridgeService
+    name: IBridgeService
+    href: Agibuild.Fulora.IBridgeService.html
+  - name: ','
+  - name: " "
+  - uid: System.IServiceProvider
+    name: IServiceProvider
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iserviceprovider
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: Agibuild.Fulora.BridgePluginExtensions.UsePlugin``1(Agibuild.Fulora.IBridgeService,System.IServiceProvider)
+  commentId: M:Agibuild.Fulora.BridgePluginExtensions.UsePlugin``1(Agibuild.Fulora.IBridgeService,System.IServiceProvider)
+  isExternal: true
+  href: Agibuild.Fulora.BridgePluginExtensions.html#Agibuild_Fulora_BridgePluginExtensions_UsePlugin__1_Agibuild_Fulora_IBridgeService_System_IServiceProvider_
+  name: UsePlugin<TPlugin>(IBridgeService, IServiceProvider)
+  nameWithType: BridgePluginExtensions.UsePlugin<TPlugin>(IBridgeService, IServiceProvider)
+  fullName: Agibuild.Fulora.BridgePluginExtensions.UsePlugin<TPlugin>(Agibuild.Fulora.IBridgeService, System.IServiceProvider)
+  nameWithType.vb: BridgePluginExtensions.UsePlugin(Of TPlugin)(IBridgeService, IServiceProvider)
+  fullName.vb: Agibuild.Fulora.BridgePluginExtensions.UsePlugin(Of TPlugin)(Agibuild.Fulora.IBridgeService, System.IServiceProvider)
+  name.vb: UsePlugin(Of TPlugin)(IBridgeService, IServiceProvider)
+  spec.csharp:
+  - uid: Agibuild.Fulora.BridgePluginExtensions.UsePlugin``1(Agibuild.Fulora.IBridgeService,System.IServiceProvider)
+    name: UsePlugin
+    href: Agibuild.Fulora.BridgePluginExtensions.html#Agibuild_Fulora_BridgePluginExtensions_UsePlugin__1_Agibuild_Fulora_IBridgeService_System_IServiceProvider_
+  - name: <
+  - name: TPlugin
+  - name: '>'
+  - name: (
+  - uid: Agibuild.Fulora.IBridgeService
+    name: IBridgeService
+    href: Agibuild.Fulora.IBridgeService.html
+  - name: ','
+  - name: " "
+  - uid: System.IServiceProvider
+    name: IServiceProvider
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iserviceprovider
+  - name: )
+  spec.vb:
+  - uid: Agibuild.Fulora.BridgePluginExtensions.UsePlugin``1(Agibuild.Fulora.IBridgeService,System.IServiceProvider)
+    name: UsePlugin
+    href: Agibuild.Fulora.BridgePluginExtensions.html#Agibuild_Fulora_BridgePluginExtensions_UsePlugin__1_Agibuild_Fulora_IBridgeService_System_IServiceProvider_
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TPlugin
+  - name: )
+  - name: (
+  - uid: Agibuild.Fulora.IBridgeService
+    name: IBridgeService
+    href: Agibuild.Fulora.IBridgeService.html
+  - name: ','
+  - name: " "
+  - uid: System.IServiceProvider
+    name: IServiceProvider
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.iserviceprovider
+  - name: )
+- uid: Agibuild.Fulora.BridgePluginExtensions
+  commentId: T:Agibuild.Fulora.BridgePluginExtensions
+  parent: Agibuild.Fulora
+  href: Agibuild.Fulora.BridgePluginExtensions.html
+  name: BridgePluginExtensions
+  nameWithType: BridgePluginExtensions
+  fullName: Agibuild.Fulora.BridgePluginExtensions
+- uid: Agibuild.Fulora.MockBridgeService.Expose``1(``0,Agibuild.Fulora.BridgeOptions)
+  commentId: M:Agibuild.Fulora.MockBridgeService.Expose``1(``0,Agibuild.Fulora.BridgeOptions)
+  href: Agibuild.Fulora.MockBridgeService.html#Agibuild_Fulora_MockBridgeService_Expose__1___0_Agibuild_Fulora_BridgeOptions_
+  name: Expose<T>(T, BridgeOptions)
+  nameWithType: MockBridgeService.Expose<T>(T, BridgeOptions)
+  fullName: Agibuild.Fulora.MockBridgeService.Expose<T>(T, Agibuild.Fulora.BridgeOptions)
+  nameWithType.vb: MockBridgeService.Expose(Of T)(T, BridgeOptions)
+  fullName.vb: Agibuild.Fulora.MockBridgeService.Expose(Of T)(T, Agibuild.Fulora.BridgeOptions)
+  name.vb: Expose(Of T)(T, BridgeOptions)
+  spec.csharp:
+  - uid: Agibuild.Fulora.MockBridgeService.Expose``1(``0,Agibuild.Fulora.BridgeOptions)
+    name: Expose
+    href: Agibuild.Fulora.MockBridgeService.html#Agibuild_Fulora_MockBridgeService_Expose__1___0_Agibuild_Fulora_BridgeOptions_
+  - name: <
+  - name: T
+  - name: '>'
+  - name: (
+  - name: T
+  - name: ','
+  - name: " "
+  - uid: Agibuild.Fulora.BridgeOptions
+    name: BridgeOptions
+    href: Agibuild.Fulora.BridgeOptions.html
+  - name: )
+  spec.vb:
+  - uid: Agibuild.Fulora.MockBridgeService.Expose``1(``0,Agibuild.Fulora.BridgeOptions)
+    name: Expose
+    href: Agibuild.Fulora.MockBridgeService.html#Agibuild_Fulora_MockBridgeService_Expose__1___0_Agibuild_Fulora_BridgeOptions_
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+  - name: (
+  - name: T
+  - name: ','
+  - name: " "
+  - uid: Agibuild.Fulora.BridgeOptions
+    name: BridgeOptions
+    href: Agibuild.Fulora.BridgeOptions.html
+  - name: )
+- uid: Agibuild.Fulora.MockBridgeService.Expose*
+  commentId: Overload:Agibuild.Fulora.MockBridgeService.Expose
+  href: Agibuild.Fulora.MockBridgeService.html#Agibuild_Fulora_MockBridgeService_Expose__1___0_Agibuild_Fulora_BridgeOptions_
+  name: Expose
+  nameWithType: MockBridgeService.Expose
+  fullName: Agibuild.Fulora.MockBridgeService.Expose
+- uid: Agibuild.Fulora.IBridgeService.Expose``1({T},Agibuild.Fulora.BridgeOptions)
+  commentId: M:Agibuild.Fulora.IBridgeService.Expose``1(``0,Agibuild.Fulora.BridgeOptions)
+  parent: Agibuild.Fulora.IBridgeService
+  definition: Agibuild.Fulora.IBridgeService.Expose``1(``0,Agibuild.Fulora.BridgeOptions)
+  href: Agibuild.Fulora.IBridgeService.html#Agibuild_Fulora_IBridgeService_Expose__1___0_Agibuild_Fulora_BridgeOptions_
+  name: Expose<T>(T, BridgeOptions)
+  nameWithType: IBridgeService.Expose<T>(T, BridgeOptions)
+  fullName: Agibuild.Fulora.IBridgeService.Expose<T>(T, Agibuild.Fulora.BridgeOptions)
+  nameWithType.vb: IBridgeService.Expose(Of T)(T, BridgeOptions)
+  fullName.vb: Agibuild.Fulora.IBridgeService.Expose(Of T)(T, Agibuild.Fulora.BridgeOptions)
+  name.vb: Expose(Of T)(T, BridgeOptions)
+  spec.csharp:
+  - uid: Agibuild.Fulora.IBridgeService.Expose``1(``0,Agibuild.Fulora.BridgeOptions)
+    name: Expose
+    href: Agibuild.Fulora.IBridgeService.html#Agibuild_Fulora_IBridgeService_Expose__1___0_Agibuild_Fulora_BridgeOptions_
+  - name: <
+  - name: T
+  - name: '>'
+  - name: (
+  - name: T
+  - name: ','
+  - name: " "
+  - uid: Agibuild.Fulora.BridgeOptions
+    name: BridgeOptions
+    href: Agibuild.Fulora.BridgeOptions.html
+  - name: )
+  spec.vb:
+  - uid: Agibuild.Fulora.IBridgeService.Expose``1(``0,Agibuild.Fulora.BridgeOptions)
+    name: Expose
+    href: Agibuild.Fulora.IBridgeService.html#Agibuild_Fulora_IBridgeService_Expose__1___0_Agibuild_Fulora_BridgeOptions_
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+  - name: (
+  - name: T
+  - name: ','
+  - name: " "
+  - uid: Agibuild.Fulora.BridgeOptions
+    name: BridgeOptions
+    href: Agibuild.Fulora.BridgeOptions.html
+  - name: )
+- uid: '{T}'
+  commentId: '!:T'
+  definition: T
+  name: T
+  nameWithType: T
+  fullName: T
+- uid: Agibuild.Fulora.BridgeOptions
+  commentId: T:Agibuild.Fulora.BridgeOptions
+  parent: Agibuild.Fulora
+  href: Agibuild.Fulora.BridgeOptions.html
+  name: BridgeOptions
+  nameWithType: BridgeOptions
+  fullName: Agibuild.Fulora.BridgeOptions
+- uid: Agibuild.Fulora.IBridgeService.Expose``1(``0,Agibuild.Fulora.BridgeOptions)
+  commentId: M:Agibuild.Fulora.IBridgeService.Expose``1(``0,Agibuild.Fulora.BridgeOptions)
+  href: Agibuild.Fulora.IBridgeService.html#Agibuild_Fulora_IBridgeService_Expose__1___0_Agibuild_Fulora_BridgeOptions_
+  name: Expose<T>(T, BridgeOptions)
+  nameWithType: IBridgeService.Expose<T>(T, BridgeOptions)
+  fullName: Agibuild.Fulora.IBridgeService.Expose<T>(T, Agibuild.Fulora.BridgeOptions)
+  nameWithType.vb: IBridgeService.Expose(Of T)(T, BridgeOptions)
+  fullName.vb: Agibuild.Fulora.IBridgeService.Expose(Of T)(T, Agibuild.Fulora.BridgeOptions)
+  name.vb: Expose(Of T)(T, BridgeOptions)
+  spec.csharp:
+  - uid: Agibuild.Fulora.IBridgeService.Expose``1(``0,Agibuild.Fulora.BridgeOptions)
+    name: Expose
+    href: Agibuild.Fulora.IBridgeService.html#Agibuild_Fulora_IBridgeService_Expose__1___0_Agibuild_Fulora_BridgeOptions_
+  - name: <
+  - name: T
+  - name: '>'
+  - name: (
+  - name: T
+  - name: ','
+  - name: " "
+  - uid: Agibuild.Fulora.BridgeOptions
+    name: BridgeOptions
+    href: Agibuild.Fulora.BridgeOptions.html
+  - name: )
+  spec.vb:
+  - uid: Agibuild.Fulora.IBridgeService.Expose``1(``0,Agibuild.Fulora.BridgeOptions)
+    name: Expose
+    href: Agibuild.Fulora.IBridgeService.html#Agibuild_Fulora_IBridgeService_Expose__1___0_Agibuild_Fulora_BridgeOptions_
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+  - name: (
+  - name: T
+  - name: ','
+  - name: " "
+  - uid: Agibuild.Fulora.BridgeOptions
+    name: BridgeOptions
+    href: Agibuild.Fulora.BridgeOptions.html
+  - name: )
+- uid: T
+  name: T
+  nameWithType: T
+  fullName: T
+- uid: Agibuild.Fulora.MockBridgeService.SetupProxy``1(``0)
+  commentId: M:Agibuild.Fulora.MockBridgeService.SetupProxy``1(``0)
+  href: Agibuild.Fulora.MockBridgeService.html#Agibuild_Fulora_MockBridgeService_SetupProxy__1___0_
+  name: SetupProxy<T>(T)
+  nameWithType: MockBridgeService.SetupProxy<T>(T)
+  fullName: Agibuild.Fulora.MockBridgeService.SetupProxy<T>(T)
+  nameWithType.vb: MockBridgeService.SetupProxy(Of T)(T)
+  fullName.vb: Agibuild.Fulora.MockBridgeService.SetupProxy(Of T)(T)
+  name.vb: SetupProxy(Of T)(T)
+  spec.csharp:
+  - uid: Agibuild.Fulora.MockBridgeService.SetupProxy``1(``0)
+    name: SetupProxy
+    href: Agibuild.Fulora.MockBridgeService.html#Agibuild_Fulora_MockBridgeService_SetupProxy__1___0_
+  - name: <
+  - name: T
+  - name: '>'
+  - name: (
+  - name: T
+  - name: )
+  spec.vb:
+  - uid: Agibuild.Fulora.MockBridgeService.SetupProxy``1(``0)
+    name: SetupProxy
+    href: Agibuild.Fulora.MockBridgeService.html#Agibuild_Fulora_MockBridgeService_SetupProxy__1___0_
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+  - name: (
+  - name: T
+  - name: )
+- uid: Agibuild.Fulora.MockBridgeService.GetProxy*
+  commentId: Overload:Agibuild.Fulora.MockBridgeService.GetProxy
+  href: Agibuild.Fulora.MockBridgeService.html#Agibuild_Fulora_MockBridgeService_GetProxy__1
+  name: GetProxy
+  nameWithType: MockBridgeService.GetProxy
+  fullName: Agibuild.Fulora.MockBridgeService.GetProxy
+- uid: Agibuild.Fulora.IBridgeService.GetProxy``1
+  commentId: M:Agibuild.Fulora.IBridgeService.GetProxy``1
+  parent: Agibuild.Fulora.IBridgeService
+  href: Agibuild.Fulora.IBridgeService.html#Agibuild_Fulora_IBridgeService_GetProxy__1
+  name: GetProxy<T>()
+  nameWithType: IBridgeService.GetProxy<T>()
+  fullName: Agibuild.Fulora.IBridgeService.GetProxy<T>()
+  nameWithType.vb: IBridgeService.GetProxy(Of T)()
+  fullName.vb: Agibuild.Fulora.IBridgeService.GetProxy(Of T)()
+  name.vb: GetProxy(Of T)()
+  spec.csharp:
+  - uid: Agibuild.Fulora.IBridgeService.GetProxy``1
+    name: GetProxy
+    href: Agibuild.Fulora.IBridgeService.html#Agibuild_Fulora_IBridgeService_GetProxy__1
+  - name: <
+  - name: T
+  - name: '>'
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: Agibuild.Fulora.IBridgeService.GetProxy``1
+    name: GetProxy
+    href: Agibuild.Fulora.IBridgeService.html#Agibuild_Fulora_IBridgeService_GetProxy__1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+  - name: (
+  - name: )
+- uid: Agibuild.Fulora.MockBridgeService.Remove*
+  commentId: Overload:Agibuild.Fulora.MockBridgeService.Remove
+  href: Agibuild.Fulora.MockBridgeService.html#Agibuild_Fulora_MockBridgeService_Remove__1
+  name: Remove
+  nameWithType: MockBridgeService.Remove
+  fullName: Agibuild.Fulora.MockBridgeService.Remove
+- uid: Agibuild.Fulora.IBridgeService.Remove``1
+  commentId: M:Agibuild.Fulora.IBridgeService.Remove``1
+  parent: Agibuild.Fulora.IBridgeService
+  href: Agibuild.Fulora.IBridgeService.html#Agibuild_Fulora_IBridgeService_Remove__1
+  name: Remove<T>()
+  nameWithType: IBridgeService.Remove<T>()
+  fullName: Agibuild.Fulora.IBridgeService.Remove<T>()
+  nameWithType.vb: IBridgeService.Remove(Of T)()
+  fullName.vb: Agibuild.Fulora.IBridgeService.Remove(Of T)()
+  name.vb: Remove(Of T)()
+  spec.csharp:
+  - uid: Agibuild.Fulora.IBridgeService.Remove``1
+    name: Remove
+    href: Agibuild.Fulora.IBridgeService.html#Agibuild_Fulora_IBridgeService_Remove__1
+  - name: <
+  - name: T
+  - name: '>'
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: Agibuild.Fulora.IBridgeService.Remove``1
+    name: Remove
+    href: Agibuild.Fulora.IBridgeService.html#Agibuild_Fulora_IBridgeService_Remove__1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+  - name: (
+  - name: )
+- uid: Agibuild.Fulora.MockBridgeService.GetProxy``1
+  commentId: M:Agibuild.Fulora.MockBridgeService.GetProxy``1
+  href: Agibuild.Fulora.MockBridgeService.html#Agibuild_Fulora_MockBridgeService_GetProxy__1
+  name: GetProxy<T>()
+  nameWithType: MockBridgeService.GetProxy<T>()
+  fullName: Agibuild.Fulora.MockBridgeService.GetProxy<T>()
+  nameWithType.vb: MockBridgeService.GetProxy(Of T)()
+  fullName.vb: Agibuild.Fulora.MockBridgeService.GetProxy(Of T)()
+  name.vb: GetProxy(Of T)()
+  spec.csharp:
+  - uid: Agibuild.Fulora.MockBridgeService.GetProxy``1
+    name: GetProxy
+    href: Agibuild.Fulora.MockBridgeService.html#Agibuild_Fulora_MockBridgeService_GetProxy__1
+  - name: <
+  - name: T
+  - name: '>'
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: Agibuild.Fulora.MockBridgeService.GetProxy``1
+    name: GetProxy
+    href: Agibuild.Fulora.MockBridgeService.html#Agibuild_Fulora_MockBridgeService_GetProxy__1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+  - name: (
+  - name: )
+- uid: Agibuild.Fulora.MockBridgeService.SetupProxy*
+  commentId: Overload:Agibuild.Fulora.MockBridgeService.SetupProxy
+  href: Agibuild.Fulora.MockBridgeService.html#Agibuild_Fulora_MockBridgeService_SetupProxy__1___0_
+  name: SetupProxy
+  nameWithType: MockBridgeService.SetupProxy
+  fullName: Agibuild.Fulora.MockBridgeService.SetupProxy
+- uid: Agibuild.Fulora.MockBridgeService.WasExposed*
+  commentId: Overload:Agibuild.Fulora.MockBridgeService.WasExposed
+  href: Agibuild.Fulora.MockBridgeService.html#Agibuild_Fulora_MockBridgeService_WasExposed__1
+  name: WasExposed
+  nameWithType: MockBridgeService.WasExposed
+  fullName: Agibuild.Fulora.MockBridgeService.WasExposed
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: Agibuild.Fulora.MockBridgeService.GetExposedImplementation*
+  commentId: Overload:Agibuild.Fulora.MockBridgeService.GetExposedImplementation
+  href: Agibuild.Fulora.MockBridgeService.html#Agibuild_Fulora_MockBridgeService_GetExposedImplementation__1
+  name: GetExposedImplementation
+  nameWithType: MockBridgeService.GetExposedImplementation
+  fullName: Agibuild.Fulora.MockBridgeService.GetExposedImplementation
+- uid: Agibuild.Fulora.MockBridgeService.ExposedCount*
+  commentId: Overload:Agibuild.Fulora.MockBridgeService.ExposedCount
+  href: Agibuild.Fulora.MockBridgeService.html#Agibuild_Fulora_MockBridgeService_ExposedCount
+  name: ExposedCount
+  nameWithType: MockBridgeService.ExposedCount
+  fullName: Agibuild.Fulora.MockBridgeService.ExposedCount
+- uid: System.Int32
+  commentId: T:System.Int32
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.int32
+  name: int
+  nameWithType: int
+  fullName: int
+  nameWithType.vb: Integer
+  fullName.vb: Integer
+  name.vb: Integer
+- uid: Agibuild.Fulora.MockBridgeService.Reset*
+  commentId: Overload:Agibuild.Fulora.MockBridgeService.Reset
+  href: Agibuild.Fulora.MockBridgeService.html#Agibuild_Fulora_MockBridgeService_Reset
+  name: Reset
+  nameWithType: MockBridgeService.Reset
+  fullName: Agibuild.Fulora.MockBridgeService.Reset
+- uid: Agibuild.Fulora.MockBridgeService.Dispose*
+  commentId: Overload:Agibuild.Fulora.MockBridgeService.Dispose
+  href: Agibuild.Fulora.MockBridgeService.html#Agibuild_Fulora_MockBridgeService_Dispose
+  name: Dispose
+  nameWithType: MockBridgeService.Dispose
+  fullName: Agibuild.Fulora.MockBridgeService.Dispose

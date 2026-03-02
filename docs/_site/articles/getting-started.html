@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Getting Started | Agibuild.Fulora </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Getting Started | Agibuild.Fulora ">
+      
+      
+      <link rel="icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/AGIBuild/Agibuild.Fulora/blob/main/docs/articles/getting-started.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../logo.svg" alt="Agibuild.Fulora">
+            Agibuild.Fulora
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+<h1 id="getting-started">Getting Started</h1>
+
+<p>Build your first <strong>framework-ready</strong> hybrid app with Avalonia + web UI.</p>
+<p>This guide follows the current product direction (Roadmap Phase 5: Framework Positioning Foundation):</p>
+<ul>
+<li>typed bridge contracts</li>
+<li>typed capability gateway</li>
+<li>policy-first runtime behavior</li>
+<li>automation-friendly diagnostics</li>
+<li>web-first template architecture</li>
+</ul>
+<h2 id="prerequisites">Prerequisites</h2>
+<ul>
+<li>.NET 10 SDK</li>
+<li>Platform runtime:
+<ul>
+<li><strong>Windows</strong>: WebView2 (usually installed with Edge)</li>
+<li><strong>macOS/iOS</strong>: WKWebView (built-in)</li>
+<li><strong>Android</strong>: Android WebView (built-in)</li>
+<li><strong>Linux</strong>: WebKitGTK (<code>libwebkit2gtk-4.1</code>)</li>
+</ul>
+</li>
+</ul>
+<h2 id="recommended-path-template-workflow">Recommended Path: Template Workflow</h2>
+<p>Use this path for most teams. It matches the recommended architecture with minimal host glue.</p>
+<pre><code class="lang-bash"># Install template (once)
+dotnet new install Agibuild.Fulora.Templates
+
+# Create app
+dotnet new agibuild-hybrid -n MyApp
+
+# Run desktop host
+cd MyApp
+dotnet run --project MyApp.Desktop
+</code></pre>
+<p>What you get immediately:</p>
+<ul>
+<li>ready-to-run host + web structure</li>
+<li>typed bridge contract wiring</li>
+<li>web-first development flow</li>
+<li>production-oriented project layout</li>
+</ul>
+<h2 id="manual-path-build-from-scratch">Manual Path: Build from Scratch</h2>
+<p>Use this when you need full control over project composition.</p>
+<h3 id="1-create-an-avalonia-app">1) Create an Avalonia app</h3>
+<pre><code class="lang-bash">dotnet new avalonia.app -n MyApp
+cd MyApp
+</code></pre>
+<h3 id="2-add-package">2) Add package</h3>
+<pre><code class="lang-bash">dotnet add package Agibuild.Fulora
+</code></pre>
+<h3 id="3-add-webview-control">3) Add WebView control</h3>
+<pre><code class="lang-xml">&lt;!-- MainWindow.axaml --&gt;
+&lt;Window xmlns:wv=&quot;clr-namespace:Agibuild.Fulora;assembly=Agibuild.Fulora&quot;&gt;
+    &lt;wv:WebView x:Name=&quot;WebView&quot; /&gt;
+&lt;/Window&gt;
+</code></pre>
+<h3 id="4-navigate-to-a-page">4) Navigate to a page</h3>
+<pre><code class="lang-csharp">// MainWindow.axaml.cs
+public MainWindow()
+{
+    InitializeComponent();
+    Loaded += async (_, _) =&gt;
+    {
+        await WebView.NavigateAsync(new Uri(&quot;https://example.com&quot;));
+    };
+}
+</code></pre>
+<h2 id="first-typed-bridge-contract">First Typed Bridge Contract</h2>
+<p>Define contracts once, then call across C# and JavaScript with type safety.</p>
+<pre><code class="lang-csharp">[JsExport] // C# -&gt; JS
+public interface IGreeterService
+{
+    Task&lt;string&gt; Greet(string name);
+}
+
+[JsImport] // JS -&gt; C#
+public interface INotificationService
+{
+    Task ShowNotification(string message);
+}
+</code></pre>
+<p>Expose C# service:</p>
+<pre><code class="lang-csharp">WebView.Bridge.Expose&lt;IGreeterService&gt;(new GreeterServiceImpl());
+</code></pre>
+<p>Call from JavaScript:</p>
+<pre><code class="lang-javascript">const result = await window.agWebView.rpc.invoke(&quot;GreeterService.greet&quot;, { name: &quot;World&quot; });
+console.log(result);
+</code></pre>
+<p>Call JavaScript from C#:</p>
+<pre><code class="lang-csharp">var notifier = WebView.Bridge.GetProxy&lt;INotificationService&gt;();
+await notifier.ShowNotification(&quot;Hello from C#!&quot;);
+</code></pre>
+<h2 id="first-web-first-spa-hosting-setup">First Web-First SPA Hosting Setup</h2>
+<p>Production mode (embedded assets):</p>
+<pre><code class="lang-csharp">WebView.EnableSpaHosting(new SpaHostingOptions
+{
+    EmbeddedResourcePrefix = &quot;wwwroot&quot;,
+    ResourceAssembly = typeof(MainWindow).Assembly,
+});
+
+await WebView.NavigateAsync(new Uri(&quot;app://localhost/index.html&quot;));
+</code></pre>
+<p>Development mode (HMR proxy):</p>
+<pre><code class="lang-csharp">WebView.EnableSpaHosting(new SpaHostingOptions
+{
+    DevServerUrl = &quot;http://localhost:5173&quot;,
+});
+</code></pre>
+<h2 id="next-steps">Next Steps</h2>
+<ul>
+<li><a href="architecture.html">Architecture</a> — Runtime topology and Phase 5 invariants</li>
+<li><a href="bridge-guide.html">Bridge Guide</a> — Advanced bridge patterns</li>
+<li><a href="spa-hosting.html">SPA Hosting</a> — Detailed hosting configuration</li>
+<li><a href="../demo/index.md">Demo walkthrough</a> — End-to-end sample experience</li>
+<li><a href="../../openspec/ROADMAP.md">Roadmap</a> — Product direction and milestones</li>
+</ul>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/AGIBuild/Agibuild.Fulora/blob/main/docs/articles/getting-started.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          Agibuild.Fulora — Cross-platform Hybrid App Framework
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

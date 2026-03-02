@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Class DownloadRequestedEventArgs | Agibuild.Fulora </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Class DownloadRequestedEventArgs | Agibuild.Fulora ">
+      
+      <meta name="description" content="Raised when a file download is initiated by the web content.">
+      <link rel="icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/AGIBuild/Agibuild.Fulora/new/main/apiSpec/new?filename=Agibuild_Fulora_DownloadRequestedEventArgs.md&amp;value=---%0Auid%3A%20Agibuild.Fulora.DownloadRequestedEventArgs%0Asummary%3A%20&#39;*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax&#39;%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../logo.svg" alt="Agibuild.Fulora">
+            Agibuild.Fulora
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="Agibuild.Fulora.DownloadRequestedEventArgs">
+
+
+
+  <h1 id="Agibuild_Fulora_DownloadRequestedEventArgs" data-uid="Agibuild.Fulora.DownloadRequestedEventArgs" class="text-break">
+Class DownloadRequestedEventArgs  <a class="header-action link-secondary" title="View source" href="https://github.com/AGIBuild/Agibuild.Fulora/blob/main/src/Agibuild.Fulora.Core/WebViewContracts.cs/#L865"><i class="bi bi-code-slash"></i></a>
+  </h1>
+
+  <div class="facts text-secondary">
+    <dl><dt>Namespace</dt><dd><a class="xref" href="Agibuild.html">Agibuild</a>.<a class="xref" href="Agibuild.Fulora.html">Fulora</a></dd></dl>
+  <dl><dt>Assembly</dt><dd>Agibuild.Fulora.Core.dll</dd></dl>
+  </div>
+
+  <div class="markdown summary"><p>Raised when a file download is initiated by the web content.</p>
+</div>
+  <div class="markdown conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public sealed class DownloadRequestedEventArgs : EventArgs</code></pre>
+  </div>
+
+
+
+
+  <dl class="typelist inheritance">
+    <dt>Inheritance</dt>
+    <dd>
+      <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a></div>
+      <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.eventargs">EventArgs</a></div>
+      <div><span class="xref">DownloadRequestedEventArgs</span></div>
+    </dd>
+  </dl>
+
+
+
+  <dl class="typelist inheritedMembers">
+    <dt>Inherited Members</dt>
+    <dd>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.eventargs.empty">EventArgs.Empty</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)">object.Equals(object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)">object.Equals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gethashcode">object.GetHashCode()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gettype">object.GetType()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.referenceequals">object.ReferenceEquals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.tostring">object.ToString()</a>
+    </div>
+  </dd></dl>
+
+
+
+
+
+
+  <h2 class="section" id="constructors">Constructors
+</h2>
+
+
+  <a id="Agibuild_Fulora_DownloadRequestedEventArgs__ctor_" data-uid="Agibuild.Fulora.DownloadRequestedEventArgs.#ctor*"></a>
+
+  <h3 id="Agibuild_Fulora_DownloadRequestedEventArgs__ctor_System_Uri_System_String_System_String_System_Nullable_System_Int64__" data-uid="Agibuild.Fulora.DownloadRequestedEventArgs.#ctor(System.Uri,System.String,System.String,System.Nullable{System.Int64})">
+  DownloadRequestedEventArgs(Uri, string?, string?, long?)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/AGIBuild/Agibuild.Fulora/blob/main/src/Agibuild.Fulora.Core/WebViewContracts.cs/#L872"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Creates a new instance.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public DownloadRequestedEventArgs(Uri downloadUri, string? suggestedFileName = null, string? contentType = null, long? contentLength = null)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>downloadUri</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.uri">Uri</a></dt>
+    <dd><p>The download URI.</p>
+</dd>
+    <dt><code>suggestedFileName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>Suggested file name.</p>
+</dd>
+    <dt><code>contentType</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>MIME type.</p>
+</dd>
+    <dt><code>contentLength</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int64">long</a>?</dt>
+    <dd><p>Content length in bytes.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <h2 class="section" id="properties">Properties
+</h2>
+
+
+  <a id="Agibuild_Fulora_DownloadRequestedEventArgs_Cancel_" data-uid="Agibuild.Fulora.DownloadRequestedEventArgs.Cancel*"></a>
+
+  <h3 id="Agibuild_Fulora_DownloadRequestedEventArgs_Cancel" data-uid="Agibuild.Fulora.DownloadRequestedEventArgs.Cancel">
+  Cancel
+  <a class="header-action link-secondary" title="View source" href="https://github.com/AGIBuild/Agibuild.Fulora/blob/main/src/Agibuild.Fulora.Core/WebViewContracts.cs/#L896"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Set to true by consumer to cancel the download.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool Cancel { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Agibuild_Fulora_DownloadRequestedEventArgs_ContentLength_" data-uid="Agibuild.Fulora.DownloadRequestedEventArgs.ContentLength*"></a>
+
+  <h3 id="Agibuild_Fulora_DownloadRequestedEventArgs_ContentLength" data-uid="Agibuild.Fulora.DownloadRequestedEventArgs.ContentLength">
+  ContentLength
+  <a class="header-action link-secondary" title="View source" href="https://github.com/AGIBuild/Agibuild.Fulora/blob/main/src/Agibuild.Fulora.Core/WebViewContracts.cs/#L890"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Content length in bytes, or null if unknown.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public long? ContentLength { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int64">long</a>?</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Agibuild_Fulora_DownloadRequestedEventArgs_ContentType_" data-uid="Agibuild.Fulora.DownloadRequestedEventArgs.ContentType*"></a>
+
+  <h3 id="Agibuild_Fulora_DownloadRequestedEventArgs_ContentType" data-uid="Agibuild.Fulora.DownloadRequestedEventArgs.ContentType">
+  ContentType
+  <a class="header-action link-secondary" title="View source" href="https://github.com/AGIBuild/Agibuild.Fulora/blob/main/src/Agibuild.Fulora.Core/WebViewContracts.cs/#L887"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>MIME type of the download content.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string? ContentType { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Agibuild_Fulora_DownloadRequestedEventArgs_DownloadPath_" data-uid="Agibuild.Fulora.DownloadRequestedEventArgs.DownloadPath*"></a>
+
+  <h3 id="Agibuild_Fulora_DownloadRequestedEventArgs_DownloadPath" data-uid="Agibuild.Fulora.DownloadRequestedEventArgs.DownloadPath">
+  DownloadPath
+  <a class="header-action link-secondary" title="View source" href="https://github.com/AGIBuild/Agibuild.Fulora/blob/main/src/Agibuild.Fulora.Core/WebViewContracts.cs/#L893"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Set by consumer to specify the save file path.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string? DownloadPath { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Agibuild_Fulora_DownloadRequestedEventArgs_DownloadUri_" data-uid="Agibuild.Fulora.DownloadRequestedEventArgs.DownloadUri*"></a>
+
+  <h3 id="Agibuild_Fulora_DownloadRequestedEventArgs_DownloadUri" data-uid="Agibuild.Fulora.DownloadRequestedEventArgs.DownloadUri">
+  DownloadUri
+  <a class="header-action link-secondary" title="View source" href="https://github.com/AGIBuild/Agibuild.Fulora/blob/main/src/Agibuild.Fulora.Core/WebViewContracts.cs/#L881"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>The URL of the resource being downloaded.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Uri DownloadUri { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.uri">Uri</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Agibuild_Fulora_DownloadRequestedEventArgs_Handled_" data-uid="Agibuild.Fulora.DownloadRequestedEventArgs.Handled*"></a>
+
+  <h3 id="Agibuild_Fulora_DownloadRequestedEventArgs_Handled" data-uid="Agibuild.Fulora.DownloadRequestedEventArgs.Handled">
+  Handled
+  <a class="header-action link-secondary" title="View source" href="https://github.com/AGIBuild/Agibuild.Fulora/blob/main/src/Agibuild.Fulora.Core/WebViewContracts.cs/#L899"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Set to true by consumer to indicate the download is fully handled externally.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool Handled { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="Agibuild_Fulora_DownloadRequestedEventArgs_SuggestedFileName_" data-uid="Agibuild.Fulora.DownloadRequestedEventArgs.SuggestedFileName*"></a>
+
+  <h3 id="Agibuild_Fulora_DownloadRequestedEventArgs_SuggestedFileName" data-uid="Agibuild.Fulora.DownloadRequestedEventArgs.SuggestedFileName">
+  SuggestedFileName
+  <a class="header-action link-secondary" title="View source" href="https://github.com/AGIBuild/Agibuild.Fulora/blob/main/src/Agibuild.Fulora.Core/WebViewContracts.cs/#L884"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Suggested filename from Content-Disposition header or URL path.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string? SuggestedFileName { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/AGIBuild/Agibuild.Fulora/blob/main/src/Agibuild.Fulora.Core/WebViewContracts.cs/#L865" class="edit-link">Edit this page</a>
+        </div>
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          Agibuild.Fulora — Cross-platform Hybrid App Framework
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

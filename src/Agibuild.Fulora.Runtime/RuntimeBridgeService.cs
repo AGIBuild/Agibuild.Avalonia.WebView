@@ -71,16 +71,15 @@ internal sealed class RuntimeBridgeService : IBridgeService, IDisposable
             var generated = FindGeneratedRegistration<T>();
             if (generated is not null)
             {
+                IWebViewRpcService targetRpc = _rpc;
                 var pipeline = BuildMiddlewarePipeline(options);
                 if (pipeline is not null)
-                {
-                    var wrapper = new MiddlewareRpcWrapper(_rpc, pipeline, generated.ServiceName);
-                    generated.RegisterHandlers(wrapper, implementation);
-                }
-                else
-                {
-                    generated.RegisterHandlers(_rpc, implementation);
-                }
+                    targetRpc = new MiddlewareRpcWrapper(targetRpc, pipeline, generated.ServiceName);
+
+                if (_tracer is not NullBridgeTracer)
+                    targetRpc = new TracingRpcWrapper(targetRpc, _tracer, generated.ServiceName);
+
+                generated.RegisterHandlers(targetRpc, implementation);
 
                 _ = _invokeScript(generated.GetJsStub());
                 _exportedServices[interfaceType] = new ExposedService(
@@ -112,6 +111,7 @@ internal sealed class RuntimeBridgeService : IBridgeService, IDisposable
         var serviceName = GetServiceName<JsExportAttribute>(interfaceType);
         var registeredMethods = new List<string>();
         var pipeline = BuildMiddlewarePipeline(options);
+        var useTracing = _tracer is not NullBridgeTracer;
 
         try
         {
@@ -123,6 +123,11 @@ internal sealed class RuntimeBridgeService : IBridgeService, IDisposable
                 {
                     var methodName = ToCamelCase(method.Name);
                     handler = WrapWithMiddleware(handler, pipeline, serviceName, methodName);
+                }
+                if (useTracing)
+                {
+                    var methodName = ToCamelCase(method.Name);
+                    handler = WrapWithTracing(handler, _tracer, serviceName, methodName);
                 }
                 _rpc.Handle(rpcMethodName, handler);
                 registeredMethods.Add(rpcMethodName);
@@ -353,9 +358,13 @@ internal sealed class RuntimeBridgeService : IBridgeService, IDisposable
         var interfaceType = typeof(T);
         var serviceName = GetServiceName<JsImportAttribute>(interfaceType);
 
+        IWebViewRpcService rpcForProxy = _rpc;
+        if (_tracer is not NullBridgeTracer)
+            rpcForProxy = new TracingRpcWrapper(rpcForProxy, _tracer, serviceName);
+
         var proxy = DispatchProxy.Create<T, BridgeImportProxy>();
         var bridgeProxy = (BridgeImportProxy)(object)proxy;
-        bridgeProxy.Initialize(_rpc, serviceName);
+        bridgeProxy.Initialize(rpcForProxy, serviceName);
 
         _logger.LogDebug("Bridge: created import proxy for {Service}", serviceName);
         return proxy;
@@ -478,6 +487,12 @@ internal sealed class RuntimeBridgeService : IBridgeService, IDisposable
     private T? FindAndCreateGeneratedProxy<T>() where T : class
     {
         var interfaceType = typeof(T);
+        IWebViewRpcService rpcForProxy = _rpc;
+        if (_tracer is not NullBridgeTracer)
+        {
+            var serviceName = GetServiceName<JsImportAttribute>(interfaceType);
+            rpcForProxy = new TracingRpcWrapper(rpcForProxy, _tracer, serviceName);
+        }
 
         foreach (var assembly in new[] { interfaceType.Assembly, Assembly.GetCallingAssembly() })
         {
@@ -485,7 +500,7 @@ internal sealed class RuntimeBridgeService : IBridgeService, IDisposable
             {
                 if (attr.InterfaceType == interfaceType)
                 {
-                    return (T)Activator.CreateInstance(attr.ProxyType, _rpc)!;
+                    return (T)Activator.CreateInstance(attr.ProxyType, rpcForProxy)!;
                 }
             }
         }
@@ -578,6 +593,172 @@ internal sealed class RuntimeBridgeService : IBridgeService, IDisposable
             }
 
             return next(context);
+        }
+    }
+
+    private static Func<JsonElement?, Task<object?>> WrapWithTracing(
+        Func<JsonElement?, Task<object?>> handler, IBridgeTracer tracer, string serviceName, string methodName)
+    {
+        return async args =>
+        {
+            var paramsJson = args?.GetRawText();
+            tracer.OnExportCallStart(serviceName, methodName, paramsJson);
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            try
+            {
+                var result = await handler(args).ConfigureAwait(false);
+                sw.Stop();
+                tracer.OnExportCallEnd(serviceName, methodName, sw.ElapsedMilliseconds, result?.GetType()?.Name);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                sw.Stop();
+                tracer.OnExportCallError(serviceName, methodName, sw.ElapsedMilliseconds, ex);
+                throw;
+            }
+        };
+    }
+
+    /// <summary>
+    /// Wraps an <see cref="IWebViewRpcService"/> to add <see cref="IBridgeTracer"/> hooks
+    /// to every handler registered through it.
+    /// </summary>
+    private sealed class TracingRpcWrapper : IWebViewRpcService
+    {
+        private readonly IWebViewRpcService _inner;
+        private readonly IBridgeTracer _tracer;
+        private readonly string _serviceName;
+
+        public TracingRpcWrapper(IWebViewRpcService inner, IBridgeTracer tracer, string serviceName)
+        {
+            _inner = inner;
+            _tracer = tracer;
+            _serviceName = serviceName;
+        }
+
+        public void Handle(string method, Func<JsonElement?, Task<object?>> handler)
+        {
+            var methodName = ExtractMethodName(method);
+            _inner.Handle(method, WrapWithTracing(handler, _tracer, _serviceName, methodName));
+        }
+
+        public void Handle(string method, Func<JsonElement?, object?> handler)
+        {
+            Func<JsonElement?, Task<object?>> asyncHandler = args => Task.FromResult(handler(args));
+            var methodName = ExtractMethodName(method);
+            _inner.Handle(method, WrapWithTracing(asyncHandler, _tracer, _serviceName, methodName));
+        }
+
+        public void Handle(string method, Func<JsonElement?, CancellationToken, Task<object?>> handler)
+        {
+            Func<JsonElement?, Task<object?>> asyncHandler = args => handler(args, CancellationToken.None);
+            var methodName = ExtractMethodName(method);
+            _inner.Handle(method, WrapWithTracing(asyncHandler, _tracer, _serviceName, methodName));
+        }
+
+        public void RemoveHandler(string method) => _inner.RemoveHandler(method);
+
+        public async Task<JsonElement> InvokeAsync(string method, object? args = null)
+        {
+            TraceImportStart(method, args);
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            try
+            {
+                var result = await _inner.InvokeAsync(method, args).ConfigureAwait(false);
+                sw.Stop();
+                TraceImportEnd(method, sw.ElapsedMilliseconds);
+                return result;
+            }
+            catch
+            {
+                sw.Stop();
+                TraceImportEnd(method, sw.ElapsedMilliseconds);
+                throw;
+            }
+        }
+
+        public async Task<T?> InvokeAsync<T>(string method, object? args = null)
+        {
+            TraceImportStart(method, args);
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            try
+            {
+                var result = await _inner.InvokeAsync<T>(method, args).ConfigureAwait(false);
+                sw.Stop();
+                TraceImportEnd(method, sw.ElapsedMilliseconds);
+                return result;
+            }
+            catch
+            {
+                sw.Stop();
+                TraceImportEnd(method, sw.ElapsedMilliseconds);
+                throw;
+            }
+        }
+
+        public async Task<JsonElement> InvokeAsync(string method, object? args, CancellationToken ct)
+        {
+            TraceImportStart(method, args);
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            try
+            {
+                var result = await _inner.InvokeAsync(method, args, ct).ConfigureAwait(false);
+                sw.Stop();
+                TraceImportEnd(method, sw.ElapsedMilliseconds);
+                return result;
+            }
+            catch
+            {
+                sw.Stop();
+                TraceImportEnd(method, sw.ElapsedMilliseconds);
+                throw;
+            }
+        }
+
+        public async Task<T?> InvokeAsync<T>(string method, object? args, CancellationToken ct)
+        {
+            TraceImportStart(method, args);
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            try
+            {
+                var result = await _inner.InvokeAsync<T>(method, args, ct).ConfigureAwait(false);
+                sw.Stop();
+                TraceImportEnd(method, sw.ElapsedMilliseconds);
+                return result;
+            }
+            catch
+            {
+                sw.Stop();
+                TraceImportEnd(method, sw.ElapsedMilliseconds);
+                throw;
+            }
+        }
+
+        public Task NotifyAsync(string method, object? args = null) => _inner.NotifyAsync(method, args);
+
+        private void TraceImportStart(string method, object? args)
+        {
+            var (svc, meth) = SplitRpcMethod(method);
+            _tracer.OnImportCallStart(svc, meth, args is not null ? JsonSerializer.Serialize(args) : null);
+        }
+
+        private void TraceImportEnd(string method, long elapsedMs)
+        {
+            var (svc, meth) = SplitRpcMethod(method);
+            _tracer.OnImportCallEnd(svc, meth, elapsedMs);
+        }
+
+        private static (string service, string method) SplitRpcMethod(string rpcMethod)
+        {
+            var dot = rpcMethod.LastIndexOf('.');
+            return dot >= 0 ? (rpcMethod[..dot], rpcMethod[(dot + 1)..]) : ("", rpcMethod);
+        }
+
+        private static string ExtractMethodName(string rpcMethod)
+        {
+            var dot = rpcMethod.LastIndexOf('.');
+            return dot >= 0 ? rpcMethod[(dot + 1)..] : rpcMethod;
         }
     }
 

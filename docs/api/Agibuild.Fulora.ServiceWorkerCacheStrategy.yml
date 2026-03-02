@@ -1,0 +1,193 @@
+### YamlMime:ManagedReference
+items:
+- uid: Agibuild.Fulora.ServiceWorkerCacheStrategy
+  commentId: T:Agibuild.Fulora.ServiceWorkerCacheStrategy
+  id: ServiceWorkerCacheStrategy
+  parent: Agibuild.Fulora
+  children:
+  - Agibuild.Fulora.ServiceWorkerCacheStrategy.CacheFirst
+  - Agibuild.Fulora.ServiceWorkerCacheStrategy.CacheOnly
+  - Agibuild.Fulora.ServiceWorkerCacheStrategy.NetworkFirst
+  - Agibuild.Fulora.ServiceWorkerCacheStrategy.NetworkOnly
+  - Agibuild.Fulora.ServiceWorkerCacheStrategy.StaleWhileRevalidate
+  langs:
+  - csharp
+  - vb
+  name: ServiceWorkerCacheStrategy
+  nameWithType: ServiceWorkerCacheStrategy
+  fullName: Agibuild.Fulora.ServiceWorkerCacheStrategy
+  type: Enum
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ServiceWorkerOptions.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: ServiceWorkerCacheStrategy
+    path: ../src/Agibuild.Fulora.Core/ServiceWorkerOptions.cs
+    startLine: 11
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: public enum ServiceWorkerCacheStrategy
+    content.vb: Public Enum ServiceWorkerCacheStrategy
+- uid: Agibuild.Fulora.ServiceWorkerCacheStrategy.CacheFirst
+  commentId: F:Agibuild.Fulora.ServiceWorkerCacheStrategy.CacheFirst
+  id: CacheFirst
+  parent: Agibuild.Fulora.ServiceWorkerCacheStrategy
+  langs:
+  - csharp
+  - vb
+  name: CacheFirst
+  nameWithType: ServiceWorkerCacheStrategy.CacheFirst
+  fullName: Agibuild.Fulora.ServiceWorkerCacheStrategy.CacheFirst
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ServiceWorkerOptions.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: CacheFirst
+    path: ../src/Agibuild.Fulora.Core/ServiceWorkerOptions.cs
+    startLine: 13
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: CacheFirst = 0
+    return:
+      type: Agibuild.Fulora.ServiceWorkerCacheStrategy
+- uid: Agibuild.Fulora.ServiceWorkerCacheStrategy.NetworkFirst
+  commentId: F:Agibuild.Fulora.ServiceWorkerCacheStrategy.NetworkFirst
+  id: NetworkFirst
+  parent: Agibuild.Fulora.ServiceWorkerCacheStrategy
+  langs:
+  - csharp
+  - vb
+  name: NetworkFirst
+  nameWithType: ServiceWorkerCacheStrategy.NetworkFirst
+  fullName: Agibuild.Fulora.ServiceWorkerCacheStrategy.NetworkFirst
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ServiceWorkerOptions.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: NetworkFirst
+    path: ../src/Agibuild.Fulora.Core/ServiceWorkerOptions.cs
+    startLine: 14
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: NetworkFirst = 1
+    return:
+      type: Agibuild.Fulora.ServiceWorkerCacheStrategy
+- uid: Agibuild.Fulora.ServiceWorkerCacheStrategy.StaleWhileRevalidate
+  commentId: F:Agibuild.Fulora.ServiceWorkerCacheStrategy.StaleWhileRevalidate
+  id: StaleWhileRevalidate
+  parent: Agibuild.Fulora.ServiceWorkerCacheStrategy
+  langs:
+  - csharp
+  - vb
+  name: StaleWhileRevalidate
+  nameWithType: ServiceWorkerCacheStrategy.StaleWhileRevalidate
+  fullName: Agibuild.Fulora.ServiceWorkerCacheStrategy.StaleWhileRevalidate
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ServiceWorkerOptions.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: StaleWhileRevalidate
+    path: ../src/Agibuild.Fulora.Core/ServiceWorkerOptions.cs
+    startLine: 15
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: StaleWhileRevalidate = 2
+    return:
+      type: Agibuild.Fulora.ServiceWorkerCacheStrategy
+- uid: Agibuild.Fulora.ServiceWorkerCacheStrategy.NetworkOnly
+  commentId: F:Agibuild.Fulora.ServiceWorkerCacheStrategy.NetworkOnly
+  id: NetworkOnly
+  parent: Agibuild.Fulora.ServiceWorkerCacheStrategy
+  langs:
+  - csharp
+  - vb
+  name: NetworkOnly
+  nameWithType: ServiceWorkerCacheStrategy.NetworkOnly
+  fullName: Agibuild.Fulora.ServiceWorkerCacheStrategy.NetworkOnly
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ServiceWorkerOptions.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: NetworkOnly
+    path: ../src/Agibuild.Fulora.Core/ServiceWorkerOptions.cs
+    startLine: 16
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: NetworkOnly = 3
+    return:
+      type: Agibuild.Fulora.ServiceWorkerCacheStrategy
+- uid: Agibuild.Fulora.ServiceWorkerCacheStrategy.CacheOnly
+  commentId: F:Agibuild.Fulora.ServiceWorkerCacheStrategy.CacheOnly
+  id: CacheOnly
+  parent: Agibuild.Fulora.ServiceWorkerCacheStrategy
+  langs:
+  - csharp
+  - vb
+  name: CacheOnly
+  nameWithType: ServiceWorkerCacheStrategy.CacheOnly
+  fullName: Agibuild.Fulora.ServiceWorkerCacheStrategy.CacheOnly
+  type: Field
+  source:
+    remote:
+      path: src/Agibuild.Fulora.Core/ServiceWorkerOptions.cs
+      branch: main
+      repo: https://github.com/AGIBuild/Agibuild.Fulora.git
+    id: CacheOnly
+    path: ../src/Agibuild.Fulora.Core/ServiceWorkerOptions.cs
+    startLine: 17
+  assemblies:
+  - Agibuild.Fulora.Core
+  namespace: Agibuild.Fulora
+  syntax:
+    content: CacheOnly = 4
+    return:
+      type: Agibuild.Fulora.ServiceWorkerCacheStrategy
+references:
+- uid: Agibuild.Fulora
+  commentId: N:Agibuild.Fulora
+  href: Agibuild.html
+  name: Agibuild.Fulora
+  nameWithType: Agibuild.Fulora
+  fullName: Agibuild.Fulora
+  spec.csharp:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+  spec.vb:
+  - uid: Agibuild
+    name: Agibuild
+    href: Agibuild.html
+  - name: .
+  - uid: Agibuild.Fulora
+    name: Fulora
+    href: Agibuild.Fulora.html
+- uid: Agibuild.Fulora.ServiceWorkerCacheStrategy
+  commentId: T:Agibuild.Fulora.ServiceWorkerCacheStrategy
+  parent: Agibuild.Fulora
+  href: Agibuild.Fulora.ServiceWorkerCacheStrategy.html
+  name: ServiceWorkerCacheStrategy
+  nameWithType: ServiceWorkerCacheStrategy
+  fullName: Agibuild.Fulora.ServiceWorkerCacheStrategy
