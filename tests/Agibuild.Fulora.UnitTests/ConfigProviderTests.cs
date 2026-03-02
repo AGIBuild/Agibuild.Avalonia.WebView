@@ -347,6 +347,156 @@ public class ConfigProviderTests
         finally { File.Delete(localPath); }
     }
 
+    // --- RemoteConfigProvider branch coverage ---
+
+    [Fact]
+    public async Task RemoteConfigProvider_IsTruthy_covers_all_branches()
+    {
+        var json = """{"boolTrue": true, "boolFalse": false, "numOne": 1, "numZero": 0, "strTrue": "true", "strFalse": "nope", "strYes": "yes", "strOn": "on", "str1": "1", "strEmpty": "", "arr": [1], "numOther": 2}""";
+        var handler = new MockHttpHandler(json);
+        var client = new HttpClient(handler);
+        var provider = new RemoteConfigProvider(client, new Uri("https://config.example.com/config.json"));
+        await provider.RefreshAsync();
+
+        Assert.True(await provider.IsFeatureEnabledAsync("boolTrue"));
+        Assert.False(await provider.IsFeatureEnabledAsync("boolFalse"));
+        Assert.True(await provider.IsFeatureEnabledAsync("numOne"));
+        Assert.False(await provider.IsFeatureEnabledAsync("numZero"));
+        Assert.True(await provider.IsFeatureEnabledAsync("strTrue"));
+        Assert.False(await provider.IsFeatureEnabledAsync("strFalse"));
+        Assert.True(await provider.IsFeatureEnabledAsync("strYes"));
+        Assert.True(await provider.IsFeatureEnabledAsync("strOn"));
+        Assert.True(await provider.IsFeatureEnabledAsync("str1"));
+        Assert.False(await provider.IsFeatureEnabledAsync("strEmpty"));
+        Assert.False(await provider.IsFeatureEnabledAsync("arr"));
+        Assert.False(await provider.IsFeatureEnabledAsync("numOther"));
+    }
+
+    [Fact]
+    public async Task RemoteConfigProvider_GetValueAsync_returns_raw_for_non_string()
+    {
+        var json = """{"num": 42, "obj": {"a": 1}}""";
+        var handler = new MockHttpHandler(json);
+        var client = new HttpClient(handler);
+        var provider = new RemoteConfigProvider(client, new Uri("https://config.example.com/config.json"));
+        await provider.RefreshAsync();
+
+        Assert.Equal("42", await provider.GetValueAsync("num"));
+        Assert.Contains("\"a\"", await provider.GetValueAsync("obj"));
+    }
+
+    [Fact]
+    public async Task RemoteConfigProvider_GetValueAsync_returns_null_without_fallback()
+    {
+        var handler = new MockHttpHandler("{}");
+        var client = new HttpClient(handler);
+        var provider = new RemoteConfigProvider(client, new Uri("https://config.example.com/config.json"));
+        await provider.RefreshAsync();
+
+        Assert.Null(await provider.GetValueAsync("missing"));
+    }
+
+    [Fact]
+    public async Task RemoteConfigProvider_GetValueAsyncT_returns_default_on_deserialize_failure()
+    {
+        var json = """{"bad": "not_a_number"}""";
+        var handler = new MockHttpHandler(json);
+        var client = new HttpClient(handler);
+        var provider = new RemoteConfigProvider(client, new Uri("https://config.example.com/config.json"));
+        await provider.RefreshAsync();
+
+        var result = await provider.GetValueAsync<int>("bad");
+        Assert.Equal(default, result);
+    }
+
+    [Fact]
+    public async Task RemoteConfigProvider_GetValueAsyncT_returns_value_from_remote()
+    {
+        var json = """{"count": 42}""";
+        var handler = new MockHttpHandler(json);
+        var client = new HttpClient(handler);
+        var provider = new RemoteConfigProvider(client, new Uri("https://config.example.com/config.json"));
+        await provider.RefreshAsync();
+
+        var result = await provider.GetValueAsync<int>("count");
+        Assert.Equal(42, result);
+    }
+
+    [Fact]
+    public async Task RemoteConfigProvider_GetValueAsyncT_falls_back_without_remote_key()
+    {
+        var handler = new MockHttpHandler("{}");
+        var client = new HttpClient(handler);
+        var provider = new RemoteConfigProvider(client, new Uri("https://config.example.com/config.json"));
+        await provider.RefreshAsync();
+
+        var result = await provider.GetValueAsync<int>("missing");
+        Assert.Equal(default, result);
+    }
+
+    [Fact]
+    public async Task RemoteConfigProvider_IsFeatureEnabled_falls_back_without_remote()
+    {
+        var handler = new MockHttpHandler("{}");
+        var client = new HttpClient(handler);
+        var provider = new RemoteConfigProvider(client, new Uri("https://config.example.com/config.json"));
+        await provider.RefreshAsync();
+
+        Assert.False(await provider.IsFeatureEnabledAsync("missing"));
+    }
+
+    [Fact]
+    public async Task RemoteConfigProvider_GetSectionAsync_returns_null_without_fallback()
+    {
+        var handler = new MockHttpHandler("{}");
+        var client = new HttpClient(handler);
+        var provider = new RemoteConfigProvider(client, new Uri("https://config.example.com/config.json"));
+        await provider.RefreshAsync();
+
+        Assert.Null(await provider.GetSectionAsync("missing"));
+    }
+
+    [Fact]
+    public async Task RemoteConfigProvider_GetSectionAsync_returns_null_for_non_object()
+    {
+        var json = """{"scalar": "hello"}""";
+        var handler = new MockHttpHandler(json);
+        var client = new HttpClient(handler);
+        var provider = new RemoteConfigProvider(client, new Uri("https://config.example.com/config.json"));
+        await provider.RefreshAsync();
+
+        Assert.Null(await provider.GetSectionAsync("scalar"));
+    }
+
+    [Fact]
+    public void RemoteConfigProvider_null_httpClient_throws()
+    {
+        Assert.Throws<ArgumentNullException>(() =>
+            new RemoteConfigProvider(null!, new Uri("https://example.com")));
+    }
+
+    [Fact]
+    public void RemoteConfigProvider_null_uri_throws()
+    {
+        Assert.Throws<ArgumentNullException>(() =>
+            new RemoteConfigProvider(new HttpClient(), null!));
+    }
+
+    [Fact]
+    public async Task RemoteConfigProvider_GetSectionAsync_with_numeric_values()
+    {
+        var json = """{"sec": {"x": 1, "y": "hello"}}""";
+        var handler = new MockHttpHandler(json);
+        var client = new HttpClient(handler);
+        var provider = new RemoteConfigProvider(client, new Uri("https://config.example.com/config.json"));
+        await provider.RefreshAsync();
+
+        var section = await provider.GetSectionAsync("sec");
+        Assert.NotNull(section);
+        Assert.Equal("1", section!["x"]);
+        Assert.Equal("hello", section["y"]);
+    }
+
     private sealed class MockHttpHandler : HttpMessageHandler
     {
         private string _response;

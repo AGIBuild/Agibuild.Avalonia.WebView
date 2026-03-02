@@ -310,4 +310,55 @@ public class BridgeDevToolsServiceTests
         svc.Tracer.OnExportCallStart("Svc", "A", null);
         Assert.Empty(scripts);
     }
+
+    [Fact]
+    public void StartPushing_twice_disposes_previous_subscription()
+    {
+        using var svc = new BridgeDevToolsService();
+        var scripts1 = new List<string>();
+        svc.StartPushing(script => { scripts1.Add(script); return Task.FromResult<string?>(null); });
+
+        var scripts2 = new List<string>();
+        svc.StartPushing(script => { scripts2.Add(script); return Task.FromResult<string?>(null); });
+
+        svc.Tracer.OnExportCallStart("S", "M", null);
+        Assert.Empty(scripts1);
+        Assert.Single(scripts2);
+    }
+}
+
+public class BridgeEventCollectorSubscriptionTests
+{
+    [Fact]
+    public void Dispose_one_subscription_keeps_others()
+    {
+        var collector = new BridgeEventCollector(10);
+        var received1 = new List<BridgeDevToolsEvent>();
+        var received2 = new List<BridgeDevToolsEvent>();
+        var sub1 = collector.Subscribe(e => received1.Add(e));
+        using var sub2 = collector.Subscribe(e => received2.Add(e));
+
+        sub1.Dispose();
+
+        collector.Add(new BridgeDevToolsEvent
+        {
+            Timestamp = DateTimeOffset.UtcNow,
+            Direction = BridgeCallDirection.Export,
+            Phase = BridgeCallPhase.Start,
+            ServiceName = "S",
+            MethodName = "M",
+        });
+
+        Assert.Empty(received1);
+        Assert.Single(received2);
+    }
+}
+
+public class DevToolsPanelTracerConstructorTests
+{
+    [Fact]
+    public void Null_collector_throws()
+    {
+        Assert.Throws<ArgumentNullException>(() => new DevToolsPanelTracer(null!));
+    }
 }

@@ -19,7 +19,7 @@ Before creating a release tag, verify locally:
 # Run full test suite
 nuke Test
 
-# Run coverage (must be ≥ 90%)
+# Run coverage (line ≥ 96%, branch ≥ 95%)
 nuke Coverage
 
 # Pack and validate NuGet packages

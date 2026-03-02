@@ -227,6 +227,41 @@ public sealed class TracingRpcWrapperTests
     }
 
     [Fact]
+    public async Task TracingRpcWrapper_InvokeAsync_with_args_traces_params()
+    {
+        var tracer = new TestTracer();
+        var rpc = new StubRpcService();
+        var bridge = new RuntimeBridgeService(
+            rpc,
+            _ => Task.FromResult<string?>(null),
+            Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance,
+            tracer: tracer);
+
+        var proxy = bridge.GetProxy<ITracingTestImport>();
+        await proxy.DoWork();
+
+        Assert.Contains(tracer.Events, e => e.Contains("ImportStart:"));
+    }
+
+    [Fact]
+    public async Task TracingRpcWrapper_InvokeAsync_error_path_traces()
+    {
+        var tracer = new TestTracer();
+        var rpc = new StubRpcService { ThrowOnInvoke = true };
+        var bridge = new RuntimeBridgeService(
+            rpc,
+            _ => Task.FromResult<string?>(null),
+            Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance,
+            tracer: tracer);
+
+        var proxy = bridge.GetProxy<ITracingTestImport>();
+        await Assert.ThrowsAsync<InvalidOperationException>(() => proxy.DoWork());
+
+        Assert.Contains(tracer.Events, e => e.Contains("ImportStart:"));
+        Assert.Contains(tracer.Events, e => e.Contains("ImportEnd:"));
+    }
+
+    [Fact]
     public void TracingRpcWrapper_RemoveHandler_delegates()
     {
         var tracer = new TestTracer();
@@ -281,6 +316,7 @@ public sealed class TracingRpcWrapperTests
         public Dictionary<string, Func<System.Text.Json.JsonElement?, Task<object?>>> Handlers { get; } = new();
         public List<string> RemovedMethods { get; } = [];
         public List<(string Method, object? Args)> Invocations { get; } = [];
+        public bool ThrowOnInvoke { get; set; }
 
         public void Handle(string method, Func<System.Text.Json.JsonElement?, Task<object?>> handler)
             => Handlers[method] = handler;
@@ -297,24 +333,28 @@ public sealed class TracingRpcWrapperTests
         public Task<System.Text.Json.JsonElement> InvokeAsync(string method, object? args = null)
         {
             Invocations.Add((method, args));
+            if (ThrowOnInvoke) throw new InvalidOperationException("stub-invoke-error");
             return Task.FromResult(default(System.Text.Json.JsonElement));
         }
 
         public Task<T?> InvokeAsync<T>(string method, object? args = null)
         {
             Invocations.Add((method, args));
+            if (ThrowOnInvoke) throw new InvalidOperationException("stub-invoke-error");
             return Task.FromResult(default(T));
         }
 
         public Task<System.Text.Json.JsonElement> InvokeAsync(string method, object? args, CancellationToken ct)
         {
             Invocations.Add((method, args));
+            if (ThrowOnInvoke) throw new InvalidOperationException("stub-invoke-error");
             return Task.FromResult(default(System.Text.Json.JsonElement));
         }
 
         public Task<T?> InvokeAsync<T>(string method, object? args, CancellationToken ct)
         {
             Invocations.Add((method, args));
+            if (ThrowOnInvoke) throw new InvalidOperationException("stub-invoke-error");
             return Task.FromResult(default(T));
         }
 

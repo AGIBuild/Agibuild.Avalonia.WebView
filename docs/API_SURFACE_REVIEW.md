@@ -1,8 +1,8 @@
 # API Surface Review — Agibuild.Fulora
 
-**Date**: 2026-03-01
+**Date**: 2026-03-02
 **Status**: 1.0 Freeze Audit
-**Test Count**: 1293 CTs passing (1113 unit + 180 integration)
+**Test Count**: 1553 CTs passing (1344 unit + 209 integration)
 **Inventory**: `docs/API_SURFACE_INVENTORY.release.txt` (Core: 72 types, Runtime: 100 types)
 
 ---

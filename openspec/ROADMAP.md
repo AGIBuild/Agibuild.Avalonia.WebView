@@ -347,7 +347,7 @@ dotnet new agibuild-hybrid -n MyApp --frontend react
 
 - Performance benchmarks (bridge latency, SPA load time, memory)
 - GTK/Linux smoke validation (currently marked "Untested")
-- Branch coverage improvement (84% → 90%+)
+- Branch coverage improvement (84% → 95%+) ✅ Done
 - API surface breaking change audit (Preview → Stable)
 
 ### 3.4 Documentation & Ecosystem
@@ -551,7 +551,8 @@ dotnet new agibuild-hybrid -n MyApp --frontend react
 
 ### Latest Evidence Snapshot
 
-- `nuke Test`: Unit `1113`, Integration `180`, Total `1293` (pass)
+- `nuke Test`: Unit `1344`, Integration `209`, Total `1553` (pass)
+- `nuke Coverage`: Line `97.83%` (threshold `96%`), Branch `95.14%` (threshold `95%`)
 - `nuke ReleaseOrchestrationGovernance`: all targets pass
 
 ### OpenSpec Archive Evidence

@@ -162,6 +162,83 @@ public class TelemetryTests
         Assert.Equal(7, inner.Calls.Count);
     }
 
+    [Fact]
+    public void CompositeTelemetryProvider_TrackException_swallows_inner_errors()
+    {
+        var received = new List<string>();
+        var good = new RecordingTelemetryProvider(onException: (ex, _) => received.Add(ex.Message));
+        var bad = new ThrowingTelemetryProvider();
+        var composite = new CompositeTelemetryProvider(good, bad);
+
+        composite.TrackException(new Exception("test_ex"));
+        Assert.Single(received);
+        Assert.Equal("test_ex", received[0]);
+    }
+
+    [Fact]
+    public void CompositeTelemetryProvider_TrackMetric_swallows_inner_errors()
+    {
+        var received = new List<double>();
+        var good = new RecordingTelemetryProvider(onMetric: (_, v, _) => received.Add(v));
+        var bad = new ThrowingTelemetryProvider();
+        var composite = new CompositeTelemetryProvider(good, bad);
+
+        composite.TrackMetric("m", 3.14);
+        Assert.Single(received);
+        Assert.Equal(3.14, received[0]);
+    }
+
+    [Fact]
+    public void CompositeTelemetryProvider_Flush_swallows_inner_errors()
+    {
+        var bad = new ThrowingTelemetryProvider();
+        var composite = new CompositeTelemetryProvider(bad);
+        composite.Flush(); // should not throw
+    }
+
+    [Fact]
+    public void CompositeTelemetryProvider_null_array_does_not_throw()
+    {
+        var composite = new CompositeTelemetryProvider(null!);
+        composite.TrackEvent("e");
+    }
+
+    [Fact]
+    public void BridgeTelemetryTracer_null_provider_throws()
+    {
+        Assert.Throws<ArgumentNullException>(() => new BridgeTelemetryTracer(null!));
+    }
+
+    [Fact]
+    public void BridgeTelemetryTracer_NullBridgeTracer_inner_is_stripped()
+    {
+        var provider = NullTelemetryProvider.Instance;
+        var tracer = new BridgeTelemetryTracer(provider, NullBridgeTracer.Instance);
+
+        tracer.OnExportCallStart("S", "M", "{}");
+        tracer.OnImportCallStart("S", "M", null);
+        tracer.OnServiceExposed("S", 1, false);
+        tracer.OnServiceRemoved("S");
+    }
+
+    [Fact]
+    public void BridgeTelemetryTracer_without_inner_does_not_throw()
+    {
+        var metrics = new List<string>();
+        var provider = new RecordingTelemetryProvider(onMetric: (n, _, _) => metrics.Add(n));
+        var tracer = new BridgeTelemetryTracer(provider);
+
+        tracer.OnExportCallStart("S", "M", "{}");
+        tracer.OnExportCallEnd("S", "M", 5, "int");
+        tracer.OnExportCallError("S", "M", 2, new Exception("e"));
+        tracer.OnImportCallStart("S", "M", null);
+        tracer.OnImportCallEnd("S", "M", 3);
+        tracer.OnServiceExposed("S", 1, false);
+        tracer.OnServiceRemoved("S");
+
+        Assert.Equal(3, metrics.Count);
+    }
+
     private sealed class RecordingTelemetryProvider : ITelemetryProvider
     {
         private readonly Action<string, double, IDictionary<string, string>?>? _onMetric;

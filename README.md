@@ -287,7 +287,7 @@ dotnet run --project MyApp.Desktop
 | Method coverage | **98.2%** |
 
 ```bash
-nuke Test            # Unit + Integration (1293 tests)
+nuke Test            # Unit + Integration (1553 tests)
 nuke Coverage        # Coverage report + threshold enforcement
 nuke NugetPackageTest  # Pack → install → run smoke test
 nuke TemplateE2E     # Template end-to-end test
