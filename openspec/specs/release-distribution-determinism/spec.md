@@ -1,4 +1,8 @@
-## MODIFIED Requirements
+## Purpose
+
+Define requirements for deterministic release distribution of NuGet packages.
+
+## Requirements
 
 ### Requirement: Distribution channel completeness gate
 The release distribution determinism contract SHALL treat npm publication as a required distribution channel alongside NuGet for stable releases.

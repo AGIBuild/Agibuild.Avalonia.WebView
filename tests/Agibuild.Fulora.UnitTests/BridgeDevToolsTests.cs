@@ -254,4 +254,60 @@ public class BridgeDevToolsServiceTests
         svc.Dispose();
         svc.Dispose();
     }
+
+    [Fact]
+    public void StartPushing_sends_existing_events_and_subscribes()
+    {
+        using var svc = new BridgeDevToolsService();
+        svc.Tracer.OnExportCallStart("Svc", "A", null);
+
+        var scripts = new List<string>();
+        svc.StartPushing(script => { scripts.Add(script); return Task.FromResult<string?>(null); });
+
+        Assert.Contains(scripts, s => s.Contains("__bridgeDevToolsLoadEvents"));
+
+        svc.Tracer.OnImportCallStart("Svc", "B", null);
+        Assert.Contains(scripts, s => s.Contains("__bridgeDevToolsAddEvent"));
+    }
+
+    [Fact]
+    public void StartPushing_no_existing_events_skips_load_batch()
+    {
+        using var svc = new BridgeDevToolsService();
+        var scripts = new List<string>();
+        svc.StartPushing(script => { scripts.Add(script); return Task.FromResult<string?>(null); });
+
+        Assert.DoesNotContain(scripts, s => s.Contains("__bridgeDevToolsLoadEvents"));
+    }
+
+    [Fact]
+    public void StopPushing_stops_callback()
+    {
+        using var svc = new BridgeDevToolsService();
+        var scripts = new List<string>();
+        svc.StartPushing(script => { scripts.Add(script); return Task.FromResult<string?>(null); });
+        svc.StopPushing();
+
+        svc.Tracer.OnExportCallStart("Svc", "A", null);
+        Assert.Empty(scripts);
+    }
+
+    [Fact]
+    public void StartPushing_null_throws()
+    {
+        using var svc = new BridgeDevToolsService();
+        Assert.Throws<ArgumentNullException>(() => svc.StartPushing(null!));
+    }
+
+    [Fact]
+    public void Dispose_stops_subscription()
+    {
+        var svc = new BridgeDevToolsService();
+        var scripts = new List<string>();
+        svc.StartPushing(script => { scripts.Add(script); return Task.FromResult<string?>(null); });
+        svc.Dispose();
+
+        svc.Tracer.OnExportCallStart("Svc", "A", null);
+        Assert.Empty(scripts);
+    }
 }

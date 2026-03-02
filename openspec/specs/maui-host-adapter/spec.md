@@ -2,7 +2,7 @@
 
 Define the MAUI integration layer for Agibuild.Fulora, allowing Fulora WebView to be used in .NET MAUI apps via an adapter pattern consistent with the Avalonia host.
 
-## ADDED Requirements
+## Requirements
 
 ### Requirement: MAUI host adapter package
 Repository SHALL provide a package (e.g., `Agibuild.Fulora.Maui`) that adapts Fulora's WebView hosting to MAUI's `WebView` control.

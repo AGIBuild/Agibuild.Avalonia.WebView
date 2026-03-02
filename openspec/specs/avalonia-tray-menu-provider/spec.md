@@ -1,4 +1,8 @@
-## ADDED Requirements
+## Purpose
+
+Define requirements for the Avalonia TrayIcon provider that binds shell tray state to native system tray icons.
+
+## Requirements
 
 ### Requirement: Avalonia provider binds TrayUpdateState to Avalonia TrayIcon
 

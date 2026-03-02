@@ -2,7 +2,7 @@
 
 Define remote configuration and feature flag support for Agibuild.Fulora, with IConfigProvider interface, local JSON fallback, optional remote HTTP endpoint, and bridge-integrated JS access.
 
-## ADDED Requirements
+## Requirements
 
 ### Requirement: IConfigProvider interface
 Runtime SHALL provide an `IConfigProvider` interface with methods to read configuration values and sections.

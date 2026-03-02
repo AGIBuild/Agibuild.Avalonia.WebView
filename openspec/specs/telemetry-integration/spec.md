@@ -2,7 +2,7 @@
 
 Define structured telemetry and crash reporting integration for Agibuild.Fulora, with ITelemetryProvider interface, bridge call metrics auto-collection, and built-in OpenTelemetry and Sentry providers.
 
-## ADDED Requirements
+## Requirements
 
 ### Requirement: ITelemetryProvider interface
 Runtime SHALL provide an `ITelemetryProvider` interface with methods for events, metrics, and exceptions.
@@ -66,7 +66,7 @@ A built-in provider SHALL integrate with Sentry for crash reporting and error tr
 - **AND** no data SHALL be sent to Sentry
 
 ### Requirement: Bridge-integrated JS API (optional)
-The bridge MAY expose a telemetry API to JS for custom events and errors.
+The bridge SHALL support optional exposure of a telemetry API to JS for custom events and errors.
 
 #### Scenario: JS can report custom event
 - **WHEN** the bridge exposes `telemetry.trackEvent(name, properties)` to JS

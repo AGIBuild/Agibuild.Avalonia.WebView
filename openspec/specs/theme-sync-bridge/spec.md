@@ -1,4 +1,8 @@
-## ADDED Requirements
+## Purpose
+
+Define requirements for the OS theme synchronization bridge service.
+
+## Requirements
 
 ### Requirement: IThemeService exposes current OS theme information via typed bridge
 

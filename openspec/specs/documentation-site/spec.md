@@ -1,4 +1,8 @@
-## ADDED Requirements
+## Purpose
+
+Define requirements for automated documentation site deployment to GitHub Pages.
+
+## Requirements
 
 ### Requirement: Documentation site is deployed to GitHub Pages
 The repository SHALL deploy the documentation site (API reference, Getting Started, architecture overview, topic guides) to GitHub Pages via a CI workflow.

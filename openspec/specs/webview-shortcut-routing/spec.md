@@ -1,4 +1,8 @@
-## MODIFIED Requirements
+## Purpose
+
+Define requirements for keyboard shortcut routing within WebView controls.
+
+## Requirements
 
 ### Requirement: WebView shortcut routing provides deterministic gesture-to-action execution with global shortcut coexistence
 

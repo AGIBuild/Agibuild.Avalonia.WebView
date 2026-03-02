@@ -1,4 +1,8 @@
-## ADDED Requirements
+## Purpose
+
+Define requirements for the bridge plugin packaging convention using IBridgePlugin and NuGet/npm dual distribution.
+
+## Requirements
 
 ### Requirement: Bridge plugins are defined via IBridgePlugin marker interface
 

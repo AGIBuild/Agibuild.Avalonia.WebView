@@ -1,4 +1,8 @@
-## ADDED Requirements
+## Purpose
+
+Define requirements for the global keyboard shortcut service exposed through the bridge.
+
+## Requirements
 
 ### Requirement: IGlobalShortcutService exposes OS-level global hotkey registration via typed bridge
 

@@ -2,7 +2,7 @@
 
 Define NativeAOT publish support validation and documentation for Agibuild.Fulora apps, ensuring source generator approach works with trimming and AOT compilation.
 
-## ADDED Requirements
+## Requirements
 
 ### Requirement: NativeAOT publish succeeds for at least one sample
 At least one Fulora sample SHALL publish successfully with `PublishAot=true` and trimming enabled on at least one target platform.

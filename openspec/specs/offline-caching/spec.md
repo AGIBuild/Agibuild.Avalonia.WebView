@@ -2,7 +2,7 @@
 
 Define Service Worker integration for offline caching in Agibuild.Fulora SPA-hosted apps, with configurable cache strategies and automatic registration.
 
-## ADDED Requirements
+## Requirements
 
 ### Requirement: Service Worker registration
 SPA hosting SHALL support automatic Service Worker registration when loading SPA content in production mode.

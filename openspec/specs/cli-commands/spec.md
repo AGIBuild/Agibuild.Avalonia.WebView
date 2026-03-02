@@ -2,7 +2,7 @@
 
 Define requirements for the `agibuild` CLI tool distributed as a .NET global tool, providing commands for project scaffolding, TypeScript type generation, dev server orchestration, and bridge service scaffolding.
 
-## ADDED Requirements
+## Requirements
 
 ### Requirement: agibuild SHALL be installable as a .NET global tool
 

@@ -2,7 +2,7 @@
 
 Define cross-WebView communication capabilities for Agibuild.Fulora, enabling publish-subscribe and request-response patterns between multiple WebView instances via the host runtime as mediator.
 
-## ADDED Requirements
+## Requirements
 
 ### Requirement: Publish-subscribe channel
 Runtime SHALL provide a publish-subscribe channel where any WebView or C# can publish to a topic and subscribers in other WebViews or C# receive the message.

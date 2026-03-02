@@ -1,4 +1,8 @@
-## ADDED Requirements
+## Purpose
+
+Define requirements for the JavaScript-side middleware pipeline in the BridgeClient.
+
+## Requirements
 
 ### Requirement: BridgeClient supports middleware registration via use()
 

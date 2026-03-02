@@ -1,4 +1,8 @@
-## MODIFIED Requirements
+## Purpose
+
+Define requirements for shell experience presets in the project template.
+
+## Requirements
 
 ### Requirement: App-shell preset scaffolds shell-ready desktop startup
 

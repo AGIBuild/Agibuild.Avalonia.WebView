@@ -2,7 +2,7 @@
 
 Define Svelte and Angular sample application requirements for Agibuild.Fulora, demonstrating framework versatility with parity to existing React and Vue samples.
 
-## ADDED Requirements
+## Requirements
 
 ### Requirement: Svelte sample project structure
 Repository SHALL provide a Svelte sample at `samples/avalonia-svelte/` with four projects: Desktop (Avalonia host), Bridge (shared interfaces/implementations), Web (Svelte + Vite + TypeScript), and Tests (xUnit).

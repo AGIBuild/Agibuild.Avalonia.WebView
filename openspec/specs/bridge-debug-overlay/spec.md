@@ -2,7 +2,7 @@
 
 Define the Bridge DevTools Panel — an in-app debug overlay that displays real-time bridge call logs, request/response payloads, latency metrics, and error details for C# ↔ JS communication debugging.
 
-## ADDED Requirements
+## Requirements
 
 ### Requirement: Tracer-backed event collector is provided
 Runtime SHALL provide an `IBridgeTracer` implementation that buffers bridge events (export/import start/end/error, service exposed/removed) for consumption by the debug overlay.

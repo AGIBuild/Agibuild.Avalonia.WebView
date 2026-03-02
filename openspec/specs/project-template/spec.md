@@ -1,4 +1,8 @@
-## MODIFIED Requirements
+## Purpose
+
+Define requirements for the Fulora hybrid app project template.
+
+## Requirements
 
 ### Requirement: Template SHALL scaffold Desktop, Bridge, and Tests projects
 

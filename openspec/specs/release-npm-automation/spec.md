@@ -1,4 +1,8 @@
-## ADDED Requirements
+## Purpose
+
+Define requirements for automated npm package publication in the release pipeline.
+
+## Requirements
 
 ### Requirement: npm publish job in release workflow
 The release workflow SHALL include an `npm-publish` job that publishes `@agibuild/bridge` to the npm registry when triggered by a version tag push.
