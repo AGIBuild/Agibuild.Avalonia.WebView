@@ -138,7 +138,7 @@ jobs:
           dotnet publish tests/Agibuild.Fulora.Integration.NugetPackageTests/Agibuild.Fulora.Integration.NugetPackageTests.csproj \
             -p:PublishAot=true \
             -r linux-x64 \
-            -p:AgibuildPackageVersion='*'
+            -p:AgibuildPackageVersion='*-*'
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
