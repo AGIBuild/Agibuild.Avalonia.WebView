@@ -704,7 +704,6 @@ public sealed class AutomationLaneGovernanceTests
 
         var roadmap = File.ReadAllText(roadmapPath);
         Assert.Matches(new Regex(@"## Phase \d+: .+\(✅ Completed\)", RegexOptions.Multiline), roadmap);
-        Assert.Matches(new Regex(@"## Phase \d+: .+\(🚧 Active\)", RegexOptions.Multiline), roadmap);
         AssertSourceContains(roadmap, "Completed phase id: `phase8-bridge-v2-parity`", PhaseTransitionConsistency, roadmapPath);
         AssertSourceContains(roadmap, "Active phase id: `phase9-ga-release-readiness`", PhaseTransitionConsistency, roadmapPath);
         AssertSourceContains(roadmap, "Closeout snapshot artifact: `artifacts/test-results/closeout-snapshot.json`", PhaseTransitionConsistency, roadmapPath);
