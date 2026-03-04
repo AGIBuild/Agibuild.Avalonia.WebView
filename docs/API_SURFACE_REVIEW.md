@@ -2,7 +2,7 @@
 
 **Date**: 2026-03-02
 **Status**: 1.0 Freeze Audit
-**Test Count**: 1553 CTs passing (1344 unit + 209 integration)
+**Test Count**: 1668 CTs passing (1459 unit + 209 integration)
 **Inventory**: `docs/API_SURFACE_INVENTORY.release.txt` (Core: 72 types, Runtime: 100 types)
 
 ---

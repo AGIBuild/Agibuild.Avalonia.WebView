@@ -153,4 +153,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Context Menu** — `ContextMenuRequested` event with media type and coordinates.
 - **WebDialog** — Modal/modeless dialog-style WebView windows.
 - **WebAuth Broker** — Platform-specific OAuth authentication flow support.
-- **1113 Unit Tests + 180 Integration Tests** — Comprehensive contract and runtime test coverage.
+- **1459 Unit Tests + 209 Integration Tests** — Comprehensive contract and runtime test coverage.

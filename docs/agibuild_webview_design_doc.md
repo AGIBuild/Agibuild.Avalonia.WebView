@@ -22,7 +22,7 @@
 - 完整导航控制（拦截、取消、重定向关联）
 - WebMessage 桥接 + 策略（Origin、Channel、Protocol 检查）
 - 丰富功能集：Cookies、Commands、Screenshot、PDF、RPC、Zoom、Find、Preload、ContextMenu、Download、Permission、WebResource
-- 1113 单元测试 + 180 集成测试，95%+ 行覆盖率
+- 1459 单元测试 + 209 集成测试，95%+ 行覆盖率
 
 ### 🧠 设计原则
 

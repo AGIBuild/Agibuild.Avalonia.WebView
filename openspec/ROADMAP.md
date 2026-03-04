@@ -21,7 +21,7 @@ Foundation               Type-Safe Bridge       SPA Hosting            Polish & 
   Screenshot, PDF,         integration            integration            audit                  • Shell presets in template                                                                                             • Platform feature parity closure
   RPC, Zoom, Find,       • MockBridge for       • Sample: Avalonia     • GTK/Linux             • Stress + soak automation
   Preload, ContextMenu     unit testing           + React app            smoke validation
-• 1113 CT + 180 IT       • Migration path       • Sample: Avalonia
+• 1459 CT + 209 IT       • Migration path       • Sample: Avalonia
 • WebDialog, Auth          from raw RPC           + Vue app
 ```
 
@@ -31,7 +31,7 @@ Foundation               Type-Safe Bridge       SPA Hosting            Polish & 
 
 **Goal**: Establish a production-quality cross-platform WebView control with contract-driven design.
 
-**Status**: All 18 changes archived. 1113 unit tests, 180 integration tests, 95%+ line coverage.
+**Status**: All 18 changes archived. 1459 unit tests, 209 integration tests, 95%+ line coverage.
 
 <details>
 <summary>Delivered capabilities (click to expand)</summary>
@@ -551,7 +551,7 @@ dotnet new agibuild-hybrid -n MyApp --frontend react
 
 ### Latest Evidence Snapshot
 
-- `nuke Test`: Unit `1344`, Integration `209`, Total `1553` (pass)
+- `nuke Test`: Unit `1459`, Integration `209`, Total `1668` (pass)
 - `nuke Coverage`: Line `97.83%` (threshold `96%`), Branch `95.14%` (threshold `95%`)
 - `nuke ReleaseOrchestrationGovernance`: all targets pass
 
