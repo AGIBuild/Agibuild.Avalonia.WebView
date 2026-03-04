@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
+using Avalonia.Media.Fonts;
 using Avalonia.Themes.Fluent;
 using Xunit;
 
@@ -22,5 +23,7 @@ public static class TestAppBuilder
 {
     public static AppBuilder BuildAvaloniaApp()
         => AppBuilder.Configure<TestApp>()
+            .UseHarfBuzz()
+            .WithInterFont()
             .UseHeadless(new AvaloniaHeadlessPlatformOptions());
 }
