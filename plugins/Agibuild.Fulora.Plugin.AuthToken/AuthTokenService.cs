@@ -12,11 +12,14 @@ public sealed class AuthTokenService : IAuthTokenService
     private const string MetaPrefix = "__meta:";
     private readonly ISecureStorageProvider _storage;
 
+    /// <summary>Initializes a new instance with the specified storage provider.</summary>
+    /// <param name="storage">The secure storage provider for persisting tokens.</param>
     public AuthTokenService(ISecureStorageProvider storage)
     {
         _storage = storage ?? throw new ArgumentNullException(nameof(storage));
     }
 
+    /// <summary>Retrieves a stored token by key. Returns null if not found or expired.</summary>
     public async Task<string?> GetToken(string key)
     {
         var value = await _storage.GetAsync(key);
@@ -33,18 +36,21 @@ public sealed class AuthTokenService : IAuthTokenService
         return value;
     }
 
+    /// <summary>Stores a token with optional expiry and scope metadata.</summary>
     public async Task SetToken(string key, string value, TokenOptions? options = null)
     {
         await _storage.SetAsync(key, value);
         await SetMetadataAsync(key, options);
     }
 
+    /// <summary>Removes a stored token and its metadata.</summary>
     public async Task RemoveToken(string key)
     {
         await _storage.RemoveAsync(key);
         await _storage.RemoveAsync(MetaPrefix + key);
     }
 
+    /// <summary>Returns all stored token keys (excluding metadata keys).</summary>
     public async Task<string[]> ListKeys()
     {
         var keys = await _storage.ListKeysAsync();

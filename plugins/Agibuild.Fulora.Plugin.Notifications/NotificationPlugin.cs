@@ -9,6 +9,7 @@ namespace Agibuild.Fulora.Plugin.Notifications;
 /// </summary>
 public sealed class NotificationPlugin : IBridgePlugin
 {
+    /// <summary>Returns the service descriptors for the Notifications plugin.</summary>
     public static IEnumerable<BridgePluginServiceDescriptor> GetServices()
     {
         yield return BridgePluginServiceDescriptor.Create<INotificationService>(

@@ -98,12 +98,14 @@ public sealed class HttpClientService : IHttpClientService
         };
     }
 
+    /// <summary>Sends an HTTP GET request to the specified URL.</summary>
     public Task<HttpBridgeResponse> Get(string url, Dictionary<string, string>? headers = null)
     {
         var request = new HttpRequestMessage(HttpMethod.Get, ResolveUrl(_options.BaseUrl, url));
         return SendAsync(request, headers);
     }
 
+    /// <summary>Sends an HTTP POST request to the specified URL.</summary>
     public Task<HttpBridgeResponse> Post(string url, string? body = null, Dictionary<string, string>? headers = null)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, ResolveUrl(_options.BaseUrl, url));
@@ -112,6 +114,7 @@ public sealed class HttpClientService : IHttpClientService
         return SendAsync(request, headers);
     }
 
+    /// <summary>Sends an HTTP PUT request to the specified URL.</summary>
     public Task<HttpBridgeResponse> Put(string url, string? body = null, Dictionary<string, string>? headers = null)
     {
         var request = new HttpRequestMessage(HttpMethod.Put, ResolveUrl(_options.BaseUrl, url));
@@ -120,12 +123,14 @@ public sealed class HttpClientService : IHttpClientService
         return SendAsync(request, headers);
     }
 
+    /// <summary>Sends an HTTP DELETE request to the specified URL.</summary>
     public Task<HttpBridgeResponse> Delete(string url, Dictionary<string, string>? headers = null)
     {
         var request = new HttpRequestMessage(HttpMethod.Delete, ResolveUrl(_options.BaseUrl, url));
         return SendAsync(request, headers);
     }
 
+    /// <summary>Sends an HTTP PATCH request to the specified URL.</summary>
     public Task<HttpBridgeResponse> Patch(string url, string? body = null, Dictionary<string, string>? headers = null)
     {
         var request = new HttpRequestMessage(HttpMethod.Patch, ResolveUrl(_options.BaseUrl, url));

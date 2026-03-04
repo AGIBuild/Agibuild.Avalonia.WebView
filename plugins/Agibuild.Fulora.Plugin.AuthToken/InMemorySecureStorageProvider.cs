@@ -9,6 +9,7 @@ public sealed class InMemorySecureStorageProvider : ISecureStorageProvider
     private readonly Dictionary<string, string> _store = new();
     private readonly object _lock = new();
 
+    /// <summary>Retrieves a stored value by key.</summary>
     public Task<string?> GetAsync(string key)
     {
         lock (_lock)
@@ -17,6 +18,7 @@ public sealed class InMemorySecureStorageProvider : ISecureStorageProvider
         }
     }
 
+    /// <summary>Stores a key-value pair.</summary>
     public Task SetAsync(string key, string value)
     {
         lock (_lock)
@@ -26,6 +28,7 @@ public sealed class InMemorySecureStorageProvider : ISecureStorageProvider
         return Task.CompletedTask;
     }
 
+    /// <summary>Removes a key-value pair.</summary>
     public Task RemoveAsync(string key)
     {
         lock (_lock)
@@ -35,6 +38,7 @@ public sealed class InMemorySecureStorageProvider : ISecureStorageProvider
         return Task.CompletedTask;
     }
 
+    /// <summary>Returns all stored keys.</summary>
     public Task<string[]> ListKeysAsync()
     {
         lock (_lock)

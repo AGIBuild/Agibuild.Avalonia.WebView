@@ -31,6 +31,7 @@ public sealed class LocalStorageService : ILocalStorageService
         _store = LoadFromDisk();
     }
 
+    /// <summary>Gets the value for a key, or null if not found.</summary>
     public Task<string?> Get(string key)
     {
         lock (_lock)
@@ -39,6 +40,7 @@ public sealed class LocalStorageService : ILocalStorageService
         }
     }
 
+    /// <summary>Sets a key-value pair. Overwrites if the key exists.</summary>
     public Task Set(string key, string value)
     {
         lock (_lock)
@@ -49,6 +51,7 @@ public sealed class LocalStorageService : ILocalStorageService
         return Task.CompletedTask;
     }
 
+    /// <summary>Removes a key. No-op if the key does not exist.</summary>
     public Task Remove(string key)
     {
         lock (_lock)
@@ -59,6 +62,7 @@ public sealed class LocalStorageService : ILocalStorageService
         return Task.CompletedTask;
     }
 
+    /// <summary>Removes all key-value pairs.</summary>
     public Task Clear()
     {
         lock (_lock)
@@ -69,6 +73,7 @@ public sealed class LocalStorageService : ILocalStorageService
         return Task.CompletedTask;
     }
 
+    /// <summary>Returns all stored keys.</summary>
     public Task<string[]> GetKeys()
     {
         lock (_lock)

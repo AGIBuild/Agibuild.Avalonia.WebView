@@ -8,6 +8,7 @@ namespace Agibuild.Fulora.Plugin.HttpClient;
 /// </summary>
 public sealed class HttpClientPlugin : IBridgePlugin
 {
+    /// <summary>Returns the service descriptors for the HttpClient plugin.</summary>
     public static IEnumerable<BridgePluginServiceDescriptor> GetServices()
     {
         yield return BridgePluginServiceDescriptor.Create<IHttpClientService>(sp =>

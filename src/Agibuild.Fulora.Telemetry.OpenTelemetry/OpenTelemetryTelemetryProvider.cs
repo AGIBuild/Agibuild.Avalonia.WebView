@@ -15,6 +15,7 @@ public sealed class OpenTelemetryTelemetryProvider : ITelemetryProvider
 
     private readonly ConcurrentDictionary<string, Histogram<double>> _metricHistograms = new();
 
+    /// <summary>Creates a telemetry provider that maps events and metrics to OTLP-compatible signals.</summary>
     public OpenTelemetryTelemetryProvider()
     {
     }

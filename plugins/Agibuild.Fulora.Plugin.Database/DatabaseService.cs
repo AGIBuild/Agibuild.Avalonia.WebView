@@ -14,6 +14,8 @@ public sealed class DatabaseService : IDatabaseService
     private SqliteConnection? _connection;
     private SqliteTransaction? _activeTransaction;
 
+    /// <summary>Initializes a new instance with the specified options.</summary>
+    /// <param name="options">Database configuration. Uses defaults when null.</param>
     public DatabaseService(DatabaseOptions? options = null)
     {
         var opts = options ?? new DatabaseOptions();
@@ -27,6 +29,7 @@ public sealed class DatabaseService : IDatabaseService
         _migrationScripts = opts.MigrationScripts;
     }
 
+    /// <summary>Executes a SELECT query and returns rows as dictionaries.</summary>
     public Task<QueryResult> Query(string sql, Dictionary<string, object?>? parameters = null)
     {
         lock (_lock)
@@ -35,6 +38,7 @@ public sealed class DatabaseService : IDatabaseService
         }
     }
 
+    /// <summary>Executes a non-query statement and returns the number of affected rows.</summary>
     public Task<int> Execute(string sql, Dictionary<string, object?>? parameters = null)
     {
         lock (_lock)
@@ -43,6 +47,7 @@ public sealed class DatabaseService : IDatabaseService
         }
     }
 
+    /// <summary>Executes multiple statements in a single transaction.</summary>
     public Task<int> ExecuteBatch(string[] statements)
     {
         lock (_lock)
@@ -51,6 +56,7 @@ public sealed class DatabaseService : IDatabaseService
         }
     }
 
+    /// <summary>Begins a new transaction. Must call Commit or Rollback before starting another.</summary>
     public Task BeginTransaction()
     {
         lock (_lock)
@@ -63,6 +69,7 @@ public sealed class DatabaseService : IDatabaseService
         }
     }
 
+    /// <summary>Commits the active transaction.</summary>
     public Task CommitTransaction()
     {
         lock (_lock)
@@ -76,6 +83,7 @@ public sealed class DatabaseService : IDatabaseService
         }
     }
 
+    /// <summary>Rolls back the active transaction.</summary>
     public Task RollbackTransaction()
     {
         lock (_lock)
@@ -89,6 +97,7 @@ public sealed class DatabaseService : IDatabaseService
         }
     }
 
+    /// <summary>Returns the current schema version from applied migrations.</summary>
     public Task<int> GetSchemaVersion()
     {
         lock (_lock)

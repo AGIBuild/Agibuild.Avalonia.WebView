@@ -8,6 +8,7 @@ namespace Agibuild.Fulora.Plugin.Database;
 /// </summary>
 public sealed class DatabasePlugin : IBridgePlugin
 {
+    /// <summary>Returns service descriptors for the Database plugin. Resolves <see cref="DatabaseOptions"/> from DI when available.</summary>
     public static IEnumerable<BridgePluginServiceDescriptor> GetServices()
     {
         yield return BridgePluginServiceDescriptor.Create<IDatabaseService>(

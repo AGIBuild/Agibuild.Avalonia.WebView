@@ -9,6 +9,7 @@ public sealed class InMemoryNotificationProvider : INativeNotificationProvider
     private readonly Dictionary<string, (string Title, string Body, NotificationOptions? Options)> _notifications = new();
     private int _idCounter;
 
+    /// <summary>Shows a notification and returns its assigned ID.</summary>
     public Task<string> ShowNotification(string title, string body, NotificationOptions? options)
     {
         var id = $"notif-{Interlocked.Increment(ref _idCounter)}";
@@ -16,17 +17,20 @@ public sealed class InMemoryNotificationProvider : INativeNotificationProvider
         return Task.FromResult(id);
     }
 
+    /// <summary>Requests notification permission; always returns true for in-memory provider.</summary>
     public Task<bool> RequestPermission()
     {
         return Task.FromResult(true);
     }
 
+    /// <summary>Clears all tracked notifications.</summary>
     public Task ClearAll()
     {
         _notifications.Clear();
         return Task.CompletedTask;
     }
 
+    /// <summary>Clears the notification with the specified ID.</summary>
     public Task Clear(string notificationId)
     {
         _notifications.Remove(notificationId);

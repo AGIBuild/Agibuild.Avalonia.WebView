@@ -39,6 +39,7 @@ public sealed class OpenTelemetryBridgeTracer : IBridgeTracer
 
     private const int MaxParamsJsonLength = 1024;
 
+    /// <summary>Creates a bridge tracer that exports spans and metrics via OpenTelemetry.</summary>
     public OpenTelemetryBridgeTracer()
     {
         _callCounter = BridgeMeter.CreateCounter<long>("fulora.bridge.call_count");

@@ -8,6 +8,7 @@ namespace Agibuild.Fulora.Plugin.LocalStorage;
 /// </summary>
 public sealed class LocalStoragePlugin : IBridgePlugin
 {
+    /// <summary>Returns service descriptors for the LocalStorage plugin.</summary>
     public static IEnumerable<BridgePluginServiceDescriptor> GetServices()
     {
         yield return BridgePluginServiceDescriptor.Create<ILocalStorageService>(

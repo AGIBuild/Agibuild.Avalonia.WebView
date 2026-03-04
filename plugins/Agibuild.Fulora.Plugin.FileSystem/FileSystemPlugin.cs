@@ -8,6 +8,7 @@ namespace Agibuild.Fulora.Plugin.FileSystem;
 /// </summary>
 public sealed class FileSystemPlugin : IBridgePlugin
 {
+    /// <summary>Returns the service descriptors for the FileSystem plugin.</summary>
     public static IEnumerable<BridgePluginServiceDescriptor> GetServices()
     {
         yield return BridgePluginServiceDescriptor.Create<IFileSystemService>(

@@ -9,6 +9,8 @@ public sealed class FileSystemService : IFileSystemService
     private readonly string _rootDirectory;
     private readonly bool _allowWrite;
 
+    /// <summary>Initializes a new instance with the specified options.</summary>
+    /// <param name="options">Configuration options; when null, uses defaults.</param>
     public FileSystemService(FileSystemOptions? options = null)
     {
         var opts = options ?? new FileSystemOptions();
@@ -16,12 +18,14 @@ public sealed class FileSystemService : IFileSystemService
         _allowWrite = opts.AllowWrite;
     }
 
+    /// <summary>Reads text content from the specified path.</summary>
     public async Task<string> ReadText(string path)
     {
         var fullPath = ResolveAndValidate(path, allowWrite: false);
         return await File.ReadAllTextAsync(fullPath);
     }
 
+    /// <summary>Writes text content to the specified path.</summary>
     public async Task WriteText(string path, string content)
     {
         EnsureWriteAllowed();
@@ -32,12 +36,14 @@ public sealed class FileSystemService : IFileSystemService
         await File.WriteAllTextAsync(fullPath, content);
     }
 
+    /// <summary>Reads binary content from the specified path.</summary>
     public async Task<byte[]> ReadBinary(string path)
     {
         var fullPath = ResolveAndValidate(path, allowWrite: false);
         return await File.ReadAllBytesAsync(fullPath);
     }
 
+    /// <summary>Writes binary data to the specified path.</summary>
     public async Task WriteBinary(string path, byte[] data)
     {
         EnsureWriteAllowed();
@@ -48,6 +54,7 @@ public sealed class FileSystemService : IFileSystemService
         await File.WriteAllBytesAsync(fullPath, data);
     }
 
+    /// <summary>Lists file and directory entries at the specified path.</summary>
     public Task<FileEntry[]> List(string path)
     {
         var fullPath = ResolveAndValidate(path, allowWrite: false);
@@ -88,6 +95,7 @@ public sealed class FileSystemService : IFileSystemService
         return Task.FromResult(results.ToArray());
     }
 
+    /// <summary>Deletes the file or directory at the specified path.</summary>
     public Task Delete(string path)
     {
         EnsureWriteAllowed();
@@ -101,12 +109,14 @@ public sealed class FileSystemService : IFileSystemService
         return Task.CompletedTask;
     }
 
+    /// <summary>Returns whether the file or directory at the specified path exists.</summary>
     public Task<bool> Exists(string path)
     {
         var fullPath = ResolveAndValidate(path, allowWrite: false);
         return Task.FromResult(File.Exists(fullPath) || Directory.Exists(fullPath));
     }
 
+    /// <summary>Creates a directory at the specified path.</summary>
     public Task CreateDirectory(string path)
     {
         EnsureWriteAllowed();

@@ -11,11 +11,15 @@ internal sealed class DatabaseMigrationRunner
 {
     private readonly SqliteConnection _connection;
 
+    /// <summary>Initializes a new instance with the specified connection.</summary>
+    /// <param name="connection">The open SQLite connection to run migrations against.</param>
     public DatabaseMigrationRunner(SqliteConnection connection)
     {
         _connection = connection;
     }
 
+    /// <summary>Applies migration scripts in version order. Skips already-applied versions.</summary>
+    /// <param name="migrationScripts">Paths to SQL migration files (e.g. 001_init.sql).</param>
     public void RunMigrations(string[] migrationScripts)
     {
         EnsureSchemaVersionTable();

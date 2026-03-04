@@ -13,6 +13,8 @@ public static class FuloraOpenTelemetryExtensions
     /// Registers <see cref="OpenTelemetryTelemetryProvider"/> as <see cref="ITelemetryProvider"/>
     /// and <see cref="OpenTelemetryBridgeTracer"/> as <see cref="IBridgeTracer"/>.
     /// </summary>
+    /// <param name="builder">The Fulora service builder to configure.</param>
+    /// <returns>The builder for chaining.</returns>
     public static FuloraServiceBuilder AddOpenTelemetry(this FuloraServiceBuilder builder)
     {
         ArgumentNullException.ThrowIfNull(builder);

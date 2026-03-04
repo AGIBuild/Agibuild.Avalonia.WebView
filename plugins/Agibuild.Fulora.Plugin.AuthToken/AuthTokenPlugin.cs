@@ -9,6 +9,7 @@ namespace Agibuild.Fulora.Plugin.AuthToken;
 /// </summary>
 public sealed class AuthTokenPlugin : IBridgePlugin
 {
+    /// <summary>Returns service descriptors for the AuthToken plugin.</summary>
     public static IEnumerable<BridgePluginServiceDescriptor> GetServices()
     {
         yield return BridgePluginServiceDescriptor.Create<IAuthTokenService>(
