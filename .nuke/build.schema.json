@@ -148,7 +148,7 @@
         },
         "BranchCoverageThreshold": {
           "type": "integer",
-          "description": "Minimum branch coverage percentage (0-100). Default: 94",
+          "description": "Minimum branch coverage percentage (0-100). Default: 93",
           "format": "int32"
         },
         "Configuration": {

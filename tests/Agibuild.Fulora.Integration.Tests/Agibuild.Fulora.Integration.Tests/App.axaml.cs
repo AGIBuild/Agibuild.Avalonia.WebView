@@ -2,8 +2,6 @@ using Agibuild.Fulora.Integration.Tests.ViewModels;
 using Agibuild.Fulora.Integration.Tests.Views;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Data.Core;
-using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
 using System;
@@ -30,9 +28,7 @@ namespace Agibuild.Fulora.Integration.Tests
         {
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
-                // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
-                DisableAvaloniaDataAnnotationValidation();
+                // In Avalonia 12+, BindingPlugins is internal; duplicate validation is handled automatically.
 
                 var args = desktop.Args ?? Array.Empty<string>();
                 var mainVm = new MainViewModel();
@@ -158,19 +154,5 @@ namespace Agibuild.Fulora.Integration.Tests
             return defaultValue;
         }
 
-        [UnconditionalSuppressMessage("Trimming", "IL2026",
-            Justification = "Avalonia DataValidators access is required to disable duplicate validation.")]
-        private void DisableAvaloniaDataAnnotationValidation()
-        {
-            // Get an array of plugins to remove
-            var dataValidationPluginsToRemove =
-                BindingPlugins.DataValidators.OfType<DataAnnotationsValidationPlugin>().ToArray();
-
-            // remove each entry found
-            foreach (var plugin in dataValidationPluginsToRemove)
-            {
-                BindingPlugins.DataValidators.Remove(plugin);
-            }
-        }
     }
 }

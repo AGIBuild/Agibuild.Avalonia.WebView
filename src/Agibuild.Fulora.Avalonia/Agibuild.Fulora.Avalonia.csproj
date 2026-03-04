@@ -23,7 +23,7 @@
     <ProjectReference Include="..\Agibuild.Fulora.Adapters.Abstractions\Agibuild.Fulora.Adapters.Abstractions.csproj" PrivateAssets="all" />
     <ProjectReference Include="..\Agibuild.Fulora.Runtime\Agibuild.Fulora.Runtime.csproj" PrivateAssets="all" />
     <ProjectReference Include="..\Agibuild.Fulora.DependencyInjection\Agibuild.Fulora.DependencyInjection.csproj" PrivateAssets="all" />
-    <PackageReference Include="Avalonia" Version="11.3.11" />
+    <PackageReference Include="Avalonia" Version="12.0.0-preview1" />
     <!-- Transitive dependency from Runtime and DI projects (which use PrivateAssets=all). -->
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.2" />
     <!-- Keep package dependency metadata for consumers, but do not import WebView2 build targets into this pack project. -->

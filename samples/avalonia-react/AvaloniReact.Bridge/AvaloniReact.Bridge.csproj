@@ -8,12 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Agibuild.Fulora.Core" Version="1.0.3-preview" />
+    <ProjectReference Include="..\..\..\src\Agibuild.Fulora.Core\Agibuild.Fulora.Core.csproj" />
   </ItemGroup>
 
   <!-- Source generator for typed bridge (AOT-safe proxies; falls back to reflection when absent) -->
   <ItemGroup>
-    <PackageReference Include="Agibuild.Fulora.Bridge.Generator" Version="1.0.3-preview" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\..\..\src\Agibuild.Fulora.Bridge.Generator\Agibuild.Fulora.Bridge.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Update="MinVer" Version="8.0.0-alpha.1" />

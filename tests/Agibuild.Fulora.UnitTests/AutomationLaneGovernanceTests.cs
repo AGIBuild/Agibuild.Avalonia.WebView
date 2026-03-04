@@ -774,7 +774,7 @@ public sealed class AutomationLaneGovernanceTests
 
         var csproj = File.ReadAllText(mainCsprojPath);
         AssertSourceContains(csproj, "<Description>", PackageMetadata, mainCsprojPath);
-        Assert.DoesNotContain("preview", csproj.ToLowerInvariant().Split("<Description>").Last().Split("</Description>").First());
+        Assert.DoesNotContain("preview", csproj.ToLowerInvariant().Split("<description>").Last().Split("</description>").First());
     }
 
     [Fact]
