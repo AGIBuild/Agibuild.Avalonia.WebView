@@ -248,14 +248,19 @@ partial class BuildTask
             psi.WorkingDirectory = workingDirectory;
 
         using var process = Process.Start(psi)!;
-        var output = process.StandardOutput.ReadToEnd();
-        var error = process.StandardError.ReadToEnd();
+        // Read both streams concurrently to prevent buffer-full deadlock
+        var stdoutTask = process.StandardOutput.ReadToEndAsync();
+        var stderrTask = process.StandardError.ReadToEndAsync();
 
         if (!process.WaitForExit(timeoutMs))
         {
             process.Kill();
+            process.WaitForExit();
             throw new TimeoutException($"Process '{fileName} {arguments}' timed out after {timeoutMs}ms.");
         }
+
+        var output = stdoutTask.GetAwaiter().GetResult();
+        var error = stderrTask.GetAwaiter().GetResult();
 
         if (process.ExitCode != 0 && !string.IsNullOrWhiteSpace(error))
         {
@@ -281,14 +286,18 @@ partial class BuildTask
             psi.WorkingDirectory = workingDirectory;
 
         using var process = Process.Start(psi)!;
-        var output = process.StandardOutput.ReadToEnd();
-        var error = process.StandardError.ReadToEnd();
+        var stdoutTask = process.StandardOutput.ReadToEndAsync();
+        var stderrTask = process.StandardError.ReadToEndAsync();
 
         if (!process.WaitForExit(timeoutMs))
         {
             process.Kill();
+            process.WaitForExit();
             throw new TimeoutException($"Process '{fileName} {arguments}' timed out after {timeoutMs}ms.");
         }
+
+        var output = stdoutTask.GetAwaiter().GetResult();
+        var error = stderrTask.GetAwaiter().GetResult();
 
         return string.Join('\n', new[] { output, error }.Where(x => !string.IsNullOrWhiteSpace(x)));
     }
@@ -327,14 +336,18 @@ partial class BuildTask
             psi.WorkingDirectory = workingDirectory;
 
         using var process = Process.Start(psi)!;
-        var output = process.StandardOutput.ReadToEnd();
-        var error = process.StandardError.ReadToEnd();
+        var stdoutTask = process.StandardOutput.ReadToEndAsync();
+        var stderrTask = process.StandardError.ReadToEndAsync();
 
         if (!process.WaitForExit(timeoutMs))
         {
             process.Kill();
+            process.WaitForExit();
             throw new TimeoutException($"Process '{fileName} {arguments}' timed out after {timeoutMs}ms.");
         }
+
+        var output = stdoutTask.GetAwaiter().GetResult();
+        var error = stderrTask.GetAwaiter().GetResult();
 
         var combined = string.Join('\n', new[] { output, error }.Where(x => !string.IsNullOrWhiteSpace(x)));
         if (process.ExitCode != 0)
