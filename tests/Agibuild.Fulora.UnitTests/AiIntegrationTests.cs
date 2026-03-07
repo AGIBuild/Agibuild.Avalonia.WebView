@@ -127,6 +127,322 @@ public sealed class AiIntegrationTests
         Assert.NotNull(sp.GetRequiredService<IAiBridgeService>());
     }
 
+    [Fact]
+    public async Task Pipeline_ordering_content_gate_runs_before_resilience()
+    {
+        var callOrder = new List<string>();
+        var blockingFilter = new OrderTrackingFilter(callOrder, blockInput: true);
+        var inner = new OrderTrackingClient(callOrder);
+
+        IChatClient pipeline = inner;
+        pipeline = new MeteringChatClient(pipeline, new AiMeteringOptions());
+        pipeline = new ResilientChatClient(pipeline, new AiResilienceOptions { MaxRetries = 2, RetryBaseDelay = TimeSpan.FromMilliseconds(1) });
+        pipeline = new ContentGateChatClient(pipeline, [blockingFilter]);
+
+        await Assert.ThrowsAsync<AiContentBlockedException>(
+            () => pipeline.GetResponseAsync([new ChatMessage(ChatRole.User, "blocked")]));
+
+        Assert.Contains("filter-input", callOrder);
+        Assert.DoesNotContain("provider-called", callOrder);
+    }
+
+    [Fact]
+    public async Task Resilience_retry_accumulates_metering_tokens()
+    {
+        var callCount = 0;
+        var failOnce = new FailOnceThenSucceedClient(() =>
+        {
+            callCount++;
+            if (callCount < 2)
+                throw new HttpRequestException("transient", null, System.Net.HttpStatusCode.ServiceUnavailable);
+            return new ChatResponse(new ChatMessage(ChatRole.Assistant, "ok"))
+            {
+                ModelId = "gpt-4",
+                Usage = new UsageDetails { InputTokenCount = 100, OutputTokenCount = 50 }
+            };
+        });
+
+        var meteringOpts = new AiMeteringOptions
+        {
+            ModelPricing = new() { ["gpt-4"] = new ModelPricing { PromptPer1K = 0.03m, CompletionPer1K = 0.06m } }
+        };
+
+        IChatClient pipeline = failOnce;
+        var metering = new MeteringChatClient(pipeline, meteringOpts);
+        pipeline = new ResilientChatClient(metering, new AiResilienceOptions
+        {
+            MaxRetries = 3,
+            RetryBaseDelay = TimeSpan.FromMilliseconds(5),
+            Timeout = TimeSpan.FromSeconds(10)
+        });
+
+        var response = await pipeline.GetResponseAsync([new ChatMessage(ChatRole.User, "hello")]);
+
+        Assert.Contains("ok", response.Text);
+        Assert.Equal(150, metering.PeriodTokensUsed);
+    }
+
+    [Fact]
+    public async Task Structured_output_with_content_filter_filters_input_before_schema_call()
+    {
+        var callLog = new List<string>();
+        var jsonClient = new JsonResponseClient("""{"name":"Test","age":42}""");
+        var filter = new LoggingContentFilter(callLog);
+
+        IChatClient pipeline = jsonClient;
+        pipeline = new ContentGateChatClient(pipeline, [filter]);
+
+        var result = await pipeline.CompleteAsync<PersonDto>(
+            [new ChatMessage(ChatRole.User, "give me a person")],
+            maxRetries: 1);
+
+        Assert.Equal("Test", result.Name);
+        Assert.Equal(42, result.Age);
+        Assert.Contains("input-filter", callLog);
+        Assert.Contains("output-filter", callLog);
+    }
+
+    [Fact]
+    public async Task Tool_registry_integrated_with_bridge_service()
+    {
+        var services = new ServiceCollection();
+        services.AddFuloraAi(ai => ai.AddChatClient("default", new SimpleMockChatClient("x", 0, 0)));
+
+        using var sp = services.BuildServiceProvider();
+        var toolRegistry = sp.GetRequiredService<IAiToolRegistry>();
+        var toolService = new ToolServiceImpl();
+        toolRegistry.Register(toolService);
+
+        var tool = toolRegistry.FindTool("Add");
+        Assert.NotNull(tool);
+
+        var result = await tool.InvokeAsync(new Microsoft.Extensions.AI.AIFunctionArguments(
+            new Dictionary<string, object?> { ["a"] = 3, ["b"] = 7 }));
+        var jsonResult = (System.Text.Json.JsonElement)result!;
+        Assert.Equal(10, jsonResult.GetInt32());
+    }
+
+    [Fact]
+    public async Task Payload_store_lifecycle_through_bridge_upload_fetch_expiry()
+    {
+        var services = new ServiceCollection();
+        services.AddFuloraAi(ai => ai.AddChatClient("default", new SimpleMockChatClient("x", 0, 0)));
+
+        using var sp = services.BuildServiceProvider();
+        var bridgeService = sp.GetRequiredService<IAiBridgeService>();
+        var payloadStore = sp.GetRequiredService<IAiPayloadStore>();
+
+        var imageData = new byte[64];
+        Random.Shared.NextBytes(imageData);
+        var base64 = Convert.ToBase64String(imageData);
+
+        var blobId = await bridgeService.UploadBlob(base64, "image/png", "test.png");
+
+        var directFetch = payloadStore.Fetch(blobId);
+        Assert.NotNull(directFetch);
+        Assert.Equal("image/png", directFetch.MimeType);
+        Assert.Equal(imageData, directFetch.Data);
+
+        var bridgeFetch = await bridgeService.FetchBlob(blobId);
+        Assert.Equal(base64, bridgeFetch);
+
+        payloadStore.Remove(blobId);
+        var afterRemove = await bridgeService.FetchBlob(blobId);
+        Assert.Null(afterRemove);
+    }
+
+    [Fact]
+    public async Task Multiple_content_filters_chain_in_order()
+    {
+        var callOrder = new List<string>();
+        var filter1 = new NamedFilter("F1", callOrder);
+        var filter2 = new NamedFilter("F2", callOrder);
+        var inner = new SimpleMockChatClient("response", 0, 0);
+
+        var pipeline = new ContentGateChatClient(inner, [filter1, filter2]);
+        await pipeline.GetResponseAsync([new ChatMessage(ChatRole.User, "hi")]);
+
+        Assert.Equal(["F1-input", "F2-input", "F1-output", "F2-output"], callOrder);
+    }
+
+    [Fact]
+    public async Task Content_filter_transform_propagates_to_provider()
+    {
+        string? receivedMessage = null;
+        var captureClient = new CaptureInputClient(msg => receivedMessage = msg);
+        var transformFilter = new TransformAllFilter("sanitized input");
+
+        var pipeline = new ContentGateChatClient(captureClient, [transformFilter]);
+        await pipeline.GetResponseAsync([new ChatMessage(ChatRole.User, "original input")]);
+
+        Assert.Equal("sanitized input", receivedMessage);
+    }
+
+    [Fact]
+    public async Task Metering_budget_blocks_second_call_in_pipeline()
+    {
+        var client = new SimpleMockChatClient("ok", 100, 50);
+        var meteringOpts = new AiMeteringOptions
+        {
+            PeriodBudgetTokens = 200,
+            BudgetPeriod = TimeSpan.FromHours(1)
+        };
+
+        var metering = new MeteringChatClient(client, meteringOpts);
+
+        await metering.GetResponseAsync([new ChatMessage(ChatRole.User, "first")]);
+        Assert.Equal(150, metering.PeriodTokensUsed);
+
+        await Assert.ThrowsAsync<AiBudgetExceededException>(
+            () => metering.GetResponseAsync([new ChatMessage(ChatRole.User, "second")]));
+    }
+
+    [Fact]
+    public void Payload_router_round_trips_through_store()
+    {
+        using var store = new InMemoryAiPayloadStore();
+        var router = new AiPayloadRouter(store, thresholdBytes: 50);
+
+        var smallPayload = new AiMediaPayload { Data = new byte[30], MimeType = "text/plain" };
+        var smallRef = router.Route(smallPayload);
+        Assert.True(smallRef.IsInline);
+        Assert.StartsWith("data:text/plain;base64,", smallRef.Value);
+
+        var largeData = new byte[100];
+        Random.Shared.NextBytes(largeData);
+        var largePayload = new AiMediaPayload { Data = largeData, MimeType = "image/jpeg" };
+        var largeRef = router.Route(largePayload);
+        Assert.False(largeRef.IsInline);
+        Assert.NotNull(largeRef.BlobId);
+
+        var retrieved = store.Fetch(largeRef.BlobId!);
+        Assert.NotNull(retrieved);
+        Assert.Equal(largeData, retrieved.Data);
+        Assert.Equal("image/jpeg", retrieved.MimeType);
+    }
+
+    [Fact]
+    public async Task BridgeService_complete_with_provider_selection()
+    {
+        var services = new ServiceCollection();
+        services.AddFuloraAi(ai =>
+        {
+            ai.AddChatClient("fast", new SimpleMockChatClient("fast response", 5, 3));
+            ai.AddChatClient("smart", new SimpleMockChatClient("smart response", 50, 30));
+        });
+
+        using var sp = services.BuildServiceProvider();
+        var bridge = sp.GetRequiredService<IAiBridgeService>();
+
+        var fastResult = await bridge.Complete(new AiChatRequest { Message = "test", Provider = "fast" });
+        Assert.Equal("fast response", fastResult.Text);
+
+        var smartResult = await bridge.Complete(new AiChatRequest { Message = "test", Provider = "smart" });
+        Assert.Equal("smart response", smartResult.Text);
+    }
+
+    public sealed record PersonDto
+    {
+        public string Name { get; init; } = "";
+        public int Age { get; init; }
+    }
+
+    [AiTool]
+    public interface ICalcToolService
+    {
+        int Add(int a, int b);
+    }
+
+    private sealed class ToolServiceImpl : ICalcToolService
+    {
+        public int Add(int a, int b) => a + b;
+    }
+
+    private sealed class OrderTrackingFilter(List<string> order, bool blockInput = false) : IAiContentFilter
+    {
+        public Task<ContentFilterResult> FilterInputAsync(string content, CancellationToken ct)
+        {
+            order.Add("filter-input");
+            return Task.FromResult(blockInput
+                ? ContentFilterResult.Block("blocked by test")
+                : ContentFilterResult.Allow);
+        }
+
+        public Task<ContentFilterResult> FilterOutputAsync(string content, CancellationToken ct)
+        {
+            order.Add("filter-output");
+            return Task.FromResult(ContentFilterResult.Allow);
+        }
+    }
+
+    private sealed class OrderTrackingClient(List<string> order) : IChatClient
+    {
+        public void Dispose() { }
+        public Task<ChatResponse> GetResponseAsync(IEnumerable<ChatMessage> m, ChatOptions? o = null, CancellationToken ct = default)
+        {
+            order.Add("provider-called");
+            return Task.FromResult(new ChatResponse(new ChatMessage(ChatRole.Assistant, "ok")));
+        }
+        public IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponseAsync(IEnumerable<ChatMessage> m, ChatOptions? o = null, CancellationToken ct = default) => AsyncEnumerable.Empty<ChatResponseUpdate>();
+        public object? GetService(Type t, object? k = null) => null;
+    }
+
+    private sealed class FailOnceThenSucceedClient(Func<ChatResponse> handler) : IChatClient
+    {
+        public void Dispose() { }
+        public Task<ChatResponse> GetResponseAsync(IEnumerable<ChatMessage> m, ChatOptions? o = null, CancellationToken ct = default)
+            => Task.FromResult(handler());
+        public IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponseAsync(IEnumerable<ChatMessage> m, ChatOptions? o = null, CancellationToken ct = default)
+            => AsyncEnumerable.Empty<ChatResponseUpdate>();
+        public object? GetService(Type t, object? k = null) => null;
+    }
+
+    private sealed class JsonResponseClient(string json) : IChatClient
+    {
+        public void Dispose() { }
+        public Task<ChatResponse> GetResponseAsync(IEnumerable<ChatMessage> m, ChatOptions? o = null, CancellationToken ct = default)
+            => Task.FromResult(new ChatResponse(new ChatMessage(ChatRole.Assistant, json)));
+        public IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponseAsync(IEnumerable<ChatMessage> m, ChatOptions? o = null, CancellationToken ct = default)
+            => AsyncEnumerable.Empty<ChatResponseUpdate>();
+        public object? GetService(Type t, object? k = null) => null;
+    }
+
+    private sealed class NamedFilter(string name, List<string> order) : IAiContentFilter
+    {
+        public Task<ContentFilterResult> FilterInputAsync(string content, CancellationToken ct)
+        {
+            order.Add($"{name}-input");
+            return Task.FromResult(ContentFilterResult.Allow);
+        }
+        public Task<ContentFilterResult> FilterOutputAsync(string content, CancellationToken ct)
+        {
+            order.Add($"{name}-output");
+            return Task.FromResult(ContentFilterResult.Allow);
+        }
+    }
+
+    private sealed class TransformAllFilter(string replacement) : IAiContentFilter
+    {
+        public Task<ContentFilterResult> FilterInputAsync(string content, CancellationToken ct)
+            => Task.FromResult(ContentFilterResult.Transform(replacement));
+        public Task<ContentFilterResult> FilterOutputAsync(string content, CancellationToken ct)
+            => Task.FromResult(ContentFilterResult.Allow);
+    }
+
+    private sealed class CaptureInputClient(Action<string> capture) : IChatClient
+    {
+        public void Dispose() { }
+        public Task<ChatResponse> GetResponseAsync(IEnumerable<ChatMessage> messages, ChatOptions? o = null, CancellationToken ct = default)
+        {
+            var userMsg = messages.FirstOrDefault(m => m.Role == ChatRole.User)?.Text;
+            if (userMsg is not null) capture(userMsg);
+            return Task.FromResult(new ChatResponse(new ChatMessage(ChatRole.Assistant, "echo")));
+        }
+        public IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponseAsync(IEnumerable<ChatMessage> m, ChatOptions? o = null, CancellationToken ct = default)
+            => AsyncEnumerable.Empty<ChatResponseUpdate>();
+        public object? GetService(Type t, object? k = null) => null;
+    }
+
     private sealed class LoggingMockChatClient(List<string> log) : IChatClient
     {
         public void Dispose() { }
