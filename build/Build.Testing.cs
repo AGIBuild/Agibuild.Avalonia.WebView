@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.Json;
-using System.Xml.Linq;
 using Nuke.Common;
 using Nuke.Common.IO;
 using Nuke.Common.Tools.DotNet;
@@ -59,27 +57,9 @@ partial class BuildTask
                 workingDirectory: RootDirectory);
 
             var mergedCoberturaFile = CoverageReportDirectory / "Cobertura.xml";
-            var coberturaPath = (string)(File.Exists(mergedCoberturaFile) ? mergedCoberturaFile : coverageFile);
-            var doc = XDocument.Load(coberturaPath);
-            var lineRateAttr = doc.Root?.Attribute("line-rate")?.Value;
-            var branchRateAttr = doc.Root?.Attribute("branch-rate")?.Value;
-
-            if (lineRateAttr is null || !double.TryParse(lineRateAttr, System.Globalization.NumberStyles.Float,
-                    System.Globalization.CultureInfo.InvariantCulture, out var lineRate))
-            {
-                Assert.Fail("Unable to parse line-rate from coverage report.");
-                return;
-            }
-
-            if (branchRateAttr is null || !double.TryParse(branchRateAttr, System.Globalization.NumberStyles.Float,
-                    System.Globalization.CultureInfo.InvariantCulture, out var branchRate))
-            {
-                Assert.Fail("Unable to parse branch-rate from coverage report.");
-                return;
-            }
-
-            var lineCoveragePct = lineRate * 100;
-            var branchCoveragePct = branchRate * 100;
+            var coberturaPath = File.Exists(mergedCoberturaFile) ? mergedCoberturaFile : coverageFile;
+            var lineCoveragePct = ReadCoberturaLineCoveragePercent(coberturaPath);
+            var branchCoveragePct = ReadCoberturaBranchCoveragePercent(coberturaPath);
             Serilog.Log.Information("Line coverage: {Coverage:F2}% (threshold: {Threshold}%)", lineCoveragePct, CoverageThreshold);
             Serilog.Log.Information("Branch coverage: {Coverage:F2}% (threshold: {Threshold}%)", branchCoveragePct, BranchCoverageThreshold);
             Serilog.Log.Information("HTML report: {Path}", CoverageReportDirectory / "index.html");
@@ -243,9 +223,7 @@ partial class BuildTask
                 lanes
             };
 
-            File.WriteAllText(
-                AutomationLaneReportFile,
-                JsonSerializer.Serialize(reportPayload, new JsonSerializerOptions { WriteIndented = true }));
+            WriteJsonReport(AutomationLaneReportFile, reportPayload);
             Serilog.Log.Information("Automation lane report written to {Path}", AutomationLaneReportFile);
 
             if (failures.Count > 0)

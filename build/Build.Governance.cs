@@ -146,9 +146,7 @@ partial class BuildTask
                 failures
             };
 
-            File.WriteAllText(
-                DependencyGovernanceReportFile,
-                JsonSerializer.Serialize(reportPayload, new JsonSerializerOptions { WriteIndented = true }));
+            WriteJsonReport(DependencyGovernanceReportFile, reportPayload);
             Serilog.Log.Information("Dependency governance report written to {Path}", DependencyGovernanceReportFile);
 
             if (failures.Count > 0)
@@ -229,9 +227,7 @@ partial class BuildTask
                 failures
             };
 
-            File.WriteAllText(
-                TypeScriptGovernanceReportFile,
-                JsonSerializer.Serialize(reportPayload, new JsonSerializerOptions { WriteIndented = true }));
+            WriteJsonReport(TypeScriptGovernanceReportFile, reportPayload);
             Serilog.Log.Information("TypeScript governance report written to {Path}", TypeScriptGovernanceReportFile);
 
             if (failures.Count > 0)
@@ -306,7 +302,7 @@ partial class BuildTask
             var lane = scenario.TryGetProperty("lane", out var laneNode) ? laneNode.GetString() : null;
             var file = scenario.TryGetProperty("file", out var fileNode) ? fileNode.GetString() : null;
             var testMethod = scenario.TryGetProperty("testMethod", out var methodNode) ? methodNode.GetString() : null;
-            var ciContext = scenario.TryGetProperty("ciContext", out var contextNode) ? contextNode.GetString() : "Ci";
+            var ciContext = scenario.TryGetProperty("ciContext", out var contextNode) ? contextNode.GetString() : LaneContextCi;
 
             if (string.IsNullOrWhiteSpace(id) || string.IsNullOrWhiteSpace(lane))
             {
@@ -314,8 +310,8 @@ partial class BuildTask
                 continue;
             }
 
-            var inScope = string.Equals(ciContext, "Ci", StringComparison.Ordinal)
-                          || (includeCiPublishContext && string.Equals(ciContext, "CiPublish", StringComparison.Ordinal));
+            var inScope = string.Equals(ciContext, LaneContextCi, StringComparison.Ordinal)
+                          || (includeCiPublishContext && string.Equals(ciContext, LaneContextCiPublish, StringComparison.Ordinal));
             if (!inScope)
                 continue;
 
@@ -384,7 +380,7 @@ partial class BuildTask
             schemaVersion = 2,
             provenance = new
             {
-                laneContext = includeCiPublishContext ? "CiPublish" : "Ci",
+                laneContext = includeCiPublishContext ? LaneContextCiPublish : LaneContextCi,
                 producerTarget = includeCiPublishContext
                     ? "RuntimeCriticalPathExecutionGovernanceCiPublish"
                     : "RuntimeCriticalPathExecutionGovernanceCi",
@@ -399,9 +395,7 @@ partial class BuildTask
             failures
         };
 
-        File.WriteAllText(
-            RuntimeCriticalPathGovernanceReportFile,
-            JsonSerializer.Serialize(reportPayload, new JsonSerializerOptions { WriteIndented = true }));
+        WriteJsonReport(RuntimeCriticalPathGovernanceReportFile, reportPayload);
         Serilog.Log.Information("Runtime critical-path governance report written to {Path}", RuntimeCriticalPathGovernanceReportFile);
 
         if (failures.Count > 0)
@@ -445,11 +439,10 @@ partial class BuildTask
                     continue;
                 }
 
-                AbsolutePath? tempDir = null;
                 try
                 {
-                    tempDir = (AbsolutePath)Path.GetFullPath(Path.Combine(Path.GetTempPath(), $"bridge-{pm}-smoke-{Guid.NewGuid():N}"));
-                    Directory.CreateDirectory(tempDir);
+                    using var tempDirScope = TempDirectoryScope.Create($"bridge-{pm}-smoke");
+                    var tempDir = (AbsolutePath)tempDirScope.Path;
 
                     var packageJson = $$"""
                         {
@@ -487,24 +480,15 @@ partial class BuildTask
                     failures.Add($"{pm} consume smoke failed: {ex.Message}");
                     checks.Add(new { manager = pm, phase = "consume-smoke", passed = false, error = ex.Message });
                 }
-                finally
-                {
-                    if (tempDir is not null && Directory.Exists(tempDir))
-                    {
-                        try { Directory.Delete(tempDir, recursive: true); }
-                        catch { /* best-effort cleanup */ }
-                    }
-                }
             }
 
             // 3. Node LTS import smoke (write temp file to avoid argument escaping issues)
             if (File.Exists(distIndex))
             {
-                AbsolutePath? ltsDir = null;
                 try
                 {
-                    ltsDir = (AbsolutePath)Path.GetFullPath(Path.Combine(Path.GetTempPath(), $"bridge-lts-smoke-{Guid.NewGuid():N}"));
-                    Directory.CreateDirectory(ltsDir);
+                    using var ltsDirScope = TempDirectoryScope.Create("bridge-lts-smoke");
+                    var ltsDir = (AbsolutePath)ltsDirScope.Path;
 
                     var fileUrl = new Uri(distIndex).AbsoluteUri;
                     var ltsScript = $"""
@@ -528,14 +512,6 @@ partial class BuildTask
                     failures.Add($"Node LTS import check failed: {ex.Message}");
                     checks.Add(new { phase = "node-lts-import", nodeVersion, passed = false, error = ex.Message });
                 }
-                finally
-                {
-                    if (ltsDir is not null && Directory.Exists(ltsDir))
-                    {
-                        try { Directory.Delete(ltsDir, recursive: true); }
-                        catch { /* best-effort cleanup */ }
-                    }
-                }
             }
             else
             {
@@ -548,7 +524,7 @@ partial class BuildTask
                 schemaVersion = 2,
                 provenance = new
                 {
-                    laneContext = "CiPublish",
+                    laneContext = LaneContextCiPublish,
                     producerTarget = "BridgeDistributionGovernance",
                     timestamp = DateTime.UtcNow.ToString("o")
                 },
@@ -558,9 +534,7 @@ partial class BuildTask
                 failures
             };
 
-            File.WriteAllText(
-                BridgeDistributionGovernanceReportFile,
-                JsonSerializer.Serialize(reportPayload, new JsonSerializerOptions { WriteIndented = true }));
+            WriteJsonReport(BridgeDistributionGovernanceReportFile, reportPayload);
             Serilog.Log.Information("Bridge distribution governance report written to {Path}", BridgeDistributionGovernanceReportFile);
 
             if (failures.Count > 0)
@@ -580,7 +554,7 @@ partial class BuildTask
 
             var canonicalPackageIds = new[]
             {
-                "Agibuild.Fulora.Avalonia",
+                PrimaryHostPackageId,
                 "Agibuild.Fulora.Core",
                 "Agibuild.Fulora.Runtime",
                 "Agibuild.Fulora.Adapters.Abstractions",
@@ -631,7 +605,7 @@ partial class BuildTask
             string? packedVersion = null;
             try
             {
-                packedVersion = ResolvePackedAgibuildVersion("Agibuild.Fulora.Avalonia");
+                packedVersion = ResolvePackedAgibuildVersion(PrimaryHostPackageId);
             }
             catch (Exception ex)
             {
@@ -646,10 +620,9 @@ partial class BuildTask
             var isStableRelease = packedVersion is not null && !packedVersion.Contains('-', StringComparison.Ordinal);
             if (isStableRelease)
             {
-                const string primaryHostPackageId = "Agibuild.Fulora.Avalonia";
-                var mainPackagePrefix = $"{primaryHostPackageId}.";
+                var mainPackagePrefix = $"{PrimaryHostPackageId}.";
                 var mainPackage = PackageOutputDirectory
-                    .GlobFiles($"{primaryHostPackageId}.*.nupkg")
+                    .GlobFiles($"{PrimaryHostPackageId}.*.nupkg")
                     .Where(path => !path.Name.EndsWith(".symbols.nupkg", StringComparison.OrdinalIgnoreCase))
                     .FirstOrDefault(path =>
                         path.Name.StartsWith(mainPackagePrefix, StringComparison.OrdinalIgnoreCase)
@@ -701,13 +674,13 @@ partial class BuildTask
                                 actual: id ?? "<null>");
                         }
 
-                        if (!string.Equals(id, primaryHostPackageId, StringComparison.Ordinal))
+                        if (!string.Equals(id, PrimaryHostPackageId, StringComparison.Ordinal))
                         {
                             AddFailure(
                                 category: "package-metadata",
                                 invariantId: StablePublishReadinessInvariantId,
                                 sourceArtifact: mainPackage.Name,
-                                expected: $"primary host package id = {primaryHostPackageId}",
+                                expected: $"primary host package id = {PrimaryHostPackageId}",
                                 actual: id ?? "<null>");
                         }
 
@@ -753,7 +726,7 @@ partial class BuildTask
                 schemaVersion = 1,
                 provenance = new
                 {
-                    laneContext = "CiPublish",
+                    laneContext = LaneContextCiPublish,
                     producerTarget = "DistributionReadinessGovernance",
                     timestamp = evaluatedAtUtc
                 },
@@ -774,9 +747,7 @@ partial class BuildTask
                 }).ToArray()
             };
 
-            File.WriteAllText(
-                DistributionReadinessGovernanceReportFile,
-                JsonSerializer.Serialize(reportPayload, new JsonSerializerOptions { WriteIndented = true }));
+            WriteJsonReport(DistributionReadinessGovernanceReportFile, reportPayload);
             Serilog.Log.Information("Distribution readiness governance report written to {Path}", DistributionReadinessGovernanceReportFile);
 
             if (failures.Count > 0)
@@ -791,17 +762,17 @@ partial class BuildTask
         .Description("Evaluates adoption-readiness signals in Ci lane.")
         .DependsOn(AutomationLaneReport, RuntimeCriticalPathExecutionGovernanceCi)
         .Executes(() => EvaluateAdoptionReadiness(
-            laneContext: "Ci",
+            laneContext: LaneContextCi,
             producerTarget: "AdoptionReadinessGovernanceCi",
-            expectedRuntimeLaneContext: "Ci"));
+            expectedRuntimeLaneContext: LaneContextCi));
 
     Target AdoptionReadinessGovernanceCiPublish => _ => _
         .Description("Evaluates adoption-readiness signals in CiPublish lane.")
         .DependsOn(AutomationLaneReport, RuntimeCriticalPathExecutionGovernanceCiPublish)
         .Executes(() => EvaluateAdoptionReadiness(
-            laneContext: "CiPublish",
+            laneContext: LaneContextCiPublish,
             producerTarget: "AdoptionReadinessGovernanceCiPublish",
-            expectedRuntimeLaneContext: "CiPublish"));
+            expectedRuntimeLaneContext: LaneContextCiPublish));
 
     void EvaluateAdoptionReadiness(string laneContext, string producerTarget, string expectedRuntimeLaneContext)
     {
@@ -963,9 +934,7 @@ partial class BuildTask
             }).ToArray()
         };
 
-        File.WriteAllText(
-            AdoptionReadinessGovernanceReportFile,
-            JsonSerializer.Serialize(reportPayload, new JsonSerializerOptions { WriteIndented = true }));
+        WriteJsonReport(AdoptionReadinessGovernanceReportFile, reportPayload);
         Serilog.Log.Information("Adoption readiness governance report written to {Path}", AdoptionReadinessGovernanceReportFile);
 
         if (blockingFindings.Count > 0)
@@ -973,44 +942,6 @@ partial class BuildTask
             var lines = blockingFindings.Select(f =>
                 $"- [{f.Category}] [{f.InvariantId}] {f.SourceArtifact}: expected {f.Expected}, actual {f.Actual}");
             Assert.Fail("Adoption readiness governance failed:\n" + string.Join('\n', lines));
-        }
-    }
-
-    static bool IsToolAvailable(string toolName)
-    {
-        try
-        {
-            if (OperatingSystem.IsWindows())
-            {
-                RunProcessCaptureAllChecked(
-                    "cmd.exe",
-                    $"/d /s /c \"{toolName} --version\"",
-                    timeoutMs: 5_000);
-            }
-            else
-            {
-                RunProcessCaptureAllChecked(toolName, "--version", timeoutMs: 5_000);
-            }
-
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
-    static void RunPmInstall(string pm, string workingDirectory)
-    {
-        if (OperatingSystem.IsWindows())
-        {
-            RunProcessCaptureAllChecked("cmd.exe", $"/d /s /c \"{pm} install\"",
-                workingDirectory: workingDirectory, timeoutMs: 120_000);
-        }
-        else
-        {
-            RunProcessCaptureAllChecked(pm, "install",
-                workingDirectory: workingDirectory, timeoutMs: 120_000);
         }
     }
 
@@ -1026,8 +957,8 @@ partial class BuildTask
             const string buildArtifactPath = "build/Build.cs";
 
             var buildSource = File.ReadAllText(RootDirectory / "build" / "Build.cs");
-            var ciDependsOnBlock = ExtractDependsOnBlock(buildSource, "Ci");
-            var ciPublishDependsOnBlock = ExtractDependsOnBlock(buildSource, "CiPublish");
+            var ciDependsOnBlock = ExtractDependsOnBlock(buildSource, LaneContextCi);
+            var ciPublishDependsOnBlock = ExtractDependsOnBlock(buildSource, LaneContextCiPublish);
 
             foreach (var rule in CloseoutCriticalTransitionGateParityRules)
             {
@@ -1035,7 +966,7 @@ partial class BuildTask
                 {
                     diagnostics.Add(new TransitionGateDiagnosticEntry(
                         TransitionGateParityInvariantId,
-                        Lane: "Ci",
+                        Lane: LaneContextCi,
                         ArtifactPath: buildArtifactPath,
                         Expected: rule.CiDependency,
                         Actual: "missing",
@@ -1047,7 +978,7 @@ partial class BuildTask
                 {
                     diagnostics.Add(new TransitionGateDiagnosticEntry(
                         TransitionGateParityInvariantId,
-                        Lane: "CiPublish",
+                        Lane: LaneContextCiPublish,
                         ArtifactPath: buildArtifactPath,
                         Expected: rule.CiPublishDependency,
                         Actual: "missing",
@@ -1064,7 +995,7 @@ partial class BuildTask
             {
                 diagnostics.Add(new TransitionGateDiagnosticEntry(
                     TransitionLaneProvenanceInvariantId,
-                    Lane: "CiPublish",
+                    Lane: LaneContextCiPublish,
                     ArtifactPath: closeoutArtifactPath,
                     Expected: "closeout snapshot exists",
                     Actual: "file missing",
@@ -1082,9 +1013,9 @@ partial class BuildTask
                 ValidateTransitionField(
                     diagnostics,
                     failures,
-                    lane: "CiPublish",
+                    lane: LaneContextCiPublish,
                     artifactPath: closeoutArtifactPath,
-                    expected: "CiPublish",
+                    expected: LaneContextCiPublish,
                     actual: provenance.GetProperty("laneContext").GetString(),
                     group: "transition-continuity",
                     fieldName: "provenance.laneContext");
@@ -1092,7 +1023,7 @@ partial class BuildTask
                 ValidateTransitionField(
                     diagnostics,
                     failures,
-                    lane: "CiPublish",
+                    lane: LaneContextCiPublish,
                     artifactPath: closeoutArtifactPath,
                     expected: "ReleaseCloseoutSnapshot",
                     actual: provenance.GetProperty("producerTarget").GetString(),
@@ -1102,7 +1033,7 @@ partial class BuildTask
                 ValidateTransitionField(
                     diagnostics,
                     failures,
-                    lane: "CiPublish",
+                    lane: LaneContextCiPublish,
                     artifactPath: closeoutArtifactPath,
                     expected: roadmapCompletedPhase,
                     actual: transition.GetProperty("completedPhase").GetString(),
@@ -1112,7 +1043,7 @@ partial class BuildTask
                 ValidateTransitionField(
                     diagnostics,
                     failures,
-                    lane: "CiPublish",
+                    lane: LaneContextCiPublish,
                     artifactPath: closeoutArtifactPath,
                     expected: roadmapActivePhase,
                     actual: transition.GetProperty("activePhase").GetString(),
@@ -1122,9 +1053,9 @@ partial class BuildTask
                 ValidateTransitionField(
                     diagnostics,
                     failures,
-                    lane: "CiPublish",
+                    lane: LaneContextCiPublish,
                     artifactPath: closeoutArtifactPath,
-                    expected: "CiPublish",
+                    expected: LaneContextCiPublish,
                     actual: continuity.GetProperty("laneContext").GetString(),
                     group: "transition-continuity",
                     fieldName: "transitionContinuity.laneContext");
@@ -1132,7 +1063,7 @@ partial class BuildTask
                 ValidateTransitionField(
                     diagnostics,
                     failures,
-                    lane: "CiPublish",
+                    lane: LaneContextCiPublish,
                     artifactPath: closeoutArtifactPath,
                     expected: "ReleaseCloseoutSnapshot",
                     actual: continuity.GetProperty("producerTarget").GetString(),
@@ -1142,7 +1073,7 @@ partial class BuildTask
                 ValidateTransitionField(
                     diagnostics,
                     failures,
-                    lane: "CiPublish",
+                    lane: LaneContextCiPublish,
                     artifactPath: closeoutArtifactPath,
                     expected: roadmapCompletedPhase,
                     actual: continuity.GetProperty("completedPhase").GetString(),
@@ -1152,7 +1083,7 @@ partial class BuildTask
                 ValidateTransitionField(
                     diagnostics,
                     failures,
-                    lane: "CiPublish",
+                    lane: LaneContextCiPublish,
                     artifactPath: closeoutArtifactPath,
                     expected: roadmapActivePhase,
                     actual: continuity.GetProperty("activePhase").GetString(),
@@ -1183,9 +1114,7 @@ partial class BuildTask
                 failures
             };
 
-            File.WriteAllText(
-                TransitionGateGovernanceReportFile,
-                JsonSerializer.Serialize(reportPayload, new JsonSerializerOptions { WriteIndented = true }));
+            WriteJsonReport(TransitionGateGovernanceReportFile, reportPayload);
             Serilog.Log.Information("Transition gate governance report written to {Path}", TransitionGateGovernanceReportFile);
 
             if (failures.Count > 0)
@@ -1244,8 +1173,8 @@ partial class BuildTask
         .DependsOn(Coverage, AutomationLaneReport, OpenSpecStrictGovernance)
         .Executes(() =>
         {
-            const string completedPhase = "phase8-bridge-v2-parity";
-            const string activePhase = "phase9-ga-release-readiness";
+            const string completedPhase = "phase12-enterprise-advanced-scenarios";
+            const string activePhase = "post-roadmap-maintenance";
             const string transitionInvariantId = "GOV-022";
             var roadmapPath = RootDirectory / "openspec" / "ROADMAP.md";
             var (roadmapCompletedPhase, roadmapActivePhase) = ReadRoadmapTransitionState(File.ReadAllText(roadmapPath));
@@ -1284,14 +1213,10 @@ partial class BuildTask
             var archiveDirectory = RootDirectory / "openspec" / "changes" / "archive";
             var completedPhaseCloseoutChangeIds = new[]
             {
-                "bridge-diagnostics-safety-net",
-                "bridge-cancellation-token-support",
-                "bridge-async-enumerable-streaming",
-                "bridge-generics-overloads",
-                "phase9-functional-triple-track",
-                "deep-link-native-registration",
-                "platform-feature-parity",
-                "phase7-closeout-phase8-reconciliation"
+                "sentry-crash-reporting",
+                "shared-state-management",
+                "enterprise-auth-patterns",
+                "plugin-quality-compatibility"
             };
             var closeoutArchives = Directory.Exists(archiveDirectory)
                 ? completedPhaseCloseoutChangeIds
@@ -1308,7 +1233,7 @@ partial class BuildTask
                 schemaVersion = 2,
                 provenance = new
                 {
-                    laneContext = "CiPublish",
+                    laneContext = LaneContextCiPublish,
                     producerTarget = "ReleaseCloseoutSnapshot",
                     timestamp = DateTime.UtcNow.ToString("o")
                 },
@@ -1321,7 +1246,7 @@ partial class BuildTask
                 transitionContinuity = new
                 {
                     invariantId = TransitionLaneProvenanceInvariantId,
-                    laneContext = "CiPublish",
+                    laneContext = LaneContextCiPublish,
                     producerTarget = "ReleaseCloseoutSnapshot",
                     completedPhase,
                     activePhase
@@ -1375,9 +1300,7 @@ partial class BuildTask
                 closeoutArchives
             };
 
-            File.WriteAllText(
-                CloseoutSnapshotFile,
-                JsonSerializer.Serialize(snapshotPayload, new JsonSerializerOptions { WriteIndented = true }));
+            WriteJsonReport(CloseoutSnapshotFile, snapshotPayload);
             Serilog.Log.Information("CI evidence snapshot (v2) written to {Path}", CloseoutSnapshotFile);
         });
 
@@ -1669,7 +1592,7 @@ partial class BuildTask
             string? packedVersion = null;
             try
             {
-                packedVersion = ResolvePackedAgibuildVersion("Agibuild.Fulora.Avalonia");
+                packedVersion = ResolvePackedAgibuildVersion(PrimaryHostPackageId);
             }
             catch (Exception ex)
             {
@@ -1690,7 +1613,7 @@ partial class BuildTask
                 ["state"] = decisionState,
                 ["isStableRelease"] = isStableRelease,
                 ["version"] = packedVersion ?? "unknown",
-                ["laneContext"] = "CiPublish",
+                ["laneContext"] = LaneContextCiPublish,
                 ["producerTarget"] = "ReleaseOrchestrationGovernance",
                 ["evaluatedAtUtc"] = evaluatedAtUtc,
                 ["blockingReasonCount"] = blockingReasons.Count
@@ -1729,7 +1652,7 @@ partial class BuildTask
                 schemaVersion = 1,
                 provenance = new
                 {
-                    laneContext = "CiPublish",
+                    laneContext = LaneContextCiPublish,
                     producerTarget = "ReleaseOrchestrationGovernance",
                     timestamp = evaluatedAtUtc
                 },
@@ -1763,9 +1686,7 @@ partial class BuildTask
                 }).ToArray()
             };
 
-            File.WriteAllText(
-                ReleaseOrchestrationDecisionReportFile,
-                JsonSerializer.Serialize(reportPayload, new JsonSerializerOptions { WriteIndented = true }));
+            WriteJsonReport(ReleaseOrchestrationDecisionReportFile, reportPayload);
             Serilog.Log.Information("Release orchestration decision report written to {Path}", ReleaseOrchestrationDecisionReportFile);
 
             if (string.Equals(decisionState, "blocked", StringComparison.Ordinal))

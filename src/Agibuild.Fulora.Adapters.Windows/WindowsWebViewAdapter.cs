@@ -294,17 +294,7 @@ internal sealed class WindowsWebViewAdapter : IWebViewAdapter, INativeWebViewHan
 
             // Inject WebMessage channel routing script
             var channelId = _host?.ChannelId ?? Guid.Empty;
-            var bridgeScript = $$"""
-                window.__agibuildWebView = window.__agibuildWebView || {};
-                window.__agibuildWebView.channelId = '{{channelId}}';
-                window.__agibuildWebView.postMessage = function(body) {
-                    window.chrome.webview.postMessage(JSON.stringify({
-                        channelId: '{{channelId}}',
-                        protocolVersion: 1,
-                        body: body
-                    }));
-                };
-                """;
+            var bridgeScript = WebViewBridgeScriptFactory.CreateWindowsBridgeBootstrapScript(channelId);
             await _webView.AddScriptToExecuteOnDocumentCreatedAsync(bridgeScript).ConfigureAwait(true);
 
             // Replay queued operations

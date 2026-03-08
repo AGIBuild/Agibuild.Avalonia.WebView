@@ -564,38 +564,11 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         var requestUri = info.RequestUri.AbsoluteUri != AboutBlank.AbsoluteUri ? info.RequestUri : AboutBlank;
 
         // Redirects / subsequent navigation actions within the same correlation id stay within one NavigationId.
-        if (_activeNavigation is not null && _activeNavigation.CorrelationId == info.CorrelationId)
-        {
-            if (_activeNavigation.RequestUri.AbsoluteUri == requestUri.AbsoluteUri)
-            {
-                _logger.LogDebug("OnNativeNavigationStarting: same-URL redirect, id={NavigationId}", _activeNavigation.NavigationId);
-                return new NativeNavigationStartingDecision(IsAllowed: true, NavigationId: _activeNavigation.NavigationId);
-            }
-
-            _activeNavigation.UpdateRequestUri(requestUri);
-            SetSourceInternal(requestUri);
-
-            var redirectArgs = new NavigationStartingEventArgs(_activeNavigation.NavigationId, requestUri);
-            _logger.LogDebug("Event NavigationStarted (redirect): id={NavigationId}, uri={Uri}", _activeNavigation.NavigationId, requestUri);
-            NavigationStarted?.Invoke(this, redirectArgs);
-
-            if (redirectArgs.Cancel)
-            {
-                _logger.LogDebug("OnNativeNavigationStarting: redirect canceled by handler, id={NavigationId}", _activeNavigation.NavigationId);
-                var activeNavigationId = _activeNavigation.NavigationId;
-                CompleteActiveNavigation(NavigationCompletedStatus.Canceled, error: null);
-                return new NativeNavigationStartingDecision(IsAllowed: false, NavigationId: activeNavigationId);
-            }
-
-            return new NativeNavigationStartingDecision(IsAllowed: true, NavigationId: _activeNavigation.NavigationId);
-        }
+        if (TryHandleNavigationRedirect(info, requestUri, out var redirectDecision))
+            return redirectDecision;
 
         // New native navigation supersedes any active navigation.
-        if (_activeNavigation is not null)
-        {
-            _logger.LogDebug("OnNativeNavigationStarting: superseding active navigation id={NavigationId}", _activeNavigation.NavigationId);
-            CompleteActiveNavigation(NavigationCompletedStatus.Superseded, error: null);
-        }
+        HandleNavigationSupersession();
 
         SetSourceInternal(requestUri);
 
@@ -615,6 +588,53 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
 
         _logger.LogDebug("OnNativeNavigationStarting: allowed, id={NavigationId}", navigationId);
         return new NativeNavigationStartingDecision(IsAllowed: true, NavigationId: navigationId);
+    }
+
+    private bool TryHandleNavigationRedirect(
+        NativeNavigationStartingInfo info,
+        Uri requestUri,
+        out NativeNavigationStartingDecision decision)
+    {
+        if (_activeNavigation is null || _activeNavigation.CorrelationId != info.CorrelationId)
+        {
+            decision = default;
+            return false;
+        }
+
+        if (_activeNavigation.RequestUri.AbsoluteUri == requestUri.AbsoluteUri)
+        {
+            _logger.LogDebug("OnNativeNavigationStarting: same-URL redirect, id={NavigationId}", _activeNavigation.NavigationId);
+            decision = new NativeNavigationStartingDecision(IsAllowed: true, NavigationId: _activeNavigation.NavigationId);
+            return true;
+        }
+
+        _activeNavigation.UpdateRequestUri(requestUri);
+        SetSourceInternal(requestUri);
+
+        var redirectArgs = new NavigationStartingEventArgs(_activeNavigation.NavigationId, requestUri);
+        _logger.LogDebug("Event NavigationStarted (redirect): id={NavigationId}, uri={Uri}", _activeNavigation.NavigationId, requestUri);
+        NavigationStarted?.Invoke(this, redirectArgs);
+
+        if (redirectArgs.Cancel)
+        {
+            _logger.LogDebug("OnNativeNavigationStarting: redirect canceled by handler, id={NavigationId}", _activeNavigation.NavigationId);
+            var activeNavigationId = _activeNavigation.NavigationId;
+            CompleteActiveNavigation(NavigationCompletedStatus.Canceled, error: null);
+            decision = new NativeNavigationStartingDecision(IsAllowed: false, NavigationId: activeNavigationId);
+            return true;
+        }
+
+        decision = new NativeNavigationStartingDecision(IsAllowed: true, NavigationId: _activeNavigation.NavigationId);
+        return true;
+    }
+
+    private void HandleNavigationSupersession()
+    {
+        if (_activeNavigation is null)
+            return;
+
+        _logger.LogDebug("OnNativeNavigationStarting: superseding active navigation id={NavigationId}", _activeNavigation.NavigationId);
+        CompleteActiveNavigation(NavigationCompletedStatus.Superseded, error: null);
     }
 
     /// <inheritdoc />
@@ -1198,6 +1218,13 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
             return operation.Task;
         }
 
+        await AwaitNavigationCompletion(navigationId, adapterInvoke).ConfigureAwait(false);
+
+        return operation.Task;
+    }
+
+    private async Task AwaitNavigationCompletion(Guid navigationId, Func<Guid, Task> adapterInvoke)
+    {
         try
         {
             await adapterInvoke(navigationId).ConfigureAwait(false);
@@ -1206,10 +1233,7 @@ public sealed class WebViewCore : IWebView, IWebViewAdapterHost, IDisposable
         {
             _logger.LogDebug(ex, "StartNavigation: adapter invocation failed, id={NavigationId}", navigationId);
             CompleteActiveNavigation(NavigationCompletedStatus.Failure, ex);
-            return operation.Task;
         }
-
-        return operation.Task;
     }
 
     private Guid StartCommandNavigation(Uri requestUri)

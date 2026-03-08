@@ -17,6 +17,9 @@ partial class BuildTask : NukeBuild
 {
     private const string ContractAutomationLane = "ContractAutomation";
     private const string RuntimeAutomationLane = "RuntimeAutomation";
+    private const string LaneContextCi = "Ci";
+    private const string LaneContextCiPublish = "CiPublish";
+    private const string PrimaryHostPackageId = "Agibuild.Fulora.Avalonia";
 
     private sealed record AutomationLaneResult(
         string Lane,

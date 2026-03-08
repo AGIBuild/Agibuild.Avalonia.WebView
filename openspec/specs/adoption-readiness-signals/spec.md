@@ -1,7 +1,7 @@
 # adoption-readiness-signals Specification
 
 ## Purpose
-TBD - created by archiving change phase7-adoption-readiness-signals. Update Purpose after archive.
+Define the contract for adoption readiness governance signals, ensuring deterministic KPI evidence emission, policy-tier classification (blocking vs advisory), and actionable source mapping for all non-passing findings.
 ## Requirements
 ### Requirement: Adoption readiness SHALL emit deterministic KPI evidence
 Adoption readiness governance MUST emit deterministic KPI evidence for documentation freshness, template operability, and runtime critical-path confidence.

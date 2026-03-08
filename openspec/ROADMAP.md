@@ -468,8 +468,8 @@ dotnet new agibuild-hybrid -n MyApp --frontend react
 
 ### Phase Transition Status (Machine-checkable)
 
-- Completed phase id: `phase8-bridge-v2-parity`
-- Active phase id: `phase9-ga-release-readiness`
+- Completed phase id: `phase12-enterprise-advanced-scenarios`
+- Active phase id: `post-roadmap-maintenance`
 - Closeout snapshot artifact: `artifacts/test-results/closeout-snapshot.json`
 
 ## Phase 6: Governance Productization (✅ Completed)
@@ -762,6 +762,18 @@ dotnet new agibuild-hybrid -n MyApp --frontend react
 | **M12.2 Shared State Management** | Cross-WebView reactive state with conflict resolution | Multi-window state consistency without manual sync | ✅ 21 tests |
 | **M12.3 Enterprise Auth Patterns** | SSO/OAuth integration guides + sample | Enterprise-ready authentication workflows | ✅ 23 tests |
 | **M12.4 Plugin Quality & Compatibility** | Plugin version compatibility matrix + quality signals | Reliable plugin selection for production apps | ✅ 14 tests |
+
+### Latest Evidence Snapshot
+
+- `nuke Test`: Unit `1879`, Integration `209`, Total `2088` (pass)
+- `nuke Coverage`: Line `97.38%` (pass, threshold `96%`), Branch `93.17%` (pass, threshold `90%`)
+
+### OpenSpec Archive Evidence
+
+- `2026-03-07-sentry-crash-reporting` (M12.1)
+- `2026-03-07-shared-state-management` (M12.2)
+- `2026-03-07-enterprise-auth-patterns` (M12.3)
+- `2026-03-07-plugin-quality-compatibility` (M12.4)
 
 ### Phase 12 Exit Criteria
 

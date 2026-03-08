@@ -24,6 +24,8 @@ public sealed class TestGetAwaiterGetResultUsageTests
             "tests/Agibuild.Fulora.UnitTests/ContractSemanticsV1SourceAndStopTests.cs",
             "tests/Agibuild.Fulora.UnitTests/ContractSemanticsV1ThreadingTests.cs",
             "tests/Agibuild.Fulora.UnitTests/CoverageGapTests.cs",
+            "tests/Agibuild.Fulora.UnitTests/WebViewCoreCoverageTests.cs",
+            "tests/Agibuild.Fulora.UnitTests/WebDialogCoverageTests.cs",
             "tests/Agibuild.Fulora.UnitTests/BuildOrchestrationBlockingWaitGovernanceTests.cs",
             "tests/Agibuild.Fulora.UnitTests/WebDialogTests.cs",
             "tests/Agibuild.Fulora.Integration.Tests.Automation/WebAuthBrokerIntegrationTests.cs",

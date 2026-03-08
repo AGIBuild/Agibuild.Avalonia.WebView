@@ -4,6 +4,7 @@ using Agibuild.Fulora.Testing;
 using Xunit;
 using static Agibuild.Fulora.Testing.GovernanceAssertionHelper;
 using static Agibuild.Fulora.Testing.GovernanceInvariantIds;
+using static Agibuild.Fulora.UnitTests.GovernanceSyntaxAssertionHelper;
 
 namespace Agibuild.Fulora.UnitTests;
 
@@ -113,14 +114,14 @@ public sealed class AutomationLaneGovernanceTests
 
         var requiredTargets = new[]
         {
-            "Target ContractAutomation", "Target RuntimeAutomation", "Target AutomationLaneReport",
-            "Target WarningGovernance", "Target WarningGovernanceSyntheticCheck",
-            "Target ReleaseCloseoutSnapshot", "Target DistributionReadinessGovernance",
-            "Target AdoptionReadinessGovernanceCi", "Target AdoptionReadinessGovernanceCiPublish",
-            "Target ReleaseOrchestrationGovernance"
+            "ContractAutomation", "RuntimeAutomation", "AutomationLaneReport",
+            "WarningGovernance", "WarningGovernanceSyntheticCheck",
+            "ReleaseCloseoutSnapshot", "DistributionReadinessGovernance",
+            "AdoptionReadinessGovernanceCi", "AdoptionReadinessGovernanceCiPublish",
+            "ReleaseOrchestrationGovernance"
         };
         foreach (var target in requiredTargets)
-            AssertSourceContains(combinedSource, target, BuildPipelineTargetGraph, "build/Build*.cs");
+            AssertTargetDeclarationExists(combinedSource, target, BuildPipelineTargetGraph, "build/Build*.cs");
 
         var requiredArtifacts = new[]
         {
@@ -482,17 +483,23 @@ public sealed class AutomationLaneGovernanceTests
         var repoRoot = FindRepoRoot();
         var bridgePath = Path.Combine(repoRoot, "src", "Agibuild.Fulora.Runtime", "Shell", "WebViewHostCapabilityBridge.cs");
         var shellPath = Path.Combine(repoRoot, "src", "Agibuild.Fulora.Runtime", "Shell", "WebViewShellExperience.cs");
+        var shellExecutorPath = Path.Combine(repoRoot, "src", "Agibuild.Fulora.Runtime", "Shell", "WebViewHostCapabilityExecutor.cs");
+        var shellNewWindowPath = Path.Combine(repoRoot, "src", "Agibuild.Fulora.Runtime", "Shell", "WebViewNewWindowHandler.cs");
         var profilePath = Path.Combine(repoRoot, "src", "Agibuild.Fulora.Runtime", "Shell", "WebViewSessionPermissionProfiles.cs");
         var helperPath = Path.Combine(repoRoot, "tests", "Agibuild.Fulora.Testing", "DiagnosticSchemaAssertionHelper.cs");
         var hostCapabilityUnitTestPath = Path.Combine(repoRoot, "tests", "Agibuild.Fulora.UnitTests", "HostCapabilityBridgeTests.cs");
         var hostCapabilityIntegrationTestPath = Path.Combine(repoRoot, "tests", "Agibuild.Fulora.Integration.Tests.Automation", "HostCapabilityBridgeIntegrationTests.cs");
         var profileIntegrationTestPath = Path.Combine(repoRoot, "tests", "Agibuild.Fulora.Integration.Tests.Automation", "MultiWindowLifecycleIntegrationTests.cs");
 
-        foreach (var p in new[] { bridgePath, shellPath, profilePath, helperPath, hostCapabilityUnitTestPath, hostCapabilityIntegrationTestPath, profileIntegrationTestPath })
+        foreach (var p in new[] { bridgePath, shellPath, shellExecutorPath, shellNewWindowPath, profilePath, helperPath, hostCapabilityUnitTestPath, hostCapabilityIntegrationTestPath, profileIntegrationTestPath })
             AssertFileExists(p, PhaseCloseoutConsistency);
 
         var bridgeSource = File.ReadAllText(bridgePath);
-        var shellSource = File.ReadAllText(shellPath);
+        var shellSource = string.Join(
+            Environment.NewLine,
+            File.ReadAllText(shellPath),
+            File.ReadAllText(shellExecutorPath),
+            File.ReadAllText(shellNewWindowPath));
         var profileSource = File.ReadAllText(profilePath);
         var helperSource = File.ReadAllText(helperPath);
         var hostCapabilityUnitTestSource = File.ReadAllText(hostCapabilityUnitTestPath);
@@ -536,17 +543,22 @@ public sealed class AutomationLaneGovernanceTests
 
         var shellMarkers = new[]
         {
-            "Host capability bridge is required for ExternalBrowser strategy.",
             "SystemIntegration = 8",
-            "_options.HostCapabilityBridge.ApplyMenuModel(",
-            "_options.HostCapabilityBridge.UpdateTrayState(",
-            "_options.HostCapabilityBridge.ExecuteSystemAction(",
-            "_options.HostCapabilityBridge.DispatchSystemIntegrationEvent(",
             "SystemIntegrationEventReceived",
             "profile.ProfileVersion", "profile.ProfileHash"
         };
         foreach (var marker in shellMarkers)
-            AssertSourceContains(shellSource, marker, PhaseCloseoutConsistency, shellPath);
+            AssertSourceContains(shellSource, marker, PhaseCloseoutConsistency, $"{shellPath} (+collaborators)");
+
+        AssertStringLiteralExists(
+            shellSource,
+            "Host capability bridge is required for ExternalBrowser strategy.",
+            PhaseCloseoutConsistency,
+            $"{shellPath} (+collaborators)");
+        AssertMemberInvocationExists(shellSource, "HostCapabilityBridge", "ApplyMenuModel", PhaseCloseoutConsistency, $"{shellPath} (+collaborators)");
+        AssertMemberInvocationExists(shellSource, "HostCapabilityBridge", "UpdateTrayState", PhaseCloseoutConsistency, $"{shellPath} (+collaborators)");
+        AssertMemberInvocationExists(shellSource, "HostCapabilityBridge", "ExecuteSystemAction", PhaseCloseoutConsistency, $"{shellPath} (+collaborators)");
+        AssertMemberInvocationExists(shellSource, "HostCapabilityBridge", "DispatchSystemIntegrationEvent", PhaseCloseoutConsistency, $"{shellPath} (+collaborators)");
 
         Assert.DoesNotContain("ExternalOpenHandler", shellSource, StringComparison.Ordinal);
 
@@ -571,21 +583,21 @@ public sealed class AutomationLaneGovernanceTests
 
         var requiredTargets = new[]
         {
-            "Target OpenSpecStrictGovernance", "Target DependencyVulnerabilityGovernance",
-            "Target TypeScriptDeclarationGovernance", "Target ReleaseCloseoutSnapshot",
-            "Target ContinuousTransitionGateGovernance", "Target DistributionReadinessGovernance",
-            "Target AdoptionReadinessGovernanceCi", "Target AdoptionReadinessGovernanceCiPublish",
-            "Target ReleaseOrchestrationGovernance"
+            "OpenSpecStrictGovernance", "DependencyVulnerabilityGovernance",
+            "TypeScriptDeclarationGovernance", "ReleaseCloseoutSnapshot",
+            "ContinuousTransitionGateGovernance", "DistributionReadinessGovernance",
+            "AdoptionReadinessGovernanceCi", "AdoptionReadinessGovernanceCiPublish",
+            "ReleaseOrchestrationGovernance"
         };
         foreach (var target in requiredTargets)
-            AssertSourceContains(combinedSource, target, CiTargetOpenSpecGate, "build/Build*.cs");
+            AssertTargetDeclarationExists(combinedSource, target, CiTargetOpenSpecGate, "build/Build*.cs");
 
-        AssertSourceContains(combinedSource, "validate --all --strict", CiTargetOpenSpecGate, "build/Build*.cs");
-        AssertSourceContains(combinedSource, "RunProcessCaptureAllChecked(", CiTargetOpenSpecGate, "build/Build*.cs");
-        AssertSourceContains(combinedSource, "dependency-governance-report.json", CiTargetOpenSpecGate, "build/Build*.cs");
-        AssertSourceContains(combinedSource, "typescript-governance-report.json", CiTargetOpenSpecGate, "build/Build*.cs");
-        AssertSourceContains(combinedSource, "closeout-snapshot.json", CiTargetOpenSpecGate, "build/Build*.cs");
-        AssertSourceContains(combinedSource, "transition-gate-governance-report.json", CiTargetOpenSpecGate, "build/Build*.cs");
+        AssertStringLiteralContains(combinedSource, "validate --all --strict", CiTargetOpenSpecGate, "build/Build*.cs");
+        AssertInvocationExists(combinedSource, "RunProcessCaptureAllChecked", CiTargetOpenSpecGate, "build/Build*.cs");
+        AssertStringLiteralExists(combinedSource, "dependency-governance-report.json", CiTargetOpenSpecGate, "build/Build*.cs");
+        AssertStringLiteralExists(combinedSource, "typescript-governance-report.json", CiTargetOpenSpecGate, "build/Build*.cs");
+        AssertStringLiteralExists(combinedSource, "closeout-snapshot.json", CiTargetOpenSpecGate, "build/Build*.cs");
+        AssertStringLiteralExists(combinedSource, "transition-gate-governance-report.json", CiTargetOpenSpecGate, "build/Build*.cs");
 
         var ciDependencies = new[]
         {
@@ -594,12 +606,7 @@ public sealed class AutomationLaneGovernanceTests
             "RuntimeCriticalPathExecutionGovernanceCi", "ContinuousTransitionGateGovernance",
             "AdoptionReadinessGovernanceCi"
         };
-        foreach (var dep in ciDependencies)
-        {
-            Assert.Matches(
-                new Regex($@"Target\s+Ci\s*=>[\s\S]*?\.DependsOn\([\s\S]*{Regex.Escape(dep)}[\s\S]*\);", RegexOptions.Multiline),
-                mainSource);
-        }
+        AssertTargetDependsOnContainsAll(mainSource, "Ci", ciDependencies, CiTargetOpenSpecGate, "build/Build.cs");
 
         var ciPublishDependencies = new[]
         {
@@ -609,12 +616,7 @@ public sealed class AutomationLaneGovernanceTests
             "DistributionReadinessGovernance", "AdoptionReadinessGovernanceCiPublish",
             "ReleaseOrchestrationGovernance"
         };
-        foreach (var dep in ciPublishDependencies)
-        {
-            Assert.Matches(
-                new Regex($@"Target\s+CiPublish\s*=>[\s\S]*?\.DependsOn\([\s\S]*{Regex.Escape(dep)}[\s\S]*\);", RegexOptions.Multiline),
-                mainSource);
-        }
+        AssertTargetDependsOnContainsAll(mainSource, "CiPublish", ciPublishDependencies, CiTargetOpenSpecGate, "build/Build.cs");
     }
 
     [Fact]
@@ -622,8 +624,8 @@ public sealed class AutomationLaneGovernanceTests
     {
         var repoRoot = FindRepoRoot();
         var mainSource = File.ReadAllText(Path.Combine(repoRoot, "build", "Build.cs"));
-        var ciDependsOn = ExtractDependsOnBlock(mainSource, "Ci");
-        var ciPublishDependsOn = ExtractDependsOnBlock(mainSource, "CiPublish");
+        var ciDependsOn = ReadTargetDependsOnDependencies(mainSource, "Ci", TransitionGateParityConsistency, "build/Build.cs");
+        var ciPublishDependsOn = ReadTargetDependsOnDependencies(mainSource, "CiPublish", TransitionGateParityConsistency, "build/Build.cs");
 
         var parityRules = new (string Group, string CiDependency, string CiPublishDependency)[]
         {
@@ -642,10 +644,10 @@ public sealed class AutomationLaneGovernanceTests
         foreach (var rule in parityRules)
         {
             Assert.True(
-                ciDependsOn.Contains(rule.CiDependency, StringComparison.Ordinal),
+                ciDependsOn.Contains(rule.CiDependency),
                 $"[{TransitionGateParityConsistency}] Missing Ci dependency '{rule.CiDependency}' for group '{rule.Group}'.");
             Assert.True(
-                ciPublishDependsOn.Contains(rule.CiPublishDependency, StringComparison.Ordinal),
+                ciPublishDependsOn.Contains(rule.CiPublishDependency),
                 $"[{TransitionGateParityConsistency}] Missing CiPublish dependency '{rule.CiPublishDependency}' for group '{rule.Group}'.");
         }
     }
@@ -704,21 +706,17 @@ public sealed class AutomationLaneGovernanceTests
 
         var roadmap = File.ReadAllText(roadmapPath);
         Assert.Matches(new Regex(@"## Phase \d+: .+\(✅ Completed\)", RegexOptions.Multiline), roadmap);
-        AssertSourceContains(roadmap, "Completed phase id: `phase8-bridge-v2-parity`", PhaseTransitionConsistency, roadmapPath);
-        AssertSourceContains(roadmap, "Active phase id: `phase9-ga-release-readiness`", PhaseTransitionConsistency, roadmapPath);
+        AssertSourceContains(roadmap, "Completed phase id: `phase12-enterprise-advanced-scenarios`", PhaseTransitionConsistency, roadmapPath);
+        AssertSourceContains(roadmap, "Active phase id: `post-roadmap-maintenance`", PhaseTransitionConsistency, roadmapPath);
         AssertSourceContains(roadmap, "Closeout snapshot artifact: `artifacts/test-results/closeout-snapshot.json`", PhaseTransitionConsistency, roadmapPath);
         AssertSourceContains(roadmap, "### Evidence Source Mapping", PhaseTransitionConsistency, roadmapPath);
 
         var completedPhaseCloseoutChangeIds = new[]
         {
-            "2026-02-28-bridge-diagnostics-safety-net",
-            "2026-02-28-bridge-cancellation-token-support",
-            "2026-02-28-bridge-async-enumerable-streaming",
-            "2026-02-28-bridge-generics-overloads",
-            "2026-03-01-phase9-functional-triple-track",
-            "2026-03-01-deep-link-native-registration",
-            "2026-02-28-platform-feature-parity",
-            "2026-02-28-phase7-closeout-phase8-reconciliation"
+            "2026-03-07-sentry-crash-reporting",
+            "2026-03-07-shared-state-management",
+            "2026-03-07-enterprise-auth-patterns",
+            "2026-03-07-plugin-quality-compatibility"
         };
         foreach (var changeId in completedPhaseCloseoutChangeIds)
             AssertSourceContains(roadmap, changeId, PhaseTransitionConsistency, roadmapPath);
@@ -903,19 +901,34 @@ public sealed class AutomationLaneGovernanceTests
         var repoRoot = FindRepoRoot();
         var combinedSource = ReadCombinedBuildSource(repoRoot);
 
-        AssertSourceContains(combinedSource, "schemaVersion = 2", EvidenceContractV2Schema, "build/Build.Governance.cs");
-        AssertSourceContains(combinedSource, "laneContext = \"CiPublish\"", EvidenceContractV2Schema, "build/Build.Governance.cs");
-        AssertSourceContains(combinedSource, "producerTarget = \"ReleaseCloseoutSnapshot\"", EvidenceContractV2Schema, "build/Build.Governance.cs");
-        AssertSourceContains(combinedSource, "transition = new", EvidenceContractV2Schema, "build/Build.Governance.cs");
-        AssertSourceContains(combinedSource, "transitionContinuity = new", EvidenceContractV2Schema, "build/Build.Governance.cs");
-        AssertSourceContains(combinedSource, "releaseDecision", EvidenceContractV2Schema, "build/Build.Governance.cs");
-        AssertSourceContains(combinedSource, "releaseBlockingReasons", EvidenceContractV2Schema, "build/Build.Governance.cs");
-        AssertSourceContains(combinedSource, "completedPhase", EvidenceContractV2Schema, "build/Build.Governance.cs");
-        AssertSourceContains(combinedSource, "activePhase", EvidenceContractV2Schema, "build/Build.Governance.cs");
+        AssertAssignmentValueIn(
+            combinedSource,
+            "schemaVersion",
+            ["2"],
+            EvidenceContractV2Schema,
+            "build/Build.Governance.cs");
+        AssertAssignmentValueIn(
+            combinedSource,
+            "laneContext",
+            ["\"CiPublish\"", "LaneContextCiPublish"],
+            EvidenceContractV2Schema,
+            "build/Build.Governance.cs");
+        AssertAssignmentValueIn(
+            combinedSource,
+            "producerTarget",
+            ["\"ReleaseCloseoutSnapshot\""],
+            EvidenceContractV2Schema,
+            "build/Build.Governance.cs");
+        AssertAnonymousObjectMemberAssignedWithNew(combinedSource, "transition", EvidenceContractV2Schema, "build/Build.Governance.cs");
+        AssertAnonymousObjectMemberAssignedWithNew(combinedSource, "transitionContinuity", EvidenceContractV2Schema, "build/Build.Governance.cs");
+        AssertIndexerStringKeyAssignmentExists(combinedSource, "releaseDecision", EvidenceContractV2Schema, "build/Build.Governance.cs");
+        AssertIndexerStringKeyAssignmentExists(combinedSource, "releaseBlockingReasons", EvidenceContractV2Schema, "build/Build.Governance.cs");
+        AssertAnonymousObjectHasMembers(
+            combinedSource,
+            ["completedPhase", "activePhase", "closeoutArchives", "distributionReadiness", "adoptionReadiness"],
+            EvidenceContractV2Schema,
+            "build/Build.Governance.cs");
         AssertSourceContains(combinedSource, "TransitionLaneProvenanceInvariantId", EvidenceContractV2Schema, "build/Build.Governance.cs");
-        AssertSourceContains(combinedSource, "closeoutArchives", EvidenceContractV2Schema, "build/Build.Governance.cs");
-        AssertSourceContains(combinedSource, "distributionReadiness", EvidenceContractV2Schema, "build/Build.Governance.cs");
-        AssertSourceContains(combinedSource, "adoptionReadiness", EvidenceContractV2Schema, "build/Build.Governance.cs");
         AssertSourceContains(combinedSource, "closeout-snapshot.json", EvidenceContractV2Schema, "build/Build.cs");
         AssertSourceContains(combinedSource, "distribution-readiness-governance-report.json", EvidenceContractV2Schema, "build/Build.cs");
         AssertSourceContains(combinedSource, "adoption-readiness-governance-report.json", EvidenceContractV2Schema, "build/Build.cs");
@@ -929,17 +942,36 @@ public sealed class AutomationLaneGovernanceTests
         var combinedSource = ReadCombinedBuildSource(repoRoot);
         var mainSource = File.ReadAllText(Path.Combine(repoRoot, "build", "Build.cs"));
 
-        AssertSourceContains(combinedSource, "Target BridgeDistributionGovernance", BridgeDistributionParity, "build/Build.Governance.cs");
-        AssertSourceContains(combinedSource, "bridge-distribution-governance-report.json", BridgeDistributionParity, "build/Build*.cs");
-        AssertSourceContains(combinedSource, "producerTarget = \"BridgeDistributionGovernance\"", BridgeDistributionParity, "build/Build.Governance.cs");
-        AssertSourceContains(combinedSource, "SMOKE_PASSED", BridgeDistributionParity, "build/Build.Governance.cs");
-        AssertSourceContains(combinedSource, "LTS_IMPORT_OK", BridgeDistributionParity, "build/Build.Governance.cs");
-        AssertSourceContains(combinedSource, "RunProcessCaptureAllChecked(toolName, \"--version\"", BridgeDistributionParity, "build/Build.Governance.cs");
+        AssertTargetDeclarationExists(combinedSource, "BridgeDistributionGovernance", BridgeDistributionParity, "build/Build.Governance.cs");
+        AssertStringLiteralExists(combinedSource, "bridge-distribution-governance-report.json", BridgeDistributionParity, "build/Build*.cs");
+        AssertAssignmentValueIn(
+            combinedSource,
+            "producerTarget",
+            ["\"BridgeDistributionGovernance\""],
+            BridgeDistributionParity,
+            "build/Build.Governance.cs");
+        AssertStringLiteralExists(combinedSource, "SMOKE_PASSED", BridgeDistributionParity, "build/Build.Governance.cs");
+        AssertStringLiteralExists(combinedSource, "LTS_IMPORT_OK", BridgeDistributionParity, "build/Build.Governance.cs");
+        AssertInvocationFirstArgumentIn(
+            combinedSource,
+            "RunProcessCaptureAllChecked",
+            new HashSet<string>(StringComparer.Ordinal) { "toolName" },
+            BridgeDistributionParity,
+            "build/Build.Governance.cs");
+        AssertInvocationContainsStringArgument(
+            combinedSource,
+            "RunProcessCaptureAllChecked",
+            "--version",
+            BridgeDistributionParity,
+            "build/Build.Governance.cs");
         AssertSourceContains(combinedSource, "{toolName} --version", BridgeDistributionParity, "build/Build.Governance.cs");
 
-        Assert.Matches(
-            new Regex(@"Target\s+CiPublish\s*=>[\s\S]*?\.DependsOn\([\s\S]*BridgeDistributionGovernance[\s\S]*\);", RegexOptions.Multiline),
-            mainSource);
+        AssertTargetDependsOnContainsAll(
+            mainSource,
+            "CiPublish",
+            ["BridgeDistributionGovernance"],
+            BridgeDistributionParity,
+            "build/Build.cs");
     }
 
     [Fact]
@@ -949,14 +981,20 @@ public sealed class AutomationLaneGovernanceTests
         var mainSource = File.ReadAllText(Path.Combine(repoRoot, "build", "Build.cs"));
         var governanceSource = File.ReadAllText(Path.Combine(repoRoot, "build", "Build.Governance.cs"));
 
-        Assert.Matches(
-            new Regex(@"Target\s+CiPublish\s*=>[\s\S]*?\.DependsOn\([\s\S]*ReleaseOrchestrationGovernance[\s\S]*Publish[\s\S]*\);", RegexOptions.Multiline),
-            mainSource);
+        AssertTargetDependsOnContainsAll(
+            mainSource,
+            "CiPublish",
+            ["ReleaseOrchestrationGovernance", "Publish"],
+            ReleaseOrchestrationDecisionGate,
+            "build/Build.cs");
 
-        AssertSourceContains(governanceSource, "Target ReleaseOrchestrationGovernance", ReleaseOrchestrationDecisionGate, "build/Build.Governance.cs");
-        AssertSourceContains(governanceSource, ".DependsOn(", ReleaseOrchestrationDecisionGate, "build/Build.Governance.cs");
-        AssertSourceContains(governanceSource, "ContinuousTransitionGateGovernance", ReleaseOrchestrationDecisionGate, "build/Build.Governance.cs");
-        AssertSourceContains(governanceSource, "ValidatePackage", ReleaseOrchestrationDecisionGate, "build/Build.Governance.cs");
+        AssertTargetDeclarationExists(governanceSource, "ReleaseOrchestrationGovernance", ReleaseOrchestrationDecisionGate, "build/Build.Governance.cs");
+        AssertTargetDependsOnContainsAll(
+            governanceSource,
+            "ReleaseOrchestrationGovernance",
+            ["ContinuousTransitionGateGovernance", "ValidatePackage"],
+            ReleaseOrchestrationDecisionGate,
+            "build/Build.Governance.cs");
         AssertSourceContains(governanceSource, "Release orchestration governance blocked publication", ReleaseOrchestrationDecisionGate, "build/Build.Governance.cs");
     }
 
@@ -1026,17 +1064,30 @@ public sealed class AutomationLaneGovernanceTests
         var governanceSource = File.ReadAllText(Path.Combine(repoRoot, "build", "Build.Governance.cs"));
         var mainSource = File.ReadAllText(Path.Combine(repoRoot, "build", "Build.cs"));
 
-        AssertSourceContains(governanceSource, "ResolvePackedAgibuildVersion(\"Agibuild.Fulora.Avalonia\")", StablePublishReadiness, "build/Build.Governance.cs");
+        AssertInvocationFirstArgumentIn(
+            governanceSource,
+            "ResolvePackedAgibuildVersion",
+            new HashSet<string>(StringComparer.Ordinal) { "\"Agibuild.Fulora.Avalonia\"", "PrimaryHostPackageId" },
+            StablePublishReadiness,
+            "build/Build.Governance.cs");
         AssertSourceContains(governanceSource, "isStableRelease", StablePublishReadiness, "build/Build.Governance.cs");
-        AssertSourceContains(governanceSource, "decisionState = blockingReasons.Count == 0 ? \"ready\" : \"blocked\"", StablePublishReadiness, "build/Build.Governance.cs");
+        AssertAssignmentValueIn(
+            governanceSource,
+            "decisionState",
+            ["blockingReasons.Count == 0 ? \"ready\" : \"blocked\""],
+            StablePublishReadiness,
+            "build/Build.Governance.cs");
         AssertSourceContains(governanceSource, "if (string.Equals(decisionState, \"blocked\", StringComparison.Ordinal))", StablePublishReadiness, "build/Build.Governance.cs");
         AssertSourceContains(governanceSource, "Release orchestration governance blocked publication", StablePublishReadiness, "build/Build.Governance.cs");
         AssertSourceContains(governanceSource, "DistributionReadinessGovernanceReportFile", StablePublishReadiness, "build/Build.Governance.cs");
         AssertSourceContains(governanceSource, "AdoptionReadinessGovernanceReportFile", StablePublishReadiness, "build/Build.Governance.cs");
 
-        Assert.Matches(
-            new Regex(@"Target\s+CiPublish\s*=>[\s\S]*?\.DependsOn\([\s\S]*ReleaseOrchestrationGovernance[\s\S]*Publish[\s\S]*\);", RegexOptions.Multiline),
-            mainSource);
+        AssertTargetDependsOnContainsAll(
+            mainSource,
+            "CiPublish",
+            ["ReleaseOrchestrationGovernance", "Publish"],
+            StablePublishReadiness,
+            "build/Build.cs");
     }
 
     [Fact]
@@ -1191,16 +1242,6 @@ public sealed class AutomationLaneGovernanceTests
                 .Select(kvp => $"{kvp.Key}: {kvp.Value}"));
 
         Assert.Fail($"[{XunitVersionAlignment}] Package version drift detected for '{packageId}'.\n{details}");
-    }
-
-    private static string ExtractDependsOnBlock(string source, string targetName)
-    {
-        var match = Regex.Match(
-            source,
-            $@"Target\s+{Regex.Escape(targetName)}\s*=>[\s\S]*?\.DependsOn\((?<deps>[\s\S]*?)\);",
-            RegexOptions.Multiline);
-        Assert.True(match.Success, $"[{TransitionGateParityConsistency}] Missing target '{targetName}' DependsOn block.");
-        return match.Groups["deps"].Value;
     }
 
 }

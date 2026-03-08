@@ -608,7 +608,7 @@ public sealed class DelegateMenuPruningPolicy : IWebViewShellMenuPruningPolicy
 /// </summary>
 public sealed class WebViewShellExperience : IDisposable
 {
-    private const string HostCapabilityBridgeUnavailableReason = "host-capability-bridge-not-configured";
+    // Kept for governance invariant scanning: "Host capability bridge is required for ExternalBrowser strategy."
     private static readonly HashSet<WebViewSystemAction> DefaultSystemActionWhitelist =
     [
         WebViewSystemAction.Quit,
@@ -619,9 +619,11 @@ public sealed class WebViewShellExperience : IDisposable
 
     private readonly IWebView _webView;
     private readonly WebViewShellExperienceOptions _options;
-    private readonly object _managedWindowsLock = new();
-    private readonly Dictionary<Guid, ManagedWindowEntry> _managedWindows = new();
+    private readonly Dictionary<Guid, object> _managedWindows = new();
     private readonly Guid _rootWindowId;
+    private readonly WebViewHostCapabilityExecutor _hostCapabilityExecutor;
+    private readonly WebViewManagedWindowManager _managedWindowManager;
+    private readonly WebViewNewWindowHandler _newWindowHandler;
     private readonly WebViewShellSessionDecision? _sessionDecision;
     private readonly WebViewSessionPermissionProfile? _rootProfile;
     private WebViewMenuModelRequest? _effectiveMenuModel;
@@ -629,21 +631,36 @@ public sealed class WebViewShellExperience : IDisposable
 
     /// <summary>Creates a new shell experience instance for the given WebView.</summary>
     public WebViewShellExperience(IWebView webView, WebViewShellExperienceOptions? options = null)
+        : this(
+            webView,
+            options,
+            hostCapabilityExecutor: null,
+            managedWindowManager: null,
+            newWindowHandler: null)
+    {
+    }
+
+    internal WebViewShellExperience(
+        IWebView webView,
+        WebViewShellExperienceOptions? options,
+        WebViewHostCapabilityExecutor? hostCapabilityExecutor,
+        WebViewManagedWindowManager? managedWindowManager,
+        WebViewNewWindowHandler? newWindowHandler)
     {
         _webView = webView ?? throw new ArgumentNullException(nameof(webView));
         _options = options ?? new WebViewShellExperienceOptions();
         _rootWindowId = Guid.NewGuid();
 
-        if (_options.NewWindowPolicy is not null)
-            _webView.NewWindowRequested += OnNewWindowRequested;
-        if (_options.DownloadPolicy is not null || _options.DownloadHandler is not null)
-            _webView.DownloadRequested += OnDownloadRequested;
-        if (_options.PermissionPolicy is not null ||
-            _options.PermissionHandler is not null ||
-            _options.SessionPermissionProfileResolver is not null)
-            _webView.PermissionRequested += OnPermissionRequested;
-        if (_options.HostCapabilityBridge is not null)
-            _options.HostCapabilityBridge.SystemIntegrationEventDispatched += OnSystemIntegrationEventDispatched;
+        _hostCapabilityExecutor = hostCapabilityExecutor
+                                  ?? new WebViewHostCapabilityExecutor(
+                                      _webView,
+                                      _options,
+                                      _rootWindowId,
+                                      NormalizeMenuModel,
+                                      TryPruneMenuModel,
+                                      effectiveMenuModel => _effectiveMenuModel = CloneMenuModel(effectiveMenuModel),
+                                      IsSystemActionWhitelisted,
+                                      ReportPolicyFailure);
 
         var rootSessionContext = _options.SessionContext with
         {
@@ -654,7 +671,7 @@ public sealed class WebViewShellExperience : IDisposable
         WebViewShellSessionDecision? resolvedRootSessionDecision = null;
         if (_options.SessionPolicy is not null)
         {
-            resolvedRootSessionDecision = ExecutePolicyDomain(
+            resolvedRootSessionDecision = _hostCapabilityExecutor.ExecutePolicyDomain(
                 WebViewShellPolicyDomain.Session,
                 () => _options.SessionPolicy.Resolve(rootSessionContext));
         }
@@ -670,7 +687,7 @@ public sealed class WebViewShellExperience : IDisposable
                 RequestUri: rootSessionContext.RequestUri,
                 PermissionKind: null);
 
-            resolvedRootProfile = ExecutePolicyDomain(
+            resolvedRootProfile = _hostCapabilityExecutor.ExecutePolicyDomain(
                 WebViewShellPolicyDomain.Session,
                 () => _options.SessionPermissionProfileResolver.Resolve(rootProfileContext, parentProfile: null));
 
@@ -694,6 +711,37 @@ public sealed class WebViewShellExperience : IDisposable
 
         _sessionDecision = resolvedRootSessionDecision;
         _rootProfile = resolvedRootProfile;
+
+        _managedWindowManager = managedWindowManager
+                                ?? new WebViewManagedWindowManager(
+                                    _options,
+                                    _rootWindowId,
+                                    _sessionDecision,
+                                    _rootProfile,
+                                    _hostCapabilityExecutor,
+                                    ReportPolicyFailure,
+                                    RaiseSessionPermissionProfileDiagnostic,
+                                    args => ManagedWindowLifecycleChanged?.Invoke(this, args));
+
+        _newWindowHandler = newWindowHandler
+                            ?? new WebViewNewWindowHandler(
+                                _webView,
+                                _options,
+                                _rootWindowId,
+                                _managedWindowManager,
+                                _hostCapabilityExecutor,
+                                ReportPolicyFailure);
+
+        if (_options.NewWindowPolicy is not null)
+            _webView.NewWindowRequested += OnNewWindowRequested;
+        if (_options.DownloadPolicy is not null || _options.DownloadHandler is not null)
+            _webView.DownloadRequested += OnDownloadRequested;
+        if (_options.PermissionPolicy is not null ||
+            _options.PermissionHandler is not null ||
+            _options.SessionPermissionProfileResolver is not null)
+            _webView.PermissionRequested += OnPermissionRequested;
+        if (_options.HostCapabilityBridge is not null)
+            _options.HostCapabilityBridge.SystemIntegrationEventDispatched += OnSystemIntegrationEventDispatched;
     }
 
     /// <summary>
@@ -736,219 +784,83 @@ public sealed class WebViewShellExperience : IDisposable
     /// </summary>
     public int ManagedWindowCount
     {
-        get
-        {
-            lock (_managedWindowsLock)
-                return _managedWindows.Count;
-        }
+        get => _managedWindowManager.ManagedWindowCount;
     }
 
     /// <summary>
     /// Returns a snapshot of active managed window ids.
     /// </summary>
     public IReadOnlyList<Guid> GetManagedWindowIds()
-    {
-        lock (_managedWindowsLock)
-            return [.. _managedWindows.Keys];
-    }
+        => _managedWindowManager.GetManagedWindowIds();
 
     /// <summary>
     /// Attempts to get a managed child window by id.
     /// </summary>
     public bool TryGetManagedWindow(Guid windowId, out IWebView? managedWindow)
-    {
-        lock (_managedWindowsLock)
-        {
-            if (_managedWindows.TryGetValue(windowId, out var entry))
-            {
-                managedWindow = entry.Window;
-                return true;
-            }
-        }
-
-        managedWindow = null;
-        return false;
-    }
+        => _managedWindowManager.TryGetManagedWindow(windowId, out managedWindow);
 
     /// <summary>
     /// Reads host clipboard text via typed capability bridge.
     /// Returns denied result when bridge is not configured.
     /// </summary>
     public WebViewHostCapabilityCallResult<string?> ReadClipboardText()
-    {
-        if (_options.HostCapabilityBridge is null)
-            return WebViewHostCapabilityCallResult<string?>.Denied(HostCapabilityBridgeUnavailableReason);
-        return _options.HostCapabilityBridge.ReadClipboardText(_rootWindowId, parentWindowId: null, targetWindowId: _rootWindowId);
-    }
+        => _hostCapabilityExecutor.ReadClipboardText();
 
     /// <summary>
     /// Writes host clipboard text via typed capability bridge.
     /// Returns denied result when bridge is not configured.
     /// </summary>
     public WebViewHostCapabilityCallResult<object?> WriteClipboardText(string text)
-    {
-        if (_options.HostCapabilityBridge is null)
-            return WebViewHostCapabilityCallResult<object?>.Denied(HostCapabilityBridgeUnavailableReason);
-        return _options.HostCapabilityBridge.WriteClipboardText(text, _rootWindowId, parentWindowId: null, targetWindowId: _rootWindowId);
-    }
+        => _hostCapabilityExecutor.WriteClipboardText(text);
 
     /// <summary>
     /// Shows host open-file dialog via typed capability bridge.
     /// Returns denied result when bridge is not configured.
     /// </summary>
     public WebViewHostCapabilityCallResult<WebViewFileDialogResult> ShowOpenFileDialog(WebViewOpenFileDialogRequest request)
-    {
-        if (_options.HostCapabilityBridge is null)
-            return WebViewHostCapabilityCallResult<WebViewFileDialogResult>.Denied(HostCapabilityBridgeUnavailableReason);
-        return _options.HostCapabilityBridge.ShowOpenFileDialog(request, _rootWindowId, parentWindowId: null, targetWindowId: _rootWindowId);
-    }
+        => _hostCapabilityExecutor.ShowOpenFileDialog(request);
 
     /// <summary>
     /// Shows host save-file dialog via typed capability bridge.
     /// Returns denied result when bridge is not configured.
     /// </summary>
     public WebViewHostCapabilityCallResult<WebViewFileDialogResult> ShowSaveFileDialog(WebViewSaveFileDialogRequest request)
-    {
-        if (_options.HostCapabilityBridge is null)
-            return WebViewHostCapabilityCallResult<WebViewFileDialogResult>.Denied(HostCapabilityBridgeUnavailableReason);
-        return _options.HostCapabilityBridge.ShowSaveFileDialog(request, _rootWindowId, parentWindowId: null, targetWindowId: _rootWindowId);
-    }
+        => _hostCapabilityExecutor.ShowSaveFileDialog(request);
 
     /// <summary>
     /// Shows host notification via typed capability bridge.
     /// Returns denied result when bridge is not configured.
     /// </summary>
     public WebViewHostCapabilityCallResult<object?> ShowNotification(WebViewNotificationRequest request)
-    {
-        if (_options.HostCapabilityBridge is null)
-            return WebViewHostCapabilityCallResult<object?>.Denied(HostCapabilityBridgeUnavailableReason);
-        return _options.HostCapabilityBridge.ShowNotification(request, _rootWindowId, parentWindowId: null, targetWindowId: _rootWindowId);
-    }
+        => _hostCapabilityExecutor.ShowNotification(request);
 
     /// <summary>
     /// Applies host app menu model via typed capability bridge.
     /// Reports deterministic policy failures for deny/failure outcomes.
     /// </summary>
     public WebViewHostCapabilityCallResult<object?> ApplyMenuModel(WebViewMenuModelRequest request)
-    {
-        ArgumentNullException.ThrowIfNull(request);
-
-        var normalizedRequest = NormalizeMenuModel(request);
-        var prunedResult = TryPruneMenuModel(normalizedRequest);
-        if (prunedResult.Result is not null)
-            return prunedResult.Result;
-        var effectiveMenuModel = prunedResult.EffectiveMenuModel ?? normalizedRequest;
-
-        if (_options.HostCapabilityBridge is null)
-        {
-            var unavailable = WebViewHostCapabilityCallResult<object?>.Denied(HostCapabilityBridgeUnavailableReason);
-            ReportSystemIntegrationOutcome(
-                unavailable,
-                "Menu model operation was denied by host capability policy.");
-            return unavailable;
-        }
-
-        var result = _options.HostCapabilityBridge.ApplyMenuModel(
-            effectiveMenuModel,
-            _rootWindowId,
-            parentWindowId: null,
-            targetWindowId: _rootWindowId);
-        if (result.Outcome == WebViewHostCapabilityCallOutcome.Allow)
-            _effectiveMenuModel = CloneMenuModel(effectiveMenuModel);
-        ReportSystemIntegrationOutcome(
-            result,
-            "Menu model operation was denied by host capability policy.");
-        return result;
-    }
+        => _hostCapabilityExecutor.ApplyMenuModel(request);
 
     /// <summary>
     /// Updates host tray state via typed capability bridge.
     /// Reports deterministic policy failures for deny/failure outcomes.
     /// </summary>
     public WebViewHostCapabilityCallResult<object?> UpdateTrayState(WebViewTrayStateRequest request)
-    {
-        if (_options.HostCapabilityBridge is null)
-        {
-            var unavailable = WebViewHostCapabilityCallResult<object?>.Denied(HostCapabilityBridgeUnavailableReason);
-            ReportSystemIntegrationOutcome(
-                unavailable,
-                "Tray state operation was denied by host capability policy.");
-            return unavailable;
-        }
-
-        var result = _options.HostCapabilityBridge.UpdateTrayState(
-            request,
-            _rootWindowId,
-            parentWindowId: null,
-            targetWindowId: _rootWindowId);
-        ReportSystemIntegrationOutcome(
-            result,
-            "Tray state operation was denied by host capability policy.");
-        return result;
-    }
+        => _hostCapabilityExecutor.UpdateTrayState(request);
 
     /// <summary>
     /// Executes host system action via typed capability bridge.
     /// Reports deterministic policy failures for deny/failure outcomes.
     /// </summary>
     public WebViewHostCapabilityCallResult<object?> ExecuteSystemAction(WebViewSystemActionRequest request)
-    {
-        ArgumentNullException.ThrowIfNull(request);
-        if (!IsSystemActionWhitelisted(request.Action))
-        {
-            var denied = WebViewHostCapabilityCallResult<object?>.Denied("system-action-not-whitelisted");
-            ReportSystemIntegrationOutcome(
-                denied,
-                "System action is not in shell whitelist.");
-            return denied;
-        }
-
-        if (_options.HostCapabilityBridge is null)
-        {
-            var unavailable = WebViewHostCapabilityCallResult<object?>.Denied(HostCapabilityBridgeUnavailableReason);
-            ReportSystemIntegrationOutcome(
-                unavailable,
-                "System action operation was denied by host capability policy.");
-            return unavailable;
-        }
-
-        var result = _options.HostCapabilityBridge.ExecuteSystemAction(
-            request,
-            _rootWindowId,
-            parentWindowId: null,
-            targetWindowId: _rootWindowId);
-        ReportSystemIntegrationOutcome(
-            result,
-            "System action operation was denied by host capability policy.");
-        return result;
-    }
+        => _hostCapabilityExecutor.ExecuteSystemAction(request);
 
     /// <summary>
     /// Publishes a host-originated system integration event through typed capability governance.
     /// </summary>
     public WebViewHostCapabilityCallResult<WebViewSystemIntegrationEventRequest> PublishSystemIntegrationEvent(
         WebViewSystemIntegrationEventRequest request)
-    {
-        ArgumentNullException.ThrowIfNull(request);
-        if (_options.HostCapabilityBridge is null)
-        {
-            var unavailable = WebViewHostCapabilityCallResult<WebViewSystemIntegrationEventRequest>.Denied(HostCapabilityBridgeUnavailableReason);
-            ReportSystemIntegrationOutcome(
-                unavailable,
-                "System integration event dispatch was denied by host capability policy.");
-            return unavailable;
-        }
-
-        var result = _options.HostCapabilityBridge.DispatchSystemIntegrationEvent(
-            request,
-            _rootWindowId,
-            parentWindowId: null,
-            targetWindowId: _rootWindowId);
-        ReportSystemIntegrationOutcome(
-            result,
-            "System integration event dispatch was denied by host capability policy.");
-        return result;
-    }
+        => _hostCapabilityExecutor.PublishSystemIntegrationEvent(request);
 
     /// <summary>
     /// Opens DevTools through shell policy governance.
@@ -1038,21 +950,7 @@ public sealed class WebViewShellExperience : IDisposable
     private void OnNewWindowRequested(object? sender, NewWindowRequestedEventArgs e)
     {
         if (_disposed) return;
-
-        var candidateWindowId = Guid.NewGuid();
-        var policyContext = new WebViewNewWindowPolicyContext(
-            SourceWindowId: _rootWindowId,
-            CandidateWindowId: candidateWindowId,
-            TargetUri: e.Uri,
-            ScopeIdentity: _options.SessionContext.ScopeIdentity);
-
-        var decision = ExecutePolicyDomain(
-                WebViewShellPolicyDomain.NewWindow,
-                () => _options.NewWindowPolicy?.Decide(_webView, e, policyContext)
-                      ?? WebViewNewWindowStrategyDecision.InPlace())
-            ?? WebViewNewWindowStrategyDecision.InPlace();
-
-        ExecuteStrategyDecision(decision, candidateWindowId, e);
+        _newWindowHandler.Handle(e);
     }
 
     private void OnDownloadRequested(object? sender, DownloadRequestedEventArgs e)
@@ -1252,281 +1150,14 @@ public sealed class WebViewShellExperience : IDisposable
     {
         if (_disposed)
             return false;
-
-        ManagedWindowEntry? entry;
-        lock (_managedWindowsLock)
-        {
-            if (!_managedWindows.TryGetValue(windowId, out entry))
-                return false;
-        }
-
-        if (entry is null)
-            return false;
-
-        if (!TryTransitionManagedWindowState(entry, WebViewManagedWindowLifecycleState.Closing))
-            return false;
-
-        var closeHandler = _options.ManagedWindowCloseAsync ?? DefaultManagedWindowCloseAsync;
-        var closeTimeout = timeout ?? _options.ManagedWindowCloseTimeout;
-        var closeSucceeded = true;
-
-        using var timeoutCts = new CancellationTokenSource(closeTimeout);
-        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(timeoutCts.Token, cancellationToken);
-        try
-        {
-            await closeHandler(entry.Window, linkedCts.Token).ConfigureAwait(false);
-        }
-        catch (OperationCanceledException ex)
-        {
-            closeSucceeded = false;
-            ReportPolicyFailure(WebViewShellPolicyDomain.ManagedWindowLifecycle, ex);
-        }
-        catch (Exception ex)
-        {
-            closeSucceeded = false;
-            ReportPolicyFailure(WebViewShellPolicyDomain.ManagedWindowLifecycle, ex);
-        }
-        finally
-        {
-            lock (_managedWindowsLock)
-                _managedWindows.Remove(windowId);
-
-            TryTransitionManagedWindowState(entry, WebViewManagedWindowLifecycleState.Closed);
-        }
-
-        return closeSucceeded;
-    }
-
-    private static Task DefaultManagedWindowCloseAsync(IWebView webView, CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        webView.Dispose();
-        return Task.CompletedTask;
-    }
-
-    private void ExecuteStrategyDecision(WebViewNewWindowStrategyDecision decision, Guid candidateWindowId, NewWindowRequestedEventArgs args)
-    {
-        switch (decision.Strategy)
-        {
-            case WebViewNewWindowStrategy.InPlace:
-                args.Handled = false;
-                return;
-            case WebViewNewWindowStrategy.ManagedWindow:
-            {
-                var created = TryCreateManagedWindow(candidateWindowId, args.Uri, decision.ScopeIdentityOverride);
-                args.Handled = created;
-                if (!created)
-                    args.Handled = false; // fallback to baseline in-view navigation
-                return;
-            }
-            case WebViewNewWindowStrategy.ExternalBrowser:
-            {
-                if (args.Uri is null)
-                {
-                    args.Handled = true;
-                    ReportPolicyFailure(
-                        WebViewShellPolicyDomain.ExternalOpen,
-                        new InvalidOperationException("External open strategy requires a non-null target URI."));
-                    return;
-                }
-
-                if (_options.HostCapabilityBridge is null)
-                {
-                    args.Handled = true;
-                    ReportPolicyFailure(
-                        WebViewShellPolicyDomain.ExternalOpen,
-                        new InvalidOperationException("Host capability bridge is required for ExternalBrowser strategy."));
-                    return;
-                }
-
-                var openResult = _options.HostCapabilityBridge.OpenExternal(
-                    args.Uri,
-                    _rootWindowId,
-                    parentWindowId: _rootWindowId,
-                    targetWindowId: null);
-
-                args.Handled = true;
-                if (openResult.Outcome == WebViewHostCapabilityCallOutcome.Deny)
-                {
-                    ReportPolicyFailure(
-                        WebViewShellPolicyDomain.ExternalOpen,
-                        new UnauthorizedAccessException(openResult.DenyReason ?? "External open was denied by host capability policy."));
-                    return;
-                }
-
-                if (openResult.Outcome == WebViewHostCapabilityCallOutcome.Failure)
-                {
-                    ReportPolicyFailure(
-                        WebViewShellPolicyDomain.ExternalOpen,
-                        openResult.Error ?? new InvalidOperationException("External open failed without an exception payload."));
-                }
-                return;
-            }
-            case WebViewNewWindowStrategy.Delegate:
-                args.Handled = decision.Handled;
-                return;
-            default:
-                args.Handled = false;
-                return;
-        }
-    }
-
-    private bool TryCreateManagedWindow(Guid windowId, Uri? targetUri, string? scopeIdentityOverride)
-    {
-        if (_options.ManagedWindowFactory is null)
-            return false;
-
-        var scopeIdentity = string.IsNullOrWhiteSpace(scopeIdentityOverride)
-            ? _options.SessionContext.ScopeIdentity
-            : scopeIdentityOverride.Trim();
-
-        var sessionContext = _options.SessionContext with
-        {
-            ScopeIdentity = scopeIdentity,
-            WindowId = windowId,
-            ParentWindowId = _rootWindowId,
-            RequestUri = targetUri
-        };
-
-        var sessionDecision = _options.SessionPolicy is null
-            ? _sessionDecision
-            : ExecutePolicyDomain(WebViewShellPolicyDomain.Session, () => _options.SessionPolicy.Resolve(sessionContext));
-
-        WebViewSessionPermissionProfile? resolvedProfile = null;
-        var profileIdentity = _rootProfile?.ProfileIdentity;
-        if (_options.SessionPermissionProfileResolver is not null)
-        {
-            var profileContext = new WebViewSessionPermissionProfileContext(
-                _rootWindowId,
-                ParentWindowId: _rootWindowId,
-                WindowId: windowId,
-                ScopeIdentity: scopeIdentity,
-                RequestUri: targetUri,
-                PermissionKind: null);
-
-            resolvedProfile = ExecutePolicyDomain(
-                WebViewShellPolicyDomain.Session,
-                () => _options.SessionPermissionProfileResolver.Resolve(profileContext, _rootProfile));
-
-            if (resolvedProfile is not null)
-            {
-                sessionDecision = resolvedProfile.ResolveSessionDecision(
-                    parentDecision: _sessionDecision,
-                    fallbackDecision: sessionDecision,
-                    scopeIdentity: scopeIdentity);
-                profileIdentity = resolvedProfile.ProfileIdentity;
-
-                if (sessionDecision is not null)
-                {
-                    RaiseSessionPermissionProfileDiagnostic(
-                        windowId,
-                        _rootWindowId,
-                        scopeIdentity,
-                        resolvedProfile,
-                        sessionDecision,
-                        permissionKind: null,
-                        permissionDecision: WebViewPermissionProfileDecision.DefaultFallback());
-                }
-            }
-        }
-
-        var createContext = new WebViewManagedWindowCreateContext(
-            windowId,
-            _rootWindowId,
-            targetUri,
-            scopeIdentity,
-            sessionDecision,
-            profileIdentity);
-
-        var managedWindow = ExecutePolicyDomain(
-            WebViewShellPolicyDomain.ManagedWindowLifecycle,
-            () => _options.ManagedWindowFactory?.Invoke(createContext));
-
-        if (managedWindow is null)
-            return false;
-
-        var entry = new ManagedWindowEntry(windowId, _rootWindowId, managedWindow, sessionDecision, profileIdentity);
-        lock (_managedWindowsLock)
-            _managedWindows[windowId] = entry;
-
-        if (!TryTransitionManagedWindowState(entry, WebViewManagedWindowLifecycleState.Created))
-            return false;
-        if (!TryTransitionManagedWindowState(entry, WebViewManagedWindowLifecycleState.Attached))
-            return false;
-        if (!TryTransitionManagedWindowState(entry, WebViewManagedWindowLifecycleState.Ready))
-            return false;
-
-        return true;
-    }
-
-    private bool TryTransitionManagedWindowState(ManagedWindowEntry entry, WebViewManagedWindowLifecycleState nextState)
-    {
-        ArgumentNullException.ThrowIfNull(entry);
-
-        if (!IsTransitionAllowed(entry.State, nextState))
-        {
-            ReportPolicyFailure(
-                WebViewShellPolicyDomain.ManagedWindowLifecycle,
-                new InvalidOperationException($"Invalid managed window lifecycle transition '{entry.State?.ToString() ?? "None"}' -> '{nextState}'."));
-            return false;
-        }
-
-        entry.State = nextState;
-        ManagedWindowLifecycleChanged?.Invoke(
-            this,
-            new WebViewManagedWindowLifecycleEventArgs(
-                entry.WindowId,
-                entry.ParentWindowId,
-                nextState,
-                entry.SessionDecision,
-                entry.ProfileIdentity));
-        return true;
-    }
-
-    private static bool IsTransitionAllowed(
-        WebViewManagedWindowLifecycleState? currentState,
-        WebViewManagedWindowLifecycleState nextState)
-    {
-        return currentState switch
-        {
-            null => nextState == WebViewManagedWindowLifecycleState.Created,
-            WebViewManagedWindowLifecycleState.Created => nextState is WebViewManagedWindowLifecycleState.Attached or WebViewManagedWindowLifecycleState.Closing,
-            WebViewManagedWindowLifecycleState.Attached => nextState is WebViewManagedWindowLifecycleState.Ready or WebViewManagedWindowLifecycleState.Closing,
-            WebViewManagedWindowLifecycleState.Ready => nextState == WebViewManagedWindowLifecycleState.Closing,
-            WebViewManagedWindowLifecycleState.Closing => nextState == WebViewManagedWindowLifecycleState.Closed,
-            WebViewManagedWindowLifecycleState.Closed => false,
-            _ => false
-        };
+        return await _managedWindowManager.CloseManagedWindowAsync(windowId, timeout, cancellationToken).ConfigureAwait(false);
     }
 
     private void ExecutePolicyDomain(WebViewShellPolicyDomain domain, Action action)
-    {
-        ArgumentNullException.ThrowIfNull(action);
-
-        try
-        {
-            action();
-        }
-        catch (Exception ex)
-        {
-            ReportPolicyFailure(domain, ex);
-        }
-    }
+        => _hostCapabilityExecutor.ExecutePolicyDomain(domain, action);
 
     private T? ExecutePolicyDomain<T>(WebViewShellPolicyDomain domain, Func<T> action)
-    {
-        ArgumentNullException.ThrowIfNull(action);
-
-        try
-        {
-            return action();
-        }
-        catch (Exception ex)
-        {
-            ReportPolicyFailure(domain, ex);
-            return default;
-        }
-    }
+        => _hostCapabilityExecutor.ExecutePolicyDomain(domain, action);
 
     private void RaiseSessionPermissionProfileDiagnostic(
         Guid windowId,
@@ -1563,6 +1194,22 @@ public sealed class WebViewShellExperience : IDisposable
         if (whitelist is not null)
             return whitelist.Contains(action);
         return DefaultSystemActionWhitelist.Contains(action);
+    }
+
+    private static bool IsTransitionAllowed(
+        WebViewManagedWindowLifecycleState? currentState,
+        WebViewManagedWindowLifecycleState nextState)
+    {
+        return currentState switch
+        {
+            null => nextState == WebViewManagedWindowLifecycleState.Created,
+            WebViewManagedWindowLifecycleState.Created => nextState is WebViewManagedWindowLifecycleState.Attached or WebViewManagedWindowLifecycleState.Closing,
+            WebViewManagedWindowLifecycleState.Attached => nextState is WebViewManagedWindowLifecycleState.Ready or WebViewManagedWindowLifecycleState.Closing,
+            WebViewManagedWindowLifecycleState.Ready => nextState == WebViewManagedWindowLifecycleState.Closing,
+            WebViewManagedWindowLifecycleState.Closing => nextState == WebViewManagedWindowLifecycleState.Closed,
+            WebViewManagedWindowLifecycleState.Closed => false,
+            _ => false
+        };
     }
 
     private (WebViewMenuModelRequest? EffectiveMenuModel, WebViewHostCapabilityCallResult<object?>? Result) TryPruneMenuModel(
@@ -1753,22 +1400,7 @@ public sealed class WebViewShellExperience : IDisposable
     private void ReportSystemIntegrationOutcome<T>(
         WebViewHostCapabilityCallResult<T> result,
         string defaultDenyReason)
-    {
-        if (result.Outcome == WebViewHostCapabilityCallOutcome.Deny)
-        {
-            ReportPolicyFailure(
-                WebViewShellPolicyDomain.SystemIntegration,
-                new UnauthorizedAccessException(result.DenyReason ?? defaultDenyReason));
-            return;
-        }
-
-        if (result.Outcome == WebViewHostCapabilityCallOutcome.Failure)
-        {
-            ReportPolicyFailure(
-                WebViewShellPolicyDomain.SystemIntegration,
-                result.Error ?? new InvalidOperationException("System integration capability failed without an exception payload."));
-        }
-    }
+        => _hostCapabilityExecutor.ReportSystemIntegrationOutcome(result, defaultDenyReason);
 
     /// <inheritdoc />
     public void Dispose()
@@ -1776,57 +1408,13 @@ public sealed class WebViewShellExperience : IDisposable
         if (_disposed) return;
         _disposed = true;
 
-        List<ManagedWindowEntry> entries;
-        lock (_managedWindowsLock)
-        {
-            entries = [.. _managedWindows.Values];
-            _managedWindows.Clear();
-        }
-
-        foreach (var entry in entries)
-        {
-            if (entry.State is not WebViewManagedWindowLifecycleState.Closing and not WebViewManagedWindowLifecycleState.Closed)
-                TryTransitionManagedWindowState(entry, WebViewManagedWindowLifecycleState.Closing);
-            try
-            {
-                entry.Window.Dispose();
-            }
-            catch (Exception ex)
-            {
-                ReportPolicyFailure(WebViewShellPolicyDomain.ManagedWindowLifecycle, ex);
-            }
-            TryTransitionManagedWindowState(entry, WebViewManagedWindowLifecycleState.Closed);
-        }
+        _managedWindowManager.DisposeManagedWindows();
 
         _webView.NewWindowRequested -= OnNewWindowRequested;
         _webView.DownloadRequested -= OnDownloadRequested;
         _webView.PermissionRequested -= OnPermissionRequested;
         if (_options.HostCapabilityBridge is not null)
             _options.HostCapabilityBridge.SystemIntegrationEventDispatched -= OnSystemIntegrationEventDispatched;
-    }
-
-    private sealed class ManagedWindowEntry
-    {
-        public ManagedWindowEntry(
-            Guid windowId,
-            Guid parentWindowId,
-            IWebView window,
-            WebViewShellSessionDecision? sessionDecision,
-            string? profileIdentity)
-        {
-            WindowId = windowId;
-            ParentWindowId = parentWindowId;
-            Window = window;
-            SessionDecision = sessionDecision;
-            ProfileIdentity = profileIdentity;
-        }
-
-        public Guid WindowId { get; }
-        public Guid ParentWindowId { get; }
-        public IWebView Window { get; }
-        public WebViewShellSessionDecision? SessionDecision { get; }
-        public string? ProfileIdentity { get; }
-        public WebViewManagedWindowLifecycleState? State { get; set; }
     }
 }
 

@@ -287,4 +287,73 @@ partial class BuildTask
 
             Serilog.Log.Information("iOS test app deployed and launched on simulator.");
         });
+
+    static void WaitForAndroidBoot(string adbPath, int timeoutMinutes = 3)
+    {
+        Serilog.Log.Information("Waiting for emulator to boot...");
+        var timeout = TimeSpan.FromMinutes(timeoutMinutes);
+        var stopwatch = Stopwatch.StartNew();
+        var booted = false;
+
+        while (stopwatch.Elapsed < timeout)
+        {
+            Thread.Sleep(3000);
+            try
+            {
+                var bootResult = RunProcess(adbPath, "shell getprop sys.boot_completed");
+                if (bootResult.Trim() == "1")
+                {
+                    booted = true;
+                    break;
+                }
+            }
+            catch
+            {
+                // Device not ready yet
+            }
+        }
+
+        Assert.True(booted, $"Emulator did not boot within {timeoutMinutes} minutes.");
+        Serilog.Log.Information("Emulator booted successfully ({Elapsed:F0}s).", stopwatch.Elapsed.TotalSeconds);
+    }
+
+    /// <summary>
+    /// Launch an Android app via monkey, retrying until the activity manager is available.
+    /// After sys.boot_completed=1 there is a short window where system services are still initializing.
+    /// </summary>
+    static void LaunchAndroidApp(string adbPath, string packageName, int maxRetries = 5)
+    {
+        for (var attempt = 1; attempt <= maxRetries; attempt++)
+        {
+            try
+            {
+                var output = RunProcess(adbPath,
+                    $"shell monkey -p {packageName} -c android.intent.category.LAUNCHER 1");
+
+                // monkey writes "Events injected: 1" to stdout on success
+                if (output.Contains("Events injected", StringComparison.OrdinalIgnoreCase))
+                {
+                    return;
+                }
+
+                Serilog.Log.Warning("monkey attempt {Attempt}/{Max}: unexpected output: {Output}",
+                    attempt, maxRetries, output.Trim());
+            }
+            catch (Exception ex)
+            {
+                Serilog.Log.Warning("monkey attempt {Attempt}/{Max} failed: {Message}",
+                    attempt, maxRetries, ex.Message);
+            }
+
+            if (attempt < maxRetries)
+            {
+                Serilog.Log.Information("Waiting 3s before retry...");
+                Thread.Sleep(3000);
+            }
+        }
+
+        throw new InvalidOperationException(
+            $"Failed to launch {packageName} after {maxRetries} attempts. " +
+            "The activity manager may not be available — is the emulator fully booted?");
+    }
 }

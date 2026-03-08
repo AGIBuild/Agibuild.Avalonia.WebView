@@ -88,9 +88,7 @@ partial class BuildTask
             }
         };
 
-        File.WriteAllText(
-            WarningGovernanceReportFile,
-            JsonSerializer.Serialize(reportPayload, new JsonSerializerOptions { WriteIndented = true }));
+        WriteJsonReport(WarningGovernanceReportFile, reportPayload);
         Serilog.Log.Information("Warning governance report written to {Path}", WarningGovernanceReportFile);
         Serilog.Log.Information(
             "Warning governance summary: known-baseline={KnownBaseline}, actionable={Actionable}, new-regression={NewRegression}",

@@ -949,20 +949,7 @@ internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHan
         // and protocolVersion independently. Double-wrapping broke RPC/Bridge
         // because the runtime layer received the envelope string instead of the
         // actual message body.
-        var bridgeScript = $$"""
-            (function() {
-                window.__agibuildWebView = window.__agibuildWebView || {};
-                window.__agibuildWebView.channelId = '{{channelId}}';
-                window.__agibuildWebView.postMessage = function(body) {
-                    if (window.__agibuildBridge) {
-                        window.__agibuildBridge.postMessage(body);
-                    }
-                };
-                if (!window.chrome) window.chrome = {};
-                if (!window.chrome.webview) window.chrome.webview = {};
-                window.chrome.webview.postMessage = window.__agibuildWebView.postMessage;
-            })();
-            """;
+        var bridgeScript = WebViewBridgeScriptFactory.CreateAndroidBridgeBootstrapScript(channelId);
 
         view.EvaluateJavascript(bridgeScript, null);
     }

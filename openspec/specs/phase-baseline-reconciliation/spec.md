@@ -1,7 +1,7 @@
 # phase-baseline-reconciliation Specification
 
 ## Purpose
-TBD - created by archiving change phase7-closeout-phase8-reconciliation. Update Purpose after archive.
+Ensure atomicity and consistency of roadmap phase transition baseline updates, so that roadmap machine-checkable markers and governance closeout constants always expose the same phase pair without intermediate drift.
 ## Requirements
 ### Requirement: Roadmap and governance transition baselines SHALL be reconciled atomically
 Repository transition baseline updates MUST change roadmap machine-checkable markers and governance closeout constants as one atomic operation.

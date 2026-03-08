@@ -288,14 +288,14 @@ dotnet run --project MyApp.Desktop
 
 | Metric | Value |
 |--------|-------|
-| Unit tests | 1459 |
+| Unit tests | 1879 |
 | Integration tests | 209 |
-| Line coverage | **95.87%** |
-| Branch coverage | **84.8%** |
-| Method coverage | **98.2%** |
+| Line coverage | **97.38%** |
+| Branch coverage | **93.17%** |
+| Method coverage | **97.1%** |
 
 ```bash
-nuke Test            # Unit + Integration (1668 tests)
+nuke Test            # Unit + Integration (2088 tests)
 nuke Coverage        # Coverage report + threshold enforcement
 nuke NugetPackageTest  # Pack → install → run smoke test
 nuke TemplateE2E     # Template end-to-end test

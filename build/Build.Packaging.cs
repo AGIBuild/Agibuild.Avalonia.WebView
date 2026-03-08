@@ -4,7 +4,6 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml.Linq;
 using Nuke.Common;
@@ -394,9 +393,7 @@ partial class BuildTask
                     resolutionSource = resolvedRoot.Source,
                     attempts = retryTelemetry
                 };
-                File.WriteAllText(
-                    NugetSmokeTelemetryFile,
-                    JsonSerializer.Serialize(telemetryPayload, new JsonSerializerOptions { WriteIndented = true }));
+                WriteJsonReport(NugetSmokeTelemetryFile, telemetryPayload);
                 Serilog.Log.Information("NuGet smoke retry telemetry written to {Path}", NugetSmokeTelemetryFile);
             }
 
@@ -415,28 +412,6 @@ partial class BuildTask
 
             Serilog.Log.Information("NuGet package integration test PASSED.");
         });
-
-    string ResolvePackedAgibuildVersion(string packageId)
-    {
-        var versionPattern = new Regex(
-            $"^{Regex.Escape(packageId)}\\.(?<v>\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z\\.]+)?(?:\\+[0-9A-Za-z\\.]+)?)\\.nupkg$",
-            RegexOptions.CultureInvariant | RegexOptions.Compiled);
-
-        var packages = PackageOutputDirectory
-            .GlobFiles("*.nupkg")
-            .Where(p => !p.Name.EndsWith(".symbols.nupkg", StringComparison.OrdinalIgnoreCase))
-            .Select(p => new FileInfo(p))
-            .Select(p => new { File = p, Match = versionPattern.Match(p.Name) })
-            .Where(x => x.Match.Success)
-            .OrderByDescending(x => x.File.LastWriteTimeUtc)
-            .ToList();
-
-        Assert.NotEmpty(packages, $"No packed nupkg found for {packageId} in {PackageOutputDirectory}.");
-
-        var chosen = packages.First();
-        Serilog.Log.Information("Using packed nupkg: {File}", chosen.File.Name);
-        return chosen.Match.Groups["v"].Value;
-    }
 
     // ──────────────────────────── NuGet Helpers ────────────────────────────
 
