@@ -1,6 +1,6 @@
 <p align="center">
-  <img src="https://img.shields.io/nuget/v/Agibuild.Fulora?logo=nuget&label=NuGet&color=004880&style=flat-square" />
-  <img src="https://img.shields.io/nuget/dt/Agibuild.Fulora?logo=nuget&label=Downloads&color=00a86b&style=flat-square" />
+  <img src="https://img.shields.io/nuget/v/Agibuild.Fulora.Avalonia?logo=nuget&label=NuGet&color=004880&style=flat-square" />
+  <img src="https://img.shields.io/nuget/dt/Agibuild.Fulora.Avalonia?logo=nuget&label=Downloads&color=00a86b&style=flat-square" />
   <a href="https://github.com/AGIBuild/Agibuild.Fulora/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/AGIBuild/Agibuild.Fulora/ci.yml?label=CI&logo=github&style=flat-square" /></a>
   <img src="https://img.shields.io/badge/License-MIT-yellow?style=flat-square" />
 </p>
@@ -13,111 +13,34 @@
 
 ---
 
-> **Product direction**  
-> Build a category-defining C# + Web application framework with a clear promise:  
-> **from first WebView embed to full product platform, without rewriting your foundation**.
->
-> **Current package ID**: `Agibuild.Fulora` (branding is now Fulora).
+## Quick Start
 
-## Vision
-
-Turn C# + Web into a first-class product-building stack for teams that need both speed and control.
-
-- Build rich experiences in TypeScript and C# as one coherent system
-- Keep platform control, security boundaries, and diagnostics first-class from day one
-- Scale from "embed one WebView" to "deliver a full product platform" without rewriting foundations
-
-## Why This Exists
-
-Most teams building cross-platform products with C# + web want two outcomes at the same time:
-
-1. Web iteration speed (React/Vue/Svelte, HMR, fast release loops)
-2. Native-grade control (security boundaries, lifecycle governance, deterministic runtime behavior)
-
-Traditional WebView wrappers often solve rendering, but still leave you to hand-build:
-
-- string-based host/web IPC
-- policy governance for host capabilities
-- diagnosable runtime behavior for CI and automation
-- scalable app-shell patterns across platforms
-
-Fulora is designed to close that gap by default.
-
-## What This Is (Framework + Control)
-
-### 0) Two adoption paths, one runtime core
-- **Control path**: integrate `WebView` into your architecture with minimal coupling
-- **Framework path**: adopt full capabilities (bridge/policy/shell/tooling) for faster product delivery
-
-### 1) Typed bridge at the center
-- `[JsExport]` / `[JsImport]` contracts
-- source-generated C# and JS-facing proxies
-- AOT-safe, reflection-free path
-- V2: binary payload (`byte[]` ↔ `Uint8Array`), `CancellationToken` ↔ `AbortSignal`, `IAsyncEnumerable` streaming, method overloads
-
-### 2) Typed capability gateway for host/system operations
-- desktop/system capabilities converge into one typed entry model
-- avoid scattered host API calls in app-layer code
-
-### 3) Policy-first runtime semantics
-- policy is evaluated before capability/provider execution
-- deterministic outcomes: `allow` / `deny` / `failure`
-
-### 4) Agent-friendly diagnostics
-- machine-checkable diagnostics for critical runtime flows
-- usable by CI, test automation, and AI agents
-
-### 5) Web-first template flow
-- starter path optimized for web-first hybrid desktop/mobile delivery
-- minimal host glue, typed contracts preserved end-to-end
-
-### 6) Shell activation & deep-link
-- single-instance activation orchestration (primary/secondary)
-- deep-link native registration with policy-governed admission
-- SPA asset hot update with signature verification and rollback
-
-## Roadmap Alignment
-
-| Phase | Theme | Status |
-|---|---|---|
-| Phase 0 | Foundation | ✅ Done |
-| Phase 1 | Type-Safe Bridge | ✅ Done |
-| Phase 2 | SPA Hosting | ✅ Core Done |
-| Phase 3 | Polish & GA | ✅ Done |
-| Phase 4 | Application Shell | ✅ Done |
-| Phase 5 | Framework Positioning Foundation | ✅ Completed |
-| Phase 6 | Governance Productization | ✅ Completed |
-| Phase 7 | Release Orchestration | ✅ Completed |
-| Phase 8 | Bridge V2 & Platform Parity | 🚧 Active |
-
-Read more:
-- [Roadmap](openspec/ROADMAP.md)
-- [Project Vision & Goals](openspec/PROJECT.md)
-
-## Platform Coverage
-
-| Platform | Engine | Status |
-|----------|--------|--------|
-| Windows | WebView2 | Preview |
-| macOS | WKWebView | Preview |
-| Linux | WebKitGTK | Preview |
-| iOS | WKWebView | Preview |
-| Android | Android WebView | Preview |
-
-> Avalonia provides an official commercial WebView option.  
-> This project focuses on an open, cross-platform, contract-driven hybrid app platform.
-
----
-
-## 60-Second Start
-
-Install package:
+**Recommended (CLI + template):**
 
 ```bash
-dotnet add package Agibuild.Fulora
+dotnet tool install -g Agibuild.Fulora.Cli
+dotnet new install Agibuild.Fulora.Templates
+fulora new MyApp --frontend react
+cd MyApp
+fulora dev
 ```
 
-Enable in `Program.cs`:
+**Alternative (template only):**
+
+```bash
+dotnet new install Agibuild.Fulora.Templates
+dotnet new agibuild-hybrid -n MyApp
+cd MyApp
+dotnet run --project MyApp.Desktop
+```
+
+**Manual (add WebView to an existing Avalonia app):**
+
+```bash
+dotnet add package Agibuild.Fulora.Avalonia
+```
+
+In `Program.cs`:
 
 ```csharp
 AppBuilder.Configure<App>()
@@ -126,24 +49,22 @@ AppBuilder.Configure<App>()
     .StartWithClassicDesktopLifetime(args);
 ```
 
-Add control in XAML:
+In XAML:
 
 ```xml
-<Window xmlns:wv="using:Agibuild.Fulora">
-    <wv:WebView x:Name="WebView" Source="https://example.com" />
+<Window xmlns:wv="clr-namespace:Agibuild.Fulora;assembly=Agibuild.Fulora">
+    <wv:WebView x:Name="WebView"
+                Source="https://example.com" />
 </Window>
 ```
 
-For full guides:
-- [Getting Started](docs/articles/getting-started.md)
-- [Architecture](docs/articles/architecture.md)
-- [Documentation Index](docs/index.md)
+Full guide: [Getting Started](docs/articles/getting-started.md) · [Documentation Index](docs/index.md)
 
 ---
 
 ## Typed Bridge in Practice
 
-Expose C# service to JavaScript:
+Expose C# to JavaScript:
 
 ```csharp
 [JsExport]
@@ -152,18 +73,15 @@ public interface IGreeterService
     Task<string> Greet(string name);
 }
 
-public sealed class GreeterService : IGreeterService
-{
-    public Task<string> Greet(string name) => Task.FromResult($"Hello, {name}!");
-}
-
 webView.Bridge.Expose<IGreeterService>(new GreeterService());
 ```
 
 Call from JavaScript:
 
 ```javascript
-const msg = await window.agWebView.rpc.invoke("GreeterService.greet", { name: "World" });
+const msg = await window.agWebView.rpc.invoke("GreeterService.greet", {
+    name: "World"
+});
 ```
 
 Call JavaScript from C#:
@@ -183,7 +101,7 @@ await notifications.ShowNotification("File saved!");
 
 ## Web-First SPA Hosting
 
-Production (embedded assets):
+**Production (embedded):**
 
 ```csharp
 webView.EnableSpaHosting(new SpaHostingOptions
@@ -191,61 +109,51 @@ webView.EnableSpaHosting(new SpaHostingOptions
     EmbeddedResourcePrefix = "wwwroot",
     ResourceAssembly = typeof(MainWindow).Assembly,
 });
-
 await webView.NavigateAsync(new Uri("app://localhost/index.html"));
 ```
 
-Development (HMR proxy):
+**Development (HMR):**
 
 ```csharp
 webView.EnableSpaHosting(new SpaHostingOptions
 {
-    DevServerUrl = "http://localhost:5173",  // Vite, webpack, etc.
+    DevServerUrl = "http://localhost:5173"
 });
 ```
 
-
 ---
 
-## Demo: Avalonia + React
+## Demos & Samples
 
-Sample project: [`samples/avalonia-react/`](samples/avalonia-react/)
+| Sample | Description |
+|--------|-------------|
+| [samples/avalonia-react](samples/avalonia-react/) | Avalonia + React (Vite), typed bridge, SPA hosting |
+| [samples/avalonia-ai-chat](samples/avalonia-ai-chat/) | AI chat with `IAsyncEnumerable` streaming, cancellation, Microsoft.Extensions.AI |
+| [samples/showcase-todo](samples/showcase-todo/) | Full-featured reference app (plugins, shell, CLI) |
 
-### Dashboard
-<p align="center"><img src="docs/demo/images/dashboard.jpg" width="720" /></p>
-
-### Chat
-<p align="center"><img src="docs/demo/images/chat.jpg" width="720" /></p>
-
-### Settings
-<p align="center"><img src="docs/demo/images/settings.jpg" width="720" /></p>
-
-Deep dive:
-- [Demo walkthrough](docs/demo/index.md)
-
-## Demo: AI Chat (Streaming)
-
-Sample project: [`samples/avalonia-ai-chat/`](samples/avalonia-ai-chat/)
-
-Demonstrates `IAsyncEnumerable<T>` streaming via the bridge with `Microsoft.Extensions.AI`. Features real-time token rendering, cancellation via `AbortController`, and echo-mode fallback.
-
-Deep dive: [AI Integration Guide](docs/ai-integration-guide.md)
+Walkthrough: [Demo guide](docs/demo/index.md) · [AI Integration](docs/ai-integration-guide.md)
 
 ---
 
 ## Capability Snapshot
 
-- OAuth / Web authentication (`IWebAuthBroker`)
-- Web dialog flows (`IWebDialog`)
-- Screenshot and PDF export
-- Cookie and command manager support
-- Environment options (DevTools, User-Agent, session modes)
-- Dependency injection integration
+**Core**
 
-For detailed API usage, see:
-- [Architecture notes](docs/articles/architecture.md)
-- [Bridge guide](docs/articles/bridge-guide.md)
-- [SPA hosting guide](docs/articles/spa-hosting.md)
+- Typed bridge: `[JsExport]` / `[JsImport]`, source-generated C#/JS proxies, AOT-safe; V2: `byte[]`/`Uint8Array`, `CancellationToken`/`AbortSignal`, `IAsyncEnumerable` streaming, overloads
+- Typed capability gateway for host/system operations (policy-first execution)
+- SPA hosting: embedded assets, dev HMR proxy, shell activation, deep-link, SPA asset hot update with signature verification
+- OAuth / Web auth (`IWebAuthBroker`), Web dialog (`IWebDialog`), screenshot & PDF, cookies, command manager
+- DevTools, User-Agent, session modes, dependency injection
+
+**Ecosystem**
+
+- Official plugins: Database (SQLite), HTTP Client, File System, Notifications, Auth Token, Biometric, LocalStorage
+- CLI: `fulora new`, `dev`, `generate`, `search`, `add plugin`, `list plugins --check`
+- Telemetry: OpenTelemetry provider, Sentry crash reporting with bridge breadcrumbs
+- AI: Microsoft.Extensions.AI integration, streaming, tool calling, Ollama/OpenAI providers
+- Enterprise: OAuth PKCE client, shared state store (cross-WebView), plugin compatibility matrix
+
+Details: [Architecture](docs/articles/architecture.md) · [Bridge guide](docs/articles/bridge-guide.md) · [SPA hosting](docs/articles/spa-hosting.md)
 
 ---
 
@@ -253,34 +161,54 @@ For detailed API usage, see:
 
 ```
 ┌──────────────────────────────────────────────────────────┐
-│                   Your Avalonia App                     │
-│                                                          │
-│  ┌───────────┐   ┌─────────────┐   ┌─────────────────┐  │
-│  │ WebView   │   │ Typed Bridge│   │ Capability Gate │  │
-│  │ Control   │   │ C# <-> JS   │   │ Host/System API │  │
-│  └─────┬─────┘   └──────┬──────┘   └────────┬────────┘  │
-│        │                │                    │           │
-│  ┌─────┴────────────────┴────────────────────┴────────┐  │
-│  │         Runtime Core (policy-first execution)      │  │
-│  │  Navigation · RPC · Shell · Diagnostics · Policy   │  │
+│                   Your Avalonia App                       │
+│  ┌───────────┐   ┌─────────────┐   ┌─────────────────┐   │
+│  │ WebView   │   │ Typed Bridge │   │ Capability Gate │   │
+│  │ Control   │   │ C# <-> JS   │   │ Host/System API │   │
+│  └─────┬─────┘   └──────┬──────┘   └────────┬────────┘   │
+│        └────────────────┴──────────────────┘             │
+│  ┌─────────────────────────────────────────────────────┐  │
+│  │    Runtime Core (policy-first execution)             │  │
+│  │    Navigation · RPC · Shell · Diagnostics · Policy  │  │
 │  └──────────────────────────┬──────────────────────────┘  │
 │                             │ IWebViewAdapter             │
 │  ┌──────────────────────────┴──────────────────────────┐  │
-│  │      WKWebView · WebView2 · WebKitGTK · Android    │  │
+│  │   WKWebView · WebView2 · WebKitGTK · Android        │  │
 │  └─────────────────────────────────────────────────────┘  │
 └──────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Template Workflow
+## Vision
 
-```bash
-dotnet new install Agibuild.Fulora.Templates
-dotnet new agibuild-hybrid -n MyApp
-cd MyApp
-dotnet run --project MyApp.Desktop
-```
+Fulora is a C# + Web application framework: **from first WebView embed to full product platform, without rewriting your foundation**. Two paths, one runtime:
+
+- **Control path**: integrate WebView with minimal coupling
+- **Framework path**: adopt bridge, policy, shell, and tooling for faster delivery
+
+We close the gap left by typical WebView wrappers: typed host/web IPC, policy-governed capabilities, machine-checkable diagnostics, and scalable app-shell patterns out of the box.
+
+---
+
+## Roadmap & Status
+
+**Current status:** Phase 12 (Enterprise & Advanced Scenarios) completed. All roadmap phases through 12 are done.
+
+- [Full Roadmap](openspec/ROADMAP.md)
+- [Project Vision & Goals](openspec/PROJECT.md)
+
+## Platform Coverage
+
+| Platform | Engine | Status |
+|----------|--------|--------|
+| Windows | WebView2 | Supported |
+| macOS | WKWebView | Supported |
+| Linux | WebKitGTK | Supported |
+| iOS | WKWebView | Supported |
+| Android | Android WebView | Supported |
+
+Avalonia offers an official commercial WebView option; this project is an open, contract-driven hybrid app platform.
 
 ---
 
@@ -288,18 +216,19 @@ dotnet run --project MyApp.Desktop
 
 | Metric | Value |
 |--------|-------|
-| Unit tests | 1879 |
+| Unit tests | 1883 |
 | Integration tests | 209 |
-| Line coverage | **97.38%** |
-| Branch coverage | **93.17%** |
-| Method coverage | **97.1%** |
+| Line coverage | **97.03%** |
+| Branch coverage | **93.03%** |
 
 ```bash
-nuke Test            # Unit + Integration (2088 tests)
-nuke Coverage        # Coverage report + threshold enforcement
+nuke Test              # Unit + Integration (2092 tests)
+nuke Coverage          # Coverage report + threshold enforcement
 nuke NugetPackageTest  # Pack → install → run smoke test
-nuke TemplateE2E     # Template end-to-end test
+nuke TemplateE2E       # Template end-to-end test
 ```
+
+---
 
 ## License
 

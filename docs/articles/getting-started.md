@@ -68,7 +68,7 @@ cd MyApp
 ### 2) Add package
 
 ```bash
-dotnet add package Agibuild.Fulora
+dotnet add package Agibuild.Fulora.Avalonia
 ```
 
 ### 3) Add WebView control

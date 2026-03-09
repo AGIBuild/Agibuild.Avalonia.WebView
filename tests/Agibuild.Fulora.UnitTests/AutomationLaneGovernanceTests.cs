@@ -794,7 +794,7 @@ public sealed class AutomationLaneGovernanceTests
         Assert.Matches(new Regex(@"\|\s*Unit tests\s*\|\s*\d{3,}\s*\|"), readme);
         Assert.Matches(new Regex(@"\|\s*Integration tests\s*\|\s*\d{2,}\s*\|"), readme);
         Assert.Matches(new Regex(@"\|\s*Line coverage\s*\|\s*\*\*\d+\.\d+%\*\*\s*\|"), readme);
-        AssertSourceContains(readme, "Phase 5 | Framework Positioning Foundation | ✅ Completed", ReadmeQualitySignals, readmePath);
+        AssertSourceContains(readme, "Phase 12", ReadmeQualitySignals, readmePath);
     }
 
     [Fact]
