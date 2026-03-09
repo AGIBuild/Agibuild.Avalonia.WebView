@@ -191,7 +191,7 @@ We close the gap left by typical WebView wrappers: typed host/web IPC, policy-go
 
 ---
 
-## Roadmap & Status
+## Roadmap Alignment
 
 **Current status:** Phase 12 (Enterprise & Advanced Scenarios) completed. All roadmap phases through 12 are done.
 
