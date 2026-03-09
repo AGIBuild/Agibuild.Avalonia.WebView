@@ -8,12 +8,30 @@
 <h1 align="center">Fulora</h1>
 
 <p align="center">
-  <strong>One runtime core for C# + Web. Build fast, stay native, scale confidently.</strong>
+  <strong>Build desktop apps at web speed, without giving up native power.</strong>
 </p>
 
 ---
 
-## Quick Start
+## Why Fulora
+
+You have a fast-moving web team and a battle-tested .NET desktop stack.  
+Most hybrid approaches force a compromise: either weak host-web contracts, or a rewrite when complexity grows.
+
+Fulora is built for the middle path that scales:
+
+- Keep your native host in C# and Avalonia
+- Ship rich UI with React/Vue/Svelte inside WebView
+- Connect both sides through a typed, source-generated bridge
+- Enforce host capabilities through policy-first execution
+
+From "just embed one page" to "run a full product shell", you stay on one runtime model.
+
+---
+
+## Start in 60 Seconds
+
+Choose the onboarding path that matches where you are today.
 
 **Recommended (CLI + template):**
 
@@ -62,7 +80,19 @@ Full guide: [Getting Started](docs/articles/getting-started.md) · [Documentatio
 
 ---
 
-## Typed Bridge in Practice
+## Demo
+
+Want to see Fulora in action before reading all docs?
+
+- Product walkthrough: [Demo guide](docs/demo/index.md)
+- AI workflow example: [AI Integration](docs/ai-integration-guide.md)
+- End-to-end sample apps: [Demos & Samples](#demos--samples)
+
+---
+
+## Speak One Language Across C# and JavaScript
+
+The bridge is the core experience: predictable contracts, async-friendly calls, and no fragile string-based IPC.
 
 Expose C# to JavaScript:
 
@@ -99,7 +129,9 @@ await notifications.ShowNotification("File saved!");
 
 ---
 
-## Web-First SPA Hosting
+## Ship SPAs Like Native Screens
+
+Run your frontend exactly how your team already works: embedded assets in production, hot reload in development.
 
 **Production (embedded):**
 
@@ -125,6 +157,8 @@ webView.EnableSpaHosting(new SpaHostingOptions
 
 ## Demos & Samples
 
+See complete patterns, not toy snippets.
+
 | Sample | Description |
 |--------|-------------|
 | [samples/avalonia-react](samples/avalonia-react/) | Avalonia + React (Vite), typed bridge, SPA hosting |
@@ -136,6 +170,8 @@ Walkthrough: [Demo guide](docs/demo/index.md) · [AI Integration](docs/ai-integr
 ---
 
 ## Capability Snapshot
+
+When your app grows from a view to a platform, Fulora already has the building blocks.
 
 **Core**
 
@@ -158,6 +194,8 @@ Details: [Architecture](docs/articles/architecture.md) · [Bridge guide](docs/ar
 ---
 
 ## Architecture at a Glance
+
+One runtime core, multiple platform adapters.
 
 ```
 ┌──────────────────────────────────────────────────────────┐
@@ -182,12 +220,14 @@ Details: [Architecture](docs/articles/architecture.md) · [Bridge guide](docs/ar
 
 ## Vision
 
-Fulora is a C# + Web application framework: **from first WebView embed to full product platform, without rewriting your foundation**. Two paths, one runtime:
+Fulora helps teams move from first WebView integration to full hybrid platform **without replacing their foundation**.
+
+Two paths, one runtime:
 
 - **Control path**: integrate WebView with minimal coupling
 - **Framework path**: adopt bridge, policy, shell, and tooling for faster delivery
 
-We close the gap left by typical WebView wrappers: typed host/web IPC, policy-governed capabilities, machine-checkable diagnostics, and scalable app-shell patterns out of the box.
+Unlike wrapper-only solutions, Fulora provides typed host/web contracts, policy-governed capabilities, machine-checkable diagnostics, and scalable app-shell patterns out of the box.
 
 ---
 
