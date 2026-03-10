@@ -53,7 +53,19 @@ public sealed class BuildOrchestrationBlockingWaitGovernanceTests
             new AllowedBlockingWait(
                 "Thread.Sleep(500);",
                 "Build.WaitForPort",
-                "Port readiness loop uses bounded short polling interval.")
+                "Port readiness loop uses bounded short polling interval."),
+            new AllowedBlockingWait(
+                "http.GetAsync($\"{OllamaEndpoint.TrimEnd('/')}/api/tags\").GetAwaiter().GetResult()",
+                "Build.Samples",
+                "Synchronous Ollama API readiness check in sample validation helper."),
+            new AllowedBlockingWait(
+                "response.Content.ReadAsStringAsync().GetAwaiter().GetResult()",
+                "Build.Samples",
+                "Synchronous content read for Ollama API response in sample validation."),
+            new AllowedBlockingWait(
+                "process.WaitForExit(timeoutMs)",
+                "Build.Samples/RunProcessCaptureAll",
+                "Bounded process wait in sample build helper matching RunProcess pattern.")
         };
 
         var found = new List<string>();

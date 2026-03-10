@@ -1,8 +1,8 @@
-using System.Reflection;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Agibuild.Fulora;
-using Avalonia.Controls;
-using AvaloniAiChat.Bridge.Services;
-using AvaloniAiChat.Desktop;
+using Agibuild.Fulora.Shell;
 using Xunit;
 
 namespace Agibuild.Fulora.UnitTests;
@@ -12,7 +12,7 @@ public sealed class WindowShellContractAndIntegrationTests
     [Fact]
     public async Task Contract_update_snapshot_stream_roundtrip_is_deterministic()
     {
-        var service = new FakeWindowShellService();
+        using var service = CreateService();
         using var cts = new CancellationTokenSource();
         var stream = service.StreamWindowShellState(cts.Token).GetAsyncEnumerator();
         try
@@ -27,7 +27,7 @@ public sealed class WindowShellContractAndIntegrationTests
                 GlassOpacityPercent = 66
             });
 
-            var streamed = await ReadNextWithinAsync(stream, TimeSpan.FromSeconds(1));
+            var streamed = await ReadNextWithinAsync(stream, TimeSpan.FromSeconds(2));
             Assert.NotNull(streamed);
 
             Assert.Equal("classic", updated.EffectiveThemeMode);
@@ -46,7 +46,7 @@ public sealed class WindowShellContractAndIntegrationTests
     [Fact]
     public async Task Contract_stream_deduplicates_equivalent_signatures()
     {
-        var service = new FakeWindowShellService();
+        using var service = CreateService();
         using var cts = new CancellationTokenSource();
         var stream = service.StreamWindowShellState(cts.Token).GetAsyncEnumerator();
         try
@@ -61,7 +61,7 @@ public sealed class WindowShellContractAndIntegrationTests
                 GlassOpacityPercent = first.Settings.GlassOpacityPercent
             });
 
-            var duplicate = await ReadNextWithinAsync(stream, TimeSpan.FromMilliseconds(280));
+            var duplicate = await ReadNextWithinAsync(stream, TimeSpan.FromMilliseconds(500));
             Assert.Null(duplicate);
         }
         finally
@@ -71,18 +71,267 @@ public sealed class WindowShellContractAndIntegrationTests
     }
 
     [Fact]
-    public void Drag_region_interactive_exclusion_is_coded_in_host()
+    public void Settings_validation_clamps_opacity_to_valid_range()
     {
-        var source = File.ReadAllText(Path.Combine(
-            FindRepoRoot(),
-            "samples",
-            "avalonia-ai-chat",
-            "AvaloniAiChat.Desktop",
-            "MainWindow.axaml.cs"));
+        var low = WindowShellService.ClampSettings(new WindowShellSettings { GlassOpacityPercent = 5 });
+        var high = WindowShellService.ClampSettings(new WindowShellSettings { GlassOpacityPercent = 100 });
+        var normal = WindowShellService.ClampSettings(new WindowShellSettings { GlassOpacityPercent = 50 });
 
-        Assert.Contains("IsInteractiveChromeSource", source, StringComparison.Ordinal);
-        Assert.Contains("Button or Avalonia.Controls.Primitives.ToggleButton or TextBox or ComboBox or Slider", source, StringComparison.Ordinal);
-        Assert.Contains("Name: \"DragRegion\"", source, StringComparison.Ordinal);
+        Assert.Equal(20, low.GlassOpacityPercent);
+        Assert.Equal(95, high.GlassOpacityPercent);
+        Assert.Equal(50, normal.GlassOpacityPercent);
+    }
+
+    [Theory]
+    [InlineData("liquid", "liquid")]
+    [InlineData("classic", "classic")]
+    [InlineData("system", "system")]
+    [InlineData("LIQUID", "liquid")]
+    [InlineData("invalid", "system")]
+    [InlineData("", "system")]
+    [InlineData(null, "system")]
+    public void Settings_validation_normalizes_theme_preference(string? input, string expected)
+    {
+        var clamped = WindowShellService.ClampSettings(new WindowShellSettings { ThemePreference = input! });
+        Assert.Equal(expected, clamped.ThemePreference);
+    }
+
+    [Fact]
+    public void Transparency_state_machine_disabled_state()
+    {
+        var message = WindowShellService.BuildValidationMessage(
+            isEnabled: false, isEffective: false, level: TransparencyLevel.None);
+        Assert.Contains("disabled", message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void Transparency_state_machine_active_state()
+    {
+        var message = WindowShellService.BuildValidationMessage(
+            isEnabled: true, isEffective: true, level: TransparencyLevel.Blur);
+        Assert.Contains("active", message, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Blur", message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Transparency_state_machine_fallback_state()
+    {
+        var message = WindowShellService.BuildValidationMessage(
+            isEnabled: true, isEffective: false, level: TransparencyLevel.None);
+        Assert.Contains("not effective", message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task Theme_resolution_system_follows_os_theme()
+    {
+        var mockTheme = new MockPlatformThemeProvider("dark");
+        using var service = new WindowShellService(new MockChromeProvider(), mockTheme);
+
+        await service.UpdateWindowShellSettings(new WindowShellSettings { ThemePreference = "system" });
+        var state = await service.GetWindowShellState();
+
+        Assert.Equal("liquid", state.EffectiveThemeMode);
+    }
+
+    [Fact]
+    public async Task Theme_resolution_liquid_ignores_os_theme()
+    {
+        var mockTheme = new MockPlatformThemeProvider("light");
+        using var service = new WindowShellService(new MockChromeProvider(), mockTheme);
+
+        await service.UpdateWindowShellSettings(new WindowShellSettings { ThemePreference = "liquid" });
+        var state = await service.GetWindowShellState();
+
+        Assert.Equal("liquid", state.EffectiveThemeMode);
+    }
+
+    [Fact]
+    public async Task Theme_resolution_classic_ignores_os_theme()
+    {
+        var mockTheme = new MockPlatformThemeProvider("dark");
+        using var service = new WindowShellService(new MockChromeProvider(), mockTheme);
+
+        await service.UpdateWindowShellSettings(new WindowShellSettings { ThemePreference = "classic" });
+        var state = await service.GetWindowShellState();
+
+        Assert.Equal("classic", state.EffectiveThemeMode);
+    }
+
+    [Fact]
+    public async Task Transparency_disabled_never_reports_effective()
+    {
+        using var service = CreateService();
+
+        var state = await service.UpdateWindowShellSettings(new WindowShellSettings
+        {
+            EnableTransparency = false
+        });
+
+        Assert.False(state.Capabilities.IsTransparencyEnabled);
+        Assert.False(state.Capabilities.IsTransparencyEffective);
+        Assert.Equal(TransparencyLevel.None, state.Capabilities.EffectiveTransparencyLevel);
+    }
+
+    [Fact]
+    public async Task Transparency_enabled_with_supporting_provider()
+    {
+        var provider = new MockChromeProvider(supportsTransparency: true, effectiveLevel: TransparencyLevel.Blur);
+        using var service = new WindowShellService(provider, new MockPlatformThemeProvider());
+
+        var state = await service.UpdateWindowShellSettings(new WindowShellSettings
+        {
+            EnableTransparency = true
+        });
+
+        Assert.True(state.Capabilities.IsTransparencyEnabled);
+        Assert.True(state.Capabilities.IsTransparencyEffective);
+        Assert.Equal(TransparencyLevel.Blur, state.Capabilities.EffectiveTransparencyLevel);
+    }
+
+    [Fact]
+    public async Task Transparency_enabled_without_support_falls_back()
+    {
+        var provider = new MockChromeProvider(supportsTransparency: true, effectiveLevel: TransparencyLevel.None);
+        using var service = new WindowShellService(provider, new MockPlatformThemeProvider());
+
+        var state = await service.UpdateWindowShellSettings(new WindowShellSettings
+        {
+            EnableTransparency = true
+        });
+
+        Assert.True(state.Capabilities.IsTransparencyEnabled);
+        Assert.False(state.Capabilities.IsTransparencyEffective);
+        Assert.Equal(TransparencyLevel.None, state.Capabilities.EffectiveTransparencyLevel);
+    }
+
+    [Fact]
+    public async Task Multi_window_update_calls_provider()
+    {
+        var provider = new MockChromeProvider();
+        using var service = new WindowShellService(provider, new MockPlatformThemeProvider());
+
+        await service.UpdateWindowShellSettings(new WindowShellSettings
+        {
+            EnableTransparency = true,
+            GlassOpacityPercent = 80,
+            ThemePreference = "liquid"
+        });
+
+        Assert.True(provider.ApplyCallCount > 0);
+        Assert.NotNull(provider.LastRequest);
+        Assert.True(provider.LastRequest!.EnableTransparency);
+        Assert.Equal(80, provider.LastRequest.OpacityPercent);
+    }
+
+    [Fact]
+    public async Task Os_theme_change_triggers_stream_emission_when_system_preference()
+    {
+        var mockTheme = new MockPlatformThemeProvider("light");
+        using var service = new WindowShellService(new MockChromeProvider(), mockTheme);
+        using var cts = new CancellationTokenSource();
+
+        await service.UpdateWindowShellSettings(new WindowShellSettings { ThemePreference = "system" });
+
+        var stream = service.StreamWindowShellState(cts.Token).GetAsyncEnumerator();
+        try
+        {
+            Assert.True(await stream.MoveNextAsync());
+            var initial = stream.Current;
+            Assert.Equal("classic", initial.EffectiveThemeMode);
+
+            mockTheme.SimulateThemeChange("dark");
+
+            var changed = await ReadNextWithinAsync(stream, TimeSpan.FromSeconds(2));
+            Assert.NotNull(changed);
+            Assert.Equal("liquid", changed!.EffectiveThemeMode);
+        }
+        finally
+        {
+            cts.Cancel();
+        }
+    }
+
+    [Fact]
+    public async Task Full_update_snapshot_stream_roundtrip()
+    {
+        using var service = CreateService();
+        using var cts = new CancellationTokenSource();
+        var stream = service.StreamWindowShellState(cts.Token).GetAsyncEnumerator();
+        try
+        {
+            Assert.True(await stream.MoveNextAsync());
+
+            var updated = await service.UpdateWindowShellSettings(new WindowShellSettings
+            {
+                ThemePreference = "liquid",
+                EnableTransparency = true,
+                GlassOpacityPercent = 70
+            });
+
+            var snapshot = await service.GetWindowShellState();
+            var streamed = await ReadNextWithinAsync(stream, TimeSpan.FromSeconds(2));
+
+            Assert.Equal(updated.EffectiveThemeMode, snapshot.EffectiveThemeMode);
+            Assert.NotNull(streamed);
+            Assert.Equal(updated.EffectiveThemeMode, streamed!.EffectiveThemeMode);
+            Assert.Equal(70, streamed.Settings.GlassOpacityPercent);
+        }
+        finally
+        {
+            cts.Cancel();
+        }
+    }
+
+    [Fact]
+    public void Signature_differs_for_different_states()
+    {
+        var state1 = BuildTestState("system", true, 78);
+        var state2 = BuildTestState("classic", false, 66);
+
+        var sig1 = WindowShellService.BuildSignature(state1);
+        var sig2 = WindowShellService.BuildSignature(state2);
+
+        Assert.NotEqual(sig1, sig2);
+    }
+
+    [Fact]
+    public void Signature_matches_for_equivalent_states()
+    {
+        var state1 = BuildTestState("liquid", true, 78);
+        var state2 = BuildTestState("liquid", true, 78);
+
+        Assert.Equal(
+            WindowShellService.BuildSignature(state1),
+            WindowShellService.BuildSignature(state2));
+    }
+
+    [Fact]
+    public void Chrome_provider_parse_transparency_level_handles_platform_tokens()
+    {
+        Assert.Equal(TransparencyLevel.AcrylicBlur, AvaloniaWindowChromeProvider.ParseTransparencyLevel("AcrylicBlur"));
+        Assert.Equal(TransparencyLevel.Mica, AvaloniaWindowChromeProvider.ParseTransparencyLevel("Mica,Blur"));
+        Assert.Equal(TransparencyLevel.Blur, AvaloniaWindowChromeProvider.ParseTransparencyLevel("Blur"));
+        Assert.Equal(TransparencyLevel.Transparent, AvaloniaWindowChromeProvider.ParseTransparencyLevel("Transparent"));
+        Assert.Equal(TransparencyLevel.Transparent, AvaloniaWindowChromeProvider.ParseTransparencyLevel("Translucent"));
+        Assert.Equal(TransparencyLevel.None, AvaloniaWindowChromeProvider.ParseTransparencyLevel("None"));
+        Assert.Equal(TransparencyLevel.None, AvaloniaWindowChromeProvider.ParseTransparencyLevel("unknown-level"));
+        Assert.Equal(TransparencyLevel.None, AvaloniaWindowChromeProvider.ParseTransparencyLevel(null));
+    }
+
+    [Fact]
+    public void Interactive_element_detection_excludes_known_controls()
+    {
+        Assert.True(AvaloniaWindowChromeProvider.IsDefaultInteractiveElement(
+            new Avalonia.Controls.Button()));
+        Assert.True(AvaloniaWindowChromeProvider.IsDefaultInteractiveElement(
+            new Avalonia.Controls.TextBox()));
+        Assert.True(AvaloniaWindowChromeProvider.IsDefaultInteractiveElement(
+            new Avalonia.Controls.ComboBox()));
+        Assert.True(AvaloniaWindowChromeProvider.IsDefaultInteractiveElement(
+            new Avalonia.Controls.Slider()));
+        Assert.False(AvaloniaWindowChromeProvider.IsDefaultInteractiveElement(
+            new Avalonia.Controls.Border()));
+        Assert.False(AvaloniaWindowChromeProvider.IsDefaultInteractiveElement(null));
     }
 
     [Fact]
@@ -90,84 +339,45 @@ public sealed class WindowShellContractAndIntegrationTests
     {
         var repoRoot = FindRepoRoot();
         var appTsx = File.ReadAllText(Path.Combine(
-            repoRoot,
-            "samples",
-            "avalonia-ai-chat",
-            "AvaloniAiChat.Web",
-            "src",
-            "App.tsx"));
+            repoRoot, "samples", "avalonia-ai-chat", "AvaloniAiChat.Web", "src", "App.tsx"));
         var css = File.ReadAllText(Path.Combine(
-            repoRoot,
-            "samples",
-            "avalonia-ai-chat",
-            "AvaloniAiChat.Web",
-            "src",
-            "index.css"));
-        var mainWindowAxaml = File.ReadAllText(Path.Combine(
-            repoRoot,
-            "samples",
-            "avalonia-ai-chat",
-            "AvaloniAiChat.Desktop",
-            "MainWindow.axaml"));
+            repoRoot, "samples", "avalonia-ai-chat", "AvaloniAiChat.Web", "src", "index.css"));
 
         Assert.Contains("'--ag-shell-top-inset'", appTsx, StringComparison.Ordinal);
         Assert.Contains("var(--ag-shell-top-inset, 0px)", css, StringComparison.Ordinal);
-        Assert.Contains("x:Name=\"DragRegion\"", mainWindowAxaml, StringComparison.Ordinal);
-        Assert.Contains("<Grid.RowDefinitions>", mainWindowAxaml, StringComparison.Ordinal);
-        Assert.Contains("Grid.Row=\"0\"", mainWindowAxaml, StringComparison.Ordinal);
     }
 
-    [Fact]
-    public void Transparency_mapping_emits_deterministic_validation_messages()
-    {
-        var method = typeof(AppearanceService).GetMethod(
-            "BuildTransparencyValidationMessage",
-            BindingFlags.NonPublic | BindingFlags.Static);
-        Assert.NotNull(method);
+    // ─── Helpers ──────────────────────────────────────────────────────
 
-        var disabled = InvokeMessage(method!, enabled: false, supportsTransparency: false, level: "none");
-        var active = InvokeMessage(method!, enabled: true, supportsTransparency: true, level: "blur");
-        var noneFallback = InvokeMessage(method!, enabled: true, supportsTransparency: false, level: "none");
-        var unknownFallback = InvokeMessage(method!, enabled: true, supportsTransparency: false, level: "unknown");
+    private static WindowShellService CreateService()
+        => new(new MockChromeProvider(), new MockPlatformThemeProvider());
 
-        Assert.Contains("disabled", disabled, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("active", active, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("none", noneFallback, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("inconclusive", unknownFallback, StringComparison.OrdinalIgnoreCase);
-    }
-
-    [Theory]
-    [InlineData("AcrylicBlur", "acrylicblur")]
-    [InlineData("Mica,Blur", "mica")]
-    [InlineData("Blur,Transparent", "blur")]
-    [InlineData("Transparent", "transparent")]
-    [InlineData("Translucent", "transparent")]
-    [InlineData("None", "none")]
-    [InlineData("unknown-level", "unknown")]
-    public void Transparency_level_normalization_handles_cross_platform_tokens(string raw, string expected)
-    {
-        var method = typeof(AppearanceService).GetMethod(
-            "NormalizeTransparencyLevel",
-            BindingFlags.NonPublic | BindingFlags.Static);
-        Assert.NotNull(method);
-
-        var normalized = (string)(method!.Invoke(null, [raw]) ?? string.Empty);
-        Assert.Equal(expected, normalized);
-    }
-
-    [Fact]
-    public void Transparency_hint_builder_returns_non_none_levels()
-    {
-        var method = typeof(AppearanceService).GetMethod(
-            "BuildTransparencyLevelHint",
-            BindingFlags.NonPublic | BindingFlags.Static);
-        Assert.NotNull(method);
-
-        var hints = (Array?)method!.Invoke(null, null);
-        Assert.NotNull(hints);
-        Assert.NotEmpty(hints!.Cast<object>());
-        Assert.DoesNotContain(hints.Cast<object>(), h => h is WindowTransparencyLevel level && level == WindowTransparencyLevel.None);
-    }
+    private static WindowShellState BuildTestState(string theme, bool transparent, int opacity)
+        => new()
+        {
+            Settings = new WindowShellSettings
+            {
+                ThemePreference = theme,
+                EnableTransparency = transparent,
+                GlassOpacityPercent = opacity
+            },
+            EffectiveThemeMode = theme == "system" ? "liquid" : theme,
+            Capabilities = new WindowShellCapabilities
+            {
+                Platform = "test",
+                SupportsTransparency = true,
+                IsTransparencyEnabled = transparent,
+                IsTransparencyEffective = transparent,
+                EffectiveTransparencyLevel = transparent ? TransparencyLevel.Blur : TransparencyLevel.None,
+                AppliedOpacityPercent = opacity
+            },
+            ChromeMetrics = new WindowChromeMetrics
+            {
+                TitleBarHeight = 32,
+                DragRegionHeight = 32,
+                SafeInsets = new WindowSafeInsets()
+            }
+        };
 
     private static async Task<WindowShellState?> ReadNextWithinAsync(
         IAsyncEnumerator<WindowShellState> stream,
@@ -177,12 +387,8 @@ public sealed class WindowShellContractAndIntegrationTests
         var completed = await Task.WhenAny(moveTask, Task.Delay(timeout));
         if (completed != moveTask)
             return null;
-
         return await moveTask ? stream.Current : null;
     }
-
-    private static string InvokeMessage(MethodInfo method, bool enabled, bool supportsTransparency, string level)
-        => (string)(method.Invoke(null, [enabled, supportsTransparency, level]) ?? string.Empty);
 
     private static string FindRepoRoot()
     {
@@ -191,119 +397,62 @@ public sealed class WindowShellContractAndIntegrationTests
         {
             if (File.Exists(Path.Combine(dir.FullName, "Agibuild.Fulora.sln")))
                 return dir.FullName;
-
             dir = dir.Parent;
         }
-
         throw new DirectoryNotFoundException("Could not locate repository root.");
     }
 
-    private sealed class FakeWindowShellService : IWindowShellService
+    // ─── Mock Providers ──────────────────────────────────────────────
+
+    private sealed class MockChromeProvider(
+        bool supportsTransparency = true,
+        TransparencyLevel effectiveLevel = TransparencyLevel.Blur) : IWindowChromeProvider
     {
-        private readonly object _gate = new();
-        private readonly SemaphoreSlim _signal = new(0, 64);
-        private WindowShellState _state = BuildState(new WindowShellSettings());
+        public string Platform => "test";
+        public bool SupportsTransparency => supportsTransparency;
+        public int ApplyCallCount { get; private set; }
+        public WindowAppearanceRequest? LastRequest { get; private set; }
 
-        public Task<WindowShellState> GetWindowShellState()
+        public event EventHandler? AppearanceChanged;
+
+        public Task ApplyWindowAppearanceAsync(WindowAppearanceRequest request)
         {
-            lock (_gate)
-                return Task.FromResult(_state);
+            ApplyCallCount++;
+            LastRequest = request;
+            return Task.CompletedTask;
         }
 
-        public Task<WindowShellState> UpdateWindowShellSettings(WindowShellSettings settings)
+        public TransparencyEffectiveState GetTransparencyState() => new()
         {
-            lock (_gate)
-                _state = BuildState(settings);
+            IsEnabled = effectiveLevel != TransparencyLevel.None,
+            IsEffective = effectiveLevel != TransparencyLevel.None,
+            Level = effectiveLevel,
+            AppliedOpacityPercent = 78
+        };
 
-            try
-            {
-                _signal.Release();
-            }
-            catch (SemaphoreFullException)
-            {
-                // No-op for test fake.
-            }
-
-            lock (_gate)
-                return Task.FromResult(_state);
-        }
-
-        public async IAsyncEnumerable<WindowShellState> StreamWindowShellState(CancellationToken cancellationToken = default)
+        public WindowChromeMetrics GetChromeMetrics() => new()
         {
-            WindowShellState current;
-            lock (_gate)
-                current = _state;
-            var lastSignature = BuildSignature(current);
-            yield return current;
+            TitleBarHeight = 32,
+            DragRegionHeight = 32,
+            SafeInsets = new WindowSafeInsets()
+        };
 
-            while (!cancellationToken.IsCancellationRequested)
-            {
-                try
-                {
-                    var signaled = await _signal.WaitAsync(TimeSpan.FromMilliseconds(800), cancellationToken);
-                    if (!signaled)
-                        continue;
-                }
-                catch (OperationCanceledException)
-                {
-                    yield break;
-                }
+        public void RaiseAppearanceChanged()
+            => AppearanceChanged?.Invoke(this, EventArgs.Empty);
+    }
 
-                lock (_gate)
-                    current = _state;
-                var signature = BuildSignature(current);
-                if (!string.Equals(signature, lastSignature, StringComparison.Ordinal))
-                {
-                    lastSignature = signature;
-                    yield return current;
-                }
-            }
-        }
+    private sealed class MockPlatformThemeProvider(string mode = "light") : IPlatformThemeProvider
+    {
+        private string _mode = mode;
+        public event EventHandler? ThemeChanged;
+        public string GetThemeMode() => _mode;
+        public string? GetAccentColor() => null;
+        public bool GetIsHighContrast() => false;
 
-        private static string BuildSignature(WindowShellState state)
-            => $"{state.Settings.ThemePreference}|{state.Settings.EnableTransparency}|{state.Settings.GlassOpacityPercent}|{state.EffectiveThemeMode}|{state.Capabilities.EffectiveTransparencyLevel}|{state.Capabilities.IsTransparencyEffective}|{state.ChromeMetrics.TitleBarHeight}|{state.ChromeMetrics.SafeInsets.Top}|{state.ChromeMetrics.SafeInsets.Right}|{state.ChromeMetrics.SafeInsets.Bottom}|{state.ChromeMetrics.SafeInsets.Left}";
-
-        private static WindowShellState BuildState(WindowShellSettings settings)
+        public void SimulateThemeChange(string newMode)
         {
-            var normalizedTheme = settings.ThemePreference?.Trim().ToLowerInvariant() switch
-            {
-                "classic" => "classic",
-                "liquid" => "liquid",
-                _ => "system"
-            };
-            var effectiveTheme = normalizedTheme == "system" ? "liquid" : normalizedTheme;
-            var opacity = Math.Clamp(settings.GlassOpacityPercent, 20, 95);
-            var effectiveLevel = settings.EnableTransparency ? "blur" : "none";
-            var supportsTransparency = effectiveLevel is "blur" or "transparent" or "acrylicblur" or "mica";
-
-            return new WindowShellState
-            {
-                Settings = new WindowShellSettings
-                {
-                    ThemePreference = normalizedTheme,
-                    EnableTransparency = settings.EnableTransparency,
-                    GlassOpacityPercent = opacity
-                },
-                EffectiveThemeMode = effectiveTheme,
-                Capabilities = new WindowShellCapabilities
-                {
-                    Platform = "test",
-                    SupportsTransparency = supportsTransparency,
-                    IsTransparencyEnabled = settings.EnableTransparency,
-                    IsTransparencyEffective = settings.EnableTransparency && supportsTransparency,
-                    EffectiveTransparencyLevel = effectiveLevel,
-                    ValidationMessage = settings.EnableTransparency
-                        ? $"Transparency is active. Effective level: {effectiveLevel}."
-                        : "Transparency is disabled in appearance settings.",
-                    AppliedOpacityPercent = opacity
-                },
-                ChromeMetrics = new WindowChromeMetrics
-                {
-                    TitleBarHeight = 44,
-                    DragRegionHeight = 44,
-                    SafeInsets = new WindowSafeInsets { Top = 0, Right = 0, Bottom = 0, Left = 0 }
-                }
-            };
+            _mode = newMode;
+            ThemeChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 }

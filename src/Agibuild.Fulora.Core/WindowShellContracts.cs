@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Agibuild.Fulora;
 
 /// <summary>
@@ -49,7 +51,8 @@ public sealed class WindowShellCapabilities
     /// <summary>
     /// Effective transparency level as reported by host runtime.
     /// </summary>
-    public string EffectiveTransparencyLevel { get; init; } = "unknown";
+    [JsonConverter(typeof(JsonStringEnumConverter<TransparencyLevel>))]
+    public TransparencyLevel EffectiveTransparencyLevel { get; init; } = TransparencyLevel.None;
 
     /// <summary>
     /// Validation or fallback diagnostic for current transparency state.

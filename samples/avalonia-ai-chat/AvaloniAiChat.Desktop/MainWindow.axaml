@@ -3,26 +3,8 @@
         xmlns:wv="clr-namespace:Agibuild.Fulora;assembly=Agibuild.Fulora"
         x:Class="AvaloniAiChat.Desktop.MainWindow"
         Title="Fulora AI Chat — Streaming Demo" Width="900" Height="700"
-        Background="Transparent"
-        TransparencyLevelHint="Blur,Transparent"
-        ExtendClientAreaToDecorationsHint="True"
-        ExtendClientAreaChromeHints="PreferSystemChrome">
+        Background="Transparent">
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="28" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
-
-        <Border x:Name="DragRegion"
-                Grid.Row="0"
-                Margin="52,0,0,0"
-                HorizontalAlignment="Stretch"
-                VerticalAlignment="Stretch"
-                Background="Transparent"
-                PointerPressed="DragRegion_OnPointerPressed" />
-
-        <wv:WebView x:Name="WebView" Grid.Row="1" />
-    </Grid>
+    <wv:WebView x:Name="WebView" />
 
 </Window>

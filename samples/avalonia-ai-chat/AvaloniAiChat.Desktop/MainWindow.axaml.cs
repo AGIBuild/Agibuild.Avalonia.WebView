@@ -2,11 +2,10 @@ using System.Diagnostics;
 using Agibuild.Fulora;
 using Agibuild.Fulora.AI;
 using Agibuild.Fulora.AI.Ollama;
+using Agibuild.Fulora.Shell;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Input;
 using Avalonia.Media;
-using Avalonia.VisualTree;
 using AvaloniAiChat.Bridge.Services;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
@@ -71,11 +70,26 @@ public partial class MainWindow : Window
                 runtime.Endpoint,
                 runtime.RequiredModel,
                 runtime.UseEchoMode);
-            var appearanceService = new AppearanceService(this);
+
+            var chromeProvider = new AvaloniaWindowChromeProvider();
+            chromeProvider.TrackWindow(this, new WindowChromeTrackingOptions
+            {
+                CustomChrome = true,
+                DragRegionHeight = 28
+            });
+            var themeProvider = new AvaloniaThemeProvider();
+            var shellService = new WindowShellService(chromeProvider, themeProvider);
+            var appearanceService = new AppearanceService(shellService);
+
             WebView.Bridge.Expose<IAiChatService>(chatService);
             WebView.Bridge.Expose<IAppearanceService>(appearanceService);
-            WebView.Bridge.Expose<IWindowShellService>(appearanceService);
-            Closed += (_, _) => appearanceService.Dispose();
+            WebView.Bridge.Expose<IWindowShellService>(shellService);
+            Closed += (_, _) =>
+            {
+                appearanceService.Dispose();
+                chromeProvider.Dispose();
+                themeProvider.Dispose();
+            };
 
             WebView.DropCompleted += (_, e) =>
             {
@@ -126,30 +140,5 @@ public partial class MainWindow : Window
         Background = isDark
             ? new SolidColorBrush(Color.FromArgb(alpha, 9, 18, 35))
             : new SolidColorBrush(Color.FromArgb(alpha, 248, 250, 252));
-    }
-
-    private void DragRegion_OnPointerPressed(object? sender, PointerPressedEventArgs e)
-    {
-        if (!e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
-            return;
-        if (IsInteractiveChromeSource(e.Source))
-            return;
-
-        BeginMoveDrag(e);
-        e.Handled = true;
-    }
-
-    private static bool IsInteractiveChromeSource(object? source)
-    {
-        for (var visual = source as Visual; visual is not null; visual = visual.GetVisualParent())
-        {
-            if (visual is Button or Avalonia.Controls.Primitives.ToggleButton or TextBox or ComboBox or Slider)
-                return true;
-
-            if (visual is Border { Name: "DragRegion" })
-                return false;
-        }
-
-        return false;
     }
 }
