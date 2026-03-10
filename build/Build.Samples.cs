@@ -182,8 +182,12 @@ partial class BuildTask
     // ──────────────────────────── Sample App Targets ────────────────────────────
 
     Target StartAiChatApp => _ => _
-        .Description("Launches the AI Chat sample. Auto-detects Ollama at localhost:11434; falls back to Echo mode.")
-        .Executes(() => StartDesktopApp(AiChatDesktopProject, AiChatWebDirectory, devPort: 5175));
+        .Description("Launches the AI Chat sample. Ensures Ollama is running and the required model is available.")
+        .Executes(() =>
+        {
+            EnsureOllamaReady();
+            StartDesktopApp(AiChatDesktopProject, AiChatWebDirectory, devPort: 5175);
+        });
 
     Target StartReactApp => _ => _
         .Description("Launches the React sample. In Debug: auto-starts Vite dev server if needed.")
@@ -207,4 +211,109 @@ partial class BuildTask
                 .SetConfiguration(Configuration));
         });
 
+    // ──────────────────────────── Ollama Bootstrapping ───────────────────────────
+
+    const string OllamaEndpoint = "http://localhost:11434";
+    const string OllamaModel = "qwen2.5:3b";
+
+    static Process? _ollamaServeProcess;
+
+    void EnsureOllamaReady()
+    {
+        var echoMode = string.Equals(
+            Environment.GetEnvironmentVariable("AI__PROVIDER"), "echo", StringComparison.OrdinalIgnoreCase);
+        if (echoMode)
+        {
+            Serilog.Log.Information("AI__PROVIDER=echo — skipping Ollama bootstrap.");
+            return;
+        }
+
+        if (!IsToolAvailable("ollama"))
+        {
+            Serilog.Log.Warning(
+                "ollama is not installed. The app will prompt the user to install it. " +
+                "Download from https://ollama.com/download");
+            return;
+        }
+
+        Serilog.Log.Information("ollama is installed.");
+
+        var apiUrl = $"{OllamaEndpoint.TrimEnd('/')}/api/tags";
+        if (!IsHttpReady(apiUrl))
+        {
+            Serilog.Log.Information("Ollama API is not reachable at {Url}. Starting 'ollama serve' in background...", OllamaEndpoint);
+            _ollamaServeProcess = StartOllamaServe();
+            WaitForOllamaApi(timeoutSeconds: 20);
+            Serilog.Log.Information("Ollama API is now reachable.");
+        }
+        else
+        {
+            Serilog.Log.Information("Ollama API is already running at {Url}.", OllamaEndpoint);
+        }
+
+        if (IsModelAvailable(OllamaModel))
+        {
+            Serilog.Log.Information("Model '{Model}' is already available.", OllamaModel);
+        }
+        else
+        {
+            Serilog.Log.Information("Model '{Model}' not found. Pulling (this may take a few minutes)...", OllamaModel);
+            PullOllamaModel(OllamaModel);
+            Serilog.Log.Information("Model '{Model}' is now available.", OllamaModel);
+        }
+    }
+
+    static Process StartOllamaServe()
+    {
+        var psi = new ProcessStartInfo
+        {
+            FileName = "ollama",
+            Arguments = "serve",
+            UseShellExecute = false,
+            RedirectStandardOutput = false,
+            RedirectStandardError = false,
+            CreateNoWindow = true,
+        };
+        var process = new Process { StartInfo = psi };
+        process.Start();
+        return process;
+    }
+
+    void WaitForOllamaApi(int timeoutSeconds = 20)
+    {
+        var apiUrl = $"{OllamaEndpoint.TrimEnd('/')}/api/tags";
+        var deadline = DateTime.UtcNow.AddSeconds(timeoutSeconds);
+        while (DateTime.UtcNow < deadline)
+        {
+            if (IsHttpReady(apiUrl)) return;
+            Thread.Sleep(500);
+        }
+
+        throw new TimeoutException(
+            $"Ollama API at {OllamaEndpoint} did not become available within {timeoutSeconds}s. " +
+            "Check that 'ollama serve' is working correctly.");
+    }
+
+    static bool IsModelAvailable(string model)
+    {
+        try
+        {
+            using var http = new System.Net.Http.HttpClient { Timeout = TimeSpan.FromSeconds(5) };
+            var response = http.GetAsync($"{OllamaEndpoint.TrimEnd('/')}/api/tags").GetAwaiter().GetResult();
+            if (!response.IsSuccessStatusCode) return false;
+            var body = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            return body.Contains($"\"name\":\"{model}\"", StringComparison.OrdinalIgnoreCase)
+                || body.Contains($"\"name\": \"{model}\"", StringComparison.OrdinalIgnoreCase);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    static void PullOllamaModel(string model)
+    {
+        var output = RunProcessCaptureAllChecked("ollama", $"pull {model}", timeoutMs: 600_000);
+        Serilog.Log.Debug("ollama pull output: {Output}", output.Trim());
+    }
 }

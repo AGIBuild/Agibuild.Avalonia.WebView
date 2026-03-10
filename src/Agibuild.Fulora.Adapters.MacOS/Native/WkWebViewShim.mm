@@ -150,6 +150,7 @@ void ag_wk_cookies_clear_all(ag_wk_handle handle, ag_wk_cookie_op_cb callback, v
 void ag_wk_set_enable_dev_tools(ag_wk_handle handle, bool enable);
 void ag_wk_set_ephemeral(ag_wk_handle handle, bool ephemeral);
 void ag_wk_set_user_agent(ag_wk_handle handle, const char* ua_utf8_or_null);
+void ag_wk_set_transparent_background(ag_wk_handle handle, bool transparent);
 
 } // extern "C"
 
@@ -233,6 +234,7 @@ struct shim_state
     // M2 options — set before attach.
     bool opt_enable_dev_tools { false };
     bool opt_ephemeral { false };
+    bool opt_transparent_background { false };
     __strong NSString* opt_user_agent { nil };
 
     // Custom scheme registrations — set before attach.
@@ -808,6 +810,18 @@ bool ag_wk_attach(ag_wk_handle handle, void* nsview_ptr)
                 s->web_view.customUserAgent = s->opt_user_agent;
             }
 
+            // Transparent background: allow the native window background to show through.
+            if (s->opt_transparent_background)
+            {
+                @try { [s->web_view setValue:@NO forKey:@"drawsBackground"]; }
+                @catch (id) { /* Private API may be removed in future macOS versions. */ }
+
+                if (@available(macOS 12.0, *))
+                {
+                    s->web_view.underPageBackgroundColor = [NSColor clearColor];
+                }
+            }
+
             s->nav_delegate = [[ShimNavigationDelegate alloc] init];
             s->nav_delegate.state = s;
             s->web_view.navigationDelegate = s->nav_delegate;
@@ -1299,6 +1313,27 @@ void ag_wk_set_user_agent(ag_wk_handle handle, const char* ua_utf8_or_null)
         if (s->web_view != nil && !s->detached.load())
         {
             s->web_view.customUserAgent = ua;
+        }
+    });
+}
+
+void ag_wk_set_transparent_background(ag_wk_handle handle, bool transparent)
+{
+    if (!handle) return;
+    auto* s = (shim_state*)handle;
+    s->opt_transparent_background = transparent;
+
+    // Also update live WebView if already attached.
+    run_on_main(^{
+        if (s->web_view != nil && !s->detached.load())
+        {
+            @try { [s->web_view setValue:(transparent ? @NO : @YES) forKey:@"drawsBackground"]; }
+            @catch (id) { /* Private API may be removed in future macOS versions. */ }
+
+            if (@available(macOS 12.0, *))
+            {
+                s->web_view.underPageBackgroundColor = transparent ? [NSColor clearColor] : [NSColor controlBackgroundColor];
+            }
         }
     });
 }

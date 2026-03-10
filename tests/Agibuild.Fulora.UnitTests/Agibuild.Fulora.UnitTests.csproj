@@ -29,6 +29,8 @@
     <ProjectReference Include="..\..\src\Agibuild.Fulora.AI\Agibuild.Fulora.AI.csproj" />
     <ProjectReference Include="..\..\src\Agibuild.Fulora.AI.Ollama\Agibuild.Fulora.AI.Ollama.csproj" />
     <ProjectReference Include="..\..\src\Agibuild.Fulora.AI.OpenAI\Agibuild.Fulora.AI.OpenAI.csproj" />
+    <ProjectReference Include="..\..\samples\avalonia-ai-chat\AvaloniAiChat.Bridge\AvaloniAiChat.Bridge.csproj" />
+    <ProjectReference Include="..\..\samples\avalonia-ai-chat\AvaloniAiChat.Desktop\AvaloniAiChat.Desktop.csproj" />
   </ItemGroup>
 
   <ItemGroup>

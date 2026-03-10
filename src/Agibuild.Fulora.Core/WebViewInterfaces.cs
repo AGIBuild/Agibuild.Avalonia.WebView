@@ -110,6 +110,7 @@ public interface IWebViewEnvironmentOptions
     bool EnableDevTools { get; set; }
     string? CustomUserAgent { get; set; }
     bool UseEphemeralSession { get; set; }
+    bool TransparentBackground { get => false; set { } }
     IReadOnlyList<CustomSchemeRegistration> CustomSchemes { get; }
     IReadOnlyList<string> PreloadScripts { get; }
 }

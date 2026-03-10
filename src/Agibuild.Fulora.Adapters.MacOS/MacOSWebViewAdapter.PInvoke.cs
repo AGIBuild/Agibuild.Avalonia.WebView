@@ -363,6 +363,7 @@ internal sealed class MacOSWebViewAdapter : IWebViewAdapter, INativeWebViewHandl
 
         NativeMethods.SetEnableDevTools(_native, options.EnableDevTools);
         NativeMethods.SetEphemeral(_native, options.UseEphemeralSession);
+        NativeMethods.SetTransparentBackground(_native, options.TransparentBackground);
 
         if (options.CustomUserAgent is not null)
         {
@@ -1176,6 +1177,9 @@ internal sealed class MacOSWebViewAdapter : IWebViewAdapter, INativeWebViewHandl
 
         [DllImport(LibraryName, EntryPoint = "ag_wk_set_user_agent", CallingConvention = CallingConvention.Cdecl)]
         internal static extern void SetUserAgent(IntPtr handle, [MarshalAs(UnmanagedType.LPUTF8Str)] string? userAgent);
+
+        [DllImport(LibraryName, EntryPoint = "ag_wk_set_transparent_background", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void SetTransparentBackground(IntPtr handle, [MarshalAs(UnmanagedType.I1)] bool transparent);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         internal delegate void ScreenshotCb(IntPtr context, IntPtr pngData, uint pngLen);

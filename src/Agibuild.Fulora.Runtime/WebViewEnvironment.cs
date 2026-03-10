@@ -14,6 +14,8 @@ public sealed class WebViewEnvironmentOptions : IWebViewEnvironmentOptions
     /// <inheritdoc />
     public bool UseEphemeralSession { get; set; }
     /// <inheritdoc />
+    public bool TransparentBackground { get; set; }
+    /// <inheritdoc />
     public IReadOnlyList<CustomSchemeRegistration> CustomSchemes { get; set; } = [];
     /// <inheritdoc />
     public IReadOnlyList<string> PreloadScripts { get; set; } = [];

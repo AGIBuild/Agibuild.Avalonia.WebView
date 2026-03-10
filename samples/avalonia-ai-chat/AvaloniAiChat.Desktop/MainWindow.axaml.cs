@@ -2,7 +2,11 @@ using System.Diagnostics;
 using Agibuild.Fulora;
 using Agibuild.Fulora.AI;
 using Agibuild.Fulora.AI.Ollama;
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Media;
+using Avalonia.VisualTree;
 using AvaloniAiChat.Bridge.Services;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,7 +19,9 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
 
-        WebView.EnvironmentOptions = new WebViewEnvironmentOptions { EnableDevTools = true };
+        AlignInitialBackgroundToSystemTheme();
+
+        WebView.EnvironmentOptions = new WebViewEnvironmentOptions { EnableDevTools = true, TransparentBackground = true };
 
         Loaded += async (_, _) =>
         {
@@ -47,20 +53,29 @@ public partial class MainWindow : Window
                 return;
             }
 
-            var (backendName, configureProvider) = DetectProvider();
+            var runtime = ResolveRuntime();
 
             var services = new ServiceCollection();
             services.AddFuloraAi(ai =>
             {
-                configureProvider(ai);
+                runtime.ConfigureProvider(ai);
                 ai.AddResilience();
                 ai.AddMetering();
             });
             var sp = services.BuildServiceProvider();
 
             var registry = sp.GetRequiredService<IAiProviderRegistry>();
-            var chatService = new AiChatService(registry.GetChatClient(), backendName);
+            var chatService = new AiChatService(
+                registry.GetChatClient(),
+                runtime.BackendName,
+                runtime.Endpoint,
+                runtime.RequiredModel,
+                runtime.UseEchoMode);
+            var appearanceService = new AppearanceService(this);
             WebView.Bridge.Expose<IAiChatService>(chatService);
+            WebView.Bridge.Expose<IAppearanceService>(appearanceService);
+            WebView.Bridge.Expose<IWindowShellService>(appearanceService);
+            Closed += (_, _) => appearanceService.Dispose();
 
             WebView.DropCompleted += (_, e) =>
             {
@@ -71,31 +86,70 @@ public partial class MainWindow : Window
         };
     }
 
-    private static (string BackendName, Action<FuloraAiBuilder> Configure) DetectProvider()
+    private static AiRuntime ResolveRuntime()
     {
+        var provider = Environment.GetEnvironmentVariable("AI__PROVIDER");
+        if (string.Equals(provider, "echo", StringComparison.OrdinalIgnoreCase))
+        {
+            return new AiRuntime(
+                true,
+                new Uri("http://localhost:11434"),
+                "echo-demo",
+                "Echo (demo mode)",
+                ai => ai.AddChatClient("default", new EchoChatClient()));
+        }
+
         var endpoint = new Uri(Environment.GetEnvironmentVariable("AI__ENDPOINT") ?? "http://localhost:11434");
-        var model = Environment.GetEnvironmentVariable("AI__MODEL");
+        var model = Environment.GetEnvironmentVariable("AI__MODEL") ?? "qwen2.5:3b";
+        return new AiRuntime(
+            false,
+            endpoint,
+            model,
+            $"Ollama ({model})",
+            ai => ai.AddOllama("default", endpoint, model));
+    }
 
-        if (model is null)
+    private sealed record AiRuntime(
+        bool UseEchoMode,
+        Uri Endpoint,
+        string RequiredModel,
+        string BackendName,
+        Action<FuloraAiBuilder> ConfigureProvider);
+
+    private void AlignInitialBackgroundToSystemTheme()
+    {
+        var variant = Application.Current?.ActualThemeVariant?.ToString() ?? string.Empty;
+        var isDark = variant.Contains("dark", StringComparison.OrdinalIgnoreCase);
+
+        const int defaultOpacity = 78;
+        var alpha = (byte)Math.Clamp(30 + (int)(defaultOpacity / 100d * 210), 30, 240);
+        Background = isDark
+            ? new SolidColorBrush(Color.FromArgb(alpha, 9, 18, 35))
+            : new SolidColorBrush(Color.FromArgb(alpha, 248, 250, 252));
+    }
+
+    private void DragRegion_OnPointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (!e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
+            return;
+        if (IsInteractiveChromeSource(e.Source))
+            return;
+
+        BeginMoveDrag(e);
+        e.Handled = true;
+    }
+
+    private static bool IsInteractiveChromeSource(object? source)
+    {
+        for (var visual = source as Visual; visual is not null; visual = visual.GetVisualParent())
         {
-            try
-            {
-                using var http = new System.Net.Http.HttpClient { Timeout = TimeSpan.FromSeconds(3) };
-                var json = http.GetStringAsync($"{endpoint}api/tags").GetAwaiter().GetResult();
-                using var doc = System.Text.Json.JsonDocument.Parse(json);
-                if (doc.RootElement.TryGetProperty("models", out var models) && models.GetArrayLength() > 0)
-                    model = models[0].GetProperty("name").GetString();
-            }
-            catch { /* Ollama not available */ }
+            if (visual is Button or Avalonia.Controls.Primitives.ToggleButton or TextBox or ComboBox or Slider)
+                return true;
+
+            if (visual is Border { Name: "DragRegion" })
+                return false;
         }
 
-        if (model is not null)
-        {
-            var capturedModel = model;
-            var capturedEndpoint = endpoint;
-            return ($"Ollama ({model})", ai => ai.AddOllama("default", capturedEndpoint, capturedModel));
-        }
-
-        return ("Echo (demo mode)", ai => ai.AddChatClient("default", new EchoChatClient()));
+        return false;
     }
 }
