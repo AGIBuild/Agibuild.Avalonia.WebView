@@ -38,13 +38,16 @@ internal sealed record BridgeMethodModel
     public string CamelCaseName { get; init; } = "";
     public string RpcMethodName { get; init; } = "";
     public string ReturnTypeFullName { get; init; } = "";
+    public BridgeTypeRef ReturnTypeRef { get; init; } = BridgeTypeRef.UnknownRef;
     public bool IsAsync { get; init; }
     public bool HasReturnValue { get; init; }
     public string? InnerReturnTypeFullName { get; init; }
+    public BridgeTypeRef? InnerReturnTypeRef { get; init; }
     public ImmutableArray<BridgeParameterModel> Parameters { get; init; } = ImmutableArray<BridgeParameterModel>.Empty;
     public bool HasCancellationToken => Parameters.Any(p => p.IsCancellationToken);
     public bool IsAsyncEnumerable { get; init; }
     public string? AsyncEnumerableInnerType { get; init; }
+    public BridgeTypeRef? AsyncEnumerableInnerTypeRef { get; init; }
     public int VisibleParameterCount => Parameters.Count(p => !p.IsCancellationToken);
     public bool IsOverload { get; init; }
 }
@@ -54,6 +57,7 @@ internal sealed record BridgeEventModel
     public string PropertyName { get; init; } = "";
     public string CamelCaseName { get; init; } = "";
     public string PayloadTypeFullName { get; init; } = "";
+    public BridgeTypeRef PayloadTypeRef { get; init; } = BridgeTypeRef.UnknownRef;
 }
 
 internal sealed record BridgeParameterModel
@@ -61,6 +65,7 @@ internal sealed record BridgeParameterModel
     public string Name { get; init; } = "";
     public string CamelCaseName { get; init; } = "";
     public string TypeFullName { get; init; } = "";
+    public BridgeTypeRef TypeRef { get; init; } = BridgeTypeRef.UnknownRef;
     public bool IsNullable { get; init; }
     public bool HasDefaultValue { get; init; }
     public string? DefaultValueLiteral { get; init; }

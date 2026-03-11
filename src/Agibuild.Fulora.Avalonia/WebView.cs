@@ -14,7 +14,7 @@ namespace Agibuild.Fulora;
 /// <code>&lt;agw:WebView Source="https://example.com" /&gt;</code>
 /// </para>
 /// </summary>
-public class WebView : NativeControlHost, IWebView
+public class WebView : NativeControlHost, ISpaHostingWebView
 {
     private static readonly Uri AboutBlankUri = new("about:blank");
 

@@ -85,7 +85,9 @@ internal static class TypeScriptMockEmitter
         if (!method.HasReturnValue)
             return "undefined";
 
-        var tsType = TypeScriptEmitter.CSharpTypeToTypeScript(method.InnerReturnTypeFullName ?? "void");
+        var tsType = method.InnerReturnTypeRef is null
+            ? "void"
+            : TypeScriptEmitter.TypeRefToTypeScript(method.InnerReturnTypeRef);
 
         if (tsType == "string") return "''";
         if (tsType == "number") return "0";

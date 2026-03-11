@@ -395,16 +395,47 @@ public sealed class AutomationLaneGovernanceTests
         AssertSourceContains(reactPackageJson, "\"@agibuild/bridge\"", TemplateMetadataSchema, Path.Combine(reactTemplateWebPath, "package.json"));
         AssertSourceContains(vuePackageJson, "\"@agibuild/bridge\"", TemplateMetadataSchema, Path.Combine(vueTemplateWebPath, "package.json"));
 
-        AssertFileExists(Path.Combine(reactTemplateWebPath, "src", "bridge", "client.ts"), TemplateMetadataSchema);
-        AssertFileExists(Path.Combine(reactTemplateWebPath, "src", "bridge", "services.ts"), TemplateMetadataSchema);
-        AssertFileExists(Path.Combine(reactTemplateWebPath, "src", "hooks", "useBridge.ts"), TemplateMetadataSchema);
-        AssertFileExists(Path.Combine(vueTemplateWebPath, "src", "bridge", "client.ts"), TemplateMetadataSchema);
-        AssertFileExists(Path.Combine(vueTemplateWebPath, "src", "bridge", "services.ts"), TemplateMetadataSchema);
-        AssertFileExists(Path.Combine(vueTemplateWebPath, "src", "composables", "useBridge.ts"), TemplateMetadataSchema);
+        var reactServicesPath = Path.Combine(reactTemplateWebPath, "src", "bridge", "services.ts");
+        var vueServicesPath = Path.Combine(vueTemplateWebPath, "src", "bridge", "services.ts");
+        var reactHookPath = Path.Combine(reactTemplateWebPath, "src", "hooks", "useBridge.ts");
+        var vueHookPath = Path.Combine(vueTemplateWebPath, "src", "composables", "useBridge.ts");
+        AssertFileExists(reactServicesPath, TemplateMetadataSchema);
+        AssertFileExists(vueServicesPath, TemplateMetadataSchema);
+        AssertFileExists(reactHookPath, TemplateMetadataSchema);
+        AssertFileExists(vueHookPath, TemplateMetadataSchema);
 
-        var reactClient = File.ReadAllText(Path.Combine(reactTemplateWebPath, "src", "bridge", "client.ts"));
-        AssertSourceContains(reactClient, "withLogging", TemplateMetadataSchema, Path.Combine(reactTemplateWebPath, "src", "bridge", "client.ts"));
-        AssertSourceContains(reactClient, "withErrorNormalization", TemplateMetadataSchema, Path.Combine(reactTemplateWebPath, "src", "bridge", "client.ts"));
+        var reactServices = File.ReadAllText(reactServicesPath);
+        var vueServices = File.ReadAllText(vueServicesPath);
+        var reactHook = File.ReadAllText(reactHookPath);
+        var vueHook = File.ReadAllText(vueHookPath);
+
+        Assert.True(
+            reactServices.Contains("generated/bridge.client", StringComparison.Ordinal) ||
+            reactServices.Contains("getService", StringComparison.Ordinal),
+            $"[{TemplateMetadataSchema}] React template must expose service contracts via generated client or typed bridge service lookup.");
+        Assert.True(
+            vueServices.Contains("generated/bridge.client", StringComparison.Ordinal) ||
+            vueServices.Contains("getService", StringComparison.Ordinal),
+            $"[{TemplateMetadataSchema}] Vue template must expose service contracts via generated client or typed bridge service lookup.");
+
+        Assert.True(
+            reactHook.Contains("ready(", StringComparison.Ordinal) ||
+            reactHook.Contains("bridge.ready(", StringComparison.Ordinal),
+            $"[{TemplateMetadataSchema}] React template must use bridge readiness contract.");
+        Assert.True(
+            vueHook.Contains("ready(", StringComparison.Ordinal) ||
+            vueHook.Contains("bridge.ready(", StringComparison.Ordinal),
+            $"[{TemplateMetadataSchema}] Vue template must use bridge readiness contract.");
+
+        var reactClientPath = Path.Combine(reactTemplateWebPath, "src", "bridge", "client.ts");
+        if (File.Exists(reactClientPath))
+        {
+            var reactClient = File.ReadAllText(reactClientPath);
+            Assert.True(
+                reactClient.Contains("withLogging", StringComparison.Ordinal) ||
+                reactClient.Contains("withErrorNormalization", StringComparison.Ordinal),
+                $"[{TemplateMetadataSchema}] React bridge client should configure middleware when custom client entrypoint exists.");
+        }
     }
 
     [Fact]

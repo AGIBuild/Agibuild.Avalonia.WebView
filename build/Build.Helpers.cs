@@ -44,24 +44,24 @@ partial class BuildTask
             projects.Add(SrcDirectory / "Agibuild.Fulora.Adapters.MacOS" / "Agibuild.Fulora.Adapters.MacOS.csproj");
         }
 
-        // Android adapter (requires Android workload)
-        if (await HasDotNetWorkloadAsync("android"))
+        // Android adapter (requires workload + Android SDK)
+        if (await HasDotNetWorkloadAsync("android") && HasAndroidSdkInstalled())
         {
             projects.Add(SrcDirectory / "Agibuild.Fulora.Adapters.Android" / "Agibuild.Fulora.Adapters.Android.csproj");
         }
         else
         {
-            Serilog.Log.Warning("Android workload not detected — skipping Android adapter build.");
+            Serilog.Log.Warning("Android workload or SDK not detected — skipping Android adapter build.");
         }
 
-        // iOS adapter (requires macOS host + iOS workload)
-        if (OperatingSystem.IsMacOS() && await HasDotNetWorkloadAsync("ios"))
+        // iOS adapter (requires macOS host + workload + Xcode iOS SDK)
+        if (OperatingSystem.IsMacOS() && await HasDotNetWorkloadAsync("ios") && await HasAppleIosSdkInstalledAsync())
         {
             projects.Add(SrcDirectory / "Agibuild.Fulora.Adapters.iOS" / "Agibuild.Fulora.Adapters.iOS.csproj");
         }
         else if (OperatingSystem.IsMacOS())
         {
-            Serilog.Log.Warning("iOS workload not detected — skipping iOS adapter build.");
+            Serilog.Log.Warning("iOS workload or SDK not detected — skipping iOS adapter build.");
         }
 
         // Main packable project
@@ -112,6 +112,30 @@ partial class BuildTask
                     return id.Equals(platformKeyword, StringComparison.OrdinalIgnoreCase)
                         || id.Split('-').Any(part => part.Equals(platformKeyword, StringComparison.OrdinalIgnoreCase));
                 });
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    bool HasAndroidSdkInstalled()
+    {
+        if (string.IsNullOrWhiteSpace(AndroidSdkRoot))
+            return false;
+
+        var sdkRoot = (AbsolutePath)AndroidSdkRoot;
+        var adbPath = sdkRoot / "platform-tools" / (OperatingSystem.IsWindows() ? "adb.exe" : "adb");
+        return Directory.Exists(sdkRoot) && File.Exists(adbPath);
+    }
+
+    static async Task<bool> HasAppleIosSdkInstalledAsync()
+    {
+        try
+        {
+            await RunProcessCheckedAsync("xcrun", ["--sdk", "iphoneos", "--show-sdk-path"], timeout: TimeSpan.FromSeconds(10));
+            await RunProcessCheckedAsync("xcodebuild", ["-version"], timeout: TimeSpan.FromSeconds(10));
+            return true;
         }
         catch
         {

@@ -31,6 +31,7 @@ public static class WebViewBootstrapExtensions
         ArgumentNullException.ThrowIfNull(webView);
         ArgumentNullException.ThrowIfNull(options);
 
+        EnsureSpaHostingConfigured(webView, options);
         var targetUri = ResolveTargetUri(options);
 
         try
@@ -56,5 +57,35 @@ public static class WebViewBootstrapExtensions
             return new Uri(options.DevServerUrl);
 
         return new Uri($"{options.Scheme}://localhost/{options.FallbackDocument}");
+    }
+
+    private static void EnsureSpaHostingConfigured(IWebView webView, SpaBootstrapOptions options)
+    {
+        var hasEmbeddedPrefix = !string.IsNullOrWhiteSpace(options.EmbeddedResourcePrefix);
+        var hasEmbeddedAssembly = options.ResourceAssembly is not null;
+
+        if (hasEmbeddedPrefix != hasEmbeddedAssembly)
+        {
+            throw new InvalidOperationException(
+                "SpaBootstrapOptions.EmbeddedResourcePrefix and ResourceAssembly must be configured together.");
+        }
+
+        if (!string.IsNullOrEmpty(options.DevServerUrl) || !hasEmbeddedPrefix)
+            return;
+
+        if (webView is not ISpaHostingWebView spaHostingWebView)
+        {
+            throw new InvalidOperationException(
+                $"WebView type '{webView.GetType().Name}' does not support SPA hosting bootstrap.");
+        }
+
+        spaHostingWebView.EnableSpaHosting(new SpaHostingOptions
+        {
+            Scheme = options.Scheme,
+            FallbackDocument = options.FallbackDocument,
+            EmbeddedResourcePrefix = options.EmbeddedResourcePrefix,
+            ResourceAssembly = options.ResourceAssembly,
+            AutoInjectBridgeScript = true
+        });
     }
 }

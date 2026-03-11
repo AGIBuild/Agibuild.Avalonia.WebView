@@ -1,20 +1,19 @@
 import { ref, onMounted } from "vue";
-import { bridge } from "../bridge/client";
+import { ready } from "@agibuild/bridge";
 
 export function useBridgeReady(timeoutMs = 3000) {
-  const ready = ref(false);
+  const isReady = ref(false);
   const error = ref<string | null>(null);
 
   onMounted(() => {
-    bridge
-      .ready({ timeoutMs })
+    ready({ timeoutMs })
       .then(() => {
-        ready.value = true;
+        isReady.value = true;
       })
       .catch((err: Error) => {
         error.value = err.message;
       });
   });
 
-  return { ready, error };
+  return { ready: isReady, error };
 }

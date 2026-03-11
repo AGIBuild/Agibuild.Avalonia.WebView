@@ -121,29 +121,21 @@ internal static class TypeScriptEmitter
         sb.AppendLine($"{indent}    public const string All = @\"{EscapeVerbatim(allTs.ToString())}\";");
         sb.AppendLine();
 
-        if (dtos.Length > 0)
+        var ir = new BridgeContractModel
         {
-            var clientTs = TypeScriptClientEmitter.EmitClient(
-                new BridgeContractModel
-                {
-                    Services = System.Collections.Immutable.ImmutableArray.CreateRange(
-                        exports.Concat(imports).Select(s => s)),
-                    Dtos = dtos,
-                });
-            sb.AppendLine($"{indent}    /// <summary>Typed client proxy module content for bridge.client.ts.</summary>");
-            sb.AppendLine($"{indent}    public const string Client = @\"{EscapeVerbatim(clientTs)}\";");
-            sb.AppendLine();
+            Services = System.Collections.Immutable.ImmutableArray.CreateRange(
+                exports.Concat(imports).Select(s => s)),
+            Dtos = dtos,
+        };
 
-            var mockTs = TypeScriptMockEmitter.EmitMock(
-                new BridgeContractModel
-                {
-                    Services = System.Collections.Immutable.ImmutableArray.CreateRange(
-                        exports.Concat(imports).Select(s => s)),
-                    Dtos = dtos,
-                });
-            sb.AppendLine($"{indent}    /// <summary>Mock stub module content for bridge.mock.ts.</summary>");
-            sb.AppendLine($"{indent}    public const string Mock = @\"{EscapeVerbatim(mockTs)}\";");
-        }
+        var clientTs = TypeScriptClientEmitter.EmitClient(ir);
+        sb.AppendLine($"{indent}    /// <summary>Typed client proxy module content for bridge.client.ts.</summary>");
+        sb.AppendLine($"{indent}    public const string Client = @\"{EscapeVerbatim(clientTs)}\";");
+        sb.AppendLine();
+
+        var mockTs = TypeScriptMockEmitter.EmitMock(ir);
+        sb.AppendLine($"{indent}    /// <summary>Mock stub module content for bridge.mock.ts.</summary>");
+        sb.AppendLine($"{indent}    public const string Mock = @\"{EscapeVerbatim(mockTs)}\";");
 
         sb.AppendLine($"{indent}}}");
 
@@ -170,7 +162,7 @@ internal static class TypeScriptEmitter
 
         foreach (var evt in model.Events)
         {
-            var tsPayload = CSharpTypeToTypeScript(evt.PayloadTypeFullName);
+            var tsPayload = TypeRefToTypeScript(evt.PayloadTypeRef);
             sb.AppendLine($"  {evt.CamelCaseName}: BridgeEvent<{tsPayload}>;");
         }
 
@@ -185,7 +177,7 @@ internal static class TypeScriptEmitter
 
         var tsParamParts = regularParams.Select(p =>
         {
-            var tsType = CSharpTypeToTypeScript(p.TypeFullName);
+            var tsType = TypeRefToTypeScript(p.TypeRef);
             var optional = p.IsNullable || p.HasDefaultValue ? "?" : "";
             return $"{p.CamelCaseName}{optional}: {tsType}";
         }).ToList();
@@ -200,12 +192,15 @@ internal static class TypeScriptEmitter
         string tsReturn;
         if (method.IsAsyncEnumerable)
         {
-            tsReturn = $"AsyncIterable<{CSharpTypeToTypeScript(method.AsyncEnumerableInnerType ?? "unknown")}>";
+            var innerType = method.AsyncEnumerableInnerTypeRef is null
+                ? "unknown"
+                : TypeRefToTypeScript(method.AsyncEnumerableInnerTypeRef);
+            tsReturn = $"AsyncIterable<{innerType}>";
         }
         else
         {
             tsReturn = method.HasReturnValue
-                ? $"Promise<{CSharpTypeToTypeScript(method.InnerReturnTypeFullName ?? "void")}>"
+                ? $"Promise<{(method.InnerReturnTypeRef is null ? "void" : TypeRefToTypeScript(method.InnerReturnTypeRef))}>"
                 : "Promise<void>";
         }
 

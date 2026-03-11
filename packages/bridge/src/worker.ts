@@ -53,9 +53,12 @@ export class WorkerBridgeClient {
   private pendingCalls = new Map<string, { resolve: (v: unknown) => void; reject: (e: unknown) => void }>();
   private nextId = 0;
   private ready: Promise<void>;
+  private readonly messageHandler: (event: MessageEvent<WorkerBridgeMessage>) => void;
+  private disposed = false;
 
   constructor(port: MessagePort) {
     this.port = port;
+    this.messageHandler = this.onMessage.bind(this);
     this.ready = new Promise<void>((resolve) => {
       const handler = (event: MessageEvent<WorkerBridgeMessage>) => {
         if (event.data.type === "fulora:worker:ready") {
@@ -65,7 +68,7 @@ export class WorkerBridgeClient {
       };
       this.port.addEventListener("message", handler);
     });
-    this.port.addEventListener("message", this.onMessage.bind(this));
+    this.port.addEventListener("message", this.messageHandler);
     this.port.start();
     this.port.postMessage({ type: "fulora:worker:init" });
   }
@@ -86,6 +89,9 @@ export class WorkerBridgeClient {
   }
 
   async callService(service: string, method: string, ...params: unknown[]): Promise<unknown> {
+    if (this.disposed) {
+      throw new Error("WorkerBridgeClient is disposed.");
+    }
     await this.ready;
     const id = String(this.nextId++);
     return new Promise((resolve, reject) => {
@@ -98,5 +104,18 @@ export class WorkerBridgeClient {
         params,
       });
     });
+  }
+
+  dispose(): void {
+    if (this.disposed) {
+      return;
+    }
+    this.disposed = true;
+    this.port.removeEventListener("message", this.messageHandler);
+    for (const pending of this.pendingCalls.values()) {
+      pending.reject(new Error("WorkerBridgeClient disposed."));
+    }
+    this.pendingCalls.clear();
+    this.port.close();
   }
 }

@@ -8,7 +8,7 @@ namespace Agibuild.Fulora;
 /// Runtime implementation of <see cref="IWebDialog"/>.
 /// Wraps a <see cref="WebViewCore"/> and delegates window management to a <see cref="IDialogHost"/>.
 /// </summary>
-public sealed class WebDialog : IWebDialog
+public sealed class WebDialog : IWebDialog, ISpaHostingWebView
 {
     private readonly IDialogHost _host;
     private readonly WebViewCore _core;
@@ -62,6 +62,9 @@ public sealed class WebDialog : IWebDialog
 
     /// <inheritdoc />
     public event EventHandler? Closing;
+
+    /// <inheritdoc />
+    public void EnableSpaHosting(SpaHostingOptions options) => _core.EnableSpaHosting(options);
 
     // ==== IWebView delegation ====
 

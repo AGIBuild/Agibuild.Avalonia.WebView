@@ -23,14 +23,6 @@ public partial class MainWindow : Window
 
         Loaded += async (_, _) =>
         {
-#if !DEBUG
-            WebView.EnableSpaHosting(new SpaHostingOptions
-            {
-                EmbeddedResourcePrefix = "wwwroot",
-                ResourceAssembly = typeof(MainWindow).Assembly,
-            });
-#endif
-
             var runtime = ResolveRuntime();
 
             var services = new ServiceCollection();
@@ -76,6 +68,9 @@ public partial class MainWindow : Window
             {
 #if DEBUG
                 DevServerUrl = "http://localhost:5175",
+#else
+                EmbeddedResourcePrefix = "wwwroot",
+                ResourceAssembly = typeof(MainWindow).Assembly,
 #endif
                 ConfigureBridge = (bridge, _) =>
                 {

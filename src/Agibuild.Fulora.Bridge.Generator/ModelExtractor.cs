@@ -154,13 +154,15 @@ internal static class ModelExtractor
             if (member is not IPropertySymbol prop) continue;
             if (!IsBridgeEventType(prop.Type)) continue;
 
-            var payloadType = ((INamedTypeSymbol)prop.Type).TypeArguments[0].ToDisplayString();
+            var payloadSymbol = ((INamedTypeSymbol)prop.Type).TypeArguments[0];
+            var payloadType = payloadSymbol.ToDisplayString();
 
             builder.Add(new BridgeEventModel
             {
                 PropertyName = prop.Name,
                 CamelCaseName = ToCamelCase(prop.Name),
                 PayloadTypeFullName = payloadType,
+                PayloadTypeRef = BuildTypeRef(payloadSymbol),
             });
         }
 
@@ -182,24 +184,30 @@ internal static class ModelExtractor
             var isAsync = IsTaskType(method.ReturnType);
             var hasReturnValue = false;
             string? innerReturnType = null;
+            BridgeTypeRef? innerReturnTypeRef = null;
             var isAsyncEnumerable = IsAsyncEnumerableType(method.ReturnType);
             string? asyncEnumerableInnerType = null;
+            BridgeTypeRef? asyncEnumerableInnerTypeRef = null;
 
             if (isAsyncEnumerable && method.ReturnType is INamedTypeSymbol asyncEnumReturn && asyncEnumReturn.IsGenericType)
             {
                 asyncEnumerableInnerType = asyncEnumReturn.TypeArguments[0].ToDisplayString();
+                asyncEnumerableInnerTypeRef = BuildTypeRef(asyncEnumReturn.TypeArguments[0]);
                 hasReturnValue = true;
                 innerReturnType = asyncEnumerableInnerType;
+                innerReturnTypeRef = asyncEnumerableInnerTypeRef;
             }
             else if (isAsync && method.ReturnType is INamedTypeSymbol namedReturn && namedReturn.IsGenericType)
             {
                 hasReturnValue = true;
                 innerReturnType = namedReturn.TypeArguments[0].ToDisplayString();
+                innerReturnTypeRef = BuildTypeRef(namedReturn.TypeArguments[0]);
             }
             else if (!isAsync && !method.ReturnsVoid && !isAsyncEnumerable)
             {
                 hasReturnValue = true;
                 innerReturnType = method.ReturnType.ToDisplayString();
+                innerReturnTypeRef = BuildTypeRef(method.ReturnType);
             }
 
             var parameters = ExtractParameters(method);
@@ -210,12 +218,15 @@ internal static class ModelExtractor
                 CamelCaseName = camelName,
                 RpcMethodName = rpcMethodName,
                 ReturnTypeFullName = method.ReturnType.ToDisplayString(),
+                ReturnTypeRef = BuildTypeRef(method.ReturnType),
                 IsAsync = isAsync,
                 HasReturnValue = hasReturnValue,
                 InnerReturnTypeFullName = innerReturnType,
+                InnerReturnTypeRef = innerReturnTypeRef,
                 Parameters = parameters,
                 IsAsyncEnumerable = isAsyncEnumerable,
                 AsyncEnumerableInnerType = asyncEnumerableInnerType,
+                AsyncEnumerableInnerTypeRef = asyncEnumerableInnerTypeRef,
             });
         }
 
@@ -269,6 +280,7 @@ internal static class ModelExtractor
                 Name = param.Name,
                 CamelCaseName = ToCamelCase(param.Name),
                 TypeFullName = param.Type.ToDisplayString(),
+                TypeRef = BuildTypeRef(param.Type),
                 IsNullable = param.NullableAnnotation == NullableAnnotation.Annotated,
                 HasDefaultValue = param.HasExplicitDefaultValue,
                 DefaultValueLiteral = param.HasExplicitDefaultValue

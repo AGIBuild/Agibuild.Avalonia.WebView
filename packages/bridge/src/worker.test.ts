@@ -30,22 +30,32 @@ describe("WorkerBridgeClient and createBridgeRelay", () => {
   it("init/ready handshake completes", async () => {
     const { mainPort, workerPort } = createMockPortPair();
     const bridge = createMockBridge({});
-    createBridgeRelay(mainPort, bridge);
-
+    const stopRelay = createBridgeRelay(mainPort, bridge);
     const client = new WorkerBridgeClient(workerPort);
-    // callService awaits ready internally; success implies handshake completed
-    const result = await client.callService("TestService", "ping");
-    assert.equal(result, "pong");
+    try {
+      // callService awaits ready internally; success implies handshake completed
+      const result = await client.callService("TestService", "ping");
+      assert.equal(result, "pong");
+    } finally {
+      client.dispose();
+      stopRelay();
+      mainPort.close();
+    }
   });
 
   it("request/response roundtrip", async () => {
     const { mainPort, workerPort } = createMockPortPair();
     const bridge = createMockBridge({ "TestService.ping": "pong" });
-    createBridgeRelay(mainPort, bridge);
-
+    const stopRelay = createBridgeRelay(mainPort, bridge);
     const client = new WorkerBridgeClient(workerPort);
-    const result = await client.callService("TestService", "ping");
-    assert.equal(result, "pong");
+    try {
+      const result = await client.callService("TestService", "ping");
+      assert.equal(result, "pong");
+    } finally {
+      client.dispose();
+      stopRelay();
+      mainPort.close();
+    }
   });
 
   it("request/response with params", async () => {
@@ -60,30 +70,44 @@ describe("WorkerBridgeClient and createBridgeRelay", () => {
         } as Record<string, (params?: unknown) => Promise<unknown>>;
       },
     };
-    createBridgeRelay(mainPort, bridge);
-
+    const stopRelay = createBridgeRelay(mainPort, bridge);
     const client = new WorkerBridgeClient(workerPort);
-    const result = await client.callService("Math", "add", { a: 2, b: 3 });
-    assert.equal(result, 5);
+    try {
+      const result = await client.callService("Math", "add", { a: 2, b: 3 });
+      assert.equal(result, 5);
+    } finally {
+      client.dispose();
+      stopRelay();
+      mainPort.close();
+    }
   });
 
   it("error propagation from service", async () => {
     const { mainPort, workerPort } = createMockPortPair();
     const bridge = createMockBridge({});
-    createBridgeRelay(mainPort, bridge);
-
+    const stopRelay = createBridgeRelay(mainPort, bridge);
     const client = new WorkerBridgeClient(workerPort);
-    await assert.rejects(
-      () => client.callService("TestService", "fail"),
-      { message: "service error" }
-    );
+    try {
+      await assert.rejects(
+        () => client.callService("TestService", "fail"),
+        { message: "service error" }
+      );
+    } finally {
+      client.dispose();
+      stopRelay();
+      mainPort.close();
+    }
   });
 
   it("relay returns cleanup function that removes listener", () => {
-    const { mainPort } = createMockPortPair();
+    const { mainPort, workerPort } = createMockPortPair();
     const bridge = createMockBridge({});
     const dispose = createBridgeRelay(mainPort, bridge);
-    assert.doesNotThrow(() => dispose());
+    assert.doesNotThrow(() => {
+      dispose();
+      mainPort.close();
+      workerPort.close();
+    });
   });
 });
 

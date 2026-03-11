@@ -18,7 +18,7 @@ namespace Agibuild.Fulora;
 /// </code>
 /// </para>
 /// </summary>
-public sealed class AvaloniaWebDialog : IWebDialog
+public sealed class AvaloniaWebDialog : IWebDialog, ISpaHostingWebView
 {
     private readonly Window _window;
     private readonly WebView _webView;
@@ -155,6 +155,13 @@ public sealed class AvaloniaWebDialog : IWebDialog
 
     /// <inheritdoc />
     public event EventHandler? Closing;
+
+    /// <inheritdoc />
+    public void EnableSpaHosting(SpaHostingOptions options)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        RunOnUIThread(() => _webView.EnableSpaHosting(options));
+    }
 
     // ==== IWebView — Delegated to embedded WebView control ====
 

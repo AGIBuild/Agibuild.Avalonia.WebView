@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { createBridgeClient, withLogging, withErrorNormalization } from "../dist/index.js";
+import { createBridgeClient, withLogging, withErrorNormalization, ready } from "../dist/index.js";
 import type { BridgeRpc } from "../dist/index.js";
 
 function createMockRpc(responses: Record<string, unknown>): BridgeRpc {
@@ -67,5 +67,34 @@ describe("bridge client integration with middleware", () => {
 
     const result = await client.invoke<string>("Svc.ping");
     assert.equal(result, "pong");
+  });
+});
+
+describe("ready handshake", () => {
+  it("top-level ready resolves from sticky-ready state", async () => {
+    const rpc = createMockRpc({ "Svc.ping": "pong" });
+    const originalWindow = (globalThis as Record<string, unknown>).window;
+
+    const eventMap = new Map<string, Array<() => void>>();
+    const fakeWindow = {
+      __agWebViewReady: true,
+      agWebView: { rpc },
+      addEventListener(name: string, handler: () => void) {
+        const handlers = eventMap.get(name) ?? [];
+        handlers.push(handler);
+        eventMap.set(name, handlers);
+      },
+      removeEventListener(name: string, handler: () => void) {
+        const handlers = eventMap.get(name) ?? [];
+        eventMap.set(name, handlers.filter(h => h !== handler));
+      }
+    };
+
+    (globalThis as Record<string, unknown>).window = fakeWindow;
+    try {
+      await ready({ timeoutMs: 50, pollIntervalMs: 0 });
+    } finally {
+      (globalThis as Record<string, unknown>).window = originalWindow;
+    }
   });
 });

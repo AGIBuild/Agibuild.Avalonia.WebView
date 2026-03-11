@@ -74,7 +74,7 @@ internal static class TypeScriptClientEmitter
 
         var tsParamParts = regularParams.Select(p =>
         {
-            var tsType = TypeScriptEmitter.CSharpTypeToTypeScript(p.TypeFullName);
+            var tsType = TypeScriptEmitter.TypeRefToTypeScript(p.TypeRef);
             var optional = p.IsNullable || p.HasDefaultValue ? "?" : "";
             return $"{p.CamelCaseName}{optional}: {tsType}";
         }).ToList();
@@ -87,13 +87,15 @@ internal static class TypeScriptClientEmitter
         string tsReturn;
         if (method.IsAsyncEnumerable)
         {
-            var innerTs = TypeScriptEmitter.CSharpTypeToTypeScript(method.AsyncEnumerableInnerType ?? "unknown");
+            var innerTs = method.AsyncEnumerableInnerTypeRef is null
+                ? "unknown"
+                : TypeScriptEmitter.TypeRefToTypeScript(method.AsyncEnumerableInnerTypeRef);
             tsReturn = $"AsyncIterable<{innerTs}>";
         }
         else
         {
             tsReturn = method.HasReturnValue
-                ? $"Promise<{TypeScriptEmitter.CSharpTypeToTypeScript(method.InnerReturnTypeFullName ?? "void")}>"
+                ? $"Promise<{GetReturnType(method)}>"
                 : "Promise<void>";
         }
 
@@ -146,7 +148,12 @@ internal static class TypeScriptClientEmitter
     private static string GetReturnCast(BridgeMethodModel method)
     {
         if (method.HasReturnValue)
-            return $"Promise<{TypeScriptEmitter.CSharpTypeToTypeScript(method.InnerReturnTypeFullName ?? "void")}>";
+            return $"Promise<{GetReturnType(method)}>";
         return "Promise<void>";
     }
+
+    private static string GetReturnType(BridgeMethodModel method)
+        => method.InnerReturnTypeRef is null
+            ? "void"
+            : TypeScriptEmitter.TypeRefToTypeScript(method.InnerReturnTypeRef);
 }

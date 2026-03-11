@@ -59,11 +59,20 @@ type BridgeRoot = {
   agWebView?: {
     rpc?: BridgeRpc;
   };
+  __agWebViewReady?: boolean;
 };
 
 function getRpcFromWindow(win: Window & typeof globalThis): BridgeRpc | null {
   const root = win as unknown as BridgeRoot;
   return root.agWebView?.rpc ?? null;
+}
+
+function hasStickyReadyFlag(): boolean {
+  if (typeof window === "undefined") {
+    return false;
+  }
+  const root = window as unknown as BridgeRoot;
+  return root.__agWebViewReady === true;
 }
 
 function validateServiceParams(params: unknown): Record<string, unknown> | undefined {
@@ -92,6 +101,7 @@ export function createBridgeClient(
     const pollIntervalMs = options.pollIntervalMs ?? 50;
 
     if (resolveRpc()) return;
+    if (hasStickyReadyFlag() && resolveRpc()) return;
 
     return new Promise<void>((resolve, reject) => {
       let settled = false;
@@ -99,7 +109,9 @@ export function createBridgeClient(
       const cleanup = () => {
         settled = true;
         clearTimeout(timeoutHandle);
-        clearInterval(pollHandle);
+        if (pollHandle !== undefined) {
+          clearInterval(pollHandle);
+        }
         if (typeof window !== "undefined") {
           window.removeEventListener("agWebViewReady", onEvent);
         }
@@ -125,7 +137,9 @@ export function createBridgeClient(
         window.addEventListener("agWebViewReady", onEvent, { once: true });
       }
 
-      const pollHandle = setInterval(tryResolve, pollIntervalMs);
+      const pollHandle = pollIntervalMs > 0
+        ? setInterval(tryResolve, pollIntervalMs)
+        : undefined;
 
       tryResolve();
     });
@@ -174,3 +188,7 @@ export function createBridgeClient(
 }
 
 export const bridgeClient = createBridgeClient();
+
+export function ready(options?: BridgeReadyOptions): Promise<void> {
+  return bridgeClient.ready(options);
+}

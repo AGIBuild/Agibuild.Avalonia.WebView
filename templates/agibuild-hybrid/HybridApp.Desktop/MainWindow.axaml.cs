@@ -13,12 +13,6 @@ public partial class MainWindow : Window
 
         Loaded += async (_, _) =>
         {
-            WebView.EnableSpaHosting(new SpaHostingOptions
-            {
-                EmbeddedResourcePrefix = "wwwroot",
-                ResourceAssembly = typeof(MainWindow).Assembly,
-            });
-
             InitializeShellPreset();
 
 #if DEBUG
@@ -27,10 +21,16 @@ public partial class MainWindow : Window
                 new KeyGesture(Key.D, KeyModifiers.Control | KeyModifiers.Shift));
 #endif
 
-            WebView.Bridge.Expose<IGreeterService>(new GreeterServiceImpl());
-            RegisterShellPresetBridgeServices();
-
-            await WebView.NavigateAsync(new Uri("app://localhost/index.html"));
+            await WebView.BootstrapSpaAsync(new SpaBootstrapOptions
+            {
+                EmbeddedResourcePrefix = "wwwroot",
+                ResourceAssembly = typeof(MainWindow).Assembly,
+                ConfigureBridge = (bridge, _) =>
+                {
+                    bridge.Expose<IGreeterService>(new GreeterServiceImpl());
+                    RegisterShellPresetBridgeServices();
+                }
+            });
         };
 
         Unloaded += (_, _) =>

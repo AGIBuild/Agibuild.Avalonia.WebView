@@ -61,6 +61,14 @@ public interface IWebView : IDisposable
     event EventHandler<ContextMenuRequestedEventArgs>? ContextMenuRequested;
 }
 
+/// <summary>
+/// Marks an <see cref="IWebView"/> implementation that can enable framework SPA hosting.
+/// </summary>
+public interface ISpaHostingWebView : IWebView
+{
+    void EnableSpaHosting(SpaHostingOptions options);
+}
+
 public interface IWebDialog : IWebView
 {
     string? Title { get; set; }

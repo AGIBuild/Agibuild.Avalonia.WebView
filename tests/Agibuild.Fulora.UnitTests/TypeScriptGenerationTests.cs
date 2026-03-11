@@ -1,4 +1,6 @@
+using System.Collections.Immutable;
 using System.Reflection;
+using Agibuild.Fulora.Bridge.Generator;
 using Xunit;
 
 namespace Agibuild.Fulora.UnitTests;
@@ -142,6 +144,78 @@ public sealed class TypeScriptGenerationTests
         Assert.Contains("declare global", content);
         Assert.Contains("interface Window", content);
         Assert.Contains("agWebView", content);
+    }
+
+    [Fact]
+    public void EmitDeclarations_emits_Client_and_Mock_even_without_DTOs()
+    {
+        var export = new BridgeInterfaceModel
+        {
+            Namespace = "TestNs",
+            InterfaceName = "IPingService",
+            ServiceName = "PingService",
+            Direction = BridgeDirection.Export,
+            Methods = ImmutableArray.Create(new BridgeMethodModel
+            {
+                Name = "Ping",
+                CamelCaseName = "ping",
+                RpcMethodName = "PingService.ping",
+                ReturnTypeFullName = "System.Threading.Tasks.Task",
+                IsAsync = true,
+                HasReturnValue = false,
+                Parameters = ImmutableArray<BridgeParameterModel>.Empty,
+            }),
+        };
+
+        var source = TypeScriptEmitter.EmitDeclarations([export], []);
+        Assert.Contains("public const string Client", source);
+        Assert.Contains("public const string Mock", source);
+    }
+
+    [Fact]
+    public void Client_emission_prefers_TypeRef_semantics_over_raw_type_strings()
+    {
+        var stringRef = new BridgeTypeRef
+        {
+            Kind = BridgeTypeKind.String,
+            FullName = "System.String",
+            Name = "string",
+        };
+
+        var method = new BridgeMethodModel
+        {
+            Name = "Echo",
+            CamelCaseName = "echo",
+            RpcMethodName = "TypeRefService.echo",
+            ReturnTypeFullName = "System.Threading.Tasks.Task<System.Int32>",
+            IsAsync = true,
+            HasReturnValue = true,
+            InnerReturnTypeFullName = "System.Int32",
+            InnerReturnTypeRef = stringRef, // Intentional mismatch with raw type string.
+            Parameters = ImmutableArray.Create(new BridgeParameterModel
+            {
+                Name = "value",
+                CamelCaseName = "value",
+                TypeFullName = "System.Int32",
+                TypeRef = stringRef, // Intentional mismatch with raw type string.
+            }),
+        };
+
+        var ir = new BridgeContractModel
+        {
+            Services = ImmutableArray.Create(new BridgeInterfaceModel
+            {
+                ServiceName = "TypeRefService",
+                Direction = BridgeDirection.Export,
+                Methods = ImmutableArray.Create(method),
+            }),
+            Dtos = ImmutableArray<BridgeDtoModel>.Empty,
+        };
+
+        var clientSource = TypeScriptClientEmitter.EmitClient(ir);
+        Assert.Contains("value: string", clientSource);
+        Assert.Contains("Promise<string>", clientSource);
+        Assert.DoesNotContain("value: number", clientSource);
     }
 
     private static string? GetTsConstant(string serviceName)

@@ -84,6 +84,38 @@ Formalize plugin/service-provider bridge exposure flow as first-class path in DI
 
 **Why:** existing capability exists but is not productized; this closes the gap without introducing reflection-heavy alternatives.
 
+## Architecture Invariants (Non-Negotiable)
+
+1. **Single Source of Truth**
+   - All bridge artifacts (`bridge.d.ts`, `bridge.client.ts`, `bridge.mock.ts`, host metadata) MUST be emitted from `BridgeContractModel`.
+   - No emitter may re-discover contract shape from raw Roslyn symbols or string parsing.
+
+2. **Type Semantics Canonicalization**
+   - Type mapping logic MUST be centralized in one IR-based mapper.
+   - String-based CLR type parsing is compatibility-only and MUST NOT drive new artifact semantics.
+
+3. **Bootstrap Ownership**
+   - `BootstrapSpaAsync` MUST own dev/prod orchestration, including production SPA hosting enablement.
+   - App hosts provide configuration, not orchestration logic.
+
+4. **Ready Contract Priority**
+   - Handshake (sticky state + event) is normative.
+   - Polling is fallback-only and must be explicitly marked compatibility behavior.
+
+5. **Behavior-over-Shape Governance**
+   - Governance checks must validate runtime behavior/contracts, not fixed file names or template folder shape.
+
+## Execution Order (Critical Path)
+
+- Phase A: Contract Kernel hardening (IR + deterministic invariants)
+- Phase B: Artifact parity (declaration/client/mock from one semantic path)
+- Phase C: Bootstrap convergence (framework-owned navigation + bridge lifecycle)
+- Phase D: Ready handshake normalization (API consistency + race safety)
+- Phase E: Sample/template migration
+- Phase F: Governance decoupling and final closeout
+
+No downstream phase may complete while upstream invariants are violated.
+
 ## Risks / Trade-offs
 
 - **[Risk] Migration churn in samples/templates** → **Mitigation:** staged migration with compatibility shims and focused acceptance tests.

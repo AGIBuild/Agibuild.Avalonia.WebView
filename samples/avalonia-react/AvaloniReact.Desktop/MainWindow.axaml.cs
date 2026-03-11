@@ -14,17 +14,13 @@ public partial class MainWindow : Window
 
         Loaded += async (_, _) =>
         {
-#if !DEBUG
-            WebView.EnableSpaHosting(new SpaHostingOptions
-            {
-                EmbeddedResourcePrefix = "wwwroot",
-                ResourceAssembly = typeof(MainWindow).Assembly,
-            });
-#endif
             await WebView.BootstrapSpaAsync(new SpaBootstrapOptions
             {
 #if DEBUG
                 DevServerUrl = "http://localhost:5173",
+#else
+                EmbeddedResourcePrefix = "wwwroot",
+                ResourceAssembly = typeof(MainWindow).Assembly,
 #endif
                 ConfigureBridge = (bridge, _) =>
                 {

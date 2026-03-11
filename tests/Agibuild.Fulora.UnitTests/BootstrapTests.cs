@@ -45,6 +45,36 @@ public class BootstrapTests
     }
 
     [Fact]
+    public async Task BootstrapSpaAsync_ProdMode_with_embedded_options_enables_spa_hosting()
+    {
+        var webView = new TrackingWebView();
+
+        await webView.BootstrapSpaAsync(new SpaBootstrapOptions
+        {
+            EmbeddedResourcePrefix = "wwwroot",
+            ResourceAssembly = typeof(BootstrapTests).Assembly,
+            FallbackDocument = "index.html"
+        }, TestContext.Current.CancellationToken);
+
+        Assert.Equal(1, webView.EnableSpaHostingCallCount);
+        Assert.NotNull(webView.LastSpaHostingOptions);
+        Assert.Equal("wwwroot", webView.LastSpaHostingOptions!.EmbeddedResourcePrefix);
+        Assert.Equal(typeof(BootstrapTests).Assembly, webView.LastSpaHostingOptions.ResourceAssembly);
+    }
+
+    [Fact]
+    public async Task BootstrapSpaAsync_throws_when_embedded_options_are_partial()
+    {
+        var webView = new TrackingWebView();
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            webView.BootstrapSpaAsync(new SpaBootstrapOptions
+            {
+                EmbeddedResourcePrefix = "wwwroot"
+            }, TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
     public async Task BootstrapSpaAsync_invokes_ConfigureBridge_after_navigation()
     {
         var webView = new TrackingWebView();
@@ -200,11 +230,13 @@ public class BootstrapTests
 
     // ==================== Test doubles ====================
 
-    private sealed class TrackingWebView : IWebView
+    private sealed class TrackingWebView : ISpaHostingWebView
     {
         public Uri? LastNavigatedUri { get; private set; }
         public string? LastScript { get; private set; }
         public string? LastHtmlContent { get; private set; }
+        public SpaHostingOptions? LastSpaHostingOptions { get; private set; }
+        public int EnableSpaHostingCallCount { get; private set; }
         public bool NavigateThrows { get; set; }
 
         public Uri Source { get; set; } = new("about:blank");
@@ -216,6 +248,12 @@ public class BootstrapTests
         public IWebViewRpcService? Rpc => null;
         public IBridgeTracer? BridgeTracer { get; set; }
         public IBridgeService Bridge { get; } = new StubBridgeService();
+
+        public void EnableSpaHosting(SpaHostingOptions options)
+        {
+            LastSpaHostingOptions = options;
+            EnableSpaHostingCallCount++;
+        }
 
         public Task NavigateAsync(Uri uri)
         {

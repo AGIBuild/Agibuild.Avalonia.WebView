@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { bridge } from "../bridge/client";
+import { ready } from "@agibuild/bridge";
 
 export function useBridgeReady(timeoutMs = 3000): {
   ready: boolean;
@@ -10,8 +10,7 @@ export function useBridgeReady(timeoutMs = 3000): {
 
   useEffect(() => {
     let cancelled = false;
-    bridge
-      .ready({ timeoutMs })
+    ready({ timeoutMs })
       .then(() => {
         if (!cancelled) setReady(true);
       })
