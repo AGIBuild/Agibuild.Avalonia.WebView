@@ -1,6 +1,38 @@
-# AI Integration Guide
+# AI Chat Demo & Integration Guide
 
-This guide explains how to build an AI-powered hybrid app with Fulora using `IAsyncEnumerable<T>` streaming and `Microsoft.Extensions.AI`.
+Build AI-powered hybrid desktop apps with **Fulora** — combining Avalonia's native shell with a modern React frontend, `IAsyncEnumerable<T>` streaming, and `Microsoft.Extensions.AI`.
+
+> **Source code**: [`samples/avalonia-ai-chat/`](https://github.com/AGIBuild/Agibuild.Fulora/tree/main/samples/avalonia-ai-chat)
+
+---
+
+## App Preview
+
+### Chat Interface
+
+![AI Chat — Main Interface](ai-chat-demo/images/app-main.png)
+
+The chat interface features a native Avalonia window with **glass transparency** and a React frontend loaded inside a WebView. The dark-themed UI includes a left sidebar with navigation icons and a bottom chat input — all communicating through Fulora's type-safe C# ↔ JavaScript bridge.
+
+### Streaming Conversation
+
+![AI Chat — Streaming Conversation](ai-chat-demo/images/app-chat.png)
+
+Messages are streamed token-by-token using `IAsyncEnumerable<T>`. The user's message appears as a blue bubble on the right, while the AI response streams in real-time on the left. In **echo mode** (no backend required), the prompt is echoed back for demonstration.
+
+### Appearance Settings
+
+![AI Chat — Appearance Settings](ai-chat-demo/images/app-settings.png)
+
+The settings panel exposes the framework's **`IWindowShellService`** capabilities directly in the UI:
+
+- **Theme** — System / Liquid (dark) / Classic (light), with automatic OS theme following.
+- **Window transparency** — Toggle native window composition (Mica, Acrylic, Blur depending on platform).
+- **Glass opacity** — Fine-tune the transparency intensity (20–95%).
+
+All appearance changes are applied globally across windows via the framework's `WindowShellService` — the application code simply calls `updateWindowShellSettings()`.
+
+---
 
 ## Architecture
 
@@ -29,12 +61,19 @@ This guide explains how to build an AI-powered hybrid app with Fulora using `IAs
 │  │   wraps IChatClient from               │      │
 │  │   Microsoft.Extensions.AI             │      │
 │  └──────────────┬─────────────────────────┘      │
+│  ┌──────────────┴─────────────────────────┐      │
+│  │ IWindowShellService (framework)        │      │
+│  │   WindowShellService + ChromeProvider  │      │
+│  │   → theme, transparency, drag regions │      │
+│  └────────────────────────────────────────┘      │
 └─────────────────┼────────────────────────────────┘
                   │
           ┌───────┴───────┐
           │  IChatClient  │  Ollama / OpenAI / Echo
           └───────────────┘
 ```
+
+---
 
 ## Streaming Patterns
 
@@ -83,6 +122,46 @@ for await (const token of iterable) {
 }
 ```
 
+---
+
+## Window Shell Service
+
+The framework provides `IWindowShellService` for unified window appearance management. The desktop host initializes it with just a few lines:
+
+```csharp
+var chromeProvider = new AvaloniaWindowChromeProvider();
+chromeProvider.TrackWindow(this, new WindowChromeTrackingOptions
+{
+    CustomChrome = true,
+    DragRegionHeight = 28
+});
+var themeProvider = new AvaloniaThemeProvider();
+var shellService = new WindowShellService(chromeProvider, themeProvider);
+
+WebView.Bridge.Expose<IWindowShellService>(shellService);
+```
+
+The web frontend can then control theme, transparency, and read chrome metrics via RPC:
+
+```typescript
+// Get current state
+const state = await WindowShellService.getWindowShellState();
+
+// Update settings
+await WindowShellService.updateWindowShellSettings({
+    themePreference: 'system',
+    enableTransparency: true,
+    glassOpacityPercent: 78
+});
+
+// Stream state changes (theme, transparency, metrics)
+for await (const state of WindowShellService.streamWindowShellState()) {
+    applyTheme(state.effectiveThemeMode);
+}
+```
+
+---
+
 ## Cancellation
 
 ### From JavaScript
@@ -103,29 +182,88 @@ The bridge maps `AbortSignal` → `CancellationToken` on the C# side.
 
 Enumerators that are not polled for 30 seconds are automatically disposed by the runtime. This prevents resource leaks from abandoned streams.
 
+---
+
 ## Backend Configuration
 
 The sample selects an AI backend via environment variables:
 
 | Variable | Value | Backend |
 |----------|-------|---------|
-| `AI__Provider` | `ollama` | Local Ollama instance |
-| `AI__Provider` | `openai` | OpenAI API (requires `AI__ApiKey`) |
-| *(not set)* | — | Echo mode (streams prompt back) |
+| `AI__PROVIDER` | `echo` | Echo mode (streams prompt back) |
+| `AI__PROVIDER` | `ollama` | Local Ollama instance |
+| *(not set)* | — | Default: Ollama at `localhost:11434` |
+
+### Echo Mode (No Backend Required)
+
+```bash
+AI__PROVIDER=echo dotnet run --project samples/avalonia-ai-chat/AvaloniAiChat.Desktop
+```
+
+Echo mode streams the user's prompt back character by character. A banner in the UI indicates demo mode. This is the easiest way to try the sample without any AI backend.
 
 ### Ollama Setup
 
 1. Install Ollama: https://ollama.com/download
-2. Pull a model: `ollama pull llama3.2`
+2. Pull a model: `ollama pull qwen2.5:3b`
 3. Run the sample:
 
 ```bash
-export AI__Provider=ollama
-export AI__Model=llama3.2
 cd samples/avalonia-ai-chat
 dotnet run --project AvaloniAiChat.Desktop
 ```
 
-### Echo Mode (No Backend Required)
+---
 
-By default, the sample runs in echo mode — it streams the user's prompt back character by character. A banner in the UI indicates demo mode.
+## Running the Demo
+
+### Prerequisites
+
+- .NET 10 SDK
+- Node.js 18+
+
+### Steps
+
+```bash
+# 1. Install frontend dependencies
+cd samples/avalonia-ai-chat/AvaloniAiChat.Web
+npm install
+
+# 2. Start the Vite dev server (HMR enabled)
+npm run dev
+
+# 3. In another terminal, run the desktop app (echo mode)
+AI__PROVIDER=echo dotnet run --project AvaloniAiChat.Desktop
+```
+
+The app opens a native Avalonia window with the React SPA loaded inside the WebView, with full bridge connectivity, glass transparency, and custom chrome drag regions — all managed by the framework.
+
+---
+
+## Project Structure
+
+```
+samples/avalonia-ai-chat/
+├── AvaloniAiChat.Bridge/          # Shared bridge contracts
+│   └── Services/
+│       ├── IAiChatService.cs      # [JsExport] AI chat streaming interface
+│       └── IAppearanceService.cs  # Sample-specific DTOs (optional)
+├── AvaloniAiChat.Desktop/         # Avalonia desktop host
+│   ├── MainWindow.axaml           # WebView control layout
+│   ├── MainWindow.axaml.cs        # Service wiring (5 lines for shell service)
+│   └── AiChatService.cs           # IChatClient wrapper
+└── AvaloniAiChat.Web/             # React frontend (Vite + TypeScript)
+    └── src/
+        └── App.tsx                # Chat UI, settings panel, theme handling
+```
+
+## Key Capabilities
+
+| Capability | How It Works | Bridge Direction |
+|---|---|---|
+| AI streaming | `IAsyncEnumerable<string>` → `AsyncIterable` | C# → JS |
+| Cancellation | `AbortSignal` → `CancellationToken` | JS → C# |
+| Theme control | `IWindowShellService.updateWindowShellSettings()` | JS → C# |
+| Transparency | `WindowShellService` + `AvaloniaWindowChromeProvider` | Bidirectional |
+| Custom drag region | `PointerPressed` tunnel handler with interactive exclusion | Host-managed |
+| State streaming | `IWindowShellService.streamWindowShellState()` | C# → JS |
