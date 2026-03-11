@@ -11,10 +11,16 @@
     <ProjectReference Include="..\..\..\src\Agibuild.Fulora.Core\Agibuild.Fulora.Core.csproj" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <BridgeTypeScriptOutputDir>$(MSBuildProjectDirectory)\..\AvaloniReact.Web\src\bridge\generated</BridgeTypeScriptOutputDir>
+  </PropertyGroup>
+
   <!-- Source generator for typed bridge (AOT-safe proxies; falls back to reflection when absent) -->
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\Agibuild.Fulora.Bridge.Generator\Agibuild.Fulora.Bridge.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
+
+  <Import Project="..\..\..\src\Agibuild.Fulora.Bridge.Generator\build\Agibuild.Fulora.Bridge.Generator.targets" />
   <ItemGroup>
     <PackageReference Update="MinVer" Version="8.0.0-alpha.1" />
   </ItemGroup>

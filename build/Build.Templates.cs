@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Nuke.Common;
 using Nuke.Common.IO;
 using Nuke.Common.Tools.DotNet;
@@ -48,7 +49,7 @@ partial class BuildTask
     Target TemplateE2E => _ => _
         .Description("End-to-end test: pack → install template → create project → inject tests → build → test → cleanup.")
         .DependsOn(Pack)
-        .Executes(() =>
+        .Executes(async () =>
         {
             var tempRoot = (AbsolutePath)Path.Combine(Path.GetTempPath(), $"agwv-template-e2e-{Guid.NewGuid():N}");
             var feedDir = tempRoot / "nuget-feed";
@@ -131,8 +132,8 @@ partial class BuildTask
                     workingDirectory: projectDir);
 
                 // ── Step 8: Validate framework-specific web scaffolds (react + vue) ──
-                ValidateFrameworkWebBuild(tempRoot, framework: "react", appName: "SmokeAppReact", webProjectSuffix: "Web.Vite.React");
-                ValidateFrameworkWebBuild(tempRoot, framework: "vue", appName: "SmokeAppVue", webProjectSuffix: "Web.Vite.Vue");
+                await ValidateFrameworkWebBuildAsync(tempRoot, framework: "react", appName: "SmokeAppReact", webProjectSuffix: "Web.Vite.React");
+                await ValidateFrameworkWebBuildAsync(tempRoot, framework: "vue", appName: "SmokeAppVue", webProjectSuffix: "Web.Vite.Vue");
 
                 Serilog.Log.Information("Template E2E test PASSED.");
             }
@@ -151,7 +152,7 @@ partial class BuildTask
             }
         });
 
-    static void ValidateFrameworkWebBuild(AbsolutePath tempRoot, string framework, string appName, string webProjectSuffix)
+    static async Task ValidateFrameworkWebBuildAsync(AbsolutePath tempRoot, string framework, string appName, string webProjectSuffix)
     {
         var projectDir = tempRoot / appName;
         Serilog.Log.Information("Creating {Framework} template project at {Path}...", framework, projectDir);
@@ -160,12 +161,12 @@ partial class BuildTask
         var webProjectDir = projectDir / $"{appName}.{webProjectSuffix}";
         Assert.DirectoryExists(webProjectDir, $"Expected generated web project not found: {webProjectDir}");
 
-        EnsureNpmAvailable(webProjectDir);
+        await EnsureNpmAvailableAsync(webProjectDir);
         Serilog.Log.Information("Running npm install for {Framework} web scaffold...", framework);
-        RunNpmProcess("install", workingDirectory: webProjectDir, timeoutMs: 120_000);
+        await RunNpmCheckedAsync(["install"], webProjectDir, TimeSpan.FromMinutes(2));
 
         Serilog.Log.Information("Running npm run build for {Framework} web scaffold...", framework);
-        RunNpmProcess("run build", workingDirectory: webProjectDir, timeoutMs: 180_000);
+        await RunNpmCheckedAsync(["run", "build"], webProjectDir, TimeSpan.FromMinutes(3));
     }
 
     static string GenerateE2ETestCode() => """

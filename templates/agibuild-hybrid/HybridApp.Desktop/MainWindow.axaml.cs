@@ -13,7 +13,6 @@ public partial class MainWindow : Window
 
         Loaded += async (_, _) =>
         {
-            // Enable SPA hosting — serves wwwroot/ as app://localhost/
             WebView.EnableSpaHosting(new SpaHostingOptions
             {
                 EmbeddedResourcePrefix = "wwwroot",
@@ -28,11 +27,9 @@ public partial class MainWindow : Window
                 new KeyGesture(Key.D, KeyModifiers.Control | KeyModifiers.Shift));
 #endif
 
-            // Expose the C# greeter service to JavaScript
             WebView.Bridge.Expose<IGreeterService>(new GreeterServiceImpl());
             RegisterShellPresetBridgeServices();
 
-            // Navigate to the embedded SPA entry point
             await WebView.NavigateAsync(new Uri("app://localhost/index.html"));
         };
 

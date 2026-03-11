@@ -88,7 +88,8 @@ internal sealed class RuntimeBridgeService : IBridgeService, IDisposable
                     generated.MethodNames.ToList(),
                     jsStub,
                     generated.UnregisterHandlers,
-                    () => generated.DisconnectEvents(implementation));
+                    () => generated.DisconnectEvents(implementation),
+                    implementation);
 
                 _tracer.OnServiceExposed(generated.ServiceName, generated.MethodNames.Count, isSourceGenerated: true);
                 _logger.LogDebug("Bridge: exposed {Service} with {Count} methods (source-generated)",
@@ -138,7 +139,7 @@ internal sealed class RuntimeBridgeService : IBridgeService, IDisposable
             var jsStub = GenerateJsStub(serviceName, interfaceType);
             _ = _invokeScript(jsStub);
 
-            _exportedServices[interfaceType] = new ExposedService(serviceName, registeredMethods, jsStub);
+            _exportedServices[interfaceType] = new ExposedService(serviceName, registeredMethods, jsStub, Implementation: implementation);
 
             _tracer.OnServiceExposed(serviceName, registeredMethods.Count, isSourceGenerated: false);
             _logger.LogDebug("Bridge: exposed {Service} with {Count} methods (reflection)",
@@ -198,8 +199,36 @@ internal sealed class RuntimeBridgeService : IBridgeService, IDisposable
 
             CleanupJsStub(service.ServiceName);
 
+            DisposeImplementation(service);
+
             _tracer.OnServiceRemoved(service.ServiceName);
             _logger.LogDebug("Bridge: removed {Service}", service.ServiceName);
+        }
+    }
+
+    private void DisposeImplementation(ExposedService service)
+    {
+        if (service.Implementation is IAsyncDisposable asyncDisposable)
+        {
+            try
+            {
+                asyncDisposable.DisposeAsync().AsTask().GetAwaiter().GetResult();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Bridge: failed to async-dispose implementation for {Service}", service.ServiceName);
+            }
+        }
+        else if (service.Implementation is IDisposable disposable)
+        {
+            try
+            {
+                disposable.Dispose();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Bridge: failed to dispose implementation for {Service}", service.ServiceName);
+            }
         }
     }
 
@@ -226,6 +255,8 @@ internal sealed class RuntimeBridgeService : IBridgeService, IDisposable
         {
             foreach (var method in kvp.Value.RegisteredMethods)
                 _rpc.RemoveHandler(method);
+
+            DisposeImplementation(kvp.Value);
         }
         _exportedServices.Clear();
         _importProxies.Clear();
@@ -579,7 +610,13 @@ internal sealed class RuntimeBridgeService : IBridgeService, IDisposable
 
     // ==================== Inner types ====================
 
-    private sealed record ExposedService(string ServiceName, List<string> RegisteredMethods, string JsStub, Action<IWebViewRpcService>? GeneratedUnregister = null, Action? GeneratedDisconnectEvents = null);
+    private sealed record ExposedService(
+        string ServiceName,
+        List<string> RegisteredMethods,
+        string JsStub,
+        Action<IWebViewRpcService>? GeneratedUnregister = null,
+        Action? GeneratedDisconnectEvents = null,
+        object? Implementation = null);
 
     /// <summary>
     /// Built-in middleware that enforces sliding-window rate limiting.

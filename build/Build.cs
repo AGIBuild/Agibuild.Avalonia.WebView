@@ -228,9 +228,9 @@ partial class BuildTask : NukeBuild
     Target Restore => _ => _
         .Description("Restores NuGet packages for buildable projects (avoids failing on missing workloads).")
         .DependsOn(Clean)
-        .Executes(() =>
+        .Executes(async () =>
         {
-            foreach (var project in GetProjectsToBuild())
+            foreach (var project in await GetProjectsToBuildAsync())
             {
                 DotNetRestore(s => s
                     .SetProjectFile(project));
@@ -240,9 +240,9 @@ partial class BuildTask : NukeBuild
     Target Build => _ => _
         .Description("Builds all platform-appropriate projects.")
         .DependsOn(Restore)
-        .Executes(() =>
+        .Executes(async () =>
         {
-            foreach (var project in GetProjectsToBuild())
+            foreach (var project in await GetProjectsToBuildAsync())
             {
                 DotNetBuild(s => s
                     .SetProjectFile(project)

@@ -15,17 +15,60 @@
   <Target Name="_WriteBridgeTypeScript"
           AfterTargets="Build"
           Condition="'$(GenerateBridgeTypeScript)' == 'true'">
-    <!--
-      This target uses a tiny inline C# task to:
-      1. Load the output assembly.
-      2. Look for BridgeTypeScriptDeclarations.All constant.
-      3. Write it to bridge.d.ts.
-    -->
     <WriteBridgeTypeScriptTask
       AssemblyPath="$(TargetPath)"
       OutputDirectory="$(BridgeTypeScriptOutputDir)"
       OutputFileName="bridge.d.ts" />
+    <WriteBridgeArtifactTask
+      AssemblyPath="$(TargetPath)"
+      OutputDirectory="$(BridgeTypeScriptOutputDir)"
+      FieldName="Client"
+      OutputFileName="bridge.client.ts" />
+    <WriteBridgeArtifactTask
+      AssemblyPath="$(TargetPath)"
+      OutputDirectory="$(BridgeTypeScriptOutputDir)"
+      FieldName="Mock"
+      OutputFileName="bridge.mock.ts" />
   </Target>
+
+  <UsingTask TaskName="WriteBridgeArtifactTask"
+             TaskFactory="RoslynCodeTaskFactory"
+             AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+    <ParameterGroup>
+      <AssemblyPath ParameterType="System.String" Required="true" />
+      <OutputDirectory ParameterType="System.String" Required="true" />
+      <FieldName ParameterType="System.String" Required="true" />
+      <OutputFileName ParameterType="System.String" Required="true" />
+    </ParameterGroup>
+    <Task>
+      <Using Namespace="System" />
+      <Using Namespace="System.IO" />
+      <Using Namespace="System.Reflection" />
+      <Code Type="Fragment" Language="cs"><![CDATA[
+try
+{
+    var asm = Assembly.LoadFrom(AssemblyPath);
+    var type = Array.Find(asm.GetTypes(), t => t.Name == "BridgeTypeScriptDeclarations");
+    if (type == null) return true;
+
+    var field = type.GetField(FieldName, BindingFlags.Public | BindingFlags.Static);
+    if (field == null) return true;
+
+    var content = field.GetValue(null) as string;
+    if (string.IsNullOrEmpty(content)) return true;
+
+    Directory.CreateDirectory(OutputDirectory);
+    var outputPath = Path.Combine(OutputDirectory, OutputFileName);
+    File.WriteAllText(outputPath, content);
+    Log.LogMessage(MessageImportance.High, "Bridge: Generated {0}", outputPath);
+}
+catch (Exception ex)
+{
+    Log.LogWarning("Bridge: Failed to generate {0}: {1}", OutputFileName, ex.Message);
+}
+      ]]></Code>
+    </Task>
+  </UsingTask>
 
   <UsingTask TaskName="WriteBridgeTypeScriptTask"
              TaskFactory="RoslynCodeTaskFactory"

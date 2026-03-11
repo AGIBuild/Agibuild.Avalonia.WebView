@@ -346,4 +346,75 @@ describe("withErrorNormalization", () => {
       }
     );
   });
+
+  it("preserves structured code/message/data fields", async () => {
+    const mw = withErrorNormalization();
+    await assert.rejects(
+      () => executeMiddlewareChain(
+        [mw],
+        createContext("S.m", undefined),
+        async () => { throw { code: -32000, message: "Custom error", data: { detail: "info" } }; }
+      ),
+      (err) => {
+        assert.ok(err instanceof BridgeError);
+        assert.equal(err.code, -32000);
+        assert.equal(err.message, "Custom error");
+        assert.deepEqual(err.data, { detail: "info" });
+        return true;
+      }
+    );
+  });
+
+  it("does not re-wrap existing BridgeError instances", async () => {
+    const mw = withErrorNormalization();
+    const original = new BridgeError("already wrapped", -32001, { key: "val" });
+    await assert.rejects(
+      () => executeMiddlewareChain(
+        [mw],
+        createContext("S.m", undefined),
+        async () => { throw original; }
+      ),
+      (err) => {
+        assert.ok(err instanceof BridgeError);
+        assert.equal(err, original);
+        assert.equal(err.code, -32001);
+        assert.deepEqual(err.data, { key: "val" });
+        return true;
+      }
+    );
+  });
+
+  it("calls global error hook before rethrowing", async () => {
+    const hookErrors: BridgeError[] = [];
+    const mw = withErrorNormalization({ onError: (e) => hookErrors.push(e) });
+    await assert.rejects(
+      () => executeMiddlewareChain(
+        [mw],
+        createContext("S.m", undefined),
+        async () => { throw { code: -32603, message: "Internal" }; }
+      ),
+      (err) => {
+        assert.ok(err instanceof BridgeError);
+        return true;
+      }
+    );
+    assert.equal(hookErrors.length, 1);
+    assert.equal(hookErrors[0].code, -32603);
+    assert.equal(hookErrors[0].message, "Internal");
+  });
+
+  it("global error hook fires for already-wrapped BridgeError", async () => {
+    const hookErrors: BridgeError[] = [];
+    const mw = withErrorNormalization({ onError: (e) => hookErrors.push(e) });
+    const original = new BridgeError("wrapped", -1);
+    await assert.rejects(
+      () => executeMiddlewareChain(
+        [mw],
+        createContext("S.m", undefined),
+        async () => { throw original; }
+      ),
+    );
+    assert.equal(hookErrors.length, 1);
+    assert.equal(hookErrors[0], original);
+  });
 });

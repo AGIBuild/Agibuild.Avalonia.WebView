@@ -593,7 +593,7 @@ public sealed class AutomationLaneGovernanceTests
             AssertTargetDeclarationExists(combinedSource, target, CiTargetOpenSpecGate, "build/Build*.cs");
 
         AssertStringLiteralContains(combinedSource, "validate --all --strict", CiTargetOpenSpecGate, "build/Build*.cs");
-        AssertInvocationExists(combinedSource, "RunProcessCaptureAllChecked", CiTargetOpenSpecGate, "build/Build*.cs");
+        AssertInvocationExists(combinedSource, "RunProcessCheckedAsync", CiTargetOpenSpecGate, "build/Build*.cs");
         AssertStringLiteralExists(combinedSource, "dependency-governance-report.json", CiTargetOpenSpecGate, "build/Build*.cs");
         AssertStringLiteralExists(combinedSource, "typescript-governance-report.json", CiTargetOpenSpecGate, "build/Build*.cs");
         AssertStringLiteralExists(combinedSource, "closeout-snapshot.json", CiTargetOpenSpecGate, "build/Build*.cs");
@@ -887,8 +887,8 @@ public sealed class AutomationLaneGovernanceTests
         AssertSourceContains(bridgeEntry, "bridgeClient", BridgeDxAssets, "packages/bridge/src/index.ts");
         AssertSourceContains(bridgeEntry, "getService", BridgeDxAssets, "packages/bridge/src/index.ts");
         AssertSourceContains(reactPackage, "\"@agibuild/bridge\"", BridgeDxAssets, "samples/avalonia-react/.../package.json");
-        AssertSourceContains(reactBridge, "bridgeClient.getService", BridgeDxAssets, "samples/avalonia-react/.../services.ts");
-        AssertSourceContains(reactBridgeHook, "bridgeClient.ready", BridgeDxAssets, "samples/avalonia-react/.../useBridge.ts");
+        AssertSourceContains(reactBridge, "from './generated/bridge.client'", BridgeDxAssets, "samples/avalonia-react/.../services.ts");
+        AssertSourceContains(reactBridgeHook, "ready", BridgeDxAssets, "samples/avalonia-react/.../useBridge.ts");
         AssertSourceContains(vueLayout, "getAppInfo", BridgeDxAssets, "samples/avalonia-vue/.../AppLayout.vue");
         AssertSourceContains(vuePackage, "\"@agibuild/bridge\"", BridgeDxAssets, "samples/avalonia-vue/.../package.json");
         AssertSourceContains(vueBridge, "bridgeClient.getService", BridgeDxAssets, "samples/avalonia-vue/.../services.ts");
@@ -952,19 +952,14 @@ public sealed class AutomationLaneGovernanceTests
             "build/Build.Governance.cs");
         AssertStringLiteralExists(combinedSource, "SMOKE_PASSED", BridgeDistributionParity, "build/Build.Governance.cs");
         AssertStringLiteralExists(combinedSource, "LTS_IMPORT_OK", BridgeDistributionParity, "build/Build.Governance.cs");
+        AssertInvocationExists(combinedSource, "IsToolAvailableAsync", BridgeDistributionParity, "build/Build*.cs");
         AssertInvocationFirstArgumentIn(
             combinedSource,
-            "RunProcessCaptureAllChecked",
+            "RunProcessCheckedAsync",
             new HashSet<string>(StringComparer.Ordinal) { "toolName" },
             BridgeDistributionParity,
-            "build/Build.Governance.cs");
-        AssertInvocationContainsStringArgument(
-            combinedSource,
-            "RunProcessCaptureAllChecked",
-            "--version",
-            BridgeDistributionParity,
-            "build/Build.Governance.cs");
-        AssertSourceContains(combinedSource, "{toolName} --version", BridgeDistributionParity, "build/Build.Governance.cs");
+            "build/Build*.cs");
+        AssertSourceContains(combinedSource, "{toolName} --version", BridgeDistributionParity, "build/Build*.cs");
 
         AssertTargetDependsOnContainsAll(
             mainSource,

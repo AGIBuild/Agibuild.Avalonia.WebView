@@ -60,19 +60,15 @@ public sealed class WebViewBridgeGenerator : IIncrementalGenerator
         {
             var (exportList, importList) = combined;
 
-            var validExports = exportList.Where(m => m.IsValid).ToImmutableArray();
-            var validImports = importList.Where(m => m.IsValid).ToImmutableArray();
+            var ir = ContractIrBuilder.Build(exportList, importList);
+            if (ir.Services.Length == 0) return;
 
-            if (validExports.Length == 0 && validImports.Length == 0) return;
-
-            var ns = validExports.Length > 0 ? validExports[0].Namespace
-                   : validImports.Length > 0 ? validImports[0].Namespace
-                   : "";
+            var ns = ir.Services[0].Namespace;
 
             var jsonSource = JsonOptionsEmitter.Emit(ns);
             spc.AddSource("BridgeGeneratedJsonOptions.g.cs", jsonSource);
 
-            var tsSource = TypeScriptEmitter.EmitDeclarations(validExports, validImports);
+            var tsSource = TypeScriptEmitter.EmitDeclarations(ir);
             spc.AddSource("BridgeTypeScriptDeclarations.g.cs", tsSource);
         });
     }

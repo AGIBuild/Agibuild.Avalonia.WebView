@@ -48,13 +48,13 @@ partial class BuildTask
         public string ReviewPoint { get; set; } = string.Empty;
     }
 
-    void EvaluateWarningGovernance(bool failOnIssues)
+    async Task EvaluateWarningGovernanceAsync(bool failOnIssues)
     {
         TestResultsDirectory.CreateDirectory();
 
         var baseline = LoadWarningGovernanceBaseline();
-        var touchedFiles = GetTouchedFilesForWarningGovernance();
-        var warnings = CollectGovernedWarnings();
+        var touchedFiles = await GetTouchedFilesForWarningGovernanceAsync();
+        var warnings = await CollectGovernedWarningsAsync();
 
         var classifications = ClassifyWarnings(warnings, baseline, touchedFiles);
         classifications.AddRange(ValidateBaselineMetadata(baseline));
@@ -153,7 +153,7 @@ partial class BuildTask
         return baseline!;
     }
 
-    List<WarningObservation> CollectGovernedWarnings()
+    async Task<List<WarningObservation>> CollectGovernedWarningsAsync()
     {
         if (!string.IsNullOrWhiteSpace(WarningGovernanceInput))
         {
@@ -164,26 +164,27 @@ partial class BuildTask
             return ParseWarningsFromOutput(File.ReadAllText(inputPath));
         }
 
+        var buildTimeout = TimeSpan.FromMinutes(3);
         var output = string.Join(
             "\n",
             new[]
             {
-                RunProcessCaptureAll("dotnet",
-                    $"build \"{WindowsAdapterProject}\" --configuration {Configuration} --no-restore --no-incremental --nologo -v minimal",
+                await RunProcessCaptureAllAsync("dotnet",
+                    ["build", WindowsAdapterProject, "--configuration", Configuration, "--no-restore", "--no-incremental", "--nologo", "-v", "minimal"],
                     workingDirectory: RootDirectory,
-                    timeoutMs: 180_000),
-                RunProcessCaptureAll("dotnet",
-                    $"build \"{PackProject}\" --configuration {Configuration} --no-restore --no-incremental --nologo -v minimal",
+                    timeout: buildTimeout),
+                await RunProcessCaptureAllAsync("dotnet",
+                    ["build", PackProject, "--configuration", Configuration, "--no-restore", "--no-incremental", "--nologo", "-v", "minimal"],
                     workingDirectory: RootDirectory,
-                    timeoutMs: 180_000),
-                RunProcessCaptureAll("dotnet",
-                    $"build \"{IntegrationTestsProject}\" --configuration {Configuration} --no-restore --no-incremental --nologo -v minimal",
+                    timeout: buildTimeout),
+                await RunProcessCaptureAllAsync("dotnet",
+                    ["build", IntegrationTestsProject, "--configuration", Configuration, "--no-restore", "--no-incremental", "--nologo", "-v", "minimal"],
                     workingDirectory: RootDirectory,
-                    timeoutMs: 180_000),
-                RunProcessCaptureAll("dotnet",
-                    $"build \"{UnitTestsProject}\" --configuration {Configuration} --no-restore --no-incremental --nologo -v minimal",
+                    timeout: buildTimeout),
+                await RunProcessCaptureAllAsync("dotnet",
+                    ["build", UnitTestsProject, "--configuration", Configuration, "--no-restore", "--no-incremental", "--nologo", "-v", "minimal"],
                     workingDirectory: RootDirectory,
-                    timeoutMs: 180_000)
+                    timeout: buildTimeout)
             });
 
         return ParseWarningsFromOutput(output);
@@ -439,13 +440,14 @@ partial class BuildTask
            || string.IsNullOrWhiteSpace(rationale)
            || string.IsNullOrWhiteSpace(reviewPoint);
 
-    HashSet<string> GetTouchedFilesForWarningGovernance()
+    async Task<HashSet<string>> GetTouchedFilesForWarningGovernanceAsync()
     {
         var files = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var gitTimeout = TimeSpan.FromSeconds(15);
 
         try
         {
-            var statusOutput = RunProcess("git", "status --porcelain", workingDirectory: RootDirectory, timeoutMs: 15_000);
+            var statusOutput = await RunProcessAsync("git", ["status", "--porcelain"], workingDirectory: RootDirectory, timeout: gitTimeout);
             foreach (var rawLine in statusOutput.Split('\n', StringSplitOptions.RemoveEmptyEntries))
             {
                 var line = rawLine.TrimEnd('\r');
@@ -478,7 +480,7 @@ partial class BuildTask
         {
             try
             {
-                var diffOutput = RunProcess("git", "diff --name-only HEAD~1..HEAD", workingDirectory: RootDirectory, timeoutMs: 15_000);
+                var diffOutput = await RunProcessAsync("git", ["diff", "--name-only", "HEAD~1..HEAD"], workingDirectory: RootDirectory, timeout: gitTimeout);
                 foreach (var rawLine in diffOutput.Split('\n', StringSplitOptions.RemoveEmptyEntries))
                 {
                     var path = rawLine.Trim();
@@ -532,9 +534,9 @@ partial class BuildTask
     Target WarningGovernance => _ => _
         .Description("Classifies governed warnings and enforces warning governance gates.")
         .DependsOn(Build)
-        .Executes(() =>
+        .Executes(async () =>
         {
-            EvaluateWarningGovernance(failOnIssues: true);
+            await EvaluateWarningGovernanceAsync(failOnIssues: true);
         });
 
     Target WarningGovernanceSyntheticCheck => _ => _

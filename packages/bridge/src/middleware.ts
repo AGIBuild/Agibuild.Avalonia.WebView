@@ -164,17 +164,27 @@ export function withRetry(options: RetryOptions): BridgeMiddleware {
   };
 }
 
-export function withErrorNormalization(): BridgeMiddleware {
+export interface ErrorNormalizationOptions {
+  onError?: (error: BridgeError) => void;
+}
+
+export function withErrorNormalization(options?: ErrorNormalizationOptions): BridgeMiddleware {
   return async (context, next) => {
     try {
       return await next();
     } catch (err) {
+      if (err instanceof BridgeError) {
+        options?.onError?.(err);
+        throw err;
+      }
       if (isRpcError(err)) {
-        throw new BridgeError(
+        const bridgeError = new BridgeError(
           err.message ?? "RPC error",
           err.code ?? -1,
           err.data
         );
+        options?.onError?.(bridgeError);
+        throw bridgeError;
       }
       throw err;
     }
@@ -183,7 +193,7 @@ export function withErrorNormalization(): BridgeMiddleware {
 
 function isRpcError(
   err: unknown
-): err is { code?: number; message?: string; data?: unknown } {
+): err is { code: number; message?: string; data?: unknown } {
   return (
     typeof err === "object" &&
     err !== null &&

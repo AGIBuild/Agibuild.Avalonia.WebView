@@ -16,6 +16,7 @@ internal sealed record BridgeInterfaceModel
     public BridgeDirection Direction { get; init; }
     public ImmutableArray<BridgeMethodModel> Methods { get; init; } = ImmutableArray<BridgeMethodModel>.Empty;
     public ImmutableArray<BridgeEventModel> Events { get; init; } = ImmutableArray<BridgeEventModel>.Empty;
+    public ImmutableArray<BridgeDtoModel> ReferencedDtos { get; init; } = ImmutableArray<BridgeDtoModel>.Empty;
     public ImmutableArray<BridgeDiagnosticInfo> ValidationErrors { get; init; } = ImmutableArray<BridgeDiagnosticInfo>.Empty;
     public bool IsValid => ValidationErrors.IsDefaultOrEmpty;
 }

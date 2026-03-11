@@ -4,7 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text.Json;
-using System.Threading;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 using Nuke.Common;
 using Nuke.Common.IO;
@@ -306,15 +306,13 @@ partial class BuildTask
     Target NpmPublish => _ => _
         .Description("Publishes @agibuild/bridge to the npm registry with token-based authentication.")
         .Requires(() => NpmToken)
-        .Executes(() =>
+        .Executes(async () =>
         {
             var bridgeDir = RootDirectory / "packages" / "bridge";
 
-            RunNpmCaptureAll("install", workingDirectory: bridgeDir, timeoutMs: 120_000);
-            RunNpmCaptureAll("run build", workingDirectory: bridgeDir, timeoutMs: 60_000);
-
-            var publishArgs = $"publish --access public --//registry.npmjs.org/:_authToken={NpmToken}";
-            RunNpmCaptureAll(publishArgs, workingDirectory: bridgeDir, timeoutMs: 60_000);
+            await RunNpmCaptureAllAsync(["install"], bridgeDir, TimeSpan.FromMinutes(2));
+            await RunNpmCaptureAllAsync(["run", "build"], bridgeDir, TimeSpan.FromMinutes(1));
+            await RunNpmCaptureAllAsync(["publish", "--access", "public", $"--//registry.npmjs.org/:_authToken={NpmToken}"], bridgeDir, TimeSpan.FromMinutes(1));
 
             Serilog.Log.Information("@agibuild/bridge published to npm registry.");
         });
@@ -324,12 +322,12 @@ partial class BuildTask
     Target NugetPackageTest => _ => _
         .Description("Packs, restores, builds, and runs the NuGet package integration smoke test end-to-end.")
         .DependsOn(ValidatePackage)
-        .Executes(() =>
+        .Executes(async () =>
         {
             var packedVersion = ResolvePackedAgibuildVersion("Agibuild.Fulora.Avalonia");
             Serilog.Log.Information("NuGet package smoke pinned to packed version: {Version}", packedVersion);
 
-            var resolvedRoot = ResolveNugetPackagesRoot();
+            var resolvedRoot = await ResolveNugetPackagesRootAsync();
             var nugetPackagesRoot = resolvedRoot.Path;
             Serilog.Log.Information(
                 "NuGet global packages root: {Path} (resolved via {Source})",
@@ -378,7 +376,7 @@ partial class BuildTask
             var retryTelemetry = new List<NugetSmokeRetryTelemetry>();
             try
             {
-                RunNugetSmokeWithRetry(
+                await RunNugetSmokeWithRetryAsync(
                     project: NugetPackageTestProject,
                     retryTelemetry: retryTelemetry,
                     maxAttempts: 3);
@@ -415,7 +413,7 @@ partial class BuildTask
 
     // ──────────────────────────── NuGet Helpers ────────────────────────────
 
-    static NugetPackagesRootResolution ResolveNugetPackagesRoot()
+    static async Task<NugetPackagesRootResolution> ResolveNugetPackagesRootAsync()
     {
         var fromEnv = Environment.GetEnvironmentVariable("NUGET_PACKAGES");
         if (!string.IsNullOrWhiteSpace(fromEnv))
@@ -427,7 +425,7 @@ partial class BuildTask
 
         try
         {
-            var output = RunProcess("dotnet", "nuget locals global-packages --list", timeoutMs: 15_000);
+            var output = await RunProcessAsync("dotnet", ["nuget", "locals", "global-packages", "--list"], timeout: TimeSpan.FromSeconds(15));
             const string marker = "global-packages:";
             var pathFromCli = output
                 .Split('\n')
@@ -481,19 +479,17 @@ partial class BuildTask
             : "deterministic";
     }
 
-    void RunNugetSmokeWithRetry(AbsolutePath project, IList<NugetSmokeRetryTelemetry> retryTelemetry, int maxAttempts)
+    async Task RunNugetSmokeWithRetryAsync(AbsolutePath project, IList<NugetSmokeRetryTelemetry> retryTelemetry, int maxAttempts)
     {
         for (var attempt = 1; attempt <= maxAttempts; attempt++)
         {
             try
             {
-                var output = RunProcessCaptureAllChecked(
+                var output = await RunProcessCheckedAsync(
                     "dotnet",
-                    $"run --project \"{project}\" " +
-                    $"--configuration {Configuration} --no-restore --no-build " +
-                    $"-- --smoke-test",
+                    ["run", "--project", project, "--configuration", Configuration, "--no-restore", "--no-build", "--", "--smoke-test"],
                     workingDirectory: RootDirectory,
-                    timeoutMs: 60_000);
+                    timeout: TimeSpan.FromMinutes(1));
 
                 if (output.Contains("Failed to unregister class Chrome_WidgetWin_0", StringComparison.Ordinal) ||
                     output.Contains("ui\\gfx\\win\\window_impl.cc:124", StringComparison.Ordinal))
@@ -535,7 +531,7 @@ partial class BuildTask
                     maxAttempts,
                     classification,
                     delayMs);
-                Thread.Sleep(delayMs);
+                await Task.Delay(delayMs);
             }
         }
     }

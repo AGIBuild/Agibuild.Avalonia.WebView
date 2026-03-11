@@ -51,6 +51,13 @@ public sealed class GetAwaiterGetResultUsageTests
                     "FlushAsync(_options.FlushTimeout).GetAwaiter().GetResult()",
                     "SentryTelemetryProvider",
                     "ITelemetryProvider.Flush() is synchronous by contract; Sentry SDK only provides async flush.")
+            ],
+            ["src/Agibuild.Fulora.Runtime/RuntimeBridgeService.cs"] =
+            [
+                new(
+                    "asyncDisposable.DisposeAsync().AsTask().GetAwaiter().GetResult()",
+                    "RuntimeBridgeService",
+                    "IDisposable.Dispose() is synchronous; IAsyncDisposable implementations must be awaited at the sync bridge boundary.")
             ]
         };
 

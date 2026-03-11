@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Nuke.Common;
 using Nuke.Common.IO;
 using Nuke.Common.Tools.DotNet;
@@ -138,7 +139,7 @@ partial class BuildTask
     Target AutomationLaneReport => _ => _
         .Description("Runs automation lanes and writes pass/fail/skip report.")
         .DependsOn(Build)
-        .Executes(() =>
+        .Executes(async () =>
         {
             var lanes = new List<AutomationLaneResult>();
             var failures = new List<string>();
@@ -165,7 +166,7 @@ partial class BuildTask
                     Project: E2EiOSProject.ToString(),
                     Reason: "Requires macOS host with iOS simulator tooling."));
             }
-            else if (!HasDotNetWorkload("ios"))
+            else if (!await HasDotNetWorkloadAsync("ios"))
             {
                 lanes.Add(new AutomationLaneResult(
                     Lane: $"{RuntimeAutomationLane}.iOS",
@@ -174,7 +175,7 @@ partial class BuildTask
                     Reason: "iOS workload not installed."));
             }
 
-            if (!HasDotNetWorkload("android"))
+            if (!await HasDotNetWorkloadAsync("android"))
             {
                 lanes.Add(new AutomationLaneResult(
                     Lane: $"{RuntimeAutomationLane}.Android",
@@ -202,10 +203,10 @@ partial class BuildTask
             }
             else
             {
-                RunLaneWithReporting(
+                await RunLaneWithReportingAsync(
                     lane: $"{RuntimeAutomationLane}.Gtk",
                     project: E2EDesktopProject,
-                    run: () => RunGtkSmokeDesktopApp(),
+                    run: RunGtkSmokeDesktopAppAsync,
                     lanes,
                     failures);
             }

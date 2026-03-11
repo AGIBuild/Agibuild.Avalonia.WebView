@@ -86,6 +86,50 @@ public sealed class TypeScriptGenerationTests
     }
 
     [Fact]
+    public void All_field_includes_DTO_interfaces()
+    {
+        var content = GetAllContent();
+        Assert.NotNull(content);
+
+        Assert.Contains("export interface UserProfile {", content);
+        Assert.Contains("export interface AppSettings {", content);
+        Assert.Contains("export interface Item {", content);
+    }
+
+    [Fact]
+    public void DTO_properties_use_camelCase()
+    {
+        var content = GetAllContent();
+        Assert.NotNull(content);
+
+        Assert.Contains("name: string;", content);
+        Assert.Contains("darkMode: boolean;", content);
+    }
+
+    [Fact]
+    public void Client_field_contains_typed_proxies()
+    {
+        var content = GetFieldContent("Client");
+        Assert.NotNull(content);
+
+        Assert.Contains("Auto-generated", content);
+        Assert.Contains("export const appService", content);
+        Assert.Contains("getCurrentUser", content);
+        Assert.Contains("saveSettings", content);
+        Assert.Contains("AppService.getCurrentUser", content);
+    }
+
+    [Fact]
+    public void Mock_field_contains_mock_installer()
+    {
+        var content = GetFieldContent("Mock");
+        Assert.NotNull(content);
+
+        Assert.Contains("installBridgeMock", content);
+        Assert.Contains("handlers", content);
+    }
+
+    [Fact]
     public void All_field_includes_Window_augmentation()
     {
         var type = Assembly.GetExecutingAssembly()
@@ -107,6 +151,18 @@ public sealed class TypeScriptGenerationTests
             .First(t => t.Name == "BridgeTypeScriptDeclarations");
 
         var field = type.GetField(serviceName, BindingFlags.Public | BindingFlags.Static);
+        return field?.GetValue(null) as string;
+    }
+
+    private static string? GetAllContent() => GetFieldContent("All");
+
+    private static string? GetFieldContent(string fieldName)
+    {
+        var type = Assembly.GetExecutingAssembly()
+            .GetTypes()
+            .First(t => t.Name == "BridgeTypeScriptDeclarations");
+
+        var field = type.GetField(fieldName, BindingFlags.Public | BindingFlags.Static);
         return field?.GetValue(null) as string;
     }
 }

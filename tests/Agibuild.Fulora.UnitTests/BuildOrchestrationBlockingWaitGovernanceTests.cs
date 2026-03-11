@@ -8,7 +8,7 @@ public sealed class BuildOrchestrationBlockingWaitGovernanceTests
     private sealed record AllowedBlockingWait(string Fragment, string Owner, string Rationale);
 
     [Fact]
-    public void Build_orchestration_blocking_waits_are_whitelisted_with_owner_and_rationale()
+    public void Build_orchestration_has_no_blocking_waits()
     {
         var repoRoot = FindRepoRoot();
         var buildDir = Path.Combine(repoRoot, "build");
@@ -16,83 +16,26 @@ public sealed class BuildOrchestrationBlockingWaitGovernanceTests
             .SelectMany(f => File.ReadAllLines(f, Encoding.UTF8))
             .ToArray();
 
-        var allowed = new[]
-        {
-            new AllowedBlockingWait(
-                "launchProcess.WaitForExit(15_000)",
-                "Build.StartIOS",
-                "Simulator launch may hang and requires bounded synchronous wait before kill/recover."),
-            new AllowedBlockingWait(
-                "process.WaitForExit()",
-                "Build.StartReactDev",
-                "Foreground dev-server target is intentionally blocking until user stops the process."),
-            new AllowedBlockingWait(
-                "!process.WaitForExit(timeoutMs)",
-                "Build.RunProcess",
-                "All shell commands use a bounded timeout and fail fast on hangs."),
-            new AllowedBlockingWait(
-                "Thread.Sleep(3000);",
-                "Build.AndroidBootAndLaunch",
-                "ADB/device boot and activity-manager readiness polling uses bounded sleep interval."),
-            new AllowedBlockingWait(
-                "Thread.Sleep(delayMs);",
-                "Build.RunNugetSmokeWithRetry",
-                "Transient package smoke retry uses bounded backoff before next attempt."),
-            new AllowedBlockingWait(
-                "http.GetAsync(url).GetAwaiter().GetResult()",
-                "Build.IsHttpReady",
-                "Synchronous readiness probe for port polling remains constrained to build helper boundary."),
-            new AllowedBlockingWait(
-                "stdoutTask.GetAwaiter().GetResult()",
-                "Build.RunProcess/RunProcessCaptureAll/RunProcessCaptureAllChecked",
-                "Async stream reads prevent stdout/stderr buffer-full deadlock; collected after WaitForExit."),
-            new AllowedBlockingWait(
-                "stderrTask.GetAwaiter().GetResult()",
-                "Build.RunProcess/RunProcessCaptureAll/RunProcessCaptureAllChecked",
-                "Async stream reads prevent stdout/stderr buffer-full deadlock; collected after WaitForExit."),
-            new AllowedBlockingWait(
-                "Thread.Sleep(500);",
-                "Build.WaitForPort",
-                "Port readiness loop uses bounded short polling interval."),
-            new AllowedBlockingWait(
-                "http.GetAsync($\"{OllamaEndpoint.TrimEnd('/')}/api/tags\").GetAwaiter().GetResult()",
-                "Build.Samples",
-                "Synchronous Ollama API readiness check in sample validation helper."),
-            new AllowedBlockingWait(
-                "response.Content.ReadAsStringAsync().GetAwaiter().GetResult()",
-                "Build.Samples",
-                "Synchronous content read for Ollama API response in sample validation."),
-            new AllowedBlockingWait(
-                "process.WaitForExit(timeoutMs)",
-                "Build.Samples/RunProcessCaptureAll",
-                "Bounded process wait in sample build helper matching RunProcess pattern.")
-        };
-
-        var found = new List<string>();
+        var violations = new List<string>();
         foreach (var line in lines)
         {
             var trimmed = line.Trim();
+            if (trimmed.StartsWith("//", StringComparison.Ordinal)
+                || trimmed.StartsWith("*", StringComparison.Ordinal))
+                continue;
+
             if (trimmed.Contains("GetAwaiter().GetResult()", StringComparison.Ordinal)
                 || trimmed.Contains("Thread.Sleep(", StringComparison.Ordinal)
-                || trimmed.Contains("WaitForExit(", StringComparison.Ordinal))
+                || trimmed.Contains(".WaitForExit(", StringComparison.Ordinal))
             {
-                found.Add(trimmed);
+                violations.Add(trimmed);
             }
         }
 
-        Assert.NotEmpty(found);
-        foreach (var usage in found)
-        {
-            Assert.Contains(
-                allowed,
-                x => usage.Contains(x.Fragment, StringComparison.Ordinal));
-        }
-
-        foreach (var entry in allowed)
-        {
-            Assert.False(string.IsNullOrWhiteSpace(entry.Owner));
-            Assert.False(string.IsNullOrWhiteSpace(entry.Rationale));
-        }
+        Assert.True(
+            violations.Count == 0,
+            $"Build orchestration must be fully async. Found {violations.Count} blocking wait(s):\n"
+            + string.Join('\n', violations));
     }
 
     private static string FindRepoRoot()

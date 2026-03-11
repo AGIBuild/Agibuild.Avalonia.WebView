@@ -145,4 +145,23 @@ public sealed class FuloraServiceBuilder
         Services.AddSingleton<ISharedStateStore, SharedStateStore>();
         return this;
     }
+
+    /// <summary>
+    /// Registers a bridge configuration action that will be invoked by
+    /// <see cref="WebViewBootstrapExtensions.BootstrapSpaAsync"/> when no explicit
+    /// <see cref="SpaBootstrapOptions.ConfigureBridge"/> is provided.
+    /// Use this to declare plugin-first bridge exposure at DI registration time.
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// services.AddFulora()
+    ///     .ConfigureBridge((bridge, sp) => bridge.UsePlugin&lt;MyPlugin&gt;(sp));
+    /// </code>
+    /// </example>
+    public FuloraServiceBuilder ConfigureBridge(Action<IBridgeService, IServiceProvider?> configure)
+    {
+        ArgumentNullException.ThrowIfNull(configure);
+        Services.AddSingleton(new BridgeConfigurationAction(configure));
+        return this;
+    }
 }

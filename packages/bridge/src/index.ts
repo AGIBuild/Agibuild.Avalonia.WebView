@@ -3,6 +3,7 @@ export type {
   BridgeMiddleware,
   LoggingOptions,
   RetryOptions,
+  ErrorNormalizationOptions,
 } from "./middleware.js";
 
 export {
@@ -89,14 +90,45 @@ export function createBridgeClient(
   async function ready(options: BridgeReadyOptions = {}): Promise<void> {
     const timeoutMs = options.timeoutMs ?? 3000;
     const pollIntervalMs = options.pollIntervalMs ?? 50;
-    const start = Date.now();
-    while (!resolveRpc()) {
-      if (Date.now() - start >= timeoutMs) {
-        throw new Error("Bridge not available within timeout.");
+
+    if (resolveRpc()) return;
+
+    return new Promise<void>((resolve, reject) => {
+      let settled = false;
+
+      const cleanup = () => {
+        settled = true;
+        clearTimeout(timeoutHandle);
+        clearInterval(pollHandle);
+        if (typeof window !== "undefined") {
+          window.removeEventListener("agWebViewReady", onEvent);
+        }
+      };
+
+      const tryResolve = () => {
+        if (settled) return;
+        if (resolveRpc()) {
+          cleanup();
+          resolve();
+        }
+      };
+
+      const onEvent = () => tryResolve();
+
+      const timeoutHandle = setTimeout(() => {
+        if (settled) return;
+        cleanup();
+        reject(new Error("Bridge not available within timeout."));
+      }, timeoutMs);
+
+      if (typeof window !== "undefined") {
+        window.addEventListener("agWebViewReady", onEvent, { once: true });
       }
 
-      await new Promise((resolve) => setTimeout(resolve, pollIntervalMs));
-    }
+      const pollHandle = setInterval(tryResolve, pollIntervalMs);
+
+      tryResolve();
+    });
   }
 
   async function invoke<T>(method: string, params?: Record<string, unknown>): Promise<T> {

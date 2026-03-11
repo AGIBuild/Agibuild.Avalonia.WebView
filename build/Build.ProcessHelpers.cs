@@ -1,13 +1,14 @@
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Threading.Tasks;
 using Nuke.Common.IO;
 
 partial class BuildTask
 {
     static readonly JsonSerializerOptions WriteIndentedJsonOptions = new() { WriteIndented = true };
+    static readonly ProcessRunner Runner = new();
 
     static void WriteJsonReport(AbsolutePath path, object payload)
     {
@@ -51,147 +52,104 @@ partial class BuildTask
         }
     }
 
-    static string RunProcess(string fileName, string arguments, string? workingDirectory = null, int timeoutMs = 30_000)
+    // ──────────────────────────── Process convenience wrappers ────────────────────────────
+
+    static async Task<string> RunProcessAsync(
+        string fileName,
+        string[] arguments,
+        string? workingDirectory = null,
+        TimeSpan? timeout = null)
     {
-        var psi = new ProcessStartInfo
-        {
-            FileName = fileName,
-            Arguments = arguments,
-            UseShellExecute = false,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            CreateNoWindow = true,
-        };
+        timeout ??= TimeSpan.FromSeconds(30);
+        var result = await Runner.RunAsync(
+            new ProcessCommand(fileName, arguments, workingDirectory, timeout));
 
-        if (!string.IsNullOrEmpty(workingDirectory))
-            psi.WorkingDirectory = workingDirectory;
+        if (!result.IsSuccess && !string.IsNullOrWhiteSpace(result.StandardError))
+            Serilog.Log.Warning("Process stderr: {Error}", result.StandardError.Trim());
 
-        using var process = Process.Start(psi)!;
-        // Read both streams concurrently to prevent buffer-full deadlock
-        var stdoutTask = process.StandardOutput.ReadToEndAsync();
-        var stderrTask = process.StandardError.ReadToEndAsync();
-
-        if (!process.WaitForExit(timeoutMs))
-        {
-            process.Kill();
-            process.WaitForExit();
-            throw new TimeoutException($"Process '{fileName} {arguments}' timed out after {timeoutMs}ms.");
-        }
-
-        var output = stdoutTask.GetAwaiter().GetResult();
-        var error = stderrTask.GetAwaiter().GetResult();
-
-        if (process.ExitCode != 0 && !string.IsNullOrWhiteSpace(error))
-        {
-            Serilog.Log.Warning("Process stderr: {Error}", error.Trim());
-        }
-
-        return output;
+        return result.StandardOutput;
     }
 
-    static string RunProcessCaptureAll(string fileName, string arguments, string? workingDirectory = null, int timeoutMs = 30_000)
+    static async Task<string> RunProcessCaptureAllAsync(
+        string fileName,
+        string[] arguments,
+        string? workingDirectory = null,
+        TimeSpan? timeout = null)
     {
-        var psi = new ProcessStartInfo
-        {
-            FileName = fileName,
-            Arguments = arguments,
-            UseShellExecute = false,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            CreateNoWindow = true,
-        };
+        timeout ??= TimeSpan.FromSeconds(30);
+        var result = await Runner.RunAsync(
+            new ProcessCommand(fileName, arguments, workingDirectory, timeout));
 
-        if (!string.IsNullOrEmpty(workingDirectory))
-            psi.WorkingDirectory = workingDirectory;
-
-        using var process = Process.Start(psi)!;
-        var stdoutTask = process.StandardOutput.ReadToEndAsync();
-        var stderrTask = process.StandardError.ReadToEndAsync();
-
-        if (!process.WaitForExit(timeoutMs))
-        {
-            process.Kill();
-            process.WaitForExit();
-            throw new TimeoutException($"Process '{fileName} {arguments}' timed out after {timeoutMs}ms.");
-        }
-
-        var output = stdoutTask.GetAwaiter().GetResult();
-        var error = stderrTask.GetAwaiter().GetResult();
-
-        return string.Join('\n', new[] { output, error }.Where(x => !string.IsNullOrWhiteSpace(x)));
+        return CombineOutput(result.StandardOutput, result.StandardError);
     }
 
-    static string RunNpmCaptureAll(string arguments, string workingDirectory, int timeoutMs = 30_000)
+    static async Task<string> RunProcessCheckedAsync(
+        string fileName,
+        string[] arguments,
+        string? workingDirectory = null,
+        TimeSpan? timeout = null)
     {
-        if (OperatingSystem.IsWindows())
-        {
-            return RunProcessCaptureAll(
-                "cmd.exe",
-                $"/d /s /c \"npm {arguments}\"",
-                workingDirectory: workingDirectory,
-                timeoutMs: timeoutMs);
-        }
+        timeout ??= TimeSpan.FromSeconds(30);
+        var result = await Runner.RunAsync(
+            new ProcessCommand(fileName, arguments, workingDirectory, timeout));
 
-        return RunProcessCaptureAll(
-            "npm",
-            arguments,
-            workingDirectory: workingDirectory,
-            timeoutMs: timeoutMs);
-    }
-
-    static string RunProcessCaptureAllChecked(string fileName, string arguments, string? workingDirectory = null, int timeoutMs = 30_000)
-    {
-        var psi = new ProcessStartInfo
-        {
-            FileName = fileName,
-            Arguments = arguments,
-            UseShellExecute = false,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            CreateNoWindow = true,
-        };
-
-        if (!string.IsNullOrEmpty(workingDirectory))
-            psi.WorkingDirectory = workingDirectory;
-
-        using var process = Process.Start(psi)!;
-        var stdoutTask = process.StandardOutput.ReadToEndAsync();
-        var stderrTask = process.StandardError.ReadToEndAsync();
-
-        if (!process.WaitForExit(timeoutMs))
-        {
-            process.Kill();
-            process.WaitForExit();
-            throw new TimeoutException($"Process '{fileName} {arguments}' timed out after {timeoutMs}ms.");
-        }
-
-        var output = stdoutTask.GetAwaiter().GetResult();
-        var error = stderrTask.GetAwaiter().GetResult();
-
-        var combined = string.Join('\n', new[] { output, error }.Where(x => !string.IsNullOrWhiteSpace(x)));
-        if (process.ExitCode != 0)
+        var combined = CombineOutput(result.StandardOutput, result.StandardError);
+        if (!result.IsSuccess)
         {
             throw new InvalidOperationException(
-                $"Process '{fileName} {arguments}' failed with exit code {process.ExitCode}.\n{combined}");
+                $"Process '{fileName} {string.Join(' ', arguments)}' failed with exit code {result.ExitCode}.\n{combined}");
         }
 
         return combined;
     }
 
-    static bool IsToolAvailable(string toolName)
+    // ──────────────────────────── npm / package-manager helpers ────────────────────────────
+
+    static Task<string> RunNpmCaptureAllAsync(
+        string[] arguments,
+        string workingDirectory,
+        TimeSpan? timeout = null)
+    {
+        return OperatingSystem.IsWindows()
+            ? RunProcessCaptureAllAsync(
+                "cmd.exe",
+                ["/d", "/s", "/c", $"npm {string.Join(' ', arguments)}"],
+                workingDirectory,
+                timeout)
+            : RunProcessCaptureAllAsync("npm", arguments, workingDirectory, timeout);
+    }
+
+    static Task<string> RunNpmCheckedAsync(
+        string[] arguments,
+        string workingDirectory,
+        TimeSpan? timeout = null)
+    {
+        return OperatingSystem.IsWindows()
+            ? RunProcessCheckedAsync(
+                "cmd.exe",
+                ["/d", "/s", "/c", $"npm {string.Join(' ', arguments)}"],
+                workingDirectory,
+                timeout)
+            : RunProcessCheckedAsync("npm", arguments, workingDirectory, timeout);
+    }
+
+    static async Task<bool> IsToolAvailableAsync(string toolName)
     {
         try
         {
             if (OperatingSystem.IsWindows())
             {
-                RunProcessCaptureAllChecked(
+                await RunProcessCheckedAsync(
                     "cmd.exe",
-                    $"/d /s /c \"{toolName} --version\"",
-                    timeoutMs: 5_000);
+                    ["/d", "/s", "/c", $"{toolName} --version"],
+                    timeout: TimeSpan.FromSeconds(5));
             }
             else
             {
-                RunProcessCaptureAllChecked(toolName, "--version", timeoutMs: 5_000);
+                await RunProcessCheckedAsync(
+                    toolName,
+                    ["--version"],
+                    timeout: TimeSpan.FromSeconds(5));
             }
 
             return true;
@@ -202,17 +160,22 @@ partial class BuildTask
         }
     }
 
-    static void RunPmInstall(string pm, string workingDirectory)
+    static Task RunPmInstallAsync(string pm, string workingDirectory)
     {
-        if (OperatingSystem.IsWindows())
-        {
-            RunProcessCaptureAllChecked("cmd.exe", $"/d /s /c \"{pm} install\"",
-                workingDirectory: workingDirectory, timeoutMs: 120_000);
-        }
-        else
-        {
-            RunProcessCaptureAllChecked(pm, "install",
-                workingDirectory: workingDirectory, timeoutMs: 120_000);
-        }
+        return OperatingSystem.IsWindows()
+            ? RunProcessCheckedAsync(
+                "cmd.exe",
+                ["/d", "/s", "/c", $"{pm} install"],
+                workingDirectory,
+                TimeSpan.FromMinutes(2))
+            : RunProcessCheckedAsync(pm, ["install"], workingDirectory, TimeSpan.FromMinutes(2));
+    }
+
+    // ──────────────────────────── Shared helpers ────────────────────────────
+
+    static string CombineOutput(string stdout, string stderr)
+    {
+        return string.Join('\n',
+            new[] { stdout, stderr }.Where(x => !string.IsNullOrWhiteSpace(x)));
     }
 }

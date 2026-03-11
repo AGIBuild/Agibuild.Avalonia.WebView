@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Agibuild.Fulora;
 using Agibuild.Fulora.AI;
 using Agibuild.Fulora.AI.Ollama;
@@ -24,33 +23,13 @@ public partial class MainWindow : Window
 
         Loaded += async (_, _) =>
         {
-            try
+#if !DEBUG
+            WebView.EnableSpaHosting(new SpaHostingOptions
             {
-#if DEBUG
-                await WebView.NavigateAsync(new Uri("http://localhost:5175"));
-#else
-                WebView.EnableSpaHosting(new SpaHostingOptions
-                {
-                    EmbeddedResourcePrefix = "wwwroot",
-                    ResourceAssembly = typeof(MainWindow).Assembly,
-                });
-                await WebView.NavigateAsync(new Uri("app://localhost/index.html"));
+                EmbeddedResourcePrefix = "wwwroot",
+                ResourceAssembly = typeof(MainWindow).Assembly,
+            });
 #endif
-            }
-            catch (WebViewNavigationException ex)
-            {
-                Debug.WriteLine($"Navigation failed: {ex.Message}");
-                await WebView.NavigateToStringAsync(
-                    "<html><body style='font-family:system-ui;padding:2em;color:#333'>" +
-                    "<h2>Navigation failed</h2>" +
-                    $"<p>{ex.Message}</p>" +
-#if DEBUG
-                    "<p>Make sure the Vite dev server is running:<br>" +
-                    "<code>cd AvaloniAiChat.Web && npm run dev</code></p>" +
-#endif
-                    "</body></html>");
-                return;
-            }
 
             var runtime = ResolveRuntime();
 
@@ -80,11 +59,8 @@ public partial class MainWindow : Window
             var themeProvider = new AvaloniaThemeProvider();
             var shellService = new WindowShellService(chromeProvider, themeProvider);
 
-            WebView.Bridge.Expose<IAiChatService>(chatService);
-            WebView.Bridge.Expose<IWindowShellService>(shellService);
             Closed += (_, _) =>
             {
-                shellService.Dispose();
                 chromeProvider.Dispose();
                 themeProvider.Dispose();
             };
@@ -95,6 +71,18 @@ public partial class MainWindow : Window
                 if (file is not null)
                     chatService.SetDroppedFile(file.Path);
             };
+
+            await WebView.BootstrapSpaAsync(new SpaBootstrapOptions
+            {
+#if DEBUG
+                DevServerUrl = "http://localhost:5175",
+#endif
+                ConfigureBridge = (bridge, _) =>
+                {
+                    bridge.Expose<IAiChatService>(chatService);
+                    bridge.Expose<IWindowShellService>(shellService);
+                },
+            });
         };
     }
 

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Nuke.Common;
 using Nuke.Common.IO;
 
@@ -69,18 +70,18 @@ partial class BuildTask
 
     Target DependencyVulnerabilityGovernance => _ => _
         .Description("Runs dependency vulnerability scans (NuGet + npm) as a hard governance gate.")
-        .Executes(() =>
+        .Executes(async () =>
         {
             TestResultsDirectory.CreateDirectory();
 
             var failures = new List<string>();
             var scanReports = new List<object>();
 
-            var nugetOutput = RunProcessCaptureAll(
+            var nugetOutput = await RunProcessCaptureAllAsync(
                 "dotnet",
-                $"list \"{SolutionFile}\" package --vulnerable --include-transitive",
+                ["list", SolutionFile, "package", "--vulnerable", "--include-transitive"],
                 workingDirectory: RootDirectory,
-                timeoutMs: 240_000);
+                timeout: TimeSpan.FromMinutes(4));
             var nugetHasVulnerability = nugetOutput.Contains("has the following vulnerable packages", StringComparison.OrdinalIgnoreCase)
                                         || nugetOutput.Contains("vulnerable", StringComparison.OrdinalIgnoreCase)
                                         && nugetOutput.Contains("Severity", StringComparison.OrdinalIgnoreCase);
@@ -104,10 +105,10 @@ partial class BuildTask
 
             foreach (var workspace in npmWorkspaces)
             {
-                var npmOutput = RunNpmCaptureAll(
-                    "audit --json --audit-level=high",
-                    workingDirectory: workspace,
-                    timeoutMs: 180_000);
+                var npmOutput = await RunNpmCaptureAllAsync(
+                    ["audit", "--json", "--audit-level=high"],
+                    workspace,
+                    TimeSpan.FromMinutes(3));
 
                 var hasHighOrCritical = false;
                 try
@@ -236,20 +237,21 @@ partial class BuildTask
 
     Target OpenSpecStrictGovernance => _ => _
         .Description("Runs OpenSpec strict validation as a hard governance gate.")
-        .Executes(() =>
+        .Executes(async () =>
         {
             TestResultsDirectory.CreateDirectory();
+            var governanceTimeout = TimeSpan.FromMinutes(3);
             var output = OperatingSystem.IsWindows()
-                ? RunProcessCaptureAllChecked(
+                ? await RunProcessCheckedAsync(
                     "powershell",
-                    "-NoLogo -NoProfile -ExecutionPolicy Bypass -Command \"npm exec --yes @fission-ai/openspec -- validate --all --strict\"",
+                    ["-NoLogo", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", "npm exec --yes @fission-ai/openspec -- validate --all --strict"],
                     workingDirectory: RootDirectory,
-                    timeoutMs: 180_000)
-                : RunProcessCaptureAllChecked(
+                    timeout: governanceTimeout)
+                : await RunProcessCheckedAsync(
                     "bash",
-                    "-lc \"npm exec --yes @fission-ai/openspec -- validate --all --strict\"",
+                    ["-lc", "npm exec --yes @fission-ai/openspec -- validate --all --strict"],
                     workingDirectory: RootDirectory,
-                    timeoutMs: 180_000);
+                    timeout: governanceTimeout);
             File.WriteAllText(OpenSpecStrictGovernanceReportFile, output);
             Serilog.Log.Information("OpenSpec strict governance report written to {Path}", OpenSpecStrictGovernanceReportFile);
         });
@@ -404,7 +406,7 @@ partial class BuildTask
 
     Target BridgeDistributionGovernance => _ => _
         .Description("Validates @agibuild/bridge npm package builds and imports across package managers and Node LTS.")
-        .Executes(() =>
+        .Executes(async () =>
         {
             TestResultsDirectory.CreateDirectory();
 
@@ -413,13 +415,13 @@ partial class BuildTask
             var checks = new List<object>();
             var failures = new List<string>();
 
-            var nodeVersion = RunProcessCaptureAll("node", "--version", workingDirectory: RootDirectory, timeoutMs: 10_000).Trim();
+            var nodeVersion = (await RunProcessCaptureAllAsync("node", ["--version"], workingDirectory: RootDirectory, timeout: TimeSpan.FromSeconds(10))).Trim();
 
             // 1. Build bridge package with npm (canonical path)
             try
             {
-                RunNpmCaptureAll("install", workingDirectory: bridgeDir, timeoutMs: 120_000);
-                RunNpmCaptureAll("run build", workingDirectory: bridgeDir, timeoutMs: 60_000);
+                await RunNpmCaptureAllAsync(["install"], bridgeDir, TimeSpan.FromMinutes(2));
+                await RunNpmCaptureAllAsync(["run", "build"], bridgeDir, TimeSpan.FromMinutes(1));
                 checks.Add(new { manager = "npm", phase = "install+build", passed = true });
             }
             catch (Exception ex)
@@ -431,7 +433,7 @@ partial class BuildTask
             // 2. Package-manager parity: pnpm and yarn consume smoke
             foreach (var pm in new[] { "pnpm", "yarn" })
             {
-                var available = IsToolAvailable(pm);
+                var available = await IsToolAvailableAsync(pm);
                 if (!available)
                 {
                     checks.Add(new { manager = pm, phase = "consume-smoke", passed = true, skipped = true, reason = $"{pm} not installed" });
@@ -457,7 +459,6 @@ partial class BuildTask
                         """;
                     File.WriteAllText(tempDir / "package.json", packageJson);
 
-                    // Force yarn (classic or berry) to use node_modules layout
                     if (string.Equals(pm, "yarn", StringComparison.OrdinalIgnoreCase))
                         File.WriteAllText(tempDir / ".yarnrc.yml", "nodeLinker: node-modules\n");
 
@@ -468,8 +469,8 @@ partial class BuildTask
                         """;
                     File.WriteAllText(tempDir / "consumer.mjs", consumerScript);
 
-                    RunPmInstall(pm, tempDir);
-                    var output = RunProcessCaptureAll("node", "consumer.mjs", workingDirectory: tempDir, timeoutMs: 30_000);
+                    await RunPmInstallAsync(pm, tempDir);
+                    var output = await RunProcessCaptureAllAsync("node", ["consumer.mjs"], workingDirectory: tempDir, timeout: TimeSpan.FromSeconds(30));
                     var passed = output.Contains("SMOKE_PASSED", StringComparison.Ordinal);
                     checks.Add(new { manager = pm, phase = "consume-smoke", passed, output = passed ? null : output });
                     if (!passed)
@@ -498,10 +499,10 @@ partial class BuildTask
                         """;
                     File.WriteAllText(ltsDir / "check.mjs", ltsScript);
 
-                    var importCheck = RunProcessCaptureAll(
-                        "node", "check.mjs",
+                    var importCheck = await RunProcessCaptureAllAsync(
+                        "node", ["check.mjs"],
                         workingDirectory: ltsDir,
-                        timeoutMs: 10_000);
+                        timeout: TimeSpan.FromSeconds(10));
                     var passed = importCheck.Contains("LTS_IMPORT_OK", StringComparison.Ordinal);
                     checks.Add(new { phase = "node-lts-import", nodeVersion, passed, output = passed ? null : importCheck, scriptContent = passed ? null : File.ReadAllText(ltsDir / "check.mjs") });
                     if (!passed)

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 using Nuke.Common;
 using Nuke.Common.IO;
@@ -32,17 +33,15 @@ partial class BuildTask
             .SetLoggers($"trx;LogFileName={trxFileName}"));
     }
 
-    void RunGtkSmokeDesktopApp()
+    async Task RunGtkSmokeDesktopAppAsync()
     {
         TestResultsDirectory.CreateDirectory();
 
-        // Use the desktop integration test app in self-terminating "--gtk-smoke" mode.
-        // The app writes detailed logs to stdout/stderr which we persist as an artifact.
-        var output = RunProcessCaptureAllChecked(
+        var output = await RunProcessCheckedAsync(
             "dotnet",
-            $"run --project \"{E2EDesktopProject}\" --configuration {Configuration} --no-build -- --gtk-smoke",
+            ["run", "--project", E2EDesktopProject, "--configuration", Configuration, "--no-build", "--", "--gtk-smoke"],
             workingDirectory: RootDirectory,
-            timeoutMs: 180_000);
+            timeout: TimeSpan.FromMinutes(3));
 
         File.WriteAllText(TestResultsDirectory / "gtk-smoke.log", output);
     }
@@ -57,6 +56,26 @@ partial class BuildTask
         try
         {
             run();
+            lanes.Add(new AutomationLaneResult(lane, "passed", project.ToString()));
+        }
+        catch (Exception ex)
+        {
+            var message = ex.Message.Split('\n').FirstOrDefault() ?? ex.Message;
+            lanes.Add(new AutomationLaneResult(lane, "failed", project.ToString(), message));
+            failures.Add($"{lane}: {message}");
+        }
+    }
+
+    static async Task RunLaneWithReportingAsync(
+        string lane,
+        AbsolutePath project,
+        Func<Task> run,
+        IList<AutomationLaneResult> lanes,
+        IList<string> failures)
+    {
+        try
+        {
+            await run();
             lanes.Add(new AutomationLaneResult(lane, "passed", project.ToString()));
         }
         catch (Exception ex)
