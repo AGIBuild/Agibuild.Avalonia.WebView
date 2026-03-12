@@ -1,0 +1,25 @@
+---
+description: Ensure CI/CD pipeline consistency when modifying build dependencies or toolchain requirements
+globs: .github/workflows/*.yml,**/*.csproj,build/**/*.cs
+alwaysApply: false
+---
+
+# CI/CD Pipeline Consistency
+
+When a change introduces new external tool dependencies into the build chain (e.g., adding `npm`/`node` calls to MSBuild targets, adding Python scripts to build, etc.):
+
+1. **Audit ALL workflows**: Check every `.github/workflows/*.yml` file, not just `ci.yml`. The project has: `ci.yml`, `release.yml`, `mutation-testing.yml`, `docs-deploy.yml`, `create-tag.yml`.
+
+2. **Environment parity**: If a new tool is required by any `.csproj` or Nuke target, ensure ALL workflows that invoke `dotnet build`/`dotnet test`/Nuke have the corresponding setup step (e.g., `actions/setup-node@v4`).
+
+3. **Verification scope**: Local `nuke Test` passing + CI passing does NOT guarantee Release will pass. Release has a different Nuke target chain (`CiPublish`) and may build projects that CI skips. Always mentally trace which solutions/projects each workflow builds.
+
+4. **Task checklist**: When creating OpenSpec tasks for changes that affect build tooling, explicitly include a task: "Update all CI/CD workflows to install required tools."
+
+## Known workflow differences
+
+| Workflow | Nuke Target | Builds Samples? | Needs Node.js? |
+|----------|-------------|-----------------|----------------|
+| CI | `Ci` | Yes (via solution) | Yes |
+| Release | `CiPublish` | Yes (via solution) | Yes |
+| Mutation Testing | `MutationTest` | No | No |
