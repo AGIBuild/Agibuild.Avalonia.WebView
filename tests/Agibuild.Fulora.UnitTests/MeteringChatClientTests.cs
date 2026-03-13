@@ -20,7 +20,7 @@ public sealed class MeteringChatClientTests
         var inner = new UsageTrackingClient(promptTokens: 100, completionTokens: 50);
         var client = new MeteringChatClient(inner, DefaultOptions);
 
-        await client.GetResponseAsync([new ChatMessage(ChatRole.User, "hi")]);
+        await client.GetResponseAsync([new ChatMessage(ChatRole.User, "hi")], cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(150, client.PeriodTokensUsed);
     }
@@ -56,7 +56,7 @@ public sealed class MeteringChatClientTests
         var client = new MeteringChatClient(inner, options);
 
         await Assert.ThrowsAsync<AiBudgetExceededException>(
-            () => client.GetResponseAsync([new ChatMessage(ChatRole.User, "hi")]));
+            () => client.GetResponseAsync([new ChatMessage(ChatRole.User, "hi")], cancellationToken: TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -68,11 +68,11 @@ public sealed class MeteringChatClientTests
         var inner = new UsageTrackingClient(promptTokens: 100, completionTokens: 50);
         var client = new MeteringChatClient(inner, options);
 
-        await client.GetResponseAsync([new ChatMessage(ChatRole.User, "first")]);
+        await client.GetResponseAsync([new ChatMessage(ChatRole.User, "first")], cancellationToken: TestContext.Current.CancellationToken);
         Assert.Equal(150, client.PeriodTokensUsed);
 
         await Assert.ThrowsAsync<AiBudgetExceededException>(
-            () => client.GetResponseAsync([new ChatMessage(ChatRole.User, "second")]));
+            () => client.GetResponseAsync([new ChatMessage(ChatRole.User, "second")], cancellationToken: TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -81,7 +81,7 @@ public sealed class MeteringChatClientTests
         var inner = new UsageTrackingClient(promptTokens: 0, completionTokens: 0, includeUsage: false);
         var client = new MeteringChatClient(inner, DefaultOptions);
 
-        var response = await client.GetResponseAsync([new ChatMessage(ChatRole.User, "hi")]);
+        var response = await client.GetResponseAsync([new ChatMessage(ChatRole.User, "hi")], cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.NotNull(response);
         Assert.Equal(0, client.PeriodTokensUsed);

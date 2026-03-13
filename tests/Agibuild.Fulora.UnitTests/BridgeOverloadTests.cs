@@ -126,7 +126,7 @@ public sealed class BridgeOverloadTests
         var registrationTree = result.GeneratedTrees.FirstOrDefault(t => t.FilePath.Contains("SearchServiceBridgeRegistration"));
         Assert.NotNull(registrationTree);
 
-        var generatedCode = registrationTree.GetText().ToString();
+        var generatedCode = registrationTree.GetText(TestContext.Current.CancellationToken).ToString();
         Assert.Contains("SearchService.search\"", generatedCode);
         Assert.Contains("SearchService.search$2\"", generatedCode);
         Assert.Contains("SearchService.search$3\"", generatedCode);
@@ -153,7 +153,7 @@ public sealed class BridgeOverloadTests
         var registrationTree = result.GeneratedTrees.FirstOrDefault(t => t.FilePath.Contains("FetchServiceBridgeRegistration"));
         Assert.NotNull(registrationTree);
 
-        var generatedCode = registrationTree.GetText().ToString();
+        var generatedCode = registrationTree.GetText(TestContext.Current.CancellationToken).ToString();
         Assert.Contains("FetchService.fetch\"", generatedCode);
         Assert.Contains("FetchService.fetch$1\"", generatedCode);
     }
@@ -180,7 +180,7 @@ public sealed class BridgeOverloadTests
         var registrationTree = result.GeneratedTrees.FirstOrDefault(t => t.FilePath.Contains("CancelOverloadServiceBridgeRegistration"));
         Assert.NotNull(registrationTree);
 
-        var generatedCode = registrationTree.GetText().ToString();
+        var generatedCode = registrationTree.GetText(TestContext.Current.CancellationToken).ToString();
         Assert.Contains("CancelOverloadService.process\"", generatedCode);
         Assert.Contains("CancelOverloadService.process$2\"", generatedCode);
     }
@@ -206,7 +206,7 @@ public sealed class BridgeOverloadTests
         var registrationTree = result.GeneratedTrees.FirstOrDefault(t => t.FilePath.Contains("SimpleServiceBridgeRegistration"));
         Assert.NotNull(registrationTree);
 
-        var generatedCode = registrationTree.GetText().ToString();
+        var generatedCode = registrationTree.GetText(TestContext.Current.CancellationToken).ToString();
         Assert.Contains("SimpleService.getItem\"", generatedCode);
         Assert.Contains("SimpleService.saveItem\"", generatedCode);
         Assert.DoesNotContain("$", generatedCode);
@@ -233,7 +233,7 @@ public sealed class BridgeOverloadTests
         var tsTree = result.GeneratedTrees.FirstOrDefault(t => t.FilePath.Contains("BridgeTypeScriptDeclarations"));
         Assert.NotNull(tsTree);
 
-        var tsCode = tsTree.GetText().ToString();
+        var tsCode = tsTree.GetText(TestContext.Current.CancellationToken).ToString();
         var searchOccurrences = tsCode.Split("search(").Length - 1;
         Assert.True(searchOccurrences >= 4, $"Expected at least 4 'search(' occurrences (2 in per-service + 2 in All), got {searchOccurrences}");
     }
@@ -259,7 +259,7 @@ public sealed class BridgeOverloadTests
         var registrationTree = result.GeneratedTrees.FirstOrDefault(t => t.FilePath.Contains("DispatchServiceBridgeRegistration"));
         Assert.NotNull(registrationTree);
 
-        var generatedCode = registrationTree.GetText().ToString();
+        var generatedCode = registrationTree.GetText(TestContext.Current.CancellationToken).ToString();
         Assert.Contains("arguments.length", generatedCode);
         Assert.Contains("DispatchService.do", generatedCode);
         Assert.Contains("DispatchService.do$1", generatedCode);
@@ -283,7 +283,7 @@ public sealed class BridgeOverloadTests
         var registrationTree = result.GeneratedTrees.FirstOrDefault(t => t.FilePath.Contains("PlainServiceBridgeRegistration"));
         Assert.NotNull(registrationTree);
 
-        var generatedCode = registrationTree.GetText().ToString();
+        var generatedCode = registrationTree.GetText(TestContext.Current.CancellationToken).ToString();
         Assert.DoesNotContain("arguments.length", generatedCode);
     }
 
@@ -311,7 +311,7 @@ public sealed class BridgeOverloadTests
         var registrationTree = result.GeneratedTrees.FirstOrDefault(t => t.FilePath.Contains("MultiOverloadBridgeRegistration"));
         Assert.NotNull(registrationTree);
 
-        var generatedCode = registrationTree.GetText().ToString();
+        var generatedCode = registrationTree.GetText(TestContext.Current.CancellationToken).ToString();
         Assert.Contains("MultiOverload.query\"", generatedCode);
         Assert.Contains("MultiOverload.query$1\"", generatedCode);
         Assert.Contains("MultiOverload.query$3\"", generatedCode);
@@ -339,7 +339,7 @@ public sealed class BridgeOverloadTests
         var registrationTree = result.GeneratedTrees.FirstOrDefault(t => t.FilePath.Contains("MixedServiceBridgeRegistration"));
         Assert.NotNull(registrationTree);
 
-        var generatedCode = registrationTree.GetText().ToString();
+        var generatedCode = registrationTree.GetText(TestContext.Current.CancellationToken).ToString();
         Assert.Contains("MixedService.getById\"", generatedCode);
         Assert.Contains("MixedService.search\"", generatedCode);
         Assert.Contains("MixedService.search$2\"", generatedCode);

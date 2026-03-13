@@ -13,7 +13,7 @@ public sealed class ContentGateChatClientTests
         var inner = new EchoChatClient();
         var client = new ContentGateChatClient(inner, []);
 
-        var response = await client.GetResponseAsync([new ChatMessage(ChatRole.User, "hello")]);
+        var response = await client.GetResponseAsync([new ChatMessage(ChatRole.User, "hello")], cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Contains("echo: hello", response.Text);
     }
@@ -26,7 +26,7 @@ public sealed class ContentGateChatClientTests
         var client = new ContentGateChatClient(inner, [filter]);
 
         var ex = await Assert.ThrowsAsync<AiContentBlockedException>(
-            () => client.GetResponseAsync([new ChatMessage(ChatRole.User, "bad words")]));
+            () => client.GetResponseAsync([new ChatMessage(ChatRole.User, "bad words")], cancellationToken: TestContext.Current.CancellationToken));
         Assert.Contains("toxic", ex.Reason);
     }
 
@@ -39,7 +39,7 @@ public sealed class ContentGateChatClientTests
             inputTransform: "cleaned input");
         var client = new ContentGateChatClient(inner, [filter]);
 
-        var response = await client.GetResponseAsync([new ChatMessage(ChatRole.User, "dirty input")]);
+        var response = await client.GetResponseAsync([new ChatMessage(ChatRole.User, "dirty input")], cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Contains("echo: cleaned input", response.Text);
     }
@@ -52,7 +52,7 @@ public sealed class ContentGateChatClientTests
         var client = new ContentGateChatClient(inner, [filter]);
 
         var ex = await Assert.ThrowsAsync<AiContentBlockedException>(
-            () => client.GetResponseAsync([new ChatMessage(ChatRole.User, "trigger")]));
+            () => client.GetResponseAsync([new ChatMessage(ChatRole.User, "trigger")], cancellationToken: TestContext.Current.CancellationToken));
         Assert.Contains("harmful output", ex.Reason);
     }
 
@@ -65,7 +65,7 @@ public sealed class ContentGateChatClientTests
             outputTransform: "safe response");
         var client = new ContentGateChatClient(inner, [filter]);
 
-        var response = await client.GetResponseAsync([new ChatMessage(ChatRole.User, "hi")]);
+        var response = await client.GetResponseAsync([new ChatMessage(ChatRole.User, "hi")], cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal("safe response", response.Text);
     }
@@ -79,7 +79,7 @@ public sealed class ContentGateChatClientTests
         var client = new ContentGateChatClient(inner, [filter]);
 
         var chunks = new List<string>();
-        await foreach (var update in client.GetStreamingResponseAsync([new ChatMessage(ChatRole.User, "test")]))
+        await foreach (var update in client.GetStreamingResponseAsync([new ChatMessage(ChatRole.User, "test")], cancellationToken: TestContext.Current.CancellationToken).WithCancellation(TestContext.Current.CancellationToken))
         {
             if (update.Text is not null)
                 chunks.Add(update.Text);
@@ -95,7 +95,7 @@ public sealed class ContentGateChatClientTests
         var filter = new TestFilter(inputAction: ContentFilterAction.Block, inputReason: "blocked");
         var client = new ContentGateChatClient(inner, [filter]);
 
-        var response = await client.GetResponseAsync([new ChatMessage(ChatRole.System, "system prompt")]);
+        var response = await client.GetResponseAsync([new ChatMessage(ChatRole.System, "system prompt")], cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Contains("echo: system prompt", response.Text);
     }

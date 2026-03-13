@@ -233,7 +233,7 @@ public class AutoUpdateServiceTests
         await svc.CheckForUpdate();
 
         // Give the background auto-download task time to complete
-        await Task.Delay(200);
+        await Task.Delay(200, TestContext.Current.CancellationToken);
 
         Assert.True(provider.DownloadWasCalled);
     }

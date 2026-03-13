@@ -35,7 +35,7 @@ public class ConfigProviderTests
         try
         {
             var provider = new JsonFileConfigProvider(path);
-            var value = await provider.GetValueAsync("appName");
+            var value = await provider.GetValueAsync("appName", TestContext.Current.CancellationToken);
             Assert.NotNull(value);
             Assert.Equal("TestApp", value);
         }
@@ -49,7 +49,7 @@ public class ConfigProviderTests
         try
         {
             var provider = new JsonFileConfigProvider(path);
-            var value = await provider.GetValueAsync("nonexistent");
+            var value = await provider.GetValueAsync("nonexistent", TestContext.Current.CancellationToken);
             Assert.Null(value);
         }
         finally { File.Delete(path); }
@@ -62,7 +62,7 @@ public class ConfigProviderTests
         try
         {
             var provider = new JsonFileConfigProvider(path);
-            var value = await provider.GetValueAsync<int>("maxRetries");
+            var value = await provider.GetValueAsync<int>("maxRetries", TestContext.Current.CancellationToken);
             Assert.Equal(3, value);
         }
         finally { File.Delete(path); }
@@ -75,7 +75,7 @@ public class ConfigProviderTests
         try
         {
             var provider = new JsonFileConfigProvider(path);
-            var value = await provider.GetValueAsync<bool>("debugMode");
+            var value = await provider.GetValueAsync<bool>("debugMode", TestContext.Current.CancellationToken);
             Assert.True(value);
         }
         finally { File.Delete(path); }
@@ -88,7 +88,7 @@ public class ConfigProviderTests
         try
         {
             var provider = new JsonFileConfigProvider(path);
-            var value = await provider.GetValueAsync<string>("appName");
+            var value = await provider.GetValueAsync<string>("appName", TestContext.Current.CancellationToken);
             Assert.Equal("TestApp", value);
         }
         finally { File.Delete(path); }
@@ -101,9 +101,9 @@ public class ConfigProviderTests
         try
         {
             var provider = new JsonFileConfigProvider(path);
-            Assert.True(await provider.IsFeatureEnabledAsync("featureA"));
-            Assert.True(await provider.IsFeatureEnabledAsync("featureC"));
-            Assert.True(await provider.IsFeatureEnabledAsync("featureE"));
+            Assert.True(await provider.IsFeatureEnabledAsync("featureA", TestContext.Current.CancellationToken));
+            Assert.True(await provider.IsFeatureEnabledAsync("featureC", TestContext.Current.CancellationToken));
+            Assert.True(await provider.IsFeatureEnabledAsync("featureE", TestContext.Current.CancellationToken));
         }
         finally { File.Delete(path); }
     }
@@ -115,9 +115,9 @@ public class ConfigProviderTests
         try
         {
             var provider = new JsonFileConfigProvider(path);
-            Assert.False(await provider.IsFeatureEnabledAsync("featureB"));
-            Assert.False(await provider.IsFeatureEnabledAsync("featureD"));
-            Assert.False(await provider.IsFeatureEnabledAsync("featureF"));
+            Assert.False(await provider.IsFeatureEnabledAsync("featureB", TestContext.Current.CancellationToken));
+            Assert.False(await provider.IsFeatureEnabledAsync("featureD", TestContext.Current.CancellationToken));
+            Assert.False(await provider.IsFeatureEnabledAsync("featureF", TestContext.Current.CancellationToken));
         }
         finally { File.Delete(path); }
     }
@@ -129,7 +129,7 @@ public class ConfigProviderTests
         try
         {
             var provider = new JsonFileConfigProvider(path);
-            var section = await provider.GetSectionAsync("nested");
+            var section = await provider.GetSectionAsync("nested", TestContext.Current.CancellationToken);
             Assert.NotNull(section);
             Assert.Single(section);
             Assert.True(section.ContainsKey("value"));
@@ -145,7 +145,7 @@ public class ConfigProviderTests
         try
         {
             var provider = new JsonFileConfigProvider(path);
-            var section = await provider.GetSectionAsync("nonexistent");
+            var section = await provider.GetSectionAsync("nonexistent", TestContext.Current.CancellationToken);
             Assert.Null(section);
         }
         finally { File.Delete(path); }
@@ -158,7 +158,7 @@ public class ConfigProviderTests
         try
         {
             var provider = new JsonFileConfigProvider(path);
-            var section = await provider.GetSectionAsync("appName");
+            var section = await provider.GetSectionAsync("appName", TestContext.Current.CancellationToken);
             Assert.Null(section);
         }
         finally { File.Delete(path); }
@@ -173,11 +173,11 @@ public class ConfigProviderTests
         {
             File.WriteAllText(tempFile, """{"key": "v1"}""");
             var provider = new JsonFileConfigProvider(tempFile);
-            Assert.Equal("v1", await provider.GetValueAsync("key"));
+            Assert.Equal("v1", await provider.GetValueAsync("key", TestContext.Current.CancellationToken));
 
             File.WriteAllText(tempFile, """{"key": "v2"}""");
-            await provider.RefreshAsync();
-            Assert.Equal("v2", await provider.GetValueAsync("key"));
+            await provider.RefreshAsync(TestContext.Current.CancellationToken);
+            Assert.Equal("v2", await provider.GetValueAsync("key", TestContext.Current.CancellationToken));
         }
         finally
         {
@@ -211,11 +211,11 @@ public class ConfigProviderTests
                 {
                     for (var j = 0; j < 50; j++)
                     {
-                        _ = await provider.GetValueAsync("a");
-                        _ = await provider.GetValueAsync<int>("b");
-                        _ = await provider.IsFeatureEnabledAsync("a");
+                        _ = await provider.GetValueAsync("a", TestContext.Current.CancellationToken);
+                        _ = await provider.GetValueAsync<int>("b", TestContext.Current.CancellationToken);
+                        _ = await provider.IsFeatureEnabledAsync("a", TestContext.Current.CancellationToken);
                     }
-                }));
+                }, TestContext.Current.CancellationToken));
             }
 
             var refreshTask = Task.Run(async () =>
@@ -223,9 +223,9 @@ public class ConfigProviderTests
                 for (var j = 0; j < 10; j++)
                 {
                     File.WriteAllText(tempFile, "{\"a\": " + j + ", \"b\": 2}");
-                    await provider.RefreshAsync();
+                    await provider.RefreshAsync(TestContext.Current.CancellationToken);
                 }
-            });
+            }, TestContext.Current.CancellationToken);
 
             await Task.WhenAll([.. readTasks, refreshTask]);
         }
@@ -246,10 +246,10 @@ public class ConfigProviderTests
         var client = new HttpClient(handler);
         var provider = new RemoteConfigProvider(client, new Uri("https://config.example.com/config.json"));
 
-        await provider.RefreshAsync();
-        var value = await provider.GetValueAsync("remoteKey");
+        await provider.RefreshAsync(TestContext.Current.CancellationToken);
+        var value = await provider.GetValueAsync("remoteKey", TestContext.Current.CancellationToken);
         Assert.Equal("remoteValue", value);
-        Assert.True(await provider.IsFeatureEnabledAsync("featureX"));
+        Assert.True(await provider.IsFeatureEnabledAsync("featureX", TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -264,10 +264,10 @@ public class ConfigProviderTests
             var client = new HttpClient(handler);
             var provider = new RemoteConfigProvider(client, new Uri("https://config.example.com/config.json"), localProvider);
 
-            await provider.RefreshAsync();
+            await provider.RefreshAsync(TestContext.Current.CancellationToken);
 
-            Assert.Equal("fromRemote", await provider.GetValueAsync("remoteOnly"));
-            Assert.Equal("localValue", await provider.GetValueAsync("localKey"));
+            Assert.Equal("fromRemote", await provider.GetValueAsync("remoteOnly", TestContext.Current.CancellationToken));
+            Assert.Equal("localValue", await provider.GetValueAsync("localKey", TestContext.Current.CancellationToken));
         }
         finally { File.Delete(localPath); }
     }
@@ -284,9 +284,9 @@ public class ConfigProviderTests
             var client = new HttpClient(handler);
             var provider = new RemoteConfigProvider(client, new Uri("https://config.example.com/config.json"), localProvider);
 
-            await provider.RefreshAsync();
+            await provider.RefreshAsync(TestContext.Current.CancellationToken);
 
-            Assert.Equal("fromRemote", await provider.GetValueAsync("sharedKey"));
+            Assert.Equal("fromRemote", await provider.GetValueAsync("sharedKey", TestContext.Current.CancellationToken));
         }
         finally { File.Delete(localPath); }
     }
@@ -298,14 +298,14 @@ public class ConfigProviderTests
         var client = new HttpClient(handler);
         var provider = new RemoteConfigProvider(client, new Uri("https://config.example.com/config.json"));
 
-        Assert.Null(await provider.GetValueAsync("v"));
+        Assert.Null(await provider.GetValueAsync("v", TestContext.Current.CancellationToken));
 
-        await provider.RefreshAsync();
-        Assert.Equal("1", await provider.GetValueAsync("v"));
+        await provider.RefreshAsync(TestContext.Current.CancellationToken);
+        Assert.Equal("1", await provider.GetValueAsync("v", TestContext.Current.CancellationToken));
 
         handler.SetResponse("""{"v": "2"}""");
-        await provider.RefreshAsync();
-        Assert.Equal("2", await provider.GetValueAsync("v"));
+        await provider.RefreshAsync(TestContext.Current.CancellationToken);
+        Assert.Equal("2", await provider.GetValueAsync("v", TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -316,8 +316,8 @@ public class ConfigProviderTests
         var client = new HttpClient(handler);
         var provider = new RemoteConfigProvider(client, new Uri("https://config.example.com/config.json"));
 
-        await provider.RefreshAsync();
-        var section = await provider.GetSectionAsync("section");
+        await provider.RefreshAsync(TestContext.Current.CancellationToken);
+        var section = await provider.GetSectionAsync("section", TestContext.Current.CancellationToken);
 
         Assert.NotNull(section);
         Assert.Equal(2, section.Count);
@@ -337,8 +337,8 @@ public class ConfigProviderTests
             var client = new HttpClient(handler);
             var provider = new RemoteConfigProvider(client, new Uri("https://config.example.com/config.json"), localProvider);
 
-            await provider.RefreshAsync();
-            var section = await provider.GetSectionAsync("nested");
+            await provider.RefreshAsync(TestContext.Current.CancellationToken);
+            var section = await provider.GetSectionAsync("nested", TestContext.Current.CancellationToken);
 
             Assert.NotNull(section);
             Assert.Single(section);
@@ -356,20 +356,20 @@ public class ConfigProviderTests
         var handler = new MockHttpHandler(json);
         var client = new HttpClient(handler);
         var provider = new RemoteConfigProvider(client, new Uri("https://config.example.com/config.json"));
-        await provider.RefreshAsync();
+        await provider.RefreshAsync(TestContext.Current.CancellationToken);
 
-        Assert.True(await provider.IsFeatureEnabledAsync("boolTrue"));
-        Assert.False(await provider.IsFeatureEnabledAsync("boolFalse"));
-        Assert.True(await provider.IsFeatureEnabledAsync("numOne"));
-        Assert.False(await provider.IsFeatureEnabledAsync("numZero"));
-        Assert.True(await provider.IsFeatureEnabledAsync("strTrue"));
-        Assert.False(await provider.IsFeatureEnabledAsync("strFalse"));
-        Assert.True(await provider.IsFeatureEnabledAsync("strYes"));
-        Assert.True(await provider.IsFeatureEnabledAsync("strOn"));
-        Assert.True(await provider.IsFeatureEnabledAsync("str1"));
-        Assert.False(await provider.IsFeatureEnabledAsync("strEmpty"));
-        Assert.False(await provider.IsFeatureEnabledAsync("arr"));
-        Assert.False(await provider.IsFeatureEnabledAsync("numOther"));
+        Assert.True(await provider.IsFeatureEnabledAsync("boolTrue", TestContext.Current.CancellationToken));
+        Assert.False(await provider.IsFeatureEnabledAsync("boolFalse", TestContext.Current.CancellationToken));
+        Assert.True(await provider.IsFeatureEnabledAsync("numOne", TestContext.Current.CancellationToken));
+        Assert.False(await provider.IsFeatureEnabledAsync("numZero", TestContext.Current.CancellationToken));
+        Assert.True(await provider.IsFeatureEnabledAsync("strTrue", TestContext.Current.CancellationToken));
+        Assert.False(await provider.IsFeatureEnabledAsync("strFalse", TestContext.Current.CancellationToken));
+        Assert.True(await provider.IsFeatureEnabledAsync("strYes", TestContext.Current.CancellationToken));
+        Assert.True(await provider.IsFeatureEnabledAsync("strOn", TestContext.Current.CancellationToken));
+        Assert.True(await provider.IsFeatureEnabledAsync("str1", TestContext.Current.CancellationToken));
+        Assert.False(await provider.IsFeatureEnabledAsync("strEmpty", TestContext.Current.CancellationToken));
+        Assert.False(await provider.IsFeatureEnabledAsync("arr", TestContext.Current.CancellationToken));
+        Assert.False(await provider.IsFeatureEnabledAsync("numOther", TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -379,10 +379,10 @@ public class ConfigProviderTests
         var handler = new MockHttpHandler(json);
         var client = new HttpClient(handler);
         var provider = new RemoteConfigProvider(client, new Uri("https://config.example.com/config.json"));
-        await provider.RefreshAsync();
+        await provider.RefreshAsync(TestContext.Current.CancellationToken);
 
-        Assert.Equal("42", await provider.GetValueAsync("num"));
-        Assert.Contains("\"a\"", await provider.GetValueAsync("obj"));
+        Assert.Equal("42", await provider.GetValueAsync("num", TestContext.Current.CancellationToken));
+        Assert.Contains("\"a\"", await provider.GetValueAsync("obj", TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -391,9 +391,9 @@ public class ConfigProviderTests
         var handler = new MockHttpHandler("{}");
         var client = new HttpClient(handler);
         var provider = new RemoteConfigProvider(client, new Uri("https://config.example.com/config.json"));
-        await provider.RefreshAsync();
+        await provider.RefreshAsync(TestContext.Current.CancellationToken);
 
-        Assert.Null(await provider.GetValueAsync("missing"));
+        Assert.Null(await provider.GetValueAsync("missing", TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -403,9 +403,9 @@ public class ConfigProviderTests
         var handler = new MockHttpHandler(json);
         var client = new HttpClient(handler);
         var provider = new RemoteConfigProvider(client, new Uri("https://config.example.com/config.json"));
-        await provider.RefreshAsync();
+        await provider.RefreshAsync(TestContext.Current.CancellationToken);
 
-        var result = await provider.GetValueAsync<int>("bad");
+        var result = await provider.GetValueAsync<int>("bad", TestContext.Current.CancellationToken);
         Assert.Equal(default, result);
     }
 
@@ -416,9 +416,9 @@ public class ConfigProviderTests
         var handler = new MockHttpHandler(json);
         var client = new HttpClient(handler);
         var provider = new RemoteConfigProvider(client, new Uri("https://config.example.com/config.json"));
-        await provider.RefreshAsync();
+        await provider.RefreshAsync(TestContext.Current.CancellationToken);
 
-        var result = await provider.GetValueAsync<int>("count");
+        var result = await provider.GetValueAsync<int>("count", TestContext.Current.CancellationToken);
         Assert.Equal(42, result);
     }
 
@@ -428,9 +428,9 @@ public class ConfigProviderTests
         var handler = new MockHttpHandler("{}");
         var client = new HttpClient(handler);
         var provider = new RemoteConfigProvider(client, new Uri("https://config.example.com/config.json"));
-        await provider.RefreshAsync();
+        await provider.RefreshAsync(TestContext.Current.CancellationToken);
 
-        var result = await provider.GetValueAsync<int>("missing");
+        var result = await provider.GetValueAsync<int>("missing", TestContext.Current.CancellationToken);
         Assert.Equal(default, result);
     }
 
@@ -440,9 +440,9 @@ public class ConfigProviderTests
         var handler = new MockHttpHandler("{}");
         var client = new HttpClient(handler);
         var provider = new RemoteConfigProvider(client, new Uri("https://config.example.com/config.json"));
-        await provider.RefreshAsync();
+        await provider.RefreshAsync(TestContext.Current.CancellationToken);
 
-        Assert.False(await provider.IsFeatureEnabledAsync("missing"));
+        Assert.False(await provider.IsFeatureEnabledAsync("missing", TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -451,9 +451,9 @@ public class ConfigProviderTests
         var handler = new MockHttpHandler("{}");
         var client = new HttpClient(handler);
         var provider = new RemoteConfigProvider(client, new Uri("https://config.example.com/config.json"));
-        await provider.RefreshAsync();
+        await provider.RefreshAsync(TestContext.Current.CancellationToken);
 
-        Assert.Null(await provider.GetSectionAsync("missing"));
+        Assert.Null(await provider.GetSectionAsync("missing", TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -463,9 +463,9 @@ public class ConfigProviderTests
         var handler = new MockHttpHandler(json);
         var client = new HttpClient(handler);
         var provider = new RemoteConfigProvider(client, new Uri("https://config.example.com/config.json"));
-        await provider.RefreshAsync();
+        await provider.RefreshAsync(TestContext.Current.CancellationToken);
 
-        Assert.Null(await provider.GetSectionAsync("scalar"));
+        Assert.Null(await provider.GetSectionAsync("scalar", TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -489,9 +489,9 @@ public class ConfigProviderTests
         var handler = new MockHttpHandler(json);
         var client = new HttpClient(handler);
         var provider = new RemoteConfigProvider(client, new Uri("https://config.example.com/config.json"));
-        await provider.RefreshAsync();
+        await provider.RefreshAsync(TestContext.Current.CancellationToken);
 
-        var section = await provider.GetSectionAsync("sec");
+        var section = await provider.GetSectionAsync("sec", TestContext.Current.CancellationToken);
         Assert.NotNull(section);
         Assert.Equal("1", section!["x"]);
         Assert.Equal("hello", section["y"]);

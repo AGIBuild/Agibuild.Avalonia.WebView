@@ -237,7 +237,7 @@ public sealed class AiBridgeMutationKillerTests
         var bridge = CreateBridgeFromMock(mock);
 
         var tokens = new List<string>();
-        await foreach (var t in bridge.StreamCompletion(new AiChatRequest { Message = "test" }))
+        await foreach (var t in bridge.StreamCompletion(new AiChatRequest { Message = "test" }, TestContext.Current.CancellationToken).WithCancellation(TestContext.Current.CancellationToken))
             tokens.Add(t);
 
         Assert.Equal(2, tokens.Count);
@@ -252,7 +252,7 @@ public sealed class AiBridgeMutationKillerTests
         var bridge = CreateBridgeFromMock(mock);
 
         await foreach (var _ in bridge.StreamCompletion(
-            new AiChatRequest { Message = "hi", SystemPrompt = "sys", ModelId = "m1" }))
+            new AiChatRequest { Message = "hi", SystemPrompt = "sys", ModelId = "m1" }, TestContext.Current.CancellationToken).WithCancellation(TestContext.Current.CancellationToken))
         { }
 
         Assert.Equal(2, mock.CapturedMessages.Count);
@@ -335,7 +335,7 @@ public sealed class AiBridgeMutationKillerTests
         var bridge = sp.GetRequiredService<IAiBridgeService>();
 
         var tokens = new List<string>();
-        await foreach (var t in bridge.StreamWithTools(new AiChatRequest { Message = "test" }))
+        await foreach (var t in bridge.StreamWithTools(new AiChatRequest { Message = "test" }, TestContext.Current.CancellationToken).WithCancellation(TestContext.Current.CancellationToken))
             tokens.Add(t);
 
         Assert.Equal(["x", "y"], tokens);
@@ -622,7 +622,7 @@ public sealed class AiBridgeMutationKillerTests
         {
             ConversationId = convId,
             Message = "msg"
-        }))
+        }, TestContext.Current.CancellationToken).WithCancellation(TestContext.Current.CancellationToken))
             tokens.Add(t);
 
         Assert.Equal(["part1", "part2"], tokens);
@@ -654,7 +654,7 @@ public sealed class AiBridgeMutationKillerTests
         {
             ConversationId = convId,
             Message = "m"
-        }))
+        }, TestContext.Current.CancellationToken).WithCancellation(TestContext.Current.CancellationToken))
             tokens.Add(t);
 
         Assert.Equal(["a", "b"], tokens);
@@ -686,7 +686,7 @@ public sealed class AiBridgeMutationKillerTests
             ConversationId = convId,
             Message = "test",
             UseTools = true
-        }))
+        }, TestContext.Current.CancellationToken).WithCancellation(TestContext.Current.CancellationToken))
         { }
 
         Assert.NotNull(mock.CapturedOptions);
@@ -715,7 +715,7 @@ public sealed class AiBridgeMutationKillerTests
             ConversationId = convId,
             Message = "test",
             UseTools = false
-        }))
+        }, TestContext.Current.CancellationToken).WithCancellation(TestContext.Current.CancellationToken))
         { }
 
         Assert.Null(mock.CapturedOptions);
@@ -743,7 +743,7 @@ public sealed class AiBridgeMutationKillerTests
             Message = "test",
             UseTools = true,
             ModelId = "model-x"
-        }))
+        }, TestContext.Current.CancellationToken).WithCancellation(TestContext.Current.CancellationToken))
         { }
 
         Assert.NotNull(mock.CapturedOptions);
@@ -788,7 +788,7 @@ public sealed class AiBridgeMutationKillerTests
             ConversationId = convId,
             Message = "5+3?",
             UseTools = true
-        }))
+        }, TestContext.Current.CancellationToken).WithCancellation(TestContext.Current.CancellationToken))
             tokens.Add(t);
 
         Assert.True(callCount >= 2, $"Expected at least 2 calls (function invocation), got {callCount}");
@@ -817,7 +817,7 @@ public sealed class AiBridgeMutationKillerTests
             ConversationId = convId,
             Message = "test",
             UseTools = false
-        }))
+        }, TestContext.Current.CancellationToken).WithCancellation(TestContext.Current.CancellationToken))
         { }
 
         Assert.Equal(1, callCount);

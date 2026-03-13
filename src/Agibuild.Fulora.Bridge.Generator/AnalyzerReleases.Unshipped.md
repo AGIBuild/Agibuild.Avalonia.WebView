@@ -9,3 +9,5 @@ AGBR004 | Agibuild.Fulora.Bridge | Error | CancellationToken is not yet supporte
 AGBR005 | Agibuild.Fulora.Bridge | Error | IAsyncEnumerable is not yet supported in bridge interfaces
 AGBR006 | Agibuild.Fulora.Bridge | Error | Open generic interfaces are not supported in bridge
 AGBR007 | Agibuild.Fulora.Bridge | Error | IBridgeEvent properties are not supported on [JsImport] interfaces
+AGBR009 | Agibuild.Fulora.Bridge | Warning | [AiTool] requires [JsExport]
+AGBR010 | Agibuild.Fulora.Bridge | Warning | [AiTool] method missing XML documentation

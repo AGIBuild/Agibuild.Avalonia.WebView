@@ -22,7 +22,7 @@ public sealed class AiBridgeStreamingTests
         var request = new AiChatRequest { Message = "test" };
 
         var received = new List<string>();
-        await foreach (var token in bridge.StreamCompletion(request))
+        await foreach (var token in bridge.StreamCompletion(request, TestContext.Current.CancellationToken).WithCancellation(TestContext.Current.CancellationToken))
         {
             received.Add(token);
         }
@@ -42,7 +42,7 @@ public sealed class AiBridgeStreamingTests
 
         var bridge = sp.GetRequiredService<IAiBridgeService>();
         var received = new List<string>();
-        await foreach (var token in bridge.StreamCompletion(new AiChatRequest { Message = "test" }))
+        await foreach (var token in bridge.StreamCompletion(new AiChatRequest { Message = "test" }, TestContext.Current.CancellationToken).WithCancellation(TestContext.Current.CancellationToken))
         {
             received.Add(token);
         }
@@ -61,7 +61,7 @@ public sealed class AiBridgeStreamingTests
 
         await Assert.ThrowsAsync<InvalidOperationException>(async () =>
         {
-            await foreach (var _ in bridge.StreamCompletion(new AiChatRequest { Message = "test" }))
+            await foreach (var _ in bridge.StreamCompletion(new AiChatRequest { Message = "test" }, TestContext.Current.CancellationToken).WithCancellation(TestContext.Current.CancellationToken))
             {
             }
         });
@@ -110,7 +110,7 @@ public sealed class AiBridgeStreamingTests
         var bridge = sp.GetRequiredService<IAiBridgeService>();
 
         var received = new List<string>();
-        await foreach (var token in bridge.StreamCompletion(new AiChatRequest { Message = "test", Provider = "smart" }))
+        await foreach (var token in bridge.StreamCompletion(new AiChatRequest { Message = "test", Provider = "smart" }, TestContext.Current.CancellationToken).WithCancellation(TestContext.Current.CancellationToken))
         {
             received.Add(token);
         }
@@ -128,7 +128,7 @@ public sealed class AiBridgeStreamingTests
         using var sp = services.BuildServiceProvider();
 
         var bridge = sp.GetRequiredService<IAiBridgeService>();
-        await foreach (var _ in bridge.StreamCompletion(new AiChatRequest { Message = "test", ModelId = "gpt-4o" }))
+        await foreach (var _ in bridge.StreamCompletion(new AiChatRequest { Message = "test", ModelId = "gpt-4o" }, TestContext.Current.CancellationToken).WithCancellation(TestContext.Current.CancellationToken))
         {
         }
 

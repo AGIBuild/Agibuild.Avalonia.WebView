@@ -52,7 +52,7 @@ public sealed class AiToolRegistryTests
         var result = await tool.InvokeAsync(new AIFunctionArguments(new Dictionary<string, object?>
         {
             ["city"] = "Tokyo"
-        }));
+        }), TestContext.Current.CancellationToken);
 
         Assert.NotNull(result);
         Assert.Contains("Tokyo", result.ToString());

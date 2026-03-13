@@ -72,7 +72,7 @@
                 <TextBlock Text="User-Agent" Classes="subheading" />
                 <TextBox Classes="mono" FontSize="11"
                          Text="{Binding UserAgentInput, Mode=TwoWay}"
-                         Watermark="Custom UA string" />
+                         PlaceholderText="Custom UA string" />
                 <Grid ColumnDefinitions="*,*">
                   <Button Grid.Column="0" Content="Set UA"
                           Command="{Binding SetUserAgentCommand}"
@@ -92,7 +92,7 @@
                 <TextBlock Text="WebDialog" Classes="subheading" />
                 <TextBox Classes="mono" FontSize="11"
                          Text="{Binding DialogUrl, Mode=TwoWay}"
-                         Watermark="URL for dialog" />
+                         PlaceholderText="URL for dialog" />
                 <Button Content="Open Dialog" Classes="primary"
                         Command="{Binding OpenDialogCommand}"
                         HorizontalAlignment="Stretch" FontSize="11" Padding="8,6" />

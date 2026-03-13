@@ -131,7 +131,7 @@ public sealed class AiToolCallingAndConversationTests
 
         var tokens = new List<string>();
         await foreach (var t in bridge.StreamMessage(
-            new AiConversationMessageRequest { ConversationId = convId, Message = "stream test" }))
+            new AiConversationMessageRequest { ConversationId = convId, Message = "stream test" }, TestContext.Current.CancellationToken).WithCancellation(TestContext.Current.CancellationToken))
         {
             tokens.Add(t);
         }
@@ -202,7 +202,7 @@ public sealed class AiToolCallingAndConversationTests
 
         var bridge = sp.GetRequiredService<IAiBridgeService>();
         var tokens = new List<string>();
-        await foreach (var t in bridge.StreamWithTools(new AiChatRequest { Message = "stream" }))
+        await foreach (var t in bridge.StreamWithTools(new AiChatRequest { Message = "stream" }, TestContext.Current.CancellationToken).WithCancellation(TestContext.Current.CancellationToken))
             tokens.Add(t);
 
         Assert.Equal(["alpha", "beta"], tokens);
@@ -255,7 +255,7 @@ public sealed class AiToolCallingAndConversationTests
             ConversationId = convId,
             Message = "stream with tools",
             UseTools = true
-        }))
+        }, TestContext.Current.CancellationToken).WithCancellation(TestContext.Current.CancellationToken))
             tokens.Add(t);
 
         Assert.Equal(["t1", "t2"], tokens);

@@ -8,7 +8,7 @@ namespace Agibuild.Fulora.UnitTests;
 
 public sealed class BridgeJsImportParityTests
 {
-    private static (ImmutableArray<Diagnostic> Diagnostics, GeneratorDriverRunResult Result) RunGenerator(string source)
+    private static (ImmutableArray<Diagnostic> Diagnostics, GeneratorDriverRunResult Result) RunGenerator(string source, CancellationToken cancellationToken = default)
     {
         var coreAssembly = typeof(JsExportAttribute).Assembly;
         var references = new MetadataReference[]
@@ -36,7 +36,7 @@ public sealed class BridgeJsImportParityTests
 
         var generator = new WebViewBridgeGenerator();
         GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
-        driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out _, out var diagnostics);
+        driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out _, out var diagnostics, cancellationToken);
 
         return (diagnostics, driver.GetRunResult());
     }
@@ -59,14 +59,14 @@ public sealed class BridgeJsImportParityTests
             }
             """;
 
-        var (diagnostics, result) = RunGenerator(source);
+        var (diagnostics, result) = RunGenerator(source, TestContext.Current.CancellationToken);
         Assert.DoesNotContain(diagnostics, d => d.Severity == DiagnosticSeverity.Error);
 
         var proxyFile = result.GeneratedTrees
             .FirstOrDefault(t => t.FilePath.Contains("RemoteServiceBridgeProxy"));
         Assert.NotNull(proxyFile);
 
-        var text = proxyFile!.GetText().ToString();
+        var text = proxyFile!.GetText(TestContext.Current.CancellationToken).ToString();
         Assert.Contains("InvokeAsync<string>", text);
         Assert.Contains("ct)", text);
         Assert.DoesNotContain("ct = ct", text);
@@ -87,14 +87,14 @@ public sealed class BridgeJsImportParityTests
             }
             """;
 
-        var (diagnostics, result) = RunGenerator(source);
+        var (diagnostics, result) = RunGenerator(source, TestContext.Current.CancellationToken);
         Assert.DoesNotContain(diagnostics, d => d.Severity == DiagnosticSeverity.Error);
 
         var proxyFile = result.GeneratedTrees
             .FirstOrDefault(t => t.FilePath.Contains("CtServiceBridgeProxy"));
         Assert.NotNull(proxyFile);
 
-        var text = proxyFile!.GetText().ToString();
+        var text = proxyFile!.GetText(TestContext.Current.CancellationToken).ToString();
         Assert.Contains("var __params = new { a, b }", text);
         Assert.DoesNotContain("ct }", text);
     }
@@ -116,14 +116,14 @@ public sealed class BridgeJsImportParityTests
             }
             """;
 
-        var (diagnostics, result) = RunGenerator(source);
+        var (diagnostics, result) = RunGenerator(source, TestContext.Current.CancellationToken);
         Assert.DoesNotContain(diagnostics, d => d.Severity == DiagnosticSeverity.Error);
 
         var proxyFile = result.GeneratedTrees
             .FirstOrDefault(t => t.FilePath.Contains("DataSourceBridgeProxy"));
         Assert.NotNull(proxyFile);
 
-        var text = proxyFile!.GetText().ToString();
+        var text = proxyFile!.GetText(TestContext.Current.CancellationToken).ToString();
         Assert.Contains("yield return", text);
         Assert.Contains("$/enumerator/next/", text);
         Assert.Contains("token", text);
@@ -146,13 +146,13 @@ public sealed class BridgeJsImportParityTests
             }
             """;
 
-        var (_, result) = RunGenerator(source);
+        var (_, result) = RunGenerator(source, TestContext.Current.CancellationToken);
 
         var tsFile = result.GeneratedTrees
             .FirstOrDefault(t => t.FilePath.Contains("BridgeTypeScriptDeclarations"));
         Assert.NotNull(tsFile);
 
-        var text = tsFile!.GetText().ToString();
+        var text = tsFile!.GetText(TestContext.Current.CancellationToken).ToString();
         Assert.Contains("signal?: AbortSignal", text);
     }
 
@@ -173,13 +173,13 @@ public sealed class BridgeJsImportParityTests
             }
             """;
 
-        var (_, result) = RunGenerator(source);
+        var (_, result) = RunGenerator(source, TestContext.Current.CancellationToken);
 
         var tsFile = result.GeneratedTrees
             .FirstOrDefault(t => t.FilePath.Contains("BridgeTypeScriptDeclarations"));
         Assert.NotNull(tsFile);
 
-        var text = tsFile!.GetText().ToString();
+        var text = tsFile!.GetText(TestContext.Current.CancellationToken).ToString();
         Assert.Contains("AsyncIterable<number>", text);
     }
 
@@ -197,12 +197,12 @@ public sealed class BridgeJsImportParityTests
             }
             """;
 
-        var (_, result) = RunGenerator(source);
+        var (_, result) = RunGenerator(source, TestContext.Current.CancellationToken);
         var tsFile = result.GeneratedTrees
             .FirstOrDefault(t => t.FilePath.Contains("BridgeTypeScriptDeclarations"));
         Assert.NotNull(tsFile);
 
-        var text = tsFile!.GetText().ToString();
+        var text = tsFile!.GetText(TestContext.Current.CancellationToken).ToString();
         Assert.Contains("echo(payload: Uint8Array): Promise<Uint8Array>", text);
     }
 
@@ -220,12 +220,12 @@ public sealed class BridgeJsImportParityTests
             }
             """;
 
-        var (_, result) = RunGenerator(source);
+        var (_, result) = RunGenerator(source, TestContext.Current.CancellationToken);
         var regFile = result.GeneratedTrees
             .FirstOrDefault(t => t.FilePath.Contains("BlobServiceBridgeRegistration"));
         Assert.NotNull(regFile);
 
-        var text = regFile!.GetText().ToString();
+        var text = regFile!.GetText(TestContext.Current.CancellationToken).ToString();
         Assert.Contains("_decodeBinaryResult", text);
         Assert.Contains("then(function(__r)", text);
     }

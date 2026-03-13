@@ -14,7 +14,8 @@ public sealed class WindowShellContractAndIntegrationTests
     {
         using var service = CreateService();
         using var cts = new CancellationTokenSource();
-        var stream = service.StreamWindowShellState(cts.Token).GetAsyncEnumerator();
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, TestContext.Current.CancellationToken);
+        var stream = service.StreamWindowShellState(linked.Token).GetAsyncEnumerator(linked.Token);
         try
         {
             Assert.True(await stream.MoveNextAsync());
@@ -48,7 +49,8 @@ public sealed class WindowShellContractAndIntegrationTests
     {
         using var service = CreateService();
         using var cts = new CancellationTokenSource();
-        var stream = service.StreamWindowShellState(cts.Token).GetAsyncEnumerator();
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, TestContext.Current.CancellationToken);
+        var stream = service.StreamWindowShellState(linked.Token).GetAsyncEnumerator(linked.Token);
         try
         {
             Assert.True(await stream.MoveNextAsync());
@@ -232,7 +234,8 @@ public sealed class WindowShellContractAndIntegrationTests
 
         await service.UpdateWindowShellSettings(new WindowShellSettings { ThemePreference = "system" });
 
-        var stream = service.StreamWindowShellState(cts.Token).GetAsyncEnumerator();
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, TestContext.Current.CancellationToken);
+        var stream = service.StreamWindowShellState(linked.Token).GetAsyncEnumerator(linked.Token);
         try
         {
             Assert.True(await stream.MoveNextAsync());
@@ -256,7 +259,8 @@ public sealed class WindowShellContractAndIntegrationTests
     {
         using var service = CreateService();
         using var cts = new CancellationTokenSource();
-        var stream = service.StreamWindowShellState(cts.Token).GetAsyncEnumerator();
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, TestContext.Current.CancellationToken);
+        var stream = service.StreamWindowShellState(linked.Token).GetAsyncEnumerator(linked.Token);
         try
         {
             Assert.True(await stream.MoveNextAsync());
@@ -377,7 +381,7 @@ public sealed class WindowShellContractAndIntegrationTests
         var countBefore = chrome.ApplyCallCount;
 
         theme.SimulateThemeChange("dark");
-        await Task.Delay(50);
+        await Task.Delay(50, TestContext.Current.CancellationToken);
 
         Assert.Equal(countBefore, chrome.ApplyCallCount);
     }
@@ -388,13 +392,14 @@ public sealed class WindowShellContractAndIntegrationTests
         var chrome = new MockChromeProvider(effectiveLevel: TransparencyLevel.Blur);
         using var service = new WindowShellService(chrome, new MockPlatformThemeProvider());
         using var cts = new CancellationTokenSource();
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, TestContext.Current.CancellationToken);
 
-        var stream = service.StreamWindowShellState(cts.Token).GetAsyncEnumerator(cts.Token);
+        var stream = service.StreamWindowShellState(linked.Token).GetAsyncEnumerator(linked.Token);
         try
         {
             Assert.True(await stream.MoveNextAsync());
             chrome.RaiseAppearanceChanged();
-            await Task.Delay(50);
+            await Task.Delay(50, TestContext.Current.CancellationToken);
         }
         finally
         {
@@ -408,11 +413,12 @@ public sealed class WindowShellContractAndIntegrationTests
     {
         using var service = CreateService();
         using var cts = new CancellationTokenSource();
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, TestContext.Current.CancellationToken);
 
         var items = new List<WindowShellState>();
-        var stream = service.StreamWindowShellState(cts.Token);
+        var stream = service.StreamWindowShellState(linked.Token);
 
-        await foreach (var state in stream)
+        await foreach (var state in stream.WithCancellation(TestContext.Current.CancellationToken))
         {
             items.Add(state);
             cts.Cancel();

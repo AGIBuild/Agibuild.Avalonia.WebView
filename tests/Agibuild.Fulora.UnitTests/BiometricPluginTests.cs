@@ -120,8 +120,10 @@ public class BiometricPluginTests
     [Fact]
     public async Task MacOsBiometricProvider_reports_availability_based_on_platform()
     {
+#pragma warning disable CA1416 // Test deliberately exercises macOS provider on all platforms for graceful degradation
         var provider = new MacOsBiometricProvider();
         var availability = await provider.CheckAvailabilityAsync(TestContext.Current.CancellationToken);
+#pragma warning restore CA1416
 
         if (OperatingSystem.IsMacOS())
         {

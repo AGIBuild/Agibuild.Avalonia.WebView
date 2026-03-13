@@ -40,7 +40,7 @@ public sealed class AiIntegrationTests
         client = new ResilientChatClient(client, resilienceOpts);
         client = new ContentGateChatClient(client, filters);
 
-        var response = await client.GetResponseAsync([new ChatMessage(ChatRole.User, "hello")]);
+        var response = await client.GetResponseAsync([new ChatMessage(ChatRole.User, "hello")], cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Contains("mock response", response.Text);
         Assert.Contains("input-filter", callLog);
@@ -140,7 +140,7 @@ public sealed class AiIntegrationTests
         pipeline = new ContentGateChatClient(pipeline, [blockingFilter]);
 
         await Assert.ThrowsAsync<AiContentBlockedException>(
-            () => pipeline.GetResponseAsync([new ChatMessage(ChatRole.User, "blocked")]));
+            () => pipeline.GetResponseAsync([new ChatMessage(ChatRole.User, "blocked")], cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Contains("filter-input", callOrder);
         Assert.DoesNotContain("provider-called", callOrder);
@@ -176,7 +176,7 @@ public sealed class AiIntegrationTests
             Timeout = TimeSpan.FromSeconds(10)
         });
 
-        var response = await pipeline.GetResponseAsync([new ChatMessage(ChatRole.User, "hello")]);
+        var response = await pipeline.GetResponseAsync([new ChatMessage(ChatRole.User, "hello")], cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Contains("ok", response.Text);
         Assert.Equal(150, metering.PeriodTokensUsed);
@@ -194,7 +194,8 @@ public sealed class AiIntegrationTests
 
         var result = await pipeline.CompleteAsync<PersonDto>(
             [new ChatMessage(ChatRole.User, "give me a person")],
-            maxRetries: 1);
+            maxRetries: 1,
+            cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal("Test", result.Name);
         Assert.Equal(42, result.Age);
@@ -217,7 +218,7 @@ public sealed class AiIntegrationTests
         Assert.NotNull(tool);
 
         var result = await tool.InvokeAsync(new Microsoft.Extensions.AI.AIFunctionArguments(
-            new Dictionary<string, object?> { ["a"] = 3, ["b"] = 7 }));
+            new Dictionary<string, object?> { ["a"] = 3, ["b"] = 7 }), TestContext.Current.CancellationToken);
         var jsonResult = (System.Text.Json.JsonElement)result!;
         Assert.Equal(10, jsonResult.GetInt32());
     }
@@ -260,7 +261,7 @@ public sealed class AiIntegrationTests
         var inner = new SimpleMockChatClient("response", 0, 0);
 
         var pipeline = new ContentGateChatClient(inner, [filter1, filter2]);
-        await pipeline.GetResponseAsync([new ChatMessage(ChatRole.User, "hi")]);
+        await pipeline.GetResponseAsync([new ChatMessage(ChatRole.User, "hi")], cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(["F1-input", "F2-input", "F1-output", "F2-output"], callOrder);
     }
@@ -273,7 +274,7 @@ public sealed class AiIntegrationTests
         var transformFilter = new TransformAllFilter("sanitized input");
 
         var pipeline = new ContentGateChatClient(captureClient, [transformFilter]);
-        await pipeline.GetResponseAsync([new ChatMessage(ChatRole.User, "original input")]);
+        await pipeline.GetResponseAsync([new ChatMessage(ChatRole.User, "original input")], cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal("sanitized input", receivedMessage);
     }
@@ -290,11 +291,11 @@ public sealed class AiIntegrationTests
 
         var metering = new MeteringChatClient(client, meteringOpts);
 
-        await metering.GetResponseAsync([new ChatMessage(ChatRole.User, "first")]);
+        await metering.GetResponseAsync([new ChatMessage(ChatRole.User, "first")], cancellationToken: TestContext.Current.CancellationToken);
         Assert.Equal(150, metering.PeriodTokensUsed);
 
         await Assert.ThrowsAsync<AiBudgetExceededException>(
-            () => metering.GetResponseAsync([new ChatMessage(ChatRole.User, "second")]));
+            () => metering.GetResponseAsync([new ChatMessage(ChatRole.User, "second")], cancellationToken: TestContext.Current.CancellationToken));
     }
 
     [Fact]

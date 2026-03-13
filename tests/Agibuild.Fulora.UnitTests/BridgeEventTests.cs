@@ -365,7 +365,7 @@ public sealed class BridgeEventDiagnosticsTests
 
         var generator = new WebViewBridgeGenerator();
         GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
-        driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out _, out var diagnostics);
+        driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out _, out var diagnostics, TestContext.Current.CancellationToken);
 
         return (diagnostics, driver.GetRunResult());
     }
@@ -462,7 +462,7 @@ public sealed class BridgeEventTypeScriptTests
 
         var generator = new WebViewBridgeGenerator();
         GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
-        driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out _, out var diagnostics);
+        driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out _, out var diagnostics, TestContext.Current.CancellationToken);
 
         return (diagnostics, driver.GetRunResult());
     }
@@ -488,7 +488,7 @@ public sealed class BridgeEventTypeScriptTests
             .FirstOrDefault(t => t.FilePath.Contains("BridgeTypeScriptDeclarations"));
         Assert.NotNull(tsFile);
 
-        var text = tsFile!.GetText().ToString();
+        var text = tsFile!.GetText(TestContext.Current.CancellationToken).ToString();
         Assert.Contains("BridgeEvent<T>", text);
         Assert.Contains("on(handler: (payload: T) => void): () => void", text);
         Assert.Contains("off(handler: (payload: T) => void): void", text);
@@ -515,7 +515,7 @@ public sealed class BridgeEventTypeScriptTests
             .FirstOrDefault(t => t.FilePath.Contains("BridgeTypeScriptDeclarations"));
         Assert.NotNull(tsFile);
 
-        var text = tsFile!.GetText().ToString();
+        var text = tsFile!.GetText(TestContext.Current.CancellationToken).ToString();
         Assert.Contains("onDone: BridgeEvent<string>", text);
     }
 }

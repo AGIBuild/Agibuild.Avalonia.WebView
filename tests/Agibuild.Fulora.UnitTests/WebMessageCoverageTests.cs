@@ -298,7 +298,7 @@ public sealed partial class CoverageGapTests
     public async Task Rpc_InvokeAsync_resolves_on_response()
     {
         var rpc = CreateTestRpcService(out var scripts);
-        var task = rpc.InvokeAsync("js.getTheme");
+        var task = rpc.InvokeAsync("js.getTheme", null, TestContext.Current.CancellationToken);
         Assert.False(task.IsCompleted);
 
         WaitUntil(() => scripts.Count > 0);
@@ -317,7 +317,7 @@ public sealed partial class CoverageGapTests
     public async Task Rpc_InvokeAsync_T_deserializes()
     {
         var rpc = CreateTestRpcService(out var scripts);
-        var task = rpc.InvokeAsync<int>("js.getCount");
+        var task = rpc.InvokeAsync<int>("js.getCount", null, TestContext.Current.CancellationToken);
 
         WaitUntil(() => scripts.Count > 0);
         var callId = ExtractRpcId(scripts[0]);
@@ -330,7 +330,7 @@ public sealed partial class CoverageGapTests
     public async Task Rpc_InvokeAsync_error_throws()
     {
         var rpc = CreateTestRpcService(out var scripts);
-        var task = rpc.InvokeAsync("js.fail");
+        var task = rpc.InvokeAsync("js.fail", null, TestContext.Current.CancellationToken);
 
         WaitUntil(() => scripts.Count > 0);
         var callId = ExtractRpcId(scripts[0]);
@@ -345,7 +345,7 @@ public sealed partial class CoverageGapTests
     public async Task Rpc_response_no_result_no_error_sets_default()
     {
         var rpc = CreateTestRpcService(out var scripts);
-        var task = rpc.InvokeAsync("js.void");
+        var task = rpc.InvokeAsync("js.void", null, TestContext.Current.CancellationToken);
 
         WaitUntil(() => scripts.Count > 0);
         var callId = ExtractRpcId(scripts[0]);
@@ -359,7 +359,7 @@ public sealed partial class CoverageGapTests
     public async Task Rpc_error_no_code_defaults_to_32603()
     {
         var rpc = CreateTestRpcService(out var scripts);
-        var task = rpc.InvokeAsync("js.x");
+        var task = rpc.InvokeAsync("js.x", null, TestContext.Current.CancellationToken);
 
         WaitUntil(() => scripts.Count > 0);
         var callId = ExtractRpcId(scripts[0]);
@@ -437,7 +437,7 @@ public sealed partial class CoverageGapTests
     public async Task Branch_Rpc_InvokeAsync_with_args_serializes_params()
     {
         var rpc = CreateTestRpcService(out var scripts);
-        var task = rpc.InvokeAsync("js.greet", new { name = "Alice" });
+        var task = rpc.InvokeAsync("js.greet", new { name = "Alice" }, TestContext.Current.CancellationToken);
 
         WaitUntil(() => scripts.Count > 0);
         Assert.NotEmpty(scripts);
@@ -475,7 +475,7 @@ public sealed partial class CoverageGapTests
     public async Task Branch_Rpc_InvokeAsync_error_without_code_uses_default()
     {
         var rpc = CreateTestRpcService(out var scripts);
-        var task = rpc.InvokeAsync("js.fail");
+        var task = rpc.InvokeAsync("js.fail", null, TestContext.Current.CancellationToken);
 
         WaitUntil(() => scripts.Count > 0);
         var callId = ExtractRpcId(scripts[0]);
@@ -492,7 +492,7 @@ public sealed partial class CoverageGapTests
     public async Task Branch_Rpc_InvokeAsync_error_without_message_uses_default()
     {
         var rpc = CreateTestRpcService(out var scripts);
-        var task = rpc.InvokeAsync("js.fail2");
+        var task = rpc.InvokeAsync("js.fail2", null, TestContext.Current.CancellationToken);
 
         WaitUntil(() => scripts.Count > 0);
         var callId = ExtractRpcId(scripts[0]);
@@ -528,7 +528,7 @@ public sealed partial class CoverageGapTests
     public async Task Branch_Rpc_InvokeAsync_T_null_result_returns_default()
     {
         var rpc = CreateTestRpcService(out var scripts);
-        var task = rpc.InvokeAsync<string>("js.nullResult");
+        var task = rpc.InvokeAsync<string>("js.nullResult", null, TestContext.Current.CancellationToken);
 
         WaitUntil(() => scripts.Count > 0);
         var callId = ExtractRpcId(scripts[0]);
@@ -544,7 +544,7 @@ public sealed partial class CoverageGapTests
     public async Task Rpc_InvokeAsync_params_serialize_as_camelCase()
     {
         var rpc = CreateTestRpcService(out var scripts);
-        var task = rpc.InvokeAsync("js.setProfile", new PlainProfile("Alice", true, 5));
+        var task = rpc.InvokeAsync("js.setProfile", new PlainProfile("Alice", true, 5), TestContext.Current.CancellationToken);
 
         WaitUntil(() => scripts.Count > 0);
         Assert.NotEmpty(scripts);
@@ -586,7 +586,7 @@ public sealed partial class CoverageGapTests
     public async Task Rpc_InvokeAsync_T_deserializes_camelCase_into_record()
     {
         var rpc = CreateTestRpcService(out var scripts);
-        var task = rpc.InvokeAsync<PlainProfile>("js.getProfile");
+        var task = rpc.InvokeAsync<PlainProfile>("js.getProfile", null, TestContext.Current.CancellationToken);
 
         WaitUntil(() => scripts.Count > 0);
         var callId = ExtractRpcId(scripts[0]);
@@ -605,7 +605,7 @@ public sealed partial class CoverageGapTests
     public async Task Rpc_JsonPropertyName_takes_priority_over_naming_policy()
     {
         var rpc = CreateTestRpcService(out var scripts);
-        var task = rpc.InvokeAsync("js.setCustomProfile", new CustomNameProfile("Charlie", true));
+        var task = rpc.InvokeAsync("js.setCustomProfile", new CustomNameProfile("Charlie", true), TestContext.Current.CancellationToken);
 
         WaitUntil(() => scripts.Count > 0);
         Assert.NotEmpty(scripts);

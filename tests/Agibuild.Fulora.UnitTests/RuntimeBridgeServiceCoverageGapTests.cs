@@ -149,8 +149,8 @@ public sealed class RuntimeBridgeServiceCoverageGapTests
         proxy.RemoveHandler("sync.echo");
         Assert.Contains("sync.echo", rpc.RemovedMethods);
 
-        await proxy.InvokeAsync("remote.call");
-        await proxy.InvokeAsync<int>("remote.generic");
+        await proxy.InvokeAsync("remote.call", null, TestContext.Current.CancellationToken);
+        await proxy.InvokeAsync<int>("remote.generic", null, TestContext.Current.CancellationToken);
 
         Assert.Contains("remote.call", rpc.InvokeAsyncCalls);
         Assert.Contains("remote.generic", rpc.InvokeAsyncGenericCalls);
