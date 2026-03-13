@@ -55,34 +55,44 @@ public sealed class AvaloniaHostCapabilityProvider : IWebViewHostCapabilityProvi
     /// </summary>
     public Avalonia.Controls.NativeMenu? NativeMenu => _menuManager.Menu;
 
+    /// <inheritdoc />
     public string? ReadClipboardText() => _inner.ReadClipboardText();
 
+    /// <inheritdoc />
     public void WriteClipboardText(string text) => _inner.WriteClipboardText(text);
 
+    /// <inheritdoc />
     public WebViewFileDialogResult ShowOpenFileDialog(WebViewOpenFileDialogRequest request)
         => _inner.ShowOpenFileDialog(request);
 
+    /// <inheritdoc />
     public WebViewFileDialogResult ShowSaveFileDialog(WebViewSaveFileDialogRequest request)
         => _inner.ShowSaveFileDialog(request);
 
+    /// <inheritdoc />
     public void OpenExternal(Uri uri) => _inner.OpenExternal(uri);
 
+    /// <inheritdoc />
     public void ShowNotification(WebViewNotificationRequest request) => _inner.ShowNotification(request);
 
+    /// <inheritdoc />
     public void ApplyMenuModel(WebViewMenuModelRequest request)
     {
         if (!_isDesktopPlatform) return;
         _menuManager.ApplyMenuModel(request);
     }
 
+    /// <inheritdoc />
     public void UpdateTrayState(WebViewTrayStateRequest request)
     {
         if (!_isDesktopPlatform) return;
         _trayManager.UpdateTrayState(request);
     }
 
+    /// <inheritdoc />
     public void ExecuteSystemAction(WebViewSystemActionRequest request) => _inner.ExecuteSystemAction(request);
 
+    /// <inheritdoc />
     public void Dispose()
     {
         _trayManager.Dispose();
