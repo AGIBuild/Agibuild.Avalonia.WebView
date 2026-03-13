@@ -1,17 +1,20 @@
 ## Why
 
-Current `Ci` and `CiPublish` do not use a single release-readiness contract, and version assignment is split between MinVer/tag flow and release-time overrides. This can cause non-deterministic release behavior and weakens the "CI passed -> Release is safe" guarantee.
+Current CI and release orchestration are split across multiple workflows and version authorities. This can cause non-deterministic release behavior and weakens the "CI passed -> Release is safe" guarantee.
 
 This change aligns with `G4` (contract-driven determinism) and roadmap post-phase maintenance priorities after Phase 12, while reinforcing Phase 7/11 release-orchestration outcomes.
 
 ## What Changes
 
-- Introduce a unified readiness path shared by CI and release, with release reusing CI-validated artifacts.
+- Merge CI and release into one workflow with two stages: CI validation stage and release promotion stage.
+- Add a mandatory manual approval gate between CI and release stages using protected environment reviewers.
+- Introduce a unified readiness path shared by CI and release stages, with release reusing CI-validated artifacts.
 - Freeze the solution version source to major/minor baseline `1.5` (single source of truth at repo level).
 - Define CI build version format as `X.Y.Z.<run_number>` without `ci` suffix text.
 - Ensure all packable outputs (NuGet and npm package version) are derived from the same computed version in one pipeline execution.
+- Remove MinVer package/configuration from active build graph to eliminate dual version authority.
 - Remove dependence on tag-time version computation for release publishing; release consumes the CI-produced version manifest and artifacts.
-- **BREAKING**: Decommission tag-driven version bumping as release authority (`create-tag.yml` no longer controls package versioning).
+- **BREAKING**: Decommission tag-driven version bumping as release authority (`create-tag.yml` no longer controls package versioning) and fully remove MinVer-based version derivation from active projects.
 
 ## Capabilities
 
@@ -23,9 +26,9 @@ This change aligns with `G4` (contract-driven determinism) and roadmap post-phas
 
 ## Impact
 
-- Affected workflows: `.github/workflows/ci.yml`, `.github/workflows/release.yml`, and release triggering strategy.
+- Affected workflows: `.github/workflows/ci.yml` (or renamed unified workflow), `.github/workflows/release.yml` decommission path, and manual approval environment policy.
 - Affected build orchestration: `build/Build.cs`, `build/Build.Governance.cs`, and packaging/version injection points.
-- Affected version configuration: repository-level shared version properties (baseline `1.5`) and CI run-number-based patch increment.
+- Affected version configuration: repository-level shared version properties (baseline `1.5`) and CI run-number-based patch increment, without MinVer fallback paths.
 - Affected governance/testing: update invariants and tests for readiness/version parity.
 
 ## Non-goals

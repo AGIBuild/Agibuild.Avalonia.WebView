@@ -14,6 +14,9 @@
     <!-- Generate XML documentation for API reference -->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
+    <!-- Unified repository version baseline (source of truth for CI version derivation) -->
+    <VersionPrefix>1.5.0</VersionPrefix>
+
     <!-- Shared NuGet package metadata -->
     <Authors>Agibuild</Authors>
     <Company>Agibuild</Company>
@@ -25,19 +28,5 @@
     <!-- SPDX license expression for all NuGet packages -->
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
 
-    <!-- MinVer: Git tag-driven versioning
-         Tag format: v{major}.{minor}.{patch}[-preview]
-         Examples: v0.2.0-preview, v0.2.1-preview, v1.0.0 -->
-    <MinVerTagPrefix>v</MinVerTagPrefix>
-    <MinVerDefaultPreReleaseIdentifiers>preview</MinVerDefaultPreReleaseIdentifiers>
-    <MinVerMinimumMajorMinor>1.0</MinVerMinimumMajorMinor>
   </PropertyGroup>
-
-  <!-- MinVer package: conditional on CPM vs non-CPM projects -->
-  <ItemGroup Condition="'$(ManagePackageVersionsCentrally)' != 'true'">
-    <PackageReference Include="MinVer" Version="6.0.0" PrivateAssets="all" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(ManagePackageVersionsCentrally)' == 'true'">
-    <PackageReference Include="MinVer" PrivateAssets="all" />
-  </ItemGroup>
 </Project>

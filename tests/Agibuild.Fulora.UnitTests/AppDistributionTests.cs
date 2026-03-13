@@ -489,13 +489,12 @@ public class AppDistributionTests
     }
 
     [Fact]
-    public async Task PackageCommand_validates_missing_project_argument()
+    public void PackageCommand_validates_missing_project_argument()
     {
         var root = new RootCommand("test");
         root.Subcommands.Add(PackageCommand.Create());
-        var config = new CommandLineConfiguration(root);
-        var parseResult = config.Parse("package");
-        var exitCode = await parseResult.InvokeAsync(TestContext.Current.CancellationToken);
+        var parseResult = root.Parse("package");
+        var exitCode = parseResult.Invoke();
         Assert.NotEqual(0, exitCode);
     }
 }

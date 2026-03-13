@@ -217,7 +217,7 @@ public sealed class AvaloniaHostCapabilityProviderTests
     [Fact]
     public void MenuManager_EmptyModel_ClearsMenu()
     {
-        var manager = new AvaloniaMenuManager();
+        var manager = CreateSynchronousMenuManager();
         manager.ApplyMenuModel(new WebViewMenuModelRequest { Items = [] });
 
         Assert.NotNull(manager.Menu);
@@ -227,7 +227,7 @@ public sealed class AvaloniaHostCapabilityProviderTests
     [Fact]
     public void MenuManager_Dispose_ClearsMenu()
     {
-        var manager = new AvaloniaMenuManager();
+        var manager = CreateSynchronousMenuManager();
         manager.ApplyMenuModel(new WebViewMenuModelRequest
         {
             Items = [new WebViewMenuItemModel { Id = "a", Label = "A" }]
@@ -241,7 +241,7 @@ public sealed class AvaloniaHostCapabilityProviderTests
     [Fact]
     public void MenuManager_FlatModel_MapsCorrectCount()
     {
-        var manager = new AvaloniaMenuManager();
+        var manager = CreateSynchronousMenuManager();
         manager.ApplyMenuModel(new WebViewMenuModelRequest
         {
             Items =
@@ -258,7 +258,7 @@ public sealed class AvaloniaHostCapabilityProviderTests
     [Fact]
     public void MenuManager_NestedModel_CreatesSubmenus()
     {
-        var manager = new AvaloniaMenuManager();
+        var manager = CreateSynchronousMenuManager();
         manager.ApplyMenuModel(new WebViewMenuModelRequest
         {
             Items =
@@ -284,7 +284,7 @@ public sealed class AvaloniaHostCapabilityProviderTests
     [Fact]
     public void MenuManager_DisabledItem_MapsIsEnabled()
     {
-        var manager = new AvaloniaMenuManager();
+        var manager = CreateSynchronousMenuManager();
         manager.ApplyMenuModel(new WebViewMenuModelRequest
         {
             Items =
@@ -301,7 +301,7 @@ public sealed class AvaloniaHostCapabilityProviderTests
     [Fact]
     public void MenuManager_ClickLeafItem_FiresEvent()
     {
-        var manager = new AvaloniaMenuManager();
+        var manager = CreateSynchronousMenuManager();
         string? clickedId = null;
         manager.MenuItemClicked += args => clickedId = args.ItemId;
 
@@ -324,7 +324,7 @@ public sealed class AvaloniaHostCapabilityProviderTests
     [Fact]
     public void MenuManager_ReapplyModel_ClearsAndRebuilds()
     {
-        var manager = new AvaloniaMenuManager();
+        var manager = CreateSynchronousMenuManager();
 
         manager.ApplyMenuModel(new WebViewMenuModelRequest
         {
@@ -345,6 +345,8 @@ public sealed class AvaloniaHostCapabilityProviderTests
 
     // ─── Helpers ────────────────────────────────────────────────────────────
 
+    private static AvaloniaMenuManager CreateSynchronousMenuManager() => new(new InlineUiDispatcher());
+
     private sealed class TrackingIconResolver : ITrayIconResolver
     {
         public bool WasCalled { get; private set; }
@@ -358,6 +360,13 @@ public sealed class AvaloniaHostCapabilityProviderTests
             // The composite resolver chain logic is validated via WasCalled tracking.
             return null;
         }
+    }
+
+    private sealed class InlineUiDispatcher : IAvaloniaUiDispatcher
+    {
+        public bool CheckAccess() => true;
+
+        public void Post(Action action) => action();
     }
 
     private sealed class TrackingProvider : IWebViewHostCapabilityProvider

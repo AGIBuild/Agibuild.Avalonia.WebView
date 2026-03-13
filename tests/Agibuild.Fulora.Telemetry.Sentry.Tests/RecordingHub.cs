@@ -16,9 +16,16 @@ internal sealed class RecordingHub : IHub
 
     public bool IsEnabled => true;
     public SentryId LastEventId => SentryId.Empty;
+    public SentryStructuredLogger Logger => throw new NotSupportedException();
+    public SentryMetricEmitter Metrics => throw new NotSupportedException();
+    public bool IsSessionActive => false;
 
     public void ConfigureScope(Action<Scope> configureScope) => configureScope(_scope);
+    public void ConfigureScope<TArg>(Action<Scope, TArg> configureScope, TArg arg) => configureScope(_scope, arg);
     public Task ConfigureScopeAsync(Func<Scope, Task> configureScope) => configureScope(_scope);
+    public Task ConfigureScopeAsync<TArg>(Func<Scope, TArg, Task> configureScope, TArg arg) => configureScope(_scope, arg);
+    public void SetTag(string key, string value) => _scope.SetTag(key, value);
+    public void UnsetTag(string key) => _scope.UnsetTag(key);
 
     public SentryId CaptureEvent(SentryEvent evt, Scope? scope, SentryHint? hint)
     {
@@ -61,6 +68,7 @@ internal sealed class RecordingHub : IHub
     public ISpan? GetSpan() => null;
     public SentryTraceHeader? GetTraceHeader() => null;
     public BaggageHeader? GetBaggage() => null;
+    public W3CTraceparentHeader? GetTraceparentHeader() => null;
 
     public TransactionContext ContinueTrace(SentryTraceHeader? traceHeader, BaggageHeader? baggageHeader, string? name = null, string? operation = null)
         => new(name ?? "test", operation ?? "test");
@@ -73,10 +81,26 @@ internal sealed class RecordingHub : IHub
     public void ResumeSession() { }
     public void EndSession(SessionEndStatus status = SessionEndStatus.Exited) { }
 
-#pragma warning disable CS0618
-    public void CaptureUserFeedback(UserFeedback userFeedback) { }
-#pragma warning restore CS0618
     public void CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null) { }
+    public SentryId CaptureFeedback(
+        SentryFeedback feedback,
+        out CaptureFeedbackResult result,
+        Action<Scope> configureScope,
+        SentryHint? hint = null)
+    {
+        configureScope(_scope);
+        result = default;
+        return SentryId.Create();
+    }
+    public SentryId CaptureFeedback(
+        SentryFeedback feedback,
+        out CaptureFeedbackResult result,
+        Scope? scope = null,
+        SentryHint? hint = null)
+    {
+        result = default;
+        return SentryId.Create();
+    }
     public bool CaptureEnvelope(Envelope envelope) => true;
 
     public SentryId CaptureCheckIn(string monitorSlug, CheckInStatus status, SentryId? sentryId = null,

@@ -7,7 +7,6 @@
     <AutomationLane>RuntimeAutomation.PackageSmoke</AutomationLane>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-    <MinVerSkip>true</MinVerSkip>
     <GenerateRuntimeConfigDevFile>true</GenerateRuntimeConfigDevFile>
     <!--
       NuGet smoke test must validate the freshly packed local artifacts (artifacts/packages),
@@ -27,7 +26,8 @@
     <PackageReference Include="Agibuild.Fulora.Core" Version="$(AgibuildPackageVersion)" />
     <PackageReference Include="Agibuild.Fulora.Bridge.Generator" Version="$(AgibuildPackageVersion)"
                       OutputItemType="Analyzer"
-                      ReferenceOutputAssembly="false" />
+                      ReferenceOutputAssembly="false"
+                      PrivateAssets="all" />
     <!-- Avalonia.Diagnostics not yet available for 12.x; re-enable when published
     <PackageReference Include="Avalonia.Diagnostics" Version="12.0.0-preview2">
       <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>

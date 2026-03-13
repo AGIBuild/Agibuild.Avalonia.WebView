@@ -1,13 +1,14 @@
-name: CI
+name: CI and Release
 
 on:
   push:
-    branches: [main, develop, 'release/**']
+    branches: [main, develop, "release/**"]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ci-release-${{ github.ref }}
   cancel-in-progress: true
 
 env:
@@ -16,25 +17,67 @@ env:
   NUKE_TELEMETRY_OPTOUT: true
 
 jobs:
-  # ────────────────────────────── Build & Test (macOS) ──────────────────────────
+  version:
+    name: Resolve Version
+    runs-on: ubuntu-latest
+    outputs:
+      version_prefix: ${{ steps.compute.outputs.version_prefix }}
+      package_version: ${{ steps.compute.outputs.package_version }}
+      npm_version: ${{ steps.compute.outputs.npm_version }}
+      run_number: ${{ steps.compute.outputs.run_number }}
+      commit_sha: ${{ steps.compute.outputs.commit_sha }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compute package versions from Directory.Build.props
+        id: compute
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION_PREFIX="$(python3 - <<'PY'
+          import xml.etree.ElementTree as ET
+          root = ET.parse("Directory.Build.props").getroot()
+          ns = {"msb": root.tag.split("}")[0].strip("{")} if "}" in root.tag else {}
+          if ns:
+            nodes = root.findall(".//msb:VersionPrefix", ns)
+          else:
+            nodes = root.findall(".//VersionPrefix")
+          value = nodes[0].text.strip() if nodes and nodes[0].text else ""
+          print(value)
+          PY
+          )"
+          if [[ -z "${VERSION_PREFIX}" ]]; then
+            echo "VersionPrefix is missing in Directory.Build.props"
+            exit 1
+          fi
+          RUN_NUMBER="${GITHUB_RUN_NUMBER}"
+          PACKAGE_VERSION="${VERSION_PREFIX}.${RUN_NUMBER}"
+          NPM_VERSION="${VERSION_PREFIX}-${RUN_NUMBER}"
+          echo "version_prefix=${VERSION_PREFIX}" >> "${GITHUB_OUTPUT}"
+          echo "package_version=${PACKAGE_VERSION}" >> "${GITHUB_OUTPUT}"
+          echo "npm_version=${NPM_VERSION}" >> "${GITHUB_OUTPUT}"
+          echo "run_number=${RUN_NUMBER}" >> "${GITHUB_OUTPUT}"
+          echo "commit_sha=${GITHUB_SHA}" >> "${GITHUB_OUTPUT}"
+
   build-macos:
-    name: Build & Test (macOS)
+    name: Build and Test (macOS)
     runs-on: macos-latest
+    needs: version
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # MinVer needs full git history
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: "22"
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '10.0.x'
-          dotnet-quality: 'preview'
+          dotnet-version: "10.0.x"
+          dotnet-quality: "preview"
 
       - name: Install .NET workloads
         run: dotnet workload install android ios macos
@@ -51,14 +94,72 @@ jobs:
         working-directory: samples/avalonia-ai-chat/AvaloniAiChat.Web
 
       - name: Run CI (Compile + Coverage + Pack)
-        run: ./build.sh --target Ci --configuration Release
+        run: ./build.sh --target Ci --configuration Release --package-version "${{ needs.version.outputs.package_version }}"
 
-      - name: Upload NuGet package
+      - name: Build npm release tarball
+        run: |
+          set -euo pipefail
+          npm version "${{ needs.version.outputs.npm_version }}" --no-git-tag-version --allow-same-version
+          mkdir -p "../../artifacts/release-bundle/npm"
+          npm pack --pack-destination "../../artifacts/release-bundle/npm"
+        working-directory: packages/bridge
+
+      - name: Assemble release bundle and manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/release-bundle/nuget
+          cp artifacts/packages/*.nupkg artifacts/release-bundle/nuget/
+          python3 - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          bundle = Path("artifacts/release-bundle")
+          nuget_dir = bundle / "nuget"
+          npm_dir = bundle / "npm"
+          package_version = "${{ needs.version.outputs.package_version }}"
+          npm_version = "${{ needs.version.outputs.npm_version }}"
+          run_number = "${{ needs.version.outputs.run_number }}"
+          commit_sha = "${{ needs.version.outputs.commit_sha }}"
+          workflow_run_id = "${{ github.run_id }}"
+
+          def digest(path: Path) -> str:
+              h = hashlib.sha256()
+              with path.open("rb") as f:
+                  for chunk in iter(lambda: f.read(1024 * 1024), b""):
+                      h.update(chunk)
+              return h.hexdigest()
+
+          nuget_files = sorted([p for p in nuget_dir.glob("*.nupkg") if p.is_file()])
+          npm_files = sorted([p for p in npm_dir.glob("*.tgz") if p.is_file()])
+
+          payload = {
+              "schemaVersion": 1,
+              "packageVersion": package_version,
+              "npmVersion": npm_version,
+              "runNumber": run_number,
+              "commitSha": commit_sha,
+              "workflowRunId": workflow_run_id,
+              "nugetPackages": [
+                  {"file": p.name, "sha256": digest(p)} for p in nuget_files
+              ],
+              "npmPackages": [
+                  {"file": p.name, "sha256": digest(p)} for p in npm_files
+              ],
+          }
+
+          manifest_path = bundle / "release-manifest.json"
+          manifest_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+          print(f"Wrote {manifest_path}")
+          PY
+
+      - name: Upload release bundle
         uses: actions/upload-artifact@v4
         with:
-          name: nuget-package-macos
-          path: artifacts/packages/*.nupkg
-          if-no-files-found: warn
+          name: release-bundle
+          path: artifacts/release-bundle/
+          if-no-files-found: error
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
@@ -76,10 +177,10 @@ jobs:
           path: artifacts/coverage-report/
           if-no-files-found: ignore
 
-  # ────────────────────────────── Build & Test (Windows) ────────────────────────
   build-windows:
-    name: Build & Test (Windows)
+    name: Build and Test (Windows)
     runs-on: windows-latest
+    needs: version
     steps:
       - uses: actions/checkout@v4
         with:
@@ -88,13 +189,13 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: "22"
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '10.0.x'
-          dotnet-quality: 'preview'
+          dotnet-version: "10.0.x"
+          dotnet-quality: "preview"
 
       - name: Install .NET workloads
         run: dotnet workload install android
@@ -112,7 +213,7 @@ jobs:
         working-directory: samples/avalonia-ai-chat/AvaloniAiChat.Web
 
       - name: Run CI (Compile + Coverage + Pack)
-        run: ./build.ps1 -Target Ci -Configuration Release
+        run: ./build.ps1 -Target Ci -Configuration Release -PackageVersion "${{ needs.version.outputs.package_version }}"
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
@@ -130,10 +231,10 @@ jobs:
           path: artifacts/coverage-report/
           if-no-files-found: ignore
 
-  # ────────────────────────────── Build & Test (Linux) ─────────────────────────
   build-linux:
-    name: Build & Test (Linux)
+    name: Build and Test (Linux)
     runs-on: ubuntu-latest
+    needs: version
     steps:
       - uses: actions/checkout@v4
         with:
@@ -147,13 +248,13 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: "22"
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '10.0.x'
-          dotnet-quality: 'preview'
+          dotnet-version: "10.0.x"
+          dotnet-quality: "preview"
 
       - name: Install .NET workloads
         run: dotnet workload install android
@@ -170,7 +271,7 @@ jobs:
         working-directory: samples/avalonia-ai-chat/AvaloniAiChat.Web
 
       - name: Run CI (Compile + Coverage + Pack)
-        run: ./build.sh --target Ci --configuration Release
+        run: ./build.sh --target Ci --configuration Release --package-version "${{ needs.version.outputs.package_version }}"
 
       - name: Validate NativeAOT publish
         run: |
@@ -194,3 +295,98 @@ jobs:
           name: coverage-report-linux
           path: artifacts/coverage-report/
           if-no-files-found: ignore
+
+  release:
+    name: Release Promotion
+    runs-on: ubuntu-latest
+    needs: [version, build-macos, build-windows, build-linux]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment: release
+    permissions:
+      contents: write
+    steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+          dotnet-quality: "preview"
+
+      - name: Download release bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: release-bundle
+          path: artifacts/release-bundle
+
+      - name: Verify release bundle manifest and hashes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import sys
+          from pathlib import Path
+
+          manifest_path = Path("artifacts/release-bundle/release-manifest.json")
+          if not manifest_path.exists():
+              print(f"Missing manifest: {manifest_path}")
+              sys.exit(1)
+
+          manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+          expected_version = "${{ needs.version.outputs.package_version }}"
+          if manifest.get("packageVersion") != expected_version:
+              print(f"Package version mismatch: expected {expected_version}, actual {manifest.get('packageVersion')}")
+              sys.exit(1)
+
+          def digest(path: Path) -> str:
+              h = hashlib.sha256()
+              with path.open("rb") as f:
+                  for chunk in iter(lambda: f.read(1024 * 1024), b""):
+                      h.update(chunk)
+              return h.hexdigest()
+
+          for item in manifest.get("nugetPackages", []):
+              path = Path("artifacts/release-bundle/nuget") / item["file"]
+              if not path.exists():
+                  print(f"Missing NuGet package: {path}")
+                  sys.exit(1)
+              if digest(path) != item["sha256"]:
+                  print(f"Hash mismatch: {path}")
+                  sys.exit(1)
+
+          for item in manifest.get("npmPackages", []):
+              path = Path("artifacts/release-bundle/npm") / item["file"]
+              if not path.exists():
+                  print(f"Missing npm package: {path}")
+                  sys.exit(1)
+              if digest(path) != item["sha256"]:
+                  print(f"Hash mismatch: {path}")
+                  sys.exit(1)
+
+          print("Release bundle verification passed.")
+          PY
+
+      - name: Push NuGet packages
+        run: |
+          dotnet nuget push "artifacts/release-bundle/nuget/*.nupkg" \
+            --source https://api.nuget.org/v3/index.json \
+            --api-key "${{ secrets.NUGET_API_KEY }}" \
+            --skip-duplicate
+
+      - name: Publish bridge package to npm
+        run: |
+          set -euo pipefail
+          mapfile -t tgz_files < <(ls artifacts/release-bundle/npm/*.tgz)
+          if [[ "${#tgz_files[@]}" -eq 0 ]]; then
+            echo "No npm tarball found in release bundle."
+            exit 1
+          fi
+          npm publish "${tgz_files[0]}" --access public --tag preview
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

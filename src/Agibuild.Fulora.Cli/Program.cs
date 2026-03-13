@@ -11,6 +11,4 @@ rootCommand.Subcommands.Add(ListPluginsCommand.Create());
 rootCommand.Subcommands.Add(SearchCommand.Create());
 rootCommand.Subcommands.Add(PackageCommand.Create());
 
-var config = new CommandLineConfiguration(rootCommand);
-var parseResult = config.Parse(args);
-return await parseResult.InvokeAsync();
+return await rootCommand.Parse(args).InvokeAsync();

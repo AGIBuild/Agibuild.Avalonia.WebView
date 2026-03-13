@@ -13,6 +13,5 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="11.0.0-preview.2.26159.112" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="11.0.0-preview.2.26159.112" />
-    <PackageReference Update="MinVer" Version="8.0.0-alpha.1" />
   </ItemGroup>
 </Project>

@@ -1,18 +1,19 @@
 # release-versioning-strategy Specification
 
 ## Purpose
-Define version progression, release artifacts, and governance for the 1.0 release train (MinVer tag-driven flow, README/CHANGELOG freshness, stable package metadata).
+Define version progression, release artifacts, and governance for the release train (CI-computed version flow, README/CHANGELOG freshness, stable package metadata).
 ## Requirements
-### Requirement: Version progression follows tag-driven MinVer flow
-The release pipeline SHALL derive package versions from git tags using MinVer. A `v1.0.0-preview.N` tag SHALL produce preview packages; a `v1.0.0` tag SHALL produce the stable release.
+### Requirement: Version progression follows CI-computed manifest flow
+The release pipeline SHALL derive package versions from repository baseline version source plus CI run metadata. Version authority SHALL be the CI manifest and SHALL NOT depend on MinVer tag derivation.
 
-#### Scenario: Preview tag produces preview packages
-- **WHEN** the nearest ancestor tag is `v1.0.0-preview.1`
-- **THEN** `nuke Pack` produces packages with version `1.0.0-preview.1+<height>.<commit>`
+#### Scenario: CI run produces compliant package version
+- **WHEN** CI resolves `VersionPrefix` and `run_number`
+- **THEN** package versions follow numeric format `X.Y.Z.<run_number>`
+- **AND** release consumes the same manifest version without recomputation
 
-#### Scenario: Stable tag produces stable packages
-- **WHEN** the nearest ancestor tag is `v1.0.0`
-- **THEN** `nuke Pack` produces packages with version `1.0.0` (no prerelease suffix)
+#### Scenario: MinVer authority is absent from active release flow
+- **WHEN** release/version authority is evaluated in active build and workflow files
+- **THEN** no MinVer-based version derivation is used for pack or publish
 
 ### Requirement: README metrics SHALL reflect latest test evidence
 README.md SHALL contain test counts and coverage percentage that match the latest CI evidence snapshot. A governance test SHALL enforce this invariant.

@@ -11,26 +11,124 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
 partial class BuildTask
 {
-    void RunContractAutomationTests(string trxFileName)
+    async Task RunContractAutomationTests(string trxFileName)
     {
-        DotNetTest(s => s
-            .SetProjectFile(UnitTestsProject)
-            .SetConfiguration(Configuration)
-            .EnableNoRestore()
-            .EnableNoBuild()
-            .SetResultsDirectory(TestResultsDirectory)
-            .SetLoggers($"trx;LogFileName={trxFileName}"));
+        await CleanupLingeringUnitTestProcessesAsync();
+        await RunDotNetTestWithHangRecoveryAsync(
+            projectFile: UnitTestsProject,
+            resultsDirectory: TestResultsDirectory,
+            trxFileName: trxFileName,
+            timeout: TimeSpan.FromMinutes(4),
+            cleanupBetweenAttempts: CleanupLingeringUnitTestProcessesAsync);
     }
 
-    void RunRuntimeAutomationTests(string trxFileName)
+    async Task RunRuntimeAutomationTests(string trxFileName)
     {
-        DotNetTest(s => s
-            .SetProjectFile(IntegrationTestsProject)
-            .SetConfiguration(Configuration)
-            .EnableNoRestore()
-            .EnableNoBuild()
-            .SetResultsDirectory(TestResultsDirectory)
-            .SetLoggers($"trx;LogFileName={trxFileName}"));
+        await CleanupLingeringIntegrationAutomationProcessesAsync();
+        await RunDotNetTestWithHangRecoveryAsync(
+            projectFile: IntegrationTestsProject,
+            resultsDirectory: TestResultsDirectory,
+            trxFileName: trxFileName,
+            timeout: TimeSpan.FromMinutes(3),
+            cleanupBetweenAttempts: CleanupLingeringIntegrationAutomationProcessesAsync);
+    }
+
+    async Task RunCoverageUnitTestsAsync(AbsolutePath resultsDirectory, string trxFileName)
+    {
+        await CleanupLingeringUnitTestProcessesAsync();
+        await RunDotNetTestWithHangRecoveryAsync(
+            projectFile: UnitTestsProject,
+            resultsDirectory: resultsDirectory,
+            trxFileName: trxFileName,
+            timeout: TimeSpan.FromMinutes(4),
+            settingsFile: RootDirectory / "coverlet.runsettings",
+            timeoutMessageTemplate: "Coverage unit tests timed out on attempt {Attempt}. Retrying once after cleanup.",
+            cleanupBetweenAttempts: CleanupLingeringUnitTestProcessesAsync);
+    }
+
+    async Task RunDotNetTestWithHangRecoveryAsync(
+        AbsolutePath projectFile,
+        AbsolutePath resultsDirectory,
+        string trxFileName,
+        TimeSpan timeout,
+        AbsolutePath? settingsFile = null,
+        string timeoutMessageTemplate = "dotnet test timed out on attempt {Attempt}. Retrying once after cleanup.",
+        Func<Task>? cleanupBetweenAttempts = null)
+    {
+        var arguments = new List<string>
+        {
+            "test",
+            projectFile.ToString(),
+            "--configuration", Configuration,
+            "--no-restore",
+            "--no-build",
+            "--results-directory", resultsDirectory.ToString(),
+            "--logger", $"trx;LogFileName={trxFileName}"
+        };
+
+        if (settingsFile is not null)
+        {
+            arguments.Add("--settings");
+            arguments.Add(settingsFile.ToString());
+        }
+
+        const int maxAttempts = 2;
+        for (var attempt = 1; attempt <= maxAttempts; attempt++)
+        {
+            try
+            {
+                await RunProcessCheckedAsync(
+                    "dotnet",
+                    arguments.ToArray(),
+                    workingDirectory: RootDirectory,
+                    timeout: timeout);
+                return;
+            }
+            catch (TimeoutException) when (attempt < maxAttempts)
+            {
+                Serilog.Log.Warning(timeoutMessageTemplate, attempt);
+                if (cleanupBetweenAttempts is not null)
+                    await cleanupBetweenAttempts();
+            }
+        }
+    }
+
+    async Task CleanupLingeringUnitTestProcessesAsync()
+    {
+        if (OperatingSystem.IsWindows())
+            return;
+
+        var testBinaryPath = $"{UnitTestsProject.Parent}/bin/{Configuration}/net10.0/Agibuild.Fulora.UnitTests";
+        var testHostPath = $"{UnitTestsProject.Parent}/bin/{Configuration}/net10.0/testhost.dll";
+        await CleanupProcessesByMarkerAsync(testBinaryPath);
+        await CleanupProcessesByMarkerAsync(testHostPath);
+    }
+
+    async Task CleanupLingeringIntegrationAutomationProcessesAsync()
+    {
+        if (OperatingSystem.IsWindows())
+            return;
+
+        var testBinaryPath = $"{IntegrationTestsProject.Parent}/bin/{Configuration}/net10.0/Agibuild.Fulora.Integration.Tests.Automation";
+        var testHostPath = $"{IntegrationTestsProject.Parent}/bin/{Configuration}/net10.0/testhost.dll";
+        await CleanupProcessesByMarkerAsync(testBinaryPath);
+        await CleanupProcessesByMarkerAsync(testHostPath);
+    }
+
+    static async Task CleanupProcessesByMarkerAsync(string marker)
+    {
+        try
+        {
+            var output = await RunProcessAsync("pkill", ["-f", marker], timeout: TimeSpan.FromSeconds(5));
+            if (string.IsNullOrWhiteSpace(output))
+            {
+                Serilog.Log.Information("Cleared lingering test processes matching marker: {Marker}", marker);
+            }
+        }
+        catch
+        {
+            // Best-effort cleanup. pkill returns non-zero when there are no matches.
+        }
     }
 
     async Task RunGtkSmokeDesktopAppAsync()

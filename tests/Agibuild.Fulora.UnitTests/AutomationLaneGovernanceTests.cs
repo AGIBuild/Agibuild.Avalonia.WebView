@@ -804,6 +804,7 @@ public sealed class AutomationLaneGovernanceTests
         var props = File.ReadAllText(directoryBuildPropsPath);
         AssertSourceContains(props, "<PackageLicenseExpression>", PackageMetadata, directoryBuildPropsPath);
         AssertSourceContains(props, "<PackageProjectUrl>", PackageMetadata, directoryBuildPropsPath);
+        AssertSourceContains(props, "<VersionPrefix>1.5.0</VersionPrefix>", PackageMetadata, directoryBuildPropsPath);
 
         var mainCsprojPath = Path.Combine(repoRoot, "src", "Agibuild.Fulora.Avalonia", "Agibuild.Fulora.Avalonia.csproj");
         AssertFileExists(mainCsprojPath, PackageMetadata);
@@ -811,6 +812,31 @@ public sealed class AutomationLaneGovernanceTests
         var csproj = File.ReadAllText(mainCsprojPath);
         AssertSourceContains(csproj, "<Description>", PackageMetadata, mainCsprojPath);
         Assert.DoesNotContain("preview", csproj.ToLowerInvariant().Split("<description>").Last().Split("</description>").First());
+    }
+
+    [Fact]
+    public void Unified_ci_workflow_enforces_manual_release_approval_and_single_release_entrypoint()
+    {
+        var repoRoot = FindRepoRoot();
+        var ciWorkflowPath = Path.Combine(repoRoot, ".github", "workflows", "ci.yml");
+        var releaseWorkflowPath = Path.Combine(repoRoot, ".github", "workflows", "release.yml");
+        var createTagWorkflowPath = Path.Combine(repoRoot, ".github", "workflows", "create-tag.yml");
+
+        AssertFileExists(ciWorkflowPath, ReleaseOrchestrationDecisionGate);
+        AssertFileExists(createTagWorkflowPath, ReleaseOrchestrationDecisionGate);
+        Assert.False(File.Exists(releaseWorkflowPath),
+            $"[{ReleaseOrchestrationDecisionGate}] release.yml should be removed after unified workflow cutover.");
+
+        var ciWorkflow = File.ReadAllText(ciWorkflowPath);
+        var createTagWorkflow = File.ReadAllText(createTagWorkflowPath);
+
+        AssertSourceContains(ciWorkflow, "name: CI and Release", ReleaseOrchestrationDecisionGate, ciWorkflowPath);
+        AssertSourceContains(ciWorkflow, "needs: [version, build-macos, build-windows, build-linux]", ReleaseOrchestrationDecisionGate, ciWorkflowPath);
+        AssertSourceContains(ciWorkflow, "environment: release", ReleaseOrchestrationDecisionGate, ciWorkflowPath);
+        AssertSourceContains(ciWorkflow, "if: github.event_name == 'push' && github.ref == 'refs/heads/main'", ReleaseOrchestrationDecisionGate, ciWorkflowPath);
+        AssertSourceContains(ciWorkflow, "Verify release bundle manifest and hashes", ReleaseOrchestrationDecisionGate, ciWorkflowPath);
+
+        Assert.DoesNotContain("gh workflow run release.yml", createTagWorkflow, StringComparison.Ordinal);
     }
 
     [Fact]

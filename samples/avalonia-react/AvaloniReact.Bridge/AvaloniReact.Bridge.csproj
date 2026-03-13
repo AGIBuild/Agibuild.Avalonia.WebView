@@ -18,10 +18,9 @@
 
   <!-- Source generator for typed bridge (AOT-safe proxies; falls back to reflection when absent) -->
   <ItemGroup>
-    <PackageReference Include="Agibuild.Fulora.Bridge.Generator" Version="*-*" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <PackageReference Include="Agibuild.Fulora.Bridge.Generator" Version="*-*" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Update="MinVer" Version="8.0.0-alpha.1" />
   </ItemGroup>
 
 </Project>

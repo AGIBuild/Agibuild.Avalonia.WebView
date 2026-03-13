@@ -201,7 +201,7 @@
         },
         "PackageVersion": {
           "type": "string",
-          "description": "NuGet package version override. When set, overrides MinVer auto-calculated version"
+          "description": "NuGet package version override for pack/publish targets"
         },
         "WarningGovernanceInput": {
           "type": "string",

@@ -11,9 +11,16 @@ namespace Agibuild.Fulora.Shell;
 /// </summary>
 internal sealed class AvaloniaMenuManager : IDisposable
 {
+    private static readonly IAvaloniaUiDispatcher DefaultDispatcher = new AvaloniaUiThreadDispatcher();
     private NativeMenu? _menu;
+    private readonly IAvaloniaUiDispatcher _dispatcher;
     private readonly List<NativeMenuItem> _trackedItems = [];
     private bool _disposed;
+
+    internal AvaloniaMenuManager(IAvaloniaUiDispatcher? dispatcher = null)
+    {
+        _dispatcher = dispatcher ?? DefaultDispatcher;
+    }
 
     /// <summary>
     /// Raised when a leaf menu item is clicked.
@@ -32,13 +39,13 @@ internal sealed class AvaloniaMenuManager : IDisposable
     {
         if (_disposed) return;
 
-        if (Dispatcher.UIThread.CheckAccess())
+        if (_dispatcher.CheckAccess())
         {
             ApplyMenuModelCore(request);
         }
         else
         {
-            Dispatcher.UIThread.Post(() => ApplyMenuModelCore(request));
+            _dispatcher.Post(() => ApplyMenuModelCore(request));
         }
     }
 
@@ -104,6 +111,20 @@ internal sealed class AvaloniaMenuManager : IDisposable
             _menu = null;
         }
     }
+}
+
+internal interface IAvaloniaUiDispatcher
+{
+    bool CheckAccess();
+
+    void Post(Action action);
+}
+
+internal sealed class AvaloniaUiThreadDispatcher : IAvaloniaUiDispatcher
+{
+    public bool CheckAccess() => Dispatcher.UIThread.CheckAccess();
+
+    public void Post(Action action) => Dispatcher.UIThread.Post(action);
 }
 
 /// <summary>

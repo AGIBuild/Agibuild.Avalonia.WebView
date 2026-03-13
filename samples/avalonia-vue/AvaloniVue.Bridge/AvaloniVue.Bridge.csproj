@@ -15,6 +15,7 @@
   <ItemGroup>
     <PackageReference Include="Agibuild.Fulora.Bridge.Generator" Version="*-*"
                       OutputItemType="Analyzer"
-                      ReferenceOutputAssembly="false" />
+                      ReferenceOutputAssembly="false"
+                      PrivateAssets="all" />
   </ItemGroup>
 </Project>

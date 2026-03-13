@@ -20,7 +20,5 @@
     <!-- Serilog logging -->
     <PackageVersion Include="Serilog" Version="4.3.2-dev-02419" />
     <PackageVersion Include="Serilog.Sinks.File" Version="8.0.0-nblumhardt-02322" />
-    <!-- MinVer: version referenced from Directory.Build.props -->
-    <PackageVersion Include="MinVer" Version="6.0.0" />
   </ItemGroup>
 </Project>

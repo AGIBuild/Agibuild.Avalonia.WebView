@@ -28,7 +28,6 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="11.0.0-preview.2.26159.112" />
     <!-- Keep package dependency metadata for consumers, but do not import WebView2 build targets into this pack project. -->
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3848-prerelease" ExcludeAssets="build;buildTransitive" />
-    <PackageReference Update="MinVer" Version="8.0.0-alpha.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -85,7 +84,7 @@
   </ItemGroup>
 
   <!-- Build adapter dependencies before packing. Uses forward slashes for cross-platform compatibility. -->
-  <Target Name="BuildPackInputs" BeforeTargets="GenerateNuspec">
+  <Target Name="BuildPackInputs" BeforeTargets="GenerateNuspec" Condition="'$(SkipPackInputBuilds)' != 'true'">
     <Exec Command="dotnet build &quot;../Agibuild.Fulora.Core/Agibuild.Fulora.Core.csproj&quot; -c $(Configuration)" />
     <Exec Command="dotnet build &quot;../Agibuild.Fulora.Adapters.Abstractions/Agibuild.Fulora.Adapters.Abstractions.csproj&quot; -c $(Configuration)" />
     <Exec Command="dotnet build &quot;../Agibuild.Fulora.Runtime/Agibuild.Fulora.Runtime.csproj&quot; -c $(Configuration)" />

@@ -9,7 +9,6 @@
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <ContentTargetFolders>content</ContentTargetFolders>
     <NoDefaultExcludes>true</NoDefaultExcludes>
-    <MinVerSkip>true</MinVerSkip>
   </PropertyGroup>
   <ItemGroup>
     <Content Include="agibuild-hybrid\**\*"

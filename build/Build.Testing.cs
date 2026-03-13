@@ -27,19 +27,12 @@ partial class BuildTask
     Target Coverage => _ => _
         .Description("Runs unit tests with code coverage and enforces minimum threshold.")
         .DependsOn(Build)
-        .Executes(() =>
+        .Executes(async () =>
         {
             CoverageDirectory.CreateOrCleanDirectory();
             CoverageReportDirectory.CreateOrCleanDirectory();
 
-            DotNetTest(s => s
-                .SetProjectFile(UnitTestsProject)
-                .SetConfiguration(Configuration)
-                .EnableNoRestore()
-                .EnableNoBuild()
-                .SetResultsDirectory(CoverageDirectory)
-                .SetLoggers("trx;LogFileName=unit-tests.trx")
-                .SetSettingsFile(RootDirectory / "coverlet.runsettings"));
+            await RunCoverageUnitTestsAsync(CoverageDirectory, "unit-tests.trx");
 
             var coverageFiles = CoverageDirectory.GlobFiles("**/coverage.cobertura.xml");
             if (!coverageFiles.Any())
@@ -123,35 +116,36 @@ partial class BuildTask
     Target ContractAutomation => _ => _
         .Description("Runs ContractAutomation lane (mock-driven unit tests).")
         .DependsOn(Build)
-        .Executes(() =>
+        .Executes(async () =>
         {
-            RunContractAutomationTests("contract-automation.trx");
+            await RunContractAutomationTests("contract-automation.trx");
         });
 
     Target RuntimeAutomation => _ => _
         .Description("Runs RuntimeAutomation lane (real adapter/runtime automation tests).")
         .DependsOn(Build)
-        .Executes(() =>
+        .Executes(async () =>
         {
-            RunRuntimeAutomationTests("runtime-automation.trx");
+            await RunRuntimeAutomationTests("runtime-automation.trx");
         });
 
     Target AutomationLaneReport => _ => _
         .Description("Runs automation lanes and writes pass/fail/skip report.")
         .DependsOn(Build)
+        .After(Coverage)
         .Executes(async () =>
         {
             var lanes = new List<AutomationLaneResult>();
             var failures = new List<string>();
 
-            RunLaneWithReporting(
+            await RunLaneWithReportingAsync(
                 lane: ContractAutomationLane,
                 project: UnitTestsProject,
                 run: () => RunContractAutomationTests("contract-automation.trx"),
                 lanes,
                 failures);
 
-            RunLaneWithReporting(
+            await RunLaneWithReportingAsync(
                 lane: RuntimeAutomationLane,
                 project: IntegrationTestsProject,
                 run: () => RunRuntimeAutomationTests("runtime-automation.trx"),

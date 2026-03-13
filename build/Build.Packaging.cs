@@ -72,10 +72,15 @@ partial class BuildTask
                     .SetConfiguration(Configuration)
                     .EnableNoRestore()
                     .EnableNoBuild()
-                    .SetOutputDirectory(PackageOutputDirectory);
+                    .SetOutputDirectory(PackageOutputDirectory)
+                    .SetProperty("SkipPackInputBuilds", "true");
 
                 if (!string.IsNullOrEmpty(PackageVersion))
-                    settings = settings.SetProperty("MinVerVersionOverride", PackageVersion);
+                {
+                    settings = settings
+                        .SetProperty("Version", PackageVersion)
+                        .SetProperty("PackageVersion", PackageVersion);
+                }
 
                 return settings;
             });
@@ -108,7 +113,11 @@ partial class BuildTask
                         .SetOutputDirectory(PackageOutputDirectory);
 
                     if (!string.IsNullOrEmpty(PackageVersion))
-                        settings = settings.SetProperty("MinVerVersionOverride", PackageVersion);
+                    {
+                        settings = settings
+                            .SetProperty("Version", PackageVersion)
+                            .SetProperty("PackageVersion", PackageVersion);
+                    }
 
                     return settings;
                 });
@@ -239,7 +248,7 @@ partial class BuildTask
                 if (string.IsNullOrEmpty(id))
                     errors.Add("NUSPEC: Missing <id>");
                 if (string.IsNullOrEmpty(version) || version == "0.0.0-dev" || version == "1.0.0")
-                    errors.Add($"NUSPEC: Invalid <version>: '{version}' — MinVer may not have run correctly");
+                    errors.Add($"NUSPEC: Invalid <version>: '{version}' — version injection may have failed");
                 if (string.IsNullOrEmpty(description))
                     errors.Add("NUSPEC: Missing <description>");
 

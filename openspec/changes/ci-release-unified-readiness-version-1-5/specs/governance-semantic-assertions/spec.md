@@ -1,5 +1,27 @@
 ## ADDED Requirements
 
+### Requirement: Governance semantic assertions SHALL enforce single-workflow staged topology
+Governance checks SHALL assert that CI validation and release promotion are modeled as staged jobs in one workflow definition with explicit release-on-CI dependency.
+
+#### Scenario: Single-workflow topology passes
+- **WHEN** workflow graph evidence is evaluated
+- **THEN** semantic assertions confirm CI and release jobs exist in one workflow with explicit dependency edge
+
+#### Scenario: Split-workflow topology fails deterministically
+- **WHEN** governance detects release orchestration outside the governed unified workflow topology
+- **THEN** governance fails with deterministic invariant diagnostics including expected and actual workflow topology
+
+### Requirement: Governance semantic assertions SHALL enforce manual approval gate presence
+Governance checks SHALL assert that release promotion job uses protected environment approval metadata before publish actions are allowed.
+
+#### Scenario: Manual approval gate passes
+- **WHEN** release stage configuration includes environment with required reviewers
+- **THEN** semantic assertions pass for approval-gate invariant
+
+#### Scenario: Missing approval gate fails deterministically
+- **WHEN** release stage lacks protected environment approval metadata
+- **THEN** governance fails with invariant-keyed diagnostics including missing gate fields
+
 ### Requirement: Governance semantic assertions SHALL verify CI-release version provenance parity
 Governance checks SHALL assert that release-published version values are identical to the CI-produced manifest version and that both are derived from the same repository baseline source.
 
@@ -11,6 +33,17 @@ Governance checks SHALL assert that release-published version values are identic
 #### Scenario: Version provenance parity fails deterministically
 - **WHEN** release publish version differs from CI manifest version or baseline source identity is missing
 - **THEN** governance fails with invariant-keyed diagnostics containing expected-vs-actual version and source metadata
+
+### Requirement: Governance semantic assertions SHALL enforce MinVer authority removal
+Governance checks SHALL assert that MinVer is not part of active version authority in build/release paths and fail deterministically if MinVer references exist in governed active files.
+
+#### Scenario: MinVer authority removal passes
+- **WHEN** governed active build/release/version files are scanned
+- **THEN** no MinVer package/config/property reference exists in active authority paths
+
+#### Scenario: MinVer authority removal fails deterministically
+- **WHEN** governance detects MinVer reference in active version authority paths
+- **THEN** governance fails with invariant-keyed diagnostics including offending file path and detected MinVer token
 
 ### Requirement: Governance semantic assertions SHALL enforce no-rebuild promotion policy
 Governance checks SHALL assert that release lane does not execute package rebuild steps for promotable artifacts and only consumes CI-produced immutable artifacts.

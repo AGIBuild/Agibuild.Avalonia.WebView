@@ -16,6 +16,5 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="10.4.0" />
-    <PackageReference Update="MinVer" Version="8.0.0-alpha.1" />
   </ItemGroup>
 </Project>

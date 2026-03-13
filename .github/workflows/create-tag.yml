@@ -22,7 +22,6 @@ on:
 
 permissions:
   contents: write
-  actions: write
 
 jobs:
   create-tag:
@@ -148,12 +147,6 @@ jobs:
           git tag "$NEW_TAG"
           git push origin "$NEW_TAG"
 
-          # ── Trigger Release workflow ────────────────────────────────────────
-          # Tags pushed by GITHUB_TOKEN don't trigger other workflows,
-          # so we explicitly dispatch the Release workflow on the new tag.
-          echo "Triggering Release workflow for $NEW_TAG ..."
-          gh workflow run release.yml --ref "$NEW_TAG"
-
           echo "## Version Tag Created" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "| Field | Value |" >> "$GITHUB_STEP_SUMMARY"
@@ -162,4 +155,4 @@ jobs:
           echo "| Bump | $BUMP |" >> "$GITHUB_STEP_SUMMARY"
           echo "| Commit | \`$(git rev-parse --short HEAD)\` |" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "The [Release workflow](../actions/workflows/release.yml) has been triggered." >> "$GITHUB_STEP_SUMMARY"
+          echo "Tag creation is metadata-only; release promotion is now gated in the unified CI workflow." >> "$GITHUB_STEP_SUMMARY"
