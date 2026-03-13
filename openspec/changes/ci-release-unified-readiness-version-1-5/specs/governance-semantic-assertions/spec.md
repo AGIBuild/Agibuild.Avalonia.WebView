@@ -62,3 +62,35 @@ When tag-driven workflow authority is disabled for version computation, governan
 #### Scenario: Authority metadata is present
 - **WHEN** governance evaluates release authority invariants
 - **THEN** diagnostic payload includes authority mode, version source, and tag-role classification
+
+### Requirement: Governance semantic assertions SHALL enforce test-before-pack ordering
+Governance checks SHALL assert that the `Pack` build target depends on test completion targets (`Coverage`, `AutomationLaneReport`) in the build dependency graph.
+
+#### Scenario: Test-before-pack ordering passes
+- **WHEN** build target dependency graph is evaluated
+- **THEN** `Pack` has transitive dependencies on `Coverage` and `AutomationLaneReport`
+
+#### Scenario: Pack without test dependency fails governance
+- **WHEN** `Pack` target does not depend on test targets
+- **THEN** governance fails with invariant-keyed diagnostics indicating missing test dependency
+
+### Requirement: Governance semantic assertions SHALL enforce release stage completeness
+Governance checks SHALL assert that the release stage in the unified workflow contains steps for NuGet publish, documentation deployment, tag creation, and GitHub Release creation.
+
+#### Scenario: Release stage completeness passes
+- **WHEN** unified workflow release job steps are evaluated
+- **THEN** steps exist for package publishing, documentation deployment, tag creation, and GitHub Release creation
+
+### Requirement: Governance semantic assertions SHALL enforce `create-tag.yml` removal
+Governance checks SHALL assert that no `create-tag.yml` file exists in `.github/workflows/`.
+
+#### Scenario: `create-tag.yml` removal passes
+- **WHEN** workflow directory is evaluated
+- **THEN** no `create-tag.yml` file is present
+
+### Requirement: Governance semantic assertions SHALL enforce release environment protection
+Governance checks SHALL validate that the `release` environment has `required_reviewers` protection rules configured.
+
+#### Scenario: Release environment protection passes
+- **WHEN** release environment configuration is queried
+- **THEN** `protection_rules` contain at least one entry with non-empty `reviewers`

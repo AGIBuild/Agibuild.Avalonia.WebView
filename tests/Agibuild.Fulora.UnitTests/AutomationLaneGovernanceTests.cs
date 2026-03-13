@@ -823,20 +823,21 @@ public sealed class AutomationLaneGovernanceTests
         var createTagWorkflowPath = Path.Combine(repoRoot, ".github", "workflows", "create-tag.yml");
 
         AssertFileExists(ciWorkflowPath, ReleaseOrchestrationDecisionGate);
-        AssertFileExists(createTagWorkflowPath, ReleaseOrchestrationDecisionGate);
         Assert.False(File.Exists(releaseWorkflowPath),
             $"[{ReleaseOrchestrationDecisionGate}] release.yml should be removed after unified workflow cutover.");
+        Assert.False(File.Exists(createTagWorkflowPath),
+            $"[{ReleaseOrchestrationDecisionGate}] create-tag.yml should be removed; tag creation is in unified workflow release stage.");
 
         var ciWorkflow = File.ReadAllText(ciWorkflowPath);
-        var createTagWorkflow = File.ReadAllText(createTagWorkflowPath);
 
         AssertSourceContains(ciWorkflow, "name: CI and Release", ReleaseOrchestrationDecisionGate, ciWorkflowPath);
         AssertSourceContains(ciWorkflow, "needs: [version, build-macos, build-windows, build-linux]", ReleaseOrchestrationDecisionGate, ciWorkflowPath);
         AssertSourceContains(ciWorkflow, "environment: release", ReleaseOrchestrationDecisionGate, ciWorkflowPath);
         AssertSourceContains(ciWorkflow, "if: github.event_name == 'push' && github.ref == 'refs/heads/main'", ReleaseOrchestrationDecisionGate, ciWorkflowPath);
         AssertSourceContains(ciWorkflow, "Verify release bundle manifest and hashes", ReleaseOrchestrationDecisionGate, ciWorkflowPath);
-
-        Assert.DoesNotContain("gh workflow run release.yml", createTagWorkflow, StringComparison.Ordinal);
+        AssertSourceContains(ciWorkflow, "Create Git tag and GitHub Release", ReleaseOrchestrationDecisionGate, ciWorkflowPath);
+        AssertSourceContains(ciWorkflow, "gh release create", ReleaseOrchestrationDecisionGate, ciWorkflowPath);
+        AssertSourceContains(ciWorkflow, "deploy-docs", ReleaseOrchestrationDecisionGate, ciWorkflowPath);
     }
 
     [Fact]
@@ -1431,6 +1432,43 @@ public sealed class AutomationLaneGovernanceTests
         var invalidFindings = RequireReadinessFindingsArray(invalidDoc.RootElement, "blockingFindings", AdoptionReadinessPolicy, artifactPath);
         Assert.Throws<GovernanceInvariantViolationException>(() =>
             AssertAdoptionReadinessFinding(invalidFindings.EnumerateArray().First(), AdoptionReadinessPolicy, artifactPath));
+    }
+
+    [Fact]
+    public void Pack_target_depends_on_test_completion()
+    {
+        var repoRoot = FindRepoRoot();
+        var combinedSource = ReadCombinedBuildSource(repoRoot);
+
+        AssertTargetDependsOnContainsAll(
+            combinedSource,
+            "Pack",
+            ["Coverage", "AutomationLaneReport"],
+            TestBeforePackOrdering,
+            "build/Build.Packaging.cs");
+    }
+
+    [Fact]
+    public void UpdateVersion_target_exists_for_manual_version_management()
+    {
+        var repoRoot = FindRepoRoot();
+        var combinedSource = ReadCombinedBuildSource(repoRoot);
+
+        AssertTargetDeclarationExists(combinedSource, "UpdateVersion", VersionManagementTarget, "build/Build.Versioning.cs");
+        AssertSourceContains(combinedSource, "VersionPrefix", VersionManagementTarget, "build/Build.Versioning.cs");
+        AssertSourceContains(combinedSource, "Directory.Build.props", VersionManagementTarget, "build/Build.Versioning.cs");
+    }
+
+    [Fact]
+    public void Docs_deploy_workflow_is_callable_only()
+    {
+        var repoRoot = FindRepoRoot();
+        var docsWorkflowPath = Path.Combine(repoRoot, ".github", "workflows", "docs-deploy.yml");
+        AssertFileExists(docsWorkflowPath, DocsWorkflowCallableOnly);
+
+        var docsWorkflow = File.ReadAllText(docsWorkflowPath);
+        AssertSourceContains(docsWorkflow, "workflow_call", DocsWorkflowCallableOnly, docsWorkflowPath);
+        Assert.DoesNotContain("push:", docsWorkflow, StringComparison.Ordinal);
     }
 
     private static string ReadCombinedBuildSource(string repoRoot)

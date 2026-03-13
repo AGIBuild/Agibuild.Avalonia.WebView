@@ -58,7 +58,7 @@ partial class BuildTask
 
     Target Pack => _ => _
         .Description("Creates all NuGet packages: main library and sub-packages (Core, Bridge.Generator, etc.).")
-        .DependsOn(Build)
+        .DependsOn(Build, Coverage, AutomationLaneReport)
         .Produces(PackageOutputDirectory / "*.nupkg")
         .Executes(() =>
         {

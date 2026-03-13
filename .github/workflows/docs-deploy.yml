@@ -1,13 +1,7 @@
 name: Deploy Documentation
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'docs/**'
-      - 'src/**/*.cs'
-      - 'src/**/*.csproj'
-      - '.github/workflows/docs-deploy.yml'
+  workflow_call:
   workflow_dispatch:
 
 permissions:

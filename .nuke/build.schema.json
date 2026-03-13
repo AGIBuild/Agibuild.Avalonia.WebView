@@ -67,6 +67,7 @@
         "Test",
         "TypeScriptDeclarationGovernance",
         "UnitTests",
+        "UpdateVersion",
         "ValidatePackage",
         "WarningGovernance",
         "WarningGovernanceSyntheticCheck"
@@ -202,6 +203,10 @@
         "PackageVersion": {
           "type": "string",
           "description": "NuGet package version override for pack/publish targets"
+        },
+        "UpdateVersionTo": {
+          "type": "string",
+          "description": "Target version to set (X.Y.Z format). If omitted, patch is auto-incremented"
         },
         "WarningGovernanceInput": {
           "type": "string",

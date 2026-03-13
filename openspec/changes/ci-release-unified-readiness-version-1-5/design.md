@@ -61,11 +61,37 @@ It also aligns with `G4` by enforcing machine-checkable, single-contract release
   - Keep MinVer as local fallback only: rejected because it still allows non-governed version paths.
   - Keep MinVer but always force `MinVerSkip=true`: rejected because dead fallback logic still adds maintenance/diagnostic complexity.
 
-### Decision 5: `create-tag.yml` is no longer release version authority
-- **Choice**: Decommission `create-tag.yml` as the workflow that decides package version.
-- **Why**: Version authority moves to CI manifest + shared baseline; tags become optional traceability metadata only.
+### Decision 5: `create-tag.yml` is deleted; tags created in release stage
+- **Choice**: Delete `create-tag.yml` entirely. Tag creation (`vX.Y.Z.<run_number>`) and GitHub Release creation move into the unified workflow's release stage after approval.
+- **Why**: Version authority is CI manifest + shared baseline; tags are release traceability artifacts, not version computation inputs.
 - **Alternatives considered**:
   - Keep `create-tag.yml` for version bump and release trigger: rejected due to dual-authority conflict.
+  - Keep `create-tag.yml` as metadata-only: rejected because it confuses operators about where tags originate.
+
+### Decision 6: `nuke UpdateVersion` for manual baseline management
+- **Choice**: Provide a Nuke `UpdateVersion` target that modifies `Directory.Build.props` `<VersionPrefix>`. Without arguments it auto-increments patch; with a `--update-version-to X.Y.Z` argument it validates `newVersion > currentVersion` before writing.
+- **Why**: Developers need a governed, auditable way to bump baseline version without editing XML manually.
+- **Alternatives considered**:
+  - Shell script: rejected for lack of cross-platform support and version comparison logic.
+  - CI-side auto-bump: rejected because version bumps should be explicit developer decisions.
+
+### Decision 7: Pack depends on test completion (test-before-pack)
+- **Choice**: `Pack` target adds `DependsOn(Coverage, AutomationLaneReport)` so packaging only happens after all tests pass.
+- **Why**: Prevents producing artifacts from untested code; aligns with "CI passed -> artifact is safe" principle.
+- **Alternatives considered**:
+  - Keep Pack parallel with tests: rejected because it produces potentially broken artifacts.
+
+### Decision 8: Release stage includes docs, tag, and GitHub Release
+- **Choice**: After approval, the release job executes NuGet publish, npm publish, documentation deployment (via `workflow_call` to `docs-deploy.yml`), tag creation, and GitHub Release creation — all in one run.
+- **Why**: Consolidates all release side-effects behind a single approval gate, ensuring atomic release semantics.
+- **Alternatives considered**:
+  - Separate docs workflow triggered by push: rejected because docs could deploy without package release.
+
+### Decision 9: Release environment must have required reviewers
+- **Choice**: The `release` GitHub environment MUST have non-empty `protection_rules` with `required_reviewers`. Governance tests validate this contract.
+- **Why**: `environment: release` without protection rules is a no-op that silently bypasses approval.
+- **Alternatives considered**:
+  - Trust workflow-level `if` conditions: rejected because they can be overridden by admins or forks.
 
 ## Risks / Trade-offs
 
@@ -81,10 +107,13 @@ It also aligns with `G4` by enforcing machine-checkable, single-contract release
 2. Introduce repository-level version baseline `1.5` and CI version computation contract.
 3. Remove MinVer package/configuration from active projects and build orchestration.
 4. Emit immutable CI artifact bundle + version/provenance manifest.
-5. Configure protected environment manual approval as the release boundary.
-6. Make release stage "download + verify + publish" only.
-7. Remove `create-tag.yml` from release authority path.
-8. Enforce governance invariants and CI tests for readiness/version parity.
+5. Configure protected environment manual approval as the release boundary with required reviewers.
+6. Make release stage "download + verify + publish + docs + tag + GitHub Release" only.
+7. Delete `create-tag.yml` entirely.
+8. Convert `docs-deploy.yml` to `workflow_call` entry, remove independent push trigger.
+9. Add `nuke UpdateVersion` target for manual version baseline management.
+10. Enforce `Pack` depends on `Coverage` + `AutomationLaneReport` (test-before-pack).
+11. Enforce governance invariants and CI tests for readiness/version parity, release completeness, and environment protection.
 
 ## Rollback Plan
 

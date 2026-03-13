@@ -42,4 +42,7 @@ public static class GovernanceInvariantIds
     public const string ReleaseEvidenceReadinessSections = "GOV-034";
     public const string BridgeSingleEntryAppLayerPolicy = "GOV-035";
     public const string SampleTemplatePackageReferencePolicy = "GOV-036";
+    public const string TestBeforePackOrdering = "GOV-037";
+    public const string VersionManagementTarget = "GOV-038";
+    public const string DocsWorkflowCallableOnly = "GOV-039";
 }

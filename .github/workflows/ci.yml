@@ -305,6 +305,10 @@ jobs:
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -390,3 +394,26 @@ jobs:
           npm publish "${tgz_files[0]}" --access public --tag preview
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create Git tag and GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TAG="v${{ needs.version.outputs.package_version }}"
+          COMMIT="${{ needs.version.outputs.commit_sha }}"
+          echo "Creating tag ${TAG} at ${COMMIT}"
+          gh release create "${TAG}" \
+            --title "${TAG}" \
+            --generate-notes \
+            --target "${COMMIT}"
+
+  deploy-docs:
+    name: Deploy Documentation
+    needs: release
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/docs-deploy.yml

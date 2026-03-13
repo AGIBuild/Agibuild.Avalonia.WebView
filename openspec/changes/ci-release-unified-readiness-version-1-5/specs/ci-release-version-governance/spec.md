@@ -63,3 +63,56 @@ Tag automation (including `create-tag.yml`) SHALL NOT be the authority that comp
 - **WHEN** a release publish action starts
 - **THEN** publish version is sourced from CI-generated manifest and shared baseline logic
 - **AND** tag metadata, if present, is treated as traceability metadata rather than version computation input
+
+### Requirement: `create-tag.yml` SHALL be deleted
+The standalone `create-tag.yml` workflow SHALL be removed from the repository. Tag creation moves into the release stage of the unified workflow.
+
+#### Scenario: Standalone tag workflow is absent
+- **WHEN** workflow files are evaluated
+- **THEN** no `create-tag.yml` file exists in `.github/workflows/`
+
+### Requirement: Pack SHALL depend on test completion
+The `Pack` build target SHALL depend on all test targets (`Coverage`, `AutomationLaneReport`) completing successfully before packaging can execute.
+
+#### Scenario: Test-before-pack ordering is enforced
+- **WHEN** the build target dependency graph is evaluated
+- **THEN** `Pack` has transitive dependencies on `Coverage` and `AutomationLaneReport`
+- **AND** `Pack` cannot execute until both test targets have completed successfully
+
+### Requirement: UpdateVersion command SHALL manage version baseline
+A Nuke `UpdateVersion` target SHALL exist to modify the `VersionPrefix` in `Directory.Build.props`. Without version argument, it auto-increments patch. With `--update-version-to X.Y.Z`, it validates the new version is strictly greater than current before writing.
+
+#### Scenario: Auto-increment patch version
+- **WHEN** `UpdateVersion` is invoked without `--update-version-to`
+- **THEN** current `VersionPrefix` patch component is incremented by 1
+- **AND** updated `VersionPrefix` is written back to `Directory.Build.props`
+
+#### Scenario: Explicit version update with valid version
+- **WHEN** `UpdateVersion` is invoked with `--update-version-to 2.0.0` and current version is `1.5.0`
+- **THEN** `VersionPrefix` is updated to `2.0.0`
+
+#### Scenario: Explicit version update with invalid version
+- **WHEN** `UpdateVersion` is invoked with `--update-version-to 1.4.0` and current version is `1.5.0`
+- **THEN** build fails with error indicating new version must be strictly greater than current
+
+### Requirement: Release stage SHALL include documentation deployment
+After manual approval, the release stage SHALL deploy documentation as part of the release process, either by calling `docs-deploy.yml` via `workflow_call` or inline steps.
+
+#### Scenario: Documentation deploys in release
+- **WHEN** release stage executes after approval
+- **THEN** documentation is built and deployed to GitHub Pages
+
+### Requirement: Release stage SHALL create Git tag and GitHub Release
+After package publishing, the release stage SHALL create a Git tag (`vX.Y.Z.<run_number>`) and a GitHub Release associated with that tag.
+
+#### Scenario: Tag and release are created
+- **WHEN** package publishing completes successfully in the release stage
+- **THEN** a Git tag `v{package_version}` is created targeting the CI commit SHA
+- **AND** a GitHub Release is created with auto-generated release notes
+
+### Requirement: Release environment SHALL have required reviewers
+The `release` GitHub environment MUST have non-empty `protection_rules` containing `required_reviewers`. An environment binding without protection rules is insufficient.
+
+#### Scenario: Environment protection is configured
+- **WHEN** the `release` environment configuration is queried via GitHub API
+- **THEN** `protection_rules` contains at least one entry with non-empty `reviewers`
