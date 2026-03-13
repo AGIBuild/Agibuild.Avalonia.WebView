@@ -2,6 +2,12 @@
   <PropertyGroup>
     <!-- Suppress experimental-API diagnostics for placeholder types defined in this solution. -->
     <NoWarn>$(NoWarn);AGWV001;AGWV002;AGWV003;AGWV004;AGWV005</NoWarn>
+    <!--
+      NU5104: stable packages with prerelease dependencies.
+      Temporary: .NET 10, Avalonia 12, and WebView2 are all in preview.
+      Remove once upstream dependencies publish stable releases.
+    -->
+    <NoWarn>$(NoWarn);NU5104</NoWarn>
 
     <!--
       Allow building iOS targets when the installed Xcode is a compatible
