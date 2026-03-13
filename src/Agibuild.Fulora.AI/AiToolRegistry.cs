@@ -11,8 +11,10 @@ public sealed class AiToolRegistry : IAiToolRegistry
 {
     private readonly Dictionary<string, AIFunction> _tools = new(StringComparer.OrdinalIgnoreCase);
 
+    /// <inheritdoc />
     public IReadOnlyList<AIFunction> Tools => [.. _tools.Values];
 
+    /// <inheritdoc />
     public void Register(object instance)
     {
         ArgumentNullException.ThrowIfNull(instance);
@@ -41,6 +43,7 @@ public sealed class AiToolRegistry : IAiToolRegistry
         }
     }
 
+    /// <inheritdoc />
     public AIFunction? FindTool(string name) =>
         _tools.GetValueOrDefault(name);
 

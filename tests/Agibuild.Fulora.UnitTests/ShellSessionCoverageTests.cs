@@ -540,7 +540,7 @@ public sealed partial class ShellExperienceBranchCoverageTests
         {
             Items =
             [
-                new WebViewMenuItemModel { Id = null, Label = "NullId", IsEnabled = true },
+                new WebViewMenuItemModel { Id = null!, Label = "NullId", IsEnabled = true },
                 new WebViewMenuItemModel { Id = "valid", Label = "Valid", IsEnabled = true }
             ]
         };

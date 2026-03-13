@@ -21,6 +21,7 @@ public sealed class MeteringChatClient : IChatClient
     private long _periodTokensUsed;
     private DateTime _periodStart;
 
+    /// <summary>Initializes a new instance.</summary>
     public MeteringChatClient(IChatClient inner, AiMeteringOptions options, IBridgeTracer? tracer = null)
     {
         ArgumentNullException.ThrowIfNull(inner);
@@ -34,6 +35,7 @@ public sealed class MeteringChatClient : IChatClient
     /// <summary>Total tokens consumed in the current period.</summary>
     public long PeriodTokensUsed => _periodTokensUsed;
 
+    /// <inheritdoc />
     public async Task<ChatResponse> GetResponseAsync(
         IEnumerable<ChatMessage> messages,
         ChatOptions? options = null,
@@ -46,6 +48,7 @@ public sealed class MeteringChatClient : IChatClient
         return response;
     }
 
+    /// <inheritdoc />
     public async IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponseAsync(
         IEnumerable<ChatMessage> messages,
         ChatOptions? options = null,
@@ -64,6 +67,7 @@ public sealed class MeteringChatClient : IChatClient
         }
     }
 
+    /// <inheritdoc />
     public object? GetService(Type serviceType, object? serviceKey = null)
     {
         if (serviceType == typeof(MeteringChatClient))
@@ -71,6 +75,7 @@ public sealed class MeteringChatClient : IChatClient
         return _inner.GetService(serviceType, serviceKey);
     }
 
+    /// <inheritdoc />
     public void Dispose() => _inner.Dispose();
 
     private void ProcessUsage(UsageDetails? usage, string? modelId)

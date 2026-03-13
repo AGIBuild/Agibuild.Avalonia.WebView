@@ -12,6 +12,7 @@ public sealed class AiPayloadRouter
     private readonly IAiPayloadStore _store;
     private readonly int _thresholdBytes;
 
+    /// <summary>Initializes a new instance.</summary>
     public AiPayloadRouter(IAiPayloadStore store, int thresholdBytes = DefaultThresholdBytes)
     {
         ArgumentNullException.ThrowIfNull(store);

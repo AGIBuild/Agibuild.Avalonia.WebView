@@ -15,12 +15,16 @@ using IPlatformHandle = global::Avalonia.Platform.IPlatformHandle;
 
 namespace Agibuild.Fulora.Integration.Tests.ViewModels;
 
+/// <summary>Auto-run mode for WebView2 smoke tests.</summary>
 public enum WebView2AutoRunMode
 {
+    /// <summary>Standard smoke test run.</summary>
     Smoke = 0,
+    /// <summary>Teardown stress test run.</summary>
     TeardownStress = 1
 }
 
+/// <summary>ViewModel for WebView2 smoke and teardown stress tests.</summary>
 public partial class WebView2SmokeViewModel : ViewModelBase, IWebViewAdapterHost
 {
     private readonly ConcurrentDictionary<Guid, Guid> _navigationIdByCorrelation = new();
@@ -36,6 +40,7 @@ public partial class WebView2SmokeViewModel : ViewModelBase, IWebViewAdapterHost
     private int _runAllInProgress;
     private readonly Action<string>? _logSink;
 
+    /// <summary>Creates a new instance with optional log sink.</summary>
     public WebView2SmokeViewModel(Action<string>? logSink = null)
     {
         _logSink = logSink;
@@ -43,16 +48,22 @@ public partial class WebView2SmokeViewModel : ViewModelBase, IWebViewAdapterHost
         Status = "Not started.";
     }
 
+    /// <summary>Channel identifier for WebView messaging.</summary>
     public Guid ChannelId { get; }
 
+    /// <summary>Whether to auto-run tests when host handle is set.</summary>
     public bool AutoRun { get; set; }
 
+    /// <summary>Auto-run mode: smoke or teardown stress.</summary>
     public WebView2AutoRunMode AutoRunMode { get; set; } = WebView2AutoRunMode.Smoke;
 
+    /// <summary>Number of teardown stress iterations.</summary>
     public int TeardownStressIterations { get; set; } = 10;
 
+    /// <summary>Raised when auto-run completes with exit code.</summary>
     public event Action<int>? AutoRunCompleted;
 
+    /// <summary>Current status text.</summary>
     [ObservableProperty]
     private string _status = string.Empty;
 
@@ -590,6 +601,7 @@ public partial class WebView2SmokeViewModel : ViewModelBase, IWebViewAdapterHost
 
     // ==================== Host interface ====================
 
+    /// <summary>Sets the native host handle and optionally starts auto-run.</summary>
     public void SetHostHandle(IPlatformHandle handle)
     {
         _hostHandle = new AvaloniaNativeHandleAdapter(handle);
@@ -603,12 +615,14 @@ public partial class WebView2SmokeViewModel : ViewModelBase, IWebViewAdapterHost
         }
     }
 
+    /// <summary>Detaches the WebView adapter.</summary>
     public void Detach()
     {
         _adapter?.Detach();
         _adapter = null;
     }
 
+    /// <inheritdoc />
     ValueTask<NativeNavigationStartingDecision> IWebViewAdapterHost.OnNativeNavigationStartingAsync(NativeNavigationStartingInfo info)
     {
         _nativeStarts.Enqueue(info);
@@ -747,13 +761,16 @@ public partial class WebView2SmokeViewModel : ViewModelBase, IWebViewAdapterHost
     {
         private readonly IPlatformHandle _inner;
 
+        /// <summary>Wraps an Avalonia platform handle as INativeHandle.</summary>
         public AvaloniaNativeHandleAdapter(IPlatformHandle inner)
         {
             _inner = inner;
         }
 
+        /// <inheritdoc />
         public nint Handle => _inner.Handle;
-        public string HandleDescriptor => _inner.HandleDescriptor;
+        /// <inheritdoc />
+        public string HandleDescriptor => _inner.HandleDescriptor ?? string.Empty;
     }
 
     // ==================== Embedded loopback HTTP server ====================
@@ -764,6 +781,7 @@ public partial class WebView2SmokeViewModel : ViewModelBase, IWebViewAdapterHost
         private readonly CancellationTokenSource _cts = new();
         private readonly Task _loop;
 
+        /// <summary>Creates a loopback HTTP server on an ephemeral port.</summary>
         public LoopbackHttpServer()
         {
             _listener = new TcpListener(IPAddress.Loopback, port: 0);
@@ -773,8 +791,10 @@ public partial class WebView2SmokeViewModel : ViewModelBase, IWebViewAdapterHost
             _loop = Task.Run(AcceptLoopAsync);
         }
 
+        /// <summary>Base URI of the loopback server.</summary>
         public Uri BaseUri { get; }
 
+        /// <inheritdoc />
         public void Dispose()
         {
             _cts.Cancel();

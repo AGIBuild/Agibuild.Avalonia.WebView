@@ -10,7 +10,7 @@ namespace Agibuild.Fulora.Plugin.Biometric;
 public sealed class InMemoryBiometricProvider(bool IsAvailable, bool ShouldSucceed, string BiometricType = "test")
     : IBiometricPlatformProvider
 {
-    /// <summary>Checks availability based on configured <see cref="IsAvailable"/>.</summary>
+    /// <summary>Checks availability based on configured availability setting.</summary>
     public Task<BiometricAvailability> CheckAvailabilityAsync(CancellationToken ct = default)
     {
         return Task.FromResult(new BiometricAvailability(
@@ -19,7 +19,7 @@ public sealed class InMemoryBiometricProvider(bool IsAvailable, bool ShouldSucce
             IsAvailable ? null : "not_available"));
     }
 
-    /// <summary>Returns success or failure based on configured <see cref="ShouldSucceed"/>.</summary>
+    /// <summary>Returns success or failure based on configured success setting.</summary>
     public Task<BiometricResult> AuthenticateAsync(string reason, CancellationToken ct = default)
     {
         if (!IsAvailable)

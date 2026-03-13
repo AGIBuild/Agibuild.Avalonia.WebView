@@ -12,6 +12,7 @@ public sealed class ContentGateChatClient : IChatClient
     private readonly IChatClient _inner;
     private readonly IReadOnlyList<IAiContentFilter> _filters;
 
+    /// <summary>Initializes a new instance.</summary>
     public ContentGateChatClient(IChatClient inner, IEnumerable<IAiContentFilter> filters)
     {
         ArgumentNullException.ThrowIfNull(inner);
@@ -20,6 +21,7 @@ public sealed class ContentGateChatClient : IChatClient
         _filters = filters.ToList().AsReadOnly();
     }
 
+    /// <inheritdoc />
     public async Task<ChatResponse> GetResponseAsync(
         IEnumerable<ChatMessage> messages,
         ChatOptions? options = null,
@@ -32,6 +34,7 @@ public sealed class ContentGateChatClient : IChatClient
         return await FilterOutputAsync(response, cancellationToken);
     }
 
+    /// <inheritdoc />
     public async IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponseAsync(
         IEnumerable<ChatMessage> messages,
         ChatOptions? options = null,
@@ -47,6 +50,7 @@ public sealed class ContentGateChatClient : IChatClient
         }
     }
 
+    /// <inheritdoc />
     public object? GetService(Type serviceType, object? serviceKey = null)
     {
         if (serviceType == typeof(ContentGateChatClient))
@@ -54,6 +58,7 @@ public sealed class ContentGateChatClient : IChatClient
         return _inner.GetService(serviceType, serviceKey);
     }
 
+    /// <inheritdoc />
     public void Dispose() => _inner.Dispose();
 
     private async Task<IList<ChatMessage>> FilterInputAsync(

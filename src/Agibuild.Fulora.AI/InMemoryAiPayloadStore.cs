@@ -13,11 +13,13 @@ public sealed class InMemoryAiPayloadStore : IAiPayloadStore, IDisposable
     private readonly ConcurrentDictionary<string, BlobEntry> _store = new();
     private readonly Timer _evictionTimer;
 
+    /// <summary>Initializes a new instance.</summary>
     public InMemoryAiPayloadStore()
     {
         _evictionTimer = new Timer(_ => EvictExpired(), null, TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(1));
     }
 
+    /// <inheritdoc />
     public string Store(AiMediaPayload payload, TimeSpan? ttl = null)
     {
         ArgumentNullException.ThrowIfNull(payload);
@@ -27,6 +29,7 @@ public sealed class InMemoryAiPayloadStore : IAiPayloadStore, IDisposable
         return id;
     }
 
+    /// <inheritdoc />
     public AiMediaPayload? Fetch(string blobId)
     {
         if (!_store.TryGetValue(blobId, out var entry))
@@ -41,8 +44,10 @@ public sealed class InMemoryAiPayloadStore : IAiPayloadStore, IDisposable
         return entry.Payload;
     }
 
+    /// <inheritdoc />
     public bool Remove(string blobId) => _store.TryRemove(blobId, out _);
 
+    /// <inheritdoc />
     public int EvictExpired()
     {
         var now = DateTime.UtcNow;
@@ -55,6 +60,7 @@ public sealed class InMemoryAiPayloadStore : IAiPayloadStore, IDisposable
         return evicted;
     }
 
+    /// <inheritdoc />
     public void Dispose() => _evictionTimer.Dispose();
 
     private sealed record BlobEntry(AiMediaPayload Payload, DateTime ExpiresAt);

@@ -15,7 +15,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
     <!-- Unified repository version baseline (source of truth for CI version derivation) -->
-    <VersionPrefix>1.5.0</VersionPrefix>
+    <VersionPrefix>1.5.1</VersionPrefix>
 
     <!-- Shared NuGet package metadata -->
     <Authors>Agibuild</Authors>

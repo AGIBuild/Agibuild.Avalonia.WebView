@@ -804,7 +804,8 @@ public sealed class AutomationLaneGovernanceTests
         var props = File.ReadAllText(directoryBuildPropsPath);
         AssertSourceContains(props, "<PackageLicenseExpression>", PackageMetadata, directoryBuildPropsPath);
         AssertSourceContains(props, "<PackageProjectUrl>", PackageMetadata, directoryBuildPropsPath);
-        AssertSourceContains(props, "<VersionPrefix>1.5.0</VersionPrefix>", PackageMetadata, directoryBuildPropsPath);
+        AssertSourceContains(props, "<VersionPrefix>", PackageMetadata, directoryBuildPropsPath);
+        Assert.Matches(@"<VersionPrefix>\d+\.\d+\.\d+</VersionPrefix>", props);
 
         var mainCsprojPath = Path.Combine(repoRoot, "src", "Agibuild.Fulora.Avalonia", "Agibuild.Fulora.Avalonia.csproj");
         AssertFileExists(mainCsprojPath, PackageMetadata);

@@ -18,6 +18,7 @@ public sealed class ResilientChatClient : IChatClient
     private readonly IChatClient _inner;
     private readonly ResiliencePipeline _pipeline;
 
+    /// <summary>Initializes a new instance.</summary>
     public ResilientChatClient(IChatClient inner, AiResilienceOptions options)
     {
         ArgumentNullException.ThrowIfNull(inner);
@@ -26,6 +27,7 @@ public sealed class ResilientChatClient : IChatClient
         _pipeline = BuildPipeline(options);
     }
 
+    /// <inheritdoc />
     public async Task<ChatResponse> GetResponseAsync(
         IEnumerable<ChatMessage> messages,
         ChatOptions? options = null,
@@ -36,6 +38,7 @@ public sealed class ResilientChatClient : IChatClient
             cancellationToken);
     }
 
+    /// <inheritdoc />
     public async IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponseAsync(
         IEnumerable<ChatMessage> messages,
         ChatOptions? options = null,
@@ -57,6 +60,7 @@ public sealed class ResilientChatClient : IChatClient
         }
     }
 
+    /// <inheritdoc />
     public object? GetService(Type serviceType, object? serviceKey = null)
     {
         if (serviceType == typeof(ResilientChatClient))
@@ -64,6 +68,7 @@ public sealed class ResilientChatClient : IChatClient
         return _inner.GetService(serviceType, serviceKey);
     }
 
+    /// <inheritdoc />
     public void Dispose() => _inner.Dispose();
 
     private static ResiliencePipeline BuildPipeline(AiResilienceOptions opts)

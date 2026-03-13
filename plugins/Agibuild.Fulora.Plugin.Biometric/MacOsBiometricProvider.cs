@@ -10,6 +10,7 @@ namespace Agibuild.Fulora.Plugin.Biometric;
 [SupportedOSPlatform("macos")]
 public sealed class MacOsBiometricProvider : IBiometricPlatformProvider
 {
+    /// <inheritdoc />
     public Task<BiometricAvailability> CheckAvailabilityAsync(CancellationToken ct = default)
     {
         if (!OperatingSystem.IsMacOS())
@@ -42,6 +43,7 @@ public sealed class MacOsBiometricProvider : IBiometricPlatformProvider
         }
     }
 
+    /// <inheritdoc />
     public Task<BiometricResult> AuthenticateAsync(string reason, CancellationToken ct = default)
     {
         if (!OperatingSystem.IsMacOS())

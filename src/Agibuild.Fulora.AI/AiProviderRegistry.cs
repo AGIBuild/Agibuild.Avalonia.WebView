@@ -13,9 +13,13 @@ public sealed class AiProviderRegistry : IAiProviderRegistry
     private string? _defaultChatClientName;
     private string? _defaultEmbeddingGeneratorName;
 
+    /// <inheritdoc />
     public IReadOnlyList<string> ChatClientNames => [.. _chatClients.Keys];
+
+    /// <inheritdoc />
     public IReadOnlyList<string> EmbeddingGeneratorNames => [.. _embeddingGenerators.Keys];
 
+    /// <summary>Registers a chat client by name.</summary>
     public void RegisterChatClient(string name, IChatClient client)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
@@ -24,6 +28,7 @@ public sealed class AiProviderRegistry : IAiProviderRegistry
         _defaultChatClientName ??= name;
     }
 
+    /// <summary>Registers an embedding generator by name.</summary>
     public void RegisterEmbeddingGenerator(string name, IEmbeddingGenerator<string, Embedding<float>> generator)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
@@ -32,6 +37,7 @@ public sealed class AiProviderRegistry : IAiProviderRegistry
         _defaultEmbeddingGeneratorName ??= name;
     }
 
+    /// <inheritdoc />
     public IChatClient GetChatClient(string? name = null)
     {
         var key = name ?? _defaultChatClientName
@@ -43,6 +49,7 @@ public sealed class AiProviderRegistry : IAiProviderRegistry
         return client;
     }
 
+    /// <inheritdoc />
     public IEmbeddingGenerator<string, Embedding<float>> GetEmbeddingGenerator(string? name = null)
     {
         var key = name ?? _defaultEmbeddingGeneratorName

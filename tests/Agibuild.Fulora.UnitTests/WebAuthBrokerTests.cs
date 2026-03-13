@@ -301,6 +301,7 @@ public sealed class WebAuthBrokerTests
         public bool Move(int x, int y) => true;
         public void Dispose() { }
 
+#pragma warning disable CS0067 // Interface-required events not raised in test stub
         public event EventHandler? Closing;
         public event EventHandler<NavigationStartingEventArgs>? NavigationStarted;
         public event EventHandler<NavigationCompletedEventArgs>? NavigationCompleted;
@@ -313,6 +314,7 @@ public sealed class WebAuthBrokerTests
         public event EventHandler<AdapterCreatedEventArgs>? AdapterCreated;
         public event EventHandler? AdapterDestroyed;
         public event EventHandler<ContextMenuRequestedEventArgs>? ContextMenuRequested;
+#pragma warning restore CS0067
     }
 
     private sealed class InlineTrackingSynchronizationContext : SynchronizationContext

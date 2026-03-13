@@ -14,6 +14,7 @@ using IPlatformHandle = global::Avalonia.Platform.IPlatformHandle;
 
 namespace Agibuild.Fulora.Integration.Tests.ViewModels;
 
+/// <summary>ViewModel for WKWebView smoke tests.</summary>
 public partial class WkWebViewSmokeViewModel : ViewModelBase, IWebViewAdapterHost
 {
     private readonly ConcurrentDictionary<Guid, Guid> _navigationIdByCorrelation = new();
@@ -29,6 +30,7 @@ public partial class WkWebViewSmokeViewModel : ViewModelBase, IWebViewAdapterHos
     private int _runAllInProgress;
     private readonly Action<string>? _logSink;
 
+    /// <summary>Creates a new instance with optional log sink.</summary>
     public WkWebViewSmokeViewModel(Action<string>? logSink = null)
     {
         _logSink = logSink;
@@ -36,12 +38,16 @@ public partial class WkWebViewSmokeViewModel : ViewModelBase, IWebViewAdapterHos
         Status = "Not started.";
     }
 
+    /// <summary>Channel identifier for WebView messaging.</summary>
     public Guid ChannelId { get; }
 
+    /// <summary>Whether to auto-run tests when host handle is set.</summary>
     public bool AutoRun { get; set; }
 
+    /// <summary>Raised when auto-run completes with exit code.</summary>
     public event Action<int>? AutoRunCompleted;
 
+    /// <summary>Current status text.</summary>
     [ObservableProperty]
     private string _status = string.Empty;
 
@@ -270,6 +276,7 @@ public partial class WkWebViewSmokeViewModel : ViewModelBase, IWebViewAdapterHos
         }
     }
 
+    /// <summary>Sets the native host handle and optionally starts auto-run.</summary>
     public void SetHostHandle(IPlatformHandle handle)
     {
         _hostHandle = new AvaloniaNativeHandleAdapter(handle);
@@ -281,12 +288,14 @@ public partial class WkWebViewSmokeViewModel : ViewModelBase, IWebViewAdapterHos
         }
     }
 
+    /// <summary>Detaches the WebView adapter.</summary>
     public void Detach()
     {
         _adapter?.Detach();
         _adapter = null;
     }
 
+    /// <inheritdoc />
     ValueTask<NativeNavigationStartingDecision> IWebViewAdapterHost.OnNativeNavigationStartingAsync(NativeNavigationStartingInfo info)
     {
         _nativeStarts.Enqueue(info);
@@ -423,13 +432,16 @@ public partial class WkWebViewSmokeViewModel : ViewModelBase, IWebViewAdapterHos
     {
         private readonly IPlatformHandle _inner;
 
+        /// <summary>Wraps an Avalonia platform handle as INativeHandle.</summary>
         public AvaloniaNativeHandleAdapter(IPlatformHandle inner)
         {
             _inner = inner;
         }
 
+        /// <inheritdoc />
         public nint Handle => _inner.Handle;
-        public string HandleDescriptor => _inner.HandleDescriptor;
+        /// <inheritdoc />
+        public string HandleDescriptor => _inner.HandleDescriptor ?? string.Empty;
     }
 
     private sealed class LoopbackHttpServer : IDisposable
@@ -438,6 +450,7 @@ public partial class WkWebViewSmokeViewModel : ViewModelBase, IWebViewAdapterHos
         private readonly CancellationTokenSource _cts = new();
         private readonly Task _loop;
 
+        /// <summary>Creates a loopback HTTP server on an ephemeral port.</summary>
         public LoopbackHttpServer()
         {
             _listener = new TcpListener(IPAddress.Loopback, port: 0);
@@ -447,8 +460,10 @@ public partial class WkWebViewSmokeViewModel : ViewModelBase, IWebViewAdapterHos
             _loop = Task.Run(AcceptLoopAsync);
         }
 
+        /// <summary>Base URI of the loopback server.</summary>
         public Uri BaseUri { get; }
 
+        /// <inheritdoc />
         public void Dispose()
         {
             _cts.Cancel();

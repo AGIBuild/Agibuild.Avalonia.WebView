@@ -16,6 +16,7 @@ public sealed class AiBridgeService : IAiBridgeService
     private readonly IAiConversationManager _conversationManager;
     private readonly AiToolCallingOptions? _toolCallingOptions;
 
+    /// <summary>Initializes a new instance.</summary>
     public AiBridgeService(
         IAiProviderRegistry providers,
         IAiPayloadStore payloadStore,
@@ -30,6 +31,7 @@ public sealed class AiBridgeService : IAiBridgeService
         _toolCallingOptions = toolCallingOptions;
     }
 
+    /// <inheritdoc />
     public async Task<AiChatResult> Complete(AiChatRequest request)
     {
         var client = _providers.GetChatClient(request.Provider);
@@ -39,6 +41,7 @@ public sealed class AiBridgeService : IAiBridgeService
         return ToResult(response);
     }
 
+    /// <inheritdoc />
     public async Task<string> CompleteTyped(AiTypedChatRequest request)
     {
         var client = _providers.GetChatClient(request.Provider);
@@ -54,11 +57,13 @@ public sealed class AiBridgeService : IAiBridgeService
         return response.Text ?? "{}";
     }
 
+    /// <inheritdoc />
     public Task<string[]> ListProviders()
     {
         return Task.FromResult(_providers.ChatClientNames.ToArray());
     }
 
+    /// <inheritdoc />
     public Task<string> UploadBlob(string base64Data, string mimeType, string? name)
     {
         var data = Convert.FromBase64String(base64Data);
@@ -67,6 +72,7 @@ public sealed class AiBridgeService : IAiBridgeService
         return Task.FromResult(blobId);
     }
 
+    /// <inheritdoc />
     public Task<string?> FetchBlob(string blobId)
     {
         var payload = _payloadStore.Fetch(blobId);
@@ -74,6 +80,7 @@ public sealed class AiBridgeService : IAiBridgeService
         return Task.FromResult<string?>(Convert.ToBase64String(payload.Data));
     }
 
+    /// <inheritdoc />
     public async IAsyncEnumerable<string> StreamCompletion(
         AiChatRequest request,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
@@ -89,6 +96,7 @@ public sealed class AiBridgeService : IAiBridgeService
         }
     }
 
+    /// <inheritdoc />
     public async Task<AiChatResult> RunWithTools(AiChatRequest request)
     {
         var client = GetToolCallingClient(request.Provider);
@@ -98,6 +106,7 @@ public sealed class AiBridgeService : IAiBridgeService
         return ToResult(response);
     }
 
+    /// <inheritdoc />
     public async IAsyncEnumerable<string> StreamWithTools(
         AiChatRequest request,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
@@ -113,12 +122,14 @@ public sealed class AiBridgeService : IAiBridgeService
         }
     }
 
+    /// <inheritdoc />
     public Task<string> CreateConversation(AiConversationCreateRequest request)
     {
         var id = _conversationManager.CreateConversation(request.SystemPrompt);
         return Task.FromResult(id);
     }
 
+    /// <inheritdoc />
     public async Task<AiChatResult> SendMessage(AiConversationMessageRequest request)
     {
         _conversationManager.AddMessage(request.ConversationId,
@@ -141,6 +152,7 @@ public sealed class AiBridgeService : IAiBridgeService
         return ToResult(response);
     }
 
+    /// <inheritdoc />
     public async IAsyncEnumerable<string> StreamMessage(
         AiConversationMessageRequest request,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
@@ -171,6 +183,7 @@ public sealed class AiBridgeService : IAiBridgeService
             new ChatMessage(ChatRole.Assistant, fullResponse.ToString()));
     }
 
+    /// <inheritdoc />
     public Task<AiConversationHistory> GetHistory(string conversationId)
     {
         var messages = _conversationManager.GetAllMessages(conversationId);
@@ -186,6 +199,7 @@ public sealed class AiBridgeService : IAiBridgeService
         return Task.FromResult(history);
     }
 
+    /// <inheritdoc />
     public Task DeleteConversation(string conversationId)
     {
         _conversationManager.RemoveConversation(conversationId);

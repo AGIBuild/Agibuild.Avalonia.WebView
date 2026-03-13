@@ -27,6 +27,7 @@ public sealed class AiStructuredOutputException : InvalidOperationException
     /// <summary>The last validation error.</summary>
     public string? ValidationError { get; }
 
+    /// <summary>Initializes a new instance.</summary>
     public AiStructuredOutputException(string message, string? rawResponse, string? validationError)
         : base(message)
     {

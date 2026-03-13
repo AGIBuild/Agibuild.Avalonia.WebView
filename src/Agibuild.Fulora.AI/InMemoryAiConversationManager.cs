@@ -13,6 +13,7 @@ public sealed class InMemoryAiConversationManager : IAiConversationManager, IDis
     private readonly AiConversationOptions _options;
     private readonly Timer? _evictionTimer;
 
+    /// <summary>Initializes a new instance.</summary>
     public InMemoryAiConversationManager(AiConversationOptions? options = null)
     {
         _options = options ?? new AiConversationOptions();
@@ -23,6 +24,7 @@ public sealed class InMemoryAiConversationManager : IAiConversationManager, IDis
         }
     }
 
+    /// <inheritdoc />
     public string CreateConversation(string? systemPrompt = null)
     {
         var id = Guid.NewGuid().ToString("N")[..12];
@@ -31,6 +33,7 @@ public sealed class InMemoryAiConversationManager : IAiConversationManager, IDis
         return id;
     }
 
+    /// <inheritdoc />
     public void AddMessage(string conversationId, ChatMessage message)
     {
         var state = GetState(conversationId);
@@ -41,6 +44,7 @@ public sealed class InMemoryAiConversationManager : IAiConversationManager, IDis
         }
     }
 
+    /// <inheritdoc />
     public IReadOnlyList<ChatMessage> GetMessages(string conversationId, int? maxTokens = null)
     {
         var state = GetState(conversationId);
@@ -53,6 +57,7 @@ public sealed class InMemoryAiConversationManager : IAiConversationManager, IDis
         }
     }
 
+    /// <inheritdoc />
     public IReadOnlyList<ChatMessage> GetAllMessages(string conversationId)
     {
         var state = GetState(conversationId);
@@ -67,6 +72,7 @@ public sealed class InMemoryAiConversationManager : IAiConversationManager, IDis
         }
     }
 
+    /// <inheritdoc />
     public void ClearConversation(string conversationId)
     {
         var state = GetState(conversationId);
@@ -77,17 +83,20 @@ public sealed class InMemoryAiConversationManager : IAiConversationManager, IDis
         }
     }
 
+    /// <inheritdoc />
     public void RemoveConversation(string conversationId)
     {
         if (!_conversations.TryRemove(conversationId, out _))
             throw new KeyNotFoundException($"Conversation '{conversationId}' not found.");
     }
 
+    /// <inheritdoc />
     public IReadOnlyList<string> ListConversations()
     {
         return [.. _conversations.Keys];
     }
 
+    /// <inheritdoc />
     public void Dispose()
     {
         _evictionTimer?.Dispose();
