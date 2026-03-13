@@ -1,71 +1,73 @@
 # Fulora
 
-Web-first product velocity with Avalonia-native performance, control, and security.
+**Ship web apps as native desktop products** — with real OS integration, not just a wrapper.
 
-## Documentation Hub
+Fulora lets you write your UI in React, Vue, or any web framework, then deliver it inside an Avalonia-powered native window with full access to file systems, system APIs, AI models, and more — all through a type-safe C# ↔ JavaScript bridge that generates code at compile time.
 
-This project targets a **framework-grade C# + web development model** while preserving **standalone WebView control integration flexibility**.
-One runtime core supports both paths.
+> One runtime core. Five platforms. Zero reflection.
 
-Use this page as the entry point based on what you want to do next.
+---
 
-## Start Here
+## Why Fulora?
 
-- **Build your first app**: [Getting Started](articles/getting-started.md)
-- **Understand architecture decisions**: [Architecture](articles/architecture.md)
-- **See a real sample experience**: [Demo: Avalonia + React Hybrid App](demo/index.md)
-- **Check product direction and phases**: [Roadmap](../openspec/ROADMAP.md)
-- **Review goals and positioning**: [Project Vision & Goals](../openspec/PROJECT.md)
+Most hybrid frameworks give you a browser in a box. Fulora gives you a **product-grade application shell** where the web frontend and the native host are equal partners:
+
+- Your React component calls `AiChatService.streamCompletion(prompt)` and gets back an `AsyncIterable` of tokens — streamed from a local Ollama model running on the user's machine.
+- Your settings page calls `WindowShellService.updateWindowShellSettings({ theme: 'dark', enableTransparency: true })` and the native window responds instantly with Mica/Acrylic effects.
+- Your file browser calls `FileService.listFiles(path)` and navigates the real file system — something browsers will never allow.
+
+All of this is type-checked at compile time, AOT-safe, and works the same on Windows, macOS, Linux, iOS, and Android.
+
+---
+
+## Start Building
+
+| What you want to do | Where to go |
+|---|---|
+| Build your first hybrid app in 5 minutes | [Getting Started](articles/getting-started.md) |
+| See a full working sample | [Demo: Avalonia + React Hybrid App](demo/index.md) |
+| Build an AI chat app with streaming | [AI Integration Guide](ai-integration-guide.md) |
+| Understand how the runtime works | [Architecture](articles/architecture.md) |
 
 ## Developer Resources
 
-- **[CLI Reference](cli.md)** — `fulora new`, `dev`, `generate types`, `add service`
-- **[Bridge DevTools Panel](bridge-devtools-panel.md)** — In-app debug overlay for bridge call inspection
-- **[Plugin Authoring Guide](plugin-authoring-guide.md)** — Create and publish bridge plugins (NuGet + npm)
-- **[Documentation Site Deployment](docs-site-deploy.md)** — How the docs site is built and deployed
-- **[Release Checklist](release-checklist.md)** — Steps for publishing a new release
+| Resource | Description |
+|---|---|
+| [Bridge Guide](articles/bridge-guide.md) | `[JsExport]`, `[JsImport]`, streaming, cancellation, error handling |
+| [SPA Hosting](articles/spa-hosting.md) | Embedded resources, `app://` scheme, dev server proxy, HMR |
+| [CLI Reference](cli.md) | `fulora new`, `dev`, `generate types`, `add service` |
+| [Plugin Authoring](plugin-authoring-guide.md) | Create bridge plugins that ship as NuGet + npm packages |
+| [Bridge DevTools](bridge-devtools-panel.md) | In-app debug overlay for bridge call inspection |
+| [Native AOT](nativeaot.md) | Trim-safe publishing and AOT compilation guidance |
+| [E2E Testing](hybrid-e2e-testing-guide.md) | End-to-end testing patterns for hybrid apps |
+| [Shipping Your App](shipping-your-app.md) | Packaging, distribution, and auto-update strategies |
 
-## Features
+## Operations
 
-- **Type-Safe Bridge**: `[JsExport]` / `[JsImport]` attributes with Roslyn Source Generator for AOT-compatible C# ↔ JS interop
-- **SPA Hosting**: Embedded resource serving with custom `app://` scheme, SPA router fallback, dev server proxy
-- **Cross-Platform**: Windows (WebView2), macOS/iOS (WKWebView), Android (WebView), Linux (WebKitGTK)
-- **Testable**: `MockBridgeService` for unit testing without a real browser
-- **Secure**: Origin-based policy, rate limiting, protocol versioning
-- **Plugin Ecosystem**: Official plugins for Database (SQLite), HTTP Client, File System, Notifications, Auth Token
-- **OpenTelemetry**: Bridge call spans and metrics export to any OTLP backend
-- **IDE Tooling**: VS Code extension with live bridge call visualization
-- **Bridge Profiler**: Per-service/method P50/P95/P99 latency statistics
-- **Web Worker Bridge**: Type-safe bridge calls from Web Workers via MessagePort relay
-- **HMR Preservation**: Bridge state preserved across hot module replacement reloads
-- **Enhanced Diagnostics**: Rich error codes with actionable hints for bridge call failures
+| Resource | Description |
+|---|---|
+| [Release Checklist](release-checklist.md) | How to publish a new release via the unified CI/Release pipeline |
+| [Documentation Deployment](docs-site-deploy.md) | How the docs site is built and deployed |
 
-## Current Product Objective
+## What's Inside
 
-**Phase 11 (Ecosystem & Developer Experience)** is complete. The framework now includes:
+- **Type-Safe Bridge** — `[JsExport]` / `[JsImport]` attributes with Roslyn source generation. No reflection, no runtime proxies, fully AOT-compatible.
+- **Streaming** — `IAsyncEnumerable<T>` on C# maps to `AsyncIterable` in JavaScript. Stream AI tokens, file contents, or sensor data with backpressure and cancellation.
+- **5 Platforms** — Windows (WebView2), macOS/iOS (WKWebView), Android (WebView), Linux (WebKitGTK). One codebase, native WebView on each OS.
+- **Plugin Ecosystem** — Database (SQLite), HTTP Client, File System, Notifications, Auth Token, Local Storage — ship as paired NuGet + npm packages.
+- **Window Shell** — Theme control, transparency, custom chrome, drag regions — all driven from the web frontend.
+- **OpenTelemetry** — Bridge call spans and metrics export to any OTLP backend. See exactly what crosses the bridge and how long it takes.
+- **HMR Preservation** — Bridge state survives hot module replacement. No more losing connections during frontend development.
 
-- 5 official bridge plugins (Database, HTTP Client, File System, Notifications, Auth Token)
-- Plugin registry discovery via `fulora search/add/list` CLI commands
-- OpenTelemetry provider package (`Agibuild.Fulora.Telemetry.OpenTelemetry`)
-- VS Code bridge extension with WebSocket debug protocol
-- Bridge call profiler with statistical aggregation
-- Web Worker bridge support
-- Full-featured showcase Todo app and interactive playground
-- Tag-driven release automation pipeline for NuGet + npm
-
-**Next**: Phase 12 — Enterprise & Advanced Scenarios (Planned)
-
-## Roadmap Snapshot
+## Roadmap
 
 | Phase | Focus | Status |
 |---|---|---|
-| Phase 0–3 | Foundation, Bridge, SPA, Polish | ✅ Done |
-| Phase 4 | Application Shell | ✅ Done |
-| Phase 5 | Framework Positioning | ✅ Done |
-| Phase 6 | Governance Productization | ✅ Done |
-| Phase 7 | Release Orchestration | ✅ Done |
-| Phase 8 | Bridge V2 & Platform Parity | ✅ Done |
-| Phase 9 | GA Release (1.0.0) | ✅ Done |
-| Phase 10 | Production Operations & Ecosystem | ✅ Done |
-| Phase 11 | Ecosystem & Developer Experience | ✅ Done |
+| Phase 0–3 | Foundation, Bridge, SPA, Polish | Done |
+| Phase 4–6 | Application Shell, Framework Positioning, Governance | Done |
+| Phase 7–8 | Release Orchestration, Bridge V2 & Platform Parity | Done |
+| Phase 9 | GA Release (1.0.0) | Done |
+| Phase 10–11 | Production Operations, Ecosystem & DX | Done |
 | Phase 12 | Enterprise & Advanced Scenarios | Planned |
+
+[Full Roadmap](../openspec/ROADMAP.md) · [Project Vision](../openspec/PROJECT.md)

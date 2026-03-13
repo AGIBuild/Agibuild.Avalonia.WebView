@@ -1,86 +1,72 @@
 # Release Checklist
 
-Step-by-step guide for publishing a new Agibuild.Fulora release (NuGet + npm + GitHub Release).
+Step-by-step guide for publishing a new Agibuild.Fulora release via the unified CI/Release pipeline.
+
+## How Releases Work
+
+Releases are fully automated through the unified `ci.yml` workflow:
+
+1. **Version baseline** is defined in `Directory.Build.props` (`<VersionPrefix>`). Update it with `nuke UpdateVersion` when you want to bump the version.
+2. **Every push to `main`** triggers the CI pipeline, which builds and tests across macOS, Windows, and Linux.
+3. **Package version** is computed as `{VersionPrefix}.{run_number}` — deterministic, monotonic, and no manual tagging required.
+4. **After CI passes**, the Release Promotion job waits for **manual approval** via the `release` GitHub environment.
+5. **After approval**, the pipeline publishes NuGet packages, npm packages, creates a Git tag (`v{version}`), a GitHub Release, and deploys documentation — all in one run.
 
 ## Prerequisites
 
-### GitHub Secrets Configuration
+### GitHub Secrets
 
-| Secret | Environment | Description |
-|--------|-------------|-------------|
-| `NUGET_API_KEY` | `nuget` | NuGet.org API key with push permissions for `Agibuild.Fulora.*` packages |
-| `NPM_TOKEN` | `npm` | npm access token with publish permissions for `@agibuild` scope |
+| Secret | Description |
+|--------|-------------|
+| `NUGET_API_KEY` | NuGet.org API key with push permissions for `Agibuild.Fulora.*` packages |
+| `NPM_TOKEN` | npm access token with publish permissions for `@agibuild` scope |
 
-### Local Verification
+### GitHub Environment
 
-Before creating a release tag, verify locally:
+The `release` environment must have **required reviewers** configured (Settings → Environments → release → Required reviewers).
+
+## Version Management
 
 ```bash
-# Run full test suite
-nuke Test
+# Auto-increment patch (e.g. 1.5.0 → 1.5.1)
+./build.sh --target UpdateVersion
 
-# Run coverage (line ≥ 96%, branch ≥ 95%)
-nuke Coverage
-
-# Pack and validate NuGet packages
-nuke ValidatePackage
-
-# Build npm bridge package
-cd packages/bridge && npm ci && npm run build
+# Set explicit version (must be greater than current)
+./build.sh --target UpdateVersion --update-version-to 2.0.0
 ```
 
-## Creating a Release
+After updating the version, commit the `Directory.Build.props` change and push to `main`. The next CI run will produce packages with the new version baseline.
 
-### 1. Decide the version
-
-- **Stable**: `v1.0.0`, `v1.1.0`, `v2.0.0` (semver, no suffix)
-- **Pre-release**: `v1.1.0-preview`, `v2.0.0-rc.1` (semver with suffix)
-
-MinVer derives the NuGet version from the git tag automatically.
-The npm version is extracted from the tag in CI and set before publish.
-
-### 2. Create and push the tag
+## Local Verification (before pushing)
 
 ```bash
-git tag v1.0.0
-git push origin v1.0.0
+# Run full CI pipeline locally
+./build.sh --target Ci --configuration Release --package-version 1.5.0.999
+
+# Or run individual steps
+./build.sh --target Coverage       # Unit tests + coverage
+./build.sh --target ValidatePackage # Pack + validate NuGet contents
 ```
 
-### 3. Monitor the release workflow
+## Monitoring a Release
 
-The `Release` workflow (`.github/workflows/release.yml`) triggers automatically:
+1. Push to `main` → CI runs automatically
+2. Watch the [Actions tab](https://github.com/AGIBuild/Agibuild.Fulora/actions) for the "CI and Release" workflow
+3. After three platforms pass, click **Review deployments** to approve the release
+4. Release Promotion publishes packages, creates tag + GitHub Release
+5. Deploy Documentation builds and deploys the docfx site
 
-1. **Build job** (macOS): Compiles, runs tests, validates packages
-2. **Publish job** (parallel): Pushes `.nupkg` to NuGet.org
-3. **npm-publish job** (parallel): Publishes `@agibuild/bridge` to npm
-4. **GitHub Release job** (parallel): Creates a GitHub Release with auto-generated notes
-
-### 4. Post-publish verification
+## Post-Release Verification
 
 ```bash
-# Verify core NuGet packages
+# Verify NuGet packages
 dotnet package search Agibuild.Fulora.Avalonia --exact-match
 
-# Verify plugin NuGet packages
-dotnet package search Agibuild.Fulora.Plugin.Database --exact-match
-dotnet package search Agibuild.Fulora.Plugin.HttpClient --exact-match
-dotnet package search Agibuild.Fulora.Plugin.FileSystem --exact-match
-dotnet package search Agibuild.Fulora.Plugin.Notifications --exact-match
-dotnet package search Agibuild.Fulora.Plugin.AuthToken --exact-match
-
-# Verify OpenTelemetry package
-dotnet package search Agibuild.Fulora.Telemetry.OpenTelemetry --exact-match
-
-# Verify npm packages
+# Verify npm package
 npm info @agibuild/bridge
-npm info @agibuild/bridge-plugin-database
-npm info @agibuild/bridge-plugin-http-client
-npm info @agibuild/bridge-plugin-file-system
-npm info @agibuild/bridge-plugin-notifications
-npm info @agibuild/bridge-plugin-auth-token
 
 # Verify GitHub Release
-gh release view v1.0.0
+gh release list --limit 3
 ```
 
 ## Published Packages
@@ -93,32 +79,21 @@ gh release view v1.0.0
 | `Agibuild.Fulora.Runtime` | Runtime implementation |
 | `Agibuild.Fulora.Avalonia` | Avalonia WebView control |
 | `Agibuild.Fulora.Bridge.Generator` | Roslyn source generator |
-| `Agibuild.Fulora.DependencyInjection` | DI integration (`AddFulora()`) |
-| `Agibuild.Fulora.Telemetry.OpenTelemetry` | OpenTelemetry bridge tracer + telemetry provider |
-| `Agibuild.Fulora.Plugin.LocalStorage` | Key-value local storage plugin |
-| `Agibuild.Fulora.Plugin.Database` | SQLite database plugin |
-| `Agibuild.Fulora.Plugin.HttpClient` | Host-routed HTTP client plugin |
-| `Agibuild.Fulora.Plugin.FileSystem` | Sandboxed file system plugin |
-| `Agibuild.Fulora.Plugin.Notifications` | System notifications plugin |
-| `Agibuild.Fulora.Plugin.AuthToken` | Secure token storage plugin |
+| `Agibuild.Fulora.Cli` | CLI tool (`fulora new`, `dev`, `generate`) |
+| `Agibuild.Fulora.Telemetry.OpenTelemetry` | OpenTelemetry bridge tracer |
+| `Agibuild.Fulora.Plugin.*` | Official bridge plugins (Database, HttpClient, FileSystem, Notifications, AuthToken, LocalStorage) |
 
 ### npm Packages
 
 | Package | Description |
 |---|---|
 | `@agibuild/bridge` | Bridge client, HMR preservation, Web Worker relay |
-| `@agibuild/bridge-plugin-local-storage` | LocalStorage typed client |
-| `@agibuild/bridge-plugin-database` | Database typed client |
-| `@agibuild/bridge-plugin-http-client` | HTTP client typed client |
-| `@agibuild/bridge-plugin-file-system` | File system typed client |
-| `@agibuild/bridge-plugin-notifications` | Notifications typed client |
-| `@agibuild/bridge-plugin-auth-token` | Auth token typed client |
 
 ## Troubleshooting
 
 | Issue | Resolution |
 |-------|------------|
-| NuGet push fails with 409 | Package already exists at that version. `--skip-duplicate` handles this. |
-| npm publish fails with 409 | Version already published. The `\|\| true` fallback prevents workflow failure. |
-| npm publish fails with 401 | `NPM_TOKEN` is missing or expired. Regenerate token and update the GitHub secret. |
-| Build job fails | Check test results artifact. Fix issues and re-tag (delete old tag first if needed). |
+| NuGet push fails with 409 | Package already exists. `--skip-duplicate` handles this automatically. |
+| npm publish fails with 401 | `NPM_TOKEN` is missing or expired. Regenerate and update the GitHub secret. |
+| Release job runs without approval | Verify `release` environment has required reviewers configured. |
+| Docs not deploying | Check GitHub Pages source is set to "GitHub Actions" in repo settings. |

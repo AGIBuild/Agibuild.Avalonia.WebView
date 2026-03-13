@@ -1,18 +1,24 @@
 # Documentation Site Deployment
 
-The API reference and guides are built with [docfx](https://dotnet.github.io/docfx/) and deployed automatically to GitHub Pages.
+The API reference and guides are built with [docfx](https://dotnet.github.io/docfx/) and deployed to GitHub Pages as part of the unified CI/Release pipeline.
 
 ## How it works
 
-1. On every push to `main` that touches `docs/**`, `src/**/*.cs`, `src/**/*.csproj`, or the workflow itself, the **Deploy Documentation** workflow runs.
-2. The workflow installs docfx via `dotnet tool restore`, builds the site with `docfx docs/docfx.json`, and deploys `docs/_site` to GitHub Pages using `actions/deploy-pages`.
+Documentation deployment is integrated into the unified `ci.yml` workflow:
+
+1. Code is pushed to `main` and the CI stage builds and tests across three platforms (macOS, Windows, Linux).
+2. After CI passes, the **Release Promotion** job requires manual approval via the `release` GitHub environment.
+3. Once approved, release publishes NuGet/npm packages, creates a Git tag and GitHub Release.
+4. The **Deploy Documentation** job runs after release, building the docfx site and deploying it to GitHub Pages.
+
+This ensures documentation is always in sync with the published release — no docs deploy without a successful release.
 
 ## GitHub Pages setup (one-time)
 
 1. Go to **Settings → Pages** in the GitHub repository.
 2. Under **Build and deployment → Source**, select **GitHub Actions**.
 3. No branch selection is needed — the workflow handles deployment via the `github-pages` environment.
-4. The site will be available at `https://<org>.github.io/Agibuild.Avalonia.WebView/` after the first successful deploy.
+4. The site will be available at `https://<org>.github.io/Agibuild.Fulora/` after the first successful deploy.
 
 ## Building locally
 
@@ -38,10 +44,8 @@ The site output is in `docs/_site/` (gitignored).
 | Bridge Guide | `docs/articles/bridge-guide.md` | Type-safe bridge usage |
 | SPA Hosting | `docs/articles/spa-hosting.md` | Embedded SPA hosting |
 | Architecture | `docs/articles/architecture.md` | System architecture overview |
-
-## Workflow file
-
-`.github/workflows/docs-deploy.yml` — triggers on push to `main`, uses `actions/upload-pages-artifact@v3` and `actions/deploy-pages@v4`.
+| AI Integration | `docs/ai-integration-guide.md` | AI chat with streaming bridge |
+| Plugin Authoring | `docs/plugin-authoring-guide.md` | Create and publish bridge plugins |
 
 ## Troubleshooting
 

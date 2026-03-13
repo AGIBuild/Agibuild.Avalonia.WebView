@@ -6,3 +6,39 @@
   href: bridge-guide.md
 - name: SPA Hosting
   href: spa-hosting.md
+- name: Guides
+  items:
+    - name: AI Integration
+      href: ../ai-integration-guide.md
+    - name: Plugin Authoring
+      href: ../plugin-authoring-guide.md
+    - name: Native AOT
+      href: ../nativeaot.md
+    - name: CLI Reference
+      href: ../cli.md
+    - name: E2E Testing
+      href: ../hybrid-e2e-testing-guide.md
+    - name: Shipping Your App
+      href: ../shipping-your-app.md
+    - name: Bridge DevTools
+      href: ../bridge-devtools-panel.md
+- name: Operations
+  items:
+    - name: Release Checklist
+      href: ../release-checklist.md
+    - name: Documentation Deployment
+      href: ../docs-site-deploy.md
+    - name: Migration Guide
+      href: ../MIGRATION_GUIDE.md
+- name: Reference
+  items:
+    - name: API Surface Review
+      href: ../API_SURFACE_REVIEW.md
+    - name: WebView Design
+      href: ../agibuild_webview_design_doc.md
+    - name: Contract Semantics
+      href: ../agibuild_webview_contract_semantics_v1.md
+    - name: Contract Tests
+      href: ../agibuild_webview_contract_tests_v1.md
+    - name: Compatibility Matrix
+      href: ../agibuild_webview_compatibility_matrix_proposal.md

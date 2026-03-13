@@ -1,45 +1,61 @@
 # Getting Started
 
-Build your first **framework-ready** hybrid app with Avalonia + web UI.
+Get a hybrid desktop app running in under five minutes — a native Avalonia window hosting your web frontend, with type-safe bridge calls between C# and JavaScript.
 
-This guide follows the current product direction (through Phase 11: Ecosystem & Developer Experience):
+## What you'll end up with
 
-- typed bridge contracts
-- typed capability gateway
-- policy-first runtime behavior
-- automation-friendly diagnostics
-- web-first template architecture
-- official bridge plugins (database, http, file system, notifications, auth)
-- OpenTelemetry observability
-- VS Code bridge extension
+A desktop application where:
+
+- The **UI** is a React (or Vue, or vanilla) SPA running inside a native WebView
+- The **backend** is C# code running in the same process — no HTTP server, no REST API
+- Communication is through **typed bridge contracts** that are code-generated at compile time
+
+```
+┌───────────────────────────────────┐
+│  Native Avalonia Window           │
+│  ┌─────────────────────────────┐  │
+│  │  React SPA in WebView       │  │
+│  │                             │  │
+│  │  await GreeterService       │  │
+│  │    .greet("World")          │  │
+│  └──────────┬──────────────────┘  │
+│             │ type-safe bridge     │
+│  ┌──────────▼──────────────────┐  │
+│  │  C# GreeterServiceImpl     │  │
+│  │  → "Hello, World!"         │  │
+│  └─────────────────────────────┘  │
+└───────────────────────────────────┘
+```
 
 ## Prerequisites
 
 - .NET 10 SDK
-- Platform runtime:
-  - **Windows**: WebView2 (usually installed with Edge)
+- Platform WebView runtime:
+  - **Windows**: WebView2 (ships with Edge)
   - **macOS/iOS**: WKWebView (built-in)
   - **Android**: Android WebView (built-in)
   - **Linux**: WebKitGTK (`libwebkit2gtk-4.1`)
 
-## Recommended Path: Template Workflow
+## Quick Path: Use the CLI Template
 
-Use this path for most teams. It matches the recommended architecture with minimal host glue.
+The fastest way to start. The CLI scaffolds a project with bridge contracts, SPA hosting, and dev tooling pre-configured.
 
 ```bash
 # Install CLI and template (once)
 dotnet tool install -g Agibuild.Fulora.Cli
 dotnet new install Agibuild.Fulora.Templates
 
-# Create app (interactive frontend selection)
+# Create app with React frontend
 fulora new MyApp --frontend react
 
-# Start dev servers (Vite + Avalonia together)
+# Start both Vite and Avalonia together
 cd MyApp
 fulora dev
 ```
 
-Or use `dotnet new` directly:
+You'll see a native window open with your React app inside, bridge-connected and ready for development.
+
+Alternatively, use `dotnet new` directly:
 
 ```bash
 dotnet new agibuild-hybrid -n MyApp
@@ -47,31 +63,17 @@ cd MyApp
 dotnet run --project MyApp.Desktop
 ```
 
-What you get immediately:
+## Manual Path: Add Fulora to an Existing Avalonia App
 
-- ready-to-run host + web structure
-- typed bridge contract wiring
-- web-first development flow
-- production-oriented project layout
+If you already have an Avalonia project or need full control over the setup.
 
-## Manual Path: Build from Scratch
-
-Use this when you need full control over project composition.
-
-### 1) Create an Avalonia app
-
-```bash
-dotnet new avalonia.app -n MyApp
-cd MyApp
-```
-
-### 2) Add package
+### 1. Add the NuGet package
 
 ```bash
 dotnet add package Agibuild.Fulora.Avalonia
 ```
 
-### 3) Add WebView control
+### 2. Add the WebView control to your window
 
 ```xml
 <!-- MainWindow.axaml -->
@@ -80,10 +82,9 @@ dotnet add package Agibuild.Fulora.Avalonia
 </Window>
 ```
 
-### 4) Navigate to a page
+### 3. Navigate to a page
 
 ```csharp
-// MainWindow.axaml.cs
 public MainWindow()
 {
     InitializeComponent();
@@ -94,47 +95,49 @@ public MainWindow()
 }
 ```
 
-## First Typed Bridge Contract
+## Your First Bridge Contract
 
-Define contracts once, then call across C# and JavaScript with type safety.
+This is where Fulora's value becomes clear. Define a C# interface, and the source generator creates everything needed for type-safe cross-language calls — no serialization boilerplate, no runtime reflection.
 
 ```csharp
-[JsExport] // C# -> JS
+[JsExport] // C# implementation, callable from JavaScript
 public interface IGreeterService
 {
     Task<string> Greet(string name);
 }
 
-[JsImport] // JS -> C#
+[JsImport] // JavaScript implementation, callable from C#
 public interface INotificationService
 {
     Task ShowNotification(string message);
 }
 ```
 
-Expose C# service:
+Expose your C# service to the web frontend:
 
 ```csharp
 WebView.Bridge.Expose<IGreeterService>(new GreeterServiceImpl());
 ```
 
-Call from JavaScript:
+Call it from JavaScript — the bridge client is auto-generated:
 
 ```javascript
-const result = await window.agWebView.rpc.invoke("GreeterService.greet", { name: "World" });
-console.log(result);
+const result = await GreeterService.greet("World");
+// → "Hello, World!"
 ```
 
-Call JavaScript from C#:
+Call JavaScript from C# with the same type safety:
 
 ```csharp
 var notifier = WebView.Bridge.GetProxy<INotificationService>();
 await notifier.ShowNotification("Hello from C#!");
 ```
 
-## First Web-First SPA Hosting Setup
+## SPA Hosting
 
-Production mode (embedded assets):
+Fulora can serve your web frontend from embedded resources (production) or proxy to a dev server (development).
+
+**Production** — embedded assets with `app://` scheme:
 
 ```csharp
 WebView.EnableSpaHosting(new SpaHostingOptions
@@ -146,7 +149,7 @@ WebView.EnableSpaHosting(new SpaHostingOptions
 await WebView.NavigateAsync(new Uri("app://localhost/index.html"));
 ```
 
-Development mode (HMR proxy):
+**Development** — Vite/Webpack dev server with HMR:
 
 ```csharp
 WebView.EnableSpaHosting(new SpaHostingOptions
@@ -157,10 +160,11 @@ WebView.EnableSpaHosting(new SpaHostingOptions
 
 ## Next Steps
 
-- [Architecture](architecture.md) — Runtime topology and design invariants
-- [Bridge Guide](bridge-guide.md) — Advanced bridge patterns
-- [SPA Hosting](spa-hosting.md) — Detailed hosting configuration
-- [Plugin Authoring Guide](../plugin-authoring-guide.md) — Create and consume bridge plugins
-- [CLI Reference](../cli.md) — `fulora new`, `dev`, `generate`, `search`, `add plugin`
-- [Demo walkthrough](../demo/index.md) — End-to-end sample experience
-- [Roadmap](../../openspec/ROADMAP.md) — Product direction and milestones
+Now that you have a running app, dive deeper:
+
+- [Bridge Guide](bridge-guide.md) — Advanced patterns: streaming, cancellation, error handling, batch calls
+- [SPA Hosting](spa-hosting.md) — Production hosting, dev server proxy, HMR state preservation
+- [Architecture](architecture.md) — How the runtime, policy engine, and capability gateway work together
+- [Plugin Authoring](../plugin-authoring-guide.md) — Create bridge plugins that ship as NuGet + npm
+- [CLI Reference](../cli.md) — `fulora new`, `dev`, `generate types`, `add service`, `search`
+- [Demo Walkthrough](../demo/index.md) — A full-featured sample with Dashboard, Chat, Files, and Settings

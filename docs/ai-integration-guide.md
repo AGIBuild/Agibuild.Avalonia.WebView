@@ -6,31 +6,27 @@ Build AI-powered hybrid desktop apps with **Fulora** — combining Avalonia's na
 
 ---
 
-## App Preview
+## What You'll Build
+
+A native desktop chat app that streams AI responses token-by-token — with glass transparency, theme switching, and custom drag regions — all driven from a React frontend through Fulora's type-safe bridge.
 
 ### Chat Interface
 
 ![AI Chat — Main Interface](ai-chat-demo/images/app-main.png)
 
-The chat interface features a native Avalonia window with **glass transparency** and a React frontend loaded inside a WebView. The dark-themed UI includes a left sidebar with navigation icons and a bottom chat input — all communicating through Fulora's type-safe C# ↔ JavaScript bridge.
+A dark-themed native Avalonia window with a React frontend loaded inside a WebView. Left sidebar navigation, bottom chat input, real-time streaming — all communicating through the type-safe C# ↔ JavaScript bridge.
 
 ### Streaming Conversation
 
 ![AI Chat — Streaming Conversation](ai-chat-demo/images/app-chat.png)
 
-Messages are streamed token-by-token using `IAsyncEnumerable<T>`. The user's message appears as a blue bubble on the right, while the AI response streams in real-time on the left. In **echo mode** (no backend required), the prompt is echoed back for demonstration.
+Messages are streamed token-by-token using `IAsyncEnumerable<T>`. User messages appear as blue bubbles, AI responses stream in real-time. In **echo mode** (no backend required), the prompt is echoed back for demonstration.
 
 ### Appearance Settings
 
 ![AI Chat — Appearance Settings](ai-chat-demo/images/app-settings.png)
 
-The settings panel exposes the framework's **`IWindowShellService`** capabilities directly in the UI:
-
-- **Theme** — System / Liquid (dark) / Classic (light), with automatic OS theme following.
-- **Window transparency** — Toggle native window composition (Mica, Acrylic, Blur depending on platform).
-- **Glass opacity** — Fine-tune the transparency intensity (20–95%).
-
-All appearance changes are applied globally across windows via the framework's `WindowShellService` — the application code simply calls `updateWindowShellSettings()`.
+The settings panel exposes the framework's `IWindowShellService` capabilities: theme switching (System / Liquid / Classic), native window transparency (Mica, Acrylic, Blur), and glass opacity control (20–95%) — all applied globally via `updateWindowShellSettings()`.
 
 ---
 
