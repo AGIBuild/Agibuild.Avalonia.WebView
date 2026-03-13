@@ -107,6 +107,7 @@ public sealed class BridgeDevToolsOverlay : ContentControl, IDisposable
         });
     }
 
+    /// <inheritdoc />
     public void Dispose()
     {
         if (_disposed) return;

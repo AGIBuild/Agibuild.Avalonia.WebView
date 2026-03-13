@@ -1,7 +1,11 @@
 namespace Agibuild.Fulora.NativeOverlay;
 
+/// <summary>
+/// Creates the platform-appropriate <see cref="INativeOverlayProvider"/> implementation.
+/// </summary>
 public static class NativeOverlayProviderFactory
 {
+    /// <summary>Returns a native overlay provider for the current operating system.</summary>
     public static INativeOverlayProvider Create()
     {
         if (OperatingSystem.IsWindows())

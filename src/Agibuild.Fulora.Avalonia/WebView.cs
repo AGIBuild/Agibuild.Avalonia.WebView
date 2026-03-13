@@ -1041,6 +1041,6 @@ public class WebView : NativeControlHost, ISpaHostingWebView
 
         public nint Handle => _inner.Handle;
 
-        public string HandleDescriptor => _inner.HandleDescriptor;
+        public string HandleDescriptor => _inner.HandleDescriptor ?? string.Empty;
     }
 }
