@@ -121,6 +121,7 @@ public sealed class AvaloniaWindowChromeProvider : IWindowChromeProvider, IDispo
         }
     }
 
+    /// <inheritdoc />
     public TransparencyEffectiveState GetTransparencyState()
     {
         TrackedWindow? primary;
@@ -154,6 +155,7 @@ public sealed class AvaloniaWindowChromeProvider : IWindowChromeProvider, IDispo
         };
     }
 
+    /// <inheritdoc />
     public WindowChromeMetrics GetChromeMetrics()
     {
         TrackedWindow? primary;

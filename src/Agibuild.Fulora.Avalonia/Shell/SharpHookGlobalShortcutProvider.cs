@@ -18,14 +18,17 @@ public sealed class SharpHookGlobalShortcutProvider : IGlobalShortcutPlatformPro
     private TaskPoolGlobalHook? _hook;
     private bool _disposed;
 
+    /// <inheritdoc />
     public bool IsSupported =>
         RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ||
         RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ||
         (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) &&
          Environment.GetEnvironmentVariable("WAYLAND_DISPLAY") is null);
 
+    /// <inheritdoc />
     public event Action<string>? ShortcutActivated;
 
+    /// <inheritdoc />
     public bool Register(string id, ShortcutKey key, ShortcutModifiers modifiers)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
@@ -40,6 +43,7 @@ public sealed class SharpHookGlobalShortcutProvider : IGlobalShortcutPlatformPro
         return true;
     }
 
+    /// <inheritdoc />
     public bool Unregister(string id)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
@@ -55,6 +59,7 @@ public sealed class SharpHookGlobalShortcutProvider : IGlobalShortcutPlatformPro
         return true;
     }
 
+    /// <inheritdoc />
     public void Dispose()
     {
         if (_disposed) return;

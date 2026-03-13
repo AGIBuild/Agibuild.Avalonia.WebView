@@ -6,7 +6,14 @@ using Avalonia.VisualTree;
 namespace Agibuild.Fulora;
 
 /// <summary>Result of hit-testing a point against the overlay.</summary>
-public enum OverlayHitTestResult { Overlay, Passthrough }
+public enum OverlayHitTestResult
+{
+    /// <summary>The point hits the overlay; handle it in the overlay.</summary>
+    Overlay,
+
+    /// <summary>The point should pass through to the WebView.</summary>
+    Passthrough,
+}
 
 /// <summary>
 /// Manages a transparent companion window for rendering Avalonia controls above a WebView.

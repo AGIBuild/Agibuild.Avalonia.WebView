@@ -5,15 +5,22 @@ namespace Agibuild.Fulora.Shell;
 /// </summary>
 public sealed class NullGlobalShortcutProvider : IGlobalShortcutPlatformProvider
 {
+    /// <inheritdoc />
     public bool IsSupported => false;
 
+    /// <inheritdoc />
     public event Action<string>? ShortcutActivated
     {
         add { }
         remove { }
     }
 
+    /// <inheritdoc />
     public bool Register(string id, ShortcutKey key, ShortcutModifiers modifiers) => false;
+
+    /// <inheritdoc />
     public bool Unregister(string id) => false;
+
+    /// <inheritdoc />
     public void Dispose() { }
 }

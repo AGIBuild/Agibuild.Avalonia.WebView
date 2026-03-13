@@ -14,14 +14,17 @@ public sealed class AvaloniaThemeProvider : IPlatformThemeProvider, IDisposable
 {
     private bool _disposed;
 
+    /// <summary>Initializes a new instance of the <see cref="AvaloniaThemeProvider"/> class.</summary>
     public AvaloniaThemeProvider()
     {
         if (Application.Current is { } app)
             app.ActualThemeVariantChanged += OnThemeVariantChanged;
     }
 
+    /// <inheritdoc />
     public event EventHandler? ThemeChanged;
 
+    /// <inheritdoc />
     public string GetThemeMode()
     {
         var variant = Application.Current?.ActualThemeVariant;
@@ -30,6 +33,7 @@ public sealed class AvaloniaThemeProvider : IPlatformThemeProvider, IDisposable
         return "system";
     }
 
+    /// <inheritdoc />
     public string? GetAccentColor()
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -39,6 +43,7 @@ public sealed class AvaloniaThemeProvider : IPlatformThemeProvider, IDisposable
         return null;
     }
 
+    /// <inheritdoc />
     public bool GetIsHighContrast()
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
