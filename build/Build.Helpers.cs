@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Nuke.Common;
@@ -9,6 +10,119 @@ using Nuke.Common.IO;
 
 internal partial class BuildTask
 {
+    private static readonly Regex TargetFrameworkRegex = new(
+        @"<TargetFrameworks?>\s*(?<tfms>[^<]+)\s*</TargetFrameworks?>",
+        RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+    private async Task<AbsolutePath> BuildPlatformAwareSolutionFilterAsync(string filterName)
+    {
+        var unavailableTfmSuffixes = await DetectUnavailableTfmSuffixesAsync();
+        if (unavailableTfmSuffixes.Count == 0)
+        {
+            Serilog.Log.Information("All platform workloads available — using full solution");
+            return SolutionFile;
+        }
+
+        var slnContent = await File.ReadAllTextAsync(SolutionFile);
+        var projectPaths = ParseProjectPathsFromSolution(slnContent);
+
+        var included = new List<string>();
+        var excluded = new List<string>();
+
+        foreach (var relPath in projectPaths)
+        {
+            var fullPath = RootDirectory / relPath;
+            if (!File.Exists(fullPath))
+            {
+                excluded.Add(relPath);
+                continue;
+            }
+
+            var csproj = await File.ReadAllTextAsync(fullPath);
+            if (RequiresUnavailableWorkload(csproj, unavailableTfmSuffixes))
+            {
+                excluded.Add(relPath);
+                Serilog.Log.Information("Excluding {Project} (requires unavailable platform workload)", relPath);
+            }
+            else
+            {
+                included.Add(relPath);
+            }
+        }
+
+        if (excluded.Count == 0)
+            return SolutionFile;
+
+        ArtifactsDirectory.CreateDirectory();
+        var filterPath = ArtifactsDirectory / $"{filterName}.slnf";
+        var solutionRelativePath = Path.GetRelativePath(ArtifactsDirectory, SolutionFile);
+
+        var filter = new
+        {
+            solution = new
+            {
+                path = solutionRelativePath,
+                projects = included
+            }
+        };
+
+        await File.WriteAllTextAsync(filterPath, JsonSerializer.Serialize(filter, WriteIndentedJsonOptions));
+        Serilog.Log.Information(
+            "Generated solution filter '{Filter}' with {Included}/{Total} projects (excluded {Excluded} platform-specific)",
+            filterName, included.Count, projectPaths.Count, excluded.Count);
+
+        return filterPath;
+    }
+
+    private async Task<IReadOnlyList<string>> DetectUnavailableTfmSuffixesAsync()
+    {
+        var unavailable = new List<string>();
+
+        var hasIos = OperatingSystem.IsMacOS()
+                     && await HasDotNetWorkloadAsync("ios")
+                     && await HasAppleIosSdkInstalledAsync();
+        if (!hasIos)
+            unavailable.Add("-ios");
+
+        var hasMacCatalyst = OperatingSystem.IsMacOS()
+                             && await HasDotNetWorkloadAsync("maccatalyst")
+                             && await HasAppleIosSdkInstalledAsync();
+        if (!hasMacCatalyst)
+            unavailable.Add("-maccatalyst");
+
+        if (!await HasDotNetWorkloadAsync("android") || !HasAndroidSdkInstalled())
+            unavailable.Add("-android");
+
+        return unavailable;
+    }
+
+    private static bool RequiresUnavailableWorkload(string csprojContent, IReadOnlyList<string> unavailableSuffixes)
+    {
+        foreach (Match match in TargetFrameworkRegex.Matches(csprojContent))
+        {
+            var tfmValue = match.Groups["tfms"].Value;
+            foreach (var suffix in unavailableSuffixes)
+            {
+                if (tfmValue.Contains(suffix, StringComparison.OrdinalIgnoreCase))
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static IReadOnlyList<string> ParseProjectPathsFromSolution(string slnContent)
+    {
+        var projectLineRegex = new Regex(
+            @"Project\("".+""\)\s*=\s*"".+""\s*,\s*""(?<path>[^""]+\.csproj)""\s*,",
+            RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+        return projectLineRegex
+            .Matches(slnContent)
+            .Select(m => m.Groups["path"].Value.Replace('\\', '/'))
+            .ToList();
+    }
+
     private static AbsolutePath? ResolveFirstExistingPath(params AbsolutePath?[] candidates)
     {
         foreach (var candidate in candidates)

@@ -46,8 +46,8 @@ jobs:
       - name: Restore .NET tools
         run: dotnet tool restore
 
-      - name: Build
-        run: dotnet build Agibuild.Fulora.sln --configuration Release
+      - name: Build (platform-aware)
+        run: ./build.sh --target BuildAll --configuration Release
 
       - name: Run Stryker mutation testing
         run: dotnet stryker --config-file ../../stryker-config.json --output ../../artifacts/mutation-report

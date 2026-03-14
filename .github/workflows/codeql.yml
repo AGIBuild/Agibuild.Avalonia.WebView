@@ -45,19 +45,16 @@ jobs:
       - name: Install .NET workloads
         run: dotnet workload install android
 
-      - name: Remove iOS projects (no iOS workload on Linux)
-        run: |
-          dotnet sln Agibuild.Fulora.sln remove \
-            "src/Agibuild.Fulora.Adapters.iOS/Agibuild.Fulora.Adapters.iOS.csproj" \
-            "tests/Agibuild.Fulora.Integration.Tests/Agibuild.Fulora.Integration.Tests.iOS/Agibuild.Fulora.Integration.Tests.iOS.csproj"
+      - name: Restore .NET tools
+        run: dotnet tool restore
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@0d579ffd059c29b07949a3cce3983f0780820c98 # v4.32.6
         with:
           languages: ${{ matrix.language }}
 
-      - name: Build
-        run: dotnet build Agibuild.Fulora.sln --configuration Release
+      - name: Build (platform-aware)
+        run: ./build.sh --target BuildAll --configuration Release
 
       - name: Analyze
         uses: github/codeql-action/analyze@0d579ffd059c29b07949a3cce3983f0780820c98 # v4.32.6

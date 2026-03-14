@@ -5,8 +5,9 @@ internal partial class BuildTask
 {
     internal Target RefreshLockFiles => _ => _
         .Description("Regenerates all packages.lock.json files after dependency changes.")
-        .Executes(() =>
+        .Executes(async () =>
         {
-            DotNet($"restore {SolutionFile} --force-evaluate");
+            var filterPath = await BuildPlatformAwareSolutionFilterAsync("lock-files");
+            DotNet($"restore {filterPath} --force-evaluate");
         });
 }

@@ -148,7 +148,7 @@
       "agibuild.fulora.adapters.abstractions": {
         "type": "Project",
         "dependencies": {
-          "Agibuild.Fulora.Core": "[1.5.1, )"
+          "Agibuild.Fulora.Core": "[1.5.2-local, )"
         }
       },
       "agibuild.fulora.avalonia": {
@@ -166,11 +166,11 @@
       "agibuild.fulora.integration.tests": {
         "type": "Project",
         "dependencies": {
-          "Agibuild.Fulora.Adapters.Abstractions": "[1.5.1, )",
-          "Agibuild.Fulora.Avalonia": "[1.5.1, )",
-          "Agibuild.Fulora.Core": "[1.5.1, )",
-          "Agibuild.Fulora.Runtime": "[1.5.1, )",
-          "Agibuild.Fulora.Testing": "[1.5.1, )",
+          "Agibuild.Fulora.Adapters.Abstractions": "[1.5.2-local, )",
+          "Agibuild.Fulora.Avalonia": "[1.5.2-local, )",
+          "Agibuild.Fulora.Core": "[1.5.2-local, )",
+          "Agibuild.Fulora.Runtime": "[1.5.2-local, )",
+          "Agibuild.Fulora.Testing": "[1.5.2-local, )",
           "Avalonia": "[12.0.0-preview2, )",
           "Avalonia.Fonts.Inter": "[12.0.0-preview2, )",
           "Avalonia.Themes.Fluent": "[12.0.0-preview2, )",
@@ -182,17 +182,17 @@
       "agibuild.fulora.runtime": {
         "type": "Project",
         "dependencies": {
-          "Agibuild.Fulora.Adapters.Abstractions": "[1.5.1, )",
-          "Agibuild.Fulora.Core": "[1.5.1, )",
+          "Agibuild.Fulora.Adapters.Abstractions": "[1.5.2-local, )",
+          "Agibuild.Fulora.Core": "[1.5.2-local, )",
           "Microsoft.Extensions.Logging.Abstractions": "[11.0.0-preview.2.26159.112, )"
         }
       },
       "agibuild.fulora.testing": {
         "type": "Project",
         "dependencies": {
-          "Agibuild.Fulora.Adapters.Abstractions": "[1.5.1, )",
-          "Agibuild.Fulora.Core": "[1.5.1, )",
-          "Agibuild.Fulora.Runtime": "[1.5.1, )"
+          "Agibuild.Fulora.Adapters.Abstractions": "[1.5.2-local, )",
+          "Agibuild.Fulora.Core": "[1.5.2-local, )",
+          "Agibuild.Fulora.Runtime": "[1.5.2-local, )"
         }
       },
       "Avalonia": {

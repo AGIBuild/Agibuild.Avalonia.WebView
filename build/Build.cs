@@ -252,6 +252,16 @@ internal sealed partial class BuildTask : NukeBuild
             }
         });
 
+    internal Target BuildAll => _ => _
+        .Description("Builds all platform-compatible projects via solution filter. Use for CodeQL / full analysis.")
+        .DependsOn(Clean)
+        .Executes(async () =>
+        {
+            var filterPath = await BuildPlatformAwareSolutionFilterAsync("build-all");
+            DotNet($"build {filterPath} --configuration {Configuration}",
+                   workingDirectory: RootDirectory);
+        });
+
     // ──────────────────────────────── CI Targets ─────────────────────────────
 
     internal Target Ci => _ => _

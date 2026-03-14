@@ -130,9 +130,10 @@ internal partial class BuildTask
             var failures = new List<string>();
             var scanReports = new List<object>();
 
+            var filterPath = await BuildPlatformAwareSolutionFilterAsync("vuln-scan");
             var nugetOutput = await RunProcessCaptureAllAsync(
                 "dotnet",
-                ["list", SolutionFile, "package", "--vulnerable", "--include-transitive"],
+                ["list", (string)filterPath, "package", "--vulnerable", "--include-transitive"],
                 workingDirectory: RootDirectory,
                 timeout: TimeSpan.FromMinutes(4));
             var nugetHasVulnerability = nugetOutput.Contains("has the following vulnerable packages", StringComparison.OrdinalIgnoreCase)
