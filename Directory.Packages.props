@@ -56,11 +56,11 @@
 
   <ItemGroup Label="Telemetry">
     <PackageVersion Include="OpenTelemetry.Api" Version="1.15.0" />
-    <PackageVersion Include="Sentry" Version="6.2.0-alpha.0" />
+    <PackageVersion Include="Sentry" Version="6.2.0" />
   </ItemGroup>
 
   <ItemGroup Label="Data">
-    <PackageVersion Include="Microsoft.Data.Sqlite" Version="9.0.6" />
+    <PackageVersion Include="Microsoft.Data.Sqlite" Version="10.0.5" />
   </ItemGroup>
 
   <ItemGroup Label="Testing">
