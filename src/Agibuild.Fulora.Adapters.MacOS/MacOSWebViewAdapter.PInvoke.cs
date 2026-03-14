@@ -894,7 +894,8 @@ internal sealed class MacOSWebViewAdapter : IWebViewAdapter, INativeWebViewHandl
             Payload = payload,
             AllowedEffects = DragDropEffects.Copy,
             Effect = DragDropEffects.Copy,
-            X = x, Y = y
+            X = x,
+            Y = y
         });
     }
 
@@ -907,7 +908,8 @@ internal sealed class MacOSWebViewAdapter : IWebViewAdapter, INativeWebViewHandl
             Payload = new DragDropPayload(),
             AllowedEffects = DragDropEffects.Copy,
             Effect = DragDropEffects.Copy,
-            X = x, Y = y
+            X = x,
+            Y = y
         });
     }
 
@@ -926,7 +928,8 @@ internal sealed class MacOSWebViewAdapter : IWebViewAdapter, INativeWebViewHandl
         {
             Payload = payload,
             Effect = DragDropEffects.Copy,
-            X = x, Y = y
+            X = x,
+            Y = y
         });
     }
 

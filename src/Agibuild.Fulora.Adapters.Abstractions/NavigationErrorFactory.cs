@@ -27,10 +27,10 @@ internal static class NavigationErrorFactory
         string message,
         Guid navigationId,
         Uri requestUri) => category switch
-    {
-        NavigationErrorCategory.Timeout => new WebViewTimeoutException(message, navigationId, requestUri),
-        NavigationErrorCategory.Network => new WebViewNetworkException(message, navigationId, requestUri),
-        NavigationErrorCategory.Ssl => new WebViewSslException(message, navigationId, requestUri),
-        _ => new WebViewNavigationException(message, navigationId, requestUri),
-    };
+        {
+            NavigationErrorCategory.Timeout => new WebViewTimeoutException(message, navigationId, requestUri),
+            NavigationErrorCategory.Network => new WebViewNetworkException(message, navigationId, requestUri),
+            NavigationErrorCategory.Ssl => new WebViewSslException(message, navigationId, requestUri),
+            _ => new WebViewNavigationException(message, navigationId, requestUri),
+        };
 }
