@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 #pragma warning disable CS1591 // build infrastructure — no XML doc needed
 
+namespace Build;
+
 public sealed record ProcessCommand(
     string FileName,
     IReadOnlyList<string> Arguments,
@@ -92,7 +94,7 @@ public sealed class ProcessRunner : IProcessRunner
             stopwatch.Elapsed);
     }
 
-    static void TryKill(Process process)
+    private static void TryKill(Process process)
     {
         try
         {

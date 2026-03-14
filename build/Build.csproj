@@ -5,13 +5,11 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <NukeTelemetryVersion>1</NukeTelemetryVersion>
-    <!-- Build orchestration project — exempt from production code analysis rules.
-         Nuke conventions (no namespaces on partial class, no explicit access modifiers,
-         delegate targets) conflict with strict analyzers. -->
-    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-    <EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>
-    <AnalysisLevel>none</AnalysisLevel>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <!-- CA1822: Nuke discovers Target properties via BindingFlags.Instance reflection.
+         Static targets are invisible to Nuke and cause runtime failures.
+         This is a framework constraint, not a code quality issue. -->
+    <NoWarn>$(NoWarn);CA1822</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Nuke.Common" />

@@ -8,9 +8,9 @@ using Nuke.Common.IO;
 using Nuke.Common.Tools.DotNet;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
-partial class BuildTask
+internal partial class BuildTask
 {
-    Target UnitTests => _ => _
+    internal Target UnitTests => _ => _
         .Description("Runs unit tests.")
         .DependsOn(Build)
         .Executes(() =>
@@ -24,7 +24,7 @@ partial class BuildTask
                 .SetLoggers("trx;LogFileName=unit-tests.trx"));
         });
 
-    Target Coverage => _ => _
+    internal Target Coverage => _ => _
         .Description("Runs unit tests with code coverage and enforces minimum threshold.")
         .DependsOn(Build)
         .Executes(async () =>
@@ -35,7 +35,7 @@ partial class BuildTask
             await RunCoverageUnitTestsAsync(CoverageDirectory, "unit-tests.trx");
 
             var coverageFiles = CoverageDirectory.GlobFiles("**/coverage.cobertura.xml");
-            if (!coverageFiles.Any())
+            if (coverageFiles.Count == 0)
             {
                 Assert.Fail("No coverage files found. Ensure coverlet.collector is referenced in the test project.");
             }
@@ -99,7 +99,7 @@ partial class BuildTask
             }
         });
 
-    Target IntegrationTests => _ => _
+    internal Target IntegrationTests => _ => _
         .Description("Runs automated integration tests.")
         .DependsOn(Build)
         .Executes(() =>
@@ -113,7 +113,7 @@ partial class BuildTask
                 .SetLoggers("trx;LogFileName=integration-tests.trx"));
         });
 
-    Target ContractAutomation => _ => _
+    internal Target ContractAutomation => _ => _
         .Description("Runs ContractAutomation lane (mock-driven unit tests).")
         .DependsOn(Build)
         .Executes(async () =>
@@ -121,7 +121,7 @@ partial class BuildTask
             await RunContractAutomationTests("contract-automation.trx");
         });
 
-    Target RuntimeAutomation => _ => _
+    internal Target RuntimeAutomation => _ => _
         .Description("Runs RuntimeAutomation lane (real adapter/runtime automation tests).")
         .DependsOn(Build)
         .Executes(async () =>
@@ -129,7 +129,7 @@ partial class BuildTask
             await RunRuntimeAutomationTests("runtime-automation.trx");
         });
 
-    Target AutomationLaneReport => _ => _
+    internal Target AutomationLaneReport => _ => _
         .Description("Runs automation lanes and writes pass/fail/skip report.")
         .DependsOn(Build)
         .After(Coverage)
@@ -227,13 +227,13 @@ partial class BuildTask
             }
         });
 
-    Target Test => _ => _
+    internal Target Test => _ => _
         .Description("Runs all tests (unit + integration).")
         .DependsOn(UnitTests, IntegrationTests);
 
-    AbsolutePath MutationReportDirectory => ArtifactsDirectory / "mutation-report";
+    private static AbsolutePath MutationReportDirectory => ArtifactsDirectory / "mutation-report";
 
-    Target MutationTest => _ => _
+    internal Target MutationTest => _ => _
         .Description("Runs Stryker.NET mutation testing on non-UI projects.")
         .DependsOn(Build)
         .Executes(() =>
@@ -247,7 +247,7 @@ partial class BuildTask
             Serilog.Log.Information("Mutation report: {Path}", MutationReportDirectory);
         });
 
-    Target E2ETests => _ => _
+    internal Target E2ETests => _ => _
         .DependsOn(Build)
         .Description("Run E2E integration tests (platform-gated, requires real WebView adapter)")
         .OnlyWhenDynamic(() => OperatingSystem.IsMacOS() || OperatingSystem.IsWindows())

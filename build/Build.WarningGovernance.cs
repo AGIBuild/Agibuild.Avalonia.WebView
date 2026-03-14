@@ -7,8 +7,10 @@ using System.Text.RegularExpressions;
 using Nuke.Common;
 using Nuke.Common.IO;
 
-partial class BuildTask
+internal partial class BuildTask
 {
+    private static readonly JsonSerializerOptions PropertyNameCaseInsensitiveJsonOptions = new() { PropertyNameCaseInsensitive = true };
+
     private sealed record WarningObservation(
         string WarningId,
         string Message,
@@ -48,7 +50,7 @@ partial class BuildTask
         public string ReviewPoint { get; set; } = string.Empty;
     }
 
-    async Task EvaluateWarningGovernanceAsync(bool failOnIssues)
+    private async Task EvaluateWarningGovernanceAsync(bool failOnIssues)
     {
         TestResultsDirectory.CreateDirectory();
 
@@ -104,7 +106,7 @@ partial class BuildTask
         }
     }
 
-    void RunSyntheticWarningGovernanceChecks()
+    private void RunSyntheticWarningGovernanceChecks()
     {
         var baseline = LoadWarningGovernanceBaseline();
 
@@ -142,18 +144,18 @@ partial class BuildTask
         Serilog.Log.Information("Synthetic warning governance checks passed.");
     }
 
-    WarningGovernanceBaseline LoadWarningGovernanceBaseline()
+    private static WarningGovernanceBaseline LoadWarningGovernanceBaseline()
     {
         Assert.FileExists(WarningGovernanceBaselineFile, $"Missing warning governance baseline file: {WarningGovernanceBaselineFile}");
         var content = File.ReadAllText(WarningGovernanceBaselineFile);
         var baseline = JsonSerializer.Deserialize<WarningGovernanceBaseline>(
             content,
-            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            PropertyNameCaseInsensitiveJsonOptions);
         Assert.NotNull(baseline, $"Unable to deserialize warning governance baseline: {WarningGovernanceBaselineFile}");
         return baseline!;
     }
 
-    async Task<List<WarningObservation>> CollectGovernedWarningsAsync()
+    private async Task<List<WarningObservation>> CollectGovernedWarningsAsync()
     {
         if (!string.IsNullOrWhiteSpace(WarningGovernanceInput))
         {
@@ -190,7 +192,7 @@ partial class BuildTask
         return ParseWarningsFromOutput(output);
     }
 
-    List<WarningObservation> ParseWarningsFromOutput(string output)
+    private static List<WarningObservation> ParseWarningsFromOutput(string output)
     {
         var observations = new List<WarningObservation>();
         foreach (var rawLine in output.Split('\n', StringSplitOptions.RemoveEmptyEntries))
@@ -229,7 +231,7 @@ partial class BuildTask
             .ToList();
     }
 
-    static bool IsGovernedWarning(string warningId, string message)
+    private static bool IsGovernedWarning(string warningId, string message)
     {
         if (string.Equals(warningId, "MSB3277", StringComparison.OrdinalIgnoreCase)
             && message.Contains("WindowsBase", StringComparison.OrdinalIgnoreCase))
@@ -240,10 +242,10 @@ partial class BuildTask
         return warningId.StartsWith("xUnit", StringComparison.OrdinalIgnoreCase);
     }
 
-    List<WarningClassification> ClassifyWarnings(
+    private static List<WarningClassification> ClassifyWarnings(
         IEnumerable<WarningObservation> warnings,
         WarningGovernanceBaseline baseline,
-        ISet<string> touchedFiles)
+        HashSet<string> touchedFiles)
     {
         var classifications = new List<WarningClassification>();
         foreach (var warning in warnings)
@@ -292,7 +294,7 @@ partial class BuildTask
         return classifications;
     }
 
-    List<WarningClassification> ValidateBaselineMetadata(WarningGovernanceBaseline baseline)
+    private static List<WarningClassification> ValidateBaselineMetadata(WarningGovernanceBaseline baseline)
     {
         var issues = new List<WarningClassification>();
 
@@ -316,7 +318,7 @@ partial class BuildTask
                     entry.WarningId,
                     entry.Path,
                     "baseline/xunitSuppressions",
-                    SourceFile: NormalizeRelativePath(entry.Path),
+                    SourceFile: NormalizeRelativePath(entry.Path, RootDirectory),
                     "xUnit suppression baseline entry is missing owner/rationale/reviewPoint metadata."));
             }
         }
@@ -324,7 +326,7 @@ partial class BuildTask
         return issues;
     }
 
-    List<WarningClassification> EvaluateXunitSuppressionFindings(ISet<string> touchedFiles, WarningGovernanceBaseline baseline)
+    private static List<WarningClassification> EvaluateXunitSuppressionFindings(ISet<string> touchedFiles, WarningGovernanceBaseline baseline)
     {
         var findings = new List<WarningClassification>();
         foreach (var touchedFile in touchedFiles)
@@ -389,7 +391,7 @@ partial class BuildTask
         return findings;
     }
 
-    static IEnumerable<string> ExtractSuppressedXunitIds(string content, string path)
+    private static IEnumerable<string> ExtractSuppressedXunitIds(string content, string path)
     {
         if (path.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
         {
@@ -427,20 +429,20 @@ partial class BuildTask
         }
     }
 
-    bool HasApprovedXunitSuppression(string sourceFile, string warningId, WarningGovernanceBaseline baseline)
+    private static bool HasApprovedXunitSuppression(string sourceFile, string warningId, WarningGovernanceBaseline baseline)
     {
         return baseline.XunitSuppressions.Any(x =>
-            string.Equals(NormalizeRelativePath(x.Path), NormalizeRelativePath(sourceFile), StringComparison.OrdinalIgnoreCase)
+            string.Equals(NormalizeRelativePath(x.Path, RootDirectory), NormalizeRelativePath(sourceFile, RootDirectory), StringComparison.OrdinalIgnoreCase)
             && string.Equals(x.WarningId, warningId, StringComparison.OrdinalIgnoreCase)
             && !IsMissingMetadata(x.Owner, x.Rationale, x.ReviewPoint));
     }
 
-    static bool IsMissingMetadata(string owner, string rationale, string reviewPoint)
+    private static bool IsMissingMetadata(string owner, string rationale, string reviewPoint)
         => string.IsNullOrWhiteSpace(owner)
            || string.IsNullOrWhiteSpace(rationale)
            || string.IsNullOrWhiteSpace(reviewPoint);
 
-    async Task<HashSet<string>> GetTouchedFilesForWarningGovernanceAsync()
+    private static async Task<HashSet<string>> GetTouchedFilesForWarningGovernanceAsync()
     {
         var files = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var gitTimeout = TimeSpan.FromSeconds(15);
@@ -468,7 +470,7 @@ partial class BuildTask
                     continue;
                 }
 
-                files.Add(NormalizeRelativePath(pathPart));
+                files.Add(NormalizeRelativePath(pathPart, RootDirectory));
             }
         }
         catch (Exception ex)
@@ -489,7 +491,7 @@ partial class BuildTask
                         continue;
                     }
 
-                    files.Add(NormalizeRelativePath(path));
+                    files.Add(NormalizeRelativePath(path, RootDirectory));
                 }
             }
             catch (Exception ex)
@@ -501,7 +503,7 @@ partial class BuildTask
         return files;
     }
 
-    string? TryExtractSourceFile(string sourcePart)
+    private static string? TryExtractSourceFile(string sourcePart)
     {
         var candidate = sourcePart.Trim();
         var parenIndex = candidate.LastIndexOf('(');
@@ -514,24 +516,24 @@ partial class BuildTask
             || candidate.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase)
             || candidate.EndsWith(".props", StringComparison.OrdinalIgnoreCase))
         {
-            return NormalizeRelativePath(candidate);
+            return NormalizeRelativePath(candidate, RootDirectory);
         }
 
         return null;
     }
 
-    string NormalizeRelativePath(string path)
+    private static string NormalizeRelativePath(string path, string rootDirectory)
     {
         var trimmed = path.Trim().Trim('"');
         var relative = Path.IsPathRooted(trimmed)
-            ? Path.GetRelativePath(RootDirectory, trimmed)
+            ? Path.GetRelativePath(rootDirectory, trimmed)
             : trimmed;
         return relative.Replace('\\', '/');
     }
 
     // ──────────────────────────── Warning Governance Targets ────────────────────────────
 
-    Target WarningGovernance => _ => _
+    internal Target WarningGovernance => _ => _
         .Description("Classifies governed warnings and enforces warning governance gates.")
         .DependsOn(Build)
         .Executes(async () =>
@@ -539,7 +541,7 @@ partial class BuildTask
             await EvaluateWarningGovernanceAsync(failOnIssues: true);
         });
 
-    Target WarningGovernanceSyntheticCheck => _ => _
+    internal Target WarningGovernanceSyntheticCheck => _ => _
         .Description("Runs synthetic regression checks for warning governance classifier.")
         .DependsOn(Build)
         .Executes(() =>

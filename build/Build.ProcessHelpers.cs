@@ -3,23 +3,24 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Build;
 using Nuke.Common.IO;
 
-partial class BuildTask
+internal partial class BuildTask
 {
-    static readonly JsonSerializerOptions WriteIndentedJsonOptions = new() { WriteIndented = true };
-    static readonly ProcessRunner Runner = new();
+    private static readonly JsonSerializerOptions WriteIndentedJsonOptions = new() { WriteIndented = true };
+    private static readonly ProcessRunner Runner = new();
 
-    static void WriteJsonReport(AbsolutePath path, object payload)
+    private static void WriteJsonReport(AbsolutePath path, object payload)
     {
         File.WriteAllText(path, JsonSerializer.Serialize(payload, WriteIndentedJsonOptions));
     }
 
-    sealed class TempDirectoryScope : IDisposable
+    private sealed class TempDirectoryScope : IDisposable
     {
-        readonly string _path;
+        private readonly string _path;
 
-        TempDirectoryScope(string path)
+        private TempDirectoryScope(string path)
         {
             _path = path;
             Directory.CreateDirectory(_path);
@@ -54,7 +55,7 @@ partial class BuildTask
 
     // ──────────────────────────── Process convenience wrappers ────────────────────────────
 
-    static async Task<string> RunProcessAsync(
+    private static async Task<string> RunProcessAsync(
         string fileName,
         string[] arguments,
         string? workingDirectory = null,
@@ -70,7 +71,7 @@ partial class BuildTask
         return result.StandardOutput;
     }
 
-    static async Task<string> RunProcessCaptureAllAsync(
+    private static async Task<string> RunProcessCaptureAllAsync(
         string fileName,
         string[] arguments,
         string? workingDirectory = null,
@@ -83,7 +84,7 @@ partial class BuildTask
         return CombineOutput(result.StandardOutput, result.StandardError);
     }
 
-    static async Task<string> RunProcessCheckedAsync(
+    private static async Task<string> RunProcessCheckedAsync(
         string fileName,
         string[] arguments,
         string? workingDirectory = null,
@@ -105,7 +106,7 @@ partial class BuildTask
 
     // ──────────────────────────── npm / package-manager helpers ────────────────────────────
 
-    static Task<string> RunNpmCaptureAllAsync(
+    private static Task<string> RunNpmCaptureAllAsync(
         string[] arguments,
         string workingDirectory,
         TimeSpan? timeout = null)
@@ -119,7 +120,7 @@ partial class BuildTask
             : RunProcessCaptureAllAsync("npm", arguments, workingDirectory, timeout);
     }
 
-    static Task<string> RunNpmCheckedAsync(
+    private static Task<string> RunNpmCheckedAsync(
         string[] arguments,
         string workingDirectory,
         TimeSpan? timeout = null)
@@ -133,7 +134,7 @@ partial class BuildTask
             : RunProcessCheckedAsync("npm", arguments, workingDirectory, timeout);
     }
 
-    static async Task<bool> IsToolAvailableAsync(string toolName)
+    private static async Task<bool> IsToolAvailableAsync(string toolName)
     {
         try
         {
@@ -160,7 +161,7 @@ partial class BuildTask
         }
     }
 
-    static Task RunPmInstallAsync(string pm, string workingDirectory)
+    private static Task<string> RunPmInstallAsync(string pm, string workingDirectory)
     {
         return OperatingSystem.IsWindows()
             ? RunProcessCheckedAsync(
@@ -173,7 +174,7 @@ partial class BuildTask
 
     // ──────────────────────────── Shared helpers ────────────────────────────
 
-    static string CombineOutput(string stdout, string stderr)
+    private static string CombineOutput(string stdout, string stderr)
     {
         return string.Join('\n',
             new[] { stdout, stderr }.Where(x => !string.IsNullOrWhiteSpace(x)));

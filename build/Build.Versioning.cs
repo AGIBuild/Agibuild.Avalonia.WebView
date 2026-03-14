@@ -3,12 +3,12 @@ using System.IO;
 using System.Xml.Linq;
 using Nuke.Common;
 
-partial class BuildTask
+internal partial class BuildTask
 {
     [Parameter("Target version to set (X.Y.Z format). If omitted, patch is auto-incremented.")]
-    readonly string? UpdateVersionTo = null;
+    private readonly string? UpdateVersionTo = null;
 
-    Target UpdateVersion => _ => _
+    internal Target UpdateVersion => _ => _
         .Description("Updates the VersionPrefix in Directory.Build.props. Auto-increments patch if no version is specified; validates new > current when specified.")
         .Executes(() =>
         {

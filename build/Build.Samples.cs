@@ -9,9 +9,9 @@ using Nuke.Common.IO;
 using Nuke.Common.Tools.DotNet;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
-partial class BuildTask
+internal partial class BuildTask
 {
-    static async Task EnsureNpmAvailableAsync(string workingDirectory)
+    private static async Task EnsureNpmAvailableAsync(string workingDirectory)
     {
         try
         {
@@ -25,7 +25,7 @@ partial class BuildTask
         }
     }
 
-    async Task EnsureSampleWebDepsInstalledAsync(AbsolutePath webDirectory)
+    private static async Task EnsureSampleWebDepsInstalledAsync(AbsolutePath webDirectory)
     {
         Assert.DirectoryExists(webDirectory, $"Web project not found at {webDirectory}.");
         await EnsureNpmAvailableAsync(webDirectory);
@@ -56,7 +56,7 @@ partial class BuildTask
         }
     }
 
-    static async Task<bool> IsHttpReadyAsync(string url)
+    private static async Task<bool> IsHttpReadyAsync(string url)
     {
         try
         {
@@ -70,7 +70,7 @@ partial class BuildTask
         }
     }
 
-    static async Task WaitForPortAsync(int port, int timeoutSeconds = 30)
+    private static async Task WaitForPortAsync(int port, int timeoutSeconds = 30)
     {
         var url = $"http://localhost:{port}";
         var deadline = DateTime.UtcNow.AddSeconds(timeoutSeconds);
@@ -83,7 +83,7 @@ partial class BuildTask
         throw new TimeoutException($"{url} did not become available within {timeoutSeconds}s.");
     }
 
-    static ProcessStartInfo CreateNpmStartInfo(string arguments, string workingDirectory)
+    private static ProcessStartInfo CreateNpmStartInfo(string arguments, string workingDirectory)
     {
         if (OperatingSystem.IsWindows())
         {
@@ -107,7 +107,7 @@ partial class BuildTask
         };
     }
 
-    async Task StartDesktopAppAsync(AbsolutePath desktopProject, AbsolutePath webDirectory, int devPort)
+    private async Task StartDesktopAppAsync(AbsolutePath desktopProject, AbsolutePath webDirectory, int devPort)
     {
         Assert.FileExists(desktopProject, $"Desktop project not found at {desktopProject}.");
 
@@ -156,7 +156,7 @@ partial class BuildTask
 
     // ──────────────────────────── Sample App Targets ────────────────────────────
 
-    Target StartAiChatApp => _ => _
+    internal Target StartAiChatApp => _ => _
         .Description("Launches the AI Chat sample. Ensures Ollama is running and the required model is available.")
         .Executes(async () =>
         {
@@ -164,19 +164,19 @@ partial class BuildTask
             await StartDesktopAppAsync(AiChatDesktopProject, AiChatWebDirectory, devPort: 5175);
         });
 
-    Target StartReactApp => _ => _
+    internal Target StartReactApp => _ => _
         .Description("Launches the React sample. In Debug: auto-starts Vite dev server if needed.")
         .Executes(async () => await StartDesktopAppAsync(ReactDesktopProject, ReactWebDirectory, devPort: 5173));
 
-    Target StartVueApp => _ => _
+    internal Target StartVueApp => _ => _
         .Description("Launches the Vue sample. In Debug: auto-starts Vite dev server if needed.")
         .Executes(async () => await StartDesktopAppAsync(VueDesktopProject, VueWebDirectory, devPort: 5174));
 
-    Target StartTodoApp => _ => _
+    internal Target StartTodoApp => _ => _
         .Description("Launches the Showcase Todo sample. In Debug: auto-starts Vite dev server if needed.")
         .Executes(async () => await StartDesktopAppAsync(TodoDesktopProject, TodoWebDirectory, devPort: 5176));
 
-    Target StartMinimalApp => _ => _
+    internal Target StartMinimalApp => _ => _
         .Description("Launches the Minimal Hybrid sample (static wwwroot, no Vite).")
         .Executes(() =>
         {
@@ -188,12 +188,12 @@ partial class BuildTask
 
     // ──────────────────────────── Ollama Bootstrapping ───────────────────────────
 
-    const string OllamaEndpoint = "http://localhost:11434";
-    const string OllamaModel = "qwen2.5:3b";
+    private const string OllamaEndpoint = "http://localhost:11434";
+    private const string OllamaModel = "qwen2.5:3b";
 
-    static Process? _ollamaServeProcess;
+    private static Process? _ollamaServeProcess;
 
-    async Task EnsureOllamaReadyAsync()
+    private static async Task EnsureOllamaReadyAsync()
     {
         var echoMode = string.Equals(
             Environment.GetEnvironmentVariable("AI__PROVIDER"), "echo", StringComparison.OrdinalIgnoreCase);
@@ -238,7 +238,7 @@ partial class BuildTask
         }
     }
 
-    static Process StartOllamaServe()
+    private static Process StartOllamaServe()
     {
         var psi = new ProcessStartInfo
         {
@@ -254,7 +254,7 @@ partial class BuildTask
         return process;
     }
 
-    async Task WaitForOllamaApiAsync(int timeoutSeconds = 20)
+    private static async Task WaitForOllamaApiAsync(int timeoutSeconds = 20)
     {
         var apiUrl = $"{OllamaEndpoint.TrimEnd('/')}/api/tags";
         var deadline = DateTime.UtcNow.AddSeconds(timeoutSeconds);
@@ -269,7 +269,7 @@ partial class BuildTask
             "Check that 'ollama serve' is working correctly.");
     }
 
-    static async Task<bool> IsModelAvailableAsync(string model)
+    private static async Task<bool> IsModelAvailableAsync(string model)
     {
         try
         {
@@ -286,7 +286,7 @@ partial class BuildTask
         }
     }
 
-    static async Task PullOllamaModelAsync(string model)
+    private static async Task PullOllamaModelAsync(string model)
     {
         var output = await RunProcessCheckedAsync("ollama", ["pull", model], timeout: TimeSpan.FromMinutes(10));
         Serilog.Log.Debug("ollama pull output: {Output}", output.Trim());

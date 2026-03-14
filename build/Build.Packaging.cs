@@ -11,7 +11,7 @@ using Nuke.Common.IO;
 using Nuke.Common.Tools.DotNet;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
-partial class BuildTask
+internal partial class BuildTask
 {
     // ──────────────────────────── Records ────────────────────────────
 
@@ -25,7 +25,7 @@ partial class BuildTask
 
     // ──────────────────────────── Pack / Validate / Publish Targets ────────────────────────────
 
-    Target PackageApp => _ => _
+    internal Target PackageApp => _ => _
         .Description("Publishes an application for a specific runtime (self-contained). Optional; not part of CI.")
         .DependsOn(Build)
         .Requires(() => PackageProject, () => PackageRuntime, () => PackageOutput)
@@ -56,7 +56,7 @@ partial class BuildTask
             Serilog.Log.Information("PackageApp output: {Output}", output);
         });
 
-    Target Pack => _ => _
+    internal Target Pack => _ => _
         .Description("Creates all NuGet packages: main library and sub-packages (Core, Bridge.Generator, etc.).")
         .DependsOn(Build, Coverage, AutomationLaneReport)
         .Produces(PackageOutputDirectory / "*.nupkg")
@@ -116,13 +116,13 @@ partial class BuildTask
             }
         });
 
-    Target ValidatePackage => _ => _
+    internal Target ValidatePackage => _ => _
         .Description("Validates the NuGet package contains all expected assemblies and files.")
         .DependsOn(Pack)
         .Executes(() =>
         {
             var nupkgFiles = PackageOutputDirectory.GlobFiles("*.nupkg")
-                .Where(f => !f.Name.EndsWith(".symbols.nupkg"))
+                .Where(f => !f.Name.EndsWith(".symbols.nupkg", StringComparison.OrdinalIgnoreCase))
                 .ToList();
 
             Assert.NotEmpty(nupkgFiles, "No .nupkg files found in output directory.");
@@ -133,7 +133,7 @@ partial class BuildTask
                     f.Name.StartsWith(mainPackagePrefix, StringComparison.OrdinalIgnoreCase)
                     && f.Name.Length > mainPackagePrefix.Length
                     && char.IsDigit(f.Name[mainPackagePrefix.Length]))
-                ?? throw new Exception($"Main package {primaryHostPackageId}.*.nupkg not found in output directory.");
+                ?? throw new InvalidOperationException($"Main package {primaryHostPackageId}.*.nupkg not found in output directory.");
             Serilog.Log.Information("Validating package: {Package}", nupkgPath.Name);
 
             using var archive = ZipFile.OpenRead(nupkgPath);
@@ -283,14 +283,14 @@ partial class BuildTask
             Serilog.Log.Information("Package validation PASSED.");
         });
 
-    Target Publish => _ => _
+    internal Target Publish => _ => _
         .Description("Pushes all NuGet packages (main library, sub-packages, CLI tool, plugins, and templates) to the configured source.")
         .DependsOn(Pack, PackTemplate)
         .Requires(() => NuGetApiKey)
         .Executes(() =>
         {
             var packages = PackageOutputDirectory.GlobFiles("*.nupkg")
-                .Where(p => !p.Name.EndsWith(".symbols.nupkg"));
+                .Where(p => !p.Name.EndsWith(".symbols.nupkg", StringComparison.OrdinalIgnoreCase));
 
             foreach (var package in packages)
             {
@@ -304,7 +304,7 @@ partial class BuildTask
 
     // ──────────────────────────── npm Publish ────────────────────────────
 
-    Target NpmPublish => _ => _
+    internal Target NpmPublish => _ => _
         .Description("Publishes @agibuild/bridge to the npm registry with token-based authentication.")
         .Requires(() => NpmToken)
         .Executes(async () =>
@@ -320,7 +320,7 @@ partial class BuildTask
 
     // ──────────────────────────── NuGet Package Smoke Test ────────────────────────────
 
-    Target NugetPackageTest => _ => _
+    internal Target NugetPackageTest => _ => _
         .Description("Packs, restores, builds, and runs the NuGet package integration smoke test end-to-end.")
         .DependsOn(ValidatePackage)
         .Executes(async () =>
@@ -414,7 +414,7 @@ partial class BuildTask
 
     // ──────────────────────────── NuGet Helpers ────────────────────────────
 
-    static async Task<NugetPackagesRootResolution> ResolveNugetPackagesRootAsync()
+    private static async Task<NugetPackagesRootResolution> ResolveNugetPackagesRootAsync()
     {
         var fromEnv = Environment.GetEnvironmentVariable("NUGET_PACKAGES");
         if (!string.IsNullOrWhiteSpace(fromEnv))
@@ -455,13 +455,13 @@ partial class BuildTask
             "user-profile-default");
     }
 
-    static string NormalizePath(string path)
+    private static string NormalizePath(string path)
     {
         var expanded = Environment.ExpandEnvironmentVariables(path.Trim().Trim('"'));
         return Path.GetFullPath(expanded);
     }
 
-    static string ClassifyNugetSmokeFailure(string message)
+    private static string ClassifyNugetSmokeFailure(string message)
     {
         var transientMarkers = new[]
         {
@@ -480,7 +480,7 @@ partial class BuildTask
             : "deterministic";
     }
 
-    async Task RunNugetSmokeWithRetryAsync(AbsolutePath project, IList<NugetSmokeRetryTelemetry> retryTelemetry, int maxAttempts)
+    private async Task RunNugetSmokeWithRetryAsync(AbsolutePath project, IList<NugetSmokeRetryTelemetry> retryTelemetry, int maxAttempts)
     {
         for (var attempt = 1; attempt <= maxAttempts; attempt++)
         {

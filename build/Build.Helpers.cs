@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 using Nuke.Common;
 using Nuke.Common.IO;
 
-partial class BuildTask
+internal partial class BuildTask
 {
-    static AbsolutePath? ResolveFirstExistingPath(params AbsolutePath?[] candidates)
+    private static AbsolutePath? ResolveFirstExistingPath(params AbsolutePath?[] candidates)
     {
         foreach (var candidate in candidates)
         {
@@ -23,7 +23,7 @@ partial class BuildTask
         return null;
     }
 
-    async Task<IReadOnlyList<AbsolutePath>> GetProjectsToBuildAsync()
+    private async Task<IReadOnlyList<AbsolutePath>> GetProjectsToBuildAsync()
     {
         var projects = new List<AbsolutePath>
         {
@@ -75,7 +75,7 @@ partial class BuildTask
         return projects;
     }
 
-    string ResolvePackedAgibuildVersion(string packageId)
+    private static string ResolvePackedAgibuildVersion(string packageId)
     {
         var versionPattern = new Regex(
             $"^{Regex.Escape(packageId)}\\.(?<v>\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z\\.]+)?(?:\\+[0-9A-Za-z\\.]+)?)\\.nupkg$",
@@ -97,7 +97,7 @@ partial class BuildTask
         return chosen.Match.Groups["v"].Value;
     }
 
-    static async Task<bool> HasDotNetWorkloadAsync(string platformKeyword)
+    private static async Task<bool> HasDotNetWorkloadAsync(string platformKeyword)
     {
         try
         {
@@ -106,7 +106,7 @@ partial class BuildTask
                 .Any(line =>
                 {
                     var trimmed = line.TrimStart();
-                    if (trimmed.Length == 0 || trimmed.StartsWith('-') || trimmed.StartsWith("Installed") || trimmed.StartsWith("Workload") || trimmed.StartsWith("Use "))
+                    if (trimmed.Length == 0 || trimmed.StartsWith('-') || trimmed.StartsWith("Installed", StringComparison.Ordinal) || trimmed.StartsWith("Workload", StringComparison.Ordinal) || trimmed.StartsWith("Use ", StringComparison.Ordinal))
                         return false;
                     var id = trimmed.Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? "";
                     return id.Equals(platformKeyword, StringComparison.OrdinalIgnoreCase)
@@ -119,7 +119,7 @@ partial class BuildTask
         }
     }
 
-    bool HasAndroidSdkInstalled()
+    private bool HasAndroidSdkInstalled()
     {
         if (string.IsNullOrWhiteSpace(AndroidSdkRoot))
             return false;
@@ -129,7 +129,7 @@ partial class BuildTask
         return Directory.Exists(sdkRoot) && File.Exists(adbPath);
     }
 
-    static async Task<bool> HasAppleIosSdkInstalledAsync()
+    private static async Task<bool> HasAppleIosSdkInstalledAsync()
     {
         try
         {

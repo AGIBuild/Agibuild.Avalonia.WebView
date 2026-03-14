@@ -13,7 +13,7 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
     On = [GitHubActionsTrigger.Push, GitHubActionsTrigger.PullRequest],
     InvokedTargets = [nameof(Ci)],
     AutoGenerate = false)]
-partial class BuildTask : NukeBuild
+internal sealed partial class BuildTask : NukeBuild
 {
     private const string ContractAutomationLane = "ContractAutomation";
     private const string RuntimeAutomationLane = "RuntimeAutomation";
@@ -32,53 +32,53 @@ partial class BuildTask : NukeBuild
     // ──────────────────────────────── Parameters ────────────────────────────────
 
     [Parameter("Configuration (Debug / Release). Default: Release on CI, Debug locally.")]
-    readonly string Configuration = IsServerBuild ? "Release" : "Debug";
+    private readonly string Configuration = IsServerBuild ? "Release" : "Debug";
 
     [Parameter("Version suffix for pack/publish targets (e.g., ci.42, rc.1). Empty = stable release.")]
-    readonly string? VersionSuffix = null;
+    private readonly string? VersionSuffix = null;
 
     [Parameter("NuGet source URL for publish. Default: https://api.nuget.org/v3/index.json")]
-    readonly string NuGetSource = "https://api.nuget.org/v3/index.json";
+    private readonly string NuGetSource = "https://api.nuget.org/v3/index.json";
 
     [Parameter("NuGet API key for publish.")]
     [Secret]
-    readonly string? NuGetApiKey = Environment.GetEnvironmentVariable("NUGET_API_KEY");
+    private readonly string? NuGetApiKey = Environment.GetEnvironmentVariable("NUGET_API_KEY");
 
     [Parameter("npm auth token for @agibuild/bridge publication.")]
     [Secret]
-    readonly string? NpmToken = Environment.GetEnvironmentVariable("NPM_TOKEN");
+    private readonly string? NpmToken = Environment.GetEnvironmentVariable("NPM_TOKEN");
 
     [Parameter("Minimum line coverage percentage (0-100). Default: 96")]
-    readonly int CoverageThreshold = 96;
+    private readonly int CoverageThreshold = 96;
 
     [Parameter("Minimum branch coverage percentage (0-100). Default: 93")]
-    readonly int BranchCoverageThreshold = 93;
+    private readonly int BranchCoverageThreshold = 93;
 
     [Parameter("Android AVD name for emulator. Default: auto-detect first available AVD.")]
-    readonly string? AndroidAvd = null;
+    private readonly string? AndroidAvd = null;
 
     [Parameter("iOS Simulator device name. Default: auto-detect first available iPhone simulator.")]
-    readonly string? iOSSimulator = null;
+    private readonly string? iOSSimulator = null;
 
     [Parameter("Android SDK root path. Default: ~/Library/Android/sdk (macOS) or ANDROID_HOME env var.")]
-    readonly string AndroidSdkRoot = ResolveAndroidSdkRoot();
+    private readonly string AndroidSdkRoot = ResolveAndroidSdkRoot();
 
     [Parameter("Optional warning scanner input file path. If set, scanner consumes this file instead of live build output.")]
-    readonly string? WarningGovernanceInput = null;
+    private readonly string? WarningGovernanceInput = null;
 
     [Parameter("Project to package (path to .csproj)")]
-    readonly string? PackageProject = null;
+    private readonly string? PackageProject = null;
 
     [Parameter("Target runtime identifier (e.g., win-x64, osx-arm64)")]
-    readonly string? PackageRuntime = null;
+    private readonly string? PackageRuntime = null;
 
     [Parameter("Application version for packaging")]
-    readonly string? PackageAppVersion = null;
+    private readonly string? PackageAppVersion = null;
 
     [Parameter("Output directory for packaged app")]
-    readonly string? PackageOutput = null;
+    private readonly string? PackageOutput = null;
 
-    static string ResolveAndroidSdkRoot()
+    private static string ResolveAndroidSdkRoot()
     {
         var home = Environment.GetEnvironmentVariable("ANDROID_HOME");
         if (!string.IsNullOrEmpty(home) && Directory.Exists(home))
@@ -93,131 +93,131 @@ partial class BuildTask : NukeBuild
 
     // ──────────────────────────────── Paths ──────────────────────────────────────
 
-    AbsolutePath SrcDirectory => RootDirectory / "src";
-    AbsolutePath TestsDirectory => RootDirectory / "tests";
-    AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
-    AbsolutePath PackageOutputDirectory => ArtifactsDirectory / "packages";
-    AbsolutePath TestResultsDirectory => ArtifactsDirectory / "test-results";
-    AbsolutePath AutomationLaneReportFile => TestResultsDirectory / "automation-lane-report.json";
-    AbsolutePath NugetSmokeTelemetryFile => TestResultsDirectory / "nuget-smoke-retry-telemetry.json";
-    AbsolutePath WarningGovernanceReportFile => TestResultsDirectory / "warning-governance-report.json";
-    AbsolutePath OpenSpecStrictGovernanceReportFile => TestResultsDirectory / "openspec-strict-governance.log";
-    AbsolutePath DependencyGovernanceReportFile => TestResultsDirectory / "dependency-governance-report.json";
-    AbsolutePath TypeScriptGovernanceReportFile => TestResultsDirectory / "typescript-governance-report.json";
-    AbsolutePath SampleTemplatePackageReferenceGovernanceReportFile => TestResultsDirectory / "sample-template-package-reference-governance-report.json";
-    AbsolutePath RuntimeCriticalPathGovernanceReportFile => TestResultsDirectory / "runtime-critical-path-governance-report.json";
-    AbsolutePath CloseoutSnapshotFile => TestResultsDirectory / "closeout-snapshot.json";
-    AbsolutePath BridgeDistributionGovernanceReportFile => TestResultsDirectory / "bridge-distribution-governance-report.json";
-    AbsolutePath TransitionGateGovernanceReportFile => TestResultsDirectory / "transition-gate-governance-report.json";
-    AbsolutePath ReleaseOrchestrationDecisionReportFile => TestResultsDirectory / "release-orchestration-decision-report.json";
-    AbsolutePath DistributionReadinessGovernanceReportFile => TestResultsDirectory / "distribution-readiness-governance-report.json";
-    AbsolutePath AdoptionReadinessGovernanceReportFile => TestResultsDirectory / "adoption-readiness-governance-report.json";
-    AbsolutePath AutomationLaneManifestFile => TestsDirectory / "automation-lanes.json";
-    AbsolutePath RuntimeCriticalPathManifestFile => TestsDirectory / "runtime-critical-path.manifest.json";
-    AbsolutePath WarningGovernanceBaselineFile => TestsDirectory / "warning-governance.baseline.json";
+    private static AbsolutePath SrcDirectory => RootDirectory / "src";
+    private static AbsolutePath TestsDirectory => RootDirectory / "tests";
+    private static AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
+    private static AbsolutePath PackageOutputDirectory => ArtifactsDirectory / "packages";
+    private static AbsolutePath TestResultsDirectory => ArtifactsDirectory / "test-results";
+    private static AbsolutePath AutomationLaneReportFile => TestResultsDirectory / "automation-lane-report.json";
+    private static AbsolutePath NugetSmokeTelemetryFile => TestResultsDirectory / "nuget-smoke-retry-telemetry.json";
+    private static AbsolutePath WarningGovernanceReportFile => TestResultsDirectory / "warning-governance-report.json";
+    private static AbsolutePath OpenSpecStrictGovernanceReportFile => TestResultsDirectory / "openspec-strict-governance.log";
+    private static AbsolutePath DependencyGovernanceReportFile => TestResultsDirectory / "dependency-governance-report.json";
+    private static AbsolutePath TypeScriptGovernanceReportFile => TestResultsDirectory / "typescript-governance-report.json";
+    private static AbsolutePath SampleTemplatePackageReferenceGovernanceReportFile => TestResultsDirectory / "sample-template-package-reference-governance-report.json";
+    private static AbsolutePath RuntimeCriticalPathGovernanceReportFile => TestResultsDirectory / "runtime-critical-path-governance-report.json";
+    private static AbsolutePath CloseoutSnapshotFile => TestResultsDirectory / "closeout-snapshot.json";
+    private static AbsolutePath BridgeDistributionGovernanceReportFile => TestResultsDirectory / "bridge-distribution-governance-report.json";
+    private static AbsolutePath TransitionGateGovernanceReportFile => TestResultsDirectory / "transition-gate-governance-report.json";
+    private static AbsolutePath ReleaseOrchestrationDecisionReportFile => TestResultsDirectory / "release-orchestration-decision-report.json";
+    private static AbsolutePath DistributionReadinessGovernanceReportFile => TestResultsDirectory / "distribution-readiness-governance-report.json";
+    private static AbsolutePath AdoptionReadinessGovernanceReportFile => TestResultsDirectory / "adoption-readiness-governance-report.json";
+    private static AbsolutePath AutomationLaneManifestFile => TestsDirectory / "automation-lanes.json";
+    private static AbsolutePath RuntimeCriticalPathManifestFile => TestsDirectory / "runtime-critical-path.manifest.json";
+    private static AbsolutePath WarningGovernanceBaselineFile => TestsDirectory / "warning-governance.baseline.json";
 
-    AbsolutePath SolutionFile => RootDirectory / "Agibuild.Fulora.sln";
-    AbsolutePath CoverageDirectory => ArtifactsDirectory / "coverage";
-    AbsolutePath CoverageReportDirectory => ArtifactsDirectory / "coverage-report";
+    private static AbsolutePath SolutionFile => RootDirectory / "Agibuild.Fulora.sln";
+    private static AbsolutePath CoverageDirectory => ArtifactsDirectory / "coverage";
+    private static AbsolutePath CoverageReportDirectory => ArtifactsDirectory / "coverage-report";
 
-    AbsolutePath PackProject =>
+    private static AbsolutePath PackProject =>
         SrcDirectory / "Agibuild.Fulora.Avalonia" / "Agibuild.Fulora.Avalonia.csproj";
 
-    AbsolutePath UnitTestsProject =>
+    private static AbsolutePath UnitTestsProject =>
         TestsDirectory / "Agibuild.Fulora.UnitTests" / "Agibuild.Fulora.UnitTests.csproj";
 
-    AbsolutePath IntegrationTestsProject =>
+    private static AbsolutePath IntegrationTestsProject =>
         TestsDirectory / "Agibuild.Fulora.Integration.Tests.Automation"
         / "Agibuild.Fulora.Integration.Tests.Automation.csproj";
 
-    AbsolutePath E2EDesktopProject =>
+    private static AbsolutePath E2EDesktopProject =>
         TestsDirectory / "Agibuild.Fulora.Integration.Tests"
         / "Agibuild.Fulora.Integration.Tests.Desktop"
         / "Agibuild.Fulora.Integration.Tests.Desktop.csproj";
 
-    AbsolutePath E2EAndroidProject =>
+    private static AbsolutePath E2EAndroidProject =>
         TestsDirectory / "Agibuild.Fulora.Integration.Tests"
         / "Agibuild.Fulora.Integration.Tests.Android"
         / "Agibuild.Fulora.Integration.Tests.Android.csproj";
 
-    AbsolutePath E2EiOSProject =>
+    private static AbsolutePath E2EiOSProject =>
         TestsDirectory / "Agibuild.Fulora.Integration.Tests"
         / "Agibuild.Fulora.Integration.Tests.iOS"
         / "Agibuild.Fulora.Integration.Tests.iOS.csproj";
 
-    AbsolutePath NugetPackageTestProject =>
+    private static AbsolutePath NugetPackageTestProject =>
         TestsDirectory / "Agibuild.Fulora.Integration.NugetPackageTests"
         / "Agibuild.Fulora.Integration.NugetPackageTests.csproj";
 
-    AbsolutePath CoreProject =>
+    private static AbsolutePath CoreProject =>
         SrcDirectory / "Agibuild.Fulora.Core" / "Agibuild.Fulora.Core.csproj";
 
-    AbsolutePath BridgeGeneratorProject =>
+    private static AbsolutePath BridgeGeneratorProject =>
         SrcDirectory / "Agibuild.Fulora.Bridge.Generator" / "Agibuild.Fulora.Bridge.Generator.csproj";
 
-    AbsolutePath AdaptersAbstractionsProject =>
+    private static AbsolutePath AdaptersAbstractionsProject =>
         SrcDirectory / "Agibuild.Fulora.Adapters.Abstractions" / "Agibuild.Fulora.Adapters.Abstractions.csproj";
 
-    AbsolutePath RuntimeProject =>
+    private static AbsolutePath RuntimeProject =>
         SrcDirectory / "Agibuild.Fulora.Runtime" / "Agibuild.Fulora.Runtime.csproj";
 
-    AbsolutePath WindowsAdapterProject =>
+    private static AbsolutePath WindowsAdapterProject =>
         SrcDirectory / "Agibuild.Fulora.Adapters.Windows" / "Agibuild.Fulora.Adapters.Windows.csproj";
 
-    AbsolutePath TestingProject =>
+    private static AbsolutePath TestingProject =>
         TestsDirectory / "Agibuild.Fulora.Testing" / "Agibuild.Fulora.Testing.csproj";
 
-    AbsolutePath CliProject =>
+    private static AbsolutePath CliProject =>
         SrcDirectory / "Agibuild.Fulora.Cli" / "Agibuild.Fulora.Cli.csproj";
 
-    AbsolutePath PluginLocalStorageProject =>
+    private static AbsolutePath PluginLocalStorageProject =>
         RootDirectory / "plugins" / "Agibuild.Fulora.Plugin.LocalStorage" / "Agibuild.Fulora.Plugin.LocalStorage.csproj";
 
-    AbsolutePath PluginAuthTokenProject =>
+    private static AbsolutePath PluginAuthTokenProject =>
         RootDirectory / "plugins" / "Agibuild.Fulora.Plugin.AuthToken" / "Agibuild.Fulora.Plugin.AuthToken.csproj";
 
-    AbsolutePath PluginHttpClientProject =>
+    private static AbsolutePath PluginHttpClientProject =>
         RootDirectory / "plugins" / "Agibuild.Fulora.Plugin.HttpClient" / "Agibuild.Fulora.Plugin.HttpClient.csproj";
 
-    AbsolutePath PluginDatabaseProject =>
+    private static AbsolutePath PluginDatabaseProject =>
         RootDirectory / "plugins" / "Agibuild.Fulora.Plugin.Database" / "Agibuild.Fulora.Plugin.Database.csproj";
 
-    AbsolutePath PluginFileSystemProject =>
+    private static AbsolutePath PluginFileSystemProject =>
         RootDirectory / "plugins" / "Agibuild.Fulora.Plugin.FileSystem" / "Agibuild.Fulora.Plugin.FileSystem.csproj";
 
-    AbsolutePath PluginNotificationsProject =>
+    private static AbsolutePath PluginNotificationsProject =>
         RootDirectory / "plugins" / "Agibuild.Fulora.Plugin.Notifications" / "Agibuild.Fulora.Plugin.Notifications.csproj";
 
-    AbsolutePath OpenTelemetryProject =>
+    private static AbsolutePath OpenTelemetryProject =>
         SrcDirectory / "Agibuild.Fulora.Telemetry.OpenTelemetry" / "Agibuild.Fulora.Telemetry.OpenTelemetry.csproj";
 
-    AbsolutePath TemplatePackProject =>
+    private static AbsolutePath TemplatePackProject =>
         RootDirectory / "templates" / "Agibuild.Fulora.Templates.csproj";
 
-    AbsolutePath TemplatePath =>
+    private static AbsolutePath TemplatePath =>
         RootDirectory / "templates" / "agibuild-hybrid";
 
-    AbsolutePath ReactSampleDirectory => RootDirectory / "samples" / "avalonia-react";
-    AbsolutePath ReactWebDirectory => ReactSampleDirectory / "AvaloniReact.Web";
-    AbsolutePath ReactDesktopProject => ReactSampleDirectory / "AvaloniReact.Desktop" / "AvaloniReact.Desktop.csproj";
+    private static AbsolutePath ReactSampleDirectory => RootDirectory / "samples" / "avalonia-react";
+    private static AbsolutePath ReactWebDirectory => ReactSampleDirectory / "AvaloniReact.Web";
+    private static AbsolutePath ReactDesktopProject => ReactSampleDirectory / "AvaloniReact.Desktop" / "AvaloniReact.Desktop.csproj";
 
-    AbsolutePath AiChatSampleDirectory => RootDirectory / "samples" / "avalonia-ai-chat";
-    AbsolutePath AiChatWebDirectory => AiChatSampleDirectory / "AvaloniAiChat.Web";
-    AbsolutePath AiChatDesktopProject => AiChatSampleDirectory / "AvaloniAiChat.Desktop" / "AvaloniAiChat.Desktop.csproj";
+    private static AbsolutePath AiChatSampleDirectory => RootDirectory / "samples" / "avalonia-ai-chat";
+    private static AbsolutePath AiChatWebDirectory => AiChatSampleDirectory / "AvaloniAiChat.Web";
+    private static AbsolutePath AiChatDesktopProject => AiChatSampleDirectory / "AvaloniAiChat.Desktop" / "AvaloniAiChat.Desktop.csproj";
 
-    AbsolutePath VueSampleDirectory => RootDirectory / "samples" / "avalonia-vue";
-    AbsolutePath VueWebDirectory => VueSampleDirectory / "AvaloniVue.Web";
-    AbsolutePath VueDesktopProject => VueSampleDirectory / "AvaloniVue.Desktop" / "AvaloniVue.Desktop.csproj";
+    private static AbsolutePath VueSampleDirectory => RootDirectory / "samples" / "avalonia-vue";
+    private static AbsolutePath VueWebDirectory => VueSampleDirectory / "AvaloniVue.Web";
+    private static AbsolutePath VueDesktopProject => VueSampleDirectory / "AvaloniVue.Desktop" / "AvaloniVue.Desktop.csproj";
 
-    AbsolutePath TodoSampleDirectory => RootDirectory / "samples" / "showcase-todo";
-    AbsolutePath TodoWebDirectory => TodoSampleDirectory / "ShowcaseTodo.Web";
-    AbsolutePath TodoDesktopProject => TodoSampleDirectory / "ShowcaseTodo.Desktop" / "ShowcaseTodo.Desktop.csproj";
+    private static AbsolutePath TodoSampleDirectory => RootDirectory / "samples" / "showcase-todo";
+    private static AbsolutePath TodoWebDirectory => TodoSampleDirectory / "ShowcaseTodo.Web";
+    private static AbsolutePath TodoDesktopProject => TodoSampleDirectory / "ShowcaseTodo.Desktop" / "ShowcaseTodo.Desktop.csproj";
 
-    AbsolutePath MinimalHybridDesktopProject => RootDirectory / "samples" / "minimal-hybrid" / "MinimalHybrid.Desktop" / "MinimalHybrid.Desktop.csproj";
+    private static AbsolutePath MinimalHybridDesktopProject => RootDirectory / "samples" / "minimal-hybrid" / "MinimalHybrid.Desktop" / "MinimalHybrid.Desktop.csproj";
 
     // ──────────────────────────────── Core Lifecycle ────────────────────────────────────
 
-    Target Clean => _ => _
+    internal Target Clean => _ => _
         .Description("Cleans bin/obj directories and the artifacts folder.")
         .Executes(() =>
         {
@@ -226,7 +226,7 @@ partial class BuildTask : NukeBuild
             ArtifactsDirectory.CreateOrCleanDirectory();
         });
 
-    Target Restore => _ => _
+    internal Target Restore => _ => _
         .Description("Restores NuGet packages for buildable projects (avoids failing on missing workloads).")
         .DependsOn(Clean)
         .Executes(async () =>
@@ -238,7 +238,7 @@ partial class BuildTask : NukeBuild
             }
         });
 
-    Target Build => _ => _
+    internal Target Build => _ => _
         .Description("Builds all platform-appropriate projects.")
         .DependsOn(Restore)
         .Executes(async () =>
@@ -254,11 +254,11 @@ partial class BuildTask : NukeBuild
 
     // ──────────────────────────────── CI Targets ─────────────────────────────
 
-    Target Ci => _ => _
+    internal Target Ci => _ => _
         .Description("Full CI pipeline: compile → coverage → lane automation → pack → validate.")
         .DependsOn(Coverage, AutomationLaneReport, RuntimeCriticalPathExecutionGovernanceCi, WarningGovernance, DependencyVulnerabilityGovernance, TypeScriptDeclarationGovernance, SampleTemplatePackageReferenceGovernance, OpenSpecStrictGovernance, ReleaseCloseoutSnapshot, ContinuousTransitionGateGovernance, AdoptionReadinessGovernanceCi, ValidatePackage);
 
-    Target CiPublish => _ => _
+    internal Target CiPublish => _ => _
         .Description("Full release pipeline: compile → coverage → lane automation → package smoke → publish.")
         .DependsOn(Coverage, AutomationLaneReport, NugetPackageTest, RuntimeCriticalPathExecutionGovernanceCiPublish, WarningGovernance, DependencyVulnerabilityGovernance, TypeScriptDeclarationGovernance, SampleTemplatePackageReferenceGovernance, OpenSpecStrictGovernance, ReleaseCloseoutSnapshot, ContinuousTransitionGateGovernance, BridgeDistributionGovernance, DistributionReadinessGovernance, AdoptionReadinessGovernanceCiPublish, ReleaseOrchestrationGovernance, PackTemplate, Publish);
 }

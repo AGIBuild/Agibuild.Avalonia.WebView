@@ -9,21 +9,21 @@ using System.Threading.Tasks;
 using Nuke.Common;
 using Nuke.Common.IO;
 
-partial class BuildTask
+internal partial class BuildTask
 {
-    const string TransitionGateParityInvariantId = "GOV-024";
-    const string TransitionLaneProvenanceInvariantId = "GOV-025";
-    const string TransitionGateDiagnosticSchemaInvariantId = "GOV-026";
-    const string ReleaseOrchestrationDecisionInvariantId = "GOV-027";
-    const string ReleaseOrchestrationBlockingReasonSchemaInvariantId = "GOV-028";
-    const string StablePublishReadinessInvariantId = "GOV-029";
-    const string DistributionReadinessDecisionInvariantId = "GOV-030";
-    const string DistributionReadinessSchemaInvariantId = "GOV-031";
-    const string AdoptionReadinessSchemaInvariantId = "GOV-032";
-    const string AdoptionReadinessPolicyInvariantId = "GOV-033";
-    const string ReleaseEvidenceReadinessSectionsInvariantId = "GOV-034";
-    const string BridgeSingleEntryAppLayerPolicyInvariantId = "GOV-035";
-    const string SampleTemplatePackageReferencePolicyInvariantId = "GOV-036";
+    private const string TransitionGateParityInvariantId = "GOV-024";
+    private const string TransitionLaneProvenanceInvariantId = "GOV-025";
+    private const string TransitionGateDiagnosticSchemaInvariantId = "GOV-026";
+    private const string ReleaseOrchestrationDecisionInvariantId = "GOV-027";
+    private const string ReleaseOrchestrationBlockingReasonSchemaInvariantId = "GOV-028";
+    private const string StablePublishReadinessInvariantId = "GOV-029";
+    private const string DistributionReadinessDecisionInvariantId = "GOV-030";
+    private const string DistributionReadinessSchemaInvariantId = "GOV-031";
+    private const string AdoptionReadinessSchemaInvariantId = "GOV-032";
+    private const string AdoptionReadinessPolicyInvariantId = "GOV-033";
+    private const string ReleaseEvidenceReadinessSectionsInvariantId = "GOV-034";
+    private const string BridgeSingleEntryAppLayerPolicyInvariantId = "GOV-035";
+    private const string SampleTemplatePackageReferencePolicyInvariantId = "GOV-036";
 
     private sealed record TransitionGateParityRule(string Group, string CiDependency, string CiPublishDependency);
 
@@ -57,7 +57,58 @@ partial class BuildTask
         string Expected,
         string Actual);
 
-    static readonly TransitionGateParityRule[] CloseoutCriticalTransitionGateParityRules =
+    private static readonly string[] TypeScriptGovernanceGovernedFiles =
+    [
+        "templates/agibuild-hybrid/HybridApp.Web.Vite.React/src/bridge/client.ts",
+        "templates/agibuild-hybrid/HybridApp.Web.Vite.React/src/hooks/useBridge.ts",
+        "templates/agibuild-hybrid/HybridApp.Web.Vite.React/src/bridge/services.ts",
+        "templates/agibuild-hybrid/HybridApp.Web.Vite.Vue/src/bridge/client.ts",
+        "templates/agibuild-hybrid/HybridApp.Web.Vite.Vue/src/composables/useBridge.ts",
+        "templates/agibuild-hybrid/HybridApp.Web.Vite.Vue/src/bridge/services.ts",
+        "samples/avalonia-react/AvaloniReact.Web/src/bridge/client.ts",
+        "samples/avalonia-react/AvaloniReact.Web/src/hooks/useBridge.ts",
+        "samples/avalonia-react/AvaloniReact.Web/src/bridge/services.ts",
+        "samples/avalonia-vue/AvaloniVue.Web/src/bridge/client.ts",
+        "samples/avalonia-vue/AvaloniVue.Web/src/composables/useBridge.ts",
+        "samples/avalonia-vue/AvaloniVue.Web/src/bridge/services.ts",
+        "samples/showcase-todo/ShowcaseTodo.Web/src/bridge/client.ts",
+        "samples/showcase-todo/ShowcaseTodo.Web/src/hooks/useBridge.ts",
+        "samples/showcase-todo/ShowcaseTodo.Web/src/bridge/services.ts",
+        "samples/avalonia-ai-chat/AvaloniAiChat.Web/src/bridge/client.ts",
+        "samples/avalonia-ai-chat/AvaloniAiChat.Web/src/hooks/useBridge.ts",
+        "samples/avalonia-ai-chat/AvaloniAiChat.Web/src/bridge/services.ts",
+        "samples/avalonia-ai-chat/AvaloniAiChat.Web/src/App.tsx",
+        "templates/agibuild-hybrid/HybridApp.Desktop/MainWindow.axaml.cs",
+        "samples/avalonia-react/AvaloniReact.Desktop/MainWindow.axaml.cs",
+        "samples/avalonia-vue/AvaloniVue.Desktop/MainWindow.axaml.cs",
+        "samples/showcase-todo/ShowcaseTodo.Desktop/MainWindow.axaml.cs",
+        "samples/avalonia-ai-chat/AvaloniAiChat.Desktop/MainWindow.axaml.cs"
+    ];
+
+    private static readonly string[] TypeScriptGovernanceProhibitedMarkers =
+    [
+        "window.agWebView",
+        ".rpc.invoke(",
+        "bridgeClient.getService",
+        "createBridgeClient(",
+        "EnableSpaHosting(",
+        "BootstrapSpaAsync(",
+        "WebView.NavigateAsync("
+    ];
+
+    private static readonly string[] SampleTemplateGovernedRootsReportNames = ["samples", "templates"];
+
+    private static readonly string[] BridgeDistributionPackageManagers = ["pnpm", "yarn"];
+
+    private static readonly string[] CompletedPhaseCloseoutChangeIds =
+    [
+        "sentry-crash-reporting",
+        "shared-state-management",
+        "enterprise-auth-patterns",
+        "plugin-quality-compatibility"
+    ];
+
+    private static readonly TransitionGateParityRule[] CloseoutCriticalTransitionGateParityRules =
     [
         new("coverage", "Coverage", "Coverage"),
         new("automation-lane-report", "AutomationLaneReport", "AutomationLaneReport"),
@@ -70,7 +121,7 @@ partial class BuildTask
         new("adoption-readiness-governance", "AdoptionReadinessGovernanceCi", "AdoptionReadinessGovernanceCiPublish")
     ];
 
-    Target DependencyVulnerabilityGovernance => _ => _
+    internal Target DependencyVulnerabilityGovernance => _ => _
         .Description("Runs dependency vulnerability scans (NuGet + npm) as a hard governance gate.")
         .Executes(async () =>
         {
@@ -156,7 +207,7 @@ partial class BuildTask
                 Assert.Fail("Dependency vulnerability governance failed:\n" + string.Join('\n', failures));
         });
 
-    Target TypeScriptDeclarationGovernance => _ => _
+    internal Target TypeScriptDeclarationGovernance => _ => _
         .Description("Validates TypeScript declaration generation and DX package wiring contracts.")
         .Executes(() =>
         {
@@ -238,46 +289,7 @@ partial class BuildTask
                     failures.Add("Vue sample tsconfig must include generated bridge.d.ts.");
             }
 
-            var governedFiles = new[]
-            {
-                "templates/agibuild-hybrid/HybridApp.Web.Vite.React/src/bridge/client.ts",
-                "templates/agibuild-hybrid/HybridApp.Web.Vite.React/src/hooks/useBridge.ts",
-                "templates/agibuild-hybrid/HybridApp.Web.Vite.React/src/bridge/services.ts",
-                "templates/agibuild-hybrid/HybridApp.Web.Vite.Vue/src/bridge/client.ts",
-                "templates/agibuild-hybrid/HybridApp.Web.Vite.Vue/src/composables/useBridge.ts",
-                "templates/agibuild-hybrid/HybridApp.Web.Vite.Vue/src/bridge/services.ts",
-                "samples/avalonia-react/AvaloniReact.Web/src/bridge/client.ts",
-                "samples/avalonia-react/AvaloniReact.Web/src/hooks/useBridge.ts",
-                "samples/avalonia-react/AvaloniReact.Web/src/bridge/services.ts",
-                "samples/avalonia-vue/AvaloniVue.Web/src/bridge/client.ts",
-                "samples/avalonia-vue/AvaloniVue.Web/src/composables/useBridge.ts",
-                "samples/avalonia-vue/AvaloniVue.Web/src/bridge/services.ts",
-                "samples/showcase-todo/ShowcaseTodo.Web/src/bridge/client.ts",
-                "samples/showcase-todo/ShowcaseTodo.Web/src/hooks/useBridge.ts",
-                "samples/showcase-todo/ShowcaseTodo.Web/src/bridge/services.ts",
-                "samples/avalonia-ai-chat/AvaloniAiChat.Web/src/bridge/client.ts",
-                "samples/avalonia-ai-chat/AvaloniAiChat.Web/src/hooks/useBridge.ts",
-                "samples/avalonia-ai-chat/AvaloniAiChat.Web/src/bridge/services.ts",
-                "samples/avalonia-ai-chat/AvaloniAiChat.Web/src/App.tsx",
-                "templates/agibuild-hybrid/HybridApp.Desktop/MainWindow.axaml.cs",
-                "samples/avalonia-react/AvaloniReact.Desktop/MainWindow.axaml.cs",
-                "samples/avalonia-vue/AvaloniVue.Desktop/MainWindow.axaml.cs",
-                "samples/showcase-todo/ShowcaseTodo.Desktop/MainWindow.axaml.cs",
-                "samples/avalonia-ai-chat/AvaloniAiChat.Desktop/MainWindow.axaml.cs"
-            };
-
-            var prohibitedMarkers = new[]
-            {
-                "window.agWebView",
-                ".rpc.invoke(",
-                "bridgeClient.getService",
-                "createBridgeClient(",
-                "EnableSpaHosting(",
-                "BootstrapSpaAsync(",
-                "WebView.NavigateAsync("
-            };
-
-            foreach (var relativePath in governedFiles)
+            foreach (var relativePath in TypeScriptGovernanceGovernedFiles)
             {
                 var absolutePath = RootDirectory / relativePath.Replace('/', Path.DirectorySeparatorChar);
                 if (!File.Exists(absolutePath))
@@ -294,7 +306,7 @@ partial class BuildTask
                     mode = "official-sample-template-strict"
                 });
 
-                foreach (var marker in prohibitedMarkers)
+                foreach (var marker in TypeScriptGovernanceProhibitedMarkers)
                 {
                     if (source.Contains(marker, StringComparison.Ordinal))
                     {
@@ -345,7 +357,7 @@ partial class BuildTask
                 Assert.Fail("TypeScript declaration governance failed:\n" + string.Join('\n', failures));
         });
 
-    Target SampleTemplatePackageReferenceGovernance => _ => _
+    internal Target SampleTemplatePackageReferenceGovernance => _ => _
         .Description("Enforces package-only Agibuild.Fulora references in sample/template projects.")
         .Executes(() =>
         {
@@ -445,7 +457,7 @@ partial class BuildTask
             {
                 generatedAtUtc = DateTime.UtcNow,
                 invariantId = SampleTemplatePackageReferencePolicyInvariantId,
-                governedRoots = new[] { "samples", "templates" },
+                governedRoots = SampleTemplateGovernedRootsReportNames,
                 checks,
                 failureCount = failures.Count,
                 failures
@@ -458,7 +470,7 @@ partial class BuildTask
                 Assert.Fail("Sample/template package-reference governance failed:\n" + string.Join('\n', failures));
         });
 
-    Target OpenSpecStrictGovernance => _ => _
+    internal Target OpenSpecStrictGovernance => _ => _
         .Description("Runs OpenSpec strict validation as a hard governance gate.")
         .Executes(async () =>
         {
@@ -479,7 +491,7 @@ partial class BuildTask
             Serilog.Log.Information("OpenSpec strict governance report written to {Path}", OpenSpecStrictGovernanceReportFile);
         });
 
-    Target RuntimeCriticalPathExecutionGovernanceCi => _ => _
+    internal Target RuntimeCriticalPathExecutionGovernanceCi => _ => _
         .Description("Validates runtime critical-path execution evidence (Ci context).")
         .DependsOn(AutomationLaneReport)
         .Executes(() =>
@@ -487,7 +499,7 @@ partial class BuildTask
             ValidateRuntimeCriticalPathExecutionEvidence(includeCiPublishContext: false);
         });
 
-    Target RuntimeCriticalPathExecutionGovernanceCiPublish => _ => _
+    internal Target RuntimeCriticalPathExecutionGovernanceCiPublish => _ => _
         .Description("Validates runtime critical-path execution evidence (Ci + CiPublish contexts).")
         .DependsOn(AutomationLaneReport, NugetPackageTest)
         .Executes(() =>
@@ -495,7 +507,7 @@ partial class BuildTask
             ValidateRuntimeCriticalPathExecutionEvidence(includeCiPublishContext: true);
         });
 
-    void ValidateRuntimeCriticalPathExecutionEvidence(bool includeCiPublishContext)
+    private static void ValidateRuntimeCriticalPathExecutionEvidence(bool includeCiPublishContext)
     {
         TestResultsDirectory.CreateDirectory();
         if (!File.Exists(RuntimeCriticalPathManifestFile))
@@ -627,7 +639,7 @@ partial class BuildTask
             Assert.Fail("Runtime critical-path execution governance failed:\n" + string.Join('\n', failures));
     }
 
-    Target BridgeDistributionGovernance => _ => _
+    internal Target BridgeDistributionGovernance => _ => _
         .Description("Validates @agibuild/bridge npm package builds and imports across package managers and Node LTS.")
         .Executes(async () =>
         {
@@ -654,7 +666,7 @@ partial class BuildTask
             }
 
             // 2. Package-manager parity: pnpm and yarn consume smoke
-            foreach (var pm in new[] { "pnpm", "yarn" })
+            foreach (var pm in BridgeDistributionPackageManagers)
             {
                 var available = await IsToolAvailableAsync(pm);
                 if (!available)
@@ -765,7 +777,7 @@ partial class BuildTask
                 Assert.Fail("Bridge distribution governance failed:\n" + string.Join('\n', failures));
         });
 
-    Target DistributionReadinessGovernance => _ => _
+    internal Target DistributionReadinessGovernance => _ => _
         .Description("Evaluates deterministic package/distribution readiness before release orchestration.")
         .DependsOn(ValidatePackage)
         .Executes(() =>
@@ -982,7 +994,7 @@ partial class BuildTask
             }
         });
 
-    Target AdoptionReadinessGovernanceCi => _ => _
+    internal Target AdoptionReadinessGovernanceCi => _ => _
         .Description("Evaluates adoption-readiness signals in Ci lane.")
         .DependsOn(AutomationLaneReport, RuntimeCriticalPathExecutionGovernanceCi)
         .Executes(() => EvaluateAdoptionReadiness(
@@ -990,7 +1002,7 @@ partial class BuildTask
             producerTarget: "AdoptionReadinessGovernanceCi",
             expectedRuntimeLaneContext: LaneContextCi));
 
-    Target AdoptionReadinessGovernanceCiPublish => _ => _
+    internal Target AdoptionReadinessGovernanceCiPublish => _ => _
         .Description("Evaluates adoption-readiness signals in CiPublish lane.")
         .DependsOn(AutomationLaneReport, RuntimeCriticalPathExecutionGovernanceCiPublish)
         .Executes(() => EvaluateAdoptionReadiness(
@@ -998,7 +1010,7 @@ partial class BuildTask
             producerTarget: "AdoptionReadinessGovernanceCiPublish",
             expectedRuntimeLaneContext: LaneContextCiPublish));
 
-    void EvaluateAdoptionReadiness(string laneContext, string producerTarget, string expectedRuntimeLaneContext)
+    private static void EvaluateAdoptionReadiness(string laneContext, string producerTarget, string expectedRuntimeLaneContext)
     {
         TestResultsDirectory.CreateDirectory();
 
@@ -1169,7 +1181,7 @@ partial class BuildTask
         }
     }
 
-    Target ContinuousTransitionGateGovernance => _ => _
+    internal Target ContinuousTransitionGateGovernance => _ => _
         .Description("Validates closeout transition-gate parity across Ci/CiPublish with lane-aware diagnostics.")
         .DependsOn(ReleaseCloseoutSnapshot)
         .Executes(() =>
@@ -1345,7 +1357,7 @@ partial class BuildTask
                 Assert.Fail("Continuous transition gate governance failed:\n" + string.Join('\n', failures));
         });
 
-    static string ExtractDependsOnBlock(string buildSource, string targetName)
+    private static string ExtractDependsOnBlock(string buildSource, string targetName)
     {
         var match = Regex.Match(
             buildSource,
@@ -1357,7 +1369,7 @@ partial class BuildTask
         return match.Groups["deps"].Value;
     }
 
-    static (string CompletedPhase, string ActivePhase) ReadRoadmapTransitionState(string roadmap)
+    private static (string CompletedPhase, string ActivePhase) ReadRoadmapTransitionState(string roadmap)
     {
         var completedMatch = Regex.Match(roadmap, @"Completed phase id:\s*`(?<id>[^`]+)`", RegexOptions.Multiline);
         var activeMatch = Regex.Match(roadmap, @"Active phase id:\s*`(?<id>[^`]+)`", RegexOptions.Multiline);
@@ -1369,9 +1381,9 @@ partial class BuildTask
             activeMatch.Groups["id"].Value.Trim());
     }
 
-    static void ValidateTransitionField(
+    private static void ValidateTransitionField(
         IList<TransitionGateDiagnosticEntry> diagnostics,
-        IList<string> failures,
+        List<string> failures,
         string lane,
         string artifactPath,
         string expected,
@@ -1392,7 +1404,7 @@ partial class BuildTask
         failures.Add($"[{TransitionLaneProvenanceInvariantId}] Transition continuity mismatch for {fieldName}. Expected '{expected}', actual '{actual ?? "<null>"}'.");
     }
 
-    Target ReleaseCloseoutSnapshot => _ => _
+    internal Target ReleaseCloseoutSnapshot => _ => _
         .Description("Generates machine-readable CI evidence snapshot (v2) from test/coverage artifacts.")
         .DependsOn(Coverage, AutomationLaneReport, OpenSpecStrictGovernance)
         .Executes(() =>
@@ -1435,15 +1447,8 @@ partial class BuildTask
             var branchCoveragePct = ReadCoberturaBranchCoveragePercent(coberturaPath!);
 
             var archiveDirectory = RootDirectory / "openspec" / "changes" / "archive";
-            var completedPhaseCloseoutChangeIds = new[]
-            {
-                "sentry-crash-reporting",
-                "shared-state-management",
-                "enterprise-auth-patterns",
-                "plugin-quality-compatibility"
-            };
             var closeoutArchives = Directory.Exists(archiveDirectory)
-                ? completedPhaseCloseoutChangeIds
+                ? CompletedPhaseCloseoutChangeIds
                     .Select(changeId => Directory.GetDirectories(archiveDirectory)
                         .Select(Path.GetFileName)
                         .FirstOrDefault(name => name is not null && name.EndsWith(changeId, StringComparison.Ordinal)))
@@ -1529,7 +1534,7 @@ partial class BuildTask
             Serilog.Log.Information("CI evidence snapshot (v2) written to {Path}", CloseoutSnapshotFile);
         });
 
-    Target ReleaseOrchestrationGovernance => _ => _
+    internal Target ReleaseOrchestrationGovernance => _ => _
         .Description("Evaluates release-orchestration readiness and blocks publish side-effects when not ready.")
         .DependsOn(
             ReleaseCloseoutSnapshot,

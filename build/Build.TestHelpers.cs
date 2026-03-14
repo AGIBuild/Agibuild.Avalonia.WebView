@@ -9,9 +9,9 @@ using Nuke.Common.IO;
 using Nuke.Common.Tools.DotNet;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
-partial class BuildTask
+internal partial class BuildTask
 {
-    async Task RunContractAutomationTests(string trxFileName)
+    private async Task RunContractAutomationTests(string trxFileName)
     {
         await CleanupLingeringUnitTestProcessesAsync();
         await RunDotNetTestWithHangRecoveryAsync(
@@ -22,7 +22,7 @@ partial class BuildTask
             cleanupBetweenAttempts: CleanupLingeringUnitTestProcessesAsync);
     }
 
-    async Task RunRuntimeAutomationTests(string trxFileName)
+    private async Task RunRuntimeAutomationTests(string trxFileName)
     {
         await CleanupLingeringIntegrationAutomationProcessesAsync();
         await RunDotNetTestWithHangRecoveryAsync(
@@ -33,7 +33,7 @@ partial class BuildTask
             cleanupBetweenAttempts: CleanupLingeringIntegrationAutomationProcessesAsync);
     }
 
-    async Task RunCoverageUnitTestsAsync(AbsolutePath resultsDirectory, string trxFileName)
+    private async Task RunCoverageUnitTestsAsync(AbsolutePath resultsDirectory, string trxFileName)
     {
         await CleanupLingeringUnitTestProcessesAsync();
         await RunDotNetTestWithHangRecoveryAsync(
@@ -46,7 +46,7 @@ partial class BuildTask
             cleanupBetweenAttempts: CleanupLingeringUnitTestProcessesAsync);
     }
 
-    async Task RunDotNetTestWithHangRecoveryAsync(
+    private async Task RunDotNetTestWithHangRecoveryAsync(
         AbsolutePath projectFile,
         AbsolutePath resultsDirectory,
         string trxFileName,
@@ -93,7 +93,7 @@ partial class BuildTask
         }
     }
 
-    async Task CleanupLingeringUnitTestProcessesAsync()
+    private async Task CleanupLingeringUnitTestProcessesAsync()
     {
         if (OperatingSystem.IsWindows())
             return;
@@ -104,7 +104,7 @@ partial class BuildTask
         await CleanupProcessesByMarkerAsync(testHostPath);
     }
 
-    async Task CleanupLingeringIntegrationAutomationProcessesAsync()
+    private async Task CleanupLingeringIntegrationAutomationProcessesAsync()
     {
         if (OperatingSystem.IsWindows())
             return;
@@ -115,7 +115,7 @@ partial class BuildTask
         await CleanupProcessesByMarkerAsync(testHostPath);
     }
 
-    static async Task CleanupProcessesByMarkerAsync(string marker)
+    private static async Task CleanupProcessesByMarkerAsync(string marker)
     {
         try
         {
@@ -131,7 +131,7 @@ partial class BuildTask
         }
     }
 
-    async Task RunGtkSmokeDesktopAppAsync()
+    private async Task RunGtkSmokeDesktopAppAsync()
     {
         TestResultsDirectory.CreateDirectory();
 
@@ -144,7 +144,7 @@ partial class BuildTask
         File.WriteAllText(TestResultsDirectory / "gtk-smoke.log", output);
     }
 
-    static void RunLaneWithReporting(
+    private static void RunLaneWithReporting(
         string lane,
         AbsolutePath project,
         Action run,
@@ -164,12 +164,12 @@ partial class BuildTask
         }
     }
 
-    static async Task RunLaneWithReportingAsync(
+    private static async Task RunLaneWithReportingAsync(
         string lane,
         AbsolutePath project,
         Func<Task> run,
         IList<AutomationLaneResult> lanes,
-        IList<string> failures)
+        List<string> failures)
     {
         try
         {
@@ -184,7 +184,7 @@ partial class BuildTask
         }
     }
 
-    static (int Total, int Passed, int Failed, int Skipped) ReadTrxCounters(AbsolutePath trxPath)
+    private static (int Total, int Passed, int Failed, int Skipped) ReadTrxCounters(AbsolutePath trxPath)
     {
         var doc = XDocument.Load(trxPath);
         var counters = doc.Root?
@@ -204,7 +204,7 @@ partial class BuildTask
             Skipped: ParseIntOrZero(counters.Attribute("notExecuted")));
     }
 
-    static HashSet<string> ReadPassedTestNamesFromTrx(AbsolutePath trxPath)
+    private static HashSet<string> ReadPassedTestNamesFromTrx(AbsolutePath trxPath)
     {
         var doc = XDocument.Load(trxPath);
         var ns = XNamespace.Get("http://microsoft.com/schemas/VisualStudio/TeamTest/2010");
@@ -220,7 +220,7 @@ partial class BuildTask
             .ToHashSet(StringComparer.Ordinal);
     }
 
-    static bool HasPassedTestMethod(HashSet<string> passedTests, string testMethod)
+    private static bool HasPassedTestMethod(HashSet<string> passedTests, string testMethod)
     {
         return passedTests.Any(name =>
             name.Equals(testMethod, StringComparison.Ordinal)
@@ -228,7 +228,7 @@ partial class BuildTask
             || name.Contains(testMethod, StringComparison.Ordinal));
     }
 
-    static double ReadCoberturaLineCoveragePercent(AbsolutePath coberturaPath)
+    private static double ReadCoberturaLineCoveragePercent(AbsolutePath coberturaPath)
     {
         var doc = XDocument.Load(coberturaPath);
         var lineRateAttr = doc.Root?.Attribute("line-rate")?.Value;
@@ -246,7 +246,7 @@ partial class BuildTask
         return lineRate * 100;
     }
 
-    static double ReadCoberturaBranchCoveragePercent(AbsolutePath coberturaPath)
+    private static double ReadCoberturaBranchCoveragePercent(AbsolutePath coberturaPath)
     {
         var doc = XDocument.Load(coberturaPath);
         var branchRateAttr = doc.Root?.Attribute("branch-rate")?.Value;

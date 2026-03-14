@@ -7,9 +7,9 @@ using Nuke.Common.IO;
 using Nuke.Common.Tools.DotNet;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
-partial class BuildTask
+internal partial class BuildTask
 {
-    Target PackTemplate => _ => _
+    internal Target PackTemplate => _ => _
         .Description("Packs the dotnet new template into a NuGet package.")
         .Produces(PackageOutputDirectory / "*.nupkg")
         .Executes(() =>
@@ -27,14 +27,14 @@ partial class BuildTask
             });
         });
 
-    Target PublishTemplate => _ => _
+    internal Target PublishTemplate => _ => _
         .Description("Publishes the template NuGet package to the configured source.")
         .DependsOn(PackTemplate)
         .Requires(() => NuGetApiKey)
         .Executes(() =>
         {
             var templatePackages = PackageOutputDirectory.GlobFiles("Agibuild.Fulora.Templates.*.nupkg")
-                .Where(p => !p.Name.EndsWith(".symbols.nupkg"));
+                .Where(p => !p.Name.EndsWith(".symbols.nupkg", StringComparison.OrdinalIgnoreCase));
 
             foreach (var package in templatePackages)
             {
@@ -46,7 +46,7 @@ partial class BuildTask
             }
         });
 
-    Target TemplateE2E => _ => _
+    internal Target TemplateE2E => _ => _
         .Description("End-to-end test: pack → install template → create project → inject tests → build → test → cleanup.")
         .DependsOn(Pack)
         .Executes(async () =>
@@ -152,7 +152,7 @@ partial class BuildTask
             }
         });
 
-    static async Task ValidateFrameworkWebBuildAsync(AbsolutePath tempRoot, string framework, string appName, string webProjectSuffix)
+    private static async Task ValidateFrameworkWebBuildAsync(AbsolutePath tempRoot, string framework, string appName, string webProjectSuffix)
     {
         var projectDir = tempRoot / appName;
         Serilog.Log.Information("Creating {Framework} template project at {Path}...", framework, projectDir);
@@ -169,7 +169,7 @@ partial class BuildTask
         await RunNpmCheckedAsync(["run", "build"], webProjectDir, TimeSpan.FromMinutes(3));
     }
 
-    static string GenerateE2ETestCode() => """
+    private static string GenerateE2ETestCode() => """
         using Agibuild.Fulora;
         using SmokeApp.Bridge;
         using Xunit;

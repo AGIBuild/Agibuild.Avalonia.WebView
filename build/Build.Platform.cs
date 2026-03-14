@@ -4,14 +4,15 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Build;
 using Nuke.Common;
 using Nuke.Common.IO;
 using Nuke.Common.Tools.DotNet;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
-partial class BuildTask
+internal partial class BuildTask
 {
-    Target Start => _ => _
+    internal Target Start => _ => _
         .Description("Launches the E2E integration test desktop app.")
         .DependsOn(Build)
         .Executes(() =>
@@ -24,7 +25,7 @@ partial class BuildTask
                 .SetConfiguration(Configuration));
         });
 
-    Target StartAndroid => _ => _
+    internal Target StartAndroid => _ => _
         .Description("Starts an Android emulator, builds the Android IT test app, and installs it.")
         .Executes(async () =>
         {
@@ -91,7 +92,7 @@ partial class BuildTask
             Serilog.Log.Information("Android test app deployed and launched successfully.");
         });
 
-    Target StartIOS => _ => _
+    internal Target StartIOS => _ => _
         .Description("Builds the iOS IT test app, deploys it to an iOS Simulator, and launches it.")
         .Executes(async () =>
         {
@@ -236,7 +237,7 @@ partial class BuildTask
                          / "bin" / Configuration / "net10.0-ios" / "iossimulator-arm64";
             var appBundles = appDir.GlobDirectories("*.app").ToList();
 
-            if (!appBundles.Any())
+            if (appBundles.Count == 0)
             {
                 appDir = (AbsolutePath)(Path.GetDirectoryName(E2EiOSProject)!)
                          / "bin" / Configuration / "net10.0-ios" / "iossimulator-x64";
@@ -269,7 +270,7 @@ partial class BuildTask
             Serilog.Log.Information("iOS test app deployed and launched on simulator.");
         });
 
-    static async Task WaitForAndroidBootAsync(string adbPath, int timeoutMinutes = 3)
+    private static async Task WaitForAndroidBootAsync(string adbPath, int timeoutMinutes = 3)
     {
         Serilog.Log.Information("Waiting for emulator to boot...");
         var timeout = TimeSpan.FromMinutes(timeoutMinutes);
@@ -302,7 +303,7 @@ partial class BuildTask
     /// Launch an Android app via monkey, retrying until the activity manager is available.
     /// After sys.boot_completed=1 there is a short window where system services are still initializing.
     /// </summary>
-    static async Task LaunchAndroidAppAsync(string adbPath, string packageName, int maxRetries = 5)
+    private static async Task LaunchAndroidAppAsync(string adbPath, string packageName, int maxRetries = 5)
     {
         for (var attempt = 1; attempt <= maxRetries; attempt++)
         {
