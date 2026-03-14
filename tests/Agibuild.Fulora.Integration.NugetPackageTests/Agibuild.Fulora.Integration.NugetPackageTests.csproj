@@ -13,6 +13,14 @@
       not whatever highest version exists on nuget.org. The build target passes this property.
     -->
     <AgibuildPackageVersion Condition="'$(AgibuildPackageVersion)' == ''">*-*</AgibuildPackageVersion>
+    <!--
+      This project is a consumer smoke test for the NuGet package, not a trim-compatibility
+      validator. IL2104/IL3053 are linker summary warnings indicating that consumed assemblies
+      (Agibuild.Fulora.Runtime) are not yet fully trim/AOT-safe. These warnings remain visible
+      in the build output but should not fail the consumer build. Making Runtime fully
+      AOT-compatible is tracked separately.
+    -->
+    <WarningsNotAsErrors>$(WarningsNotAsErrors);IL2104;IL3053</WarningsNotAsErrors>
   </PropertyGroup>
 
   <ItemGroup>
