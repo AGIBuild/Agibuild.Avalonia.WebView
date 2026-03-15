@@ -485,16 +485,17 @@ jobs:
           def test_color(failed):
               return "brightgreen" if failed == 0 else "red"
 
-          trx_dir = Path("test-results")
-          unit_trx = trx_dir / "unit-tests.trx"
-          integration_trx = None
-          for name in ["runtime-automation.trx", "integration-tests.trx"]:
-              candidate = trx_dir / name
-              if candidate.exists():
-                  integration_trx = candidate
-                  break
+          def find_trx(name, dirs):
+              for d in dirs:
+                  for p in d.rglob(name):
+                      return p
+              return None
 
-          unit = parse_trx_counters(unit_trx) if unit_trx.exists() else None
+          search_dirs = [Path("test-results"), Path("coverage-report")]
+          unit_trx = find_trx("unit-tests.trx", search_dirs)
+          integration_trx = find_trx("runtime-automation.trx", search_dirs) or find_trx("integration-tests.trx", search_dirs)
+
+          unit = parse_trx_counters(unit_trx) if unit_trx else None
           integration = parse_trx_counters(integration_trx) if integration_trx else None
 
           cob_file = find_cobertura(Path("coverage-report"))
