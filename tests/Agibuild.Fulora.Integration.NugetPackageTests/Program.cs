@@ -1,6 +1,6 @@
-using Avalonia;
-using Agibuild.Fulora;
 using System;
+using Agibuild.Fulora;
+using Avalonia;
 
 namespace Agibuild.Fulora.Integration.NugetPackageTests;
 

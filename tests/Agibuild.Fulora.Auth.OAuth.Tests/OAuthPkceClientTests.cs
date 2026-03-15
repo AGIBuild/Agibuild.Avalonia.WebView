@@ -98,7 +98,7 @@ public class OAuthPkceClientTests
         var httpClient = new HttpClient(handler);
         var client = new OAuthPkceClient(httpClient, CreateOptions());
 
-        var result = await client.ExchangeCodeAsync("auth-code", "code-verifier");
+        var result = await client.ExchangeCodeAsync("auth-code", "code-verifier", TestContext.Current.CancellationToken);
 
         Assert.Equal("access-123", result.AccessToken);
         Assert.Equal("refresh-456", result.RefreshToken);
@@ -114,7 +114,7 @@ public class OAuthPkceClientTests
         var client = new OAuthPkceClient(httpClient, CreateOptions());
 
         var ex = await Assert.ThrowsAsync<OAuthException>(() =>
-            client.ExchangeCodeAsync("bad-code", "verifier"));
+            client.ExchangeCodeAsync("bad-code", "verifier", TestContext.Current.CancellationToken));
 
         Assert.Equal("invalid_grant", ex.ErrorCode);
         Assert.Equal("Code expired", ex.ErrorDescription);
@@ -128,7 +128,7 @@ public class OAuthPkceClientTests
         var client = new OAuthPkceClient(httpClient, CreateOptions());
 
         var ex = await Assert.ThrowsAsync<OAuthException>(() =>
-            client.ExchangeCodeAsync("code", "verifier"));
+            client.ExchangeCodeAsync("code", "verifier", TestContext.Current.CancellationToken));
 
         Assert.Contains("500", ex.Message);
     }
@@ -147,7 +147,7 @@ public class OAuthPkceClientTests
         var httpClient = new HttpClient(handler);
         var client = new OAuthPkceClient(httpClient, CreateOptions());
 
-        var result = await client.RefreshTokenAsync("old-refresh-token");
+        var result = await client.RefreshTokenAsync("old-refresh-token", TestContext.Current.CancellationToken);
 
         Assert.Equal("new-access", result.AccessToken);
         Assert.Equal("new-refresh", result.RefreshToken);
@@ -162,7 +162,7 @@ public class OAuthPkceClientTests
         var client = new OAuthPkceClient(httpClient, CreateOptions());
 
         var ex = await Assert.ThrowsAsync<OAuthException>(() =>
-            client.RefreshTokenAsync("expired-token"));
+            client.RefreshTokenAsync("expired-token", TestContext.Current.CancellationToken));
 
         Assert.Equal("invalid_grant", ex.ErrorCode);
     }
@@ -175,7 +175,7 @@ public class OAuthPkceClientTests
         var httpClient = new HttpClient(handler);
         var client = new OAuthPkceClient(httpClient, CreateOptions());
 
-        await client.ExchangeCodeAsync("my-code", "my-verifier");
+        await client.ExchangeCodeAsync("my-code", "my-verifier", TestContext.Current.CancellationToken);
 
         Assert.NotNull(handler.LastRequestContent);
         Assert.Contains("grant_type=authorization_code", handler.LastRequestContent);
