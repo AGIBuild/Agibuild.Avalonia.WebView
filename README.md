@@ -79,7 +79,7 @@ In `Program.cs`:
 ```csharp
 AppBuilder.Configure<App>()
     .UsePlatformDetect()
-    .UseAgibuildWebView()
+    .UseFulora()
     .StartWithClassicDesktopLifetime(args);
 ```
 

@@ -26,7 +26,7 @@ public static class ServiceCollectionExtensions
     /// </para>
     /// <para>
     /// After building the <see cref="IServiceProvider"/>, call
-    /// <c>provider.UseAgibuildWebView()</c> (or
+    /// <c>provider.UseFulora()</c> (or
     /// <see cref="WebViewEnvironment.Initialize(ILoggerFactory?)"/> directly) so that XAML
     /// <c>&lt;agw:WebView /&gt;</c> controls automatically pick up <see cref="ILoggerFactory"/>
     /// and other shared services from DI.

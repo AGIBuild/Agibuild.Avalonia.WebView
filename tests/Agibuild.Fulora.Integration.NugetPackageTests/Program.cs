@@ -15,5 +15,5 @@ internal class Program
             .UsePlatformDetect()
             .WithInterFont()
             .LogToTrace()
-            .UseAgibuildWebView(); // Initialize WebView environment via DI
+            .UseFulora(); // Initialize WebView environment via DI
 }

@@ -1,13 +1,11 @@
 using Agibuild.Fulora;
-using Agibuild.Fulora.AI;
-using Agibuild.Fulora.AI.Ollama;
 using Agibuild.Fulora.Shell;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
 using AvaloniAiChat.Bridge.Services;
 using Microsoft.Extensions.AI;
-using Microsoft.Extensions.DependencyInjection;
+using OllamaSharp;
 
 namespace AvaloniAiChat.Desktop;
 
@@ -24,19 +22,8 @@ public partial class MainWindow : Window
         Loaded += async (_, _) =>
         {
             var runtime = ResolveRuntime();
-
-            var services = new ServiceCollection();
-            services.AddFuloraAi(ai =>
-            {
-                runtime.ConfigureProvider(ai);
-                ai.AddResilience();
-                ai.AddMetering();
-            });
-            var sp = services.BuildServiceProvider();
-
-            var registry = sp.GetRequiredService<IAiProviderRegistry>();
             var chatService = new AiChatService(
-                registry.GetChatClient(),
+                runtime.CreateChatClient(),
                 runtime.BackendName,
                 runtime.Endpoint,
                 runtime.RequiredModel,
@@ -119,7 +106,7 @@ public partial class MainWindow : Window
                 new Uri("http://localhost:11434"),
                 "echo-demo",
                 "Echo (demo mode)",
-                ai => ai.AddChatClient("default", new EchoChatClient()));
+                () => new EchoChatClient());
         }
 
         var endpoint = new Uri(Environment.GetEnvironmentVariable("AI__ENDPOINT") ?? "http://localhost:11434");
@@ -129,7 +116,7 @@ public partial class MainWindow : Window
             endpoint,
             model,
             $"Ollama ({model})",
-            ai => ai.AddOllama("default", endpoint, model));
+            () => new OllamaApiClient(endpoint, model));
     }
 
     private sealed record AiRuntime(
@@ -137,7 +124,7 @@ public partial class MainWindow : Window
         Uri Endpoint,
         string RequiredModel,
         string BackendName,
-        Action<FuloraAiBuilder> ConfigureProvider);
+        Func<IChatClient> CreateChatClient);
 
     private void AlignInitialBackgroundToSystemTheme()
     {

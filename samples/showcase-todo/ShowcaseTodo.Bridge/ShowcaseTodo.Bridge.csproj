@@ -6,7 +6,6 @@
     <Nullable>enable</Nullable>
     <RootNamespace>ShowcaseTodo.Bridge</RootNamespace>
     <BridgeTypeScriptOutputDir>$(MSBuildProjectDirectory)\..\ShowcaseTodo.Web\src\bridge\generated</BridgeTypeScriptOutputDir>
-    <RestoreAdditionalProjectSources>$(RestoreAdditionalProjectSources);$(MSBuildThisFileDirectory)..\..\..\artifacts\packages</RestoreAdditionalProjectSources>
   </PropertyGroup>
 
   <ItemGroup>

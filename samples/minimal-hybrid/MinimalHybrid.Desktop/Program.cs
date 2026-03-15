@@ -3,7 +3,7 @@ using Avalonia;
 
 namespace MinimalHybrid.Desktop;
 
-class Program
+internal class Program
 {
     [STAThread]
     public static void Main(string[] args) => BuildAvaloniaApp()

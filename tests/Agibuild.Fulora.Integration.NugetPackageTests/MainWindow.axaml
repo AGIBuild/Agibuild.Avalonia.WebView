@@ -7,7 +7,7 @@
     <TextBlock x:Name="StatusText" DockPanel.Dock="Top" Margin="8"
                FontSize="14" Foreground="Gray"
                Text="Starting smoke test..." />
-    <!-- WebView created via XAML — relies on UseAgibuildWebView() DI initialization -->
+    <!-- WebView created via XAML — relies on UseFulora() DI initialization -->
     <agw:WebView x:Name="WebViewControl" />
   </DockPanel>
 </Window>

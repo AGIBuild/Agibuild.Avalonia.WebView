@@ -1,8 +1,9 @@
+using Agibuild.Fulora;
 using Avalonia;
 
 namespace HybridApp.Desktop;
 
-class Program
+internal class Program
 {
     [STAThread]
     public static void Main(string[] args) => BuildAvaloniaApp()
@@ -11,5 +12,6 @@ class Program
     public static AppBuilder BuildAvaloniaApp()
         => AppBuilder.Configure<App>()
             .UsePlatformDetect()
+            .UseAgibuildWebView()
             .LogToTrace();
 }

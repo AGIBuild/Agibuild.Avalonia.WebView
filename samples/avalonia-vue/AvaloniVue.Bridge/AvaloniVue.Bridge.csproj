@@ -5,7 +5,6 @@
     <Nullable>enable</Nullable>
     <RootNamespace>AvaloniVue.Bridge</RootNamespace>
     <BridgeTypeScriptOutputDir>$(MSBuildProjectDirectory)\..\AvaloniVue.Web\src\bridge\generated</BridgeTypeScriptOutputDir>
-    <RestoreAdditionalProjectSources>$(RestoreAdditionalProjectSources);$(MSBuildThisFileDirectory)..\..\..\artifacts\packages</RestoreAdditionalProjectSources>
   </PropertyGroup>
 
   <ItemGroup>

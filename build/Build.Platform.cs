@@ -14,7 +14,6 @@ internal partial class BuildTask
 {
     internal Target Start => _ => _
         .Description("Launches the E2E integration test desktop app.")
-        .DependsOn(Build)
         .Executes(() =>
         {
             DotNetRestore(s => s
@@ -29,18 +28,36 @@ internal partial class BuildTask
         .Description("Starts an Android emulator, builds the Android IT test app, and installs it.")
         .Executes(async () =>
         {
+            if (!await HasDotNetWorkloadAsync("android"))
+            {
+                Assert.Fail("Android .NET workload is not installed. Run: dotnet workload install android");
+            }
+
             var emulatorPath = Path.Combine(AndroidSdkRoot, "emulator", "emulator");
             var adbPath = Path.Combine(AndroidSdkRoot, "platform-tools", "adb");
+            var emulatorCommand = File.Exists(emulatorPath) ? emulatorPath : "emulator";
+            var adbCommand = File.Exists(adbPath) ? adbPath : "adb";
 
-            Assert.FileExists(emulatorPath, $"Android emulator not found at {emulatorPath}. Set --android-sdk-root.");
-            Assert.FileExists(adbPath, $"adb not found at {adbPath}. Set --android-sdk-root.");
+            if (!await IsToolAvailableAsync(emulatorCommand))
+            {
+                Assert.Fail(
+                    $"Android emulator tool not found. Checked '{emulatorPath}' and PATH entry 'emulator'. " +
+                    "Set --android-sdk-root or install Android command-line tools.");
+            }
+
+            if (!await IsToolAvailableAsync(adbCommand))
+            {
+                Assert.Fail(
+                    $"adb tool not found. Checked '{adbPath}' and PATH entry 'adb'. " +
+                    "Set --android-sdk-root or install Android platform-tools.");
+            }
 
             // 1. Resolve AVD name
             var avdName = AndroidAvd;
             if (string.IsNullOrEmpty(avdName))
             {
                 Serilog.Log.Information("No --android-avd specified, detecting available AVDs...");
-                var listResult = await RunProcessAsync(emulatorPath, ["-list-avds"]);
+                var listResult = await RunProcessStdoutCheckedAsync(emulatorCommand, ["-list-avds"]);
                 var avds = listResult
                     .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
                     .Where(l => !l.StartsWith("INFO", StringComparison.OrdinalIgnoreCase))
@@ -52,7 +69,7 @@ internal partial class BuildTask
             }
 
             // 2. Check if emulator is already running
-            var devicesOutput = await RunProcessAsync(adbPath, ["devices"]);
+            var devicesOutput = await RunProcessStdoutCheckedAsync(adbCommand, ["devices"]);
             var hasRunningEmulator = devicesOutput
                 .Split('\n')
                 .Any(l => l.StartsWith("emulator-", StringComparison.Ordinal) && l.Contains("device"));
@@ -69,7 +86,7 @@ internal partial class BuildTask
                 {
                     StartInfo = new ProcessStartInfo
                     {
-                        FileName = emulatorPath,
+                        FileName = emulatorCommand,
                         Arguments = $"-avd {avdName} -no-snapshot-load -no-audio",
                         UseShellExecute = true,
                     }
@@ -78,16 +95,16 @@ internal partial class BuildTask
             }
 
             // 4. Wait for device to fully boot (always, even if emulator was already running)
-            await WaitForAndroidBootAsync(adbPath);
+            await WaitForAndroidBootAsync(adbCommand);
 
             // 5. Build and install the Android test app
             Serilog.Log.Information("Building and installing Android test app...");
-            await RunProcessAsync("dotnet", ["build", E2EAndroidProject, "--configuration", Configuration, "-t:Install"]);
+            await RunProcessCheckedAsync("dotnet", ["build", E2EAndroidProject, "--configuration", Configuration, "-t:Install"]);
 
             // 6. Launch the app (with retry to handle activity manager startup delay)
             const string packageName = "com.CompanyName.Agibuild.Fulora.Integration.Tests";
             Serilog.Log.Information("Launching {Package}...", packageName);
-            await LaunchAndroidAppAsync(adbPath, packageName);
+            await LaunchAndroidAppAsync(adbCommand, packageName);
 
             Serilog.Log.Information("Android test app deployed and launched successfully.");
         });
@@ -100,16 +117,30 @@ internal partial class BuildTask
             {
                 Assert.Fail("StartIOS requires macOS with Xcode installed.");
             }
+            if (!await IsToolAvailableAsync("xcrun"))
+            {
+                Assert.Fail("xcrun is not available. Install Xcode command-line tools and ensure xcrun is on PATH.");
+            }
+            if (!await HasDotNetWorkloadAsync("ios"))
+            {
+                Assert.Fail("iOS .NET workload is not installed. Run: dotnet workload install ios");
+            }
+            if (!await HasAppleIosSdkInstalledAsync())
+            {
+                Assert.Fail("Apple iOS SDK is not available. Install Xcode and run `xcode-select --switch /Applications/Xcode.app`.");
+            }
 
             // 1. Resolve simulator device
-            var deviceName = iOSSimulator;
+            var deviceName = IosSimulator;
             string deviceUdid;
             var simctlTimeout = TimeSpan.FromSeconds(15);
 
             if (string.IsNullOrEmpty(deviceName))
             {
-                Serilog.Log.Information("No --i-o-s-simulator specified, detecting available simulators...");
-                var listJson = await RunProcessAsync("xcrun", ["simctl", "list", "devices", "available", "--json"], timeout: simctlTimeout);
+                Serilog.Log.Information("No --ios-simulator specified, detecting available simulators...");
+                var listJson = await RunProcessStdoutCheckedAsync("xcrun", ["simctl", "list", "devices", "available", "--json"], timeout: simctlTimeout);
+                if (string.IsNullOrWhiteSpace(listJson))
+                    Assert.Fail("xcrun simctl returned empty output. Ensure Xcode simulators are installed.");
 
                 var jsonDoc = JsonDocument.Parse(listJson);
                 var devicesObj = jsonDoc.RootElement.GetProperty("devices");
@@ -152,7 +183,9 @@ internal partial class BuildTask
             else
             {
                 Serilog.Log.Information("Looking up simulator: {Name}...", deviceName);
-                var listJson = await RunProcessAsync("xcrun", ["simctl", "list", "devices", "available", "--json"], timeout: simctlTimeout);
+                var listJson = await RunProcessStdoutCheckedAsync("xcrun", ["simctl", "list", "devices", "available", "--json"], timeout: simctlTimeout);
+                if (string.IsNullOrWhiteSpace(listJson))
+                    Assert.Fail("xcrun simctl returned empty output. Ensure Xcode simulators are installed.");
                 var jsonDoc = JsonDocument.Parse(listJson);
                 var devicesObj = jsonDoc.RootElement.GetProperty("devices");
 
@@ -186,7 +219,9 @@ internal partial class BuildTask
             }
 
             // 2. Boot the simulator if not already booted
-            var deviceState = await RunProcessAsync("xcrun", ["simctl", "list", "devices", "--json"], timeout: TimeSpan.FromSeconds(10));
+            var deviceState = await RunProcessStdoutCheckedAsync("xcrun", ["simctl", "list", "devices", "--json"], timeout: TimeSpan.FromSeconds(10));
+            if (string.IsNullOrWhiteSpace(deviceState))
+                Assert.Fail("xcrun simctl returned empty device state output.");
             if (!deviceState.Contains($"\"{deviceUdid}\"") || !deviceState.Contains("\"state\" : \"Booted\""))
             {
                 var stateJson = JsonDocument.Parse(deviceState);
@@ -211,9 +246,9 @@ internal partial class BuildTask
                 if (!isBooted)
                 {
                     Serilog.Log.Information("Booting simulator {Udid}...", deviceUdid);
-                    await RunProcessAsync("xcrun", ["simctl", "boot", deviceUdid], timeout: TimeSpan.FromSeconds(30));
+                    await RunProcessCheckedAsync("xcrun", ["simctl", "boot", deviceUdid], timeout: TimeSpan.FromSeconds(30));
 
-                    try { await RunProcessAsync("open", ["-a", "Simulator"], timeout: TimeSpan.FromSeconds(5)); }
+                    try { await RunProcessCheckedAsync("open", ["-a", "Simulator"], timeout: TimeSpan.FromSeconds(5)); }
                     catch { /* Simulator.app may already be open */ }
 
                     await Task.Delay(3000);
@@ -250,7 +285,7 @@ internal partial class BuildTask
 
             // 5. Install the app on the simulator
             Serilog.Log.Information("Installing app on simulator...");
-            await RunProcessAsync("xcrun", ["simctl", "install", deviceUdid, appBundle], timeout: TimeSpan.FromMinutes(2));
+            await RunProcessCheckedAsync("xcrun", ["simctl", "install", deviceUdid, appBundle], timeout: TimeSpan.FromMinutes(2));
 
             // 6. Launch the app
             const string bundleId = "companyName.Agibuild.Fulora.Integration.Tests";

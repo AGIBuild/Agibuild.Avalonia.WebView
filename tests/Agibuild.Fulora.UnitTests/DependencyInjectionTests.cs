@@ -59,14 +59,14 @@ public sealed class DependencyInjectionTests : IDisposable
     }
 
     [Fact]
-    public void UseAgibuildWebView_initializes_WebViewEnvironment_LoggerFactory()
+    public void UseFulora_initializes_WebViewEnvironment_LoggerFactory()
     {
         var services = new ServiceCollection();
         services.AddLogging(b => b.AddProvider(NullLoggerProvider.Instance));
         services.AddWebView();
 
         using var provider = services.BuildServiceProvider();
-        provider.UseAgibuildWebView();
+        provider.UseFulora();
 
         Assert.NotNull(WebViewEnvironment.LoggerFactory);
     }

@@ -115,6 +115,26 @@ internal partial class BuildTask
         return combined;
     }
 
+    private static async Task<string> RunProcessStdoutCheckedAsync(
+        string fileName,
+        string[] arguments,
+        string? workingDirectory = null,
+        TimeSpan? timeout = null)
+    {
+        timeout ??= TimeSpan.FromSeconds(30);
+        var result = await Runner.RunAsync(
+            new ProcessCommand(fileName, arguments, workingDirectory, timeout));
+
+        if (!result.IsSuccess)
+        {
+            var combined = CombineOutput(result.StandardOutput, result.StandardError);
+            throw new InvalidOperationException(
+                $"Process '{fileName} {string.Join(' ', arguments)}' failed with exit code {result.ExitCode}.\n{combined}");
+        }
+
+        return result.StandardOutput;
+    }
+
     // ──────────────────────────── npm / package-manager helpers ────────────────────────────
 
     private static Task<string> RunNpmCaptureAllAsync(

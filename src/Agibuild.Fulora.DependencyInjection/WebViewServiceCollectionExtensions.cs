@@ -25,14 +25,22 @@ public static class WebViewServiceCollectionExtensions
     /// services.AddLogging(b =&gt; b.AddConsole());
     /// services.AddFulora();
     /// var provider = services.BuildServiceProvider();
-    /// provider.UseAgibuildWebView(); // ← initializes global WebView config
+    /// provider.UseFulora(); // ← initializes global WebView config
     /// </code>
     /// </example>
     /// </summary>
-    public static IServiceProvider UseAgibuildWebView(this IServiceProvider provider)
+    public static IServiceProvider UseFulora(this IServiceProvider provider)
     {
         ArgumentNullException.ThrowIfNull(provider);
         WebViewEnvironment.Initialize(provider.GetService<ILoggerFactory>());
         return provider;
     }
+
+    /// <summary>
+    /// Backward-compatible alias for <see cref="UseFulora(IServiceProvider)"/>.
+    /// </summary>
+    /// <param name="provider">Built service provider.</param>
+    /// <returns>The same <see cref="IServiceProvider"/> instance.</returns>
+    public static IServiceProvider UseAgibuildWebView(this IServiceProvider provider)
+        => UseFulora(provider);
 }

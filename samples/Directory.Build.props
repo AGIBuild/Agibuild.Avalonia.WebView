@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <!-- Samples are runnable demos, not API packages; disable XML doc generation to avoid CS1591 build blockers. -->
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+</Project>

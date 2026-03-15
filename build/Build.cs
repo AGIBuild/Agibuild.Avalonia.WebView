@@ -58,7 +58,7 @@ internal sealed partial class BuildTask : NukeBuild
     private readonly string? AndroidAvd = null;
 
     [Parameter("iOS Simulator device name. Default: auto-detect first available iPhone simulator.")]
-    private readonly string? iOSSimulator = null;
+    private readonly string? IosSimulator = null;
 
     [Parameter("Android SDK root path. Default: ~/Library/Android/sdk (macOS) or ANDROID_HOME env var.")]
     private readonly string AndroidSdkRoot = ResolveAndroidSdkRoot();
