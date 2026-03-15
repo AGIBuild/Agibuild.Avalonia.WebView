@@ -127,6 +127,22 @@ public sealed class BridgeErrorDiagnosticTests
         Assert.Contains("JsonSerializable", serialization.Hint);
     }
 
+    [Theory]
+    [InlineData(BridgeErrorCode.ServiceNotFound, -32601)]
+    [InlineData(BridgeErrorCode.MethodNotFound, -32601)]
+    [InlineData(BridgeErrorCode.ParameterMismatch, -32602)]
+    [InlineData(BridgeErrorCode.SerializationError, -32602)]
+    [InlineData(BridgeErrorCode.InvocationError, -32603)]
+    [InlineData(BridgeErrorCode.TimeoutError, -32603)]
+    [InlineData(BridgeErrorCode.CancellationError, -32800)]
+    [InlineData(BridgeErrorCode.PermissionDenied, -32603)]
+    [InlineData(BridgeErrorCode.RateLimitExceeded, -32029)]
+    [InlineData(BridgeErrorCode.Unknown, -32603)]
+    public void ToJsonRpcCode_maps_all_error_codes_correctly(BridgeErrorCode code, int expectedRpcCode)
+    {
+        Assert.Equal(expectedRpcCode, BridgeErrorDiagnostic.ToJsonRpcCode(code));
+    }
+
     [Fact]
     public void Method_not_found_response_includes_diagnostic_when_EnableDevToolsDiagnostics_true()
     {
