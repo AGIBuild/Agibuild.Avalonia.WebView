@@ -64,7 +64,7 @@ public sealed class AutomationLaneGovernanceTests
         var scenarioIds = ExtractStringIds(scenarios, "id");
         AssertContainsAll(scenarioIds, requiredScenarioIds, RuntimeCriticalPathScenarioPresence, manifestPath);
 
-        var validCiContexts = new HashSet<string>(StringComparer.Ordinal) { "Ci", "CiPublish" };
+        var validCiContexts = new HashSet<string>(StringComparer.Ordinal) { "Ci" };
 
         foreach (var scenario in scenarios.EnumerateArray())
         {
@@ -74,9 +74,6 @@ public sealed class AutomationLaneGovernanceTests
             var ciContext = scenario.TryGetProperty("ciContext", out var ciContextNode) ? ciContextNode.GetString()! : "Ci";
 
             AssertControlledVocabulary([ciContext], validCiContexts, RuntimeCriticalPathScenarioPresence, $"scenario '{id}' ciContext");
-
-            if (string.Equals(id, "package-consumption-smoke", StringComparison.Ordinal))
-                Assert.Equal("CiPublish", ciContext);
 
             AssertEvidenceLinkage(repoRoot, file, testMethod, RuntimeCriticalPathEvidenceLinkage);
         }
@@ -118,7 +115,7 @@ public sealed class AutomationLaneGovernanceTests
             "WarningGovernance", "WarningGovernanceSyntheticCheck",
             "SampleTemplatePackageReferenceGovernance",
             "ReleaseCloseoutSnapshot", "DistributionReadinessGovernance",
-            "AdoptionReadinessGovernanceCi", "AdoptionReadinessGovernanceCiPublish",
+            "AdoptionReadinessGovernance",
             "ReleaseOrchestrationGovernance"
         };
         foreach (var target in requiredTargets)
@@ -621,7 +618,7 @@ public sealed class AutomationLaneGovernanceTests
             "SampleTemplatePackageReferenceGovernance",
             "TypeScriptDeclarationGovernance", "ReleaseCloseoutSnapshot",
             "ContinuousTransitionGateGovernance", "DistributionReadinessGovernance",
-            "AdoptionReadinessGovernanceCi", "AdoptionReadinessGovernanceCiPublish",
+            "AdoptionReadinessGovernance",
             "ReleaseOrchestrationGovernance"
         };
         foreach (var target in requiredTargets)
@@ -640,20 +637,14 @@ public sealed class AutomationLaneGovernanceTests
             "OpenSpecStrictGovernance", "DependencyVulnerabilityGovernance",
             "SampleTemplatePackageReferenceGovernance",
             "TypeScriptDeclarationGovernance", "ReleaseCloseoutSnapshot",
-            "RuntimeCriticalPathExecutionGovernanceCi", "ContinuousTransitionGateGovernance",
-            "AdoptionReadinessGovernanceCi"
+            "RuntimeCriticalPathExecutionGovernance", "ContinuousTransitionGateGovernance",
+            "NugetPackageTest", "BridgeDistributionGovernance",
+            "DistributionReadinessGovernance", "AdoptionReadinessGovernance",
+            "ReleaseOrchestrationGovernance"
         };
         AssertTargetDependsOnContainsAll(mainSource, "Ci", ciDependencies, CiTargetOpenSpecGate, "build/Build.cs");
 
-        var ciPublishDependencies = new[]
-        {
-            "OpenSpecStrictGovernance", "DependencyVulnerabilityGovernance",
-            "SampleTemplatePackageReferenceGovernance",
-            "TypeScriptDeclarationGovernance", "ReleaseCloseoutSnapshot",
-            "RuntimeCriticalPathExecutionGovernanceCiPublish", "ContinuousTransitionGateGovernance",
-            "DistributionReadinessGovernance", "AdoptionReadinessGovernanceCiPublish",
-            "ReleaseOrchestrationGovernance"
-        };
+        var ciPublishDependencies = new[] { "Ci", "Publish" };
         AssertTargetDependsOnContainsAll(mainSource, "CiPublish", ciPublishDependencies, CiTargetOpenSpecGate, "build/Build.cs");
     }
 
@@ -665,29 +656,25 @@ public sealed class AutomationLaneGovernanceTests
         var ciDependsOn = ReadTargetDependsOnDependencies(mainSource, "Ci", TransitionGateParityConsistency, "build/Build.cs");
         var ciPublishDependsOn = ReadTargetDependsOnDependencies(mainSource, "CiPublish", TransitionGateParityConsistency, "build/Build.cs");
 
-        var parityRules = new (string Group, string CiDependency, string CiPublishDependency)[]
+        var ciRequiredDependencies = new[]
         {
-            ("coverage", "Coverage", "Coverage"),
-            ("automation-lane-report", "AutomationLaneReport", "AutomationLaneReport"),
-            ("warning-governance", "WarningGovernance", "WarningGovernance"),
-            ("dependency-vulnerability-governance", "DependencyVulnerabilityGovernance", "DependencyVulnerabilityGovernance"),
-            ("typescript-declaration-governance", "TypeScriptDeclarationGovernance", "TypeScriptDeclarationGovernance"),
-            ("openspec-strict-governance", "OpenSpecStrictGovernance", "OpenSpecStrictGovernance"),
-            ("release-closeout-snapshot", "ReleaseCloseoutSnapshot", "ReleaseCloseoutSnapshot"),
-            ("runtime-critical-path-governance", "RuntimeCriticalPathExecutionGovernanceCi", "RuntimeCriticalPathExecutionGovernanceCiPublish"),
-            ("adoption-readiness-governance", "AdoptionReadinessGovernanceCi", "AdoptionReadinessGovernanceCiPublish"),
-            ("continuous-transition-gate", "ContinuousTransitionGateGovernance", "ContinuousTransitionGateGovernance")
+            "Coverage", "AutomationLaneReport", "WarningGovernance",
+            "DependencyVulnerabilityGovernance", "TypeScriptDeclarationGovernance",
+            "OpenSpecStrictGovernance", "ReleaseCloseoutSnapshot",
+            "RuntimeCriticalPathExecutionGovernance", "AdoptionReadinessGovernance",
+            "ContinuousTransitionGateGovernance"
         };
 
-        foreach (var rule in parityRules)
+        foreach (var dep in ciRequiredDependencies)
         {
             Assert.True(
-                ciDependsOn.Contains(rule.CiDependency),
-                $"[{TransitionGateParityConsistency}] Missing Ci dependency '{rule.CiDependency}' for group '{rule.Group}'.");
-            Assert.True(
-                ciPublishDependsOn.Contains(rule.CiPublishDependency),
-                $"[{TransitionGateParityConsistency}] Missing CiPublish dependency '{rule.CiPublishDependency}' for group '{rule.Group}'.");
+                ciDependsOn.Contains(dep),
+                $"[{TransitionGateParityConsistency}] Missing Ci dependency '{dep}'.");
         }
+
+        Assert.True(
+            ciPublishDependsOn.Contains("Ci"),
+            $"[{TransitionGateParityConsistency}] CiPublish must depend on Ci.");
     }
 
     [Fact]
@@ -701,7 +688,7 @@ public sealed class AutomationLaneGovernanceTests
               "diagnostics": [
                 {
                   "invariantId": "GOV-024",
-                  "lane": "CiPublish",
+                  "lane": "Ci",
                   "artifactPath": "build/Build.cs",
                   "expected": "ReleaseCloseoutSnapshot",
                   "actual": "missing",
@@ -1164,7 +1151,7 @@ public sealed class AutomationLaneGovernanceTests
         AssertAssignmentValueIn(
             combinedSource,
             "laneContext",
-            ["\"CiPublish\"", "LaneContextCiPublish"],
+            ["\"Ci\"", "LaneContextCi"],
             EvidenceContractV2Schema,
             "build/Build.Governance.cs");
         AssertAssignmentValueIn(
@@ -1217,7 +1204,7 @@ public sealed class AutomationLaneGovernanceTests
 
         AssertTargetDependsOnContainsAll(
             mainSource,
-            "CiPublish",
+            "Ci",
             ["BridgeDistributionGovernance"],
             BridgeDistributionParity,
             "build/Build.cs");
@@ -1232,8 +1219,14 @@ public sealed class AutomationLaneGovernanceTests
 
         AssertTargetDependsOnContainsAll(
             mainSource,
+            "Ci",
+            ["ReleaseOrchestrationGovernance"],
+            ReleaseOrchestrationDecisionGate,
+            "build/Build.cs");
+        AssertTargetDependsOnContainsAll(
+            mainSource,
             "CiPublish",
-            ["ReleaseOrchestrationGovernance", "Publish"],
+            ["Ci", "Publish"],
             ReleaseOrchestrationDecisionGate,
             "build/Build.cs");
 
@@ -1333,8 +1326,14 @@ public sealed class AutomationLaneGovernanceTests
 
         AssertTargetDependsOnContainsAll(
             mainSource,
+            "Ci",
+            ["ReleaseOrchestrationGovernance"],
+            StablePublishReadiness,
+            "build/Build.cs");
+        AssertTargetDependsOnContainsAll(
+            mainSource,
             "CiPublish",
-            ["ReleaseOrchestrationGovernance", "Publish"],
+            ["Ci", "Publish"],
             StablePublishReadiness,
             "build/Build.cs");
     }

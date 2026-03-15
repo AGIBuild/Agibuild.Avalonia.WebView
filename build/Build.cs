@@ -266,9 +266,9 @@ internal sealed partial class BuildTask : NukeBuild
 
     internal Target Ci => _ => _
         .Description("Full CI pipeline: compile → coverage → lane automation → pack → validate.")
-        .DependsOn(Coverage, AutomationLaneReport, RuntimeCriticalPathExecutionGovernanceCi, WarningGovernance, DependencyVulnerabilityGovernance, TypeScriptDeclarationGovernance, SampleTemplatePackageReferenceGovernance, OpenSpecStrictGovernance, ReleaseCloseoutSnapshot, ContinuousTransitionGateGovernance, AdoptionReadinessGovernanceCi, ValidatePackage, PackTemplate);
+        .DependsOn(Coverage, AutomationLaneReport, RuntimeCriticalPathExecutionGovernance, WarningGovernance, DependencyVulnerabilityGovernance, TypeScriptDeclarationGovernance, SampleTemplatePackageReferenceGovernance, OpenSpecStrictGovernance, ReleaseCloseoutSnapshot, ContinuousTransitionGateGovernance, NugetPackageTest, BridgeDistributionGovernance, DistributionReadinessGovernance, AdoptionReadinessGovernance, ReleaseOrchestrationGovernance, ValidatePackage, PackTemplate);
 
     internal Target CiPublish => _ => _
-        .Description("Full release pipeline: compile → coverage → lane automation → package smoke → publish.")
-        .DependsOn(Coverage, AutomationLaneReport, NugetPackageTest, RuntimeCriticalPathExecutionGovernanceCiPublish, WarningGovernance, DependencyVulnerabilityGovernance, TypeScriptDeclarationGovernance, SampleTemplatePackageReferenceGovernance, OpenSpecStrictGovernance, ReleaseCloseoutSnapshot, ContinuousTransitionGateGovernance, BridgeDistributionGovernance, DistributionReadinessGovernance, AdoptionReadinessGovernanceCiPublish, ReleaseOrchestrationGovernance, PackTemplate, Publish);
+        .Description("Full release pipeline: Ci + publish.")
+        .DependsOn(Ci, Publish);
 }

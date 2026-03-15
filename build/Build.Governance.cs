@@ -117,8 +117,8 @@ internal partial class BuildTask
         new("typescript-declaration-governance", "TypeScriptDeclarationGovernance", "TypeScriptDeclarationGovernance"),
         new("openspec-strict-governance", "OpenSpecStrictGovernance", "OpenSpecStrictGovernance"),
         new("release-closeout-snapshot", "ReleaseCloseoutSnapshot", "ReleaseCloseoutSnapshot"),
-        new("runtime-critical-path-governance", "RuntimeCriticalPathExecutionGovernanceCi", "RuntimeCriticalPathExecutionGovernanceCiPublish"),
-        new("adoption-readiness-governance", "AdoptionReadinessGovernanceCi", "AdoptionReadinessGovernanceCiPublish")
+        new("runtime-critical-path-governance", "RuntimeCriticalPathExecutionGovernance", "RuntimeCriticalPathExecutionGovernance"),
+        new("adoption-readiness-governance", "AdoptionReadinessGovernance", "AdoptionReadinessGovernance")
     ];
 
     internal Target DependencyVulnerabilityGovernance => _ => _
@@ -492,23 +492,15 @@ internal partial class BuildTask
             Serilog.Log.Information("OpenSpec strict governance report written to {Path}", OpenSpecStrictGovernanceReportFile);
         });
 
-    internal Target RuntimeCriticalPathExecutionGovernanceCi => _ => _
-        .Description("Validates runtime critical-path execution evidence (Ci context).")
-        .DependsOn(AutomationLaneReport)
-        .Executes(() =>
-        {
-            ValidateRuntimeCriticalPathExecutionEvidence(includeCiPublishContext: false);
-        });
-
-    internal Target RuntimeCriticalPathExecutionGovernanceCiPublish => _ => _
-        .Description("Validates runtime critical-path execution evidence (Ci + CiPublish contexts).")
+    internal Target RuntimeCriticalPathExecutionGovernance => _ => _
+        .Description("Validates runtime critical-path execution evidence.")
         .DependsOn(AutomationLaneReport, NugetPackageTest)
         .Executes(() =>
         {
-            ValidateRuntimeCriticalPathExecutionEvidence(includeCiPublishContext: true);
+            ValidateRuntimeCriticalPathExecutionEvidence();
         });
 
-    private static void ValidateRuntimeCriticalPathExecutionEvidence(bool includeCiPublishContext)
+    private static void ValidateRuntimeCriticalPathExecutionEvidence()
     {
         TestResultsDirectory.CreateDirectory();
         if (!File.Exists(RuntimeCriticalPathManifestFile))
@@ -540,18 +532,12 @@ internal partial class BuildTask
             var lane = scenario.TryGetProperty("lane", out var laneNode) ? laneNode.GetString() : null;
             var file = scenario.TryGetProperty("file", out var fileNode) ? fileNode.GetString() : null;
             var testMethod = scenario.TryGetProperty("testMethod", out var methodNode) ? methodNode.GetString() : null;
-            var ciContext = scenario.TryGetProperty("ciContext", out var contextNode) ? contextNode.GetString() : LaneContextCi;
 
             if (string.IsNullOrWhiteSpace(id) || string.IsNullOrWhiteSpace(lane))
             {
                 failures.Add("Runtime critical-path scenario is missing required id/lane fields.");
                 continue;
             }
-
-            var inScope = string.Equals(ciContext, LaneContextCi, StringComparison.Ordinal)
-                          || (includeCiPublishContext && string.Equals(ciContext, LaneContextCiPublish, StringComparison.Ordinal));
-            if (!inScope)
-                continue;
 
             if (string.IsNullOrWhiteSpace(file))
             {
@@ -568,13 +554,12 @@ internal partial class BuildTask
                     {
                         id,
                         lane,
-                        ciContext,
                         evidenceType = "nuget-smoke-telemetry",
                         telemetryPath = NugetSmokeTelemetryFile.ToString(),
                         passed = telemetryExists
                     });
 
-                    if (includeCiPublishContext && !telemetryExists)
+                    if (!telemetryExists)
                         failures.Add($"Scenario '{id}' requires NuGet smoke telemetry evidence at '{NugetSmokeTelemetryFile}'.");
                 }
 
@@ -604,7 +589,6 @@ internal partial class BuildTask
             {
                 id,
                 lane,
-                ciContext,
                 testMethod,
                 passed
             });
@@ -618,13 +602,10 @@ internal partial class BuildTask
             schemaVersion = 2,
             provenance = new
             {
-                laneContext = includeCiPublishContext ? LaneContextCiPublish : LaneContextCi,
-                producerTarget = includeCiPublishContext
-                    ? "RuntimeCriticalPathExecutionGovernanceCiPublish"
-                    : "RuntimeCriticalPathExecutionGovernanceCi",
+                laneContext = LaneContextCi,
+                producerTarget = "RuntimeCriticalPathExecutionGovernance",
                 timestamp = DateTime.UtcNow.ToString("o")
             },
-            includeCiPublishContext,
             manifestPath = RuntimeCriticalPathManifestFile.ToString(),
             runtimeTrxPath = runtimeTrxPath?.ToString(),
             contractTrxPath = contractTrxPath?.ToString(),
@@ -761,7 +742,7 @@ internal partial class BuildTask
                 schemaVersion = 2,
                 provenance = new
                 {
-                    laneContext = LaneContextCiPublish,
+                    laneContext = LaneContextCi,
                     producerTarget = "BridgeDistributionGovernance",
                     timestamp = DateTime.UtcNow.ToString("o")
                 },
@@ -963,7 +944,7 @@ internal partial class BuildTask
                 schemaVersion = 1,
                 provenance = new
                 {
-                    laneContext = LaneContextCiPublish,
+                    laneContext = LaneContextCi,
                     producerTarget = "DistributionReadinessGovernance",
                     timestamp = evaluatedAtUtc
                 },
@@ -995,21 +976,13 @@ internal partial class BuildTask
             }
         });
 
-    internal Target AdoptionReadinessGovernanceCi => _ => _
-        .Description("Evaluates adoption-readiness signals in Ci lane.")
-        .DependsOn(AutomationLaneReport, RuntimeCriticalPathExecutionGovernanceCi)
+    internal Target AdoptionReadinessGovernance => _ => _
+        .Description("Evaluates adoption-readiness signals.")
+        .DependsOn(AutomationLaneReport, RuntimeCriticalPathExecutionGovernance)
         .Executes(() => EvaluateAdoptionReadiness(
             laneContext: LaneContextCi,
-            producerTarget: "AdoptionReadinessGovernanceCi",
+            producerTarget: "AdoptionReadinessGovernance",
             expectedRuntimeLaneContext: LaneContextCi));
-
-    internal Target AdoptionReadinessGovernanceCiPublish => _ => _
-        .Description("Evaluates adoption-readiness signals in CiPublish lane.")
-        .DependsOn(AutomationLaneReport, RuntimeCriticalPathExecutionGovernanceCiPublish)
-        .Executes(() => EvaluateAdoptionReadiness(
-            laneContext: LaneContextCiPublish,
-            producerTarget: "AdoptionReadinessGovernanceCiPublish",
-            expectedRuntimeLaneContext: LaneContextCiPublish));
 
     private static void EvaluateAdoptionReadiness(string laneContext, string producerTarget, string expectedRuntimeLaneContext)
     {
@@ -1183,7 +1156,7 @@ internal partial class BuildTask
     }
 
     internal Target ContinuousTransitionGateGovernance => _ => _
-        .Description("Validates closeout transition-gate parity across Ci/CiPublish with lane-aware diagnostics.")
+        .Description("Validates closeout transition-gate governance targets are present in Ci with lane-aware diagnostics.")
         .DependsOn(ReleaseCloseoutSnapshot)
         .Executes(() =>
         {
@@ -1210,18 +1183,18 @@ internal partial class BuildTask
                         Group: rule.Group));
                     failures.Add($"[{TransitionGateParityInvariantId}] Missing Ci dependency '{rule.CiDependency}' for group '{rule.Group}'.");
                 }
+            }
 
-                if (!ciPublishDependsOnBlock.Contains(rule.CiPublishDependency, StringComparison.Ordinal))
-                {
-                    diagnostics.Add(new TransitionGateDiagnosticEntry(
-                        TransitionGateParityInvariantId,
-                        Lane: LaneContextCiPublish,
-                        ArtifactPath: buildArtifactPath,
-                        Expected: rule.CiPublishDependency,
-                        Actual: "missing",
-                        Group: rule.Group));
-                    failures.Add($"[{TransitionGateParityInvariantId}] Missing CiPublish dependency '{rule.CiPublishDependency}' for group '{rule.Group}'.");
-                }
+            if (!ciPublishDependsOnBlock.Contains(LaneContextCi, StringComparison.Ordinal))
+            {
+                diagnostics.Add(new TransitionGateDiagnosticEntry(
+                    TransitionGateParityInvariantId,
+                    Lane: LaneContextCiPublish,
+                    ArtifactPath: buildArtifactPath,
+                    Expected: LaneContextCi,
+                    Actual: "missing",
+                    Group: "ci-inheritance"));
+                failures.Add($"[{TransitionGateParityInvariantId}] CiPublish must depend on Ci.");
             }
 
             var roadmapPath = RootDirectory / "openspec" / "ROADMAP.md";
@@ -1232,7 +1205,7 @@ internal partial class BuildTask
             {
                 diagnostics.Add(new TransitionGateDiagnosticEntry(
                     TransitionLaneProvenanceInvariantId,
-                    Lane: LaneContextCiPublish,
+                    Lane: LaneContextCi,
                     ArtifactPath: closeoutArtifactPath,
                     Expected: "closeout snapshot exists",
                     Actual: "file missing",
@@ -1250,9 +1223,9 @@ internal partial class BuildTask
                 ValidateTransitionField(
                     diagnostics,
                     failures,
-                    lane: LaneContextCiPublish,
+                    lane: LaneContextCi,
                     artifactPath: closeoutArtifactPath,
-                    expected: LaneContextCiPublish,
+                    expected: LaneContextCi,
                     actual: provenance.GetProperty("laneContext").GetString(),
                     group: "transition-continuity",
                     fieldName: "provenance.laneContext");
@@ -1260,7 +1233,7 @@ internal partial class BuildTask
                 ValidateTransitionField(
                     diagnostics,
                     failures,
-                    lane: LaneContextCiPublish,
+                    lane: LaneContextCi,
                     artifactPath: closeoutArtifactPath,
                     expected: "ReleaseCloseoutSnapshot",
                     actual: provenance.GetProperty("producerTarget").GetString(),
@@ -1270,7 +1243,7 @@ internal partial class BuildTask
                 ValidateTransitionField(
                     diagnostics,
                     failures,
-                    lane: LaneContextCiPublish,
+                    lane: LaneContextCi,
                     artifactPath: closeoutArtifactPath,
                     expected: roadmapCompletedPhase,
                     actual: transition.GetProperty("completedPhase").GetString(),
@@ -1280,7 +1253,7 @@ internal partial class BuildTask
                 ValidateTransitionField(
                     diagnostics,
                     failures,
-                    lane: LaneContextCiPublish,
+                    lane: LaneContextCi,
                     artifactPath: closeoutArtifactPath,
                     expected: roadmapActivePhase,
                     actual: transition.GetProperty("activePhase").GetString(),
@@ -1290,9 +1263,9 @@ internal partial class BuildTask
                 ValidateTransitionField(
                     diagnostics,
                     failures,
-                    lane: LaneContextCiPublish,
+                    lane: LaneContextCi,
                     artifactPath: closeoutArtifactPath,
-                    expected: LaneContextCiPublish,
+                    expected: LaneContextCi,
                     actual: continuity.GetProperty("laneContext").GetString(),
                     group: "transition-continuity",
                     fieldName: "transitionContinuity.laneContext");
@@ -1300,7 +1273,7 @@ internal partial class BuildTask
                 ValidateTransitionField(
                     diagnostics,
                     failures,
-                    lane: LaneContextCiPublish,
+                    lane: LaneContextCi,
                     artifactPath: closeoutArtifactPath,
                     expected: "ReleaseCloseoutSnapshot",
                     actual: continuity.GetProperty("producerTarget").GetString(),
@@ -1310,7 +1283,7 @@ internal partial class BuildTask
                 ValidateTransitionField(
                     diagnostics,
                     failures,
-                    lane: LaneContextCiPublish,
+                    lane: LaneContextCi,
                     artifactPath: closeoutArtifactPath,
                     expected: roadmapCompletedPhase,
                     actual: continuity.GetProperty("completedPhase").GetString(),
@@ -1320,7 +1293,7 @@ internal partial class BuildTask
                 ValidateTransitionField(
                     diagnostics,
                     failures,
-                    lane: LaneContextCiPublish,
+                    lane: LaneContextCi,
                     artifactPath: closeoutArtifactPath,
                     expected: roadmapActivePhase,
                     actual: continuity.GetProperty("activePhase").GetString(),
@@ -1463,7 +1436,7 @@ internal partial class BuildTask
                 schemaVersion = 2,
                 provenance = new
                 {
-                    laneContext = LaneContextCiPublish,
+                    laneContext = LaneContextCi,
                     producerTarget = "ReleaseCloseoutSnapshot",
                     timestamp = DateTime.UtcNow.ToString("o")
                 },
@@ -1476,7 +1449,7 @@ internal partial class BuildTask
                 transitionContinuity = new
                 {
                     invariantId = TransitionLaneProvenanceInvariantId,
-                    laneContext = LaneContextCiPublish,
+                    laneContext = LaneContextCi,
                     producerTarget = "ReleaseCloseoutSnapshot",
                     completedPhase,
                     activePhase
@@ -1540,7 +1513,7 @@ internal partial class BuildTask
         .DependsOn(
             ReleaseCloseoutSnapshot,
             ContinuousTransitionGateGovernance,
-            RuntimeCriticalPathExecutionGovernanceCiPublish,
+            RuntimeCriticalPathExecutionGovernance,
             WarningGovernance,
             DependencyVulnerabilityGovernance,
             TypeScriptDeclarationGovernance,
@@ -1548,7 +1521,7 @@ internal partial class BuildTask
             SampleTemplatePackageReferenceGovernance,
             BridgeDistributionGovernance,
             DistributionReadinessGovernance,
-            AdoptionReadinessGovernanceCiPublish,
+            AdoptionReadinessGovernance,
             ValidatePackage)
         .Executes(() =>
         {
@@ -1846,7 +1819,7 @@ internal partial class BuildTask
                 ["state"] = decisionState,
                 ["isStableRelease"] = isStableRelease,
                 ["version"] = packedVersion ?? "unknown",
-                ["laneContext"] = LaneContextCiPublish,
+                ["laneContext"] = LaneContextCi,
                 ["producerTarget"] = "ReleaseOrchestrationGovernance",
                 ["evaluatedAtUtc"] = evaluatedAtUtc,
                 ["blockingReasonCount"] = blockingReasons.Count
@@ -1885,7 +1858,7 @@ internal partial class BuildTask
                 schemaVersion = 1,
                 provenance = new
                 {
-                    laneContext = LaneContextCiPublish,
+                    laneContext = LaneContextCi,
                     producerTarget = "ReleaseOrchestrationGovernance",
                     timestamp = evaluatedAtUtc
                 },
