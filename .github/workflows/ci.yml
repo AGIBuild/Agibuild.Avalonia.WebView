@@ -418,16 +418,16 @@ jobs:
 
   update-badges:
     name: Update Quality Badges
-    needs: [merge-coverage, build-macos]
+    needs: [build-macos]
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Download merged coverage report
+      - name: Download coverage report
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          name: merged-coverage-report
-          path: merged-coverage-report
+          name: coverage-report-macos
+          path: coverage-report
 
       - name: Download test results
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -459,6 +459,12 @@ jobs:
                   "failed": int(counters.get("failed", "0")),
               }
 
+          def find_cobertura(base_dir):
+              for name in ["Cobertura.xml", "coverage.cobertura.xml"]:
+                  for p in base_dir.rglob(name):
+                      return p
+              return None
+
           def parse_cobertura(cob_path):
               tree = ET.parse(cob_path)
               root = tree.getroot()
@@ -479,7 +485,6 @@ jobs:
           def test_color(failed):
               return "brightgreen" if failed == 0 else "red"
 
-          # Parse test results
           trx_dir = Path("test-results")
           unit_trx = trx_dir / "unit-tests.trx"
           integration_trx = None
@@ -492,12 +497,9 @@ jobs:
           unit = parse_trx_counters(unit_trx) if unit_trx.exists() else None
           integration = parse_trx_counters(integration_trx) if integration_trx else None
 
-          # Parse coverage
-          cob_dir = Path("merged-coverage-report")
-          cob_file = cob_dir / "Cobertura.xml"
-          line_pct, branch_pct = parse_cobertura(cob_file) if cob_file.exists() else (0.0, 0.0)
+          cob_file = find_cobertura(Path("coverage-report"))
+          line_pct, branch_pct = parse_cobertura(cob_file) if cob_file else (0.0, 0.0)
 
-          # Build badge files
           files = {}
           if unit:
               msg = f"{unit['total']} passed" if unit['failed'] == 0 else f"{unit['passed']}/{unit['total']} passed"
@@ -505,7 +507,7 @@ jobs:
           if integration:
               msg = f"{integration['total']} passed" if integration['failed'] == 0 else f"{integration['passed']}/{integration['total']} passed"
               files["integration-tests.json"] = {"content": badge_json("integration tests", msg, test_color(integration['failed']))}
-          if cob_file.exists():
+          if cob_file:
               files["line-coverage.json"] = {"content": badge_json("line coverage", f"{line_pct}%", coverage_color(line_pct))}
               files["branch-coverage.json"] = {"content": badge_json("branch coverage", f"{branch_pct}%", coverage_color(branch_pct))}
 
@@ -513,7 +515,6 @@ jobs:
               print("No metrics found — skipping badge update.")
               sys.exit(0)
 
-          # Update Gist
           token = os.environ.get("GIST_TOKEN", "")
           if not token:
               print("GIST_SECRET not set — skipping badge update.")
