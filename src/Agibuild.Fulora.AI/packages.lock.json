@@ -53,18 +53,22 @@
       },
       "Microsoft.SourceLink.GitHub": {
         "type": "Direct",
-        "requested": "[10.0.102, )",
-        "resolved": "10.0.102",
-        "contentHash": "Oxq3RCIJSdtpIU4hLqO7XaDe/Ra3HS9Wi8rJl838SAg6Zu1iQjerA0+xXWBgUFYbgknUGCLOU0T+lzMLkvY9Qg==",
+        "requested": "[11.0.100-preview.2.26159.112, )",
+        "resolved": "11.0.100-preview.2.26159.112",
+        "contentHash": "tOnAJEilYQeFZfKjAd4dKiBzcWmu9FLHhaOC1IWSUVQIA+FdqU53QERbWgyE57czhrS1yGFcjaoqb0ehOFDOug==",
         "dependencies": {
-          "Microsoft.Build.Tasks.Git": "10.0.102",
-          "Microsoft.SourceLink.Common": "10.0.102"
+          "Microsoft.Build.Tasks.Git": "11.0.100-preview.2.26159.112",
+          "Microsoft.SourceLink.Common": "11.0.100-preview.2.26159.112",
+          "System.IO.Hashing": "11.0.0-preview.2.26159.112"
         }
       },
       "Microsoft.Build.Tasks.Git": {
         "type": "Transitive",
-        "resolved": "10.0.102",
-        "contentHash": "0i81LYX31U6UiXz4NOLbvc++u+/mVDmOt+PskrM/MygpDxkv9THKQyRUmavBpLK6iBV0abNWnn+CQgSRz//Pwg=="
+        "resolved": "11.0.100-preview.2.26159.112",
+        "contentHash": "z+qGAmrjBf4MIboYAp5RYYpWp8t5a9NZh9uVZBI6/dBctnUznZ0dfio1H1W+dfAzs9AruIaGFsdOdTd0lue3Lw==",
+        "dependencies": {
+          "System.IO.Hashing": "11.0.0-preview.2.26159.112"
+        }
       },
       "Microsoft.Extensions.Caching.Abstractions": {
         "type": "Transitive",
@@ -171,8 +175,8 @@
       },
       "Microsoft.SourceLink.Common": {
         "type": "Transitive",
-        "resolved": "10.0.102",
-        "contentHash": "Mk1IMb9q5tahC2NltxYXFkLBtuBvfBoCQ3pIxYQWfzbCE9o1OB9SsHe0hnNGo7lWgTA/ePbFAJLWu6nLL9K17A=="
+        "resolved": "11.0.100-preview.2.26159.112",
+        "contentHash": "F2KYT8RxU7WtNBxdGpeNiQwprCnBRbbMDGvZM0odbLaNQNtjf4wRQSRUMMwoIlMzrIWvwLdxiBIKQfDBGC/FIg=="
       },
       "Polly.Core": {
         "type": "Transitive",
@@ -202,6 +206,11 @@
         "type": "Transitive",
         "resolved": "11.0.0-preview.2.26159.112",
         "contentHash": "53nimBaVbzyZjQfi/hx/mRuqtNBGpu1uk7o8P9esiBVWsWz3+cimhT5pE8exQPYEJMDermE2mv5+HtPSo0TkGg=="
+      },
+      "System.IO.Hashing": {
+        "type": "Transitive",
+        "resolved": "11.0.0-preview.2.26159.112",
+        "contentHash": "5xr0B5D23NoH3jcHO3SVPchTo0dwD+wqpqrysAZeOKY+XEOheKZN0bApd/EoWj+ym5NtmiNxCtYVZtDpo8FUlQ=="
       },
       "System.Numerics.Tensors": {
         "type": "Transitive",

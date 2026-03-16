@@ -84,7 +84,7 @@ avalonia-react/
 │       └── *.cs                       # Implementations
 │
 ├── AvaloniReact.Desktop/              # Avalonia host application
-│   ├── Program.cs                     # Entry point + UseAgibuildWebView()
+│   ├── Program.cs                     # Entry point + UseFulora()
 │   ├── MainWindow.axaml.cs           # SPA hosting + Bridge registration
 │   └── AvaloniReact.Desktop.csproj   # Debug→Vite proxy / Release→embedded
 │

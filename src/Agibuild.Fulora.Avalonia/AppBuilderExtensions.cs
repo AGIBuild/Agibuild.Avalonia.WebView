@@ -26,22 +26,4 @@ public static class AppBuilderExtensions
         WebViewEnvironment.Initialize(loggerFactory);
         return builder;
     }
-
-    /// <summary>
-    /// Backward-compatible alias for <see cref="UseFulora(AppBuilder)"/>.
-    /// </summary>
-    /// <param name="builder">The Avalonia app builder.</param>
-    /// <returns>The same <see cref="AppBuilder"/> for fluent chaining.</returns>
-    public static AppBuilder UseAgibuildWebView(this AppBuilder builder)
-        => UseFulora(builder);
-
-    /// <summary>
-    /// Backward-compatible alias for <see cref="UseFulora(AppBuilder, ILoggerFactory?)"/>.
-    /// </summary>
-    /// <param name="builder">The Avalonia app builder.</param>
-    /// <param name="loggerFactory">Optional logger factory used by WebView internals.</param>
-    /// <returns>The same <see cref="AppBuilder"/> for fluent chaining.</returns>
-    public static AppBuilder UseAgibuildWebView(this AppBuilder builder, ILoggerFactory? loggerFactory)
-        => UseFulora(builder, loggerFactory);
-
 }

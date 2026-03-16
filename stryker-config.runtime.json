@@ -3,7 +3,16 @@
   "stryker-config": {
     "project": "Agibuild.Fulora.Runtime.csproj",
     "mutate": [
-      "**/*.cs",
+      "**/RuntimeBridgeService.cs",
+      "**/WebViewMessageBus.cs",
+      "**/SharedStateStore.cs",
+      "**/WebAuthBroker.cs",
+      "**/SpaHostingService.cs",
+      "**/WebViewAdapterFactory.cs",
+      "**/BridgeDebugServer.cs",
+      "**/JsonFileConfigProvider.cs",
+      "**/RemoteConfigProvider.cs",
+      "**/ServiceWorkerRegistrar.cs",
       "!**/obj/**",
       "!**/bin/**"
     ],

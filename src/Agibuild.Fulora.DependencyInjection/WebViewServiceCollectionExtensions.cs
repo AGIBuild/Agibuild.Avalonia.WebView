@@ -35,12 +35,4 @@ public static class WebViewServiceCollectionExtensions
         WebViewEnvironment.Initialize(provider.GetService<ILoggerFactory>());
         return provider;
     }
-
-    /// <summary>
-    /// Backward-compatible alias for <see cref="UseFulora(IServiceProvider)"/>.
-    /// </summary>
-    /// <param name="provider">Built service provider.</param>
-    /// <returns>The same <see cref="IServiceProvider"/> instance.</returns>
-    public static IServiceProvider UseAgibuildWebView(this IServiceProvider provider)
-        => UseFulora(provider);
 }

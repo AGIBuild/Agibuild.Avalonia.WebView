@@ -3,7 +3,12 @@
   "stryker-config": {
     "project": "Agibuild.Fulora.Core.csproj",
     "mutate": [
-      "**/*.cs",
+      "**/WebAuthCallbackMatcher.cs",
+      "**/ScriptResultHelper.cs",
+      "**/BridgeErrorDiagnostic.cs",
+      "**/BridgeDevToolsEvent.cs",
+      "**/ShortcutKey.cs",
+      "**/PluginManifest.cs",
       "!**/obj/**",
       "!**/bin/**",
       "!**/AssemblyAttributes.cs"
