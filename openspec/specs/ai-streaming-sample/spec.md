@@ -86,3 +86,40 @@ The sample SHALL function without any external AI service by falling back to an 
 - **WHEN** the sample app starts
 - **THEN** the app SHALL use an echo-mode implementation that streams back the prompt character by character
 - **AND** a banner SHALL inform the user that AI is in demo mode
+
+### Requirement: AI chat sample window title SHALL remain semantically consistent across host and web shell
+The `avalonia-ai-chat` sample SHALL expose a consistent user-facing product title between native host window chrome and the web shell header, so users do not see conflicting title identity across layers.
+
+#### Scenario: Host and web title identity are aligned
+- **WHEN** the desktop sample window is opened and the web shell header is rendered
+- **THEN** the host window title and web shell title SHALL represent the same product identity
+- **AND** no conflicting naming variants SHALL be shown simultaneously in the sample default UI
+
+### Requirement: AI chat sample titlebar fallback height SHALL match host drag-region contract
+The web shell bootstrap fallback titlebar height SHALL match the host drag-region height configured by the sample, so layout remains stable before bridge metrics are hydrated.
+
+#### Scenario: Bridge state is not yet available
+- **WHEN** the web shell calculates titlebar height before `windowShellBridgeService.getWindowShellState()` resolves
+- **THEN** the fallback value SHALL equal the host drag-region height configured by the desktop sample
+- **AND** the rendered top spacing SHALL avoid bootstrap-time `titlebar`/drag-area mismatch
+
+#### Scenario: Bridge state becomes available
+- **WHEN** host `chromeMetrics.titleBarHeight` is streamed to the web shell
+- **THEN** the web shell SHALL use host-provided `chromeMetrics.titleBarHeight` as the primary value
+- **AND** fallback constants SHALL no longer drive steady-state titlebar layout
+
+### Requirement: AI chat sample appearance settings SHALL persist across app restarts
+The desktop AI chat sample SHALL persist host window appearance settings so user-applied transparency/theme preferences remain stable after relaunch.
+
+#### Scenario: User saves appearance settings
+- **WHEN** web UI calls `updateWindowShellSettings` and host successfully applies settings
+- **THEN** the sample host SHALL persist the applied/normalized `WindowShellSettings` to local storage
+
+#### Scenario: App starts with persisted settings
+- **WHEN** desktop sample starts and persisted settings file exists
+- **THEN** host SHALL load the persisted settings and apply them before SPA bootstrap
+- **AND** initial shell appearance state returned to web SHALL reflect persisted values
+
+#### Scenario: Persisted settings are invalid
+- **WHEN** persisted settings file is missing, unreadable, or invalid JSON
+- **THEN** sample SHALL fall back to default settings without startup failure
