@@ -170,7 +170,7 @@
           "description": "Minimum line coverage percentage (0-100). Default: 96",
           "format": "int32"
         },
-        "iOSSimulator": {
+        "IosSimulator": {
           "type": "string",
           "description": "iOS Simulator device name. Default: auto-detect first available iPhone simulator"
         },
