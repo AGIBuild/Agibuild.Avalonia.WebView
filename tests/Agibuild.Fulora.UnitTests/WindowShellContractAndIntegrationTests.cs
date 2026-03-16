@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Agibuild.Fulora;
@@ -448,16 +451,298 @@ public sealed class WindowShellContractAndIntegrationTests
     }
 
     [Fact]
-    public void Mac_chrome_drag_and_safe_inset_paths_are_wired_end_to_end()
+    public void Ai_chat_titlebar_contract_paths_are_wired_end_to_end()
     {
         var repoRoot = FindRepoRoot();
+        var mainWindowAxaml = File.ReadAllText(Path.Combine(
+            repoRoot, "samples", "avalonia-ai-chat", "AvaloniAiChat.Desktop", "MainWindow.axaml"));
+        var mainWindowCodeBehind = File.ReadAllText(Path.Combine(
+            repoRoot, "samples", "avalonia-ai-chat", "AvaloniAiChat.Desktop", "MainWindow.axaml.cs"));
+        var settingsStoreCode = File.ReadAllText(Path.Combine(
+            repoRoot, "samples", "avalonia-ai-chat", "AvaloniAiChat.Desktop", "WindowShellSettingsStore.cs"));
         var appTsx = File.ReadAllText(Path.Combine(
             repoRoot, "samples", "avalonia-ai-chat", "AvaloniAiChat.Web", "src", "App.tsx"));
         var css = File.ReadAllText(Path.Combine(
             repoRoot, "samples", "avalonia-ai-chat", "AvaloniAiChat.Web", "src", "index.css"));
+        var chromeProvider = File.ReadAllText(Path.Combine(
+            repoRoot, "src", "Agibuild.Fulora.Avalonia", "Shell", "AvaloniaWindowChromeProvider.cs"));
 
+        Assert.Contains("Title=\"Fulora AI Chat\"", mainWindowAxaml, StringComparison.Ordinal);
+        Assert.Contains("CustomChrome = false", mainWindowCodeBehind, StringComparison.Ordinal);
+        Assert.Contains("var settingsStore = new WindowShellSettingsStore();", mainWindowCodeBehind, StringComparison.Ordinal);
+        Assert.Contains("await shellService.UpdateWindowShellSettings(persistedSettings);", mainWindowCodeBehind, StringComparison.Ordinal);
+        Assert.Contains("settingsStore.Save(updated.Settings);", mainWindowCodeBehind, StringComparison.Ordinal);
+        Assert.Contains("window-shell-settings.json", settingsStoreCode, StringComparison.Ordinal);
+        Assert.Contains("<h1 className=\"chat-header__title\">Fulora AI Chat</h1>", appTsx, StringComparison.Ordinal);
+        Assert.Contains("titleBarHeight = appearance?.chromeMetrics?.titleBarHeight ?? 28;", appTsx, StringComparison.Ordinal);
+        Assert.Contains("--titlebar-h: 28px;", css, StringComparison.Ordinal);
+        Assert.Contains("window.ExtendClientAreaToDecorationsHint = trackedWindow.Options.CustomChrome;", chromeProvider, StringComparison.Ordinal);
+        Assert.Contains("ReadTransparencyLevelOnUIThread", chromeProvider, StringComparison.Ordinal);
         Assert.Contains("'--ag-shell-top-inset'", appTsx, StringComparison.Ordinal);
         Assert.Contains("var(--ag-shell-top-inset, 0px)", css, StringComparison.Ordinal);
+    }
+
+    // ─── Persistence & Serialization ─────────────────────────────────
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void Settings_json_roundtrip_preserves_enableTransparency(bool enableTransparency)
+    {
+        var options = new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        };
+
+        var original = new WindowShellSettings
+        {
+            ThemePreference = "liquid",
+            EnableTransparency = enableTransparency,
+            GlassOpacityPercent = 42,
+        };
+
+        var json = JsonSerializer.Serialize(original, options);
+        var deserialized = JsonSerializer.Deserialize<WindowShellSettings>(json, options);
+
+        Assert.NotNull(deserialized);
+        Assert.Equal(original.ThemePreference, deserialized!.ThemePreference);
+        Assert.Equal(original.EnableTransparency, deserialized.EnableTransparency);
+        Assert.Equal(original.GlassOpacityPercent, deserialized.GlassOpacityPercent);
+    }
+
+    [Fact]
+    public void Settings_json_roundtrip_with_bridge_options_preserves_enableTransparency_false()
+    {
+        var bridgeOptions = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        };
+
+        var original = new WindowShellSettings
+        {
+            ThemePreference = "system",
+            EnableTransparency = false,
+            GlassOpacityPercent = 78,
+        };
+
+        var json = JsonSerializer.Serialize(original, bridgeOptions);
+        Assert.Contains("\"enableTransparency\":false", json.Replace(" ", ""));
+
+        var deserialized = JsonSerializer.Deserialize<WindowShellSettings>(json, bridgeOptions);
+        Assert.NotNull(deserialized);
+        Assert.False(deserialized!.EnableTransparency);
+    }
+
+    [Fact]
+    public void Settings_json_from_camelCase_input_deserializes_correctly()
+    {
+        var bridgeOptions = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        };
+
+        const string inputJson = """
+            {
+              "themePreference": "system",
+              "enableTransparency": false,
+              "glassOpacityPercent": 55
+            }
+            """;
+
+        var settings = JsonSerializer.Deserialize<WindowShellSettings>(inputJson, bridgeOptions);
+        Assert.NotNull(settings);
+        Assert.Equal("system", settings!.ThemePreference);
+        Assert.False(settings.EnableTransparency);
+        Assert.Equal(55, settings.GlassOpacityPercent);
+    }
+
+    [Fact]
+    public void WindowShellState_json_roundtrip_preserves_settings_enableTransparency_false()
+    {
+        var options = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        };
+
+        var state = new WindowShellState
+        {
+            Settings = new WindowShellSettings
+            {
+                ThemePreference = "classic",
+                EnableTransparency = false,
+                GlassOpacityPercent = 66,
+            },
+            EffectiveThemeMode = "classic",
+            Capabilities = new WindowShellCapabilities
+            {
+                Platform = "macOS",
+                SupportsTransparency = true,
+                IsTransparencyEnabled = false,
+                IsTransparencyEffective = false,
+            },
+            ChromeMetrics = new WindowChromeMetrics
+            {
+                TitleBarHeight = 28,
+                DragRegionHeight = 28,
+            },
+        };
+
+        var json = JsonSerializer.Serialize(state, options);
+        var deserialized = JsonSerializer.Deserialize<WindowShellState>(json, options);
+
+        Assert.NotNull(deserialized);
+        Assert.False(deserialized!.Settings.EnableTransparency);
+        Assert.Equal("classic", deserialized.Settings.ThemePreference);
+        Assert.Equal(66, deserialized.Settings.GlassOpacityPercent);
+        Assert.Equal("classic", deserialized.EffectiveThemeMode);
+        Assert.False(deserialized.Capabilities.IsTransparencyEnabled);
+    }
+
+    [Fact]
+    public void Settings_file_persistence_roundtrip_preserves_enableTransparency_false()
+    {
+        var tempPath = Path.Combine(Path.GetTempPath(), $"fulora-test-{Guid.NewGuid():N}.json");
+        try
+        {
+            var options = new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            };
+
+            var original = new WindowShellSettings
+            {
+                ThemePreference = "system",
+                EnableTransparency = false,
+                GlassOpacityPercent = 78,
+            };
+
+            File.WriteAllText(tempPath, JsonSerializer.Serialize(original, options));
+            var loaded = JsonSerializer.Deserialize<WindowShellSettings>(File.ReadAllText(tempPath), options);
+
+            Assert.NotNull(loaded);
+            Assert.False(loaded!.EnableTransparency);
+            Assert.Equal("system", loaded.ThemePreference);
+            Assert.Equal(78, loaded.GlassOpacityPercent);
+        }
+        finally
+        {
+            if (File.Exists(tempPath)) File.Delete(tempPath);
+        }
+    }
+
+    [Fact]
+    public async Task Adapter_flow_update_returns_correct_settings_and_persists()
+    {
+        var chrome = new MockChromeProvider();
+        var theme = new MockPlatformThemeProvider("dark");
+        using var shellService = new WindowShellService(chrome, theme);
+
+        var persistedSettings = new List<WindowShellSettings>();
+        var adapter = new TestWindowShellAdapter(shellService, persistedSettings);
+
+        var result = await adapter.UpdateWindowShellSettings(new WindowShellSettings
+        {
+            ThemePreference = "system",
+            EnableTransparency = false,
+            GlassOpacityPercent = 78,
+        });
+
+        Assert.False(result.Settings.EnableTransparency);
+        Assert.Equal("system", result.Settings.ThemePreference);
+        Assert.Equal(78, result.Settings.GlassOpacityPercent);
+
+        Assert.Single(persistedSettings);
+        Assert.False(persistedSettings[0].EnableTransparency);
+    }
+
+    [Fact]
+    public async Task Adapter_flow_get_after_update_returns_consistent_state()
+    {
+        var chrome = new MockChromeProvider();
+        var theme = new MockPlatformThemeProvider("dark");
+        using var shellService = new WindowShellService(chrome, theme);
+
+        var persistedSettings = new List<WindowShellSettings>();
+        var adapter = new TestWindowShellAdapter(shellService, persistedSettings);
+
+        await adapter.UpdateWindowShellSettings(new WindowShellSettings
+        {
+            ThemePreference = "classic",
+            EnableTransparency = false,
+            GlassOpacityPercent = 50,
+        });
+
+        var snapshot = await adapter.GetWindowShellState();
+        Assert.False(snapshot.Settings.EnableTransparency);
+        Assert.Equal("classic", snapshot.Settings.ThemePreference);
+        Assert.Equal(50, snapshot.Settings.GlassOpacityPercent);
+    }
+
+    [Fact]
+    public async Task Adapter_flow_stream_after_update_reflects_new_settings()
+    {
+        var chrome = new MockChromeProvider();
+        var theme = new MockPlatformThemeProvider("dark");
+        using var shellService = new WindowShellService(chrome, theme);
+
+        var persistedSettings = new List<WindowShellSettings>();
+        var adapter = new TestWindowShellAdapter(shellService, persistedSettings);
+
+        using var cts = new CancellationTokenSource();
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, TestContext.Current.CancellationToken);
+        var stream = adapter.StreamWindowShellState(linked.Token).GetAsyncEnumerator(linked.Token);
+        try
+        {
+            Assert.True(await stream.MoveNextAsync());
+
+            await adapter.UpdateWindowShellSettings(new WindowShellSettings
+            {
+                ThemePreference = "system",
+                EnableTransparency = false,
+                GlassOpacityPercent = 40,
+            });
+
+            var streamed = await ReadNextWithinAsync(stream, TimeSpan.FromSeconds(2));
+            Assert.NotNull(streamed);
+            Assert.False(streamed!.Settings.EnableTransparency);
+            Assert.Equal(40, streamed.Settings.GlassOpacityPercent);
+        }
+        finally
+        {
+            cts.Cancel();
+        }
+    }
+
+    [Fact]
+    public async Task Adapter_flow_toggle_transparency_twice_persists_both_states()
+    {
+        var chrome = new MockChromeProvider();
+        var theme = new MockPlatformThemeProvider("dark");
+        using var shellService = new WindowShellService(chrome, theme);
+
+        var persistedSettings = new List<WindowShellSettings>();
+        var adapter = new TestWindowShellAdapter(shellService, persistedSettings);
+
+        var result1 = await adapter.UpdateWindowShellSettings(new WindowShellSettings
+        {
+            EnableTransparency = false,
+        });
+        Assert.False(result1.Settings.EnableTransparency);
+
+        var result2 = await adapter.UpdateWindowShellSettings(new WindowShellSettings
+        {
+            EnableTransparency = true,
+        });
+        Assert.True(result2.Settings.EnableTransparency);
+
+        Assert.Equal(2, persistedSettings.Count);
+        Assert.False(persistedSettings[0].EnableTransparency);
+        Assert.True(persistedSettings[1].EnableTransparency);
     }
 
     // ─── Helpers ──────────────────────────────────────────────────────
@@ -567,5 +852,22 @@ public sealed class WindowShellContractAndIntegrationTests
             _mode = newMode;
             ThemeChanged?.Invoke(this, EventArgs.Empty);
         }
+    }
+
+    private sealed class TestWindowShellAdapter(
+        IWindowShellService inner,
+        List<WindowShellSettings> persistLog)
+    {
+        public Task<WindowShellState> GetWindowShellState() => inner.GetWindowShellState();
+
+        public async Task<WindowShellState> UpdateWindowShellSettings(WindowShellSettings settings)
+        {
+            var updated = await inner.UpdateWindowShellSettings(settings);
+            persistLog.Add(updated.Settings);
+            return updated;
+        }
+
+        public IAsyncEnumerable<WindowShellState> StreamWindowShellState(CancellationToken cancellationToken = default)
+            => inner.StreamWindowShellState(cancellationToken);
     }
 }

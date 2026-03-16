@@ -168,7 +168,7 @@ export function App() {
   const transparencyEnabled = appliedAppearance.enableTransparency;
   const opacityPercent = appliedAppearance.glassOpacityPercent;
   const shellTopInset = appearance?.chromeMetrics?.safeInsets?.top ?? 0;
-  const titleBarHeight = appearance?.chromeMetrics?.titleBarHeight ?? 44;
+  const titleBarHeight = appearance?.chromeMetrics?.titleBarHeight ?? 28;
 
   const shellStyle = {
     '--ag-shell-top-inset': `${shellTopInset}px`,

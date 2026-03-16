@@ -32,11 +32,17 @@ public partial class MainWindow : Window
             var chromeProvider = new AvaloniaWindowChromeProvider();
             chromeProvider.TrackWindow(this, new WindowChromeTrackingOptions
             {
-                CustomChrome = true,
+                // Keep system chrome behavior consistent with other samples
+                // to preserve native dragging and window button layout.
+                CustomChrome = false,
                 DragRegionHeight = 28
             });
             var themeProvider = new AvaloniaThemeProvider();
             var shellService = new WindowShellService(chromeProvider, themeProvider);
+            var settingsStore = new WindowShellSettingsStore();
+            var persistedSettings = settingsStore.Load();
+            if (persistedSettings is not null)
+                await shellService.UpdateWindowShellSettings(persistedSettings);
 
             WebView.DropCompleted += (_, e) =>
             {
@@ -64,7 +70,7 @@ public partial class MainWindow : Window
                         Configure = (bridge, _, _) =>
                         {
                             bridge.Expose<IAiChatService>(chatService);
-                            bridge.Expose<IWindowShellBridgeService>(new WindowShellBridgeServiceAdapter(shellService));
+                            bridge.Expose<IWindowShellBridgeService>(new WindowShellBridgeServiceAdapter(shellService, settingsStore));
                         }
                     }
                 ],
@@ -85,12 +91,18 @@ public partial class MainWindow : Window
         };
     }
 
-    private sealed class WindowShellBridgeServiceAdapter(IWindowShellService inner) : IWindowShellBridgeService
+    private sealed class WindowShellBridgeServiceAdapter(
+        IWindowShellService inner,
+        WindowShellSettingsStore settingsStore) : IWindowShellBridgeService
     {
         public Task<WindowShellState> GetWindowShellState() => inner.GetWindowShellState();
 
-        public Task<WindowShellState> UpdateWindowShellSettings(WindowShellSettings settings)
-            => inner.UpdateWindowShellSettings(settings);
+        public async Task<WindowShellState> UpdateWindowShellSettings(WindowShellSettings settings)
+        {
+            var updated = await inner.UpdateWindowShellSettings(settings);
+            settingsStore.Save(updated.Settings);
+            return updated;
+        }
 
         public IAsyncEnumerable<WindowShellState> StreamWindowShellState(CancellationToken cancellationToken = default)
             => inner.StreamWindowShellState(cancellationToken);

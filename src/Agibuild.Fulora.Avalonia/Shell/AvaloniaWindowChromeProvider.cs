@@ -113,12 +113,7 @@ public sealed class AvaloniaWindowChromeProvider : IWindowChromeProvider, IDispo
             snapshot = [.. _windows];
 
         foreach (var tw in snapshot)
-        {
-            await Dispatcher.UIThread.InvokeAsync(() =>
-            {
-                ApplyAppearanceToWindow(tw.Window, request);
-            });
-        }
+            await Dispatcher.UIThread.InvokeAsync(() => ApplyAppearanceToWindow(tw, request));
     }
 
     /// <inheritdoc />
@@ -140,7 +135,7 @@ public sealed class AvaloniaWindowChromeProvider : IWindowChromeProvider, IDispo
             };
         }
 
-        var level = ReadActualTransparencyLevel(primary.Window);
+        var level = ReadTransparencyLevelOnUIThread(primary.Window);
         var isEffective = level != TransparencyLevel.None;
 
         return new TransparencyEffectiveState
@@ -153,6 +148,16 @@ public sealed class AvaloniaWindowChromeProvider : IWindowChromeProvider, IDispo
                 ? $"Transparency is active. Effective level: {level}."
                 : "Platform reported no transparency level."
         };
+    }
+
+    private static TransparencyLevel ReadTransparencyLevelOnUIThread(Window window)
+    {
+        if (Dispatcher.UIThread.CheckAccess())
+            return ReadActualTransparencyLevel(window);
+
+        return Dispatcher.UIThread.InvokeAsync(() => ReadActualTransparencyLevel(window))
+            .GetAwaiter()
+            .GetResult();
     }
 
     /// <inheritdoc />
@@ -172,23 +177,24 @@ public sealed class AvaloniaWindowChromeProvider : IWindowChromeProvider, IDispo
         };
     }
 
-    private static void ApplyAppearanceToWindow(Window window, WindowAppearanceRequest request)
+    private static void ApplyAppearanceToWindow(TrackedWindow trackedWindow, WindowAppearanceRequest request)
     {
-        window.ExtendClientAreaToDecorationsHint = true;
+        var window = trackedWindow.Window;
+
+        window.ExtendClientAreaToDecorationsHint = trackedWindow.Options.CustomChrome;
         window.WindowDecorations = WindowDecorations.Full;
 
-        var pct = request.OpacityPercent / 100d;
-        var windowAlpha = (byte)Math.Clamp((int)(30 + pct * 210), 30, 240);
-
         var isDark = request.EffectiveThemeMode == "liquid";
-        var tintedBackground = isDark
-            ? new SolidColorBrush(Color.FromArgb(windowAlpha, 9, 18, 35))
-            : new SolidColorBrush(Color.FromArgb(windowAlpha, 248, 250, 252));
 
         if (request.EnableTransparency)
         {
             window.TransparencyLevelHint = BuildTransparencyLevelHint();
-            window.Background = tintedBackground;
+
+            var pct = request.OpacityPercent / 100d;
+            var alpha = (byte)Math.Clamp((int)(30 + pct * 210), 30, 240);
+            window.Background = isDark
+                ? new SolidColorBrush(Color.FromArgb(alpha, 9, 18, 35))
+                : new SolidColorBrush(Color.FromArgb(alpha, 248, 250, 252));
         }
         else
         {
