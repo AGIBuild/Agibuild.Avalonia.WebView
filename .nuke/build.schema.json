@@ -29,6 +29,7 @@
         "BridgeDistributionGovernance",
         "Build",
         "BuildAll",
+        "BuildMutationScope",
         "Ci",
         "CiMatrix",
         "CiPublish",

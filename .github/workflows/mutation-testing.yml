@@ -40,18 +40,11 @@ jobs:
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
           restore-keys: ${{ runner.os }}-nuget-
 
-      - name: Install .NET workloads
-        run: dotnet workload install android ios macos
-
       - name: Restore .NET tools
         run: dotnet tool restore
 
-      - name: Build (platform-aware)
-        run: ./build.sh --target BuildAll --configuration Release
-
-      - name: Run Stryker mutation testing
-        run: dotnet stryker --config-file ../../stryker-config.json --output ../../artifacts/mutation-report
-        working-directory: tests/Agibuild.Fulora.UnitTests
+      - name: Run mutation testing via Nuke orchestration
+        run: ./build.sh --target MutationTest --configuration Release
 
       - name: Upload mutation report
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0

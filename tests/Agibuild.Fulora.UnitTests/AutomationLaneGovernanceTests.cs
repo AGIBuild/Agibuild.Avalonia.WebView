@@ -1489,6 +1489,22 @@ public sealed class AutomationLaneGovernanceTests
     }
 
     [Fact]
+    public void Mutation_workflow_uses_nuke_mutation_target_as_single_entrypoint()
+    {
+        var repoRoot = FindRepoRoot();
+        var mutationWorkflowPath = Path.Combine(repoRoot, ".github", "workflows", "mutation-testing.yml");
+        var mutationWorkflow = File.ReadAllText(mutationWorkflowPath);
+
+        AssertSourceContains(
+            mutationWorkflow,
+            "./build.sh --target MutationTest --configuration Release",
+            BuildPipelineTargetGraph,
+            mutationWorkflowPath);
+        Assert.DoesNotContain("BuildAll", mutationWorkflow, StringComparison.Ordinal);
+        Assert.DoesNotContain("dotnet stryker", mutationWorkflow, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Workflow_actions_use_node24_compatible_versions_and_force_env()
     {
         var repoRoot = FindRepoRoot();

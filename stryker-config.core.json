@@ -1,0 +1,29 @@
+{
+  "$schema": "https://raw.githubusercontent.com/stryker-mutator/stryker-net/master/src/Stryker.Core/Stryker.Core/stryker-config.schema.json",
+  "stryker-config": {
+    "project": "Agibuild.Fulora.Core.csproj",
+    "mutate": [
+      "**/*.cs",
+      "!**/obj/**",
+      "!**/bin/**",
+      "!**/AssemblyAttributes.cs"
+    ],
+    "mutation-level": "Standard",
+    "thresholds": {
+      "high": 90,
+      "low": 80,
+      "break": 0
+    },
+    "reporters": [
+      "html",
+      "json",
+      "progress",
+      "cleartext"
+    ],
+    "ignore-mutations": [
+      "string",
+      "linq"
+    ],
+    "concurrency": 4
+  }
+}

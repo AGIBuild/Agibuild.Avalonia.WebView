@@ -113,6 +113,31 @@ internal partial class BuildTask
                 .SetLoggers("trx;LogFileName=integration-tests.trx"));
         });
 
+    private static IReadOnlyList<AbsolutePath> GetMutationProjectsToBuild() =>
+    [
+        CoreProject,
+        RuntimeProject,
+        SrcDirectory / "Agibuild.Fulora.AI" / "Agibuild.Fulora.AI.csproj",
+        UnitTestsProject
+    ];
+
+    internal Target BuildMutationScope => _ => _
+        .Description("Builds only projects required by mutation testing profiles.")
+        .DependsOn(Clean)
+        .Executes(() =>
+        {
+            foreach (var project in GetMutationProjectsToBuild())
+            {
+                DotNetRestore(s => s
+                    .SetProjectFile(project));
+
+                DotNetBuild(s => s
+                    .SetProjectFile(project)
+                    .SetConfiguration(Configuration)
+                    .EnableNoRestore());
+            }
+        });
+
     internal Target ContractAutomation => _ => _
         .Description("Runs ContractAutomation lane (mock-driven unit tests).")
         .DependsOn(Build)
@@ -232,17 +257,34 @@ internal partial class BuildTask
         .DependsOn(UnitTests, IntegrationTests);
 
     private static AbsolutePath MutationReportDirectory => ArtifactsDirectory / "mutation-report";
+    private sealed record MutationProfile(string Name, string ConfigFileName);
+
+    private static IReadOnlyList<MutationProfile> GetMutationProfiles() =>
+    [
+        new("core", "stryker-config.core.json"),
+        new("runtime", "stryker-config.runtime.json"),
+        new("ai", "stryker-config.ai.json")
+    ];
 
     internal Target MutationTest => _ => _
-        .Description("Runs Stryker.NET mutation testing on non-UI projects.")
-        .DependsOn(Build)
+        .Description("Runs Stryker.NET mutation testing on core business profiles.")
+        .DependsOn(BuildMutationScope)
         .Executes(() =>
         {
             MutationReportDirectory.CreateOrCleanDirectory();
 
-            DotNet(
-                $"stryker --config-file {RootDirectory / "stryker-config.json"} --output {MutationReportDirectory}",
-                workingDirectory: UnitTestsProject.Parent);
+            foreach (var profile in GetMutationProfiles())
+            {
+                var configPath = RootDirectory / profile.ConfigFileName;
+                Assert.FileExists(configPath, $"Missing mutation profile config: {configPath}");
+
+                var profileOutput = MutationReportDirectory / profile.Name;
+                profileOutput.CreateOrCleanDirectory();
+
+                DotNet(
+                    $"stryker --config-file {configPath} --output {profileOutput}",
+                    workingDirectory: UnitTestsProject.Parent);
+            }
 
             Serilog.Log.Information("Mutation report: {Path}", MutationReportDirectory);
         });
