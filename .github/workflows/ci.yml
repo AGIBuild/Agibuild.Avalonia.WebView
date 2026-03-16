@@ -572,32 +572,19 @@ jobs:
           path: docs/_site
           if-no-files-found: error
 
-  release:
-    name: Release
+  release-gate:
+    name: Release Gate
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: [version, build-macos, build-windows, build-linux, build-docs]
     if: needs.version.outputs.is_release == 'true'
     environment: release
-    permissions:
-      contents: write
-      attestations: write
-      id-token: write
-    concurrency:
-      group: release-tag-${{ needs.version.outputs.tag }}
-      cancel-in-progress: true
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           ref: ${{ needs.version.outputs.sha }}
           fetch-depth: 0
           token: ${{ secrets.GH_TOKEN }}
-
-      - name: Setup Node.js
-        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
-        with:
-          node-version: "22"
-          registry-url: "https://registry.npmjs.org"
 
       - name: Setup .NET
         uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5.2.0
@@ -707,12 +694,50 @@ jobs:
           print("Release bundle verification passed.")
           PY
 
+  publish-nuget:
+    name: Publish NuGet
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [version, release-gate]
+    if: needs.version.outputs.is_release == 'true'
+    steps:
+      - name: Setup .NET
+        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5.2.0
+        with:
+          dotnet-version: "10.0.x"
+          dotnet-quality: "preview"
+
+      - name: Download release bundle
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: release-bundle
+          path: artifacts/release-bundle
+
       - name: Push NuGet packages
         run: |
           dotnet nuget push "artifacts/release-bundle/nuget/*.nupkg" \
             --source https://api.nuget.org/v3/index.json \
             --api-key "${{ secrets.NUGET_API_KEY }}" \
             --skip-duplicate
+
+  publish-npm:
+    name: Publish npm
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [version, release-gate]
+    if: needs.version.outputs.is_release == 'true'
+    steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        with:
+          node-version: "22"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Download release bundle
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: release-bundle
+          path: artifacts/release-bundle
 
       - name: Publish bridge package to npm
         run: |
@@ -728,16 +753,35 @@ jobs:
           else
             NPM_TAG="next"
           fi
-          PACKAGE_NAME="@agibuild/bridge"
-          PACKAGE_VERSION="${{ needs.version.outputs.full_version }}"
-
-          if npm view "${PACKAGE_NAME}@${PACKAGE_VERSION}" version >/dev/null 2>&1; then
-            echo "::notice::${PACKAGE_NAME}@${PACKAGE_VERSION} already exists on npm, skipping publish."
-          else
-            npm publish "${tgz_files[0]}" --access public --tag "$NPM_TAG"
-          fi
+          npm publish "${tgz_files[0]}" --access public --tag "$NPM_TAG"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  create-github-release:
+    name: Create Tag and GitHub Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [version, publish-nuget, publish-npm]
+    if: needs.version.outputs.is_release == 'true'
+    permissions:
+      contents: write
+      attestations: write
+      id-token: write
+    concurrency:
+      group: release-tag-${{ needs.version.outputs.tag }}
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ needs.version.outputs.sha }}
+          fetch-depth: 0
+          token: ${{ secrets.GH_TOKEN }}
+
+      - name: Download release bundle
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: release-bundle
+          path: artifacts/release-bundle
 
       - name: Generate SBOM
         uses: anchore/sbom-action@57aae528053a48a3f6235f2d9461b05fbcb7366d # v0.23.1
@@ -803,7 +847,6 @@ jobs:
         run: |
           TAG="${{ needs.version.outputs.tag }}"
           RELEASE_NAME="Agibuild.Fulora $TAG"
-          FULL_VERSION="${{ needs.version.outputs.full_version }}"
           VERSION_SUFFIX="${{ needs.version.outputs.version_suffix }}"
 
           if gh release view "$TAG" >/dev/null 2>&1; then
@@ -824,7 +867,7 @@ jobs:
 
   deploy-docs:
     name: Deploy Documentation
-    needs: [version, release, build-docs]
+    needs: [version, create-github-release, build-docs]
     if: needs.version.outputs.is_release == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
