@@ -29,6 +29,16 @@ All of this is type-checked at compile time, AOT-safe, and works the same on Win
 | Build an AI chat app with streaming | [AI Integration Guide](ai-integration-guide.md) |
 | Understand how the runtime works | [Architecture](articles/architecture.md) |
 
+## Platform Documents
+
+| Platform document | Purpose |
+|---|---|
+| [Product Platform Roadmap](product-platform-roadmap.md) | Positioning, strategy, layering model, capability contract, and P0-P5 roadmap |
+| [Architecture Layering](architecture-layering.md) | Dependency boundaries, API category rules, and kernel approval policy |
+| [Platform Status](platform-status.md) | Current governed platform snapshot |
+| [Release Governance](release-governance.md) | Stable release rules, gates, and promotion flow |
+| [Framework Capabilities](framework-capabilities.json) | Machine-readable capability registry baseline |
+
 ## Developer Resources
 
 | Resource | Description |
