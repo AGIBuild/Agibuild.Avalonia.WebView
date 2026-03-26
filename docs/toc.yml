@@ -1,3 +1,13 @@
+- name: Product Platform Roadmap
+  href: product-platform-roadmap.md
+- name: Architecture Layering
+  href: architecture-layering.md
+- name: Platform Status
+  href: platform-status.md
+- name: Release Governance
+  href: release-governance.md
+- name: Framework Capabilities
+  href: framework-capabilities.json
 - name: Demo
   href: demo/
 - name: Articles

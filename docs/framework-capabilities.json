@@ -1,0 +1,66 @@
+{
+  "schemaVersion": "1.0",
+  "updatedAtUtc": "2026-03-26T00:00:00Z",
+  "capabilities": [
+    {
+      "id": "kernel.bridge.contracts",
+      "name": "Kernel Bridge Contracts",
+      "layer": "Kernel",
+      "status": "stable",
+      "supportTier": "LTS",
+      "owner": "runtime-core",
+      "breakingChangePolicy": "architecture-approval-required",
+      "compatibilityScope": "all-supported-hosts-and-framework-bindings",
+      "rollbackStrategy": "revert-kernel-contract-change-and-restore-previous-bridge-schema",
+      "observability": {
+        "traces": true,
+        "metrics": true,
+        "structuredErrors": true
+      },
+      "security": {
+        "boundaryValidated": true,
+        "defaultDeny": true
+      }
+    },
+    {
+      "id": "platform.shell.integration",
+      "name": "Platform Shell Integration",
+      "layer": "Platform Services",
+      "status": "stable",
+      "supportTier": "standard",
+      "owner": "platform-services",
+      "breakingChangePolicy": "release-gate-required",
+      "compatibilityScope": "all-supported-desktop-hosts",
+      "rollbackStrategy": "disable-shell-feature-flag-and-fallback-to-previous-platform-adapter",
+      "observability": {
+        "traces": true,
+        "metrics": true,
+        "structuredErrors": true
+      },
+      "security": {
+        "boundaryValidated": true,
+        "defaultDeny": true
+      }
+    },
+    {
+      "id": "extension.framework.adapter.react",
+      "name": "React Framework Adapter",
+      "layer": "Experience Extensions",
+      "status": "provisional",
+      "supportTier": "best-effort",
+      "owner": "framework-extensions",
+      "breakingChangePolicy": "compatibility-note-required",
+      "compatibilityScope": "react-adapter-consumers-on-supported-runtime-version",
+      "rollbackStrategy": "pin-previous-adapter-version-and-disable-new-extension-binding",
+      "observability": {
+        "traces": true,
+        "metrics": false,
+        "structuredErrors": true
+      },
+      "security": {
+        "boundaryValidated": true,
+        "defaultDeny": true
+      }
+    }
+  ]
+}

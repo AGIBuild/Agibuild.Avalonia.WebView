@@ -37,6 +37,7 @@
           "articles/**/toc.yml",
           "demo/**.md",
           "demo/**/toc.yml",
+          "framework-capabilities.json",
           "toc.yml",
           "*.md"
         ]
