@@ -486,6 +486,34 @@ public sealed class DocumentationGovernanceTests
     }
 
     [Fact]
+    public void Openspec_assets_and_prompts_are_removed_and_pr_template_no_longer_requires_openspec_artifacts()
+    {
+        var repoRoot = FindRepoRoot();
+        var openspecPath = Path.Combine(repoRoot, "openspec");
+        var skillsPath = Path.Combine(repoRoot, ".github", "skills");
+        var promptsPath = Path.Combine(repoRoot, ".github", "prompts");
+        var prTemplatePath = Path.Combine(repoRoot, ".github", "PULL_REQUEST_TEMPLATE.md");
+
+        Assert.False(Directory.Exists(openspecPath), "openspec/ directory should be removed.");
+        var openspecSkillAssets = Directory.Exists(skillsPath)
+            ? Directory.EnumerateFileSystemEntries(skillsPath, "openspec-*", SearchOption.TopDirectoryOnly)
+            : Enumerable.Empty<string>();
+        Assert.Empty(openspecSkillAssets);
+
+        var opsxPromptAssets = Directory.Exists(promptsPath)
+            ? Directory.EnumerateFileSystemEntries(promptsPath, "opsx-*", SearchOption.TopDirectoryOnly)
+            : Enumerable.Empty<string>();
+        Assert.Empty(opsxPromptAssets);
+
+        Assert.True(File.Exists(prTemplatePath), "Missing .github/PULL_REQUEST_TEMPLATE.md");
+        var prTemplate = File.ReadAllText(prTemplatePath);
+
+        Assert.DoesNotContain("OpenSpec", prTemplate, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("openspec", prTemplate, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Layer Impact", prTemplate, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void Historical_webview_design_doc_redirects_to_new_platform_documents()
     {
         var repoRoot = FindRepoRoot();
