@@ -1,17 +1,28 @@
 {
-  "schemaVersion": "1.0",
-  "updatedAtUtc": "2026-03-26T00:00:00Z",
+  "schemaVersion": "1.1",
+  "updatedAtUtc": "2026-03-27T00:00:00Z",
+  "layers": [
+    "Kernel",
+    "Bridge",
+    "Framework",
+    "Plugin"
+  ],
+  "supportTiers": [
+    "Tier A",
+    "Tier B",
+    "Tier C"
+  ],
   "capabilities": [
     {
-      "id": "kernel.bridge.contracts",
-      "name": "Kernel Bridge Contracts",
+      "id": "navigation",
+      "name": "Navigation Lifecycle",
       "layer": "Kernel",
       "status": "stable",
-      "supportTier": "LTS",
+      "supportTier": "Tier A",
       "owner": "runtime-core",
       "breakingChangePolicy": "architecture-approval-required",
-      "compatibilityScope": "all-supported-hosts-and-framework-bindings",
-      "rollbackStrategy": "revert-kernel-contract-change-and-restore-previous-bridge-schema",
+      "compatibilityScope": "all-supported-hosts",
+      "rollbackStrategy": "revert-navigation-contract-and-restore-previous-runtime-package",
       "observability": {
         "traces": true,
         "metrics": true,
@@ -23,15 +34,15 @@
       }
     },
     {
-      "id": "platform.shell.integration",
-      "name": "Platform Shell Integration",
-      "layer": "Platform Services",
+      "id": "lifecycle.disposal",
+      "name": "Lifecycle Disposal Semantics",
+      "layer": "Kernel",
       "status": "stable",
-      "supportTier": "standard",
-      "owner": "platform-services",
-      "breakingChangePolicy": "release-gate-required",
-      "compatibilityScope": "all-supported-desktop-hosts",
-      "rollbackStrategy": "disable-shell-feature-flag-and-fallback-to-previous-platform-adapter",
+      "supportTier": "Tier A",
+      "owner": "runtime-core",
+      "breakingChangePolicy": "architecture-approval-required",
+      "compatibilityScope": "all-runtime-implementations",
+      "rollbackStrategy": "restore-previous-lifecycle-state-machine-and-disable-regressing-code-path",
       "observability": {
         "traces": true,
         "metrics": true,
@@ -43,15 +54,155 @@
       }
     },
     {
-      "id": "extension.framework.adapter.react",
-      "name": "React Framework Adapter",
-      "layer": "Experience Extensions",
+      "id": "bridge.binary",
+      "name": "Binary Payload Bridge",
+      "layer": "Bridge",
+      "status": "stable",
+      "supportTier": "Tier A",
+      "owner": "bridge-platform",
+      "breakingChangePolicy": "release-gate-required",
+      "compatibilityScope": "bridge-v2-supported-hosts-and-clients",
+      "rollbackStrategy": "fallback-to-previous-bridge-schema-and-disable-binary-payload-upgrade",
+      "observability": {
+        "traces": true,
+        "metrics": true,
+        "structuredErrors": true
+      },
+      "security": {
+        "boundaryValidated": true,
+        "defaultDeny": true
+      }
+    },
+    {
+      "id": "bridge.cancellation",
+      "name": "Cancelable Bridge Requests",
+      "layer": "Bridge",
+      "status": "stable",
+      "supportTier": "Tier A",
+      "owner": "bridge-platform",
+      "breakingChangePolicy": "release-gate-required",
+      "compatibilityScope": "bridge-v2-request-lifecycle",
+      "rollbackStrategy": "disable-cancel-transport-and-restore-previous-request-timeout-behavior",
+      "observability": {
+        "traces": true,
+        "metrics": true,
+        "structuredErrors": true
+      },
+      "security": {
+        "boundaryValidated": true,
+        "defaultDeny": true
+      }
+    },
+    {
+      "id": "bridge.streaming",
+      "name": "Streaming Bridge Responses",
+      "layer": "Bridge",
       "status": "provisional",
-      "supportTier": "best-effort",
-      "owner": "framework-extensions",
+      "supportTier": "Tier B",
+      "owner": "bridge-platform",
       "breakingChangePolicy": "compatibility-note-required",
-      "compatibilityScope": "react-adapter-consumers-on-supported-runtime-version",
-      "rollbackStrategy": "pin-previous-adapter-version-and-disable-new-extension-binding",
+      "compatibilityScope": "bridge-v2-streaming-consumers-on-supported-runtime-version",
+      "rollbackStrategy": "pin-previous-streaming-protocol-version-and-fallback-to-buffered-responses",
+      "observability": {
+        "traces": true,
+        "metrics": true,
+        "structuredErrors": true
+      },
+      "security": {
+        "boundaryValidated": true,
+        "defaultDeny": true
+      }
+    },
+    {
+      "id": "spa.hosting",
+      "name": "SPA Hosting Shell",
+      "layer": "Framework",
+      "status": "stable",
+      "supportTier": "Tier B",
+      "owner": "framework-shell",
+      "breakingChangePolicy": "release-gate-required",
+      "compatibilityScope": "supported-web-frameworks-on-governed-host-shells",
+      "rollbackStrategy": "restore-previous-host-bootstrap-template-and-disable-new-shell-preset",
+      "observability": {
+        "traces": true,
+        "metrics": true,
+        "structuredErrors": true
+      },
+      "security": {
+        "boundaryValidated": true,
+        "defaultDeny": true
+      }
+    },
+    {
+      "id": "shell.activation",
+      "name": "Shell Activation Routing",
+      "layer": "Framework",
+      "status": "provisional",
+      "supportTier": "Tier B",
+      "owner": "framework-shell",
+      "breakingChangePolicy": "compatibility-note-required",
+      "compatibilityScope": "desktop-shell-entrypoints-and-deep-link-handlers",
+      "rollbackStrategy": "disable-new-activation-handler-and-fallback-to-primary-window-routing",
+      "observability": {
+        "traces": true,
+        "metrics": true,
+        "structuredErrors": true
+      },
+      "security": {
+        "boundaryValidated": true,
+        "defaultDeny": true
+      }
+    },
+    {
+      "id": "filesystem.read",
+      "name": "File System Read Access",
+      "layer": "Plugin",
+      "status": "stable",
+      "supportTier": "Tier C",
+      "owner": "plugin-ecosystem",
+      "breakingChangePolicy": "compatibility-note-required",
+      "compatibilityScope": "file-system-plugin-consumers-on-supported-hosts",
+      "rollbackStrategy": "disable-plugin-registration-and-restore-previous-plugin-package",
+      "observability": {
+        "traces": true,
+        "metrics": false,
+        "structuredErrors": true
+      },
+      "security": {
+        "boundaryValidated": true,
+        "defaultDeny": true
+      }
+    },
+    {
+      "id": "http.outbound",
+      "name": "HTTP Outbound Client",
+      "layer": "Plugin",
+      "status": "stable",
+      "supportTier": "Tier C",
+      "owner": "plugin-ecosystem",
+      "breakingChangePolicy": "compatibility-note-required",
+      "compatibilityScope": "http-client-plugin-consumers-on-supported-runtime-version",
+      "rollbackStrategy": "pin-previous-http-plugin-version-and-disable-new-request-pipeline",
+      "observability": {
+        "traces": true,
+        "metrics": true,
+        "structuredErrors": true
+      },
+      "security": {
+        "boundaryValidated": true,
+        "defaultDeny": true
+      }
+    },
+    {
+      "id": "notification.post",
+      "name": "Notification Dispatch",
+      "layer": "Plugin",
+      "status": "provisional",
+      "supportTier": "Tier C",
+      "owner": "plugin-ecosystem",
+      "breakingChangePolicy": "compatibility-note-required",
+      "compatibilityScope": "notification-plugin-consumers-on-supported-desktop-hosts",
+      "rollbackStrategy": "disable-notification-plugin-and-fallback-to-no-op-notification-provider",
       "observability": {
         "traces": true,
         "metrics": false,

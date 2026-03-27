@@ -19,14 +19,17 @@ Fulora is a product platform for shipping web-first applications as native deskt
 ## Layering Model
 
 - `Kernel` — cross-platform runtime contracts and execution invariants.
-- `Platform Services` — persistence, networking, shell integration, and policy enforcement abstractions.
-- `Experience Extensions` — framework adapters, plugins, and host-specific implementations.
-- `Product Surface` — templates, samples, and product applications consuming public contracts.
+- `Bridge` — JS/C# contract generation, transport semantics, and bridge diagnostics.
+- `Framework` — host integration, adapter composition, shell bootstrapping, and SPA hosting surfaces.
+- `Plugin` — optional capability packages that extend the platform without reversing lower-layer dependencies.
+- Product surfaces consume these four layers but do not define the platform dependency envelope.
 
 ## Capability Support Contract
 
 - Capabilities are registered in `framework-capabilities.json` with explicit lifecycle states.
+- Current release-line publication status lives in `platform-status.md`.
 - Each capability declares owner, support tier, compatibility scope, and rollback strategy.
+- Tier A covers stable `Kernel` and `Bridge` contracts, Tier B covers governed `Framework` surfaces, and Tier C covers optional `Plugin` capabilities.
 - Breaking capability changes must follow each capability's `breakingChangePolicy`.
 - Architecture approval is mandatory for kernel-level changes and capability policies that explicitly require it.
 - release-gate evidence is required for all breaking capability changes.

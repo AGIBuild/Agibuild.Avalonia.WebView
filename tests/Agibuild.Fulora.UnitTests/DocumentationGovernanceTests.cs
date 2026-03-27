@@ -204,6 +204,40 @@ public sealed class DocumentationGovernanceTests
     }
 
     [Fact]
+    public void Framework_capabilities_registry_exposes_required_keys_and_governed_layers()
+    {
+        var repoRoot = FindRepoRoot();
+        var capabilitiesPath = Path.Combine(repoRoot, "docs", "framework-capabilities.json");
+        Assert.True(File.Exists(capabilitiesPath), "Missing docs/framework-capabilities.json");
+
+        using var doc = JsonDocument.Parse(File.ReadAllText(capabilitiesPath));
+        var root = doc.RootElement;
+
+        Assert.True(root.TryGetProperty("schemaVersion", out _), "Capability registry must declare schemaVersion.");
+        Assert.True(root.TryGetProperty("updatedAtUtc", out _), "Capability registry must declare updatedAtUtc.");
+        Assert.True(root.TryGetProperty("layers", out var layersElement), "Capability registry must declare governed layers.");
+        Assert.True(root.TryGetProperty("capabilities", out var capabilitiesElement), "Capability registry must declare capabilities.");
+
+        var governedLayers = layersElement.EnumerateArray()
+            .Select(x => x.GetString())
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .ToHashSet(StringComparer.Ordinal);
+        Assert.Contains("Kernel", governedLayers);
+        Assert.Contains("Bridge", governedLayers);
+        Assert.Contains("Framework", governedLayers);
+        Assert.Contains("Plugin", governedLayers);
+
+        var capabilityLayers = capabilitiesElement.EnumerateArray()
+            .Select(x => x.GetProperty("layer").GetString())
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .ToHashSet(StringComparer.Ordinal);
+        Assert.Contains("Kernel", capabilityLayers);
+        Assert.Contains("Bridge", capabilityLayers);
+        Assert.Contains("Framework", capabilityLayers);
+        Assert.Contains("Plugin", capabilityLayers);
+    }
+
+    [Fact]
     public void Framework_capabilities_wrapper_doc_links_machine_source_and_related_governance_docs()
     {
         var repoRoot = FindRepoRoot();
@@ -258,6 +292,32 @@ public sealed class DocumentationGovernanceTests
         Assert.DoesNotContain("Phase ", content, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("all roadmap phases", content, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("current governed platform snapshot", content, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void Platform_status_and_roadmap_publish_capability_tiers_and_registry_links()
+    {
+        var repoRoot = FindRepoRoot();
+        var platformStatusPath = Path.Combine(repoRoot, "docs", "platform-status.md");
+        var roadmapPath = Path.Combine(repoRoot, "docs", "product-platform-roadmap.md");
+        var compatibilityProposalPath = Path.Combine(repoRoot, "docs", "agibuild_webview_compatibility_matrix_proposal.md");
+
+        Assert.True(File.Exists(platformStatusPath), "Missing docs/platform-status.md");
+        Assert.True(File.Exists(roadmapPath), "Missing docs/product-platform-roadmap.md");
+        Assert.True(File.Exists(compatibilityProposalPath), "Missing docs/agibuild_webview_compatibility_matrix_proposal.md");
+
+        var platformStatus = File.ReadAllText(platformStatusPath);
+        Assert.Contains("Tier A", platformStatus, StringComparison.Ordinal);
+        Assert.Contains("Tier B", platformStatus, StringComparison.Ordinal);
+        Assert.Contains("Tier C", platformStatus, StringComparison.Ordinal);
+
+        var roadmap = File.ReadAllText(roadmapPath);
+        Assert.Contains("framework-capabilities.json", roadmap, StringComparison.Ordinal);
+        Assert.Contains("platform-status.md", roadmap, StringComparison.Ordinal);
+
+        var compatibilityProposal = File.ReadAllText(compatibilityProposalPath);
+        Assert.Contains("framework-capabilities", compatibilityProposal, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("platform-status", compatibilityProposal, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
