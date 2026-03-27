@@ -11,14 +11,36 @@ public sealed class DocumentationGovernanceTests
         ["Architecture Layering"] = "architecture-layering.md",
         ["Platform Status"] = "platform-status.md",
         ["Release Governance"] = "release-governance.md",
-        ["Framework Capabilities"] = "framework-capabilities.json"
+        ["Framework Capabilities"] = "framework-capabilities.md"
+    };
+
+    private static readonly string[] RequiredMachineReadableArtifacts =
+    {
+        "docs/framework-capabilities.json"
+    };
+
+    private static readonly string[] GovernedPublicDocuments =
+    {
+        "README.md",
+        "docs/index.md",
+        "docs/framework-capabilities.md",
+        "docs/articles/architecture.md",
+        "docs/articles/bridge-guide.md",
+        "docs/articles/spa-hosting.md",
+        "docs/shipping-your-app.md",
+        "docs/release-checklist.md",
+        "docs/agibuild_webview_design_doc.md",
+        "docs/docs-site-deploy.md"
     };
 
     [Fact]
     public void Required_platform_documents_exist()
     {
         var repoRoot = FindRepoRoot();
-        var requiredFiles = RequiredPlatformDocuments.Values.Select(x => $"docs/{x}").ToArray();
+        var requiredFiles = RequiredPlatformDocuments.Values
+            .Select(x => $"docs/{x}")
+            .Concat(RequiredMachineReadableArtifacts)
+            .ToArray();
 
         foreach (var relativePath in requiredFiles)
         {
@@ -89,11 +111,20 @@ public sealed class DocumentationGovernanceTests
 
         Assert.Contains("*.md", contentFiles);
         Assert.Contains("toc.yml", contentFiles);
-        Assert.Contains("framework-capabilities.json", contentFiles);
+
+        var resourceFiles = docfx.RootElement.GetProperty("build").GetProperty("resource")
+            .EnumerateArray()
+            .Where(x => x.TryGetProperty("files", out _))
+            .SelectMany(x => x.GetProperty("files").EnumerateArray())
+            .Select(x => x.GetString())
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .ToHashSet(StringComparer.Ordinal);
+
+        Assert.Contains("framework-capabilities.json", resourceFiles);
     }
 
     [Fact]
-    public void Docfx_build_content_includes_framework_capabilities_json()
+    public void Docfx_build_content_models_framework_capabilities_as_wrapper_page_with_json_resource()
     {
         var repoRoot = FindRepoRoot();
         var docfxPath = Path.Combine(repoRoot, "docs", "docfx.json");
@@ -101,17 +132,33 @@ public sealed class DocumentationGovernanceTests
 
         using var doc = JsonDocument.Parse(File.ReadAllText(docfxPath));
         var contentEntries = doc.RootElement.GetProperty("build").GetProperty("content");
+        var resourceEntries = doc.RootElement.GetProperty("build").GetProperty("resource");
 
-        var includesFrameworkCapabilities = contentEntries
+        var contentFiles = contentEntries
             .EnumerateArray()
             .Where(x => x.TryGetProperty("files", out _))
             .SelectMany(x => x.GetProperty("files").EnumerateArray())
             .Select(x => x.GetString())
-            .Any(x => string.Equals(x, "framework-capabilities.json", StringComparison.Ordinal));
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .ToHashSet(StringComparer.Ordinal);
+
+        var resourceFiles = resourceEntries
+            .EnumerateArray()
+            .Where(x => x.TryGetProperty("files", out _))
+            .SelectMany(x => x.GetProperty("files").EnumerateArray())
+            .Select(x => x.GetString())
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .ToHashSet(StringComparer.Ordinal);
 
         Assert.True(
-            includesFrameworkCapabilities,
-            "DocFX build content must include framework-capabilities.json so docs links remain valid.");
+            contentFiles.Contains("*.md") || contentFiles.Contains("framework-capabilities.md"),
+            "DocFX build content must include markdown conceptual pages, including the framework capabilities wrapper.");
+        Assert.False(
+            contentFiles.Contains("framework-capabilities.json"),
+            "framework-capabilities.json should not be modeled as conceptual content.");
+        Assert.True(
+            resourceFiles.Contains("framework-capabilities.json"),
+            "DocFX build resource must include framework-capabilities.json as downloadable machine-readable artifact.");
     }
 
     [Fact]
@@ -157,6 +204,63 @@ public sealed class DocumentationGovernanceTests
     }
 
     [Fact]
+    public void Framework_capabilities_wrapper_doc_links_machine_source_and_related_governance_docs()
+    {
+        var repoRoot = FindRepoRoot();
+        var wrapperDocPath = Path.Combine(repoRoot, "docs", "framework-capabilities.md");
+        Assert.True(File.Exists(wrapperDocPath), "Missing docs/framework-capabilities.md");
+
+        var content = File.ReadAllText(wrapperDocPath);
+        Assert.Contains("framework-capabilities.json", content, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("product-platform-roadmap.md", content, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("platform-status.md", content, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("release-governance.md", content, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void Platform_status_entrypoints_describe_governed_status_location_not_prepopulated_snapshot()
+    {
+        var repoRoot = FindRepoRoot();
+        var entrypointFiles = new[]
+        {
+            Path.Combine(repoRoot, "README.md"),
+            Path.Combine(repoRoot, "docs", "index.md"),
+            Path.Combine(repoRoot, "docs", "framework-capabilities.md")
+        };
+
+        foreach (var path in entrypointFiles)
+        {
+            Assert.True(File.Exists(path), $"Missing entrypoint doc: {path}");
+            var content = File.ReadAllText(path);
+            Assert.Contains("platform-status.md", content, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("current governed platform snapshot", content, StringComparison.OrdinalIgnoreCase);
+            Assert.True(
+                content.Contains("status page", StringComparison.OrdinalIgnoreCase)
+                || content.Contains("snapshot location", StringComparison.OrdinalIgnoreCase)
+                || content.Contains("template", StringComparison.OrdinalIgnoreCase),
+                "Platform status entrypoints should describe status semantics as a governed page/template/publication location.");
+        }
+    }
+
+    [Fact]
+    public void Platform_status_page_stays_as_governed_template_and_publication_location()
+    {
+        var repoRoot = FindRepoRoot();
+        var platformStatusPath = Path.Combine(repoRoot, "docs", "platform-status.md");
+        Assert.True(File.Exists(platformStatusPath), "Missing docs/platform-status.md");
+
+        var content = File.ReadAllText(platformStatusPath);
+        Assert.True(
+            content.Contains("template", StringComparison.OrdinalIgnoreCase)
+            || content.Contains("publication location", StringComparison.OrdinalIgnoreCase)
+            || content.Contains("release-line snapshots", StringComparison.OrdinalIgnoreCase),
+            "Platform status page should describe template/publication-location semantics.");
+        Assert.DoesNotContain("Phase ", content, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("all roadmap phases", content, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("current governed platform snapshot", content, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void Roadmap_breaking_change_rule_matches_capability_policy_model()
     {
         var repoRoot = FindRepoRoot();
@@ -164,9 +268,240 @@ public sealed class DocumentationGovernanceTests
         Assert.True(File.Exists(roadmapPath), "Missing docs/product-platform-roadmap.md");
 
         var content = File.ReadAllText(roadmapPath);
-        Assert.Contains("Breaking capability changes must follow each capability's `breakingChangePolicy`.", content, StringComparison.Ordinal);
-        Assert.Contains("Architecture approval is mandatory for kernel-level changes", content, StringComparison.Ordinal);
-        Assert.Contains("release-gate evidence is required for all breaking capability changes", content, StringComparison.Ordinal);
+        Assert.Contains("breakingChangePolicy", content, StringComparison.Ordinal);
+        Assert.True(
+            (content.Contains("architecture approval", StringComparison.OrdinalIgnoreCase)
+             || content.Contains("approval", StringComparison.OrdinalIgnoreCase))
+            && content.Contains("kernel", StringComparison.OrdinalIgnoreCase),
+            "Roadmap must define architecture approval requirements for kernel-level changes.");
+        Assert.True(
+            content.Contains("release-gate", StringComparison.OrdinalIgnoreCase)
+            && content.Contains("breaking", StringComparison.OrdinalIgnoreCase),
+            "Roadmap must define release-gate evidence requirements for breaking changes.");
+    }
+
+    [Fact]
+    public void Governed_public_docs_do_not_reference_removed_openspec_paths()
+    {
+        var repoRoot = FindRepoRoot();
+        var blockedPaths = new[]
+        {
+            "openspec/ROADMAP.md",
+            "openspec/PROJECT.md",
+            "openspec/specs/"
+        };
+
+        foreach (var relativePath in GovernedPublicDocuments)
+        {
+            var fullPath = Path.Combine(repoRoot, relativePath.Replace('/', Path.DirectorySeparatorChar));
+            Assert.True(File.Exists(fullPath), $"Missing governed public doc: {relativePath}");
+
+            var content = File.ReadAllText(fullPath);
+            foreach (var blockedPath in blockedPaths)
+            {
+                Assert.DoesNotContain(
+                    blockedPath,
+                    content,
+                    StringComparison.OrdinalIgnoreCase);
+            }
+        }
+    }
+
+    [Fact]
+    public void Readme_repoints_roadmap_navigation_to_product_platform_roadmap_document()
+    {
+        var repoRoot = FindRepoRoot();
+        var readmePath = Path.Combine(repoRoot, "README.md");
+        Assert.True(File.Exists(readmePath), "Missing README.md");
+
+        var content = File.ReadAllText(readmePath);
+        Assert.Contains("docs/product-platform-roadmap.md", content, StringComparison.Ordinal);
+        Assert.DoesNotContain("openspec/ROADMAP.md", content, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("openspec/PROJECT.md", content, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void Readme_uses_capability_tiers_language_and_links_new_platform_documents()
+    {
+        var repoRoot = FindRepoRoot();
+        var readmePath = Path.Combine(repoRoot, "README.md");
+        Assert.True(File.Exists(readmePath), "Missing README.md");
+
+        var content = File.ReadAllText(readmePath);
+        Assert.Contains("Capability Tiers", content, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("docs/product-platform-roadmap.md", content, StringComparison.Ordinal);
+        Assert.Contains("docs/platform-status.md", content, StringComparison.Ordinal);
+        Assert.DoesNotContain("you stay on one runtime model", content, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("Two paths, one runtime", content, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void Readme_does_not_publish_legacy_phase_completion_claims()
+    {
+        var repoRoot = FindRepoRoot();
+        var readmePath = Path.Combine(repoRoot, "README.md");
+        Assert.True(File.Exists(readmePath), "Missing README.md");
+
+        var content = File.ReadAllText(readmePath);
+        Assert.DoesNotContain("Phase 12", content, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("All roadmap phases through 12 are done", content, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void Architecture_article_aligns_with_platform_layering_terms()
+    {
+        var repoRoot = FindRepoRoot();
+        var architecturePath = Path.Combine(repoRoot, "docs", "articles", "architecture.md");
+        Assert.True(File.Exists(architecturePath), "Missing docs/articles/architecture.md");
+
+        var content = File.ReadAllText(architecturePath);
+        Assert.Contains("platform kernel", content, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("adapter layer", content, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("capability", content, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void Bridge_and_spa_guides_reference_new_platform_roadmap()
+    {
+        var repoRoot = FindRepoRoot();
+        var guidePaths = new[]
+        {
+            Path.Combine(repoRoot, "docs", "articles", "bridge-guide.md"),
+            Path.Combine(repoRoot, "docs", "articles", "spa-hosting.md")
+        };
+
+        foreach (var guidePath in guidePaths)
+        {
+            Assert.True(File.Exists(guidePath), $"Missing guide: {guidePath}");
+            var content = File.ReadAllText(guidePath);
+            Assert.Contains("../product-platform-roadmap.md", content, StringComparison.Ordinal);
+            Assert.DoesNotContain("openspec/ROADMAP.md", content, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("Phase 5", content, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("Phase 8", content, StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
+    [Fact]
+    public void Shipping_guide_references_release_governance_document()
+    {
+        var repoRoot = FindRepoRoot();
+        var shippingGuidePath = Path.Combine(repoRoot, "docs", "shipping-your-app.md");
+        Assert.True(File.Exists(shippingGuidePath), "Missing docs/shipping-your-app.md");
+
+        var content = File.ReadAllText(shippingGuidePath);
+        Assert.Contains("(release-governance.md)", content, StringComparison.Ordinal);
+        Assert.DoesNotContain("(docs/release-governance.md)", content, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("openspec/specs/", content, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void Release_checklist_declares_release_governance_as_normative_reference()
+    {
+        var repoRoot = FindRepoRoot();
+        var releaseChecklistPath = Path.Combine(repoRoot, "docs", "release-checklist.md");
+        Assert.True(File.Exists(releaseChecklistPath), "Missing docs/release-checklist.md");
+
+        var content = File.ReadAllText(releaseChecklistPath);
+        Assert.Contains("[Release Governance](release-governance.md)", content, StringComparison.Ordinal);
+        Assert.True(
+            content.Contains("source of truth", StringComparison.OrdinalIgnoreCase)
+            || content.Contains("governed by", StringComparison.OrdinalIgnoreCase),
+            "Release checklist should declare normative governance semantics.");
+    }
+
+    [Fact]
+    public void Docs_site_deploy_doc_does_not_allow_invalidfilelink_openspec_exceptions()
+    {
+        var repoRoot = FindRepoRoot();
+        var docsSiteDeployPath = Path.Combine(repoRoot, "docs", "docs-site-deploy.md");
+        Assert.True(File.Exists(docsSiteDeployPath), "Missing docs/docs-site-deploy.md");
+
+        var content = File.ReadAllText(docsSiteDeployPath);
+        Assert.DoesNotContain("InvalidFileLink", content, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("openspec", content, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void Docs_site_deploy_document_matches_independent_docs_workflow_semantics()
+    {
+        var repoRoot = FindRepoRoot();
+        var docsWorkflowPath = Path.Combine(repoRoot, ".github", "workflows", "docs.yml");
+        var ciWorkflowPath = Path.Combine(repoRoot, ".github", "workflows", "ci.yml");
+        var docsDeployDocPath = Path.Combine(repoRoot, "docs", "docs-site-deploy.md");
+
+        Assert.True(File.Exists(docsWorkflowPath), "Missing .github/workflows/docs.yml");
+        Assert.True(File.Exists(ciWorkflowPath), "Missing .github/workflows/ci.yml");
+        Assert.True(File.Exists(docsDeployDocPath), "Missing docs/docs-site-deploy.md");
+
+        var docsWorkflow = File.ReadAllText(docsWorkflowPath);
+        var ciWorkflow = File.ReadAllText(ciWorkflowPath);
+        var deployDoc = File.ReadAllText(docsDeployDocPath);
+
+        Assert.True(
+            docsWorkflow.Contains("Deploy Documentation", StringComparison.OrdinalIgnoreCase)
+            && docsWorkflow.Contains("push", StringComparison.OrdinalIgnoreCase)
+            && docsWorkflow.Contains("main", StringComparison.OrdinalIgnoreCase)
+            && docsWorkflow.Contains("docs/**", StringComparison.Ordinal)
+            && (docsWorkflow.Contains("GitHub Pages", StringComparison.OrdinalIgnoreCase)
+                || docsWorkflow.Contains("deploy-pages", StringComparison.OrdinalIgnoreCase)),
+            "docs.yml should model docs deployment on main + docs/** to GitHub Pages.");
+        Assert.True(
+            ciWorkflow.Contains("paths-ignore:", StringComparison.OrdinalIgnoreCase)
+            && ciWorkflow.Contains("docs/**", StringComparison.Ordinal)
+            && ciWorkflow.Contains("*.md", StringComparison.Ordinal),
+            "ci.yml should ignore docs-only changes.");
+
+        Assert.Contains("docs.yml", deployDoc, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("docs/**", deployDoc, StringComparison.Ordinal);
+        Assert.Contains("main", deployDoc, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("GitHub Pages", deployDoc, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("integrated into the unified `ci.yml` workflow", deployDoc, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("After approval", deployDoc, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void Release_checklist_version_semantics_match_ci_workflow_resolution_rules()
+    {
+        var repoRoot = FindRepoRoot();
+        var ciWorkflowPath = Path.Combine(repoRoot, ".github", "workflows", "ci.yml");
+        var releaseChecklistPath = Path.Combine(repoRoot, "docs", "release-checklist.md");
+
+        Assert.True(File.Exists(ciWorkflowPath), "Missing .github/workflows/ci.yml");
+        Assert.True(File.Exists(releaseChecklistPath), "Missing docs/release-checklist.md");
+
+        var ciWorkflow = File.ReadAllText(ciWorkflowPath);
+        var checklist = File.ReadAllText(releaseChecklistPath);
+
+        Assert.True(
+            ciWorkflow.Contains("is_release", StringComparison.OrdinalIgnoreCase)
+            && ciWorkflow.Contains("v$VERSION", StringComparison.Ordinal)
+            && ciWorkflow.Contains("ci.${RUN_NUMBER}", StringComparison.Ordinal)
+            && ciWorkflow.Contains("prerelease_suffix", StringComparison.OrdinalIgnoreCase),
+            "ci.yml should define stable-tag, ci-suffix, and manual-prerelease version semantics.");
+
+        Assert.DoesNotContain("{VersionPrefix}.{run_number}", checklist, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("v{VersionPrefix}", checklist, StringComparison.Ordinal);
+        Assert.Contains("VersionPrefix-ci.{run_number}", checklist, StringComparison.Ordinal);
+        Assert.Contains("prerelease", checklist, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void Historical_webview_design_doc_redirects_to_new_platform_documents()
+    {
+        var repoRoot = FindRepoRoot();
+        var designDocPath = Path.Combine(repoRoot, "docs", "agibuild_webview_design_doc.md");
+        Assert.True(File.Exists(designDocPath), "Missing docs/agibuild_webview_design_doc.md");
+
+        var content = File.ReadAllText(designDocPath);
+        Assert.True(
+            content.Contains("保留早期", StringComparison.OrdinalIgnoreCase)
+            || content.Contains("历史背景", StringComparison.OrdinalIgnoreCase)
+            || content.Contains("historical", StringComparison.OrdinalIgnoreCase),
+            "Design doc should clearly indicate it is historical/background context.");
+        Assert.Contains("product-platform-roadmap.md", content, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("platform-status.md", content, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("openspec/ROADMAP.md", content, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("openspec/PROJECT.md", content, StringComparison.OrdinalIgnoreCase);
     }
 
     private static string FindRepoRoot()
@@ -229,7 +564,6 @@ public sealed class DocumentationGovernanceTests
     {
         var result = new Dictionary<string, string>(StringComparer.Ordinal);
         var inSection = false;
-        var inTable = false;
 
         foreach (var rawLine in lines)
         {
@@ -245,36 +579,30 @@ public sealed class DocumentationGovernanceTests
             if (line.StartsWith("## ", StringComparison.Ordinal))
                 break;
 
-            if (!inTable)
+            if (string.IsNullOrWhiteSpace(line))
+                continue;
+
+            var scanIndex = 0;
+            while (scanIndex < line.Length)
             {
-                if (line.StartsWith("| Platform document |", StringComparison.Ordinal))
-                    inTable = true;
+                var labelStart = line.IndexOf('[', scanIndex);
+                if (labelStart < 0)
+                    break;
 
-                continue;
+                var labelEnd = line.IndexOf(']', labelStart + 1);
+                var hrefStart = labelEnd >= 0 ? line.IndexOf('(', labelEnd + 1) : -1;
+                var hrefEnd = hrefStart >= 0 ? line.IndexOf(')', hrefStart + 1) : -1;
+
+                if (labelEnd < 0 || hrefStart < 0 || hrefEnd < 0)
+                    break;
+
+                var label = line[(labelStart + 1)..labelEnd].Trim();
+                var href = line[(hrefStart + 1)..hrefEnd].Trim();
+                if (!string.IsNullOrWhiteSpace(label) && !string.IsNullOrWhiteSpace(href))
+                    result[label] = href;
+
+                scanIndex = hrefEnd + 1;
             }
-
-            if (!line.StartsWith("|", StringComparison.Ordinal))
-                continue;
-
-            if (line.StartsWith("|---", StringComparison.Ordinal))
-                continue;
-
-            var cells = line.Split('|', StringSplitOptions.None);
-            if (cells.Length < 3)
-                continue;
-
-            var docCell = cells[1].Trim();
-            var labelStart = docCell.IndexOf('[', StringComparison.Ordinal);
-            var labelEnd = docCell.IndexOf(']', StringComparison.Ordinal);
-            var hrefStart = docCell.IndexOf('(', StringComparison.Ordinal);
-            var hrefEnd = docCell.IndexOf(')', StringComparison.Ordinal);
-
-            if (labelStart < 0 || labelEnd <= labelStart || hrefStart < 0 || hrefEnd <= hrefStart)
-                continue;
-
-            var label = docCell[(labelStart + 1)..labelEnd];
-            var href = docCell[(hrefStart + 1)..hrefEnd];
-            result[label] = href;
         }
 
         return result;

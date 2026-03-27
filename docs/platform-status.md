@@ -1,8 +1,8 @@
 # Platform Status
 
-## Current Snapshot
+## Governed Status Template
 
-This page is a controlled snapshot placeholder for platform status reporting.
+This page is the governed status template and publication location for release-line snapshots.
 
 - Snapshot date: `TBD`
 - Channel status: `TBD`

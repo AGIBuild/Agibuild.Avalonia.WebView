@@ -7,7 +7,7 @@
 - name: Release Governance
   href: release-governance.md
 - name: Framework Capabilities
-  href: framework-capabilities.json
+  href: framework-capabilities.md
 - name: Demo
   href: demo/
 - name: Articles

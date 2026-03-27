@@ -41,7 +41,7 @@ Fulora is built for the middle path that scales:
 - Connect both sides through a typed, source-generated bridge
 - Enforce host capabilities through policy-first execution
 
-From "just embed one page" to "run a full product shell", you stay on one runtime model.
+From "just embed one page" to "run a full product shell", teams can grow through capability tiers while keeping a stable platform contract.
 
 ---
 
@@ -185,9 +185,9 @@ Walkthrough: [Demo guide](docs/demo/index.md) · [AI Integration](docs/ai-integr
 
 ---
 
-## Capability Snapshot
+## Capability Tiers
 
-From a single embedded page to a full product shell — everything you need is already here.
+Fulora capabilities are delivered by tiers so teams can adopt progressively, while keeping a stable platform contract.
 
 **Core**
 
@@ -211,7 +211,7 @@ Details: [Architecture](docs/articles/architecture.md) · [Bridge guide](docs/ar
 
 ## Architecture at a Glance
 
-One runtime core, multiple platform adapters.
+Four-layer platform model from product layer to adapter layer.
 
 ```mermaid
 graph TD
@@ -224,7 +224,7 @@ graph TD
         Bridge --- Core
         Gateway --- Core
 
-        Core["Runtime Core<br/>Navigation · RPC · Shell · Diagnostics · Policy"]
+        Core["Platform Kernel + Capability Plane<br/>Navigation · RPC · Policy · Diagnostics"]
         Core --- Adapter["IWebViewAdapter"]
     end
 
@@ -240,16 +240,16 @@ graph TD
 
 Fulora helps teams move from first WebView integration to full hybrid platform **without replacing their foundation**.
 
-Two paths, one runtime:
+Two adoption lanes, one stable platform contract:
 
 - **Control path**: integrate WebView with minimal coupling
 - **Framework path**: adopt bridge, policy, shell, and tooling for faster delivery
 
 Unlike wrapper-only solutions, Fulora provides typed host/web contracts, policy-governed capabilities, machine-checkable diagnostics, and scalable app-shell patterns out of the box.
 
-**Current status:** Phase 12 (Enterprise & Advanced Scenarios) completed. All roadmap phases through 12 are done.
+**Current status:** See [Platform Status](docs/platform-status.md) for the governed status page and published release-line snapshots.
 
-[Full Roadmap](openspec/ROADMAP.md) · [Project Vision & Goals](openspec/PROJECT.md)
+[Product Platform Roadmap](docs/product-platform-roadmap.md) · [Platform Status](docs/platform-status.md)
 
 ---
 

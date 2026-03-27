@@ -16,7 +16,7 @@ Fulora takes a different approach: the web frontend and the native host share a 
                                │
                                ▼
 ┌──────────────────────────────────────────────────────────┐
-│                       Runtime Core                       │
+│        Platform Kernel + Capability/Experience Planes    │
 │  Typed Bridge · Capability Gateway · Policy Engine       │
 │  Diagnostics Pipeline · Shell Experience · SPA Hosting   │
 └──────────────────────────────┬───────────────────────────┘
@@ -34,7 +34,7 @@ Fulora takes a different approach: the web frontend and the native host share a 
 └──────────────────────────────────────────────────────────┘
 ```
 
-The key insight: **your application code never touches the WebView engine directly**. The runtime core mediates everything — bridge calls, capability requests, SPA hosting, diagnostics — through well-defined abstractions. This is what makes the same app code run on five platforms without `#if` blocks.
+The key insight: **your application code never touches the WebView engine directly**. Fulora's four-layer model (product layer -> platform kernel -> capability/experience planes -> adapter layer) mediates bridge calls, capability requests, SPA hosting, and diagnostics through well-defined abstractions. This is what makes the same app code run on five platforms without `#if` blocks.
 
 ## Bridge Model
 
@@ -103,5 +103,5 @@ Secondary instances forward activation to the primary. Duplicate activations are
 
 - [Getting Started](./getting-started.md) — Build your first app
 - [Bridge Guide](./bridge-guide.md) — Advanced bridge patterns
-- [Roadmap](../../openspec/ROADMAP.md) — Product direction
-- [Project Vision](../../openspec/PROJECT.md) — Goals and positioning
+- [Product Platform Roadmap](../product-platform-roadmap.md) — Product direction and capability tiers
+- [Platform Status](../platform-status.md) — Governed status page and release-line snapshot publication location

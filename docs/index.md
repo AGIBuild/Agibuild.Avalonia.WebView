@@ -4,7 +4,7 @@
 
 Fulora lets you write your UI in React, Vue, or any web framework, then deliver it inside an Avalonia-powered native window with full access to file systems, system APIs, AI models, and more — all through a type-safe C# ↔ JavaScript bridge that generates code at compile time.
 
-> One runtime core. Five platforms. Zero reflection.
+> Capability tiers on a governed four-layer platform. Five platforms. Zero reflection.
 
 ---
 
@@ -35,9 +35,11 @@ All of this is type-checked at compile time, AOT-safe, and works the same on Win
 |---|---|
 | [Product Platform Roadmap](product-platform-roadmap.md) | Positioning, strategy, layering model, capability contract, and P0-P5 roadmap |
 | [Architecture Layering](architecture-layering.md) | Dependency boundaries, API category rules, and kernel approval policy |
-| [Platform Status](platform-status.md) | Current governed platform snapshot |
+| [Platform Status](platform-status.md) | Governed status page and published release-line snapshot location |
 | [Release Governance](release-governance.md) | Stable release rules, gates, and promotion flow |
-| [Framework Capabilities](framework-capabilities.json) | Machine-readable capability registry baseline |
+| [Framework Capabilities](framework-capabilities.md) | Capability registry entry (wrapper) with machine-readable source |
+
+Key entry points: [Product Platform Roadmap](product-platform-roadmap.md) · [Platform Status](platform-status.md)
 
 ## Developer Resources
 
@@ -68,16 +70,3 @@ All of this is type-checked at compile time, AOT-safe, and works the same on Win
 - **Window Shell** — Theme control, transparency, custom chrome, drag regions — all driven from the web frontend.
 - **OpenTelemetry** — Bridge call spans and metrics export to any OTLP backend. See exactly what crosses the bridge and how long it takes.
 - **HMR Preservation** — Bridge state survives hot module replacement. No more losing connections during frontend development.
-
-## Roadmap
-
-| Phase | Focus | Status |
-|---|---|---|
-| Phase 0–3 | Foundation, Bridge, SPA, Polish | Done |
-| Phase 4–6 | Application Shell, Framework Positioning, Governance | Done |
-| Phase 7–8 | Release Orchestration, Bridge V2 & Platform Parity | Done |
-| Phase 9 | GA Release (1.0.0) | Done |
-| Phase 10–11 | Production Operations, Ecosystem & DX | Done |
-| Phase 12 | Enterprise & Advanced Scenarios | Planned |
-
-[Full Roadmap](../openspec/ROADMAP.md) · [Project Vision](../openspec/PROJECT.md)

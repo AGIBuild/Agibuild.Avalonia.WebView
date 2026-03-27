@@ -86,7 +86,7 @@ options.AddEmbeddedFileProvider("app", typeof(App).Assembly, "wwwroot");
 options.AddDevServerProxy("app", "http://localhost:5173");
 ```
 
-## SPA Asset Hot Update (Phase 8)
+## SPA Asset Hot Update Capability
 
 `SpaAssetHotUpdateService` enables signed package-based version management for production SPA assets:
 
@@ -134,4 +134,4 @@ Key behaviors:
 - [Getting Started](./getting-started.md)
 - [Bridge Guide](./bridge-guide.md)
 - [Architecture](./architecture.md)
-- [Roadmap](../../openspec/ROADMAP.md)
+- [Product Platform Roadmap](../product-platform-roadmap.md)
