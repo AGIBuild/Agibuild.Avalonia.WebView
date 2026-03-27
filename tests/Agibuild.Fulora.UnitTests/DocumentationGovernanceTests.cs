@@ -361,6 +361,33 @@ public sealed class DocumentationGovernanceTests
     }
 
     [Fact]
+    public void Architecture_layering_doc_and_pr_template_expose_layering_governance_hook()
+    {
+        var repoRoot = FindRepoRoot();
+        var layeringDocPath = Path.Combine(repoRoot, "docs", "architecture-layering.md");
+        var prTemplatePath = Path.Combine(repoRoot, ".github", "PULL_REQUEST_TEMPLATE.md");
+        var layeringBuildFilePath = Path.Combine(repoRoot, "build", "Build.LayeringGovernance.cs");
+        var layeringTargetsPath = Path.Combine(repoRoot, "build", "LayeringGovernance.targets");
+
+        Assert.True(File.Exists(layeringDocPath), "Missing docs/architecture-layering.md");
+        Assert.True(File.Exists(prTemplatePath), "Missing .github/PULL_REQUEST_TEMPLATE.md");
+
+        var layeringDoc = File.ReadAllText(layeringDocPath);
+        Assert.Contains("Dependency Policy", layeringDoc, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Kernel", layeringDoc, StringComparison.Ordinal);
+        Assert.Contains("Bridge", layeringDoc, StringComparison.Ordinal);
+        Assert.Contains("Framework", layeringDoc, StringComparison.Ordinal);
+        Assert.Contains("Plugin", layeringDoc, StringComparison.Ordinal);
+
+        var prTemplate = File.ReadAllText(prTemplatePath);
+        Assert.Contains("Layer Impact", prTemplate, StringComparison.OrdinalIgnoreCase);
+
+        Assert.True(
+            File.Exists(layeringBuildFilePath) || File.Exists(layeringTargetsPath),
+            "A repo-visible layering governance build hook must exist under build/.");
+    }
+
+    [Fact]
     public void Bridge_and_spa_guides_reference_new_platform_roadmap()
     {
         var repoRoot = FindRepoRoot();
