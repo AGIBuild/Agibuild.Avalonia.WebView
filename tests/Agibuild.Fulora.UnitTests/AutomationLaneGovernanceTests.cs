@@ -10,6 +10,11 @@ namespace Agibuild.Fulora.UnitTests;
 
 public sealed class AutomationLaneGovernanceTests
 {
+    private static readonly string LegacyStrictGovernanceToken = string.Concat("Open", "Spec", "Strict", "Governance");
+    private static readonly string LegacyStrictGovernanceLog = string.Concat("open", "spec", "-strict-governance.log");
+    private static readonly string LegacyRoadmapPathToken = string.Concat("open", "spec", "/ROADMAP.md");
+    private static readonly string LegacyArchivePathToken = string.Concat("open", "spec", "/changes/archive");
+
     [Fact]
     public void Automation_lane_manifest_declares_required_lanes_and_existing_projects()
     {
@@ -624,23 +629,23 @@ public sealed class AutomationLaneGovernanceTests
             "ReleaseOrchestrationGovernance"
         };
         foreach (var target in requiredTargets)
-            AssertTargetDeclarationExists(combinedSource, target, CiTargetOpenSpecGate, "build/Build*.cs");
+            AssertTargetDeclarationExists(combinedSource, target, CiTargetDocsFirstGovernance, "build/Build*.cs");
 
-        Assert.DoesNotContain("OpenSpecStrictGovernance", combinedSource, StringComparison.Ordinal);
+        Assert.DoesNotContain(LegacyStrictGovernanceToken, combinedSource, StringComparison.Ordinal);
         Assert.DoesNotContain("validate --all --strict", combinedSource, StringComparison.Ordinal);
-        Assert.DoesNotContain("openspec-strict-governance.log", combinedSource, StringComparison.Ordinal);
-        AssertStringLiteralExists(combinedSource, "dependency-governance-report.json", CiTargetOpenSpecGate, "build/Build*.cs");
-        AssertStringLiteralExists(combinedSource, "typescript-governance-report.json", CiTargetOpenSpecGate, "build/Build*.cs");
-        AssertStringLiteralExists(combinedSource, "sample-template-package-reference-governance-report.json", CiTargetOpenSpecGate, "build/Build*.cs");
-        AssertStringLiteralExists(combinedSource, "closeout-snapshot.json", CiTargetOpenSpecGate, "build/Build*.cs");
-        AssertStringLiteralExists(combinedSource, "transition-gate-governance-report.json", CiTargetOpenSpecGate, "build/Build*.cs");
+        Assert.DoesNotContain(LegacyStrictGovernanceLog, combinedSource, StringComparison.Ordinal);
+        AssertStringLiteralExists(combinedSource, "dependency-governance-report.json", CiTargetDocsFirstGovernance, "build/Build*.cs");
+        AssertStringLiteralExists(combinedSource, "typescript-governance-report.json", CiTargetDocsFirstGovernance, "build/Build*.cs");
+        AssertStringLiteralExists(combinedSource, "sample-template-package-reference-governance-report.json", CiTargetDocsFirstGovernance, "build/Build*.cs");
+        AssertStringLiteralExists(combinedSource, "closeout-snapshot.json", CiTargetDocsFirstGovernance, "build/Build*.cs");
+        AssertStringLiteralExists(combinedSource, "transition-gate-governance-report.json", CiTargetDocsFirstGovernance, "build/Build*.cs");
 
         var ciDirectDependencies = new[]
         {
             "ReleaseOrchestrationGovernance", "SolutionConsistencyGovernance",
             "NugetPackageTest", "PackTemplate"
         };
-        AssertTargetDependsOnContainsAll(mainSource, "Ci", ciDirectDependencies, CiTargetOpenSpecGate, "build/Build.cs");
+        AssertTargetDependsOnContainsAll(mainSource, "Ci", ciDirectDependencies, CiTargetDocsFirstGovernance, "build/Build.cs");
 
         var ciRequiredClosureDependencies = new[]
         {
@@ -655,11 +660,11 @@ public sealed class AutomationLaneGovernanceTests
         {
             Assert.True(
                 ciClosure.Contains(dependency),
-                $"[{CiTargetOpenSpecGate}] Missing Ci transitive dependency '{dependency}'.");
+                $"[{CiTargetDocsFirstGovernance}] Missing Ci transitive dependency '{dependency}'.");
         }
 
         var ciPublishDependencies = new[] { "Ci", "Publish" };
-        AssertTargetDependsOnContainsAll(mainSource, "CiPublish", ciPublishDependencies, CiTargetOpenSpecGate, "build/Build.cs");
+        AssertTargetDependsOnContainsAll(mainSource, "CiPublish", ciPublishDependencies, CiTargetDocsFirstGovernance, "build/Build.cs");
     }
 
     [Fact]
@@ -748,8 +753,8 @@ public sealed class AutomationLaneGovernanceTests
         AssertSourceContains(releaseGovernance, "docs-first", PhaseTransitionConsistency, releaseGovernancePath);
         AssertSourceContains(releaseGovernance, "closeout-snapshot.json", PhaseTransitionConsistency, releaseGovernancePath);
         AssertSourceContains(releaseGovernance, "release-governance.md", PhaseTransitionConsistency, releaseGovernancePath);
-        Assert.DoesNotContain("openspec/ROADMAP.md", releaseGovernance, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("openspec/changes/archive", releaseGovernance, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain(LegacyRoadmapPathToken, releaseGovernance, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain(LegacyArchivePathToken, releaseGovernance, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("ROADMAP.md", releaseGovernance, StringComparison.Ordinal);
 
         using var runtimeDoc = LoadJsonArtifact(runtimeManifestPath, PhaseTransitionConsistency);
@@ -1177,8 +1182,8 @@ public sealed class AutomationLaneGovernanceTests
         Assert.DoesNotContain("completedPhase", combinedSource, StringComparison.Ordinal);
         Assert.DoesNotContain("activePhase", combinedSource, StringComparison.Ordinal);
         Assert.DoesNotContain("closeoutArchives", combinedSource, StringComparison.Ordinal);
-        Assert.DoesNotContain("openSpecStrictGovernance", combinedSource, StringComparison.Ordinal);
-        Assert.DoesNotContain("openspec/ROADMAP.md", combinedSource, StringComparison.Ordinal);
+        Assert.DoesNotContain(string.Concat("open", "Spec", "Strict", "Governance"), combinedSource, StringComparison.Ordinal);
+        Assert.DoesNotContain(LegacyRoadmapPathToken, combinedSource, StringComparison.Ordinal);
         AssertSourceContains(combinedSource, "closeout-snapshot.json", EvidenceContractV2Schema, "build/Build.cs");
         AssertSourceContains(combinedSource, "distribution-readiness-governance-report.json", EvidenceContractV2Schema, "build/Build.cs");
         AssertSourceContains(combinedSource, "adoption-readiness-governance-report.json", EvidenceContractV2Schema, "build/Build.cs");

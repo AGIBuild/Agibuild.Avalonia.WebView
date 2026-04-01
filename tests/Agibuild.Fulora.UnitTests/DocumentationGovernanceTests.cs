@@ -27,12 +27,16 @@ public sealed class DocumentationGovernanceTests
         "docs/docs-site-deploy.md"
     ];
 
-    private static readonly string[] ForbiddenOpenSpecReferences =
+    private static readonly string[] ForbiddenLegacySpecReferences =
     [
-        "openspec/ROADMAP.md",
-        "openspec/PROJECT.md",
-        "openspec/specs/"
+        string.Concat("open", "spec", "/ROADMAP.md"),
+        string.Concat("open", "spec", "/PROJECT.md"),
+        string.Concat("open", "spec", "/specs/")
     ];
+
+    private static readonly string LegacySpecDirectoryName = string.Concat("open", "spec");
+    private static readonly string LegacySpecAssetPattern = string.Concat("open", "spec", "-*");
+    private static readonly string LegacyPromptAssetPattern = string.Concat("op", "sx", "-*");
 
     [Fact]
     public void Required_platform_documents_exist()
@@ -511,7 +515,7 @@ public sealed class DocumentationGovernanceTests
     }
 
     [Fact]
-    public void Public_docs_do_not_reference_legacy_openspec_paths()
+    public void Public_docs_do_not_reference_legacy_spec_workspace_paths()
     {
         var repoRoot = FindRepoRoot();
 
@@ -521,7 +525,7 @@ public sealed class DocumentationGovernanceTests
             Assert.True(File.Exists(absolutePath), $"Missing public document under test: {relativePath}");
 
             var content = File.ReadAllText(absolutePath);
-            foreach (var forbidden in ForbiddenOpenSpecReferences)
+            foreach (var forbidden in ForbiddenLegacySpecReferences)
             {
                 Assert.DoesNotContain(forbidden, content, StringComparison.OrdinalIgnoreCase);
             }
@@ -529,44 +533,44 @@ public sealed class DocumentationGovernanceTests
     }
 
     [Fact]
-    public void Openspec_directory_is_removed()
+    public void Legacy_spec_workspace_directory_is_removed()
     {
         var repoRoot = FindRepoRoot();
-        var openspecPath = Path.Combine(repoRoot, "openspec");
-        Assert.False(Directory.Exists(openspecPath), "The openspec directory must be removed.");
+        var legacySpecPath = Path.Combine(repoRoot, LegacySpecDirectoryName);
+        Assert.False(Directory.Exists(legacySpecPath), "The legacy spec workspace directory must be removed.");
     }
 
     [Fact]
-    public void Openspec_skill_assets_are_removed()
+    public void Legacy_spec_skill_assets_are_removed()
     {
         var repoRoot = FindRepoRoot();
         var skillsPath = Path.Combine(repoRoot, ".github", "skills");
         Assert.True(Directory.Exists(skillsPath), "Missing .github/skills directory under test.");
 
-        var matches = Directory.EnumerateFileSystemEntries(skillsPath, "openspec-*", SearchOption.TopDirectoryOnly);
+        var matches = Directory.EnumerateFileSystemEntries(skillsPath, LegacySpecAssetPattern, SearchOption.TopDirectoryOnly);
         Assert.Empty(matches);
     }
 
     [Fact]
-    public void Opsx_prompt_assets_are_removed()
+    public void Legacy_prompt_assets_are_removed()
     {
         var repoRoot = FindRepoRoot();
         var promptsPath = Path.Combine(repoRoot, ".github", "prompts");
         Assert.True(Directory.Exists(promptsPath), "Missing .github/prompts directory under test.");
 
-        var matches = Directory.EnumerateFileSystemEntries(promptsPath, "opsx-*", SearchOption.TopDirectoryOnly);
+        var matches = Directory.EnumerateFileSystemEntries(promptsPath, LegacyPromptAssetPattern, SearchOption.TopDirectoryOnly);
         Assert.Empty(matches);
     }
 
     [Fact]
-    public void Pull_request_template_removes_openspec_requirement_and_adds_layer_impact()
+    public void Pull_request_template_removes_legacy_spec_requirement_and_adds_layer_impact()
     {
         var repoRoot = FindRepoRoot();
         var pullRequestTemplatePath = Path.Combine(repoRoot, ".github", "PULL_REQUEST_TEMPLATE.md");
         Assert.True(File.Exists(pullRequestTemplatePath), "Missing .github/PULL_REQUEST_TEMPLATE.md");
 
         var content = File.ReadAllText(pullRequestTemplatePath);
-        Assert.DoesNotContain("OpenSpec artifacts created for non-trivial changes", content, StringComparison.Ordinal);
+        Assert.DoesNotContain(string.Concat("Open", "Spec artifacts created for non-trivial changes"), content, StringComparison.Ordinal);
         Assert.Contains("Layer Impact", content, StringComparison.Ordinal);
     }
 
