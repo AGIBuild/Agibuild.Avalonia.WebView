@@ -256,6 +256,53 @@ public class BridgeDevToolsServiceTests
     }
 
     [Fact]
+    public void BridgeCallProfiler_emits_unified_diagnostics_event()
+    {
+        var sink = new MemoryFuloraDiagnosticsSink();
+        var profiler = new BridgeCallProfiler(diagnosticsSink: sink);
+
+        profiler.OnImportCallEnd("UiCtrl", "showNotif", 5);
+
+        var diagnostic = Assert.Single(sink.Events);
+        Assert.Equal("bridge.import.end", diagnostic.EventName);
+        Assert.Equal("bridge", diagnostic.Layer);
+        Assert.Equal("BridgeCallProfiler", diagnostic.Component);
+        Assert.Equal("UiCtrl", diagnostic.Service);
+        Assert.Equal("showNotif", diagnostic.Method);
+        Assert.Equal(5, diagnostic.DurationMs);
+    }
+
+    [Fact]
+    public void DiagnosticsSink_projects_unified_events_into_collector()
+    {
+        using var svc = new BridgeDevToolsService();
+
+        svc.DiagnosticsSink.OnEvent(new FuloraDiagnosticsEvent
+        {
+            EventName = "bridge.export.error",
+            Layer = "bridge",
+            Component = "TestComponent",
+            Service = "AppService",
+            Method = "fail",
+            DurationMs = 12,
+            Status = "error",
+            ErrorType = "InvalidOperationException",
+            Attributes = new Dictionary<string, string>
+            {
+                ["message"] = "boom"
+            }
+        });
+
+        var evt = Assert.Single(svc.Collector.GetEvents());
+        Assert.Equal(BridgeCallDirection.Export, evt.Direction);
+        Assert.Equal(BridgeCallPhase.Error, evt.Phase);
+        Assert.Equal("AppService", evt.ServiceName);
+        Assert.Equal("fail", evt.MethodName);
+        Assert.Equal(12, evt.ElapsedMs);
+        Assert.Equal("boom", evt.ErrorMessage);
+    }
+
+    [Fact]
     public void StartPushing_sends_existing_events_and_subscribes()
     {
         using var svc = new BridgeDevToolsService();

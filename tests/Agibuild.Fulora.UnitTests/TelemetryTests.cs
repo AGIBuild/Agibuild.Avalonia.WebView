@@ -44,6 +44,24 @@ public class TelemetryTests
     }
 
     [Fact]
+    public void BridgeTelemetryTracer_emits_unified_diagnostics_event()
+    {
+        var sink = new MemoryFuloraDiagnosticsSink();
+        var tracer = new BridgeTelemetryTracer(NullTelemetryProvider.Instance, diagnosticsSink: sink);
+
+        tracer.OnExportCallEnd("AppService", "getUser", 42, "UserProfile");
+
+        var diagnostic = Assert.Single(sink.Events);
+        Assert.Equal("bridge.export.end", diagnostic.EventName);
+        Assert.Equal("bridge", diagnostic.Layer);
+        Assert.Equal("BridgeTelemetryTracer", diagnostic.Component);
+        Assert.Equal("AppService", diagnostic.Service);
+        Assert.Equal("getUser", diagnostic.Method);
+        Assert.Equal(42, diagnostic.DurationMs);
+        Assert.Equal("success", diagnostic.Status);
+    }
+
+    [Fact]
     public void BridgeTelemetryTracer_tracks_exception_on_export_call_error()
     {
         var metrics = new List<(string Name, double Value, IDictionary<string, string>? Dims)>();
