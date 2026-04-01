@@ -443,6 +443,48 @@ public sealed class DocumentationGovernanceTests
     }
 
     [Fact]
+    public void Openspec_directory_is_removed()
+    {
+        var repoRoot = FindRepoRoot();
+        var openspecPath = Path.Combine(repoRoot, "openspec");
+        Assert.False(Directory.Exists(openspecPath), "The openspec directory must be removed.");
+    }
+
+    [Fact]
+    public void Openspec_skill_assets_are_removed()
+    {
+        var repoRoot = FindRepoRoot();
+        var skillsPath = Path.Combine(repoRoot, ".github", "skills");
+        Assert.True(Directory.Exists(skillsPath), "Missing .github/skills directory under test.");
+
+        var matches = Directory.EnumerateFileSystemEntries(skillsPath, "openspec-*", SearchOption.TopDirectoryOnly);
+        Assert.Empty(matches);
+    }
+
+    [Fact]
+    public void Opsx_prompt_assets_are_removed()
+    {
+        var repoRoot = FindRepoRoot();
+        var promptsPath = Path.Combine(repoRoot, ".github", "prompts");
+        Assert.True(Directory.Exists(promptsPath), "Missing .github/prompts directory under test.");
+
+        var matches = Directory.EnumerateFileSystemEntries(promptsPath, "opsx-*", SearchOption.TopDirectoryOnly);
+        Assert.Empty(matches);
+    }
+
+    [Fact]
+    public void Pull_request_template_removes_openspec_requirement_and_adds_layer_impact()
+    {
+        var repoRoot = FindRepoRoot();
+        var pullRequestTemplatePath = Path.Combine(repoRoot, ".github", "PULL_REQUEST_TEMPLATE.md");
+        Assert.True(File.Exists(pullRequestTemplatePath), "Missing .github/PULL_REQUEST_TEMPLATE.md");
+
+        var content = File.ReadAllText(pullRequestTemplatePath);
+        Assert.DoesNotContain("OpenSpec artifacts created for non-trivial changes", content, StringComparison.Ordinal);
+        Assert.Contains("Layer Impact", content, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Readme_links_to_product_platform_roadmap_doc_entry()
     {
         var repoRoot = FindRepoRoot();
