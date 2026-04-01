@@ -1,36 +1,41 @@
 # Architecture Layering
 
+## Four Layers
+
+- `Kernel`
+- `Bridge`
+- `Framework Services`
+- `Plugins / Vertical Features`
+
 ## Allowed Dependencies
 
 - `Kernel` depends only on BCL and internal kernel contracts.
-- `Platform Services` may depend on `Kernel` but never on `Experience Extensions`.
-- `Experience Extensions` may depend on `Kernel` and `Platform Services`.
-- `Product Surface` may depend on all public APIs but cannot introduce reverse dependencies into lower layers.
+- `Bridge` may depend on `Kernel` but must not depend on `Framework Services` or `Plugins / Vertical Features`.
+- `Framework Services` may depend on `Kernel` and `Bridge` but must not redefine kernel or bridge semantics.
+- `Plugins / Vertical Features` may depend on `Kernel`, `Bridge`, and `Framework Services`, but must remain outside the kernel boundary.
 
-## Allowed Public API Categories
+## Allowed Public API Types
 
-- `Kernel API` — core lifecycle, scheduling, bridge contracts, and invariant enforcement.
-- `Platform API` — host-neutral service abstractions (storage, shell, diagnostics, security policy).
-- `Extension API` — framework adapters and plugin contracts with explicit support tier labels.
-- `Product API` — template-facing composition APIs and app bootstrap surfaces.
+- `Kernel API`: WebView lifecycle, dispatcher, dialog, auth broker, navigation, messaging, cancellation, exception, and baseline security semantics.
+- `Bridge API`: typed export and import contracts, generators, streaming, transport, binary payload, and tracing abstractions.
+- `Framework API`: SPA hosting, shell activation, deep linking, window shell coordination, telemetry integration, and auto-update orchestration.
+- `Plugin API`: optional feature and vertical integration contracts such as filesystem, HTTP, database, notifications, auth token, biometric, local storage, or AI.
 
-## Classification Decision Tree
+## Capability Classification Decision Tree
 
-1. Does the API define runtime invariants used across hosts/frameworks?
-   - Yes: classify as `Kernel API`.
-2. Does the API expose host-neutral platform service behavior?
-   - Yes: classify as `Platform API`.
-3. Does the API bind to framework/host/plugin-specific behavior?
-   - Yes: classify as `Extension API`.
-4. Is the API only for app composition/template setup?
-   - Yes: classify as `Product API`.
-5. If none apply, keep internal and do not publish.
+1. Does the capability define host-neutral runtime invariants or baseline security semantics?
+   - Yes: classify it as `Kernel`.
+2. Does the capability define typed bridge execution, source generation, or transport semantics?
+   - Yes: classify it as `Bridge`.
+3. Does the capability coordinate shell, hosting, deep linking, updates, or telemetry on top of kernel and bridge contracts?
+   - Yes: classify it as `Framework Services`.
+4. Does the capability expose vertical integrations, optional plugins, or showcase-only features?
+   - Yes: classify it as `Plugins / Vertical Features`.
+5. If none apply, keep the capability internal until the owning layer is clear.
 
-## Kernel API Architectural Approval Rule
+## Kernel API Approval Rules
 
-- Any new public `Kernel API`, breaking `Kernel API` change, or semantic behavior change requires architecture approval before merge.
-- Approval must include:
-  - dependency-boundary impact statement,
-  - compatibility plan,
-  - rollback/fallback plan,
-  - linked governance evidence for release gates.
+- Any new public `Kernel API` requires architecture approval before merge.
+- Any breaking `Kernel API` change requires architecture approval before merge and again before stable release promotion.
+- Any semantic change to lifecycle, security, cancellation, navigation, or messaging invariants is treated as a kernel change even if signatures do not move.
+- Every kernel approval record must include dependency impact, compatibility plan, rollback plan, and linked release-gate evidence.

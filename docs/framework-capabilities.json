@@ -1,66 +1,103 @@
 {
   "schemaVersion": "1.0",
-  "updatedAtUtc": "2026-03-26T00:00:00Z",
+  "updatedAtUtc": "2026-04-01T00:00:00Z",
+  "registry_status": "starter-placeholder",
+  "migration_notes": "Both 'id' and 'capability_id' are currently preserved for migration compatibility. New consumers should use 'capability_id' as the canonical key while legacy readers transition from 'id'.",
   "capabilities": [
     {
-      "id": "kernel.bridge.contracts",
-      "name": "Kernel Bridge Contracts",
+      "id": "kernel.navigation",
+      "capability_id": "kernel.navigation",
+      "name": "Kernel Navigation Semantics",
       "layer": "Kernel",
+      "tier": "A",
       "status": "stable",
-      "supportTier": "LTS",
-      "owner": "runtime-core",
       "breakingChangePolicy": "architecture-approval-required",
-      "compatibilityScope": "all-supported-hosts-and-framework-bindings",
-      "rollbackStrategy": "revert-kernel-contract-change-and-restore-previous-bridge-schema",
-      "observability": {
-        "traces": true,
-        "metrics": true,
-        "structuredErrors": true
-      },
-      "security": {
-        "boundaryValidated": true,
-        "defaultDeny": true
-      }
-    },
-    {
-      "id": "platform.shell.integration",
-      "name": "Platform Shell Integration",
-      "layer": "Platform Services",
-      "status": "stable",
-      "supportTier": "standard",
-      "owner": "platform-services",
-      "breakingChangePolicy": "release-gate-required",
       "compatibilityScope": "all-supported-desktop-hosts",
-      "rollbackStrategy": "disable-shell-feature-flag-and-fallback-to-previous-platform-adapter",
-      "observability": {
-        "traces": true,
-        "metrics": true,
-        "structuredErrors": true
+      "rollbackStrategy": "revert-to-previous-kernel-navigation-contract-and-restore-last-stable-host-adapters",
+      "platform_support": {
+        "windows": "stable",
+        "macos": "stable",
+        "linux": "stable",
+        "ios": "preview",
+        "android": "preview"
       },
-      "security": {
-        "boundaryValidated": true,
-        "defaultDeny": true
-      }
+      "test_requirements": [
+        "contract",
+        "integration"
+      ],
+      "contract_ref": "product-platform-roadmap.md#capability-support-contract",
+      "limitations_ref": "platform-status.md#known-limitations"
     },
     {
-      "id": "extension.framework.adapter.react",
-      "name": "React Framework Adapter",
-      "layer": "Experience Extensions",
-      "status": "provisional",
-      "supportTier": "best-effort",
-      "owner": "framework-extensions",
-      "breakingChangePolicy": "compatibility-note-required",
-      "compatibilityScope": "react-adapter-consumers-on-supported-runtime-version",
-      "rollbackStrategy": "pin-previous-adapter-version-and-disable-new-extension-binding",
-      "observability": {
-        "traces": true,
-        "metrics": false,
-        "structuredErrors": true
+      "id": "bridge.transport.streaming",
+      "capability_id": "bridge.transport.streaming",
+      "name": "Bridge Transport Streaming",
+      "layer": "Bridge",
+      "tier": "A",
+      "status": "stable",
+      "breakingChangePolicy": "architecture-approval-required",
+      "compatibilityScope": "governed-runtime-contract-with-documented-platform-variation",
+      "rollbackStrategy": "disable-the-new-streaming-transport-path-and-pin-the-previous-bridge-contract",
+      "platform_support": {
+        "windows": "stable",
+        "macos": "stable",
+        "linux": "stable",
+        "ios": "preview",
+        "android": "preview"
       },
-      "security": {
-        "boundaryValidated": true,
-        "defaultDeny": true
-      }
+      "test_requirements": [
+        "contract",
+        "integration"
+      ],
+      "contract_ref": "architecture-layering.md#allowed-public-api-types",
+      "limitations_ref": "platform-status.md#known-limitations"
+    },
+    {
+      "id": "framework.shell.integration",
+      "capability_id": "framework.shell.integration",
+      "name": "Framework Shell Integration",
+      "layer": "Framework Services",
+      "tier": "B",
+      "status": "stable",
+      "breakingChangePolicy": "release-gate-required",
+      "compatibilityScope": "supported-desktop-hosts-with-documented-platform-variation",
+      "rollbackStrategy": "disable-new-shell-integration-path-and-pin-the-previous-framework-service-adapter",
+      "platform_support": {
+        "windows": "stable",
+        "macos": "stable",
+        "linux": "documented-variation",
+        "ios": "planned",
+        "android": "planned"
+      },
+      "test_requirements": [
+        "integration",
+        "governance"
+      ],
+      "contract_ref": "architecture-layering.md#allowed-public-api-types",
+      "limitations_ref": "platform-status.md#tier-b"
+    },
+    {
+      "id": "plugin.ai.integration",
+      "capability_id": "plugin.ai.integration",
+      "name": "Plugin AI Integration",
+      "layer": "Plugins / Vertical Features",
+      "tier": "C",
+      "status": "experimental",
+      "breakingChangePolicy": "compatibility-note-required",
+      "compatibilityScope": "opt-in-plugin-consumers-on-matching-runtime-versions",
+      "rollbackStrategy": "pin-the-previous-plugin-version-and-disable-the-new-vertical-feature-by-policy",
+      "platform_support": {
+        "windows": "experimental",
+        "macos": "experimental",
+        "linux": "experimental",
+        "ios": "planned",
+        "android": "planned"
+      },
+      "test_requirements": [
+        "governance"
+      ],
+      "contract_ref": "product-platform-roadmap.md#stable-core-vs-extensions",
+      "limitations_ref": "platform-status.md#tier-c"
     }
   ]
 }

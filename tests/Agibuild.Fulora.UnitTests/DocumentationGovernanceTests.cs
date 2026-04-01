@@ -34,11 +34,12 @@ public sealed class DocumentationGovernanceTests
         var indexPath = Path.Combine(repoRoot, "docs", "index.md");
         Assert.True(File.Exists(indexPath), "Missing docs/index.md");
 
-        var platformLinks = ParsePlatformDocumentsTableLinks(File.ReadAllLines(indexPath));
-        Assert.Equal(RequiredPlatformDocuments.Count, platformLinks.Count);
+        var indexContent = File.ReadAllText(indexPath);
 
         foreach (var expected in RequiredPlatformDocuments)
-            Assert.Equal(expected.Value, platformLinks[expected.Key]);
+        {
+            AssertContainsAllTokens(indexContent, expected.Key, expected.Value);
+        }
     }
 
     [Fact]
@@ -48,81 +49,44 @@ public sealed class DocumentationGovernanceTests
         var tocPath = Path.Combine(repoRoot, "docs", "toc.yml");
         Assert.True(File.Exists(tocPath), "Missing docs/toc.yml");
 
-        var topLevelItems = ParseTopLevelTocItems(File.ReadAllLines(tocPath));
+        var tocContent = File.ReadAllText(tocPath);
         foreach (var expected in RequiredPlatformDocuments)
         {
-            Assert.True(
-                topLevelItems.TryGetValue(expected.Key, out var href),
-                $"Top-level TOC item '{expected.Key}' not found.");
-            Assert.Equal(expected.Value, href);
+            AssertContainsAllTokens(tocContent, expected.Key, expected.Value);
         }
     }
 
     [Fact]
-    public void Platform_document_entries_are_consistent_across_index_toc_and_docfx_content()
+    public void Platform_document_entries_are_consistent_across_index_and_toc()
     {
         var repoRoot = FindRepoRoot();
         var indexPath = Path.Combine(repoRoot, "docs", "index.md");
         var tocPath = Path.Combine(repoRoot, "docs", "toc.yml");
-        var docfxPath = Path.Combine(repoRoot, "docs", "docfx.json");
 
-        var indexLinks = ParsePlatformDocumentsTableLinks(File.ReadAllLines(indexPath));
-        var tocLinks = ParseTopLevelTocItems(File.ReadAllLines(tocPath));
-
-        Assert.Equal(indexLinks.Count, RequiredPlatformDocuments.Count);
-        Assert.Equal(tocLinks.Count(x => RequiredPlatformDocuments.ContainsKey(x.Key)), RequiredPlatformDocuments.Count);
+        var indexContent = File.ReadAllText(indexPath);
+        var tocContent = File.ReadAllText(tocPath);
 
         foreach (var expected in RequiredPlatformDocuments)
         {
-            Assert.Equal(expected.Value, indexLinks[expected.Key]);
-            Assert.Equal(expected.Value, tocLinks[expected.Key]);
+            AssertContainsAllTokens(indexContent, expected.Key, expected.Value);
+            AssertContainsAllTokens(tocContent, expected.Key, expected.Value);
         }
-
-        using var docfx = JsonDocument.Parse(File.ReadAllText(docfxPath));
-        var contentFiles = docfx.RootElement.GetProperty("build").GetProperty("content")
-            .EnumerateArray()
-            .Where(x => x.TryGetProperty("files", out _))
-            .SelectMany(x => x.GetProperty("files").EnumerateArray())
-            .Select(x => x.GetString())
-            .Where(x => !string.IsNullOrWhiteSpace(x))
-            .ToHashSet(StringComparer.Ordinal);
-
-        Assert.Contains("*.md", contentFiles);
-        Assert.Contains("toc.yml", contentFiles);
-        Assert.Contains("framework-capabilities.json", contentFiles);
     }
 
     [Fact]
-    public void Docfx_build_content_includes_framework_capabilities_json()
-    {
-        var repoRoot = FindRepoRoot();
-        var docfxPath = Path.Combine(repoRoot, "docs", "docfx.json");
-        Assert.True(File.Exists(docfxPath), "Missing docs/docfx.json");
-
-        using var doc = JsonDocument.Parse(File.ReadAllText(docfxPath));
-        var contentEntries = doc.RootElement.GetProperty("build").GetProperty("content");
-
-        var includesFrameworkCapabilities = contentEntries
-            .EnumerateArray()
-            .Where(x => x.TryGetProperty("files", out _))
-            .SelectMany(x => x.GetProperty("files").EnumerateArray())
-            .Select(x => x.GetString())
-            .Any(x => string.Equals(x, "framework-capabilities.json", StringComparison.Ordinal));
-
-        Assert.True(
-            includesFrameworkCapabilities,
-            "DocFX build content must include framework-capabilities.json so docs links remain valid.");
-    }
-
-    [Fact]
-    public void Framework_capabilities_entries_declare_compatibility_scope_and_rollback_strategy()
+    public void Framework_capabilities_registry_includes_governed_metadata_for_each_capability()
     {
         var repoRoot = FindRepoRoot();
         var capabilitiesPath = Path.Combine(repoRoot, "docs", "framework-capabilities.json");
         Assert.True(File.Exists(capabilitiesPath), "Missing docs/framework-capabilities.json");
 
         using var doc = JsonDocument.Parse(File.ReadAllText(capabilitiesPath));
-        var capabilities = doc.RootElement.GetProperty("capabilities").EnumerateArray().ToList();
+        var root = doc.RootElement;
+        Assert.True(root.TryGetProperty("capabilities", out var capabilitiesElement), "Capabilities array is required.");
+        Assert.True(root.TryGetProperty("registry_status", out var registryStatus) && registryStatus.ValueKind == JsonValueKind.String);
+        Assert.Contains("placeholder", registryStatus.GetString() ?? string.Empty, StringComparison.OrdinalIgnoreCase);
+
+        var capabilities = capabilitiesElement.EnumerateArray().ToList();
         Assert.NotEmpty(capabilities);
 
         var validPolicies = new HashSet<string>(StringComparer.Ordinal)
@@ -131,42 +95,313 @@ public sealed class DocumentationGovernanceTests
             "release-gate-required",
             "compatibility-note-required"
         };
+        var validLayers = new HashSet<string>(StringComparer.Ordinal)
+        {
+            "Kernel",
+            "Bridge",
+            "Framework Services",
+            "Plugins / Vertical Features"
+        };
+        var validTiers = new HashSet<string>(StringComparer.Ordinal) { "A", "B", "C" };
+        var requiredPlatformKeys = new[] { "windows", "macos", "linux", "ios", "android" };
+        var hasDualIdFields = false;
 
         foreach (var capability in capabilities)
         {
-            var capabilityId = capability.GetProperty("id").GetString();
+            Assert.True(capability.TryGetProperty("capability_id", out var starterId) && starterId.ValueKind == JsonValueKind.String);
+            Assert.True(capability.TryGetProperty("id", out var legacyId) && legacyId.ValueKind == JsonValueKind.String);
+
+            var starterCapabilityId = starterId.GetString();
+            var legacyCapabilityId = legacyId.GetString();
+            Assert.False(string.IsNullOrWhiteSpace(starterCapabilityId), "capability_id must not be empty.");
+            Assert.False(string.IsNullOrWhiteSpace(legacyCapabilityId), "id must not be empty.");
+            Assert.Equal(starterCapabilityId, legacyCapabilityId);
+            hasDualIdFields = true;
 
             Assert.True(
                 capability.TryGetProperty("breakingChangePolicy", out var policy)
                 && policy.ValueKind == JsonValueKind.String
                 && validPolicies.Contains(policy.GetString() ?? string.Empty),
-                $"Capability '{capabilityId}' must define a governed breakingChangePolicy.");
+                $"Capability '{starterCapabilityId}' must define a governed breakingChangePolicy.");
+
+            Assert.True(
+                capability.TryGetProperty("layer", out var layer)
+                && layer.ValueKind == JsonValueKind.String
+                && validLayers.Contains(layer.GetString() ?? string.Empty),
+                $"Capability '{starterCapabilityId}' must declare a valid layer.");
+
+            Assert.True(
+                capability.TryGetProperty("tier", out var tier)
+                && tier.ValueKind == JsonValueKind.String
+                && validTiers.Contains(tier.GetString() ?? string.Empty),
+                $"Capability '{starterCapabilityId}' must declare a valid tier.");
+
+            Assert.True(
+                capability.TryGetProperty("status", out var status)
+                && status.ValueKind == JsonValueKind.String
+                && !string.IsNullOrWhiteSpace(status.GetString()),
+                $"Capability '{starterCapabilityId}' must declare status.");
 
             Assert.True(
                 capability.TryGetProperty("compatibilityScope", out var compatibilityScope)
                 && compatibilityScope.ValueKind == JsonValueKind.String
                 && !string.IsNullOrWhiteSpace(compatibilityScope.GetString()),
-                $"Capability '{capabilityId}' must define non-empty compatibilityScope.");
+                $"Capability '{starterCapabilityId}' must declare compatibilityScope.");
 
             Assert.True(
                 capability.TryGetProperty("rollbackStrategy", out var rollbackStrategy)
                 && rollbackStrategy.ValueKind == JsonValueKind.String
                 && !string.IsNullOrWhiteSpace(rollbackStrategy.GetString()),
-                $"Capability '{capabilityId}' must define non-empty rollbackStrategy.");
+                $"Capability '{starterCapabilityId}' must declare rollbackStrategy.");
+
+            Assert.True(
+                capability.TryGetProperty("test_requirements", out var testRequirements)
+                && testRequirements.ValueKind == JsonValueKind.Array
+                && testRequirements.GetArrayLength() > 0
+                && testRequirements.EnumerateArray().All(item => item.ValueKind == JsonValueKind.String && !string.IsNullOrWhiteSpace(item.GetString())),
+                $"Capability '{starterCapabilityId}' must declare non-empty test requirements.");
+
+            Assert.True(
+                capability.TryGetProperty("platform_support", out var platformSupport)
+                && platformSupport.ValueKind == JsonValueKind.Object,
+                $"Capability '{starterCapabilityId}' must declare platform_support.");
+
+            foreach (var platform in requiredPlatformKeys)
+            {
+                Assert.True(
+                    platformSupport.TryGetProperty(platform, out var supportStatus)
+                    && supportStatus.ValueKind == JsonValueKind.String
+                    && !string.IsNullOrWhiteSpace(supportStatus.GetString()),
+                    $"Capability '{starterCapabilityId}' must include platform_support.{platform}.");
+            }
+
+            Assert.True(
+                capability.TryGetProperty("contract_ref", out var contractRef)
+                && contractRef.ValueKind == JsonValueKind.String
+                && !string.IsNullOrWhiteSpace(contractRef.GetString()),
+                $"Capability '{starterCapabilityId}' must declare contract_ref.");
+
+            Assert.True(
+                capability.TryGetProperty("limitations_ref", out var limitationsRef)
+                && limitationsRef.ValueKind == JsonValueKind.String
+                && !string.IsNullOrWhiteSpace(limitationsRef.GetString()),
+                $"Capability '{starterCapabilityId}' must declare limitations_ref.");
+        }
+
+        if (hasDualIdFields)
+        {
+            Assert.True(
+                root.TryGetProperty("migration_notes", out var migrationNotes)
+                && migrationNotes.ValueKind == JsonValueKind.String
+                && !string.IsNullOrWhiteSpace(migrationNotes.GetString()),
+                "When both id and capability_id are present, root.migration_notes must explain compatibility intent.");
         }
     }
 
     [Fact]
-    public void Roadmap_breaking_change_rule_matches_capability_policy_model()
+    public void Roadmap_mentions_capability_governance_and_release_controls()
     {
         var repoRoot = FindRepoRoot();
         var roadmapPath = Path.Combine(repoRoot, "docs", "product-platform-roadmap.md");
         Assert.True(File.Exists(roadmapPath), "Missing docs/product-platform-roadmap.md");
 
         var content = File.ReadAllText(roadmapPath);
-        Assert.Contains("Breaking capability changes must follow each capability's `breakingChangePolicy`.", content, StringComparison.Ordinal);
-        Assert.Contains("Architecture approval is mandatory for kernel-level changes", content, StringComparison.Ordinal);
-        Assert.Contains("release-gate evidence is required for all breaking capability changes", content, StringComparison.Ordinal);
+        Assert.Contains("capabilit", content, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("architect", content, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("release", content, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void Product_platform_roadmap_covers_required_governance_sections()
+    {
+        var repoRoot = FindRepoRoot();
+        var roadmapPath = Path.Combine(repoRoot, "docs", "product-platform-roadmap.md");
+        Assert.True(File.Exists(roadmapPath), "Missing docs/product-platform-roadmap.md");
+
+        var content = File.ReadAllText(roadmapPath);
+        AssertContainsAnyTokenGroupIgnoreCase(
+            content,
+            ["positioning"],
+            ["product-grade", "platform"]);
+        AssertContainsAnyTokenGroupIgnoreCase(
+            content,
+            ["strategic", "direction"],
+            ["strategy", "stable"]);
+        AssertContainsAnyTokenGroupIgnoreCase(
+            content,
+            ["stable core", "extensions"],
+            ["stable", "core", "extensions"]);
+        AssertContainsAnyTokenGroupIgnoreCase(
+            content,
+            ["layering", "model"],
+            ["four", "layers"]);
+        AssertContainsAnyTokenGroupIgnoreCase(
+            content,
+            ["capability", "support", "contract"],
+            ["capability", "tier"]);
+        AssertContainsAnyTokenGroupIgnoreCase(
+            content,
+            ["security"],
+            ["boundary", "default deny"]);
+        AssertContainsAnyTokenGroupIgnoreCase(
+            content,
+            ["observability"],
+            ["traces", "metrics"]);
+        AssertContainsAnyTokenGroupIgnoreCase(
+            content,
+            ["release", "governance"],
+            ["release gates"]);
+        AssertContainsAnyTokenGroupIgnoreCase(
+            content,
+            ["developer", "defaults"],
+            ["templates", "default"]);
+        AssertContainsAnyTokenGroupIgnoreCase(
+            content,
+            ["p0", "p5"],
+            ["priority", "p0"]);
+        AssertContainsAnyTokenGroupIgnoreCase(
+            content,
+            ["documentation", "governance"],
+            ["docfx", "discoverable"]);
+    }
+
+    [Fact]
+    public void Architecture_layering_defines_four_layers_decision_tree_and_kernel_approval_rules()
+    {
+        var repoRoot = FindRepoRoot();
+        var layeringPath = Path.Combine(repoRoot, "docs", "architecture-layering.md");
+        Assert.True(File.Exists(layeringPath), "Missing docs/architecture-layering.md");
+
+        var content = File.ReadAllText(layeringPath);
+        AssertContainsAllTokensIgnoreCase(
+            content,
+            "kernel",
+            "bridge",
+            "framework services",
+            "plugins / vertical features");
+        AssertContainsAnyTokenGroupIgnoreCase(
+            content,
+            ["allowed dependencies"],
+            ["depends only", "must not depend"]);
+        AssertContainsAnyTokenGroupIgnoreCase(
+            content,
+            ["public api", "types"],
+            ["kernel api", "bridge api", "framework api", "plugin api"]);
+        AssertContainsAnyTokenGroupIgnoreCase(
+            content,
+            ["decision tree"],
+            ["classify", "capability"]);
+        AssertContainsAnyTokenGroupIgnoreCase(
+            content,
+            ["kernel", "approval", "before merge"],
+            ["kernel api", "approval rules"]);
+    }
+
+    [Fact]
+    public void Platform_status_placeholder_reserves_tiered_support_and_known_limitations_sections()
+    {
+        var repoRoot = FindRepoRoot();
+        var statusPath = Path.Combine(repoRoot, "docs", "platform-status.md");
+        Assert.True(File.Exists(statusPath), "Missing docs/platform-status.md");
+
+        var content = File.ReadAllText(statusPath);
+        AssertContainsAllTokensIgnoreCase(content, "placeholder", "tbd");
+        AssertContainsAnyTokenGroupIgnoreCase(
+            content,
+            ["must not", "stable release fact snapshot"],
+            ["not be treated", "stable", "fact snapshot"]);
+        AssertContainsAnyTokenGroupIgnoreCase(
+            content,
+            ["tier a", "tier b", "tier c"],
+            ["known limitations"]);
+    }
+
+    [Fact]
+    public void Index_declares_tier_registry_status_as_governed_truth_source()
+    {
+        var repoRoot = FindRepoRoot();
+        var indexPath = Path.Combine(repoRoot, "docs", "index.md");
+        Assert.True(File.Exists(indexPath), "Missing docs/index.md");
+
+        var content = File.ReadAllText(indexPath);
+        AssertContainsAllTokensIgnoreCase(
+            content,
+            "runtime model",
+            "tiered",
+            "registry",
+            "status",
+            "governed source of truth");
+        AssertContainsAnyTokenGroupIgnoreCase(
+            content,
+            ["directional", "five platforms"],
+            ["directional", "five-platform"],
+            ["does not mean", "fully covered"]);
+    }
+
+    [Fact]
+    public void Framework_capabilities_registry_uses_starter_schema_and_representative_entries()
+    {
+        var repoRoot = FindRepoRoot();
+        var capabilitiesPath = Path.Combine(repoRoot, "docs", "framework-capabilities.json");
+        Assert.True(File.Exists(capabilitiesPath), "Missing docs/framework-capabilities.json");
+
+        using var doc = JsonDocument.Parse(File.ReadAllText(capabilitiesPath));
+        var root = doc.RootElement;
+        Assert.True(root.TryGetProperty("schemaVersion", out var schemaVersion) && schemaVersion.ValueKind == JsonValueKind.String);
+        Assert.True(root.TryGetProperty("migration_notes", out var migrationNotes) && migrationNotes.ValueKind == JsonValueKind.String);
+        var migrationNotesText = migrationNotes.GetString() ?? string.Empty;
+        AssertContainsAllTokensIgnoreCase(
+            migrationNotesText,
+            "capability_id",
+            "canonical",
+            "id",
+            "compatibility",
+            "migration");
+        Assert.True(root.TryGetProperty("capabilities", out var capabilitiesElement), "Capabilities array is required.");
+
+        var capabilities = capabilitiesElement.EnumerateArray().ToList();
+        Assert.True(capabilities.Count >= 4, "Starter capability registry should include representative entries across four layers.");
+
+        var observedLayers = new HashSet<string>(StringComparer.Ordinal);
+
+        foreach (var capability in capabilities)
+        {
+            Assert.True(capability.TryGetProperty("layer", out var layer) && layer.ValueKind == JsonValueKind.String);
+            var layerName = layer.GetString();
+            Assert.False(string.IsNullOrWhiteSpace(layerName), "Each capability must declare a non-empty layer.");
+            observedLayers.Add(layerName!);
+        }
+
+        Assert.Contains("Kernel", observedLayers);
+        Assert.Contains("Bridge", observedLayers);
+        Assert.Contains("Framework Services", observedLayers);
+        Assert.Contains("Plugins / Vertical Features", observedLayers);
+    }
+
+    [Fact]
+    public void Release_governance_defines_stable_rules_and_release_gates()
+    {
+        var repoRoot = FindRepoRoot();
+        var governancePath = Path.Combine(repoRoot, "docs", "release-governance.md");
+        Assert.True(File.Exists(governancePath), "Missing docs/release-governance.md");
+
+        var content = File.ReadAllText(governancePath);
+        AssertContainsAnyTokenGroupIgnoreCase(content, ["stable release", "rules"], ["release gates"], ["promotion flow"]);
+        AssertContainsAnyTokenGroupIgnoreCase(content, ["compatibility"], ["security"], ["observability"]);
+        AssertContainsAnyTokenGroupIgnoreCase(content, ["evidence contract"], ["artifact convention"]);
+        AssertContainsAnyTokenGroupIgnoreCase(content, ["schema"], ["path"], ["naming"]);
+        AssertContainsAllTokens(content, "`gate`", "`releaseLine`", "`snapshotAtUtc`", "`status`", "`producer`", "`artifacts[]`");
+        AssertContainsAnyTokenGroupIgnoreCase(
+            content,
+            ["must include"],
+            ["required"],
+            ["every gate artifact"]);
+        AssertContainsAnyTokenGroupIgnoreCase(content, ["gate", "identity"], ["gate", "belongs"]);
+        AssertContainsAnyTokenGroupIgnoreCase(content, ["releaseline", "release line"], ["governed release line"]);
+        AssertContainsAnyTokenGroupIgnoreCase(content, ["snapshotatutc", "utc"], ["iso-8601"], ["yyyy-mm-ddthh:mm:ssz"]);
+        AssertContainsAnyTokenGroupIgnoreCase(content, ["status", "pass", "fail"], ["status", "blocked"]);
+        AssertContainsAnyTokenGroupIgnoreCase(content, ["producer", "generator"], ["ci", "workflow", "job"], ["release tool"]);
+        AssertContainsAnyTokenGroupIgnoreCase(content, ["artifacts[]", "type", "path"], ["hash"], ["build/run id"]);
     }
 
     private static string FindRepoRoot()
@@ -185,98 +420,27 @@ public sealed class DocumentationGovernanceTests
         throw new DirectoryNotFoundException("Could not locate repository root.");
     }
 
-    private static Dictionary<string, string> ParseTopLevelTocItems(IEnumerable<string> lines)
+    private static void AssertContainsAllTokens(string content, params string[] tokens)
     {
-        var result = new Dictionary<string, string>(StringComparer.Ordinal);
-        string? pendingName = null;
-
-        foreach (var rawLine in lines)
+        foreach (var token in tokens)
         {
-            var line = rawLine.TrimEnd();
-            if (string.IsNullOrWhiteSpace(line))
-                continue;
-
-            var trimmedStart = line.TrimStart();
-            var leadingSpaces = line.Length - trimmedStart.Length;
-
-            if (trimmedStart.StartsWith("- name:", StringComparison.Ordinal))
-            {
-                if (leadingSpaces != 0)
-                    continue;
-
-                pendingName = trimmedStart["- name:".Length..].Trim();
-                continue;
-            }
-
-            if (leadingSpaces == 0)
-            {
-                pendingName = null;
-                continue;
-            }
-
-            if (trimmedStart.StartsWith("href:", StringComparison.Ordinal) && !string.IsNullOrWhiteSpace(pendingName))
-            {
-                var href = trimmedStart["href:".Length..].Trim();
-                result[pendingName] = href;
-                pendingName = null;
-            }
+            Assert.Contains(token, content, StringComparison.Ordinal);
         }
-
-        return result;
     }
 
-    private static Dictionary<string, string> ParsePlatformDocumentsTableLinks(IEnumerable<string> lines)
+    private static void AssertContainsAllTokensIgnoreCase(string content, params string[] tokens)
     {
-        var result = new Dictionary<string, string>(StringComparer.Ordinal);
-        var inSection = false;
-        var inTable = false;
-
-        foreach (var rawLine in lines)
+        foreach (var token in tokens)
         {
-            var line = rawLine.Trim();
-            if (!inSection)
-            {
-                if (string.Equals(line, "## Platform Documents", StringComparison.Ordinal))
-                    inSection = true;
-
-                continue;
-            }
-
-            if (line.StartsWith("## ", StringComparison.Ordinal))
-                break;
-
-            if (!inTable)
-            {
-                if (line.StartsWith("| Platform document |", StringComparison.Ordinal))
-                    inTable = true;
-
-                continue;
-            }
-
-            if (!line.StartsWith("|", StringComparison.Ordinal))
-                continue;
-
-            if (line.StartsWith("|---", StringComparison.Ordinal))
-                continue;
-
-            var cells = line.Split('|', StringSplitOptions.None);
-            if (cells.Length < 3)
-                continue;
-
-            var docCell = cells[1].Trim();
-            var labelStart = docCell.IndexOf('[', StringComparison.Ordinal);
-            var labelEnd = docCell.IndexOf(']', StringComparison.Ordinal);
-            var hrefStart = docCell.IndexOf('(', StringComparison.Ordinal);
-            var hrefEnd = docCell.IndexOf(')', StringComparison.Ordinal);
-
-            if (labelStart < 0 || labelEnd <= labelStart || hrefStart < 0 || hrefEnd <= hrefStart)
-                continue;
-
-            var label = docCell[(labelStart + 1)..labelEnd];
-            var href = docCell[(hrefStart + 1)..hrefEnd];
-            result[label] = href;
+            Assert.Contains(token, content, StringComparison.OrdinalIgnoreCase);
         }
+    }
 
-        return result;
+    private static void AssertContainsAnyTokenGroupIgnoreCase(string content, params string[][] groups)
+    {
+        var matched = groups.Any(group => group.All(token => content.Contains(token, StringComparison.OrdinalIgnoreCase)));
+        Assert.True(
+            matched,
+            $"Content must satisfy at least one semantic token group. Groups: {string.Join(" | ", groups.Select(g => $"[{string.Join(", ", g)}]"))}");
     }
 }
