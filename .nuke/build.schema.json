@@ -45,7 +45,6 @@
         "MutationTest",
         "NpmPublish",
         "NugetPackageTest",
-        "OpenSpecStrictGovernance",
         "Pack",
         "PackageApp",
         "PackTemplate",
