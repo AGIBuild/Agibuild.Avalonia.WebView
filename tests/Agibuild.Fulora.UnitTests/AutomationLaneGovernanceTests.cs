@@ -144,6 +144,8 @@ public sealed class AutomationLaneGovernanceTests
         AssertSourceContains(mainSource, "partial class BuildTask", BuildPipelineTargetGraph, "build/Build.cs");
         AssertSourceContains(mainSource, "Execute<BuildTask>(x => x.Build)", BuildPipelineTargetGraph, "build/Build.cs");
         AssertSourceContains(combinedSource, "--shellPreset app-shell", BuildPipelineTargetGraph, "build/Build*.cs");
+        AssertSourceContains(combinedSource, "IsMacOsGuiSmokeEnvironment", BuildPipelineTargetGraph, "build/Build*.cs");
+        AssertSourceContains(combinedSource, "macOS CI agents with a display server", BuildPipelineTargetGraph, "build/Build*.cs");
     }
 
     [Fact]
@@ -736,6 +738,58 @@ public sealed class AutomationLaneGovernanceTests
 
         AssertSourceContains(processHelpers, "Directory.CreateDirectory", BuildPipelineTargetGraph, "build/Build.ProcessHelpers.cs");
         AssertSourceContains(processHelpers, "Path.GetDirectoryName(path)", BuildPipelineTargetGraph, "build/Build.ProcessHelpers.cs");
+    }
+
+    [Fact]
+    public void Dependency_vulnerability_governance_parses_npm_audit_from_stdout_only()
+    {
+        var repoRoot = FindRepoRoot();
+        var governanceSource = File.ReadAllText(Path.Combine(repoRoot, "build", "Build.Governance.Dependency.cs"));
+        var processHelpers = File.ReadAllText(Path.Combine(repoRoot, "build", "Build.ProcessHelpers.cs"));
+
+        AssertSourceContains(
+            governanceSource,
+            "RunNpmStdoutAsync",
+            CiTargetDocsFirstGovernance,
+            "build/Build.Governance.Dependency.cs");
+        Assert.DoesNotContain("RunNpmCaptureAllAsync", governanceSource, StringComparison.Ordinal);
+        AssertSourceContains(
+            processHelpers,
+            "RunNpmStdoutAsync",
+            CiTargetDocsFirstGovernance,
+            "build/Build.ProcessHelpers.cs");
+    }
+
+    [Fact]
+    public void Dependency_vulnerability_governance_scans_all_web_samples()
+    {
+        var repoRoot = FindRepoRoot();
+        var governanceSource = File.ReadAllText(Path.Combine(repoRoot, "build", "Build.Governance.Dependency.cs"));
+
+        foreach (var sampleDirectory in new[]
+                 {
+                     "ReactWebDirectory",
+                     "AiChatWebDirectory",
+                     "VueWebDirectory",
+                     "TodoWebDirectory"
+                 })
+        {
+            AssertSourceContains(
+                governanceSource,
+                sampleDirectory,
+                CiTargetDocsFirstGovernance,
+                "build/Build.Governance.Dependency.cs");
+        }
+    }
+
+    [Fact]
+    public void Gui_smoke_environment_detection_accepts_common_ci_markers()
+    {
+        var repoRoot = FindRepoRoot();
+        var processHelpers = File.ReadAllText(Path.Combine(repoRoot, "build", "Build.Helpers.cs"));
+
+        AssertSourceContains(processHelpers, "TF_BUILD", BuildPipelineTargetGraph, "build/Build.Helpers.cs");
+        AssertSourceContains(processHelpers, "\"1\"", BuildPipelineTargetGraph, "build/Build.Helpers.cs");
     }
 
     [Fact]

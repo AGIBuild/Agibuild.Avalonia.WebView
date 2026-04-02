@@ -155,6 +155,20 @@ internal partial class BuildTask
             : RunProcessCaptureAllAsync("npm", arguments, workingDirectory, timeout);
     }
 
+    private static Task<string> RunNpmStdoutAsync(
+        string[] arguments,
+        string workingDirectory,
+        TimeSpan? timeout = null)
+    {
+        return OperatingSystem.IsWindows()
+            ? RunProcessAsync(
+                "cmd.exe",
+                ["/d", "/s", "/c", $"npm {string.Join(' ', arguments)}"],
+                workingDirectory,
+                timeout)
+            : RunProcessAsync("npm", arguments, workingDirectory, timeout);
+    }
+
     private static Task<string> RunNpmCheckedAsync(
         string[] arguments,
         string workingDirectory,

@@ -48,7 +48,10 @@ internal partial class BuildTask
 
                     var npmWorkspaces = new[]
                     {
-                        ReactWebDirectory
+                        ReactWebDirectory,
+                        AiChatWebDirectory,
+                        VueWebDirectory,
+                        TodoWebDirectory
                     }
                     .Where(path => File.Exists(path / "package-lock.json"))
                     .Distinct()
@@ -56,7 +59,7 @@ internal partial class BuildTask
 
                     foreach (var workspace in npmWorkspaces)
                     {
-                        var npmOutput = await RunNpmCaptureAllAsync(
+                        var npmOutput = await RunNpmStdoutAsync(
                             ["audit", "--json", "--audit-level=high"],
                             workspace,
                             TimeSpan.FromMinutes(3));
