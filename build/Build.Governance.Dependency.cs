@@ -53,12 +53,22 @@ internal partial class BuildTask
                         VueWebDirectory,
                         TodoWebDirectory
                     }
-                    .Where(path => File.Exists(path / "package-lock.json"))
                     .Distinct()
                     .ToArray();
 
                     foreach (var workspace in npmWorkspaces)
                     {
+                        if (!File.Exists(workspace / "package-lock.json"))
+                        {
+                            failures.Add(new GovernanceFailure(
+                                Category: "dependency-vulnerability",
+                                InvariantId: DependencyVulnerabilityInvariantId,
+                                SourceArtifact: workspace.ToString(),
+                                Expected: "missing npm lockfile is treated as a governance failure",
+                                Actual: "missing npm lockfile"));
+                            continue;
+                        }
+
                         var npmOutput = await RunNpmStdoutAsync(
                             ["audit", "--json", "--audit-level=high"],
                             workspace,

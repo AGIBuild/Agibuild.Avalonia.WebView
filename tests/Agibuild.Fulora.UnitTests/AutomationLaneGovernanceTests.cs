@@ -783,6 +783,20 @@ public sealed class AutomationLaneGovernanceTests
     }
 
     [Fact]
+    public void Dependency_vulnerability_governance_requires_lockfiles_for_all_web_samples()
+    {
+        var repoRoot = FindRepoRoot();
+        var governanceSource = File.ReadAllText(Path.Combine(repoRoot, "build", "Build.Governance.Dependency.cs"));
+
+        AssertSourceContains(
+            governanceSource,
+            "missing npm lockfile",
+            CiTargetDocsFirstGovernance,
+            "build/Build.Governance.Dependency.cs");
+        Assert.DoesNotContain(".Where(path => File.Exists(path / \"package-lock.json\"))", governanceSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Gui_smoke_environment_detection_accepts_common_ci_markers()
     {
         var repoRoot = FindRepoRoot();
