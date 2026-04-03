@@ -169,6 +169,129 @@ public sealed class ShellCollaboratorCoverageTests
     }
 
     [Fact]
+    public void ShellMenuGovernanceRuntime_ctor_null_guards()
+    {
+        using var webView = CreateCore();
+        var options = new WebViewShellExperienceOptions();
+
+        Assert.Throws<ArgumentNullException>(() =>
+            new ShellMenuGovernanceRuntime(
+                null!,
+                options,
+                Guid.NewGuid(),
+                () => null,
+                () => null,
+                (_, _, _, _, _, _, _) => { },
+                (_, _) => { },
+                (_, _) => { }));
+        Assert.Throws<ArgumentNullException>(() =>
+            new ShellMenuGovernanceRuntime(
+                webView,
+                null!,
+                Guid.NewGuid(),
+                () => null,
+                () => null,
+                (_, _, _, _, _, _, _) => { },
+                (_, _) => { },
+                (_, _) => { }));
+        Assert.Throws<ArgumentNullException>(() =>
+            new ShellMenuGovernanceRuntime(
+                webView,
+                options,
+                Guid.NewGuid(),
+                null!,
+                () => null,
+                (_, _, _, _, _, _, _) => { },
+                (_, _) => { },
+                (_, _) => { }));
+        Assert.Throws<ArgumentNullException>(() =>
+            new ShellMenuGovernanceRuntime(
+                webView,
+                options,
+                Guid.NewGuid(),
+                () => null,
+                null!,
+                (_, _, _, _, _, _, _) => { },
+                (_, _) => { },
+                (_, _) => { }));
+        Assert.Throws<ArgumentNullException>(() =>
+            new ShellMenuGovernanceRuntime(
+                webView,
+                options,
+                Guid.NewGuid(),
+                () => null,
+                () => null,
+                null!,
+                (_, _) => { },
+                (_, _) => { }));
+        Assert.Throws<ArgumentNullException>(() =>
+            new ShellMenuGovernanceRuntime(
+                webView,
+                options,
+                Guid.NewGuid(),
+                () => null,
+                () => null,
+                (_, _, _, _, _, _, _) => { },
+                null!,
+                (_, _) => { }));
+        Assert.Throws<ArgumentNullException>(() =>
+            new ShellMenuGovernanceRuntime(
+                webView,
+                options,
+                Guid.NewGuid(),
+                () => null,
+                () => null,
+                (_, _, _, _, _, _, _) => { },
+                (_, _) => { },
+                null!));
+    }
+
+    [Fact]
+    public void ShellMenuGovernanceRuntime_effective_model_snapshot_is_cloned()
+    {
+        using var webView = CreateCore();
+        var runtime = new ShellMenuGovernanceRuntime(
+            webView,
+            new WebViewShellExperienceOptions(),
+            Guid.NewGuid(),
+            () => null,
+            () => null,
+            (_, _, _, _, _, _, _) => { },
+            (_, _) => { },
+            (_, _) => { });
+
+        runtime.UpdateEffectiveMenuModel(new WebViewMenuModelRequest
+        {
+            Items =
+            [
+                new WebViewMenuItemModel
+                {
+                    Id = "file",
+                    Label = "File",
+                    Children = [new WebViewMenuItemModel { Id = "new", Label = "New" }]
+                }
+            ]
+        });
+
+        var snapshot = runtime.GetEffectiveMenuModelSnapshot();
+        Assert.NotNull(snapshot);
+        Assert.Single(snapshot!.Items);
+
+        var snapshotItems = Assert.IsType<WebViewMenuItemModel[]>(snapshot.Items);
+        snapshotItems[0] = new WebViewMenuItemModel
+        {
+            Id = "mutated",
+            Label = "Mutated",
+            Children = [new WebViewMenuItemModel { Id = "mutated-child", Label = "Mutated Child" }]
+        };
+
+        var secondSnapshot = runtime.GetEffectiveMenuModelSnapshot();
+        Assert.NotNull(secondSnapshot);
+        Assert.Equal("file", secondSnapshot!.Items[0].Id);
+        Assert.Equal("new", secondSnapshot.Items[0].Children[0].Id);
+    }
+
+    [Fact]
     public void WebViewManagedWindowManager_IsTransitionAllowed_branch_matrix()
     {
         var method = typeof(WebViewManagedWindowManager)
