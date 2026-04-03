@@ -514,6 +514,7 @@ public sealed class AutomationLaneGovernanceTests
         var repoRoot = FindRepoRoot();
         var bridgePath = Path.Combine(repoRoot, "src", "Agibuild.Fulora.Runtime", "Shell", "WebViewHostCapabilityBridge.cs");
         var shellPath = Path.Combine(repoRoot, "src", "Agibuild.Fulora.Runtime", "Shell", "WebViewShellExperience.cs");
+        var shellContractsPath = Path.Combine(repoRoot, "src", "Agibuild.Fulora.Runtime", "Shell", "WebViewShellPolicyContracts.cs");
         var shellExecutorPath = Path.Combine(repoRoot, "src", "Agibuild.Fulora.Runtime", "Shell", "WebViewHostCapabilityExecutor.cs");
         var shellNewWindowPath = Path.Combine(repoRoot, "src", "Agibuild.Fulora.Runtime", "Shell", "WebViewNewWindowHandler.cs");
         var profilePath = Path.Combine(repoRoot, "src", "Agibuild.Fulora.Runtime", "Shell", "WebViewSessionPermissionProfiles.cs");
@@ -522,13 +523,14 @@ public sealed class AutomationLaneGovernanceTests
         var hostCapabilityIntegrationTestPath = Path.Combine(repoRoot, "tests", "Agibuild.Fulora.Integration.Tests.Automation", "HostCapabilityBridgeIntegrationTests.cs");
         var profileIntegrationTestPath = Path.Combine(repoRoot, "tests", "Agibuild.Fulora.Integration.Tests.Automation", "MultiWindowLifecycleIntegrationTests.cs");
 
-        foreach (var p in new[] { bridgePath, shellPath, shellExecutorPath, shellNewWindowPath, profilePath, helperPath, hostCapabilityUnitTestPath, hostCapabilityIntegrationTestPath, profileIntegrationTestPath })
+        foreach (var p in new[] { bridgePath, shellPath, shellContractsPath, shellExecutorPath, shellNewWindowPath, profilePath, helperPath, hostCapabilityUnitTestPath, hostCapabilityIntegrationTestPath, profileIntegrationTestPath })
             AssertFileExists(p, PhaseCloseoutConsistency);
 
         var bridgeSource = File.ReadAllText(bridgePath);
         var shellSource = string.Join(
             Environment.NewLine,
             File.ReadAllText(shellPath),
+            File.ReadAllText(shellContractsPath),
             File.ReadAllText(shellExecutorPath),
             File.ReadAllText(shellNewWindowPath));
         var profileSource = File.ReadAllText(profilePath);
@@ -603,6 +605,28 @@ public sealed class AutomationLaneGovernanceTests
         };
         foreach (var marker in profileMarkers)
             AssertSourceContains(profileSource, marker, PhaseCloseoutConsistency, profilePath);
+    }
+
+    [Fact]
+    public void Shell_contract_and_policy_types_are_separated_from_shell_experience_coordinator()
+    {
+        var repoRoot = FindRepoRoot();
+        var shellPath = Path.Combine(repoRoot, "src", "Agibuild.Fulora.Runtime", "Shell", "WebViewShellExperience.cs");
+        var contractsPath = Path.Combine(repoRoot, "src", "Agibuild.Fulora.Runtime", "Shell", "WebViewShellPolicyContracts.cs");
+
+        AssertFileExists(shellPath, PhaseCloseoutConsistency);
+        AssertFileExists(contractsPath, PhaseCloseoutConsistency);
+
+        var shellSource = File.ReadAllText(shellPath);
+        var contractsSource = File.ReadAllText(contractsPath);
+
+        Assert.DoesNotContain("public enum WebViewShellPolicyDomain", shellSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("public sealed class DelegateMenuPruningPolicy", shellSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("public interface IWebViewShellMenuPruningPolicy", shellSource, StringComparison.Ordinal);
+
+        AssertSourceContains(contractsSource, "public enum WebViewShellPolicyDomain", PhaseCloseoutConsistency, contractsPath);
+        AssertSourceContains(contractsSource, "public sealed class DelegateMenuPruningPolicy", PhaseCloseoutConsistency, contractsPath);
+        AssertSourceContains(contractsSource, "public interface IWebViewShellMenuPruningPolicy", PhaseCloseoutConsistency, contractsPath);
     }
 
     [Fact]
