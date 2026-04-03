@@ -40,6 +40,40 @@ internal sealed class ShellWindowingRuntime
                 () => _options.SessionPolicy.Resolve(context));
     }
 
+    public (WebViewShellSessionDecision? SessionDecision, WebViewSessionPermissionProfile? RootProfile) ResolveRootShellState()
+    {
+        var rootSessionContext = _options.SessionContext with
+        {
+            WindowId = _rootWindowId,
+            ParentWindowId = null
+        };
+
+        var sessionDecision = ResolveSessionDecision(rootSessionContext, fallbackDecision: null);
+        WebViewSessionPermissionProfile? rootProfile = null;
+
+        if (_options.SessionPermissionProfileResolver is not null)
+        {
+            var rootProfileContext = new WebViewSessionPermissionProfileContext(
+                _rootWindowId,
+                ParentWindowId: null,
+                WindowId: _rootWindowId,
+                ScopeIdentity: rootSessionContext.ScopeIdentity,
+                RequestUri: rootSessionContext.RequestUri,
+                PermissionKind: null);
+
+            rootProfile = ResolveSessionPermissionProfile(rootProfileContext, parentProfile: null);
+            if (rootProfile is not null)
+            {
+                sessionDecision = rootProfile.ResolveSessionDecision(
+                    parentDecision: null,
+                    fallbackDecision: sessionDecision,
+                    scopeIdentity: rootSessionContext.ScopeIdentity);
+            }
+        }
+
+        return (sessionDecision, rootProfile);
+    }
+
     public WebViewSessionPermissionProfile? ResolveSessionPermissionProfile(
         WebViewSessionPermissionProfileContext context,
         WebViewSessionPermissionProfile? parentProfile)

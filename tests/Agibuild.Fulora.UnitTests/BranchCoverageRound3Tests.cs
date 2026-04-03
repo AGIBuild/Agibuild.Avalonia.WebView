@@ -303,10 +303,18 @@ public sealed class BranchCoverageRound3Tests
         DispatcherTestPump.WaitUntil(dispatcher, () => shell.ManagedWindowCount == 1);
 
         // Set the managed window's state to Closing via reflection
-        var managedWindowsField = typeof(WebViewShellExperience).GetField(
+        var managerField = typeof(WebViewShellExperience).GetField(
+            "_managedWindowManager", BindingFlags.NonPublic | BindingFlags.Instance);
+        Assert.NotNull(managerField);
+
+        var manager = managerField!.GetValue(shell);
+        Assert.NotNull(manager);
+
+        var managedWindowsField = manager!.GetType().GetField(
             "_managedWindows", BindingFlags.NonPublic | BindingFlags.Instance);
         Assert.NotNull(managedWindowsField);
-        var windows = managedWindowsField!.GetValue(shell);
+
+        var windows = managedWindowsField!.GetValue(manager);
         var entriesProperty = windows!.GetType().GetProperty("Values");
         var entries = entriesProperty!.GetValue(windows) as System.Collections.IEnumerable;
         foreach (var entry in entries!)

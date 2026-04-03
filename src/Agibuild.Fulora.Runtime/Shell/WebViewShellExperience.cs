@@ -619,7 +619,6 @@ public sealed class WebViewShellExperience : IDisposable
 
     private readonly IWebView _webView;
     private readonly WebViewShellExperienceOptions _options;
-    private readonly Dictionary<Guid, object> _managedWindows = new();
     private readonly Guid _rootWindowId;
     private readonly WebViewHostCapabilityExecutor _hostCapabilityExecutor;
     private readonly ShellSystemIntegrationRuntime _systemIntegrationRuntime;
@@ -665,52 +664,17 @@ public sealed class WebViewShellExperience : IDisposable
                                       ReportPolicyFailure);
         _systemIntegrationRuntime = new ShellSystemIntegrationRuntime(_hostCapabilityExecutor);
         _windowingRuntime = new ShellWindowingRuntime(_webView, _options, _rootWindowId, _hostCapabilityExecutor);
-
-        var rootSessionContext = _options.SessionContext with
+        var (resolvedRootSessionDecision, resolvedRootProfile) = _windowingRuntime.ResolveRootShellState();
+        if (resolvedRootProfile is not null && resolvedRootSessionDecision is not null)
         {
-            WindowId = _rootWindowId,
-            ParentWindowId = null
-        };
-
-        WebViewShellSessionDecision? resolvedRootSessionDecision = null;
-        if (_options.SessionPolicy is not null)
-        {
-            resolvedRootSessionDecision = _hostCapabilityExecutor.ExecutePolicyDomain(
-                WebViewShellPolicyDomain.Session,
-                () => _options.SessionPolicy.Resolve(rootSessionContext));
-        }
-
-        WebViewSessionPermissionProfile? resolvedRootProfile = null;
-        if (_options.SessionPermissionProfileResolver is not null)
-        {
-            var rootProfileContext = new WebViewSessionPermissionProfileContext(
+            RaiseSessionPermissionProfileDiagnostic(
                 _rootWindowId,
-                ParentWindowId: null,
-                WindowId: _rootWindowId,
-                ScopeIdentity: rootSessionContext.ScopeIdentity,
-                RequestUri: rootSessionContext.RequestUri,
-                PermissionKind: null);
-
-            resolvedRootProfile = _hostCapabilityExecutor.ExecutePolicyDomain(
-                WebViewShellPolicyDomain.Session,
-                () => _options.SessionPermissionProfileResolver.Resolve(rootProfileContext, parentProfile: null));
-
-            if (resolvedRootProfile is not null)
-            {
-                resolvedRootSessionDecision = resolvedRootProfile.ResolveSessionDecision(
-                    parentDecision: null,
-                    fallbackDecision: resolvedRootSessionDecision,
-                    scopeIdentity: rootSessionContext.ScopeIdentity);
-
-                RaiseSessionPermissionProfileDiagnostic(
-                    _rootWindowId,
-                    parentWindowId: null,
-                    scopeIdentity: rootSessionContext.ScopeIdentity,
-                    profile: resolvedRootProfile,
-                    sessionDecision: resolvedRootSessionDecision,
-                    permissionKind: null,
-                    permissionDecision: WebViewPermissionProfileDecision.DefaultFallback());
-            }
+                parentWindowId: null,
+                scopeIdentity: _options.SessionContext.ScopeIdentity,
+                profile: resolvedRootProfile,
+                sessionDecision: resolvedRootSessionDecision,
+                permissionKind: null,
+                permissionDecision: WebViewPermissionProfileDecision.DefaultFallback());
         }
 
         _sessionDecision = resolvedRootSessionDecision;
