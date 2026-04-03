@@ -188,7 +188,8 @@ public sealed class WebViewCoreHotspotCoverageTests
             AllowedOrigins = new HashSet<string> { "*" }
         });
 
-        SetPrivateField(core, "_webMessagePolicy", null);
+        var bridgeRuntime = GetPrivateField<WebViewCoreBridgeRuntime>(core, "_bridgeRuntime");
+        SetPrivateField(bridgeRuntime, "_webMessagePolicy", null);
 
         WebMessageReceivedEventArgs? args = null;
         core.WebMessageReceived += (_, e) => args = e;
@@ -238,6 +239,15 @@ public sealed class WebViewCoreHotspotCoverageTests
             BindingFlags.Instance | BindingFlags.NonPublic);
         Assert.True(field is not null, $"field not found: {fieldName}");
         field!.SetValue(instance, value);
+    }
+
+    private static T GetPrivateField<T>(object instance, string fieldName)
+    {
+        var field = instance.GetType().GetField(
+            fieldName,
+            BindingFlags.Instance | BindingFlags.NonPublic);
+        Assert.True(field is not null, $"field not found: {fieldName}");
+        return Assert.IsType<T>(field!.GetValue(instance));
     }
 
     private static void MarkAdapterDestroyed(WebViewCore core)
