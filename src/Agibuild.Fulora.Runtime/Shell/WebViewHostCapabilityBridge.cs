@@ -333,7 +333,7 @@ public sealed class WebViewHostCapabilityCallResult<T>
 public sealed class WebViewHostCapabilityDiagnosticEventArgs : EventArgs
 {
     /// <summary>Current schema version for host capability diagnostics.</summary>
-    public const int CurrentDiagnosticSchemaVersion = 1;
+    public const int CurrentDiagnosticSchemaVersion = 2;
 
     /// <summary>Create diagnostic payload.</summary>
     public WebViewHostCapabilityDiagnosticEventArgs(
@@ -419,7 +419,8 @@ public sealed class WebViewHostCapabilityDiagnosticEventArgs : EventArgs
             wasAuthorized: WasAuthorized,
             denyReason: DenyReason,
             failureCategory: FailureCategory is null ? null : ToKebabCase(FailureCategory.Value.ToString()),
-            durationMilliseconds: DurationMilliseconds);
+            durationMilliseconds: DurationMilliseconds,
+            policyConstraints: PolicyDecision.Constraints ?? new Dictionary<string, string>(StringComparer.Ordinal));
 
     private static WebViewCapabilityPolicyDecision InferPolicyDecision(
         WebViewHostCapabilityCallOutcome outcome,
@@ -473,7 +474,8 @@ public sealed class WebViewHostCapabilityDiagnosticExportRecord
         bool wasAuthorized,
         string? denyReason,
         string? failureCategory,
-        long durationMilliseconds)
+        long durationMilliseconds,
+        IReadOnlyDictionary<string, string> policyConstraints)
     {
         SchemaVersion = schemaVersion;
         CorrelationId = correlationId;
@@ -490,6 +492,7 @@ public sealed class WebViewHostCapabilityDiagnosticExportRecord
         DenyReason = denyReason;
         FailureCategory = failureCategory;
         DurationMilliseconds = durationMilliseconds;
+        PolicyConstraints = policyConstraints;
     }
 
     /// <summary>Diagnostic schema version.</summary>
@@ -522,6 +525,8 @@ public sealed class WebViewHostCapabilityDiagnosticExportRecord
     public string? FailureCategory { get; }
     /// <summary>Elapsed duration in milliseconds.</summary>
     public long DurationMilliseconds { get; }
+    /// <summary>Effective policy constraints when the request is conditionally allowed.</summary>
+    public IReadOnlyDictionary<string, string> PolicyConstraints { get; }
 }
 
 /// <summary>
@@ -573,6 +578,7 @@ public sealed class WebViewHostCapabilityBridge
 
     private readonly IWebViewHostCapabilityProvider _provider;
     private readonly IWebViewHostCapabilityPolicy? _policy;
+    private readonly IWebViewHostCapabilityPolicyV2? _policyV2;
     private readonly WebViewCapabilityPolicyEvaluator _policyEvaluator;
     private readonly int _maxSystemIntegrationMetadataTotalLength;
 
@@ -590,13 +596,30 @@ public sealed class WebViewHostCapabilityBridge
         IWebViewHostCapabilityProvider provider,
         IWebViewHostCapabilityPolicy? policy = null,
         WebViewHostCapabilityBridgeOptions? options = null)
+        : this(provider, policy, policyV2: null, options)
+    {
+    }
+
+    private WebViewHostCapabilityBridge(
+        IWebViewHostCapabilityProvider provider,
+        IWebViewHostCapabilityPolicy? policy,
+        IWebViewHostCapabilityPolicyV2? policyV2,
+        WebViewHostCapabilityBridgeOptions? options)
     {
         _provider = provider ?? throw new ArgumentNullException(nameof(provider));
         _policy = policy;
+        _policyV2 = policyV2;
         _policyEvaluator = new WebViewCapabilityPolicyEvaluator();
         options ??= new WebViewHostCapabilityBridgeOptions();
         _maxSystemIntegrationMetadataTotalLength = ValidateSystemIntegrationMetadataTotalLength(options.SystemIntegrationMetadataTotalLength);
     }
+
+    /// <summary>Create bridge with provider, policy v2 and boundary options.</summary>
+    public static WebViewHostCapabilityBridge CreateWithPolicyV2(
+        IWebViewHostCapabilityProvider provider,
+        IWebViewHostCapabilityPolicyV2 policy,
+        WebViewHostCapabilityBridgeOptions? options = null)
+        => new(provider, policy: null, policyV2: policy, options);
 
     /// <summary>Reads text from clipboard.</summary>
     public WebViewHostCapabilityCallResult<string?> ReadClipboardText(
@@ -629,7 +652,9 @@ public sealed class WebViewHostCapabilityBridge
             {
                 _provider.WriteClipboardText(text);
                 return null;
-            });
+            },
+            requestedAction: "write-text",
+            attributes: null);
     }
 
     /// <summary>Shows open-file dialog.</summary>
@@ -646,7 +671,13 @@ public sealed class WebViewHostCapabilityBridge
                 parentWindowId,
                 targetWindowId,
                 WebViewHostCapabilityOperation.FileDialogOpen),
-            () => _provider.ShowOpenFileDialog(request));
+            () => _provider.ShowOpenFileDialog(request),
+            requestedAction: "open",
+            attributes: new Dictionary<string, string>(StringComparer.Ordinal)
+            {
+                ["dialogKind"] = "open",
+                ["allowMultiple"] = request.AllowMultiple ? "true" : "false"
+            });
     }
 
     /// <summary>Shows save-file dialog.</summary>
@@ -663,7 +694,12 @@ public sealed class WebViewHostCapabilityBridge
                 parentWindowId,
                 targetWindowId,
                 WebViewHostCapabilityOperation.FileDialogSave),
-            () => _provider.ShowSaveFileDialog(request));
+            () => _provider.ShowSaveFileDialog(request),
+            requestedAction: "save",
+            attributes: new Dictionary<string, string>(StringComparer.Ordinal)
+            {
+                ["dialogKind"] = "save"
+            });
     }
 
     /// <summary>Opens URI using external host app/browser.</summary>
@@ -685,6 +721,12 @@ public sealed class WebViewHostCapabilityBridge
             {
                 _provider.OpenExternal(uri);
                 return null;
+            },
+            requestedAction: "open-external",
+            attributes: new Dictionary<string, string>(StringComparer.Ordinal)
+            {
+                ["scheme"] = uri.Scheme,
+                ["host"] = uri.Host
             });
     }
 
@@ -706,7 +748,9 @@ public sealed class WebViewHostCapabilityBridge
             {
                 _provider.ShowNotification(request);
                 return null;
-            });
+            },
+            requestedAction: "show-notification",
+            attributes: null);
     }
 
     /// <summary>Applies host app menu model.</summary>
@@ -727,6 +771,12 @@ public sealed class WebViewHostCapabilityBridge
             {
                 _provider.ApplyMenuModel(request);
                 return null;
+            },
+            requestedAction: "apply-menu-model",
+            attributes: new Dictionary<string, string>(StringComparer.Ordinal)
+            {
+                ["target"] = "menu",
+                ["itemCount"] = request.Items.Count.ToString(System.Globalization.CultureInfo.InvariantCulture)
             });
     }
 
@@ -748,6 +798,12 @@ public sealed class WebViewHostCapabilityBridge
             {
                 _provider.UpdateTrayState(request);
                 return null;
+            },
+            requestedAction: "update-tray-state",
+            attributes: new Dictionary<string, string>(StringComparer.Ordinal)
+            {
+                ["target"] = "tray",
+                ["hasIconPath"] = string.IsNullOrWhiteSpace(request.IconPath) ? "false" : "true"
             });
     }
 
@@ -769,6 +825,11 @@ public sealed class WebViewHostCapabilityBridge
             {
                 _provider.ExecuteSystemAction(request);
                 return null;
+            },
+            requestedAction: ToKebabCase(request.Action.ToString()),
+            attributes: new Dictionary<string, string>(StringComparer.Ordinal)
+            {
+                ["systemAction"] = ToKebabCase(request.Action.ToString())
             });
     }
 
@@ -806,20 +867,25 @@ public sealed class WebViewHostCapabilityBridge
             {
                 SystemIntegrationEventDispatched?.Invoke(this, normalizedRequest);
                 return normalizedRequest;
-            });
+            },
+            requestedAction: request.Kind == WebViewSystemIntegrationEventKind.TrayInteracted ? "dispatch-tray-event" : "dispatch-menu-event",
+            attributes: null);
     }
 
     private WebViewHostCapabilityCallResult<T> Execute<T>(
         in WebViewHostCapabilityRequestContext context,
-        Func<T> action)
+        Func<T> action,
+        string? requestedAction = null,
+        IReadOnlyDictionary<string, string>? attributes = null)
     {
         ArgumentNullException.ThrowIfNull(action);
         var correlationId = Guid.NewGuid();
         var stopwatch = Stopwatch.StartNew();
         WebViewHostCapabilityCallResult<T> result;
         var capability = _policyEvaluator.Describe(context);
+        var authorizationContext = _policyEvaluator.CreateAuthorizationContext(context, requestedAction, attributes);
 
-        if (!TryEvaluatePolicy(context, out var decision, out var policyFailure))
+        if (!TryEvaluatePolicy(authorizationContext, out var decision, out var policyFailure))
         {
             result = WebViewHostCapabilityCallResult<T>.Failure(
                 capability,
@@ -847,18 +913,18 @@ public sealed class WebViewHostCapabilityBridge
         }
 
         stopwatch.Stop();
-        EmitCapabilityDiagnostic(correlationId, context, result, stopwatch.ElapsedMilliseconds);
+        EmitCapabilityDiagnostic(correlationId, authorizationContext, result, stopwatch.ElapsedMilliseconds);
         return result;
     }
 
     private bool TryEvaluatePolicy(
-        in WebViewHostCapabilityRequestContext context,
+        in WebViewCapabilityAuthorizationContext context,
         out WebViewCapabilityPolicyDecision decision,
         out Exception? failure)
     {
         try
         {
-            decision = _policyEvaluator.Evaluate(_policy, context);
+            decision = _policyEvaluator.Evaluate(_policy, _policyV2, context);
             failure = null;
             return true;
         }
@@ -982,9 +1048,10 @@ public sealed class WebViewHostCapabilityBridge
         var capability = _policyEvaluator.Describe(context);
         var policyDecision = WebViewCapabilityPolicyDecision.Deny(denyReason);
         var result = WebViewHostCapabilityCallResult<T>.Denied(capability, policyDecision, denyReason);
+        var authorizationContext = _policyEvaluator.CreateAuthorizationContext(context);
         EmitCapabilityDiagnostic(
             Guid.NewGuid(),
-            context,
+            authorizationContext,
             result,
             durationMilliseconds: 0);
         return result;
@@ -992,7 +1059,7 @@ public sealed class WebViewHostCapabilityBridge
 
     private void EmitCapabilityDiagnostic<T>(
         Guid correlationId,
-        in WebViewHostCapabilityRequestContext context,
+        in WebViewCapabilityAuthorizationContext context,
         WebViewHostCapabilityCallResult<T> result,
         long durationMilliseconds)
     {
@@ -1016,5 +1083,23 @@ public sealed class WebViewHostCapabilityBridge
                 durationMilliseconds,
                 result.Capability,
                 result.PolicyDecision));
+    }
+
+    private static string ToKebabCase(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return string.Empty;
+
+        var chars = new List<char>(value.Length + 8);
+        for (var i = 0; i < value.Length; i++)
+        {
+            var c = value[i];
+            if (char.IsUpper(c) && i > 0)
+                chars.Add('-');
+
+            chars.Add(char.ToLowerInvariant(c));
+        }
+
+        return new string(chars.ToArray());
     }
 }

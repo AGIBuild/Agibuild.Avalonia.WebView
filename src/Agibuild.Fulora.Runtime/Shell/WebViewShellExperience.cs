@@ -622,6 +622,7 @@ public sealed class WebViewShellExperience : IDisposable
     private readonly Dictionary<Guid, object> _managedWindows = new();
     private readonly Guid _rootWindowId;
     private readonly WebViewHostCapabilityExecutor _hostCapabilityExecutor;
+    private readonly ShellSystemIntegrationRuntime _systemIntegrationRuntime;
     private readonly WebViewManagedWindowManager _managedWindowManager;
     private readonly WebViewNewWindowHandler _newWindowHandler;
     private readonly WebViewShellSessionDecision? _sessionDecision;
@@ -661,6 +662,7 @@ public sealed class WebViewShellExperience : IDisposable
                                       effectiveMenuModel => _effectiveMenuModel = CloneMenuModel(effectiveMenuModel),
                                       IsSystemActionWhitelisted,
                                       ReportPolicyFailure);
+        _systemIntegrationRuntime = new ShellSystemIntegrationRuntime(_hostCapabilityExecutor);
 
         var rootSessionContext = _options.SessionContext with
         {
@@ -801,63 +803,63 @@ public sealed class WebViewShellExperience : IDisposable
     /// Returns denied result when bridge is not configured.
     /// </summary>
     public WebViewHostCapabilityCallResult<string?> ReadClipboardText()
-        => _hostCapabilityExecutor.ReadClipboardText();
+        => _systemIntegrationRuntime.ReadClipboardText();
 
     /// <summary>
     /// Writes host clipboard text via typed capability bridge.
     /// Returns denied result when bridge is not configured.
     /// </summary>
     public WebViewHostCapabilityCallResult<object?> WriteClipboardText(string text)
-        => _hostCapabilityExecutor.WriteClipboardText(text);
+        => _systemIntegrationRuntime.WriteClipboardText(text);
 
     /// <summary>
     /// Shows host open-file dialog via typed capability bridge.
     /// Returns denied result when bridge is not configured.
     /// </summary>
     public WebViewHostCapabilityCallResult<WebViewFileDialogResult> ShowOpenFileDialog(WebViewOpenFileDialogRequest request)
-        => _hostCapabilityExecutor.ShowOpenFileDialog(request);
+        => _systemIntegrationRuntime.ShowOpenFileDialog(request);
 
     /// <summary>
     /// Shows host save-file dialog via typed capability bridge.
     /// Returns denied result when bridge is not configured.
     /// </summary>
     public WebViewHostCapabilityCallResult<WebViewFileDialogResult> ShowSaveFileDialog(WebViewSaveFileDialogRequest request)
-        => _hostCapabilityExecutor.ShowSaveFileDialog(request);
+        => _systemIntegrationRuntime.ShowSaveFileDialog(request);
 
     /// <summary>
     /// Shows host notification via typed capability bridge.
     /// Returns denied result when bridge is not configured.
     /// </summary>
     public WebViewHostCapabilityCallResult<object?> ShowNotification(WebViewNotificationRequest request)
-        => _hostCapabilityExecutor.ShowNotification(request);
+        => _systemIntegrationRuntime.ShowNotification(request);
 
     /// <summary>
     /// Applies host app menu model via typed capability bridge.
     /// Reports deterministic policy failures for deny/failure outcomes.
     /// </summary>
     public WebViewHostCapabilityCallResult<object?> ApplyMenuModel(WebViewMenuModelRequest request)
-        => _hostCapabilityExecutor.ApplyMenuModel(request);
+        => _systemIntegrationRuntime.ApplyMenuModel(request);
 
     /// <summary>
     /// Updates host tray state via typed capability bridge.
     /// Reports deterministic policy failures for deny/failure outcomes.
     /// </summary>
     public WebViewHostCapabilityCallResult<object?> UpdateTrayState(WebViewTrayStateRequest request)
-        => _hostCapabilityExecutor.UpdateTrayState(request);
+        => _systemIntegrationRuntime.UpdateTrayState(request);
 
     /// <summary>
     /// Executes host system action via typed capability bridge.
     /// Reports deterministic policy failures for deny/failure outcomes.
     /// </summary>
     public WebViewHostCapabilityCallResult<object?> ExecuteSystemAction(WebViewSystemActionRequest request)
-        => _hostCapabilityExecutor.ExecuteSystemAction(request);
+        => _systemIntegrationRuntime.ExecuteSystemAction(request);
 
     /// <summary>
     /// Publishes a host-originated system integration event through typed capability governance.
     /// </summary>
     public WebViewHostCapabilityCallResult<WebViewSystemIntegrationEventRequest> PublishSystemIntegrationEvent(
         WebViewSystemIntegrationEventRequest request)
-        => _hostCapabilityExecutor.PublishSystemIntegrationEvent(request);
+        => _systemIntegrationRuntime.PublishSystemIntegrationEvent(request);
 
     /// <summary>
     /// Opens DevTools through shell policy governance.

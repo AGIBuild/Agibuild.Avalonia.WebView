@@ -194,7 +194,7 @@ public sealed class HostCapabilityBridgeTests
         {
             DiagnosticSchemaAssertionHelper.AssertHostCapabilityDiagnostic(d, root);
         });
-        Assert.Equal(1, WebViewHostCapabilityDiagnosticEventArgs.CurrentDiagnosticSchemaVersion);
+        Assert.Equal(2, WebViewHostCapabilityDiagnosticEventArgs.CurrentDiagnosticSchemaVersion);
     }
 
     [Fact]
@@ -626,6 +626,83 @@ public sealed class HostCapabilityBridgeTests
     }
 
     [Fact]
+    public void V2_policy_can_allow_external_open_with_constraints()
+    {
+        var provider = new TestHostCapabilityProvider();
+        var policy = new ConstraintExternalOpenPolicy();
+        var bridge = WebViewHostCapabilityBridge.CreateWithPolicyV2(provider, policy);
+        var result = bridge.OpenExternal(new Uri("https://example.com/docs"), Guid.NewGuid());
+
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, result.Outcome);
+        Assert.True(result.IsAllowed);
+        Assert.Equal(WebViewCapabilityPolicyDecisionKind.AllowWithConstraint, result.PolicyDecision.Kind);
+        Assert.Equal("https", result.PolicyDecision.Constraints!["allowedSchemes"]);
+        Assert.Equal("example.com", result.PolicyDecision.Constraints["allowedHosts"]);
+        Assert.Single(provider.ExternalOpens);
+    }
+
+    [Fact]
+    public void V2_policy_denies_external_open_when_host_is_outside_constraint()
+    {
+        var provider = new TestHostCapabilityProvider();
+        var policy = new ConstraintExternalOpenPolicy();
+        var bridge = WebViewHostCapabilityBridge.CreateWithPolicyV2(provider, policy);
+
+        var result = bridge.OpenExternal(new Uri("https://evil.example.net/docs"), Guid.NewGuid());
+
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Deny, result.Outcome);
+        Assert.False(result.IsAllowed);
+        Assert.Equal(WebViewCapabilityPolicyDecisionKind.Deny, result.PolicyDecision.Kind);
+        Assert.Equal("capability-constraint-host-denied", result.DenyReason);
+        Assert.Empty(provider.ExternalOpens);
+    }
+
+    [Fact]
+    public void V2_policy_can_constrain_allowed_system_actions()
+    {
+        var provider = new TestHostCapabilityProvider();
+        var bridge = WebViewHostCapabilityBridge.CreateWithPolicyV2(provider, new ConstraintSystemActionPolicy());
+
+        var allowed = bridge.ExecuteSystemAction(new WebViewSystemActionRequest
+        {
+            Action = WebViewSystemAction.FocusMainWindow
+        }, Guid.NewGuid());
+
+        var denied = bridge.ExecuteSystemAction(new WebViewSystemActionRequest
+        {
+            Action = WebViewSystemAction.Quit
+        }, Guid.NewGuid());
+
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, allowed.Outcome);
+        Assert.Equal(WebViewCapabilityPolicyDecisionKind.AllowWithConstraint, allowed.PolicyDecision.Kind);
+        Assert.Equal("focus-main-window", allowed.PolicyDecision.Constraints!["allowedActions"]);
+
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Deny, denied.Outcome);
+        Assert.Equal("capability-constraint-action-denied", denied.DenyReason);
+    }
+
+    [Fact]
+    public void Capability_diagnostic_export_records_include_constraints_when_policy_is_constrained()
+    {
+        var provider = new TestHostCapabilityProvider();
+        var bridge = WebViewHostCapabilityBridge.CreateWithPolicyV2(provider, new ConstraintExternalOpenPolicy());
+        var diagnostics = new List<WebViewHostCapabilityDiagnosticEventArgs>();
+        bridge.CapabilityCallCompleted += (_, e) => diagnostics.Add(e);
+
+        var result = bridge.OpenExternal(new Uri("https://example.com/docs"), Guid.NewGuid());
+
+        Assert.Equal(WebViewHostCapabilityCallOutcome.Allow, result.Outcome);
+        var diagnostic = Assert.Single(diagnostics);
+        Assert.Equal(WebViewCapabilityPolicyDecisionKind.AllowWithConstraint, diagnostic.PolicyDecision.Kind);
+        Assert.Equal("example.com", diagnostic.PolicyDecision.Constraints!["allowedHosts"]);
+
+        var record = diagnostic.ToExportRecord();
+        Assert.Equal("allow-with-constraint", record.PolicyDecision);
+        Assert.Equal("https", record.PolicyConstraints["allowedSchemes"]);
+        Assert.Equal("example.com", record.PolicyConstraints["allowedHosts"]);
+    }
+
+    [Fact]
     public void Missing_core_fields_are_denied_before_policy_and_dispatch()
     {
         var provider = new TestHostCapabilityProvider();
@@ -666,6 +743,29 @@ public sealed class HostCapabilityBridgeTests
     {
         public WebViewHostCapabilityDecision Evaluate(in WebViewHostCapabilityRequestContext context)
             => throw new InvalidOperationException("policy exploded");
+    }
+
+    private sealed class ConstraintExternalOpenPolicy : IWebViewHostCapabilityPolicyV2
+    {
+        public WebViewCapabilityPolicyDecision Evaluate(in WebViewCapabilityAuthorizationContext context)
+            => WebViewCapabilityPolicyDecision.AllowWithConstraint(
+                new Dictionary<string, string>(StringComparer.Ordinal)
+                {
+                    ["allowedSchemes"] = "https",
+                    ["allowedHosts"] = "example.com"
+                },
+                "trusted-browser-egress");
+    }
+
+    private sealed class ConstraintSystemActionPolicy : IWebViewHostCapabilityPolicyV2
+    {
+        public WebViewCapabilityPolicyDecision Evaluate(in WebViewCapabilityAuthorizationContext context)
+            => WebViewCapabilityPolicyDecision.AllowWithConstraint(
+                new Dictionary<string, string>(StringComparer.Ordinal)
+                {
+                    ["allowedActions"] = "focus-main-window"
+                },
+                "ui-safe-actions-only");
     }
 
     private sealed class SelectivePolicy : IWebViewHostCapabilityPolicy

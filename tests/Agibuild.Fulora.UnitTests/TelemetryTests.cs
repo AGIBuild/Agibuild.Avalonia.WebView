@@ -124,7 +124,7 @@ public class TelemetryTests
     }
 
     [Fact]
-    public void LoggingFuloraDiagnosticsSink_uses_warning_for_error_and_dropped_statuses()
+    public void LoggingFuloraDiagnosticsSink_uses_warning_for_error_denied_failed_and_dropped_statuses()
     {
         var logger = new RecordingLogger();
         var sink = new LoggingFuloraDiagnosticsSink(logger);
@@ -148,7 +148,25 @@ public class TelemetryTests
             Status = "dropped"
         });
 
-        Assert.Equal(2, logger.Entries.Count);
+        sink.OnEvent(new FuloraDiagnosticsEvent
+        {
+            EventName = "shell.capability.denied",
+            Layer = "shell",
+            Component = "ShellSystemIntegrationRuntime",
+            Status = "denied",
+            CapabilityId = "shell.external_open"
+        });
+
+        sink.OnEvent(new FuloraDiagnosticsEvent
+        {
+            EventName = "shell.capability.failed",
+            Layer = "shell",
+            Component = "ShellSystemIntegrationRuntime",
+            Status = "failed",
+            CapabilityId = "shell.external_open"
+        });
+
+        Assert.Equal(4, logger.Entries.Count);
         Assert.All(logger.Entries, entry => Assert.Equal(Microsoft.Extensions.Logging.LogLevel.Warning, entry.Level));
     }
 

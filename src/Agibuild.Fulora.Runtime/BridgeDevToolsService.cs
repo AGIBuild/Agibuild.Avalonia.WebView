@@ -111,19 +111,18 @@ public sealed class BridgeDevToolsService : IDisposable
         {
             ArgumentNullException.ThrowIfNull(diagnosticEvent);
 
-            if (!TryMapDirection(diagnosticEvent.EventName, out var direction) ||
-                !TryMapPhase(diagnosticEvent.EventName, out var phase))
+            if (!TryMapEvent(diagnosticEvent, out var direction, out var phase, out var serviceName, out var methodName))
             {
                 return;
             }
 
             _collector.Add(new BridgeDevToolsEvent
             {
-                Timestamp = DateTimeOffset.UtcNow,
+                Timestamp = diagnosticEvent.TimestampUtc,
                 Direction = direction,
                 Phase = phase,
-                ServiceName = diagnosticEvent.Service ?? diagnosticEvent.Component,
-                MethodName = diagnosticEvent.Method ?? string.Empty,
+                ServiceName = serviceName,
+                MethodName = methodName,
                 ElapsedMs = diagnosticEvent.DurationMs,
                 ErrorMessage = diagnosticEvent.Attributes.TryGetValue("message", out var message) ? message : diagnosticEvent.ErrorType,
                 ResultJson = diagnosticEvent.Attributes.TryGetValue("resultType", out var resultType) ? resultType : null,
@@ -132,50 +131,89 @@ public sealed class BridgeDevToolsService : IDisposable
             });
         }
 
-        private static bool TryMapDirection(string eventName, out BridgeCallDirection direction)
+        private static bool TryMapEvent(
+            FuloraDiagnosticsEvent diagnosticEvent,
+            out BridgeCallDirection direction,
+            out BridgeCallPhase phase,
+            out string serviceName,
+            out string methodName)
         {
+            var eventName = diagnosticEvent.EventName;
             if (eventName.StartsWith("bridge.export.", StringComparison.Ordinal))
             {
                 direction = BridgeCallDirection.Export;
-                return true;
+                phase = eventName switch
+                {
+                    "bridge.export.start" => BridgeCallPhase.Start,
+                    "bridge.export.end" => BridgeCallPhase.End,
+                    "bridge.export.error" => BridgeCallPhase.Error,
+                    _ => default
+                };
+                serviceName = diagnosticEvent.Service ?? diagnosticEvent.Component;
+                methodName = diagnosticEvent.Method ?? string.Empty;
+                return eventName is "bridge.export.start" or "bridge.export.end" or "bridge.export.error";
             }
 
             if (eventName.StartsWith("bridge.import.", StringComparison.Ordinal))
             {
                 direction = BridgeCallDirection.Import;
-                return true;
+                phase = eventName switch
+                {
+                    "bridge.import.start" => BridgeCallPhase.Start,
+                    "bridge.import.end" => BridgeCallPhase.End,
+                    _ => default
+                };
+                serviceName = diagnosticEvent.Service ?? diagnosticEvent.Component;
+                methodName = diagnosticEvent.Method ?? string.Empty;
+                return eventName is "bridge.import.start" or "bridge.import.end";
             }
 
             if (eventName.StartsWith("bridge.service.", StringComparison.Ordinal))
             {
                 direction = BridgeCallDirection.Lifecycle;
+                phase = eventName switch
+                {
+                    "bridge.service.exposed" => BridgeCallPhase.ServiceExposed,
+                    "bridge.service.removed" => BridgeCallPhase.ServiceRemoved,
+                    _ => default
+                };
+                serviceName = diagnosticEvent.Service ?? diagnosticEvent.Component;
+                methodName = diagnosticEvent.Method ?? string.Empty;
+                return eventName is "bridge.service.exposed" or "bridge.service.removed";
+            }
+
+            if (TrySplitEventName(eventName, out var layer, out var domain, out var terminalPhase) &&
+                terminalPhase is "completed" or "denied" or "failed" or "dropped")
+            {
+                direction = BridgeCallDirection.Lifecycle;
+                phase = terminalPhase == "completed" ? BridgeCallPhase.End : BridgeCallPhase.Error;
+                serviceName = $"{layer}.{domain}";
+                methodName = diagnosticEvent.Status ?? string.Empty;
                 return true;
             }
 
             direction = default;
+            phase = default;
+            serviceName = string.Empty;
+            methodName = string.Empty;
             return false;
         }
 
-        private static bool TryMapPhase(string eventName, out BridgeCallPhase phase)
+        private static bool TrySplitEventName(string eventName, out string layer, out string domain, out string phase)
         {
-            phase = eventName switch
+            var parts = eventName.Split('.', 3, StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length != 3)
             {
-                "bridge.export.start" or "bridge.import.start" => BridgeCallPhase.Start,
-                "bridge.export.end" or "bridge.import.end" => BridgeCallPhase.End,
-                "bridge.export.error" => BridgeCallPhase.Error,
-                "bridge.service.exposed" => BridgeCallPhase.ServiceExposed,
-                "bridge.service.removed" => BridgeCallPhase.ServiceRemoved,
-                _ => default
-            };
+                layer = string.Empty;
+                domain = string.Empty;
+                phase = string.Empty;
+                return false;
+            }
 
-            return eventName is
-                "bridge.export.start" or
-                "bridge.import.start" or
-                "bridge.export.end" or
-                "bridge.import.end" or
-                "bridge.export.error" or
-                "bridge.service.exposed" or
-                "bridge.service.removed";
+            layer = parts[0];
+            domain = parts[1];
+            phase = parts[2];
+            return true;
         }
     }
 }

@@ -5,6 +5,9 @@ namespace Agibuild.Fulora;
 /// </summary>
 public sealed record FuloraDiagnosticsEvent
 {
+    /// <summary>UTC timestamp when the event was created.</summary>
+    public DateTimeOffset TimestampUtc { get; init; } = DateTimeOffset.UtcNow;
+
     /// <summary>Stable event name.</summary>
     public required string EventName { get; init; }
 
@@ -37,6 +40,12 @@ public sealed record FuloraDiagnosticsEvent
 
     /// <summary>Optional error or drop taxonomy token.</summary>
     public string? ErrorType { get; init; }
+
+    /// <summary>Optional capability identifier for host/runtime governance events.</summary>
+    public string? CapabilityId { get; init; }
+
+    /// <summary>Optional operation token for typed host/runtime events.</summary>
+    public string? Operation { get; init; }
 
     /// <summary>Optional correlation identifier.</summary>
     public string? CorrelationId { get; init; }

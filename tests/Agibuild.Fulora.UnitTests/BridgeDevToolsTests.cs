@@ -344,6 +344,72 @@ public class BridgeDevToolsServiceTests
         Assert.Empty(svc.Collector.GetEvents());
     }
 
+    [Theory]
+    [InlineData("runtime.navigation.completed", "runtime", "navigation", "completed", BridgeCallPhase.End)]
+    [InlineData("shell.capability.denied", "shell", "capability", "denied", BridgeCallPhase.Error)]
+    public void DiagnosticsSink_projects_runtime_and_shell_events_into_lifecycle_entries(
+        string eventName,
+        string expectedLayer,
+        string expectedDomain,
+        string expectedStatus,
+        BridgeCallPhase expectedPhase)
+    {
+        using var svc = new BridgeDevToolsService();
+
+        svc.DiagnosticsSink.OnEvent(new FuloraDiagnosticsEvent
+        {
+            EventName = eventName,
+            Layer = expectedLayer,
+            Component = "ComponentFallback",
+            Status = expectedStatus,
+            Attributes = new Dictionary<string, string>
+            {
+                ["domain"] = expectedDomain
+            }
+        });
+
+        var evt = Assert.Single(svc.Collector.GetEvents());
+        Assert.Equal(BridgeCallDirection.Lifecycle, evt.Direction);
+        Assert.Equal(expectedPhase, evt.Phase);
+        Assert.Equal($"{expectedLayer}.{expectedDomain}", evt.ServiceName);
+        Assert.Equal(expectedStatus, evt.MethodName);
+    }
+
+    [Fact]
+    public void DiagnosticsSink_runtime_terminal_event_without_status_uses_empty_method_name()
+    {
+        using var svc = new BridgeDevToolsService();
+
+        svc.DiagnosticsSink.OnEvent(new FuloraDiagnosticsEvent
+        {
+            EventName = "runtime.navigation.completed",
+            Layer = "runtime",
+            Component = "WebViewCore"
+        });
+
+        var evt = Assert.Single(svc.Collector.GetEvents());
+        Assert.Equal(BridgeCallDirection.Lifecycle, evt.Direction);
+        Assert.Equal(BridgeCallPhase.End, evt.Phase);
+        Assert.Equal("runtime.navigation", evt.ServiceName);
+        Assert.Equal(string.Empty, evt.MethodName);
+    }
+
+    [Fact]
+    public void DiagnosticsSink_ignores_malformed_non_bridge_event_names()
+    {
+        using var svc = new BridgeDevToolsService();
+
+        svc.DiagnosticsSink.OnEvent(new FuloraDiagnosticsEvent
+        {
+            EventName = "runtime-navigation",
+            Layer = "runtime",
+            Component = "WebViewCore",
+            Status = "completed"
+        });
+
+        Assert.Empty(svc.Collector.GetEvents());
+    }
+
     [Fact]
     public void DiagnosticsSink_maps_export_end_and_copies_result_and_params()
     {
@@ -408,6 +474,24 @@ public class BridgeDevToolsServiceTests
             Layer = "bridge",
             Component = "BridgeRuntime",
             Status = "cancelled"
+        });
+
+        Assert.Empty(svc.Collector.GetEvents());
+    }
+
+    [Theory]
+    [InlineData("bridge.import.cancelled")]
+    [InlineData("bridge.service.updated")]
+    public void DiagnosticsSink_ignores_known_prefixes_with_unknown_phase_for_import_and_service(string eventName)
+    {
+        using var svc = new BridgeDevToolsService();
+
+        svc.DiagnosticsSink.OnEvent(new FuloraDiagnosticsEvent
+        {
+            EventName = eventName,
+            Layer = "bridge",
+            Component = "BridgeRuntime",
+            Status = "ignored"
         });
 
         Assert.Empty(svc.Collector.GetEvents());
