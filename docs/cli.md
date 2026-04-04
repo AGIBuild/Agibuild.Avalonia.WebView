@@ -123,7 +123,7 @@ fulora add plugin Agibuild.Fulora.Plugin.HttpClient --project ./MyApp.Desktop/My
 |---|---|
 | `--project`, `-p` | Path to the `.csproj` file (auto-detected if omitted) |
 
-### `fulora search <query>`
+### `fulora search [query]`
 
 Search NuGet.org for Fulora bridge plugins tagged `fulora-plugin`.
 
@@ -134,7 +134,7 @@ fulora search http --take 20
 
 | Option | Description |
 |---|---|
-| `--take` | Maximum results to return (default: 10) |
+| `--take` | Maximum results to return (default: 20) |
 
 ### `fulora list plugins`
 
