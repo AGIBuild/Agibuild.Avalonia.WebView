@@ -2,6 +2,16 @@
 
 Get a hybrid desktop app running in under five minutes — a native Avalonia window hosting your web frontend, with type-safe bridge calls between C# and JavaScript.
 
+## The main path
+
+For most teams, the fastest route is:
+
+1. Install the Fulora CLI and project template
+2. Run `fulora new` to scaffold a new app
+3. Run `fulora dev` to start the frontend and native shell together
+
+That path gives you a working app first. The bridge details are still important, but you do not need to learn them before you can get started.
+
 ## What you'll end up with
 
 A desktop application where:
@@ -36,24 +46,35 @@ A desktop application where:
   - **Android**: Android WebView (built-in)
   - **Linux**: WebKitGTK (`libwebkit2gtk-4.1`)
 
-## Quick Path: Use the CLI Template
+## 1. Install the CLI and template
 
-The fastest way to start. The CLI scaffolds a project with bridge contracts, SPA hosting, and dev tooling pre-configured.
+Install the Fulora CLI and template once on your machine:
 
 ```bash
-# Install CLI and template (once)
 dotnet tool install -g Agibuild.Fulora.Cli
 dotnet new install Agibuild.Fulora.Templates
+```
 
-# Create app with React frontend
+## 2. Run `fulora new`
+
+Create a new app from the template:
+
+```bash
 fulora new MyApp --frontend react
-
-# Start both Vite and Avalonia together
 cd MyApp
+```
+
+The template gives you a native host, a web frontend, and the default services already wired together.
+
+## 3. Run `fulora dev`
+
+Start the frontend dev server and the Avalonia shell together:
+
+```bash
 fulora dev
 ```
 
-You'll see a native window open with your React app inside, bridge-connected and ready for development.
+You'll see a native window open with your app inside, ready for normal product work.
 
 Alternatively, use `dotnet new` directly:
 
@@ -63,7 +84,17 @@ cd MyApp
 dotnet run --project MyApp.Desktop
 ```
 
-## Manual Path: Add Fulora to an Existing Avalonia App
+## Fulora services already use the bridge underneath
+
+When you use `fulora new`, you mostly work with app-level services and UI code first. Under the hood, those services talk across the Fulora bridge for you.
+
+- Your frontend still runs inside a native WebView
+- Your native code still runs in-process in C#
+- Fulora services use generated bridge contracts underneath, so app code can stay focused on product features
+
+This means you can start by building screens and calling services, then learn the bridge layer when you need custom native capabilities or plugin work.
+
+## Manual path: add Fulora to an existing Avalonia app
 
 If you already have an Avalonia project or need full control over the setup.
 
@@ -95,9 +126,9 @@ public MainWindow()
 }
 ```
 
-## Your First Bridge Contract
+## Advanced: bridge details
 
-This is where Fulora's value becomes clear. Define a C# interface, and the source generator creates everything needed for type-safe cross-language calls — no serialization boilerplate, no runtime reflection.
+Once your app is running, you can go deeper into the bridge model. Define a C# interface, and the source generator creates everything needed for type-safe cross-language calls — no serialization boilerplate, no runtime reflection.
 
 ```csharp
 [JsExport] // C# implementation, callable from JavaScript
@@ -133,7 +164,7 @@ var notifier = WebView.Bridge.GetProxy<INotificationService>();
 await notifier.ShowNotification("Hello from C#!");
 ```
 
-## SPA Hosting
+## SPA hosting details
 
 Fulora can serve your web frontend from embedded resources (production) or proxy to a dev server (development).
 

@@ -22,12 +22,13 @@ All of this is type-checked at compile time, AOT-safe, and works the same on Win
 
 ## Start Building
 
-| What you want to do | Where to go |
+| Role | Main path |
 |---|---|
-| Build your first hybrid app in 5 minutes | [Getting Started](articles/getting-started.md) |
-| See a full working sample | [Demo: Avalonia + React Hybrid App](demo/index.md) |
-| Build an AI chat app with streaming | [AI Integration Guide](ai-integration-guide.md) |
-| Understand how the runtime works | [Architecture](articles/architecture.md) |
+| I am building an app | [Getting Started](articles/getting-started.md) |
+| I am building a plugin | [Plugin Authoring](plugin-authoring-guide.md) |
+| I am working on the platform | [Product Platform Roadmap](product-platform-roadmap.md) |
+
+If you want a working sample after the main path, continue with [Demo: Avalonia + React Hybrid App](demo/index.md), [AI Integration Guide](ai-integration-guide.md), or [Architecture](articles/architecture.md).
 
 ## Platform Documents
 
