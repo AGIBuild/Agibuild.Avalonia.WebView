@@ -24,9 +24,46 @@ fulora package --profile desktop-public
 
 That gives you a React-based desktop app with the Fulora host, local dev loop, and a packaging path you can hand to teammates or testers.
 
-Need a little more than just a WebView? Fulora gives your app typed app services for host-to-web communication, plus native capabilities like auth flows, dialogs, files, notifications, screenshots, PDF, cookies, and plugin-based extensions.
+Need a little more than just a WebView? Fulora gives your app typed app services for host-to-web communication, plus native capabilities delivered through core features and official plugins, including auth flows, dialogs, screenshots, PDF, cookies, files, notifications, and more.
 
 Go deeper with [Getting Started](docs/articles/getting-started.md), the [Documentation Index](docs/index.md), [Bridge guide](docs/articles/bridge-guide.md), and [SPA hosting](docs/articles/spa-hosting.md).
+
+If you want a different onboarding path:
+
+**Alternative (template only):**
+
+```bash
+dotnet new install Agibuild.Fulora.Templates
+dotnet new agibuild-hybrid -n MyApp
+cd MyApp
+dotnet run --project MyApp.Desktop
+```
+
+**Manual (add WebView to an existing Avalonia app):**
+
+```bash
+dotnet add package Agibuild.Fulora.Avalonia
+```
+
+In `Program.cs`:
+
+```csharp
+AppBuilder.Configure<App>()
+    .UsePlatformDetect()
+    .UseFulora()
+    .StartWithClassicDesktopLifetime(args);
+```
+
+In XAML:
+
+```xml
+<Window xmlns:wv="clr-namespace:Agibuild.Fulora;assembly=Agibuild.Fulora">
+    <wv:WebView x:Name="WebView"
+                Source="https://example.com" />
+</Window>
+```
+
+Full guide: [Getting Started](docs/articles/getting-started.md) · [Documentation Index](docs/index.md)
 
 ---
 
@@ -67,41 +104,6 @@ Fulora is built for the middle path that scales:
 - Enforce host capabilities through policy-first execution
 
 From "just embed one page" to "run a full product shell", teams can grow through capability tiers while keeping a stable platform contract.
-
-**Alternative (template only):**
-
-```bash
-dotnet new install Agibuild.Fulora.Templates
-dotnet new agibuild-hybrid -n MyApp
-cd MyApp
-dotnet run --project MyApp.Desktop
-```
-
-**Manual (add WebView to an existing Avalonia app):**
-
-```bash
-dotnet add package Agibuild.Fulora.Avalonia
-```
-
-In `Program.cs`:
-
-```csharp
-AppBuilder.Configure<App>()
-    .UsePlatformDetect()
-    .UseFulora()
-    .StartWithClassicDesktopLifetime(args);
-```
-
-In XAML:
-
-```xml
-<Window xmlns:wv="clr-namespace:Agibuild.Fulora;assembly=Agibuild.Fulora">
-    <wv:WebView x:Name="WebView"
-                Source="https://example.com" />
-</Window>
-```
-
-Full guide: [Getting Started](docs/articles/getting-started.md) · [Documentation Index](docs/index.md)
 
 ---
 
