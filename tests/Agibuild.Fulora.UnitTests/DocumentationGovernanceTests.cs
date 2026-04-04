@@ -434,10 +434,10 @@ public sealed class DocumentationGovernanceTests
         var readmePath = Path.Combine(repoRoot, "README.md");
         Assert.True(File.Exists(readmePath), "Missing README.md");
 
-        var content = File.ReadAllText(readmePath);
-        Assert.Contains("fulora new", content, StringComparison.Ordinal);
-        Assert.Contains("fulora dev", content, StringComparison.Ordinal);
-        Assert.Contains("fulora package", content, StringComparison.Ordinal);
+        var quickStartSection = ParseMarkdownSection(File.ReadAllLines(readmePath), "## Start in 60 Seconds");
+        Assert.Contains("fulora new", quickStartSection, StringComparison.Ordinal);
+        Assert.Contains("fulora dev", quickStartSection, StringComparison.Ordinal);
+        Assert.Contains("fulora package", quickStartSection, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -754,5 +754,32 @@ public sealed class DocumentationGovernanceTests
         }
 
         return result;
+    }
+
+    private static string ParseMarkdownSection(IEnumerable<string> lines, string heading)
+    {
+        var sectionLines = new List<string>();
+        var inSection = false;
+
+        foreach (var rawLine in lines)
+        {
+            var line = rawLine.TrimEnd();
+
+            if (!inSection)
+            {
+                if (string.Equals(line.Trim(), heading, StringComparison.Ordinal))
+                    inSection = true;
+
+                continue;
+            }
+
+            if (line.StartsWith("## ", StringComparison.Ordinal))
+                break;
+
+            sectionLines.Add(rawLine);
+        }
+
+        Assert.NotEmpty(sectionLines);
+        return string.Join(Environment.NewLine, sectionLines);
     }
 }
