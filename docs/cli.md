@@ -1,6 +1,6 @@
 # Fulora CLI
 
-The `fulora` CLI is a .NET global tool that streamlines common Fulora hybrid app workflows.
+The `fulora` CLI is a .NET global tool for the main Fulora app-building path: create a project, run it locally, and package it for distribution.
 
 ## Installation
 
@@ -8,7 +8,9 @@ The `fulora` CLI is a .NET global tool that streamlines common Fulora hybrid app
 dotnet tool install -g Agibuild.Fulora.Cli
 ```
 
-## Commands
+## Primary Path
+
+Start here if you are building an app.
 
 ### `fulora new <name>`
 
@@ -22,11 +24,11 @@ fulora new MyApp --frontend vue --preset app-shell
 | Option | Description |
 |---|---|
 | `--frontend`, `-f` | **Required.** `react`, `vue`, or `vanilla` |
-| `--preset` | Template preset (e.g. `app-shell`) |
+| `--preset` | Template preset (for example `app-shell`) |
 
 ### `fulora dev`
 
-Start Vite dev server and Avalonia desktop app together. Run from the solution root.
+Start the Vite dev server and Avalonia desktop app together. Run from the solution root.
 
 ```bash
 fulora dev
@@ -36,10 +38,43 @@ fulora dev --web ./MyApp.Web.Vite.React --desktop ./MyApp.Desktop/MyApp.Desktop.
 | Option | Description |
 |---|---|
 | `--web` | Web project directory (auto-detected) |
-| `--desktop` | Desktop .csproj path (auto-detected) |
+| `--desktop` | Desktop `.csproj` path (auto-detected) |
 | `--npm-script` | npm script name (default: `dev`) |
 
 Press **Ctrl+C** to stop both processes.
+
+### `fulora package`
+
+Package your app for distribution. The recommended first path is to start with a named profile.
+
+```bash
+fulora package --project ./src/MyApp.Desktop/MyApp.Desktop.csproj --profile desktop-public
+fulora package --project ./src/MyApp.Desktop/MyApp.Desktop.csproj --profile mac-notarized
+```
+
+Available profiles today:
+
+- `desktop-public`
+- `desktop-internal`
+- `mac-notarized`
+
+| Option | Description |
+|---|---|
+| `--profile` | Packaging profile with recommended defaults |
+| `--project`, `-p` | Path to the `.csproj` (required) |
+| `--runtime`, `-r` | Target RID such as `win-x64`, `osx-arm64`, or `linux-x64` |
+| `--version`, `-v` | Package version (semver). Defaults to the project version |
+| `--output`, `-o` | Output directory. Defaults to `./Releases` under the project |
+| `--icon`, `-i` | Path to the app icon |
+| `--sign-params`, `-n` | Raw signing parameters passed to `vpk` |
+| `--notarize` | Enable macOS notarization |
+| `--channel`, `-c` | Release channel |
+
+If `vpk` is not installed, `fulora package` falls back to copying the `dotnet publish` output into the output directory.
+
+## Advanced Workflows
+
+Use these commands after the main path is already working.
 
 ### `fulora generate types`
 
@@ -52,12 +87,13 @@ fulora gen types --project ./MyApp.Bridge/MyApp.Bridge.csproj --output ./MyApp.W
 
 | Option | Description |
 |---|---|
-| `--project`, `-p` | Bridge .csproj path (auto-detected) |
-| `--output`, `-o` | Output directory for `.d.ts` (auto-detected) |
+| `--project`, `-p` | Bridge `.csproj` path (auto-detected) |
+| `--output`, `-o` | Output directory for generated `.d.ts` files (auto-detected) |
 
 ### `fulora add service <name>`
 
 Scaffold a new bridge service with three files:
+
 1. C# interface (`[JsExport]`) in the Bridge project
 2. C# implementation in the Desktop project
 3. TypeScript proxy in the web project
@@ -88,7 +124,7 @@ fulora add plugin Agibuild.Fulora.Plugin.HttpClient --version 1.0.0
 
 ### `fulora search <query>`
 
-Search NuGet.org for Fulora bridge plugins (packages tagged `fulora-plugin`).
+Search NuGet.org for Fulora bridge plugins tagged `fulora-plugin`.
 
 ```bash
 fulora search database
@@ -101,7 +137,7 @@ fulora search http --take 20
 
 ### `fulora list plugins`
 
-List all installed Fulora plugin packages in the current project.
+List the Fulora plugin packages installed in the current project.
 
 ```bash
 fulora list plugins

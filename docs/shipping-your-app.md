@@ -4,34 +4,45 @@ This guide covers packaging, code signing, auto-update setup, and CI integration
 
 ## Prerequisites
 
-- **.NET SDK** (net10.0 or later)
-- **Velopack CLI (`vpk`)** — for creating installers and update packages
+- **.NET SDK** (`net10.0` or later)
+- **Velopack CLI (`vpk`)** for installers and update packages
   - Install: `dotnet tool install -g vpk` or download from [Velopack releases](https://github.com/velopack/velopack/releases)
   - Verify: `vpk -H`
 
 ## Basic Packaging Workflow
 
-### 1. Publish and package
+### 1. Start with a packaging profile
 
 ```bash
 fulora package --project ./src/MyApp.Desktop/MyApp.Desktop.csproj \
-  --runtime win-x64 \
+  --profile desktop-public \
   --version 1.0.0 \
   --output ./Releases
 ```
 
-### 2. Options
+Profiles are the productized shipping path in Fulora. They bundle the recommended defaults for a release scenario so you do not need to remember low-level flags every time.
+
+Current built-in profiles:
+
+- `desktop-public` for a normal public desktop release
+- `desktop-internal` for internal builds on the `internal` channel
+- `mac-notarized` for macOS releases that should default to notarization
+
+You can still override profile defaults with explicit flags. For example, `--runtime linux-x64` or `--channel preview` wins over the profile setting.
+
+### 2. Package command options
 
 | Option | Description | Default |
 |--------|-------------|---------|
-| `--project`, `-p` | Path to the .csproj (required) | — |
-| `--runtime`, `-r` | Target RID (win-x64, osx-arm64, linux-x64, etc.) | win-x64 |
-| `--version`, `-v` | Package version (semver) | From &lt;Version&gt; in .csproj |
-| `--output`, `-o` | Output directory | ./Releases |
+| `--profile` | Packaging profile with recommended defaults | — |
+| `--project`, `-p` | Path to the `.csproj` (required) | — |
+| `--runtime`, `-r` | Target RID (`win-x64`, `osx-arm64`, `linux-x64`, etc.) | `win-x64` |
+| `--version`, `-v` | Package version (semver) | From `<Version>` in the `.csproj` |
+| `--output`, `-o` | Output directory | `./Releases` under the project |
 | `--icon`, `-i` | Path to icon file | — |
-| `--sign-params`, `-n` | Code signing parameters (platform-specific) | — |
-| `--notarize` | Enable macOS notarization (uses notaryProfile default) | false |
-| `--channel`, `-c` | Release channel | stable |
+| `--sign-params`, `-n` | Raw code signing parameters passed to `vpk` | — |
+| `--notarize` | Enable macOS notarization | `false` unless the profile enables it |
+| `--channel`, `-c` | Release channel | `stable` unless the profile changes it |
 
 ### 3. What gets produced
 
@@ -41,32 +52,44 @@ fulora package --project ./src/MyApp.Desktop/MyApp.Desktop.csproj \
 
 If `vpk` is not installed, `fulora package` falls back to copying the `dotnet publish` output into the output directory.
 
-## Code Signing Notes
+## Raw Signing And Notarization Flags
 
-### Windows
+Most teams should stay on the profile-based path. Use the raw flags below when you need to tune signing behavior for a specific environment.
 
-Use `--sign-params` to pass arguments to `signtool.exe`:
+### Windows signing
+
+Use `--sign-params` to pass arguments through to `signtool.exe` via `vpk`:
 
 ```bash
-fulora package --project MyApp.csproj --sign-params "/a /tr http://timestamp.digicert.com /td sha256 /fd sha256"
+fulora package --project MyApp.csproj \
+  --profile desktop-public \
+  --sign-params "/a /tr http://timestamp.digicert.com /td sha256 /fd sha256"
 ```
 
-### macOS
+### macOS notarization
 
 Signing and notarization require:
 
-1. **Signing identity** in Keychain (Developer ID Application)
-2. **Notary credentials** (Apple ID + app-specific password) stored via `xcrun notarytool store-credentials`
+1. A signing identity in Keychain (`Developer ID Application`)
+2. Notary credentials stored with `xcrun notarytool store-credentials`
+
+If you want the Fulora default notarized path, use the profile:
+
+```bash
+fulora package --project MyApp.csproj --profile mac-notarized
+```
+
+You can also opt in manually with the raw flag:
 
 ```bash
 fulora package --project MyApp.csproj --runtime osx-arm64 --notarize
 ```
 
-For custom signing, use `vpk pack` directly with `--signAppIdentity` and `--signInstallIdentity`.
+For custom signing identities beyond the built-in path, use `vpk pack` directly with `--signAppIdentity` and `--signInstallIdentity`.
 
 ## Auto-Update Setup
 
-### 1. Register VelopackAutoUpdateProvider
+### 1. Register `VelopackAutoUpdateProvider`
 
 ```csharp
 builder.AddAutoUpdate(
@@ -143,7 +166,7 @@ jobs:
         run: |
           dotnet tool install -g Agibuild.Fulora.Cli
           fulora package --project ./src/MyApp.Desktop/MyApp.Desktop.csproj \
-            --runtime win-x64 \
+            --profile desktop-public \
             --version ${{ github.ref_name }} \
             --output ./Releases
       - name: Upload artifacts
