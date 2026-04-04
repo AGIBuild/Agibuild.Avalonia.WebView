@@ -71,6 +71,19 @@ public sealed class DocumentationGovernanceTests
     }
 
     [Fact]
+    public void Docs_index_includes_role_based_entrypoints_for_primary_docs_paths()
+    {
+        var repoRoot = FindRepoRoot();
+        var indexPath = Path.Combine(repoRoot, "docs", "index.md");
+        Assert.True(File.Exists(indexPath), "Missing docs/index.md");
+
+        var content = File.ReadAllText(indexPath);
+        Assert.Contains("I am building an app", content, StringComparison.Ordinal);
+        Assert.Contains("I am building a plugin", content, StringComparison.Ordinal);
+        Assert.Contains("I am working on the platform", content, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Docs_toc_includes_required_platform_navigation_at_top_level()
     {
         var repoRoot = FindRepoRoot();
@@ -412,6 +425,19 @@ public sealed class DocumentationGovernanceTests
         var content = File.ReadAllText(readmePath);
         Assert.DoesNotContain("Phase 12", content, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("All roadmap phases through 12 are done", content, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void Readme_preserves_primary_path_quick_start_commands()
+    {
+        var repoRoot = FindRepoRoot();
+        var readmePath = Path.Combine(repoRoot, "README.md");
+        Assert.True(File.Exists(readmePath), "Missing README.md");
+
+        var content = File.ReadAllText(readmePath);
+        Assert.Contains("fulora new", content, StringComparison.Ordinal);
+        Assert.Contains("fulora dev", content, StringComparison.Ordinal);
+        Assert.Contains("fulora package", content, StringComparison.Ordinal);
     }
 
     [Fact]
