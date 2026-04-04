@@ -18,13 +18,13 @@ Create a new Fulora hybrid app from the template.
 
 ```bash
 fulora new MyApp --frontend react
-fulora new MyApp --frontend vue --preset app-shell
+fulora new MyApp --frontend vue --shell-preset app-shell
 ```
 
 | Option | Description |
 |---|---|
 | `--frontend`, `-f` | **Required.** `react`, `vue`, or `vanilla` |
-| `--preset` | Template preset (for example `app-shell`) |
+| `--shell-preset` | Desktop shell preset: `baseline` or `app-shell` |
 
 ### `fulora dev`
 
@@ -99,12 +99,13 @@ Scaffold a new bridge service with three files:
 3. TypeScript proxy in the web project
 
 ```bash
-fulora add service NotificationService
-fulora add service IAnalyticsService --import
+fulora add service NotificationService --layer bridge
+fulora add service IAnalyticsService --layer plugin --import
 ```
 
 | Option | Description |
 |---|---|
+| `--layer` | **Required.** Service ownership layer: `bridge`, `framework`, or `plugin` |
 | `--import` | Generate `[JsImport]` instead of `[JsExport]` |
 | `--bridge-project` | Bridge project path (auto-detected) |
 | `--web-dir` | Web project `src/` directory (auto-detected) |
@@ -115,12 +116,12 @@ Install a Fulora bridge plugin NuGet package into the current project.
 
 ```bash
 fulora add plugin Agibuild.Fulora.Plugin.Database
-fulora add plugin Agibuild.Fulora.Plugin.HttpClient --version 1.0.0
+fulora add plugin Agibuild.Fulora.Plugin.HttpClient --project ./MyApp.Desktop/MyApp.Desktop.csproj
 ```
 
 | Option | Description |
 |---|---|
-| `--version` | Specific package version (default: latest) |
+| `--project`, `-p` | Path to the `.csproj` file (auto-detected if omitted) |
 
 ### `fulora search <query>`
 
@@ -141,9 +142,9 @@ List the Fulora plugin packages installed in the current project.
 
 ```bash
 fulora list plugins
-fulora list plugins --project ./MyApp.Desktop/MyApp.Desktop.csproj
+fulora list plugins --check
 ```
 
 | Option | Description |
 |---|---|
-| `--project` | Project file to inspect (auto-detected) |
+| `--check` | Check plugin compatibility with the installed Fulora version |
