@@ -461,25 +461,82 @@ public class AppDistributionTests
     }
 
     [Fact]
-    public void PackageCommand_profile_defaults_allow_explicit_runtime_and_channel_overrides()
+    public void PackageCommand_profile_defaults_apply_when_options_are_implicit()
     {
         var command = PackageCommand.Create();
         var runtimeOption = Assert.IsType<Option<string>>(command.Options.Single(o => o.Name == "--runtime"));
         var channelOption = Assert.IsType<Option<string>>(command.Options.Single(o => o.Name == "--channel"));
-        var profile = PackageProfileDefaults.Resolve("desktop-public");
+        var notarizeOption = Assert.IsType<Option<bool>>(command.Options.Single(o => o.Name == "--notarize"));
+        var profile = PackageProfileDefaults.Resolve("mac-notarized");
         var root = new RootCommand("test");
         root.Subcommands.Add(command);
-        var parseResult = root.Parse("package --profile desktop-public --runtime linux-x64 --channel preview");
+        var parseResult = root.Parse("package --profile mac-notarized");
 
         var runtimeResult = parseResult.GetResult(runtimeOption);
         var channelResult = parseResult.GetResult(channelOption);
+        var notarizeResult = parseResult.GetResult(notarizeOption);
 
         Assert.NotNull(runtimeResult);
         Assert.NotNull(channelResult);
+        Assert.NotNull(notarizeResult);
+        Assert.True(runtimeResult!.Implicit);
+        Assert.True(channelResult!.Implicit);
+        Assert.True(notarizeResult!.Implicit);
+        Assert.Equal("osx-arm64", PackageCommand.GetValue(runtimeOption, parseResult, profile.Runtime));
+        Assert.Equal("stable", PackageCommand.GetValue(channelOption, parseResult, profile.Channel));
+        Assert.True(PackageCommand.GetValue(notarizeOption, parseResult, profile.Notarize));
+    }
+
+    [Fact]
+    public void PackageCommand_profile_defaults_allow_explicit_runtime_channel_and_notarize_overrides()
+    {
+        var command = PackageCommand.Create();
+        var runtimeOption = Assert.IsType<Option<string>>(command.Options.Single(o => o.Name == "--runtime"));
+        var channelOption = Assert.IsType<Option<string>>(command.Options.Single(o => o.Name == "--channel"));
+        var notarizeOption = Assert.IsType<Option<bool>>(command.Options.Single(o => o.Name == "--notarize"));
+        var profile = PackageProfileDefaults.Resolve("mac-notarized");
+        var root = new RootCommand("test");
+        root.Subcommands.Add(command);
+        var parseResult = root.Parse("package --profile mac-notarized --runtime osx-x64 --channel preview --notarize false");
+
+        var runtimeResult = parseResult.GetResult(runtimeOption);
+        var channelResult = parseResult.GetResult(channelOption);
+        var notarizeResult = parseResult.GetResult(notarizeOption);
+
+        Assert.NotNull(runtimeResult);
+        Assert.NotNull(channelResult);
+        Assert.NotNull(notarizeResult);
         Assert.False(runtimeResult!.Implicit);
         Assert.False(channelResult!.Implicit);
-        Assert.Equal("linux-x64", PackageCommand.GetValue(runtimeOption, parseResult, profile.Runtime));
+        Assert.False(notarizeResult!.Implicit);
+        Assert.Equal("osx-x64", PackageCommand.GetValue(runtimeOption, parseResult, profile.Runtime));
         Assert.Equal("preview", PackageCommand.GetValue(channelOption, parseResult, profile.Channel));
+        Assert.False(PackageCommand.GetValue(notarizeOption, parseResult, profile.Notarize));
+    }
+
+    [Fact]
+    public void PackageCommand_try_resolve_profile_reports_unknown_profiles()
+    {
+        using var stderr = new StringWriter();
+        var previousError = Console.Error;
+        Console.SetError(stderr);
+
+        try
+        {
+            var resolved = PackageCommand.TryResolveProfile("unknown-profile", out var profile);
+
+            Assert.False(resolved);
+            Assert.Equal(string.Empty, profile.Name);
+            Assert.Equal("stable", profile.Channel);
+            Assert.Null(profile.Runtime);
+            Assert.False(profile.Notarize);
+            Assert.Contains("Unknown package profile 'unknown-profile'.", stderr.ToString(), StringComparison.Ordinal);
+            Assert.Contains("desktop-internal, desktop-public, mac-notarized", stderr.ToString(), StringComparison.Ordinal);
+        }
+        finally
+        {
+            Console.SetError(previousError);
+        }
     }
 
     [Fact]

@@ -1,6 +1,6 @@
 # Getting Started
 
-Get a hybrid desktop app running in under five minutes — a native Avalonia window hosting your web frontend, with type-safe bridge calls between C# and JavaScript.
+Get a hybrid desktop app running in under five minutes — a native Avalonia window hosting your web frontend so you can start building product features right away.
 
 ## The main path
 
@@ -51,6 +51,12 @@ fulora dev
 
 You'll see a native window open with your app inside, ready for normal product work.
 
+After these three steps, you have:
+
+- A native desktop window hosting your web app
+- A web frontend and native host already wired together
+- Fulora services ready for normal app development
+
 Alternatively, use `dotnet new` directly:
 
 ```bash
@@ -59,13 +65,17 @@ cd MyApp
 dotnet run --project MyApp.Desktop
 ```
 
-## What you'll end up with
+## Fulora services already use the bridge underneath
 
-After the three steps above, you have a native desktop window hosting your web app, with Fulora services ready for normal app development.
+When you use `fulora new`, you mostly work with app-level services and UI code first. Under the hood, those services talk across the Fulora bridge for you.
 
-- The **UI** runs inside a native WebView
-- The **backend** runs in-process in C#
-- Fulora connects them with generated bridge contracts underneath
+- Your frontend still runs inside a native WebView
+- Your native code still runs in-process in C#
+- Fulora services use generated bridge contracts underneath, so app code can stay focused on product features
+
+This means you can start by building screens and calling services, then learn the bridge layer when you need custom native capabilities or plugin work.
+
+If you want the mental model, it looks like this:
 
 ```
 ┌───────────────────────────────────┐
@@ -83,16 +93,6 @@ After the three steps above, you have a native desktop window hosting your web a
 │  └─────────────────────────────┘  │
 └───────────────────────────────────┘
 ```
-
-## Fulora services already use the bridge underneath
-
-When you use `fulora new`, you mostly work with app-level services and UI code first. Under the hood, those services talk across the Fulora bridge for you.
-
-- Your frontend still runs inside a native WebView
-- Your native code still runs in-process in C#
-- Fulora services use generated bridge contracts underneath, so app code can stay focused on product features
-
-This means you can start by building screens and calling services, then learn the bridge layer when you need custom native capabilities or plugin work.
 
 ## Manual path: add Fulora to an existing Avalonia app
 
