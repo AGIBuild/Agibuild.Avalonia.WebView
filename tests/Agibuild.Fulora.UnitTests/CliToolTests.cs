@@ -17,10 +17,19 @@ public class CliToolTests
     private static string GetCliBinaryPath()
     {
         var repoRoot = FindRepoRoot();
-        var path = Path.Combine(repoRoot, "src", "Agibuild.Fulora.Cli", "bin", "Debug", "net10.0", "Agibuild.Fulora.Cli.dll");
-        if (!File.Exists(path))
-            throw new FileNotFoundException($"CLI binary not found at {path}");
-        return path;
+        var binRoot = Path.Combine(repoRoot, "src", "Agibuild.Fulora.Cli", "bin");
+        var candidates = new[]
+            {
+                Path.Combine(binRoot, "Release", "net10.0", "Agibuild.Fulora.Cli.dll"),
+                Path.Combine(binRoot, "Debug", "net10.0", "Agibuild.Fulora.Cli.dll"),
+            }
+            .Where(File.Exists)
+            .ToArray();
+
+        if (candidates.Length > 0)
+            return candidates[0];
+
+        throw new FileNotFoundException($"CLI binary not found under {binRoot}");
     }
 
     private static string FindRepoRoot()
@@ -366,13 +375,14 @@ public class CliToolTests
 
             GenerateCommand.WriteArtifactManifest(tempDir, manifest);
             var loaded = GenerateCommand.ReadArtifactManifest(tempDir);
+            var buildIdentity = BridgeArtifactConsistency.ParseBuildIdentity(Assembly.GetExecutingAssembly().Location);
 
             Assert.NotNull(loaded);
             Assert.Equal(1, loaded!.SchemaVersion);
             Assert.Equal("Agibuild.Fulora.UnitTests.csproj", loaded.BridgeProjectFileName);
             Assert.Equal(Path.GetFullPath(tempDir), loaded.ArtifactDirectory);
-            Assert.Equal("Debug", loaded.BuildConfiguration);
-            Assert.Equal("net10.0", loaded.TargetFramework);
+            Assert.Equal(buildIdentity.BuildConfiguration, loaded.BuildConfiguration);
+            Assert.Equal(buildIdentity.TargetFramework, loaded.TargetFramework);
             Assert.Equal(Path.GetFileName(Assembly.GetExecutingAssembly().Location), loaded.AssemblyFileName);
             Assert.Equal(3, loaded.Artifacts.Count);
             Assert.Contains("bridge.client.ts", loaded.Artifacts.Keys);
