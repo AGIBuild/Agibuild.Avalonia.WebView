@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Reflection;
+using System.Text.Json;
 using Agibuild.Fulora.Cli.Commands;
 using Xunit;
 
@@ -318,7 +319,15 @@ public class CliToolTests
             Assert.True(File.Exists(Path.Combine(workspace.OutputDirectory, "bridge.d.ts")));
             Assert.True(File.Exists(Path.Combine(workspace.OutputDirectory, "bridge.client.ts")));
             Assert.True(File.Exists(Path.Combine(workspace.OutputDirectory, "bridge.mock.ts")));
-            Assert.True(File.Exists(Path.Combine(workspace.OutputDirectory, "bridge.manifest.json")));
+            var manifestPath = Path.Combine(workspace.OutputDirectory, "bridge.manifest.json");
+            Assert.True(File.Exists(manifestPath));
+
+            using var manifestDoc = JsonDocument.Parse(File.ReadAllText(manifestPath));
+            var root = manifestDoc.RootElement;
+            Assert.Equal(1, root.GetProperty("SchemaVersion").GetInt32());
+            Assert.Equal(Path.GetFileName(workspace.BridgeProjectPath), root.GetProperty("BridgeProjectFileName").GetString());
+            Assert.Equal("net10.0", root.GetProperty("TargetFramework").GetString());
+            Assert.True(root.GetProperty("Artifacts").TryGetProperty("bridge.client.ts", out _));
         }
         finally
         {
@@ -429,6 +438,8 @@ public class CliToolTests
             var workspace = CreateScaffoldWorkspace(tempDir, "SampleApp");
             MakeBridgeProjectBuildable(workspace.BridgeProjectPath);
             var webDir = Path.GetDirectoryName(workspace.WebSrcPath)!;
+            var generatedDir = Path.Combine(webDir, "src", "bridge", "generated");
+            Directory.CreateDirectory(generatedDir);
 
             var (stdout, stderr, exitCode) = await RunCliAsync(
                 $"dev --preflight-only --web \"{webDir}\" --desktop \"{workspace.DesktopProjectPath}\"",
@@ -438,6 +449,7 @@ public class CliToolTests
             Assert.Equal(string.Empty, stderr);
             Assert.Contains("Refreshing bridge artifacts", stdout, StringComparison.Ordinal);
             Assert.Contains("Preflight complete.", stdout, StringComparison.Ordinal);
+            Assert.Contains("Bridge consistency:", stdout, StringComparison.Ordinal);
             Assert.DoesNotContain("Starting dev server", stdout, StringComparison.Ordinal);
         }
         finally
@@ -790,6 +802,10 @@ public class CliToolTests
         try
         {
             var workspace = CreateScaffoldWorkspace(tempDir, "SampleApp");
+            MakeBridgeProjectBuildable(workspace.BridgeProjectPath);
+            var webDir = Path.GetDirectoryName(workspace.WebSrcPath)!;
+            var generatedDir = Path.Combine(webDir, "src", "bridge", "generated");
+            Directory.CreateDirectory(generatedDir);
 
             var (stdout, stderr, exitCode) = await RunCliAsync(
                 $"package --project \"{workspace.DesktopProjectPath}\" --profile desktop-public --preflight-only",
@@ -798,6 +814,7 @@ public class CliToolTests
             Assert.Equal(0, exitCode);
             Assert.Equal(string.Empty, stderr);
             Assert.Contains("Preflight:", stdout, StringComparison.Ordinal);
+            Assert.Contains("Bridge consistency:", stdout, StringComparison.Ordinal);
             Assert.Contains("Preflight complete.", stdout, StringComparison.Ordinal);
             Assert.DoesNotContain("Running: dotnet publish", stdout, StringComparison.Ordinal);
         }
