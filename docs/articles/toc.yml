@@ -1,5 +1,9 @@
 - name: Getting Started
   href: getting-started.md
+- name: Bring Your Existing Web App — Quick Start
+  href: bring-your-own-web-app-quickstart.md
+- name: Bring Your Existing Web App
+  href: bring-your-own-web-app.md
 - name: Architecture
   href: architecture.md
 - name: Bridge Guide

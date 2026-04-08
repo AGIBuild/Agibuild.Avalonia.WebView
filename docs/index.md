@@ -25,6 +25,7 @@ All of this is type-checked at compile time, AOT-safe, and works the same on Win
 | Role | Main path |
 |---|---|
 | I am building an app | [Getting Started](articles/getting-started.md) |
+| I already have a web app | [Bring Your Existing Web App — Quick Start](articles/bring-your-own-web-app-quickstart.md) |
 | I am building a plugin | [Plugin Authoring](plugin-authoring-guide.md) |
 | I am working on the platform | [Product Platform Roadmap](product-platform-roadmap.md) |
 
@@ -47,6 +48,7 @@ Key entry points: [Product Platform Roadmap](product-platform-roadmap.md) · [Pl
 | Resource | Description |
 |---|---|
 | [Bridge Guide](articles/bridge-guide.md) | `[JsExport]`, `[JsImport]`, streaming, cancellation, error handling |
+| [Bring Your Existing Web App](articles/bring-your-own-web-app.md) | Connect an existing React/Vue-style app to Fulora without rewriting the frontend |
 | [SPA Hosting](articles/spa-hosting.md) | Embedded resources, `app://` scheme, dev server proxy, HMR |
 | [CLI Reference](cli.md) | `fulora new`, `dev`, `generate types`, `add service` |
 | [Plugin Authoring](plugin-authoring-guide.md) | Create bridge plugins that ship as NuGet + npm packages |

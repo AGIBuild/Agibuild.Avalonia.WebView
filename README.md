@@ -28,6 +28,41 @@ Need a little more than just a WebView? Fulora gives your app typed app services
 
 Go deeper with [Getting Started](docs/articles/getting-started.md), the [Documentation Index](docs/index.md), [Bridge guide](docs/articles/bridge-guide.md), and [SPA hosting](docs/articles/spa-hosting.md).
 
+## Already have a web app?
+
+You do not need to rebuild your frontend to adopt Fulora.
+
+The recommended path is:
+
+1. keep your existing React/Vue/Next-style web app
+2. point Fulora at your dev server during development
+3. switch to embedded or packaged static assets in production
+4. add native capabilities gradually through typed app services
+
+In development, that usually looks like:
+
+```csharp
+webView.EnableSpaHosting(new SpaHostingOptions
+{
+    DevServerUrl = "http://localhost:5173"
+});
+
+await webView.NavigateAsync(new Uri("app://localhost/index.html"));
+```
+
+Your frontend can then use generated services such as:
+
+```ts
+import { services } from "./bridge/client";
+
+const profile = await services.userProfile.get();
+```
+
+Start here:
+
+- [Bring Your Existing Web App — Quick Start](docs/articles/bring-your-own-web-app-quickstart.md)
+- [Bring Your Existing Web App](docs/articles/bring-your-own-web-app.md)
+
 If you want a different onboarding path:
 
 **Alternative (template only):**
