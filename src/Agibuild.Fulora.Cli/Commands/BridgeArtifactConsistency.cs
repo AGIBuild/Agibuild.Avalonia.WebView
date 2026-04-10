@@ -18,7 +18,16 @@ internal static class BridgeArtifactConsistency
         string artifactDirectory,
         string assemblyPath,
         IReadOnlyDictionary<string, string> artifacts)
+        => CreateArtifactManifest(bridgeProjectFileName, artifactDirectory, assemblyPath, artifacts, RealFileSystem.Instance);
+
+    internal static GenerateCommand.BridgeArtifactManifest CreateArtifactManifest(
+        string bridgeProjectFileName,
+        string artifactDirectory,
+        string assemblyPath,
+        IReadOnlyDictionary<string, string> artifacts,
+        IFileSystem fileSystem)
     {
+        ArgumentNullException.ThrowIfNull(fileSystem);
         var buildIdentity = ParseBuildIdentity(assemblyPath);
 
         return new GenerateCommand.BridgeArtifactManifest(
@@ -29,7 +38,7 @@ internal static class BridgeArtifactConsistency
             BuildConfiguration: buildIdentity.BuildConfiguration,
             TargetFramework: buildIdentity.TargetFramework,
             AssemblyFileName: Path.GetFileName(assemblyPath),
-            AssemblySha256: ComputeSha256(File.ReadAllBytes(assemblyPath)),
+            AssemblySha256: ComputeSha256(fileSystem.ReadAllBytes(assemblyPath)),
             Artifacts: artifacts.ToDictionary(
                 pair => pair.Key,
                 pair => ComputeSha256(Encoding.UTF8.GetBytes(pair.Value)),
@@ -37,32 +46,47 @@ internal static class BridgeArtifactConsistency
     }
 
     internal static void WriteArtifactManifest(string outputDirectory, GenerateCommand.BridgeArtifactManifest manifest)
+        => WriteArtifactManifest(outputDirectory, manifest, RealFileSystem.Instance);
+
+    internal static void WriteArtifactManifest(
+        string outputDirectory,
+        GenerateCommand.BridgeArtifactManifest manifest,
+        IFileSystem fileSystem)
     {
-        Directory.CreateDirectory(outputDirectory);
+        ArgumentNullException.ThrowIfNull(fileSystem);
+        fileSystem.CreateDirectory(outputDirectory);
         var manifestPath = Path.Combine(outputDirectory, ManifestFileName);
         var json = JsonSerializer.Serialize(manifest, new JsonSerializerOptions { WriteIndented = true });
-        File.WriteAllText(manifestPath, json);
+        fileSystem.WriteAllText(manifestPath, json);
     }
 
     internal static GenerateCommand.BridgeArtifactManifest? ReadArtifactManifest(string outputDirectory)
+        => ReadArtifactManifest(outputDirectory, RealFileSystem.Instance);
+
+    internal static GenerateCommand.BridgeArtifactManifest? ReadArtifactManifest(string outputDirectory, IFileSystem fileSystem)
     {
+        ArgumentNullException.ThrowIfNull(fileSystem);
         var manifestPath = Path.Combine(outputDirectory, ManifestFileName);
-        if (!File.Exists(manifestPath))
+        if (!fileSystem.FileExists(manifestPath))
             return null;
 
-        return JsonSerializer.Deserialize<GenerateCommand.BridgeArtifactManifest>(File.ReadAllText(manifestPath));
+        return JsonSerializer.Deserialize<GenerateCommand.BridgeArtifactManifest>(fileSystem.ReadAllText(manifestPath));
     }
 
     internal static string? FindBuiltAssembly(string bridgeProject)
+        => FindBuiltAssembly(bridgeProject, RealFileSystem.Instance);
+
+    internal static string? FindBuiltAssembly(string bridgeProject, IFileSystem fileSystem)
     {
+        ArgumentNullException.ThrowIfNull(fileSystem);
         var projectDir = Path.GetDirectoryName(bridgeProject)!;
         var projectName = Path.GetFileNameWithoutExtension(bridgeProject);
         var binDir = Path.Combine(projectDir, "bin");
 
-        if (!Directory.Exists(binDir))
+        if (!fileSystem.DirectoryExists(binDir))
             return null;
 
-        return Directory.GetFiles(binDir, $"{projectName}.dll", SearchOption.AllDirectories)
+        return fileSystem.GetFiles(binDir, $"{projectName}.dll", SearchOption.AllDirectories)
             .Where(path =>
                 !path.Contains($"{Path.DirectorySeparatorChar}ref{Path.DirectorySeparatorChar}", StringComparison.OrdinalIgnoreCase) &&
                 !path.Contains($"{Path.DirectorySeparatorChar}publish{Path.DirectorySeparatorChar}", StringComparison.OrdinalIgnoreCase))
@@ -73,14 +97,21 @@ internal static class BridgeArtifactConsistency
     internal static IReadOnlyList<string> CollectArtifactConsistencyWarnings(
         string bridgeProject,
         Func<string, string?> detectWebArtifactsDirectory)
+        => CollectArtifactConsistencyWarnings(bridgeProject, detectWebArtifactsDirectory, RealFileSystem.Instance);
+
+    internal static IReadOnlyList<string> CollectArtifactConsistencyWarnings(
+        string bridgeProject,
+        Func<string, string?> detectWebArtifactsDirectory,
+        IFileSystem fileSystem)
     {
+        ArgumentNullException.ThrowIfNull(fileSystem);
         var warnings = new List<string>();
         var artifactDirectory = detectWebArtifactsDirectory(bridgeProject);
-        if (string.IsNullOrWhiteSpace(artifactDirectory) || !Directory.Exists(artifactDirectory))
+        if (string.IsNullOrWhiteSpace(artifactDirectory) || !fileSystem.DirectoryExists(artifactDirectory))
             return warnings;
 
         var missingArtifacts = ExpectedArtifactFileNames
-            .Where(fileName => !File.Exists(Path.Combine(artifactDirectory, fileName)))
+            .Where(fileName => !fileSystem.FileExists(Path.Combine(artifactDirectory, fileName)))
             .ToArray();
 
         if (missingArtifacts.Length > 0)
@@ -89,11 +120,11 @@ internal static class BridgeArtifactConsistency
                 $"missing generated bridge artifacts in {artifactDirectory}: {string.Join(", ", missingArtifacts)}. Run `fulora generate types --project \"{bridgeProject}\"`.");
         }
 
-        var assemblyPath = FindBuiltAssembly(bridgeProject);
-        if (string.IsNullOrWhiteSpace(assemblyPath) || !File.Exists(assemblyPath))
+        var assemblyPath = FindBuiltAssembly(bridgeProject, fileSystem);
+        if (string.IsNullOrWhiteSpace(assemblyPath) || !fileSystem.FileExists(assemblyPath))
             return warnings;
 
-        var manifest = ReadArtifactManifest(artifactDirectory);
+        var manifest = ReadArtifactManifest(artifactDirectory, fileSystem);
         if (manifest is null)
         {
             warnings.Add(
@@ -101,7 +132,7 @@ internal static class BridgeArtifactConsistency
             return warnings;
         }
 
-        var assemblyHash = ComputeSha256(File.ReadAllBytes(assemblyPath));
+        var assemblyHash = ComputeSha256(fileSystem.ReadAllBytes(assemblyPath));
         var staleReasons = new List<string>();
         var currentBuildIdentity = ParseBuildIdentity(assemblyPath);
 
@@ -135,7 +166,7 @@ internal static class BridgeArtifactConsistency
         foreach (var fileName in ExpectedArtifactFileNames)
         {
             var artifactPath = Path.Combine(artifactDirectory, fileName);
-            if (!File.Exists(artifactPath))
+            if (!fileSystem.FileExists(artifactPath))
                 continue;
 
             if (!manifest.Artifacts.TryGetValue(fileName, out var expectedHash))
@@ -144,7 +175,7 @@ internal static class BridgeArtifactConsistency
                 continue;
             }
 
-            var currentHash = ComputeSha256(File.ReadAllBytes(artifactPath));
+            var currentHash = ComputeSha256(fileSystem.ReadAllBytes(artifactPath));
             if (!string.Equals(expectedHash, currentHash, StringComparison.OrdinalIgnoreCase))
             {
                 staleReasons.Add($"{fileName} hash does not match manifest");

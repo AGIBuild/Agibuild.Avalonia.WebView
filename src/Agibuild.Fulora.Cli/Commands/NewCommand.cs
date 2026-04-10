@@ -1,6 +1,4 @@
 using System.CommandLine;
-using System.Diagnostics;
-
 namespace Agibuild.Fulora.Cli.Commands;
 
 internal static class NewCommand
@@ -64,18 +62,5 @@ internal static class NewCommand
 
     internal static async Task<int> RunProcessAsync(
         string fileName, string arguments, string? workingDirectory = null, CancellationToken ct = default)
-    {
-        var psi = new ProcessStartInfo(fileName, arguments)
-        {
-            UseShellExecute = false,
-            WorkingDirectory = workingDirectory ?? Directory.GetCurrentDirectory(),
-        };
-
-        using var process = Process.Start(psi);
-        if (process is null)
-            return -1;
-
-        await process.WaitForExitAsync(ct);
-        return process.ExitCode;
-    }
+        => await RealProcessRunner.Instance.RunAsync(fileName, arguments, workingDirectory, ct);
 }

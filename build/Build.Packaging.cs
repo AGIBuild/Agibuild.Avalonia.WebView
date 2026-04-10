@@ -23,6 +23,68 @@ internal partial class BuildTask
 
     private sealed record NugetPackagesRootResolution(string Path, string Source);
 
+    private IReadOnlyList<AbsolutePath> GetNugetSmokeFeedProjects() =>
+    [
+        PackProject,
+        CoreProject,
+        AdaptersAbstractionsProject,
+        RuntimeProject,
+        BridgeGeneratorProject,
+        DependencyInjectionProject
+    ];
+
+    private void PackNugetSmokeFeedProjects(IReadOnlyList<AbsolutePath> projects)
+    {
+        PackageOutputDirectory.CreateDirectory();
+
+        foreach (var project in projects)
+        {
+            DotNetPack(s =>
+            {
+                var settings = s
+                    .SetProject(project)
+                    .SetConfiguration(Configuration)
+                    .SetOutputDirectory(PackageOutputDirectory)
+                    .EnableNoRestore()
+                    .EnableNoBuild();
+
+                if (project == PackProject)
+                    settings = settings.SetProperty("SkipPackInputBuilds", "true");
+
+                if (!string.IsNullOrEmpty(VersionSuffix))
+                    settings = settings.SetVersionSuffix(VersionSuffix);
+
+                return settings;
+            });
+        }
+    }
+
+    private async Task<NugetPackagesRootResolution> ClearAgibuildNugetCacheAsync()
+    {
+        var resolvedRoot = await ResolveNugetPackagesRootAsync();
+        var nugetPackagesRoot = resolvedRoot.Path;
+        Serilog.Log.Information(
+            "NuGet global packages root: {Path} (resolved via {Source})",
+            nugetPackagesRoot,
+            resolvedRoot.Source);
+
+        var agibuildPackageDirs = Directory.Exists(nugetPackagesRoot)
+            ? Directory.GetDirectories(nugetPackagesRoot, "agibuild.fulora*")
+            : [];
+        foreach (var dir in agibuildPackageDirs)
+        {
+            Serilog.Log.Information("Clearing NuGet cache: {Path}", dir);
+            Directory.Delete(dir, recursive: true);
+        }
+
+        var afterCleanup = Directory.Exists(nugetPackagesRoot)
+            ? Directory.GetDirectories(nugetPackagesRoot, "agibuild.fulora*")
+            : [];
+        Assert.True(afterCleanup.Length == 0, "Expected clean NuGet cache for Agibuild packages before restore.");
+
+        return resolvedRoot;
+    }
+
     // ──────────────────────────── Pack / Validate / Publish Targets ────────────────────────────
 
     internal Target PackageApp => _ => _
@@ -114,6 +176,43 @@ internal partial class BuildTask
                     return settings;
                 });
             }
+        });
+
+    internal Target PrepareNugetPackageSmokeFeed => _ => _
+        .Description("Packs the local Agibuild packages required by the NuGet package smoke consumer.")
+        .DependsOn(Build)
+        .Produces(PackageOutputDirectory / "*.nupkg")
+        .Executes(() =>
+        {
+            PackageOutputDirectory.CreateOrCleanDirectory();
+            PackNugetSmokeFeedProjects(GetNugetSmokeFeedProjects());
+        });
+
+    internal Target ValidateLinuxNativeAotNugetPackagePublish => _ => _
+        .Description("Publishes the NuGet smoke consumer as linux-x64 NativeAOT against the prepared local package feed.")
+        .DependsOn(PrepareNugetPackageSmokeFeed)
+        .OnlyWhenDynamic(
+            () => OperatingSystem.IsLinux(),
+            "Linux NativeAOT smoke publish runs only on Linux hosts")
+        .Executes(async () =>
+        {
+            var packedVersion = ResolvePackedAgibuildVersion("Agibuild.Fulora.Avalonia");
+            Serilog.Log.Information("Linux NativeAOT NuGet smoke publish pinned to packed version: {Version}", packedVersion);
+
+            await ClearAgibuildNugetCacheAsync();
+
+            var testProjectDir = TestsDirectory / "Agibuild.Fulora.Integration.NugetPackageTests";
+            var testBinDir = testProjectDir / "bin";
+            var testObjDir = testProjectDir / "obj";
+            if (Directory.Exists(testBinDir)) testBinDir.DeleteDirectory();
+            if (Directory.Exists(testObjDir)) testObjDir.DeleteDirectory();
+
+            DotNetPublish(s => s
+                .SetProject(NugetPackageTestProject)
+                .SetConfiguration(Configuration)
+                .SetRuntime("linux-x64")
+                .SetProperty("PublishAot", "true")
+                .SetProperty("AgibuildPackageVersion", packedVersion));
         });
 
     internal Target ValidatePackage => _ => _
@@ -331,25 +430,8 @@ internal partial class BuildTask
             var packedVersion = ResolvePackedAgibuildVersion("Agibuild.Fulora.Avalonia");
             Serilog.Log.Information("NuGet package smoke pinned to packed version: {Version}", packedVersion);
 
-            var resolvedRoot = await ResolveNugetPackagesRootAsync();
+            var resolvedRoot = await ClearAgibuildNugetCacheAsync();
             var nugetPackagesRoot = resolvedRoot.Path;
-            Serilog.Log.Information(
-                "NuGet global packages root: {Path} (resolved via {Source})",
-                nugetPackagesRoot,
-                resolvedRoot.Source);
-
-            var agibuildPackageDirs = Directory.Exists(nugetPackagesRoot)
-                ? Directory.GetDirectories(nugetPackagesRoot, "agibuild.fulora*")
-                : [];
-            foreach (var dir in agibuildPackageDirs)
-            {
-                Serilog.Log.Information("Clearing NuGet cache: {Path}", dir);
-                Directory.Delete(dir, recursive: true);
-            }
-            var afterCleanup = Directory.Exists(nugetPackagesRoot)
-                ? Directory.GetDirectories(nugetPackagesRoot, "agibuild.fulora*")
-                : [];
-            Assert.True(afterCleanup.Length == 0, "Expected clean NuGet cache for Agibuild packages before restore.");
 
             var testProjectDir = TestsDirectory / "Agibuild.Fulora.Integration.NugetPackageTests";
             var testBinDir = testProjectDir / "bin";

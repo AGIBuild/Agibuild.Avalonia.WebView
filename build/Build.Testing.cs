@@ -10,18 +10,97 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
 internal partial class BuildTask
 {
+    private void RestoreTestProject(AbsolutePath projectFile)
+    {
+        DotNetRestore(s => s
+            .SetProjectFile(projectFile));
+    }
+
+    private void BuildTestProject(AbsolutePath projectFile)
+    {
+        DotNetBuild(s => s
+            .SetProjectFile(projectFile)
+            .SetConfiguration(Configuration)
+            .EnableNoRestore());
+    }
+
+    private void RunFastTestProject(AbsolutePath projectFile, string trxFileName)
+    {
+        DotNetTest(s => s
+            .SetProjectFile(projectFile)
+            .SetConfiguration(Configuration)
+            .SetResultsDirectory(TestResultsDirectory)
+            .SetLoggers($"trx;LogFileName={trxFileName}"));
+    }
+
+    private void RunUnitTestProject(AbsolutePath projectFile, string trxFileName)
+    {
+        DotNetTest(s => s
+            .SetProjectFile(projectFile)
+            .SetConfiguration(Configuration)
+            .EnableNoRestore()
+            .EnableNoBuild()
+            .SetResultsDirectory(TestResultsDirectory)
+            .SetLoggers($"trx;LogFileName={trxFileName}"));
+    }
+
+    private void RunHotFastTestProject(AbsolutePath projectFile, string trxFileName)
+    {
+        DotNetTest(s => s
+            .SetProjectFile(projectFile)
+            .SetConfiguration(Configuration)
+            .EnableNoRestore()
+            .EnableNoBuild()
+            .SetResultsDirectory(TestResultsDirectory)
+            .SetLoggers($"trx;LogFileName={trxFileName}"));
+    }
+
+    internal Target FastTestBuild => _ => _
+        .Description("Restores and builds only the fast CLI/docs test projects for quick reruns.")
+        .Executes(() =>
+        {
+            RestoreTestProject(CliUnitTestsProject);
+            RestoreTestProject(DocsUnitTestsProject);
+            BuildTestProject(CliUnitTestsProject);
+            BuildTestProject(DocsUnitTestsProject);
+        });
+
+    internal Target GovernanceTestBuild => _ => _
+        .Description("Restores and builds governance-focused test projects.")
+        .Executes(() =>
+        {
+            RestoreTestProject(GovernanceUnitTestsProject);
+            BuildTestProject(GovernanceUnitTestsProject);
+        });
+
+    internal Target FastUnitTests => _ => _
+        .Description("Runs the fast CLI/docs-focused unit test lane after a targeted fast build.")
+        .DependsOn(FastTestBuild)
+        .Executes(() =>
+        {
+            TestResultsDirectory.CreateDirectory();
+            RunHotFastTestProject(CliUnitTestsProject, "cli-fast-unit-tests.trx");
+            RunHotFastTestProject(DocsUnitTestsProject, "docs-fast-unit-tests.trx");
+        });
+
+    internal Target GovernanceUnitTests => _ => _
+        .Description("Runs governance-focused tests after a targeted governance build.")
+        .DependsOn(GovernanceTestBuild)
+        .Executes(() =>
+        {
+            TestResultsDirectory.CreateDirectory();
+            RunHotFastTestProject(GovernanceUnitTestsProject, "governance-unit-tests.trx");
+        });
+
     internal Target UnitTests => _ => _
         .Description("Runs unit tests.")
         .DependsOn(Build)
         .Executes(() =>
         {
-            DotNetTest(s => s
-                .SetProjectFile(UnitTestsProject)
-                .SetConfiguration(Configuration)
-                .EnableNoRestore()
-                .EnableNoBuild()
-                .SetResultsDirectory(TestResultsDirectory)
-                .SetLoggers("trx;LogFileName=unit-tests.trx"));
+            RunUnitTestProject(UnitTestsProject, "unit-tests.trx");
+            RunUnitTestProject(CliUnitTestsProject, "cli-unit-tests.trx");
+            RunUnitTestProject(DocsUnitTestsProject, "docs-unit-tests.trx");
+            RunUnitTestProject(GovernanceUnitTestsProject, "governance-unit-tests.trx");
         });
 
     internal Target Coverage => _ => _

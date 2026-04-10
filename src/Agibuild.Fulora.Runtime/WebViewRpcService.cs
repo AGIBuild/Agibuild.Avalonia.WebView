@@ -1,5 +1,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
@@ -432,9 +434,113 @@ internal sealed class WebViewRpcService : IWebViewRpcService
         var response = new RpcResponse
         {
             Id = id,
-            Result = result is null ? null : JsonSerializer.SerializeToElement(result, BridgeJsonOptions)
+            Result = SerializeResultToElement(result)
         };
         return JsonSerializer.Serialize(response, RpcJsonContext.Default.RpcResponse);
+    }
+
+    [UnconditionalSuppressMessage("Trimming", "IL2026",
+        Justification = "Dynamic serialization is used only when dynamic code is supported; Native AOT falls back to explicit primitive handling.")]
+    private static JsonElement? SerializeResultToElement(object? result)
+    {
+        if (result is null)
+            return null;
+
+        if (result is JsonElement element)
+            return element.Clone();
+
+        if (result is JsonDocument document)
+            return document.RootElement.Clone();
+
+        if (TrySerializeKnownResultToElement(result, out var known))
+            return known;
+
+        if (!RuntimeFeature.IsDynamicCodeSupported)
+        {
+            throw new NotSupportedException(
+                $"Native AOT RPC result serialization requires primitive/JSON-compatible results or source-generated serializers. Unsupported result type: {result.GetType().FullName}.");
+        }
+
+        return JsonSerializer.SerializeToElement(result, BridgeJsonOptions);
+    }
+
+    private static bool TrySerializeKnownResultToElement(object result, out JsonElement element)
+    {
+        switch (result)
+        {
+            case string value:
+                element = ParseJsonToken(JsonSerializer.Serialize(value, RpcJsonContext.Default.String));
+                return true;
+            case bool value:
+                element = ParseJsonToken(value ? "true" : "false");
+                return true;
+            case byte value:
+                element = ParseJsonToken(value.ToString(CultureInfo.InvariantCulture));
+                return true;
+            case sbyte value:
+                element = ParseJsonToken(value.ToString(CultureInfo.InvariantCulture));
+                return true;
+            case short value:
+                element = ParseJsonToken(value.ToString(CultureInfo.InvariantCulture));
+                return true;
+            case ushort value:
+                element = ParseJsonToken(value.ToString(CultureInfo.InvariantCulture));
+                return true;
+            case int value:
+                element = ParseJsonToken(value.ToString(CultureInfo.InvariantCulture));
+                return true;
+            case uint value:
+                element = ParseJsonToken(value.ToString(CultureInfo.InvariantCulture));
+                return true;
+            case long value:
+                element = ParseJsonToken(value.ToString(CultureInfo.InvariantCulture));
+                return true;
+            case ulong value:
+                element = ParseJsonToken(value.ToString(CultureInfo.InvariantCulture));
+                return true;
+            case float value:
+                element = ParseJsonToken(value.ToString("R", CultureInfo.InvariantCulture));
+                return true;
+            case double value:
+                element = ParseJsonToken(value.ToString("R", CultureInfo.InvariantCulture));
+                return true;
+            case decimal value:
+                element = ParseJsonToken(value.ToString(CultureInfo.InvariantCulture));
+                return true;
+            case char value:
+                element = ParseJsonToken(JsonSerializer.Serialize(value.ToString(), RpcJsonContext.Default.String));
+                return true;
+            case Guid value:
+                element = ParseJsonToken(JsonSerializer.Serialize(value.ToString(), RpcJsonContext.Default.String));
+                return true;
+            case DateTime value:
+                element = ParseJsonToken(JsonSerializer.Serialize(value, RpcJsonContext.Default.DateTime));
+                return true;
+            case DateTimeOffset value:
+                element = ParseJsonToken(JsonSerializer.Serialize(value, RpcJsonContext.Default.DateTimeOffset));
+                return true;
+            case TimeSpan value:
+                element = ParseJsonToken(JsonSerializer.Serialize(value.ToString("c", CultureInfo.InvariantCulture), RpcJsonContext.Default.String));
+                return true;
+            case Uri value:
+                element = ParseJsonToken(JsonSerializer.Serialize(value.ToString(), RpcJsonContext.Default.String));
+                return true;
+            default:
+                if (result.GetType().IsEnum)
+                {
+                    element = ParseJsonToken(Convert.ToUInt64(result, CultureInfo.InvariantCulture).ToString(CultureInfo.InvariantCulture));
+                    return true;
+                }
+
+                element = default;
+                return false;
+        }
+    }
+
+    private static JsonElement ParseJsonToken(string json)
+    {
+        using var document = JsonDocument.Parse(json);
+        return document.RootElement.Clone();
     }
 
     private static string BuildErrorResponseJson(string? id, int code, string message)
@@ -880,6 +986,8 @@ internal sealed class WebViewRpcService : IWebViewRpcService
 [JsonSerializable(typeof(WebViewRpcService.RpcError))]
 [JsonSerializable(typeof(WebViewRpcService.RpcErrorData))]
 [JsonSerializable(typeof(string))]
+[JsonSerializable(typeof(DateTime))]
+[JsonSerializable(typeof(DateTimeOffset))]
 internal partial class RpcJsonContext : JsonSerializerContext
 {
 }

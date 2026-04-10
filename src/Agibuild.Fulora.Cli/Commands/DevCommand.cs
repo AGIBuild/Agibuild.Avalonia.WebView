@@ -6,6 +6,7 @@ namespace Agibuild.Fulora.Cli.Commands;
 internal static class DevCommand
 {
     internal delegate Task<int> ProcessRunner(string fileName, string arguments, string? workingDirectory, CancellationToken ct);
+    internal delegate Task RunUntilCancelled(string fileName, string arguments, string? workingDirectory, string prefix, CancellationToken ct);
 
     public static Command Create()
     {
@@ -35,69 +36,17 @@ internal static class DevCommand
 
         command.SetAction(async (parseResult, ct) =>
         {
-            var webDir = parseResult.GetValue(webDirOpt);
-            var desktopDir = parseResult.GetValue(desktopDirOpt);
-            var npmScript = parseResult.GetValue(npmScriptOpt) ?? "dev";
-            var preflightOnly = parseResult.GetValue(preflightOnlyOpt);
-
-            var web = webDir ?? DetectWebProject();
-            var desktop = desktopDir ?? DetectDesktopProject();
-
-            if (web is null)
-            {
-                Console.Error.WriteLine("Could not find web project (package.json). Use --web to specify.");
-                return 1;
-            }
-
-            if (desktop is null)
-            {
-                Console.Error.WriteLine("Could not find Desktop .csproj. Use --desktop to specify.");
-                return 1;
-            }
-
-            var preflightExitCode = await PrepareBridgeArtifactsAsync(
-                explicitBridgeProject: null,
+            return await ExecuteAsync(
+                explicitWebProject: parseResult.GetValue(webDirOpt),
+                explicitDesktopProject: parseResult.GetValue(desktopDirOpt),
+                npmScript: parseResult.GetValue(npmScriptOpt) ?? "dev",
+                preflightOnly: parseResult.GetValue(preflightOnlyOpt),
+                workingDirectory: Directory.GetCurrentDirectory(),
                 output: Console.Out,
                 error: Console.Error,
                 runProcessAsync: NewCommand.RunProcessAsync,
+                runUntilCancelledAsync: RunProcessUntilCancelledAsync,
                 ct);
-            if (preflightExitCode != 0)
-                return preflightExitCode;
-
-            if (preflightOnly)
-            {
-                Console.WriteLine("Preflight complete.");
-                return 0;
-            }
-
-            Console.WriteLine($"Starting dev server in {Path.GetFileName(web)}...");
-            Console.WriteLine($"Starting Avalonia app from {Path.GetFileName(desktop)}...");
-            Console.WriteLine("Press Ctrl+C to stop both.");
-            Console.WriteLine();
-
-            using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-            Console.CancelKeyPress += (_, e) =>
-            {
-                e.Cancel = true;
-                cts.Cancel();
-            };
-
-            var npmCmd = OperatingSystem.IsWindows() ? "npm.cmd" : "npm";
-            var viteTask = RunProcessUntilCancelledAsync(npmCmd, $"run {npmScript}", web, "[vite]", cts.Token);
-            var dotnetTask = RunProcessUntilCancelledAsync("dotnet", $"run --project \"{desktop}\"", null, "[dotnet]", cts.Token);
-
-            try
-            {
-                await Task.WhenAll(viteTask, dotnetTask);
-            }
-            catch (OperationCanceledException)
-            {
-                // Expected on Ctrl+C
-            }
-
-            Console.WriteLine();
-            Console.WriteLine("Development servers stopped.");
-            return 0;
         });
 
         return command;
@@ -135,6 +84,106 @@ internal static class DevCommand
         error.WriteLine($"Fix the bridge build and rerun `fulora dev`, or inspect generation manually with `fulora generate types --project \"{bridgeProject}\"`.");
         return exitCode;
     }
+
+    internal static async Task<int> ExecuteAsync(
+        string? explicitWebProject,
+        string? explicitDesktopProject,
+        string npmScript,
+        bool preflightOnly,
+        string workingDirectory,
+        TextWriter output,
+        TextWriter error,
+        ProcessRunner runProcessAsync,
+        RunUntilCancelled runUntilCancelledAsync,
+        CancellationToken ct)
+    {
+        ArgumentNullException.ThrowIfNull(output);
+        ArgumentNullException.ThrowIfNull(error);
+        ArgumentNullException.ThrowIfNull(runProcessAsync);
+        ArgumentNullException.ThrowIfNull(runUntilCancelledAsync);
+
+        var web = ResolveWebProject(explicitWebProject, workingDirectory);
+        var desktop = ResolveDesktopProject(explicitDesktopProject, workingDirectory);
+
+        if (web is null)
+        {
+            error.WriteLine("Could not find web project (package.json). Use --web to specify.");
+            return 1;
+        }
+
+        if (desktop is null)
+        {
+            error.WriteLine("Could not find Desktop .csproj. Use --desktop to specify.");
+            return 1;
+        }
+
+        var preflightExitCode = await PrepareBridgeArtifactsAsync(
+            explicitBridgeProject: ResolveBridgeProject(workingDirectory),
+            output: output,
+            error: error,
+            runProcessAsync: runProcessAsync,
+            ct);
+        if (preflightExitCode != 0)
+            return preflightExitCode;
+
+        if (preflightOnly)
+        {
+            output.WriteLine("Preflight complete.");
+            return 0;
+        }
+
+        output.WriteLine($"Starting dev server in {Path.GetFileName(web)}...");
+        output.WriteLine($"Starting Avalonia app from {Path.GetFileName(desktop)}...");
+        output.WriteLine("Press Ctrl+C to stop both.");
+        output.WriteLine();
+
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        ConsoleCancelEventHandler? handler = null;
+        handler = (_, e) =>
+        {
+            e.Cancel = true;
+            cts.Cancel();
+        };
+        Console.CancelKeyPress += handler;
+
+        try
+        {
+            var npmCmd = OperatingSystem.IsWindows() ? "npm.cmd" : "npm";
+            var viteTask = runUntilCancelledAsync(npmCmd, $"run {npmScript}", web, "[vite]", cts.Token);
+            var dotnetTask = runUntilCancelledAsync("dotnet", $"run --project \"{desktop}\"", null, "[dotnet]", cts.Token);
+
+            try
+            {
+                await Task.WhenAll(viteTask, dotnetTask);
+            }
+            catch (OperationCanceledException)
+            {
+                // Expected on Ctrl+C
+            }
+        }
+        finally
+        {
+            Console.CancelKeyPress -= handler;
+        }
+
+        output.WriteLine();
+        output.WriteLine("Development servers stopped.");
+        return 0;
+    }
+
+    internal static string? ResolveWebProject(string? explicitWebProject, string workingDirectory, IFileSystem? fileSystem = null)
+        => explicitWebProject
+            ?? FuloraWorkspaceConfigResolver.Load(workingDirectory, fileSystem)?.ResolveWebRoot()
+            ?? DetectWebProject(workingDirectory, fileSystem);
+
+    internal static string? ResolveDesktopProject(string? explicitDesktopProject, string workingDirectory, IFileSystem? fileSystem = null)
+        => explicitDesktopProject
+            ?? FuloraWorkspaceConfigResolver.Load(workingDirectory, fileSystem)?.ResolveDesktopProject()
+            ?? DetectDesktopProject(workingDirectory, fileSystem);
+
+    internal static string? ResolveBridgeProject(string workingDirectory, IFileSystem? fileSystem = null)
+        => FuloraWorkspaceConfigResolver.Load(workingDirectory, fileSystem)?.ResolveBridgeProject()
+            ?? GenerateCommand.DetectBridgeProject(workingDirectory, fileSystem);
 
     private static void EmitArtifactConsistencyWarnings(string bridgeProject, TextWriter output)
     {
@@ -192,9 +241,12 @@ internal static class DevCommand
     }
 
     private static string? DetectWebProject()
+        => DetectWebProject(Directory.GetCurrentDirectory());
+
+    private static string? DetectWebProject(string cwd, IFileSystem? fileSystem = null)
     {
-        var cwd = Directory.GetCurrentDirectory();
-        var packageJsons = Directory.GetFiles(cwd, "package.json", SearchOption.AllDirectories)
+        fileSystem ??= RealFileSystem.Instance;
+        var packageJsons = fileSystem.GetFiles(cwd, "package.json", SearchOption.AllDirectories)
             .Where(p => !p.Contains("node_modules"))
             .ToArray();
 
@@ -211,9 +263,12 @@ internal static class DevCommand
     }
 
     private static string? DetectDesktopProject()
+        => DetectDesktopProject(Directory.GetCurrentDirectory());
+
+    private static string? DetectDesktopProject(string cwd, IFileSystem? fileSystem = null)
     {
-        var cwd = Directory.GetCurrentDirectory();
-        var csprojs = Directory.GetFiles(cwd, "*.Desktop.csproj", SearchOption.AllDirectories);
+        fileSystem ??= RealFileSystem.Instance;
+        var csprojs = fileSystem.GetFiles(cwd, "*.Desktop.csproj", SearchOption.AllDirectories);
         return csprojs.Length == 1 ? csprojs[0] : csprojs.FirstOrDefault();
     }
 }

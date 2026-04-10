@@ -5,6 +5,8 @@ namespace Agibuild.Fulora.Cli.Commands;
 
 internal static class GenerateCommand
 {
+    internal delegate Task<int> ProcessRunner(string fileName, string arguments, string? workingDirectory, CancellationToken ct);
+
     internal static readonly string[] ExpectedArtifactFileNames = BridgeArtifactConsistency.ExpectedArtifactFileNames;
     internal const string ManifestFileName = BridgeArtifactConsistency.ManifestFileName;
 
@@ -33,64 +35,16 @@ internal static class GenerateCommand
 
         command.SetAction(async (parseResult, ct) =>
         {
-            var project = parseResult.GetValue(projectOpt);
-            var output = parseResult.GetValue(outputOpt);
-
-            var bridgeProject = project ?? DetectBridgeProject();
-            if (bridgeProject is null)
-            {
-                Console.Error.WriteLine("Could not find a Bridge .csproj. Use --project to specify one.");
-                return 1;
-            }
-
-            Console.WriteLine($"Building {Path.GetFileName(bridgeProject)} to generate bridge TypeScript artifacts...");
-
-            var exitCode = await NewCommand.RunProcessAsync("dotnet", $"build \"{bridgeProject}\" -v q -m:1 -nodeReuse:false", ct: ct);
-            if (exitCode != 0)
-            {
-                Console.Error.WriteLine($"Build failed with exit code {exitCode}.");
-                return exitCode;
-            }
-
-            var assemblyPath = FindBuiltAssembly(bridgeProject);
-            if (assemblyPath is null)
-            {
-                Console.Error.WriteLine("Could not find the built Bridge assembly after compilation.");
-                Console.Error.WriteLine("Ensure the project builds successfully and targets a concrete framework output.");
-                return 1;
-            }
-
-            var outDir = output ?? DetectWebTypesDirectory(bridgeProject);
-            if (outDir is null)
-            {
-                Console.Error.WriteLine("Could not detect web project types directory. Use --output to specify.");
-                return 1;
-            }
-
-            Directory.CreateDirectory(outDir);
-            IReadOnlyDictionary<string, string> artifacts;
-            try
-            {
-                artifacts = ReadGeneratedArtifactsFromAssembly(assemblyPath);
-            }
-            catch (InvalidOperationException ex)
-            {
-                Console.Error.WriteLine(ex.Message);
-                Console.Error.WriteLine("Ensure the project references Agibuild.Fulora.Bridge.Generator and exposes BridgeTypeScriptDeclarations.");
-                return 1;
-            }
-
-            foreach (var artifact in artifacts)
-            {
-                var destPath = Path.Combine(outDir, artifact.Key);
-                File.WriteAllText(destPath, artifact.Value);
-                Console.WriteLine($"TypeScript artifact written to {destPath}");
-            }
-
-            var manifest = CreateArtifactManifest(Path.GetFileName(bridgeProject), outDir, assemblyPath, artifacts);
-            WriteArtifactManifest(outDir, manifest);
-            Console.WriteLine($"Bridge artifact manifest written to {Path.Combine(outDir, ManifestFileName)}");
-            return 0;
+            return await ExecuteTypesAsync(
+                explicitProject: parseResult.GetValue(projectOpt),
+                explicitOutput: parseResult.GetValue(outputOpt),
+                workingDirectory: Directory.GetCurrentDirectory(),
+                output: Console.Out,
+                error: Console.Error,
+                runProcessAsync: NewCommand.RunProcessAsync,
+                findBuiltAssembly: FindBuiltAssembly,
+                fileSystem: RealFileSystem.Instance,
+                ct);
         });
 
         return command;
@@ -99,10 +53,22 @@ internal static class GenerateCommand
     internal static string? DetectBridgeProject()
         => DetectBridgeProject(Directory.GetCurrentDirectory());
 
-    internal static string? DetectBridgeProject(string cwd)
+    internal static string? ResolveBridgeProject(string? explicitProject, string workingDirectory, IFileSystem? fileSystem = null)
+        => explicitProject
+            ?? FuloraWorkspaceConfigResolver.Load(workingDirectory, fileSystem)?.ResolveBridgeProject()
+            ?? DetectBridgeProject(workingDirectory, fileSystem);
+
+    internal static string? ResolveOutputDirectory(string? explicitOutput, string bridgeProject, string workingDirectory, IFileSystem? fileSystem = null)
+        => explicitOutput
+            ?? FuloraWorkspaceConfigResolver.Load(workingDirectory, fileSystem)?.ResolveGeneratedDir()
+            ?? DetectWebTypesDirectory(bridgeProject, fileSystem);
+
+    internal static string? DetectBridgeProject(string cwd, IFileSystem? fileSystem = null)
     {
-        var candidates = Directory.GetFiles(cwd, "*.Bridge.csproj", SearchOption.AllDirectories)
-            .Concat(Directory.GetFiles(cwd, "*Bridge*.csproj", SearchOption.AllDirectories))
+        fileSystem ??= RealFileSystem.Instance;
+
+        var candidates = fileSystem.GetFiles(cwd, "*.Bridge.csproj", SearchOption.AllDirectories)
+            .Concat(fileSystem.GetFiles(cwd, "*Bridge*.csproj", SearchOption.AllDirectories))
             .Distinct()
             .ToArray();
 
@@ -146,20 +112,95 @@ internal static class GenerateCommand
         => BridgeArtifactConsistency.FindBuiltAssembly(bridgeProject);
 
     internal static string? DetectWebArtifactsDirectory(string bridgeProject)
-        => DetectWebTypesDirectory(bridgeProject);
+        => DetectWebTypesDirectory(bridgeProject, RealFileSystem.Instance);
 
     internal static IReadOnlyList<string> CollectArtifactConsistencyWarnings(string bridgeProject)
-        => BridgeArtifactConsistency.CollectArtifactConsistencyWarnings(bridgeProject, DetectWebTypesDirectory);
+        => BridgeArtifactConsistency.CollectArtifactConsistencyWarnings(bridgeProject, path => DetectWebTypesDirectory(path, RealFileSystem.Instance));
 
-    private static string? DetectWebTypesDirectory(string bridgeProject)
+    internal static async Task<int> ExecuteTypesAsync(
+        string? explicitProject,
+        string? explicitOutput,
+        string workingDirectory,
+        TextWriter output,
+        TextWriter error,
+        ProcessRunner runProcessAsync,
+        Func<string, string?> findBuiltAssembly,
+        IFileSystem fileSystem,
+        CancellationToken ct)
     {
+        ArgumentNullException.ThrowIfNull(output);
+        ArgumentNullException.ThrowIfNull(error);
+        ArgumentNullException.ThrowIfNull(runProcessAsync);
+        ArgumentNullException.ThrowIfNull(findBuiltAssembly);
+        ArgumentNullException.ThrowIfNull(fileSystem);
+
+        var bridgeProject = ResolveBridgeProject(explicitProject, workingDirectory, fileSystem);
+        if (bridgeProject is null)
+        {
+            error.WriteLine("Could not find a Bridge .csproj. Use --project to specify one.");
+            return 1;
+        }
+
+        output.WriteLine($"Building {Path.GetFileName(bridgeProject)} to generate bridge TypeScript artifacts...");
+
+        var exitCode = await runProcessAsync("dotnet", $"build \"{bridgeProject}\" -v q -m:1 -nodeReuse:false", null, ct);
+        if (exitCode != 0)
+        {
+            error.WriteLine($"Build failed with exit code {exitCode}.");
+            return exitCode;
+        }
+
+        var assemblyPath = findBuiltAssembly(bridgeProject);
+        if (assemblyPath is null)
+        {
+            error.WriteLine("Could not find the built Bridge assembly after compilation.");
+            error.WriteLine("Ensure the project builds successfully and targets a concrete framework output.");
+            return 1;
+        }
+
+        var outDir = ResolveOutputDirectory(explicitOutput, bridgeProject, workingDirectory, fileSystem);
+        if (outDir is null)
+        {
+            error.WriteLine("Could not detect web project types directory. Use --output to specify.");
+            return 1;
+        }
+
+        fileSystem.CreateDirectory(outDir);
+        IReadOnlyDictionary<string, string> artifacts;
+        try
+        {
+            artifacts = ReadGeneratedArtifactsFromAssembly(assemblyPath);
+        }
+        catch (InvalidOperationException ex)
+        {
+            error.WriteLine(ex.Message);
+            error.WriteLine("Ensure the project references Agibuild.Fulora.Bridge.Generator and exposes BridgeTypeScriptDeclarations.");
+            return 1;
+        }
+
+        foreach (var artifact in artifacts)
+        {
+            var destPath = Path.Combine(outDir, artifact.Key);
+            fileSystem.WriteAllText(destPath, artifact.Value);
+            output.WriteLine($"TypeScript artifact written to {destPath}");
+        }
+
+        var manifest = BridgeArtifactConsistency.CreateArtifactManifest(Path.GetFileName(bridgeProject), outDir, assemblyPath, artifacts, fileSystem);
+        BridgeArtifactConsistency.WriteArtifactManifest(outDir, manifest, fileSystem);
+        output.WriteLine($"Bridge artifact manifest written to {Path.Combine(outDir, ManifestFileName)}");
+        return 0;
+    }
+
+    private static string? DetectWebTypesDirectory(string bridgeProject, IFileSystem? fileSystem = null)
+    {
+        fileSystem ??= RealFileSystem.Instance;
         var solutionDir = Path.GetDirectoryName(bridgeProject);
         if (solutionDir is null) return null;
 
-        var parent = Directory.GetParent(solutionDir)?.FullName;
+        var parent = Path.GetDirectoryName(solutionDir);
         if (parent is null) return null;
 
-        var webDirs = Directory.GetDirectories(parent)
+        var webDirs = fileSystem.GetDirectories(parent)
             .Where(d =>
             {
                 var name = Path.GetFileName(d);
@@ -173,11 +214,11 @@ internal static class GenerateCommand
 
         var webDir = webDirs[0];
         var generatedBridgeDir = Path.Combine(webDir, "src", "bridge", "generated");
-        if (Directory.Exists(generatedBridgeDir))
+        if (fileSystem.DirectoryExists(generatedBridgeDir))
             return generatedBridgeDir;
 
         var srcBridge = Path.Combine(webDir, "src", "bridge");
-        return Directory.Exists(srcBridge) ? srcBridge : Path.Combine(webDir, "src", "types");
+        return fileSystem.DirectoryExists(srcBridge) ? srcBridge : Path.Combine(webDir, "src", "types");
     }
 
     private static string ReadArtifactField(Type declarationsType, string fieldName)

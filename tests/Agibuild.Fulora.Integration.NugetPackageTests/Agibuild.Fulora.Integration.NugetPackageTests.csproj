@@ -21,7 +21,18 @@
       AOT-compatible is tracked separately.
     -->
     <WarningsNotAsErrors>$(WarningsNotAsErrors);IL2104;IL3053</WarningsNotAsErrors>
+    <!--
+      This project is a package-consumer smoke test for freshly packed local artifacts.
+      Dependency audit enforcement belongs to the pack/governance lanes, not this consumer
+      restore/build path, otherwise unrelated upstream advisories can block local feed validation.
+    -->
+    <NuGetAudit>false</NuGetAudit>
+    <LocalAgibuildPackageSource>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)/../../artifacts/packages'))</LocalAgibuildPackageSource>
   </PropertyGroup>
+
+  <Target Name="EnsureLocalAgibuildPackageSourceExists" BeforeTargets="Restore">
+    <MakeDir Directories="$(LocalAgibuildPackageSource)" />
+  </Target>
 
   <ItemGroup>
     <PackageReference Include="Avalonia" />

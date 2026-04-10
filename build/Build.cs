@@ -130,6 +130,15 @@ internal sealed partial class BuildTask : NukeBuild
     private static AbsolutePath UnitTestsProject =>
         TestsDirectory / "Agibuild.Fulora.UnitTests" / "Agibuild.Fulora.UnitTests.csproj";
 
+    private static AbsolutePath CliUnitTestsProject =>
+        TestsDirectory / "Agibuild.Fulora.Cli.UnitTests" / "Agibuild.Fulora.Cli.UnitTests.csproj";
+
+    private static AbsolutePath DocsUnitTestsProject =>
+        TestsDirectory / "Agibuild.Fulora.Docs.UnitTests" / "Agibuild.Fulora.Docs.UnitTests.csproj";
+
+    private static AbsolutePath GovernanceUnitTestsProject =>
+        TestsDirectory / "Agibuild.Fulora.Governance.UnitTests" / "Agibuild.Fulora.Governance.UnitTests.csproj";
+
     private static AbsolutePath IntegrationTestsProject =>
         TestsDirectory / "Agibuild.Fulora.Integration.Tests.Automation"
         / "Agibuild.Fulora.Integration.Tests.Automation.csproj";
@@ -164,6 +173,9 @@ internal sealed partial class BuildTask : NukeBuild
 
     private static AbsolutePath RuntimeProject =>
         SrcDirectory / "Agibuild.Fulora.Runtime" / "Agibuild.Fulora.Runtime.csproj";
+
+    private static AbsolutePath DependencyInjectionProject =>
+        SrcDirectory / "Agibuild.Fulora.DependencyInjection" / "Agibuild.Fulora.DependencyInjection.csproj";
 
     private static AbsolutePath WindowsAdapterProject =>
         SrcDirectory / "Agibuild.Fulora.Adapters.Windows" / "Agibuild.Fulora.Adapters.Windows.csproj";

@@ -1,0 +1,24 @@
+using System.CommandLine;
+using Agibuild.Fulora.Cli.Commands;
+
+namespace Agibuild.Fulora.Cli;
+
+internal static class CliRootCommand
+{
+    internal static RootCommand Create()
+    {
+        var rootCommand = new RootCommand("Agibuild.Fulora CLI — scaffold, develop, and package apps");
+
+        rootCommand.Subcommands.Add(NewCommand.Create());
+        rootCommand.Subcommands.Add(AttachCommand.Create());
+        rootCommand.Subcommands.Add(GenerateCommand.Create());
+        rootCommand.Subcommands.Add(DevCommand.Create());
+        rootCommand.Subcommands.Add(AddCommand.Create());
+        rootCommand.Subcommands.Add(ListPluginsCommand.Create());
+        rootCommand.Subcommands.Add(InspectPluginCommand.Create());
+        rootCommand.Subcommands.Add(SearchCommand.Create());
+        rootCommand.Subcommands.Add(PackageCommand.Create());
+
+        return rootCommand;
+    }
+}

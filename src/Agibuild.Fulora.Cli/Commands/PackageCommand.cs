@@ -68,133 +68,175 @@ internal static class PackageCommand
 
         command.SetAction(async (parseResult, ct) =>
         {
-            var profileName = parseResult.GetValue(profileOpt);
-            var project = parseResult.GetValue(projectOpt);
-            var version = parseResult.GetValue(versionOpt);
-            var output = parseResult.GetValue(outputOpt);
-            var icon = parseResult.GetValue(iconOpt);
-            var signParams = parseResult.GetValue(signParamsOpt);
-            var preflightOnly = parseResult.GetValue(preflightOnlyOpt);
-            if (!TryResolveProfile(profileName, out var profile))
-            {
-                return 1;
-            }
-
-            var runtime = GetValue(runtimeOpt, parseResult, profile.Runtime);
-            var notarize = GetValue(notarizeOpt, parseResult, profile.Notarize);
-            var channel = GetValue(channelOpt, parseResult, profile.Channel)!;
-
-            if (string.IsNullOrWhiteSpace(project))
-            {
-                Console.Error.WriteLine("--project is required. Specify the path to your .csproj.");
-                return 1;
-            }
-
-            project = project.Trim();
-
-            var projectPath = Path.GetFullPath(project);
-            if (!File.Exists(projectPath))
-            {
-                Console.Error.WriteLine($"Project file not found: {projectPath}");
-                return 1;
-            }
-
-            var projectDir = Path.GetDirectoryName(projectPath)!;
-            var projectName = Path.GetFileNameWithoutExtension(projectPath);
-            var packId = projectName;
-            var packVersion = version ?? GetProjectVersion(projectPath) ?? "1.0.0";
-            var outputDir = Path.GetFullPath(output ?? Path.Combine(projectDir, "Releases"));
-            var publishDir = Path.Combine(Path.GetTempPath(), "FuloraPackage", Guid.NewGuid().ToString("N"));
-            var vpkPath = FindVpk();
-
-            foreach (var note in CollectPreflightNotes(profileName, runtime ?? "win-x64", notarize, signParams, vpkPath is not null, OperatingSystem.IsMacOS()))
-            {
-                Console.WriteLine($"Preflight: {note}");
-            }
-
-            foreach (var note in CollectBridgeArtifactPreflightNotes(projectPath))
-            {
-                Console.WriteLine(note);
-            }
-
-            if (preflightOnly)
-            {
-                Console.WriteLine("Preflight complete.");
-                return 0;
-            }
-
-            try
-            {
-                Directory.CreateDirectory(publishDir);
-
-                var publishArgs = $"publish \"{projectPath}\" -c Release -r {runtime} --self-contained -o \"{publishDir}\"";
-                Console.WriteLine($"Running: dotnet {publishArgs}");
-                var exitCode = await NewCommand.RunProcessAsync("dotnet", publishArgs, projectDir, ct);
-                if (exitCode != 0)
-                {
-                    Console.Error.WriteLine("dotnet publish failed.");
-                    return exitCode;
-                }
-
-                var mainExe = GetMainExeName(projectName, runtime ?? "win-x64");
-                var mainExePath = Path.Combine(publishDir, mainExe);
-                if (!File.Exists(mainExePath))
-                {
-                    var fallback = Directory.GetFiles(publishDir, "*.exe").FirstOrDefault()
-                        ?? Directory.GetFiles(publishDir).FirstOrDefault(f => !Path.GetExtension(f).Equals(".dll", StringComparison.OrdinalIgnoreCase));
-                    mainExe = fallback is not null ? Path.GetFileName(fallback) : mainExe;
-                }
-
-                if (vpkPath is not null)
-                {
-                    var vpkArgs = $"pack -u {packId} -v {packVersion} -p \"{publishDir}\" -e \"{mainExe}\" -o \"{outputDir}\" -c {channel}";
-                    if (!string.IsNullOrWhiteSpace(icon))
-                        vpkArgs += $" -i \"{Path.GetFullPath(icon)}\"";
-                    if (!string.IsNullOrWhiteSpace(signParams))
-                        vpkArgs += $" -n \"{signParams}\"";
-                    if (notarize && OperatingSystem.IsMacOS())
-                        vpkArgs += " --notaryProfile default";
-
-                    Console.WriteLine($"Running: vpk {vpkArgs}");
-                    exitCode = await NewCommand.RunProcessAsync(vpkPath, vpkArgs, null, ct);
-                    if (exitCode != 0)
-                    {
-                        Console.Error.WriteLine("vpk pack failed.");
-                        return exitCode;
-                    }
-                }
-                else
-                {
-                    Directory.CreateDirectory(outputDir);
-                    var destDir = Path.Combine(outputDir, $"{packId}-{packVersion}");
-                    if (Directory.Exists(destDir))
-                        Directory.Delete(destDir, recursive: true);
-                    CopyDirectory(publishDir, destDir);
-                    Console.WriteLine($"Packaged to {destDir} (vpk not found; copied publish output)");
-                }
-
-                Console.WriteLine();
-                Console.WriteLine($"Packages created in: {outputDir}");
-                return 0;
-            }
-            finally
-            {
-                if (Directory.Exists(publishDir))
-                {
-                    try { Directory.Delete(publishDir, recursive: true); }
-                    catch { /* Ignore */ }
-                }
-            }
+            return await ExecuteAsync(
+                profileName: parseResult.GetValue(profileOpt),
+                explicitProject: parseResult.GetValue(projectOpt),
+                version: parseResult.GetValue(versionOpt),
+                outputDirectory: parseResult.GetValue(outputOpt),
+                iconPath: parseResult.GetValue(iconOpt),
+                signParams: parseResult.GetValue(signParamsOpt),
+                preflightOnly: parseResult.GetValue(preflightOnlyOpt),
+                parseResult: parseResult,
+                runtimeOption: runtimeOpt,
+                notarizeOption: notarizeOpt,
+                channelOption: channelOpt,
+                workingDirectory: RealEnvironmentContext.Instance.CurrentDirectory,
+                output: Console.Out,
+                error: Console.Error,
+                processRunner: RealProcessRunner.Instance,
+                environment: RealEnvironmentContext.Instance,
+                fileSystem: RealFileSystem.Instance,
+                ct);
         });
 
         return command;
     }
 
-    private static string? GetProjectVersion(string projectPath)
+    internal static async Task<int> ExecuteAsync(
+        string? profileName,
+        string? explicitProject,
+        string? version,
+        string? outputDirectory,
+        string? iconPath,
+        string? signParams,
+        bool preflightOnly,
+        ParseResult parseResult,
+        Option<string> runtimeOption,
+        Option<bool> notarizeOption,
+        Option<string> channelOption,
+        string workingDirectory,
+        TextWriter output,
+        TextWriter error,
+        IProcessRunner processRunner,
+        IEnvironmentContext environment,
+        IFileSystem fileSystem,
+        CancellationToken ct)
     {
+        ArgumentNullException.ThrowIfNull(parseResult);
+        ArgumentNullException.ThrowIfNull(output);
+        ArgumentNullException.ThrowIfNull(error);
+        ArgumentNullException.ThrowIfNull(processRunner);
+        ArgumentNullException.ThrowIfNull(environment);
+        ArgumentNullException.ThrowIfNull(fileSystem);
+
+        if (!TryResolveProfile(profileName, out var profile))
+            return 1;
+
+        var workspaceConfig = FuloraWorkspaceConfigResolver.Load(workingDirectory, fileSystem);
+        var runtime = GetValue(runtimeOption, parseResult, profile.Runtime);
+        var notarize = GetValue(notarizeOption, parseResult, profile.Notarize);
+        var channel = GetValue(channelOption, parseResult, profile.Channel)!;
+        var project = ResolveProjectPath(explicitProject, workingDirectory, fileSystem);
+
+        if (string.IsNullOrWhiteSpace(project))
+        {
+            error.WriteLine("--project is required. Specify the path to your .csproj.");
+            return 1;
+        }
+
+        project = project.Trim();
+
+        var projectPath = Path.GetFullPath(project);
+        if (!fileSystem.FileExists(projectPath))
+        {
+            error.WriteLine($"Project file not found: {projectPath}");
+            return 1;
+        }
+
+        if (explicitProject is null && workspaceConfig is not null)
+            output.WriteLine($"Using configured desktop project: {Path.GetFileName(projectPath)}");
+
+        var projectDir = Path.GetDirectoryName(projectPath)!;
+        var projectName = Path.GetFileNameWithoutExtension(projectPath);
+        var packId = projectName;
+        var packVersion = version ?? GetProjectVersion(projectPath, fileSystem) ?? "1.0.0";
+        var resolvedOutputDir = Path.GetFullPath(outputDirectory ?? Path.Combine(projectDir, "Releases"));
+        var publishDir = Path.Combine(environment.TempPath, "FuloraPackage", Guid.NewGuid().ToString("N"));
+        var vpkPath = FindVpk(environment, fileSystem);
+
+        foreach (var note in CollectPreflightNotes(profileName, runtime ?? "win-x64", notarize, signParams, vpkPath is not null, environment.IsMacOS))
+            output.WriteLine($"Preflight: {note}");
+
+        foreach (var note in CollectBridgeArtifactPreflightNotes(projectPath))
+            output.WriteLine(note);
+
+        if (preflightOnly)
+        {
+            output.WriteLine("Preflight complete.");
+            return 0;
+        }
+
         try
         {
-            var xml = File.ReadAllText(projectPath);
+            fileSystem.CreateDirectory(publishDir);
+
+            var publishArgs = $"publish \"{projectPath}\" -c Release -r {runtime} --self-contained -o \"{publishDir}\"";
+            output.WriteLine($"Running: dotnet {publishArgs}");
+            var exitCode = await processRunner.RunAsync("dotnet", publishArgs, projectDir, ct);
+            if (exitCode != 0)
+            {
+                error.WriteLine("dotnet publish failed.");
+                return exitCode;
+            }
+
+            var mainExe = GetMainExeName(projectName, runtime ?? "win-x64");
+            var mainExePath = Path.Combine(publishDir, mainExe);
+            if (!fileSystem.FileExists(mainExePath))
+            {
+                var fallback = fileSystem.GetFiles(publishDir, "*.exe", SearchOption.TopDirectoryOnly).FirstOrDefault()
+                    ?? fileSystem.GetFiles(publishDir, "*", SearchOption.TopDirectoryOnly)
+                        .FirstOrDefault(f => !Path.GetExtension(f).Equals(".dll", StringComparison.OrdinalIgnoreCase));
+                mainExe = fallback is not null ? Path.GetFileName(fallback) : mainExe;
+            }
+
+            if (vpkPath is not null)
+            {
+                var vpkArgs = $"pack -u {packId} -v {packVersion} -p \"{publishDir}\" -e \"{mainExe}\" -o \"{resolvedOutputDir}\" -c {channel}";
+                if (!string.IsNullOrWhiteSpace(iconPath))
+                    vpkArgs += $" -i \"{Path.GetFullPath(iconPath)}\"";
+                if (!string.IsNullOrWhiteSpace(signParams))
+                    vpkArgs += $" -n \"{signParams}\"";
+                if (notarize && environment.IsMacOS)
+                    vpkArgs += " --notaryProfile default";
+
+                output.WriteLine($"Running: vpk {vpkArgs}");
+                exitCode = await processRunner.RunAsync(vpkPath, vpkArgs, null, ct);
+                if (exitCode != 0)
+                {
+                    error.WriteLine("vpk pack failed.");
+                    return exitCode;
+                }
+            }
+            else
+            {
+                fileSystem.CreateDirectory(resolvedOutputDir);
+                var destDir = Path.Combine(resolvedOutputDir, $"{packId}-{packVersion}");
+                if (fileSystem.DirectoryExists(destDir))
+                    fileSystem.DeleteDirectory(destDir, recursive: true);
+                CopyDirectory(publishDir, destDir, fileSystem);
+                output.WriteLine($"Packaged to {destDir} (vpk not found; copied publish output)");
+            }
+
+            output.WriteLine();
+            output.WriteLine($"Packages created in: {resolvedOutputDir}");
+            return 0;
+        }
+        finally
+        {
+            if (fileSystem.DirectoryExists(publishDir))
+            {
+                try { fileSystem.DeleteDirectory(publishDir, recursive: true); }
+                catch { /* Ignore */ }
+            }
+        }
+    }
+
+    private static string? GetProjectVersion(string projectPath, IFileSystem? fileSystem = null)
+    {
+        fileSystem ??= RealFileSystem.Instance;
+        try
+        {
+            var xml = fileSystem.ReadAllText(projectPath);
             var match = System.Text.RegularExpressions.Regex.Match(xml, @"<Version>(.*?)</Version>");
             if (match.Success)
                 return match.Groups[1].Value.Trim();
@@ -213,13 +255,15 @@ internal static class PackageCommand
         return projectName;
     }
 
-    private static string? FindVpk()
+    private static string? FindVpk(IEnvironmentContext? environment = null, IFileSystem? fileSystem = null)
     {
-        var pathEnv = Environment.GetEnvironmentVariable("PATH") ?? "";
+        environment ??= RealEnvironmentContext.Instance;
+        fileSystem ??= RealFileSystem.Instance;
+        var pathEnv = environment.GetEnvironmentVariable("PATH") ?? "";
         foreach (var dir in pathEnv.Split(Path.PathSeparator))
         {
-            var vpk = Path.Combine(dir.Trim(), OperatingSystem.IsWindows() ? "vpk.exe" : "vpk");
-            if (File.Exists(vpk))
+            var vpk = Path.Combine(dir.Trim(), environment.IsWindows ? "vpk.exe" : "vpk");
+            if (fileSystem.FileExists(vpk))
                 return vpk;
         }
         return null;
@@ -272,14 +316,19 @@ internal static class PackageCommand
         return notes;
     }
 
-    internal static IReadOnlyList<string> CollectBridgeArtifactPreflightNotes(string projectPath)
+    internal static string? ResolveProjectPath(string? explicitProject, string workingDirectory, IFileSystem? fileSystem = null)
+        => explicitProject
+            ?? FuloraWorkspaceConfigResolver.Load(workingDirectory, fileSystem)?.ResolveDesktopProject();
+
+    internal static IReadOnlyList<string> CollectBridgeArtifactPreflightNotes(string projectPath, IFileSystem? fileSystem = null)
     {
+        fileSystem ??= RealFileSystem.Instance;
         var projectDirectory = Path.GetDirectoryName(Path.GetFullPath(projectPath));
-        var solutionRoot = projectDirectory is null ? null : Directory.GetParent(projectDirectory)?.FullName;
+        var solutionRoot = projectDirectory is null ? null : Path.GetDirectoryName(projectDirectory);
         if (string.IsNullOrWhiteSpace(solutionRoot))
             return [];
 
-        var bridgeProject = GenerateCommand.DetectBridgeProject(solutionRoot);
+        var bridgeProject = GenerateCommand.DetectBridgeProject(solutionRoot, fileSystem);
         if (string.IsNullOrWhiteSpace(bridgeProject))
             return [];
 
@@ -314,12 +363,12 @@ internal static class PackageCommand
         return profileDefault is not null ? profileDefault : parseResult.GetValue(option)!;
     }
 
-    private static void CopyDirectory(string source, string dest)
+    private static void CopyDirectory(string source, string dest, IFileSystem fileSystem)
     {
-        Directory.CreateDirectory(dest);
-        foreach (var file in Directory.GetFiles(source))
-            File.Copy(file, Path.Combine(dest, Path.GetFileName(file)));
-        foreach (var dir in Directory.GetDirectories(source))
-            CopyDirectory(dir, Path.Combine(dest, Path.GetFileName(dir)));
+        fileSystem.CreateDirectory(dest);
+        foreach (var file in fileSystem.GetFiles(source, "*", SearchOption.TopDirectoryOnly))
+            fileSystem.CopyFile(file, Path.Combine(dest, Path.GetFileName(file)), overwrite: true);
+        foreach (var dir in fileSystem.GetDirectories(source))
+            CopyDirectory(dir, Path.Combine(dest, Path.GetFileName(dir)), fileSystem);
     }
 }

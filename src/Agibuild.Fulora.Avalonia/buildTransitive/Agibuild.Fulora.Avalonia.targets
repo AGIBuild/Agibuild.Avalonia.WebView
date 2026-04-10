@@ -8,9 +8,13 @@
         runtime assembly is present, we add an explicit reference to WebView2.Core on Windows.
     -->
     <AgibuildWebView_WebView2PackageVersion>1.0.3719.77</AgibuildWebView_WebView2PackageVersion>
+    <AgibuildFuloraTargetRuntimeIdentifier>$([System.String]::Copy('$(RuntimeIdentifier)').ToLowerInvariant())</AgibuildFuloraTargetRuntimeIdentifier>
+    <AgibuildFuloraTargetRuntimeIdentifier Condition="'$(AgibuildFuloraTargetRuntimeIdentifier)' == '' and $([MSBuild]::IsOSPlatform(`windows`))">win-host</AgibuildFuloraTargetRuntimeIdentifier>
+    <AgibuildFuloraTargetRuntimeIdentifier Condition="'$(AgibuildFuloraTargetRuntimeIdentifier)' == '' and $([MSBuild]::IsOSPlatform(`osx`))">osx-host</AgibuildFuloraTargetRuntimeIdentifier>
+    <AgibuildFuloraTargetRuntimeIdentifier Condition="'$(AgibuildFuloraTargetRuntimeIdentifier)' == '' and $([MSBuild]::IsOSPlatform(`linux`))">linux-host</AgibuildFuloraTargetRuntimeIdentifier>
   </PropertyGroup>
 
-  <ItemGroup Condition="$([MSBuild]::IsOSPlatform('windows'))">
+  <ItemGroup Condition="$([System.String]::Copy('$(AgibuildFuloraTargetRuntimeIdentifier)').StartsWith('win'))">
     <Reference Include="Microsoft.Web.WebView2.Core">
       <HintPath>$(NuGetPackageRoot)microsoft.web.webview2\$(AgibuildWebView_WebView2PackageVersion)\lib_manual\netcoreapp3.0\Microsoft.Web.WebView2.Core.dll</HintPath>
       <Private>true</Private>
@@ -25,12 +29,14 @@
   -->
   <ItemGroup Condition="'$(PublishTrimmed)' == 'true'">
     <TrimmerRootAssembly Include="Agibuild.Fulora.Adapters.MacOS"
-                         Condition="$([MSBuild]::IsOSPlatform('osx'))" />
+                         Condition="$([System.String]::Copy('$(AgibuildFuloraTargetRuntimeIdentifier)').StartsWith('osx'))" />
     <TrimmerRootAssembly Include="Agibuild.Fulora.Adapters.Windows"
-                         Condition="$([MSBuild]::IsOSPlatform('windows'))" />
+                         Condition="$([System.String]::Copy('$(AgibuildFuloraTargetRuntimeIdentifier)').StartsWith('win'))" />
     <TrimmerRootAssembly Include="Agibuild.Fulora.Adapters.Gtk"
-                         Condition="$([MSBuild]::IsOSPlatform('linux'))" />
+                         Condition="$([System.String]::Copy('$(AgibuildFuloraTargetRuntimeIdentifier)').StartsWith('linux'))" />
     <TrimmerRootAssembly Include="Agibuild.Fulora.Adapters.Android"
-                         Condition="$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('android'))" />
+                         Condition="$([System.String]::Copy('$(AgibuildFuloraTargetRuntimeIdentifier)').StartsWith('android'))" />
+    <TrimmerRootAssembly Include="Agibuild.Fulora.Adapters.iOS"
+                         Condition="$([System.String]::Copy('$(AgibuildFuloraTargetRuntimeIdentifier)').StartsWith('ios')) Or $([System.String]::Copy('$(AgibuildFuloraTargetRuntimeIdentifier)').StartsWith('maccatalyst'))" />
   </ItemGroup>
 </Project>
