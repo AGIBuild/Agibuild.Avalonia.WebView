@@ -32,12 +32,40 @@ Go deeper with [Getting Started](docs/articles/getting-started.md), the [Documen
 
 You do not need to rebuild your frontend to adopt Fulora.
 
-The recommended path is:
+The canonical brownfield path is:
+
+```text
+attach web -> dev -> package
+```
+
+In practice, start by wiring the existing frontend into a Fulora workspace:
+
+```bash
+fulora attach web \
+  --web ./app/web \
+  --desktop ./app/desktop \
+  --bridge ./app/bridge \
+  --framework react \
+  --web-command "npm run dev" \
+  --dev-server-url http://localhost:5173
+```
+
+Then use the saved `fulora.json` wiring for the normal loop:
+
+```bash
+fulora dev --preflight-only
+fulora package --profile desktop-public --preflight-only
+```
+
+The recommended flow is:
 
 1. keep your existing React/Vue/Next-style web app
-2. point Fulora at your dev server during development
-3. switch to embedded or packaged static assets in production
-4. add native capabilities gradually through typed app services
+2. run `fulora attach web` once to scaffold Fulora-owned files and persist `fulora.json`
+3. point Fulora at your dev server during development
+4. switch to embedded or packaged static assets in production
+5. add native capabilities gradually through typed app services
+
+If bridge artifacts drift, fix them explicitly with `fulora generate types`; the preflight commands report drift instead of silently auto-fixing files behind your back.
 
 In development, that usually looks like:
 

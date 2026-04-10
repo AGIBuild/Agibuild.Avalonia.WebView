@@ -2,12 +2,31 @@
 
 If you already have a React, Vue, or similar web application, you can adopt Fulora without rewriting your frontend.
 
-The recommended path is:
+The recommended brownfield path is:
+
+```text
+attach web -> dev -> package
+```
+
+Start by wiring your existing frontend into a Fulora workspace:
+
+```bash
+fulora attach web \
+  --web ./app/web \
+  --desktop ./app/desktop \
+  --bridge ./app/bridge \
+  --framework react \
+  --web-command "npm run dev" \
+  --dev-server-url http://localhost:5173
+```
+
+This creates Fulora-owned wiring, writes `fulora.json`, and leaves the existing web app structure intact.
 
 1. keep your existing web project
-2. add a lightweight Avalonia + Fulora desktop host
-3. connect the host to your web dev server in development
-4. add native capabilities gradually through typed services
+2. run `fulora attach web` once
+3. add a lightweight Avalonia + Fulora desktop host
+4. connect the host to your web dev server in development
+5. add native capabilities gradually through typed services
 
 ## Development model
 
@@ -79,10 +98,13 @@ const profile = await services.userProfile.get();
 ## Useful commands
 
 ```bash
+fulora attach web --web ./app/web --framework react
 fulora dev --preflight-only
 fulora package --profile desktop-public --preflight-only
 fulora generate types --project ./app/bridge/MyProduct.Bridge.csproj
 ```
+
+If bridge artifacts are missing or stale, run `fulora generate types` explicitly. Fulora preflight checks report drift instead of silently rewriting files.
 
 ## Next step
 

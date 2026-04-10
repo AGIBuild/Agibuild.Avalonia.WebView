@@ -8,6 +8,37 @@
 
 **Tech Stack:** .NET 10, System.CommandLine, System.Text.Json, xUnit, existing Fulora CLI command/test infrastructure, DocFX markdown docs.
 
+## Current implementation status — 2026-04-10
+
+This plan is now **implemented for the current approved slice**.
+
+Completed slices:
+
+- shared `fulora.json` config model and resolver
+- `fulora attach web` command registration, validation flow, and scaffolding
+- config-first reuse in `dev`, `generate types`, and `package`
+- generated/client-facing `createFuloraClient()` + `services.*` ergonomics
+- dedicated CLI / docs / governance test projects and broad per-project test coverage
+
+Remaining caveats:
+
+- this plan document was updated after implementation, so the original checkbox workflow was not maintained in real time
+- broader DX roadmap items like `fulora doctor` and deeper packaging productization remain follow-up work outside this attach-web slice
+
+Evidence anchors for completed work:
+
+- `src/Agibuild.Fulora.Cli/Commands/AttachCommand.cs`
+- `src/Agibuild.Fulora.Cli/Commands/AttachWebScaffolder.cs`
+- `src/Agibuild.Fulora.Cli/Commands/FuloraWorkspaceConfig.cs`
+- `src/Agibuild.Fulora.Cli/Commands/FuloraWorkspaceConfigResolver.cs`
+- `src/Agibuild.Fulora.Cli/Commands/DevCommand.cs`
+- `src/Agibuild.Fulora.Cli/Commands/GenerateCommand.cs`
+- `src/Agibuild.Fulora.Cli/Commands/PackageCommand.cs`
+- `src/Agibuild.Fulora.Bridge.Generator/TypeScriptClientEmitter.cs`
+- `tests/Agibuild.Fulora.Cli.UnitTests/`
+- `tests/Agibuild.Fulora.Docs.UnitTests/`
+- `tests/Agibuild.Fulora.Governance.UnitTests/`
+
 ---
 
 ## File Map
@@ -79,7 +110,7 @@
 - Create: `src/Agibuild.Fulora.Cli/Commands/FuloraWorkspaceConfigResolver.cs`
 - Create: `tests/Agibuild.Fulora.UnitTests/FuloraWorkspaceConfigTests.cs`
 
-- [ ] **Step 1: Write the failing config tests**
+- [x] **Step 1: Write the failing config tests**
 
 Create `tests/Agibuild.Fulora.UnitTests/FuloraWorkspaceConfigTests.cs` with focused tests that require:
 
@@ -96,7 +127,7 @@ public void Resolve_from_nested_working_directory_finds_repo_root_config()
 
 Also cover that `generatedDir`, `bridge.project`, and `desktop.project` are persisted exactly as repo-relative paths.
 
-- [ ] **Step 2: Run the focused tests to verify they fail**
+- [x] **Step 2: Run the focused tests to verify they fail**
 
 Run:
 
@@ -106,7 +137,7 @@ dotnet test tests/Agibuild.Fulora.UnitTests/Agibuild.Fulora.UnitTests.csproj --f
 
 Expected: FAIL because the config types and resolver do not exist yet.
 
-- [ ] **Step 3: Implement the minimal config model and resolver**
+- [x] **Step 3: Implement the minimal config model and resolver**
 
 Add:
 
@@ -125,7 +156,7 @@ Add:
 
 Keep the schema intentionally small and deterministic.
 
-- [ ] **Step 4: Re-run the focused tests**
+- [x] **Step 4: Re-run the focused tests**
 
 Run:
 
@@ -135,7 +166,7 @@ dotnet test tests/Agibuild.Fulora.UnitTests/Agibuild.Fulora.UnitTests.csproj --f
 
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/Agibuild.Fulora.Cli/Commands/FuloraWorkspaceConfig.cs src/Agibuild.Fulora.Cli/Commands/FuloraWorkspaceConfigResolver.cs tests/Agibuild.Fulora.UnitTests/FuloraWorkspaceConfigTests.cs
@@ -149,7 +180,7 @@ git commit -m "Add a shared workspace config for brownfield Fulora apps"
 - Create: `src/Agibuild.Fulora.Cli/Commands/AttachCommand.cs`
 - Modify: `tests/Agibuild.Fulora.UnitTests/CliToolTests.cs`
 
-- [ ] **Step 1: Write the failing CLI tests for command discovery and validation**
+- [x] **Step 1: Write the failing CLI tests for command discovery and validation**
 
 Add or extend tests that require:
 
@@ -168,7 +199,7 @@ Use a temp workspace with and without `package.json` so the failure message is a
 
 - `Fulora could not find your web project root.`
 
-- [ ] **Step 2: Run the focused CLI tests to verify failure**
+- [x] **Step 2: Run the focused CLI tests to verify failure**
 
 Run:
 
@@ -178,7 +209,7 @@ dotnet test tests/Agibuild.Fulora.UnitTests/Agibuild.Fulora.UnitTests.csproj --f
 
 Expected: FAIL because `attach web` is not registered and the validation path does not exist.
 
-- [ ] **Step 3: Implement the command shell and option parsing**
+- [x] **Step 3: Implement the command shell and option parsing**
 
 Register a new top-level `attach` command group with a `web` subcommand in `Program.cs`.
 
@@ -200,7 +231,7 @@ Validation rules:
 
 Do not scaffold files yet in this task; only get the command contract, parsing, and user-facing validation in place.
 
-- [ ] **Step 4: Re-run the focused CLI tests**
+- [x] **Step 4: Re-run the focused CLI tests**
 
 Run:
 
@@ -210,7 +241,7 @@ dotnet test tests/Agibuild.Fulora.UnitTests/Agibuild.Fulora.UnitTests.csproj --f
 
 Expected: PASS for the new help and validation coverage.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/Agibuild.Fulora.Cli/Program.cs src/Agibuild.Fulora.Cli/Commands/AttachCommand.cs tests/Agibuild.Fulora.UnitTests/CliToolTests.cs
@@ -224,7 +255,7 @@ git commit -m "Add the attach web CLI contract"
 - Create: `src/Agibuild.Fulora.Cli/Commands/AttachWebScaffolder.cs`
 - Modify: `tests/Agibuild.Fulora.UnitTests/CliToolTests.cs`
 
-- [ ] **Step 1: Write the failing attach-web scaffolding test**
+- [x] **Step 1: Write the failing attach-web scaffolding test**
 
 Add a temp-workspace CLI test that:
 
@@ -250,7 +281,7 @@ and prints next steps containing:
 - `fulora dev`
 - `fulora generate types`
 
-- [ ] **Step 2: Run the focused attach tests to verify failure**
+- [x] **Step 2: Run the focused attach tests to verify failure**
 
 Run:
 
@@ -260,7 +291,7 @@ dotnet test tests/Agibuild.Fulora.UnitTests/Agibuild.Fulora.UnitTests.csproj --f
 
 Expected: FAIL because the command does not yet scaffold or persist config.
 
-- [ ] **Step 3: Implement the minimal scaffolder**
+- [x] **Step 3: Implement the minimal scaffolder**
 
 Create `AttachWebScaffolder.cs` that:
 
@@ -275,7 +306,7 @@ Important constraints:
 - if an existing file conflicts, fail with an actionable message instead of guessing
 - do not call `fulora generate types` automatically
 
-- [ ] **Step 4: Re-run the focused attach tests**
+- [x] **Step 4: Re-run the focused attach tests**
 
 Run:
 
@@ -285,7 +316,7 @@ dotnet test tests/Agibuild.Fulora.UnitTests/Agibuild.Fulora.UnitTests.csproj --f
 
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/Agibuild.Fulora.Cli/Commands/AttachCommand.cs src/Agibuild.Fulora.Cli/Commands/AttachWebScaffolder.cs tests/Agibuild.Fulora.UnitTests/CliToolTests.cs
@@ -301,7 +332,7 @@ git commit -m "Scaffold brownfield Fulora wiring for existing web apps"
 - Modify: `tests/Agibuild.Fulora.UnitTests/CliToolTests.cs`
 - Modify: `tests/Agibuild.Fulora.UnitTests/AppDistributionTests.cs`
 
-- [ ] **Step 1: Write the failing config-aware command tests**
+- [x] **Step 1: Write the failing config-aware command tests**
 
 Add tests that require:
 
@@ -311,7 +342,7 @@ Add tests that require:
 
 Use temp workspaces that intentionally do not satisfy the current heuristic naming rules so the tests prove config reuse, not fallback luck.
 
-- [ ] **Step 2: Run the focused tests to verify failure**
+- [x] **Step 2: Run the focused tests to verify failure**
 
 Run:
 
@@ -321,7 +352,7 @@ dotnet test tests/Agibuild.Fulora.UnitTests/Agibuild.Fulora.UnitTests.csproj --f
 
 Expected: FAIL because the commands currently rely on heuristics and explicit flags only.
 
-- [ ] **Step 3: Implement config-first resolution**
+- [x] **Step 3: Implement config-first resolution**
 
 Update the commands so they resolve values in this order:
 
@@ -335,7 +366,7 @@ Rules:
 - do not change manifest/hash consistency behavior
 - package remains explicit-override-friendly, but config removes unnecessary path repetition
 
-- [ ] **Step 4: Re-run the focused tests**
+- [x] **Step 4: Re-run the focused tests**
 
 Run:
 
@@ -345,7 +376,7 @@ dotnet test tests/Agibuild.Fulora.UnitTests/Agibuild.Fulora.UnitTests.csproj --f
 
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/Agibuild.Fulora.Cli/Commands/DevCommand.cs src/Agibuild.Fulora.Cli/Commands/GenerateCommand.cs src/Agibuild.Fulora.Cli/Commands/PackageCommand.cs tests/Agibuild.Fulora.UnitTests/CliToolTests.cs tests/Agibuild.Fulora.UnitTests/AppDistributionTests.cs
@@ -361,7 +392,7 @@ git commit -m "Reuse fulora.json across dev, generate, and package"
 - Modify: `docs/articles/bring-your-own-web-app.md`
 - Modify: `tests/Agibuild.Fulora.UnitTests/DocumentationGovernanceTests.cs`
 
-- [ ] **Step 1: Write the failing docs-governance assertions**
+- [x] **Step 1: Write the failing docs-governance assertions**
 
 Extend `DocumentationGovernanceTests.cs` so first-contact docs require:
 
@@ -369,7 +400,7 @@ Extend `DocumentationGovernanceTests.cs` so first-contact docs require:
 - the canonical brownfield path `attach web -> dev -> package`
 - explicit wording that stale bridge artifacts should be fixed with `fulora generate types`, not hidden auto-fix
 
-- [ ] **Step 2: Run the focused docs tests to verify failure**
+- [x] **Step 2: Run the focused docs tests to verify failure**
 
 Run:
 
@@ -379,7 +410,7 @@ dotnet test tests/Agibuild.Fulora.UnitTests/Agibuild.Fulora.UnitTests.csproj --f
 
 Expected: FAIL because docs do not yet reflect the implemented attach-web path.
 
-- [ ] **Step 3: Update docs to match the shipped CLI**
+- [x] **Step 3: Update docs to match the shipped CLI**
 
 Update:
 
@@ -393,7 +424,7 @@ Make sure docs clearly state:
 - `generate types` regenerates artifacts explicitly
 - `dev/package --preflight-only` verify consistency and report drift
 
-- [ ] **Step 4: Re-run the focused docs tests**
+- [x] **Step 4: Re-run the focused docs tests**
 
 Run:
 
@@ -403,7 +434,7 @@ dotnet test tests/Agibuild.Fulora.UnitTests/Agibuild.Fulora.UnitTests.csproj --f
 
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add README.md docs/cli.md docs/articles/bring-your-own-web-app-quickstart.md docs/articles/bring-your-own-web-app.md tests/Agibuild.Fulora.UnitTests/DocumentationGovernanceTests.cs
@@ -415,7 +446,7 @@ git commit -m "Document the attach-web brownfield path"
 **Files:**
 - Modify: none (verification only unless failures require fixes)
 
-- [ ] **Step 1: Run the unit test suite for the touched surfaces**
+- [x] **Step 1: Run the unit test suite for the touched surfaces**
 
 Run:
 
@@ -425,7 +456,7 @@ dotnet test tests/Agibuild.Fulora.UnitTests/Agibuild.Fulora.UnitTests.csproj --f
 
 Expected: PASS
 
-- [ ] **Step 2: Run a docs build smoke check**
+- [x] **Step 2: Run a docs build smoke check**
 
 Run:
 
@@ -436,7 +467,7 @@ dotnet docfx docs/docfx.json
 
 Expected: PASS with no broken brownfield-path references.
 
-- [ ] **Step 3: Run a repository diff review**
+- [x] **Step 3: Run a repository diff review**
 
 Run:
 
@@ -450,7 +481,7 @@ Expected:
 - no whitespace/conflict issues
 - only intended CLI/docs/test files changed
 
-- [ ] **Step 4: Create the final integration commit**
+- [x] **Step 4: Create the final integration commit**
 
 ```bash
 git add src/Agibuild.Fulora.Cli README.md docs/cli.md docs/articles/bring-your-own-web-app-quickstart.md docs/articles/bring-your-own-web-app.md tests/Agibuild.Fulora.UnitTests

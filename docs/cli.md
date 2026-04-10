@@ -26,6 +26,34 @@ fulora new MyApp --frontend vue --shell-preset app-shell
 | `--frontend`, `-f` | **Required.** `react`, `vue`, or `vanilla` |
 | `--shell-preset` | Desktop shell preset: `baseline` or `app-shell` |
 
+### `fulora attach web`
+
+Attach an existing web app to a Fulora desktop host without rewriting the frontend first.
+
+```bash
+fulora attach web --web ./app/web --desktop ./app/desktop --bridge ./app/bridge --framework react
+fulora attach web --web ./app/web --framework vue --web-command "npm run dev" --dev-server-url http://localhost:5173
+```
+
+This is the canonical brownfield path:
+
+```text
+attach web -> dev -> package
+```
+
+The command creates Fulora-owned wiring, writes `fulora.json`, and leaves your existing frontend business code intact.
+
+| Option | Description |
+|---|---|
+| `--web` | **Required.** Existing web project directory containing `package.json` |
+| `--desktop` | Desktop project directory to create/reuse |
+| `--bridge` | Bridge project directory to create/reuse |
+| `--framework` | `react`, `vue`, or `generic` |
+| `--web-command` | Existing frontend dev command to echo in next steps |
+| `--dev-server-url` | Existing frontend dev server URL such as `http://localhost:5173` |
+
+`fulora attach web` establishes the structure once. If generated bridge artifacts later drift, regenerate them explicitly with `fulora generate types`; Fulora reports drift in preflight checks instead of silently auto-fixing generated files.
+
 ### `fulora dev`
 
 Start the Vite dev server and Avalonia desktop app together. Run from the solution root.
@@ -46,6 +74,8 @@ fulora dev --preflight-only
 Press **Ctrl+C** to stop both processes.
 
 Use `--preflight-only` when you want to validate bridge artifact consistency and project wiring without launching Vite or the desktop host.
+
+When `fulora.json` is present, `fulora dev` reuses the attached brownfield workspace configuration before falling back to heuristics.
 
 ### `fulora package`
 
@@ -86,6 +116,8 @@ The command now emits **preflight notes** before packaging when the selected pro
 
 Use `--preflight-only` when you want those checks without triggering `dotnet publish` or `vpk`.
 
+When `fulora.json` is present, `fulora package` reuses the configured desktop project before falling back to heuristics.
+
 ## Advanced Workflows
 
 Use these commands after the main path is already working.
@@ -110,6 +142,8 @@ fulora gen types --project ./MyApp.Bridge/MyApp.Bridge.csproj --output ./MyApp.W
 | `--output`, `-o` | Output directory for generated bridge artifacts (auto-detected; prefers `src/bridge/generated` when present) |
 
 The generated `bridge.manifest.json` records the bridge project identity, artifact directory, build configuration, target framework, bridge assembly hash, and artifact hashes so `fulora dev` and `fulora package` can detect missing or stale generated outputs without relying only on timestamps.
+
+Use this command explicitly when bridge artifacts drift. Fulora surfaces the mismatch in preflight output; it does not silently auto-fix generated files during `dev` or `package`.
 
 ### `fulora add service <name>`
 

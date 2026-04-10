@@ -458,6 +458,52 @@ public sealed class DocumentationGovernanceTests
     }
 
     [Fact]
+    public void Brownfield_entry_docs_lead_with_attach_web_path()
+    {
+        var repoRoot = FindRepoRoot();
+        var paths = new[]
+        {
+            Path.Combine(repoRoot, "README.md"),
+            Path.Combine(repoRoot, "docs", "cli.md"),
+            Path.Combine(repoRoot, "docs", "articles", "bring-your-own-web-app-quickstart.md"),
+            Path.Combine(repoRoot, "docs", "articles", "bring-your-own-web-app.md")
+        };
+
+        foreach (var path in paths)
+        {
+            Assert.True(File.Exists(path), $"Missing brownfield doc: {path}");
+            var content = File.ReadAllText(path);
+            Assert.Contains("fulora attach web", content, StringComparison.Ordinal);
+            Assert.Contains("attach web -> dev -> package", content, StringComparison.Ordinal);
+        }
+    }
+
+    [Fact]
+    public void Brownfield_docs_require_explicit_generate_types_instead_of_hidden_auto_fix()
+    {
+        var repoRoot = FindRepoRoot();
+        var paths = new[]
+        {
+            Path.Combine(repoRoot, "README.md"),
+            Path.Combine(repoRoot, "docs", "cli.md"),
+            Path.Combine(repoRoot, "docs", "articles", "bring-your-own-web-app-quickstart.md"),
+            Path.Combine(repoRoot, "docs", "articles", "bring-your-own-web-app.md")
+        };
+
+        foreach (var path in paths)
+        {
+            Assert.True(File.Exists(path), $"Missing brownfield doc: {path}");
+            var content = File.ReadAllText(path);
+            Assert.Contains("fulora generate types", content, StringComparison.Ordinal);
+            Assert.True(
+                content.Contains("silently auto-fix", StringComparison.OrdinalIgnoreCase)
+                || content.Contains("silently rewriting", StringComparison.OrdinalIgnoreCase)
+                || content.Contains("silently rewrite", StringComparison.OrdinalIgnoreCase),
+                $"Brownfield doc must explain that Fulora reports drift instead of silently auto-fixing generated files: {path}");
+        }
+    }
+
+    [Fact]
     public void Architecture_article_aligns_with_platform_layering_terms()
     {
         var repoRoot = FindRepoRoot();

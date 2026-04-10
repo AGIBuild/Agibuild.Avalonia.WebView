@@ -6,6 +6,26 @@ If you already have a React, Vue, or similar web application, you do not need to
 
 This guide explains the recommended architecture, development flow, and best practices for that adoption path.
 
+The canonical brownfield path is:
+
+```text
+attach web -> dev -> package
+```
+
+Start by wiring the existing frontend into Fulora explicitly:
+
+```bash
+fulora attach web \
+  --web ./app/web \
+  --desktop ./app/desktop \
+  --bridge ./app/bridge \
+  --framework react \
+  --web-command "npm run dev" \
+  --dev-server-url http://localhost:5173
+```
+
+This scaffolds the Fulora-owned desktop + bridge wiring, creates `fulora.json`, and keeps your existing frontend business code intact.
+
 ## When to use this approach
 
 This guide is for teams that:
@@ -24,6 +44,24 @@ Typical fits include:
 - internal web platforms that expose a development server and/or static build output
 
 If you are starting from scratch, use the standard Fulora template path first. If you already have a product, this “bring your own web app” path is usually the better starting point.
+
+## Brownfield workflow at a glance
+
+Use the commands in this order:
+
+```bash
+fulora attach web --web ./app/web --framework react
+fulora dev --preflight-only
+fulora package --profile desktop-public --preflight-only
+```
+
+If bridge artifacts drift, regenerate them explicitly:
+
+```bash
+fulora generate types --project ./app/bridge/MyProduct.Bridge.csproj
+```
+
+Fulora reports drift in preflight output instead of silently auto-fixing generated files during `dev` or `package`.
 
 ## Fulora’s role in an existing web app architecture
 
