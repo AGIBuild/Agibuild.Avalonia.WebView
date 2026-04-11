@@ -646,6 +646,12 @@ public class CliToolTests
 
             Assert.Equal(0, exitCode);
             Assert.Equal(string.Empty, stderr.ToString());
+            Assert.Contains("Fulora Dev Status", stdout.ToString(), StringComparison.Ordinal);
+            Assert.Contains("Web App", stdout.ToString(), StringComparison.Ordinal);
+            Assert.Contains("Desktop Host", stdout.ToString(), StringComparison.Ordinal);
+            Assert.Contains("Bridge Artifacts", stdout.ToString(), StringComparison.Ordinal);
+            Assert.Contains("Mock Mode", stdout.ToString(), StringComparison.Ordinal);
+            Assert.Contains("Package Readiness", stdout.ToString(), StringComparison.Ordinal);
             Assert.Contains("Refreshing bridge artifacts", stdout.ToString(), StringComparison.Ordinal);
             Assert.Contains("Preflight complete.", stdout.ToString(), StringComparison.Ordinal);
             Assert.Contains("Bridge consistency:", stdout.ToString(), StringComparison.Ordinal);
@@ -868,6 +874,77 @@ public class CliToolTests
         finally
         {
             Directory.SetCurrentDirectory(originalCwd);
+            Directory.Delete(tempDir, recursive: true);
+        }
+    }
+
+    [Fact]
+    public async Task Dev_command_missing_web_project_reports_attach_web_next_step()
+    {
+        var tempDir = Path.Combine(Path.GetTempPath(), $"fulora-cli-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(tempDir);
+
+        try
+        {
+            var desktopProject = Path.Combine(tempDir, "Demo.Desktop.csproj");
+            File.WriteAllText(desktopProject, "<Project Sdk=\"Microsoft.NET.Sdk\"></Project>");
+            using var stdout = new StringWriter();
+            using var stderr = new StringWriter();
+
+            var exitCode = await DevCommand.ExecuteAsync(
+                explicitWebProject: null,
+                explicitDesktopProject: desktopProject,
+                npmScript: "dev",
+                preflightOnly: true,
+                workingDirectory: tempDir,
+                output: stdout,
+                error: stderr,
+                runProcessAsync: (_, _, _, _) => Task.FromResult(0),
+                runUntilCancelledAsync: (_, _, _, _, _) => Task.CompletedTask,
+                ct: CancellationToken.None);
+
+            Assert.Equal(1, exitCode);
+            Assert.Contains("Could not find web project", stderr.ToString(), StringComparison.Ordinal);
+            Assert.Contains("fulora attach web", stderr.ToString(), StringComparison.Ordinal);
+        }
+        finally
+        {
+            Directory.Delete(tempDir, recursive: true);
+        }
+    }
+
+    [Fact]
+    public async Task Dev_command_missing_desktop_project_reports_attach_web_next_step()
+    {
+        var tempDir = Path.Combine(Path.GetTempPath(), $"fulora-cli-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(tempDir);
+
+        try
+        {
+            var webDir = Path.Combine(tempDir, "web");
+            Directory.CreateDirectory(webDir);
+            File.WriteAllText(Path.Combine(webDir, "package.json"), "{\"name\":\"demo-web\"}");
+            using var stdout = new StringWriter();
+            using var stderr = new StringWriter();
+
+            var exitCode = await DevCommand.ExecuteAsync(
+                explicitWebProject: webDir,
+                explicitDesktopProject: null,
+                npmScript: "dev",
+                preflightOnly: true,
+                workingDirectory: tempDir,
+                output: stdout,
+                error: stderr,
+                runProcessAsync: (_, _, _, _) => Task.FromResult(0),
+                runUntilCancelledAsync: (_, _, _, _, _) => Task.CompletedTask,
+                ct: CancellationToken.None);
+
+            Assert.Equal(1, exitCode);
+            Assert.Contains("Could not find Desktop .csproj", stderr.ToString(), StringComparison.Ordinal);
+            Assert.Contains("fulora attach web", stderr.ToString(), StringComparison.Ordinal);
+        }
+        finally
+        {
             Directory.Delete(tempDir, recursive: true);
         }
     }

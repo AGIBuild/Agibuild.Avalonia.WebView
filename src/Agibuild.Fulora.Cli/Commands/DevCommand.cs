@@ -5,6 +5,13 @@ namespace Agibuild.Fulora.Cli.Commands;
 
 internal static class DevCommand
 {
+    private readonly record struct DevStatusSnapshot(
+        string WebApp,
+        string DesktopHost,
+        string BridgeArtifacts,
+        string MockMode,
+        string PackageReadiness);
+
     internal delegate Task<int> ProcessRunner(string fileName, string arguments, string? workingDirectory, CancellationToken ct);
     internal delegate Task RunUntilCancelled(string fileName, string arguments, string? workingDirectory, string prefix, CancellationToken ct);
 
@@ -107,18 +114,28 @@ internal static class DevCommand
 
         if (web is null)
         {
-            error.WriteLine("Could not find web project (package.json). Use --web to specify.");
+            error.WriteLine("Could not find web project (package.json). Use --web to specify or run `fulora attach web --web <existing-web-app>` to wire an existing frontend into Fulora.");
             return 1;
         }
 
         if (desktop is null)
         {
-            error.WriteLine("Could not find Desktop .csproj. Use --desktop to specify.");
+            error.WriteLine("Could not find Desktop .csproj. Use --desktop to specify or run `fulora attach web --desktop <desktop-dir>` to scaffold the desktop host.");
             return 1;
         }
 
+        var bridgeProject = ResolveBridgeProject(workingDirectory);
+        WriteStatusPanel(
+            output,
+            new DevStatusSnapshot(
+                WebApp: $"{Path.GetFileName(web)} (preflight)",
+                DesktopHost: $"{Path.GetFileName(desktop)} (preflight)",
+                BridgeArtifacts: bridgeProject is null ? "skipped (no bridge project detected)" : $"checking {Path.GetFileName(bridgeProject)}",
+                MockMode: "off",
+                PackageReadiness: DescribePackageReadiness(desktop)));
+
         var preflightExitCode = await PrepareBridgeArtifactsAsync(
-            explicitBridgeProject: ResolveBridgeProject(workingDirectory),
+            explicitBridgeProject: bridgeProject,
             output: output,
             error: error,
             runProcessAsync: runProcessAsync,
@@ -169,6 +186,34 @@ internal static class DevCommand
         output.WriteLine();
         output.WriteLine("Development servers stopped.");
         return 0;
+    }
+
+    private static void WriteStatusPanel(TextWriter output, DevStatusSnapshot snapshot)
+    {
+        output.WriteLine("Fulora Dev Status");
+        output.WriteLine("────────────────────────");
+        output.WriteLine($"Web App           {snapshot.WebApp}");
+        output.WriteLine($"Desktop Host      {snapshot.DesktopHost}");
+        output.WriteLine($"Bridge Artifacts  {snapshot.BridgeArtifacts}");
+        output.WriteLine($"Mock Mode         {snapshot.MockMode}");
+        output.WriteLine($"Package Readiness {snapshot.PackageReadiness}");
+        output.WriteLine();
+    }
+
+    private static string DescribePackageReadiness(string desktopProjectPath)
+    {
+        var notes = PackageCommand.CollectPreflightNotes(
+            profileName: "desktop-public",
+            runtime: OperatingSystem.IsMacOS() ? "osx-arm64" : OperatingSystem.IsWindows() ? "win-x64" : "linux-x64",
+            notarize: false,
+            signParams: null,
+            hasVpk: PackageCommand.FindVpk() is not null,
+            isMacOS: OperatingSystem.IsMacOS());
+
+        if (notes.Count == 0)
+            return $"{Path.GetFileNameWithoutExtension(desktopProjectPath)} ready";
+
+        return $"warning ({notes[0]})";
     }
 
     internal static string? ResolveWebProject(string? explicitWebProject, string workingDirectory, IFileSystem? fileSystem = null)

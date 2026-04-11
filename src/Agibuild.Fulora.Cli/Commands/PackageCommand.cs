@@ -255,7 +255,7 @@ internal static class PackageCommand
         return projectName;
     }
 
-    private static string? FindVpk(IEnvironmentContext? environment = null, IFileSystem? fileSystem = null)
+    internal static string? FindVpk(IEnvironmentContext? environment = null, IFileSystem? fileSystem = null)
     {
         environment ??= RealEnvironmentContext.Instance;
         fileSystem ??= RealFileSystem.Instance;
