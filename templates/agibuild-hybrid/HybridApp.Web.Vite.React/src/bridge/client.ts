@@ -5,8 +5,16 @@ import {
   withLogging,
 } from "@fulora/client";
 import { greeterService } from "./generated/bridge.client";
+import { installBridgeMock } from "./generated/bridge.mock";
 
 export type { GreeterService } from "./generated/bridge";
+
+export const isMockMode =
+  import.meta.env.MODE === "mock" || import.meta.env.VITE_FULORA_MOCK === "true";
+
+if (isMockMode) {
+  installBridgeMock();
+}
 
 const bridgeClient = createBridgeClient();
 

@@ -393,15 +393,42 @@ public sealed class AutomationLaneGovernanceTests
         var vuePackageJson = File.ReadAllText(Path.Combine(vueTemplateWebPath, "package.json"));
         AssertSourceContains(reactPackageJson, "\"@fulora/client\"", TemplateMetadataSchema, Path.Combine(reactTemplateWebPath, "package.json"));
         AssertSourceContains(vuePackageJson, "\"@fulora/client\"", TemplateMetadataSchema, Path.Combine(vueTemplateWebPath, "package.json"));
+        AssertSourceContains(reactPackageJson, "\"vite\": \"^8.", TemplateMetadataSchema, Path.Combine(reactTemplateWebPath, "package.json"));
+        AssertSourceContains(vuePackageJson, "\"vite\": \"^8.", TemplateMetadataSchema, Path.Combine(vueTemplateWebPath, "package.json"));
+        AssertSourceContains(reactPackageJson, "\"@biomejs/biome\": \"^2.", TemplateMetadataSchema, Path.Combine(reactTemplateWebPath, "package.json"));
+        AssertSourceContains(vuePackageJson, "\"@biomejs/biome\": \"^2.", TemplateMetadataSchema, Path.Combine(vueTemplateWebPath, "package.json"));
+        AssertSourceContains(reactPackageJson, "\"vitest\": \"^4.", TemplateMetadataSchema, Path.Combine(reactTemplateWebPath, "package.json"));
+        AssertSourceContains(vuePackageJson, "\"vitest\": \"^4.", TemplateMetadataSchema, Path.Combine(vueTemplateWebPath, "package.json"));
+        AssertSourceContains(reactPackageJson, "\"@vitest/browser\": \"^4.", TemplateMetadataSchema, Path.Combine(reactTemplateWebPath, "package.json"));
+        AssertSourceContains(vuePackageJson, "\"@vitest/browser\": \"^4.", TemplateMetadataSchema, Path.Combine(vueTemplateWebPath, "package.json"));
+        AssertSourceContains(reactPackageJson, "\"playwright\": \"^1.59.", TemplateMetadataSchema, Path.Combine(reactTemplateWebPath, "package.json"));
+        AssertSourceContains(vuePackageJson, "\"playwright\": \"^1.59.", TemplateMetadataSchema, Path.Combine(vueTemplateWebPath, "package.json"));
+        foreach (var script in new[] { "\"dev:mock\"", "\"test\"", "\"test:browser\"", "\"test:e2e\"", "\"check\"", "\"format\"" })
+        {
+            AssertSourceContains(reactPackageJson, script, TemplateMetadataSchema, Path.Combine(reactTemplateWebPath, "package.json"));
+            AssertSourceContains(vuePackageJson, script, TemplateMetadataSchema, Path.Combine(vueTemplateWebPath, "package.json"));
+        }
 
         var reactServicesPath = Path.Combine(reactTemplateWebPath, "src", "bridge", "services.ts");
         var vueServicesPath = Path.Combine(vueTemplateWebPath, "src", "bridge", "services.ts");
         var reactHookPath = Path.Combine(reactTemplateWebPath, "src", "hooks", "useBridge.ts");
         var vueHookPath = Path.Combine(vueTemplateWebPath, "src", "composables", "useBridge.ts");
+        var reactBiomePath = Path.Combine(reactTemplateWebPath, "biome.json");
+        var vueBiomePath = Path.Combine(vueTemplateWebPath, "biome.json");
+        var reactVitestPath = Path.Combine(reactTemplateWebPath, "vitest.config.ts");
+        var vueVitestPath = Path.Combine(vueTemplateWebPath, "vitest.config.ts");
+        var reactPlaywrightPath = Path.Combine(reactTemplateWebPath, "playwright.config.ts");
+        var vuePlaywrightPath = Path.Combine(vueTemplateWebPath, "playwright.config.ts");
         AssertFileExists(reactServicesPath, TemplateMetadataSchema);
         AssertFileExists(vueServicesPath, TemplateMetadataSchema);
         AssertFileExists(reactHookPath, TemplateMetadataSchema);
         AssertFileExists(vueHookPath, TemplateMetadataSchema);
+        AssertFileExists(reactBiomePath, TemplateMetadataSchema);
+        AssertFileExists(vueBiomePath, TemplateMetadataSchema);
+        AssertFileExists(reactVitestPath, TemplateMetadataSchema);
+        AssertFileExists(vueVitestPath, TemplateMetadataSchema);
+        AssertFileExists(reactPlaywrightPath, TemplateMetadataSchema);
+        AssertFileExists(vuePlaywrightPath, TemplateMetadataSchema);
 
         var reactServices = File.ReadAllText(reactServicesPath);
         var vueServices = File.ReadAllText(vueServicesPath);
