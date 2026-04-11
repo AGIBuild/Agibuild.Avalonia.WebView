@@ -1,5 +1,5 @@
 {
-  "name": "@agibuild/bridge-plugin-biometric",
+  "name": "@fulora/plugin-biometric",
   "version": "0.0.0",
   "description": "TypeScript types for the Agibuild Fulora biometric authentication bridge plugin",
   "type": "module",
@@ -11,7 +11,7 @@
     "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
-    "@agibuild/bridge": "^1.0.0"
+    "@fulora/client": "^1.0.0"
   },
   "devDependencies": {
     "typescript": "^5.9.3"

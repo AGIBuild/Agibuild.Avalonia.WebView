@@ -4,7 +4,7 @@ import {
   type BridgeReadyOptions,
   withErrorNormalization,
   withLogging,
-} from '@agibuild/bridge';
+} from '@fulora/client';
 import { todoService } from './generated/bridge.client';
 import { installBridgeMock } from './generated/bridge.mock';
 

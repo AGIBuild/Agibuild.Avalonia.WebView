@@ -1,5 +1,5 @@
 {
-  "name": "@agibuild/bridge-plugin-drag-drop",
+  "name": "@fulora/plugin-drag-drop",
   "version": "0.0.0",
   "description": "TypeScript types for the Agibuild Fulora drag-and-drop bridge plugin",
   "type": "module",
@@ -11,7 +11,7 @@
     "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
-    "@agibuild/bridge": "^1.0.0"
+    "@fulora/client": "^1.0.0"
   },
   "devDependencies": {
     "typescript": "^5.0.0"

@@ -1,12 +1,13 @@
 using System.CommandLine;
 using System.Diagnostics;
+using System.Text;
 
 namespace Agibuild.Fulora.Cli.Commands;
 
 internal static class AddPluginCommand
 {
     private const string PluginPrefix = "Agibuild.Fulora.Plugin.";
-    private const string NpmPackagePrefix = "@agibuild/bridge-plugin-";
+    private const string NpmPackagePrefix = "@fulora/plugin-";
 
     public static Command Create()
     {
@@ -84,7 +85,17 @@ internal static class AddPluginCommand
         if (suffix.Length == 0)
             return null;
 
-        var npmSuffix = suffix.ToLowerInvariant();
+        var builder = new StringBuilder(suffix.Length + 4);
+        for (var i = 0; i < suffix.Length; i++)
+        {
+            var ch = suffix[i];
+            if (char.IsUpper(ch) && i > 0)
+                builder.Append('-');
+
+            builder.Append(char.ToLowerInvariant(ch));
+        }
+
+        var npmSuffix = builder.ToString();
         return $"{NpmPackagePrefix}{npmSuffix}";
     }
 

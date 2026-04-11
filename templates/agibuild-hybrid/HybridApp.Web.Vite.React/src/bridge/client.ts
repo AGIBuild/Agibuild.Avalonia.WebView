@@ -3,7 +3,7 @@ import {
   type BridgeReadyOptions,
   withErrorNormalization,
   withLogging,
-} from "@agibuild/bridge";
+} from "@fulora/client";
 import { greeterService } from "./generated/bridge.client";
 
 export type { GreeterService } from "./generated/bridge";

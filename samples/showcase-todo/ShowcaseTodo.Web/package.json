@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@agibuild/bridge": "file:../../../packages/bridge",
+    "@fulora/client": "file:../../../packages/bridge",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

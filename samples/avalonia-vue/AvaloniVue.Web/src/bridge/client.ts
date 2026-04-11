@@ -4,7 +4,7 @@ import {
   type BridgeReadyOptions,
   withErrorNormalization,
   withLogging,
-} from '@agibuild/bridge';
+} from '@fulora/client';
 import {
   appShellService,
   chatService,

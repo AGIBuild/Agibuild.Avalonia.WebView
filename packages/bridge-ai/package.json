@@ -1,7 +1,7 @@
 {
-  "name": "@agibuild/bridge-ai",
+  "name": "@fulora/ai",
   "version": "0.1.0",
-  "description": "AI bridge client for Agibuild.Fulora — typed helpers for calling AI services from JavaScript.",
+  "description": "Fulora AI helpers for typed app-service calls from JavaScript.",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -20,10 +20,10 @@
     "prepare": "npm run build"
   },
   "peerDependencies": {
-    "@agibuild/bridge": ">=1.0.0"
+    "@fulora/client": ">=1.0.0"
   },
   "devDependencies": {
-    "@agibuild/bridge": "^1.1.0",
+    "@fulora/client": "file:../bridge",
     "typescript": "^5.9.3"
   },
   "repository": {

@@ -3,7 +3,7 @@ import {
   type BridgeReadyOptions,
   withErrorNormalization,
   withLogging,
-} from '@agibuild/bridge';
+} from '@fulora/client';
 import { aiChatService, windowShellBridgeService } from './generated/bridge.client';
 
 export type {

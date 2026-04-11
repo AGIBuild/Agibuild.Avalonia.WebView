@@ -1,7 +1,7 @@
 {
-  "name": "@agibuild/bridge",
+  "name": "@fulora/client",
   "version": "1.1.0",
-  "description": "Typed bridge client runtime for Agibuild.Fulora — call C# services from JavaScript with full type safety.",
+  "description": "Fulora client runtime for typed app-service calls from JavaScript.",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -35,13 +35,15 @@
   },
   "author": "AGIBuild",
   "keywords": [
+    "client",
+    "services",
+    "fulora",
     "webview",
     "bridge",
     "avalonia",
     "rpc",
     "csharp",
-    "interop",
-    "fulora"
+    "interop"
   ],
   "devDependencies": {
     "typescript": "^6.0.2"

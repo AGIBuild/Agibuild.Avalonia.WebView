@@ -29,7 +29,7 @@ Releases are fully automated through the unified `ci.yml` workflow:
 | Secret | Description |
 |--------|-------------|
 | `NUGET_API_KEY` | NuGet.org API key with push permissions for `Agibuild.Fulora.*` packages |
-| `NPM_TOKEN` | npm access token with publish permissions for `@agibuild` scope |
+| `NPM_TOKEN` | npm access token with publish permissions for `@fulora` scope |
 
 ### GitHub Environment
 
@@ -74,7 +74,7 @@ After updating the version, commit the `Directory.Build.props` change and push t
 dotnet package search Agibuild.Fulora.Avalonia --exact-match
 
 # Verify npm package
-npm info @agibuild/bridge
+npm info @fulora/client
 
 # Verify GitHub Release
 gh release list --limit 3
@@ -98,7 +98,7 @@ gh release list --limit 3
 
 | Package | Description |
 |---|---|
-| `@agibuild/bridge` | Bridge client, HMR preservation, Web Worker relay |
+| `@fulora/client` | Fulora client runtime, HMR preservation, Web Worker relay |
 
 ## Troubleshooting
 

@@ -281,7 +281,7 @@ import {
   type BridgeReadyOptions,
   withErrorNormalization,
   withLogging,
-} from "@agibuild/bridge";
+} from "@fulora/client";
 
 import { userProfileService } from "./generated/bridge.client";
 

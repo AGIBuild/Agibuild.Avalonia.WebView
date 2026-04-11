@@ -444,8 +444,8 @@ public sealed class AutomationLaneGovernanceTests
 
         var reactPackageJson = File.ReadAllText(Path.Combine(reactTemplateWebPath, "package.json"));
         var vuePackageJson = File.ReadAllText(Path.Combine(vueTemplateWebPath, "package.json"));
-        AssertSourceContains(reactPackageJson, "\"@agibuild/bridge\"", TemplateMetadataSchema, Path.Combine(reactTemplateWebPath, "package.json"));
-        AssertSourceContains(vuePackageJson, "\"@agibuild/bridge\"", TemplateMetadataSchema, Path.Combine(vueTemplateWebPath, "package.json"));
+        AssertSourceContains(reactPackageJson, "\"@fulora/client\"", TemplateMetadataSchema, Path.Combine(reactTemplateWebPath, "package.json"));
+        AssertSourceContains(vuePackageJson, "\"@fulora/client\"", TemplateMetadataSchema, Path.Combine(vueTemplateWebPath, "package.json"));
 
         var reactServicesPath = Path.Combine(reactTemplateWebPath, "src", "bridge", "services.ts");
         var vueServicesPath = Path.Combine(vueTemplateWebPath, "src", "bridge", "services.ts");
@@ -1103,7 +1103,7 @@ public sealed class AutomationLaneGovernanceTests
         var aiChatApp = File.ReadAllText(Path.Combine(repoRoot, "samples", "avalonia-ai-chat", "AvaloniAiChat.Web", "src", "App.tsx"));
         var vueLayout = File.ReadAllText(Path.Combine(repoRoot, "samples", "avalonia-vue", "AvaloniVue.Web", "src", "components", "AppLayout.vue"));
 
-        AssertSourceContains(bridgePackage, "\"@agibuild/bridge\"", BridgeDxAssets, "packages/bridge/package.json");
+        AssertSourceContains(bridgePackage, "\"@fulora/client\"", BridgeDxAssets, "packages/bridge/package.json");
         AssertSourceContains(bridgePackage, "\"prepare\": \"npm run build\"", BridgeDxAssets, "packages/bridge/package.json");
         AssertSourceContains(bridgeEntry, "createBridgeClient", BridgeDxAssets, "packages/bridge/src/index.ts");
         AssertSourceContains(bridgeEntry, "bridgeClient", BridgeDxAssets, "packages/bridge/src/index.ts");
@@ -1111,32 +1111,32 @@ public sealed class AutomationLaneGovernanceTests
         AssertSourceContains(bridgeProfileEntry, "createBridgeProfile", BridgeDxAssets, "packages/bridge/src/profile.ts");
         AssertSourceContains(bridgeProfileEntry, "withErrorNormalization", BridgeDxAssets, "packages/bridge/src/profile.ts");
         AssertSourceContains(templateDesktopMainWindow, "BootstrapSpaProfileAsync", BridgeDxAssets, "templates/agibuild-hybrid/HybridApp.Desktop/MainWindow.axaml.cs");
-        AssertSourceContains(templateReactClient, "@agibuild/bridge", BridgeDxAssets, "templates/agibuild-hybrid/HybridApp.Web.Vite.React/src/bridge/client.ts");
-        AssertSourceContains(templateVueClient, "@agibuild/bridge", BridgeDxAssets, "templates/agibuild-hybrid/HybridApp.Web.Vite.Vue/src/bridge/client.ts");
-        AssertSourceContains(reactPackage, "\"@agibuild/bridge\"", BridgeDxAssets, "samples/avalonia-react/.../package.json");
+        AssertSourceContains(templateReactClient, "@fulora/client", BridgeDxAssets, "templates/agibuild-hybrid/HybridApp.Web.Vite.React/src/bridge/client.ts");
+        AssertSourceContains(templateVueClient, "@fulora/client", BridgeDxAssets, "templates/agibuild-hybrid/HybridApp.Web.Vite.Vue/src/bridge/client.ts");
+        AssertSourceContains(reactPackage, "\"@fulora/client\"", BridgeDxAssets, "samples/avalonia-react/.../package.json");
         Assert.True(
             reactBridge.Contains("from './generated/bridge.client'", StringComparison.Ordinal) ||
             reactBridge.Contains("from './client'", StringComparison.Ordinal),
             $"[{BridgeDxAssets}] React sample bridge services should re-export generated contracts directly or through the primary client entry point.");
         AssertSourceContains(reactBridgeHook, "bridgeProfile.ready", BridgeDxAssets, "samples/avalonia-react/.../useBridge.ts");
         AssertSourceContains(vueLayout, "getAppInfo", BridgeDxAssets, "samples/avalonia-vue/.../AppLayout.vue");
-        AssertSourceContains(vuePackage, "\"@agibuild/bridge\"", BridgeDxAssets, "samples/avalonia-vue/.../package.json");
+        AssertSourceContains(vuePackage, "\"@fulora/client\"", BridgeDxAssets, "samples/avalonia-vue/.../package.json");
         Assert.True(
             vueBridge.Contains("from './generated/bridge.client'", StringComparison.Ordinal) ||
             vueBridge.Contains("from './client'", StringComparison.Ordinal),
             $"[{BridgeDxAssets}] Vue sample bridge services should re-export generated contracts directly or through the primary client entry point.");
-        AssertSourceContains(vueClient, "@agibuild/bridge", BridgeDxAssets, "samples/avalonia-vue/.../client.ts");
+        AssertSourceContains(vueClient, "@fulora/client", BridgeDxAssets, "samples/avalonia-vue/.../client.ts");
         AssertSourceContains(vueTsConfig, "src/bridge/generated/bridge.d.ts", BridgeDxAssets, "samples/avalonia-vue/.../tsconfig.json");
         Assert.True(
             todoBridge.Contains("from './generated/bridge.client'", StringComparison.Ordinal) ||
             todoBridge.Contains("from './client'", StringComparison.Ordinal),
             $"[{BridgeDxAssets}] Showcase todo bridge services should re-export generated contracts directly or through the primary client entry point.");
-        AssertSourceContains(todoClient, "@agibuild/bridge", BridgeDxAssets, "samples/showcase-todo/.../client.ts");
+        AssertSourceContains(todoClient, "@fulora/client", BridgeDxAssets, "samples/showcase-todo/.../client.ts");
         Assert.True(
             aiChatBridge.Contains("from './generated/bridge.client'", StringComparison.Ordinal) ||
             aiChatBridge.Contains("from './client'", StringComparison.Ordinal),
             $"[{BridgeDxAssets}] AI chat bridge services should re-export generated contracts directly or through the primary client entry point.");
-        AssertSourceContains(aiChatClient, "@agibuild/bridge", BridgeDxAssets, "samples/avalonia-ai-chat/.../client.ts");
+        AssertSourceContains(aiChatClient, "@fulora/client", BridgeDxAssets, "samples/avalonia-ai-chat/.../client.ts");
         AssertSourceContains(aiChatApp, "from './bridge/services'", BridgeDxAssets, "samples/avalonia-ai-chat/.../App.tsx");
     }
 

@@ -38,7 +38,7 @@ Copy your existing web application into the `MyApp.Web.Vite.React/` directory (o
 **Key change**: Replace Electron's `preload.js` with the Fulora bridge client:
 
 ```bash
-npm install @agibuild/bridge
+npm install @fulora/client
 ```
 
 ### 3. Replace IPC with Bridge Services
@@ -82,7 +82,7 @@ webView.Bridge.Expose<IFileService>(new FileService());
 
 ```typescript
 // TypeScript — Consume the service (auto-generated types)
-import { bridgeClient } from '@agibuild/bridge';
+import { bridgeClient } from '@fulora/client';
 import type { IFileService } from './bridge'; // auto-generated .d.ts
 
 const fileService = bridgeClient.getService<IFileService>('FileService');
@@ -152,7 +152,7 @@ dotnet publish -c Release
 | `ipcRenderer.send(channel, ...args)` | `bridgeClient.invoke(method, params)` |
 | `ipcMain.on(channel, handler)` | `Rpc.Handle(method, handler)` |
 | `webContents.send(channel, ...args)` | `Rpc.InvokeAsync(method, args)` (C# → JS) |
-| `contextBridge.exposeInMainWorld` | Automatic via `@agibuild/bridge` client |
+| `contextBridge.exposeInMainWorld` | Automatic via `@fulora/client` client |
 
 ---
 

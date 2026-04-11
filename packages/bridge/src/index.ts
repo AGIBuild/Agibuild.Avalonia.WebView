@@ -56,7 +56,7 @@ export type BridgeServiceMethod<TParams = void, TResult = unknown> =
     : (params: TParams) => Promise<TResult>;
 
 export type BridgeServiceContract<TService extends object> = {
-  [K in keyof TService]: TService[K] extends (...args: any[]) => Promise<any>
+  [K in keyof TService]: TService[K] extends (...args: any[]) => Promise<any> | AsyncIterable<any>
     ? TService[K]
     : never;
 };
