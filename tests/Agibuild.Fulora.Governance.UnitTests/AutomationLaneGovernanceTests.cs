@@ -1092,16 +1092,32 @@ public sealed class AutomationLaneGovernanceTests
             "templates/agibuild-hybrid/HybridApp.Web.Vite.Vue/src/bridge/services.ts",
             "templates/agibuild-hybrid/HybridApp.Web.Vite.Vue/src/composables/useBridge.ts",
             "samples/avalonia-react/AvaloniReact.Web/package.json",
+            "samples/avalonia-react/AvaloniReact.Web/biome.json",
+            "samples/avalonia-react/AvaloniReact.Web/vitest.config.ts",
+            "samples/avalonia-react/AvaloniReact.Web/vitest.browser.config.ts",
+            "samples/avalonia-react/AvaloniReact.Web/playwright.config.ts",
             "samples/avalonia-react/AvaloniReact.Web/src/bridge/services.ts",
             "samples/avalonia-react/AvaloniReact.Web/src/hooks/useBridge.ts",
             "samples/avalonia-vue/AvaloniVue.Web/src/main.ts",
             "samples/avalonia-vue/AvaloniVue.Web/package.json",
+            "samples/avalonia-vue/AvaloniVue.Web/biome.json",
+            "samples/avalonia-vue/AvaloniVue.Web/vitest.config.ts",
+            "samples/avalonia-vue/AvaloniVue.Web/vitest.browser.config.ts",
+            "samples/avalonia-vue/AvaloniVue.Web/playwright.config.ts",
             "samples/avalonia-vue/AvaloniVue.Web/src/bridge/services.ts",
             "samples/avalonia-vue/AvaloniVue.Web/src/bridge/client.ts",
             "samples/avalonia-vue/AvaloniVue.Web/tsconfig.json",
+            "samples/showcase-todo/ShowcaseTodo.Web/biome.json",
+            "samples/showcase-todo/ShowcaseTodo.Web/vitest.config.ts",
+            "samples/showcase-todo/ShowcaseTodo.Web/vitest.browser.config.ts",
+            "samples/showcase-todo/ShowcaseTodo.Web/playwright.config.ts",
             "samples/showcase-todo/ShowcaseTodo.Web/src/bridge/services.ts",
             "samples/showcase-todo/ShowcaseTodo.Web/src/bridge/client.ts",
             "samples/showcase-todo/ShowcaseTodo.Web/src/hooks/useBridge.ts",
+            "samples/avalonia-ai-chat/AvaloniAiChat.Web/biome.json",
+            "samples/avalonia-ai-chat/AvaloniAiChat.Web/vitest.config.ts",
+            "samples/avalonia-ai-chat/AvaloniAiChat.Web/vitest.browser.config.ts",
+            "samples/avalonia-ai-chat/AvaloniAiChat.Web/playwright.config.ts",
             "samples/avalonia-ai-chat/AvaloniAiChat.Web/src/bridge/services.ts",
             "samples/avalonia-ai-chat/AvaloniAiChat.Web/src/bridge/client.ts",
             "samples/avalonia-ai-chat/AvaloniAiChat.Web/src/hooks/useBridge.ts",
@@ -1141,6 +1157,22 @@ public sealed class AutomationLaneGovernanceTests
         AssertSourceContains(templateReactClient, "@fulora/client", BridgeDxAssets, "templates/agibuild-hybrid/HybridApp.Web.Vite.React/src/bridge/client.ts");
         AssertSourceContains(templateVueClient, "@fulora/client", BridgeDxAssets, "templates/agibuild-hybrid/HybridApp.Web.Vite.Vue/src/bridge/client.ts");
         AssertSourceContains(reactPackage, "\"@fulora/client\"", BridgeDxAssets, "samples/avalonia-react/.../package.json");
+        foreach (var (packageJson, label) in new[]
+        {
+            (reactPackage, "samples/avalonia-react/.../package.json"),
+            (vuePackage, "samples/avalonia-vue/.../package.json"),
+            (File.ReadAllText(Path.Combine(repoRoot, "samples", "showcase-todo", "ShowcaseTodo.Web", "package.json")), "samples/showcase-todo/.../package.json"),
+            (File.ReadAllText(Path.Combine(repoRoot, "samples", "avalonia-ai-chat", "AvaloniAiChat.Web", "package.json")), "samples/avalonia-ai-chat/.../package.json"),
+        })
+        {
+            AssertSourceContains(packageJson, "\"vite\": \"^8.", BridgeDxAssets, label);
+            AssertSourceContains(packageJson, "\"@biomejs/biome\": \"^2.", BridgeDxAssets, label);
+            AssertSourceContains(packageJson, "\"vitest\": \"^4.", BridgeDxAssets, label);
+            AssertSourceContains(packageJson, "\"@vitest/browser\": \"^4.", BridgeDxAssets, label);
+            AssertSourceContains(packageJson, "\"playwright\": \"^1.59.", BridgeDxAssets, label);
+            foreach (var script in new[] { "\"dev:mock\"", "\"test\"", "\"test:browser\"", "\"test:e2e\"", "\"check\"", "\"format\"" })
+                AssertSourceContains(packageJson, script, BridgeDxAssets, label);
+        }
         Assert.True(
             reactBridge.Contains("from './generated/bridge.client'", StringComparison.Ordinal) ||
             reactBridge.Contains("from './client'", StringComparison.Ordinal),

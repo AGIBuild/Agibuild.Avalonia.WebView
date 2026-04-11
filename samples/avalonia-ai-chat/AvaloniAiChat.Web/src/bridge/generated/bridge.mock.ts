@@ -43,7 +43,15 @@ export function installBridgeMock() {
     streamWindowShellState: (..._args: unknown[]) => Promise.resolve({} as any),
   };
 
+  for (const [serviceName, methods] of Object.entries(bridge)) {
+    for (const [methodName, handler] of Object.entries(methods)) {
+      handlers[`${serviceName[0]!.toUpperCase()}${serviceName.slice(1)}.${methodName}`] = (params) => handler(params);
+    }
+  }
+
   (window as any).agWebView = { rpc, bridge };
+  (window as any).__agWebViewReady = true;
+  window.dispatchEvent(new Event('agWebViewReady'));
 
   return { rpc, bridge, handlers };
 }

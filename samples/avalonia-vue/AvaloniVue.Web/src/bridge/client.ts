@@ -45,6 +45,10 @@ function installMockOnce() {
   mockInstalled = true;
 }
 
+if (import.meta.env.MODE === 'mock' || import.meta.env.VITE_FULORA_MOCK === 'true') {
+  installMockOnce();
+}
+
 export const bridge = bridgeClient;
 
 export const bridgeProfile = {
