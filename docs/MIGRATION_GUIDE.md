@@ -41,6 +41,13 @@ Copy your existing web application into the `MyApp.Web.Vite.React/` directory (o
 npm install @fulora/client
 ```
 
+If you are migrating from an earlier Fulora JavaScript integration, update imports from the old generic package names:
+
+```diff
+- import { createBridgeClient } from '@agibuild/bridge'
++ import { createBridgeClient } from '@fulora/client'
+```
+
 ### 3. Replace IPC with Bridge Services
 
 **Electron (before):**

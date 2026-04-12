@@ -67,6 +67,36 @@ After updating the version, commit the `Directory.Build.props` change and push t
 5. If this is a release run, Deploy Documentation publishes docs from the release pipeline
 6. For docs-only changes, monitor the separate `Deploy Documentation` workflow (`docs.yml`)
 
+## npm package migration note
+
+The repository has already moved its JavaScript naming model to:
+
+- `@fulora/client`
+- `@fulora/ai`
+- `@fulora/plugin-*`
+
+Until `@fulora/client` is published on npm, the React/Vue starter templates use a temporary alias:
+
+```json
+"@fulora/client": "npm:@agibuild/bridge@^1.1.1"
+```
+
+That alias keeps template installs working during the migration window. Once `@fulora/client` is published, remove the alias and point the templates directly at the Fulora package name.
+
+### Post-publish cleanup checklist
+
+After publishing `@fulora/client`:
+
+1. Replace the template dependency alias with a direct dependency:
+
+   ```json
+   "@fulora/client": "^1.1.0"
+   ```
+
+2. Refresh the template lock files.
+3. Re-run template build/test/browser/e2e verification.
+4. Commit the alias removal as a follow-up cleanup change.
+
 ## Post-Release Verification
 
 ```bash
@@ -106,5 +136,6 @@ gh release list --limit 3
 |-------|------------|
 | NuGet push fails with 409 | Package already exists. `--skip-duplicate` handles this automatically. |
 | npm publish fails with 401 | `NPM_TOKEN` is missing or expired. Regenerate and update the GitHub secret. |
+| Templates still point at `npm:@agibuild/bridge` after publishing `@fulora/client` | Remove the alias from template `package.json` files, refresh lock files, and rerun template verification. |
 | Release job runs without approval | Verify `release` environment has required reviewers configured. |
 | Docs not deploying | Check GitHub Pages source is set to "GitHub Actions" in repo settings. |

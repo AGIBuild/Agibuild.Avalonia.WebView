@@ -540,8 +540,35 @@ public sealed class DocumentationGovernanceTests
             Assert.True(File.Exists(path), $"Missing JS package doc: {path}");
             var content = File.ReadAllText(path);
             Assert.Contains("@fulora/client", content, StringComparison.Ordinal);
-            Assert.DoesNotContain("@agibuild/bridge", content, StringComparison.Ordinal);
+            if (path.EndsWith("MIGRATION_GUIDE.md", StringComparison.Ordinal))
+            {
+                Assert.Contains("@agibuild/bridge", content, StringComparison.Ordinal);
+                Assert.Contains("migrating from an earlier Fulora JavaScript integration", content, StringComparison.OrdinalIgnoreCase);
+            }
+            else if (path.EndsWith("release-checklist.md", StringComparison.Ordinal))
+            {
+                Assert.Contains("npm:@agibuild/bridge", content, StringComparison.Ordinal);
+                Assert.Contains("Post-publish cleanup checklist", content, StringComparison.Ordinal);
+            }
+            else
+            {
+                Assert.DoesNotContain("@agibuild/bridge", content, StringComparison.Ordinal);
+            }
         }
+    }
+
+    [Fact]
+    public void Release_docs_explain_the_temporary_template_alias_and_post_publish_cleanup()
+    {
+        var repoRoot = FindRepoRoot();
+        var releaseChecklistPath = Path.Combine(repoRoot, "docs", "release-checklist.md");
+        Assert.True(File.Exists(releaseChecklistPath), "Missing docs/release-checklist.md");
+
+        var content = File.ReadAllText(releaseChecklistPath);
+        Assert.Contains("npm:@agibuild/bridge", content, StringComparison.Ordinal);
+        Assert.Contains("@fulora/client", content, StringComparison.Ordinal);
+        Assert.Contains("Post-publish cleanup checklist", content, StringComparison.Ordinal);
+        Assert.Contains("Remove the alias", content, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
