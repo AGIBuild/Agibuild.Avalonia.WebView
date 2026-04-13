@@ -15,6 +15,8 @@ public sealed class WebViewAdapterRegistryTests
     [Fact]
     public void TryCreateForCurrentPlatform_prefers_matching_provider_with_highest_priority()
     {
+        WebViewAdapterRegistry.ResetForTests();
+
         var lower = new StubPlatformProvider("low", canHandle: true, priority: int.MinValue, () => new MarkerAdapter("low"));
         var higher = new StubPlatformProvider("high", canHandle: true, priority: int.MaxValue, () => new MarkerAdapter("high"));
 
@@ -31,6 +33,8 @@ public sealed class WebViewAdapterRegistryTests
     [Fact]
     public void TryCreateForCurrentPlatform_ignores_provider_that_cannot_handle_current_platform()
     {
+        WebViewAdapterRegistry.ResetForTests();
+
         WebViewAdapterRegistry.RegisterProvider(new StubPlatformProvider("off", canHandle: false, priority: int.MaxValue, () => new MarkerAdapter("off")));
         WebViewAdapterRegistry.RegisterProvider(new StubPlatformProvider("on", canHandle: true, priority: 0, () => new MarkerAdapter("on")));
 
@@ -39,6 +43,25 @@ public sealed class WebViewAdapterRegistryTests
         Assert.True(result);
         Assert.Null(reason);
         Assert.Equal("on", Assert.IsType<MarkerAdapter>(adapter).Id);
+    }
+
+    [Fact]
+    public void TryCreateForCurrentPlatform_prefers_highest_priority_across_provider_and_legacy_registration()
+    {
+        WebViewAdapterRegistry.ResetForTests();
+
+        WebViewAdapterRegistry.RegisterProvider(new StubPlatformProvider("provider-low", canHandle: true, priority: 10, () => new MarkerAdapter("provider-low")));
+        WebViewAdapterRegistry.Register(new WebViewAdapterRegistration(
+            GetCurrentPlatformForTest(),
+            "legacy-high",
+            () => new MarkerAdapter("legacy-high"),
+            Priority: int.MaxValue));
+
+        var result = WebViewAdapterRegistry.TryCreateForCurrentPlatform(out var adapter, out var reason);
+
+        Assert.True(result);
+        Assert.Null(reason);
+        Assert.Equal("legacy-high", Assert.IsType<MarkerAdapter>(adapter).Id);
     }
 
     [Fact]
@@ -189,5 +212,18 @@ public sealed class WebViewAdapterRegistryTests
     private sealed class MarkerAdapter(string id) : MockWebViewAdapter
     {
         public string Id { get; } = id;
+    }
+
+    private static WebViewAdapterPlatform GetCurrentPlatformForTest()
+    {
+        if (OperatingSystem.IsWindows())
+            return WebViewAdapterPlatform.Windows;
+        if (OperatingSystem.IsIOS())
+            return WebViewAdapterPlatform.iOS;
+        if (OperatingSystem.IsMacOS())
+            return WebViewAdapterPlatform.MacOS;
+        if (OperatingSystem.IsAndroid())
+            return WebViewAdapterPlatform.Android;
+        return WebViewAdapterPlatform.Gtk;
     }
 }

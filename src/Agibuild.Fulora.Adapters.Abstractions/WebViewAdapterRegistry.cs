@@ -25,6 +25,7 @@ internal static class WebViewAdapterRegistry
 {
     private static readonly ConcurrentDictionary<(WebViewAdapterPlatform Platform, string AdapterId), WebViewAdapterRegistration> Registrations = new();
     private static readonly ConcurrentDictionary<string, IWebViewPlatformProvider> Providers = new(StringComparer.Ordinal);
+    private sealed record CandidateAdapter(int Priority, Func<IWebViewAdapter> Factory);
 
     public static void Register(WebViewAdapterRegistration registration)
     {
@@ -48,40 +49,39 @@ internal static class WebViewAdapterRegistry
         Providers.TryAdd(provider.Id, provider);
     }
 
+    internal static void ResetForTests()
+    {
+        Providers.Clear();
+        Registrations.Clear();
+    }
+
     public static bool HasAnyForCurrentPlatform()
         => Providers.Values.Any(static provider => provider.CanHandleCurrentPlatform())
             || Registrations.Keys.Any(k => k.Platform == GetCurrentPlatform());
 
     public static bool TryCreateForCurrentPlatform(out IWebViewAdapter adapter, out string? failureReason)
     {
-        var provider = Providers.Values
+        var platform = GetCurrentPlatform();
+
+        var candidate = Providers.Values
             .Where(static provider => provider.CanHandleCurrentPlatform())
-            .OrderByDescending(static provider => provider.Priority)
+            .Select(static provider => new CandidateAdapter(provider.Priority, provider.CreateAdapter))
+            .Concat(Registrations.Values
+                .Where(registration => registration.Platform == platform)
+                .Select(static registration => new CandidateAdapter(registration.Priority, registration.Factory)))
+            .OrderByDescending(static candidate => candidate.Priority)
             .FirstOrDefault();
 
-        if (provider is not null)
+        if (candidate is not null)
         {
-            adapter = provider.CreateAdapter();
+            adapter = candidate.Factory();
             failureReason = null;
             return true;
         }
 
-        var platform = GetCurrentPlatform();
-        var best = Registrations.Values
-            .Where(r => r.Platform == platform)
-            .OrderByDescending(r => r.Priority)
-            .FirstOrDefault();
-
-        if (best is null)
-        {
-            adapter = null!;
-            failureReason = $"No WebView adapter registered for platform '{platform}'.";
-            return false;
-        }
-
-        adapter = best.Factory();
-        failureReason = null;
-        return true;
+        adapter = null!;
+        failureReason = $"No WebView adapter registered for platform '{platform}'.";
+        return false;
     }
 
     [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
