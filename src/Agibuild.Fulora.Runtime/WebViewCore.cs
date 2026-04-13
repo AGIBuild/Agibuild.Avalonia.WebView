@@ -7,7 +7,7 @@ namespace Agibuild.Fulora;
 /// <summary>
 /// Core runtime implementation of <see cref="IWebView"/> over a platform adapter.
 /// </summary>
-public sealed class WebViewCore : ISpaHostingWebView, IWebViewAdapterHost, IWebViewCoreFeatureHost, IWebViewCoreBridgeHost, IWebViewCoreAdapterEventHost, IWebViewCoreNavigationHost, IDisposable
+public sealed class WebViewCore : ISpaHostingWebView, IWebViewAdapterHost, IWebViewCoreFeatureHost, IWebViewCoreBridgeHost, IWebViewCoreAdapterEventHost, IWebViewCoreNavigationHost, IWebViewCoreSpaHostingHost, IDisposable
 {
     private static readonly Uri AboutBlank = new("about:blank");
 
@@ -97,7 +97,7 @@ public sealed class WebViewCore : ISpaHostingWebView, IWebViewAdapterHost, IWebV
     private readonly WebViewCoreBridgeRuntime _bridgeRuntime;
     private readonly WebViewCoreAdapterEventRuntime _adapterEventRuntime;
     private readonly WebViewCoreNavigationRuntime _navigationRuntime;
-    private SpaHostingService? _spaHostingService;
+    private readonly WebViewCoreSpaHostingRuntime _spaHostingRuntime;
 
     internal WebViewCore(IWebViewAdapter adapter, IWebViewDispatcher dispatcher)
         : this(adapter, dispatcher, NullLogger<WebViewCore>.Instance)
@@ -174,6 +174,7 @@ public sealed class WebViewCore : ISpaHostingWebView, IWebViewAdapterHost, IWebV
         _capabilityRuntime = new WebViewCoreCapabilityRuntime(_featureRuntime, _bridgeRuntime, _cookieManager, _commandManager);
         _adapterEventRuntime = new WebViewCoreAdapterEventRuntime(this, _dispatcher, _logger);
         _navigationRuntime = new WebViewCoreNavigationRuntime(this, _dispatcher, _logger);
+        _spaHostingRuntime = new WebViewCoreSpaHostingRuntime(this, _logger);
 
         _adapter.NavigationCompleted += OnAdapterNavigationCompleted;
         _adapter.NewWindowRequested += OnAdapterNewWindowRequested;
@@ -275,8 +276,7 @@ public sealed class WebViewCore : ISpaHostingWebView, IWebViewAdapterHost, IWebV
 
         _bridgeRuntime.Dispose();
 
-        _spaHostingService?.Dispose();
-        _spaHostingService = null;
+        _spaHostingRuntime.Dispose();
 
         _logger.LogDebug("Dispose: completed");
     }
@@ -606,6 +606,21 @@ public sealed class WebViewCore : ISpaHostingWebView, IWebViewAdapterHost, IWebV
     internal void ReinjectBridgeStubsIfEnabled()
         => _capabilityRuntime.ReinjectBridgeStubsIfEnabled();
 
+    bool IWebViewCoreSpaHostingHost.IsBridgeEnabled => _bridgeRuntime.IsBridgeEnabled;
+    void IWebViewCoreSpaHostingHost.ThrowIfDisposed() => ThrowIfDisposed();
+
+    void IWebViewCoreSpaHostingHost.RegisterCustomScheme(CustomSchemeRegistration registration)
+    {
+        if (_adapter is ICustomSchemeAdapter customSchemeAdapter)
+            customSchemeAdapter.RegisterCustomSchemes([registration]);
+    }
+
+    void IWebViewCoreSpaHostingHost.AddWebResourceRequestedHandler(EventHandler<WebResourceRequestedEventArgs> handler)
+        => WebResourceRequested += handler;
+
+    void IWebViewCoreSpaHostingHost.RemoveWebResourceRequestedHandler(EventHandler<WebResourceRequestedEventArgs> handler)
+        => WebResourceRequested -= handler;
+
     // ==================== SPA Hosting ====================
 
     /// <summary>
@@ -613,38 +628,11 @@ public sealed class WebViewCore : ISpaHostingWebView, IWebViewAdapterHost, IWebV
     /// and optionally auto-enables the bridge.
     /// </summary>
     public void EnableSpaHosting(SpaHostingOptions options)
-    {
-        ArgumentNullException.ThrowIfNull(options);
-        ThrowIfDisposed();
+        => _spaHostingRuntime.EnableSpaHosting(options);
 
-        if (_spaHostingService is not null)
-            throw new InvalidOperationException("SPA hosting is already enabled.");
-
-        _spaHostingService = new SpaHostingService(options, _logger);
-
-        // Register custom scheme with the adapter.
-        if (_adapter is ICustomSchemeAdapter customSchemeAdapter)
-        {
-            customSchemeAdapter.RegisterCustomSchemes([_spaHostingService.GetSchemeRegistration()]);
-        }
-
-        // Subscribe to WebResourceRequested to intercept app:// requests.
-        WebResourceRequested += OnSpaWebResourceRequested;
-
-        // Auto-enable bridge if requested.
-        if (options.AutoInjectBridgeScript && !_bridgeRuntime.IsBridgeEnabled)
-        {
-            EnableWebMessageBridge(new WebMessageBridgeOptions());
-        }
-
-        _logger.LogDebug("SPA hosting enabled: scheme={Scheme}, devServer={DevServer}",
-            options.Scheme, options.DevServerUrl ?? "(embedded)");
-    }
-
+    // Compatibility shim for focused tests and incremental refactors.
     private void OnSpaWebResourceRequested(object? sender, WebResourceRequestedEventArgs e)
-    {
-        _spaHostingService?.TryHandle(e);
-    }
+        => _spaHostingRuntime.HandleWebResourceRequested(e);
 
     private Task<object?> EnqueueOperationAsync(string operationType, Func<Task> func)
         => EnqueueOperationAsync<object?>(operationType, async () =>
