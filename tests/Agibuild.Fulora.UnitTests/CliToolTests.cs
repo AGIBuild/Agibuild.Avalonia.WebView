@@ -130,7 +130,7 @@ public class CliToolTests
 
     private static string InvokeDetectWebArtifactsDirectory(string bridgeProjectPath)
     {
-        var method = typeof(GenerateCommand).GetMethod("DetectWebTypesDirectory", BindingFlags.NonPublic | BindingFlags.Static);
+        var method = typeof(GenerateCommand).GetMethod("DetectWebArtifactsDirectory", BindingFlags.NonPublic | BindingFlags.Static);
         Assert.NotNull(method);
         return Assert.IsType<string>(method!.Invoke(null, [bridgeProjectPath]));
     }

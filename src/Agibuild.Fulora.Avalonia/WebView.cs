@@ -3,7 +3,6 @@ using Avalonia.Controls;
 using Avalonia.Platform;
 using Avalonia.VisualTree;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Agibuild.Fulora;
 
@@ -79,6 +78,7 @@ public class WebView : NativeControlHost, ISpaHostingWebView
     private EventHandler<PixelPointEventArgs>? _hostWindowPositionChangedHandler;
     private readonly WebViewControlRuntime _controlRuntime = new();
     private readonly WebViewControlEventRuntime _eventRuntime;
+    private readonly WebViewControlLifecycleRuntime _lifecycleRuntime;
 
     // ---------------------------------------------------------------------------
     //  Constructor
@@ -116,6 +116,17 @@ public class WebView : NativeControlHost, ISpaHostingWebView
             navigateInPlaceAsync: uri => _controlRuntime.NavigateAsync(uri),
             getInitialZoomFactor: () => ZoomFactor,
             applyInitialZoomFactor: zoom => _ = _controlRuntime.SetZoomFactorAsync(zoom));
+
+        _lifecycleRuntime = new WebViewControlLifecycleRuntime(
+            _controlRuntime,
+            _eventRuntime,
+            getLoggerFactory: () => _loggerFactory,
+            getEnvironmentOptions: () => EnvironmentOptions,
+            getPendingSource: () => Source,
+            setCore: core => _core = core,
+            setCoreAttached: attached => _coreAttached = attached,
+            setAdapterUnavailable: unavailable => _adapterUnavailable = unavailable,
+            createDispatcher: static () => new SynchronizationContextWebViewDispatcher());
     }
 
     // ---------------------------------------------------------------------------
@@ -607,47 +618,10 @@ public class WebView : NativeControlHost, ISpaHostingWebView
     {
         var handle = base.CreateNativeControlCore(parent);
 
-        try
-        {
-            var dispatcher = new SynchronizationContextWebViewDispatcher();
-            var effectiveLoggerFactory = _loggerFactory ?? WebViewEnvironment.LoggerFactory;
-            var logger = effectiveLoggerFactory?.CreateLogger<WebViewCore>()
-                         ?? (ILogger<WebViewCore>)NullLogger<WebViewCore>.Instance;
+        _lifecycleRuntime.AttachToNativeControl(handle);
 
-            _core = WebViewCore.CreateForControl(dispatcher, logger, EnvironmentOptions);
-            _controlRuntime.AttachCore(_core);
-
-            // Subscribe before Attach so we receive AdapterCreated raised during Attach().
-            _eventRuntime.Attach(_core);
-
-            _core.Attach(new AvaloniaNativeHandleAdapter(handle));
-            _coreAttached = true;
+        if (_coreAttached)
             HookHostWindowClosing();
-
-            // If Source was set before attachment, navigate now (after AdapterCreated).
-            var pendingSource = Source;
-            if (pendingSource is not null)
-            {
-                _ = _core.NavigateAsync(pendingSource);
-            }
-        }
-        catch (PlatformNotSupportedException)
-        {
-            // No adapter for this platform — degrade gracefully (empty control).
-            _core?.Dispose();
-            _core = null;
-            _coreAttached = false;
-            _adapterUnavailable = true;
-            _controlRuntime.MarkAdapterUnavailable();
-        }
-        catch
-        {
-            _core?.Dispose();
-            _core = null;
-            _coreAttached = false;
-            _controlRuntime.ClearCore();
-            throw;
-        }
 
         return handle;
     }
@@ -658,20 +632,10 @@ public class WebView : NativeControlHost, ISpaHostingWebView
     protected override void DestroyNativeControlCore(IPlatformHandle control)
     {
         UnhookHostWindowClosing();
-        _eventRuntime.Detach(_core);
 
         _overlayHost?.Dispose();
         _overlayHost = null;
-
-        if (_coreAttached)
-        {
-            _core?.Detach();
-            _coreAttached = false;
-        }
-
-        _core?.Dispose();
-        _core = null;
-        _controlRuntime.ClearCore();
+        _lifecycleRuntime.DestroyAttachedCore(_core, _coreAttached);
 
         base.DestroyNativeControlCore(control);
     }
@@ -786,19 +750,10 @@ public class WebView : NativeControlHost, ISpaHostingWebView
     {
         GC.SuppressFinalize(this);
         UnhookHostWindowClosing();
-        _eventRuntime.Detach(_core);
 
         _overlayHost?.Dispose();
         _overlayHost = null;
-
-        if (_coreAttached)
-        {
-            _core?.Detach();
-            _coreAttached = false;
-        }
-
-        _core?.Dispose();
-        _core = null;
+        _lifecycleRuntime.DestroyAttachedCore(_core, _coreAttached);
     }
 
     // Close events can be user-triggered, app-triggered, or OS-triggered.
@@ -908,17 +863,4 @@ public class WebView : NativeControlHost, ISpaHostingWebView
         _overlayHost.SyncVisibilityWith(IsVisible);
     }
 
-    private sealed class AvaloniaNativeHandleAdapter : INativeHandle
-    {
-        private readonly IPlatformHandle _inner;
-
-        public AvaloniaNativeHandleAdapter(IPlatformHandle inner)
-        {
-            _inner = inner ?? throw new ArgumentNullException(nameof(inner));
-        }
-
-        public nint Handle => _inner.Handle;
-
-        public string HandleDescriptor => _inner.HandleDescriptor ?? string.Empty;
-    }
 }
