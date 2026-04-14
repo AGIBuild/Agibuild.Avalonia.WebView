@@ -15,6 +15,7 @@ public sealed class WebViewCore : ISpaHostingWebView, IWebViewAdapterHost, IWebV
     private readonly IWebViewDispatcher _dispatcher;
     private readonly ILogger<WebViewCore> _logger;
     private readonly IWebViewEnvironmentOptions _environmentOptions;
+    private readonly WebViewCoreCapabilityDetectionRuntime _capabilityDetectionRuntime;
     private readonly object _operationQueueLock = new();
     private Task _operationQueueTail = Task.CompletedTask;
     private long _operationSequence;
@@ -124,37 +125,12 @@ public sealed class WebViewCore : ISpaHostingWebView, IWebViewAdapterHost, IWebV
 
         _adapter.Initialize(this);
         _logger.LogDebug("Adapter initialized");
+        _capabilityDetectionRuntime = new WebViewCoreCapabilityDetectionRuntime(_adapter, _environmentOptions, _logger);
 
-        // Apply global environment options if adapter supports them.
-        if (_adapter is IWebViewAdapterOptions adapterOptions)
-        {
-            var envOptions = _environmentOptions;
-            adapterOptions.ApplyEnvironmentOptions(envOptions);
-            _logger.LogDebug("Environment options applied: DevTools={DevTools}, Ephemeral={Ephemeral}, UA={UA}",
-                envOptions.EnableDevTools, envOptions.UseEphemeralSession, envOptions.CustomUserAgent ?? "(default)");
-        }
-
-        _cookieManager = adapter is ICookieAdapter cookieAdapter
-            ? new RuntimeCookieManager(cookieAdapter, this, _logger)
-            : null;
-        _logger.LogDebug("Cookie support: {Supported}", _cookieManager is not null);
-
-        // Register custom schemes if adapter supports it.
-        if (_adapter is ICustomSchemeAdapter customSchemeAdapter)
-        {
-            var schemes = _environmentOptions.CustomSchemes;
-            if (schemes.Count > 0)
-            {
-                customSchemeAdapter.RegisterCustomSchemes(schemes);
-                _logger.LogDebug("Custom schemes registered: {Count}", schemes.Count);
-            }
-        }
-
-        // Detect command support.
-        _commandManager = _adapter is ICommandAdapter commandAdapter
-            ? new RuntimeCommandManager(commandAdapter, this)
-            : null;
-        _logger.LogDebug("Command support: {Supported}", _commandManager is not null);
+        _capabilityDetectionRuntime.ApplyEnvironmentOptions();
+        _cookieManager = _capabilityDetectionRuntime.CreateCookieManager(this);
+        _capabilityDetectionRuntime.RegisterConfiguredCustomSchemes();
+        _commandManager = _capabilityDetectionRuntime.CreateCommandManager(this);
 
         _featureRuntime = new WebViewCoreFeatureRuntime(this, _adapter, _dispatcher, _logger, _environmentOptions);
         _bridgeRuntime = new WebViewCoreBridgeRuntime(this, _logger, _environmentOptions.EnableDevTools);
@@ -1017,7 +993,7 @@ public sealed class WebViewCore : ISpaHostingWebView, IWebViewAdapterHost, IWebV
     /// <summary>
     /// Runtime wrapper around <see cref="ICookieAdapter"/> that adds lifecycle guards and dispatcher marshaling.
     /// </summary>
-    private sealed class RuntimeCookieManager : ICookieManager
+    internal sealed class RuntimeCookieManager : ICookieManager
     {
         private readonly ICookieAdapter _cookieAdapter;
         private readonly WebViewCore _owner;
@@ -1070,7 +1046,7 @@ public sealed class WebViewCore : ISpaHostingWebView, IWebViewAdapterHost, IWebV
     /// <summary>
     /// Runtime wrapper around <see cref="ICommandAdapter"/> that delegates editing commands.
     /// </summary>
-    private sealed class RuntimeCommandManager : ICommandManager
+    internal sealed class RuntimeCommandManager : ICommandManager
     {
         private readonly ICommandAdapter _commandAdapter;
         private readonly WebViewCore _owner;
