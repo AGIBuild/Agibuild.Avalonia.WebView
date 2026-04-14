@@ -90,6 +90,7 @@ public sealed class WebViewCore : ISpaHostingWebView, IWebViewAdapterHost, IWebV
     private readonly ICommandManager? _commandManager;
     private readonly WebViewCoreFeatureRuntime _featureRuntime;
     private readonly WebViewCoreCapabilityRuntime _capabilityRuntime;
+    private readonly WebViewCoreEventWiringRuntime _eventWiringRuntime;
 
     /// <summary>Whether the current adapter supports drag-and-drop.</summary>
     internal bool HasDragDropSupport => _featureRuntime.HasDragDropSupport;
@@ -149,20 +150,6 @@ public sealed class WebViewCore : ISpaHostingWebView, IWebViewAdapterHost, IWebV
             }
         }
 
-        // Subscribe to download events if adapter supports it.
-        if (_adapter is IDownloadAdapter downloadAdapter)
-        {
-            downloadAdapter.DownloadRequested += OnAdapterDownloadRequested;
-            _logger.LogDebug("Download support: enabled");
-        }
-
-        // Subscribe to permission events if adapter supports it.
-        if (_adapter is IPermissionAdapter permissionAdapter)
-        {
-            permissionAdapter.PermissionRequested += OnAdapterPermissionRequested;
-            _logger.LogDebug("Permission support: enabled");
-        }
-
         // Detect command support.
         _commandManager = _adapter is ICommandAdapter commandAdapter
             ? new RuntimeCommandManager(commandAdapter, this)
@@ -175,12 +162,16 @@ public sealed class WebViewCore : ISpaHostingWebView, IWebViewAdapterHost, IWebV
         _adapterEventRuntime = new WebViewCoreAdapterEventRuntime(this, _dispatcher, _logger);
         _navigationRuntime = new WebViewCoreNavigationRuntime(this, _dispatcher, _logger);
         _spaHostingRuntime = new WebViewCoreSpaHostingRuntime(this, _logger);
-
-        _adapter.NavigationCompleted += OnAdapterNavigationCompleted;
-        _adapter.NewWindowRequested += OnAdapterNewWindowRequested;
-        _adapter.WebMessageReceived += OnAdapterWebMessageReceived;
-        _adapter.WebResourceRequested += OnAdapterWebResourceRequested;
-        _adapter.EnvironmentRequested += OnAdapterEnvironmentRequested;
+        _eventWiringRuntime = new WebViewCoreEventWiringRuntime(
+            _adapter,
+            _logger,
+            OnAdapterNavigationCompleted,
+            OnAdapterNewWindowRequested,
+            OnAdapterWebMessageReceived,
+            OnAdapterWebResourceRequested,
+            OnAdapterEnvironmentRequested,
+            OnAdapterDownloadRequested,
+            OnAdapterPermissionRequested);
     }
 
     /// <inheritdoc />
@@ -254,16 +245,7 @@ public sealed class WebViewCore : ISpaHostingWebView, IWebViewAdapterHost, IWebV
         _disposed = true;
         _lifecycleState = WebViewLifecycleState.Disposed;
 
-        _adapter.NavigationCompleted -= OnAdapterNavigationCompleted;
-        _adapter.NewWindowRequested -= OnAdapterNewWindowRequested;
-        _adapter.WebMessageReceived -= OnAdapterWebMessageReceived;
-        _adapter.WebResourceRequested -= OnAdapterWebResourceRequested;
-        _adapter.EnvironmentRequested -= OnAdapterEnvironmentRequested;
-
-        if (_adapter is IDownloadAdapter downloadAdapter)
-            downloadAdapter.DownloadRequested -= OnAdapterDownloadRequested;
-        if (_adapter is IPermissionAdapter permissionAdapter)
-            permissionAdapter.PermissionRequested -= OnAdapterPermissionRequested;
+        _eventWiringRuntime.Dispose();
         if (_activeNavigation is not null)
         {
             _logger.LogDebug("Dispose: faulting active navigation id={NavigationId}", _activeNavigation.NavigationId);
