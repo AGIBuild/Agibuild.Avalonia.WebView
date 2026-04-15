@@ -25,7 +25,6 @@ internal static class WebViewAdapterRegistry
 {
     private static readonly ConcurrentDictionary<(WebViewAdapterPlatform Platform, string AdapterId), WebViewAdapterRegistration> Registrations = new();
     private static readonly ConcurrentDictionary<string, IWebViewPlatformProvider> Providers = new(StringComparer.Ordinal);
-    private sealed record CandidateAdapter(int Priority, Func<IWebViewAdapter> Factory);
 
     public static void Register(WebViewAdapterRegistration registration)
     {
@@ -56,31 +55,29 @@ internal static class WebViewAdapterRegistry
     }
 
     public static bool HasAnyForCurrentPlatform()
-        => Providers.Values.Any(static provider => provider.CanHandleCurrentPlatform())
-            || Registrations.Keys.Any(k => k.Platform == GetCurrentPlatform());
+    {
+        var platform = GetCurrentPlatform();
+        return WebViewAdapterCandidateResolver.HasCandidates(
+            Providers.Values.Where(static provider => provider.CanHandleCurrentPlatform()),
+            Registrations.Values.Where(registration => registration.Platform == platform));
+    }
 
     public static bool TryCreateForCurrentPlatform(out IWebViewAdapter adapter, out string? failureReason)
     {
         var platform = GetCurrentPlatform();
 
-        var candidate = Providers.Values
-            .Where(static provider => provider.CanHandleCurrentPlatform())
-            .Select(static provider => new CandidateAdapter(provider.Priority, provider.CreateAdapter))
-            .Concat(Registrations.Values
-                .Where(registration => registration.Platform == platform)
-                .Select(static registration => new CandidateAdapter(registration.Priority, registration.Factory)))
-            .OrderByDescending(static candidate => candidate.Priority)
-            .FirstOrDefault();
-
-        if (candidate is not null)
+        if (WebViewAdapterCandidateResolver.TryCreateAdapter(
+                Providers.Values.Where(static provider => provider.CanHandleCurrentPlatform()),
+                Registrations.Values.Where(registration => registration.Platform == platform),
+                $"No WebView adapter registered for platform '{platform}'.",
+                out var resolvedAdapter,
+                out failureReason))
         {
-            adapter = candidate.Factory();
-            failureReason = null;
+            adapter = resolvedAdapter!;
             return true;
         }
 
         adapter = null!;
-        failureReason = $"No WebView adapter registered for platform '{platform}'.";
         return false;
     }
 
