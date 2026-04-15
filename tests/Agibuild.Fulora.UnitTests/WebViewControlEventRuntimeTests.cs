@@ -107,12 +107,49 @@ public sealed class WebViewControlEventRuntimeTests
 
         var core = new StubCoreEvents();
         runtime.Attach(core);
-        runtime.Detach(core);
+        runtime.Detach();
 
         core.RaiseWebMessageReceived(new WebMessageReceivedEventArgs());
         core.RaiseContextMenuRequested(new ContextMenuRequestedEventArgs());
 
         Assert.Equal(0, messages);
+    }
+
+    [Fact]
+    public void Attach_to_new_core_detaches_previous_core_handlers()
+    {
+        var messages = 0;
+        var runtime = new WebViewControlEventRuntime(
+            _ => { },
+            _ => { },
+            _ => { },
+            _ => messages++,
+            _ => { },
+            _ => { },
+            _ => { },
+            _ => { },
+            _ => { },
+            () => { },
+            _ => { },
+            () => null,
+            () => null,
+            () => null,
+            () => null,
+            () => null,
+            _ => Task.CompletedTask,
+            () => 1.0,
+            _ => { });
+
+        var firstCore = new StubCoreEvents();
+        var secondCore = new StubCoreEvents();
+
+        runtime.Attach(firstCore);
+        runtime.Attach(secondCore);
+
+        firstCore.RaiseWebMessageReceived(new WebMessageReceivedEventArgs());
+        secondCore.RaiseWebMessageReceived(new WebMessageReceivedEventArgs());
+
+        Assert.Equal(1, messages);
     }
 
 #pragma warning disable CS0067

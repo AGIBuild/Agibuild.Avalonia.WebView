@@ -33,6 +33,7 @@ internal sealed class WebViewControlEventRuntime
     private EventHandler<AdapterCreatedEventArgs>? _adapterCreated;
     private EventHandler? _adapterDestroyed;
     private EventHandler<double>? _zoomFactorChanged;
+    private IWebViewCoreControlEvents? _attachedCore;
 
     public WebViewControlEventRuntime(
         Action<NavigationStartingEventArgs> raiseNavigationStarted,
@@ -80,6 +81,9 @@ internal sealed class WebViewControlEventRuntime
     {
         ArgumentNullException.ThrowIfNull(core);
 
+        if (!ReferenceEquals(_attachedCore, core))
+            Detach();
+
         _navigationStarted = (_, e) => _raiseNavigationStarted(e);
         _navigationCompleted = (_, e) => _raiseNavigationCompleted(e);
         _newWindowRequested = async (_, e) =>
@@ -123,10 +127,13 @@ internal sealed class WebViewControlEventRuntime
         var zoom = _getInitialZoomFactor();
         if (Math.Abs(zoom - 1.0) > 0.001)
             _applyInitialZoomFactor(zoom);
+
+        _attachedCore = core;
     }
 
-    public void Detach(IWebViewCoreControlEvents? core)
+    public void Detach()
     {
+        var core = _attachedCore;
         if (core is null)
             return;
 
@@ -152,5 +159,7 @@ internal sealed class WebViewControlEventRuntime
             core.DragLeft -= dragLeft;
         if (_getDropCompletedHandlers() is { } drop)
             core.DropCompleted -= drop;
+
+        _attachedCore = null;
     }
 }

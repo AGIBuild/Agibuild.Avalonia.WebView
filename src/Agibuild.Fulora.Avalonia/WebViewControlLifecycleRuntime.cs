@@ -67,7 +67,7 @@ internal sealed class WebViewControlLifecycleRuntime
         }
         catch (PlatformNotSupportedException)
         {
-            _eventRuntime.Detach(core);
+            _eventRuntime.Detach();
             core?.Dispose();
             _setCoreAttached(false);
             _setAdapterUnavailable(true);
@@ -75,7 +75,7 @@ internal sealed class WebViewControlLifecycleRuntime
         }
         catch
         {
-            _eventRuntime.Detach(core);
+            _eventRuntime.Detach();
             core?.Dispose();
             _setCoreAttached(false);
             _setAdapterUnavailable(false);
@@ -86,10 +86,11 @@ internal sealed class WebViewControlLifecycleRuntime
 
     public void DestroyAttachedCore()
     {
-        var core = _controlRuntime.Core;
         var coreAttached = _controlRuntime.IsCoreAttached;
 
-        _eventRuntime.Detach(core);
+        _eventRuntime.Detach();
+
+        var core = _controlRuntime.Core;
 
         if (coreAttached)
         {

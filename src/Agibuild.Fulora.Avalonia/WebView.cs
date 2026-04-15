@@ -615,7 +615,7 @@ public class WebView : NativeControlHost, ISpaHostingWebView
             _eventRuntime.Attach(_controlRuntime.Core);
     }
 
-    internal void TestOnlyUnsubscribeCoreEvents() => _eventRuntime.Detach(_controlRuntime.Core);
+    internal void TestOnlyUnsubscribeCoreEvents() => _eventRuntime.Detach();
 
     private void OnCoreNewWindowRequested(NewWindowRequestedEventArgs e)
         => NewWindowRequested?.Invoke(this, e);
