@@ -104,4 +104,44 @@ public sealed class WebViewControlRuntimeTests
         Assert.False(runtime.IsCoreAttached);
         Assert.Equal(Guid.Empty, runtime.ChannelId);
     }
+
+    [Fact]
+    public void ClearCore_resets_IsCoreAttached_preventing_zombie_attached_state()
+    {
+        // ClearCore() enforces the invariant: _core == null → IsCoreAttached == false.
+        // Without this, callers that call ClearCore() directly (without prior SetCoreAttached(false))
+        // would produce a zombie state where IsCoreAttached is true but Core is null.
+        var runtime = new WebViewControlRuntime();
+        var core = new WebViewCore(MockWebViewAdapter.Create(), _dispatcher);
+
+        runtime.AttachCore(core);
+        runtime.SetCoreAttached(true);
+
+        Assert.True(runtime.IsCoreAttached);
+        Assert.NotNull(runtime.Core);
+
+        runtime.ClearCore();
+
+        Assert.Null(runtime.Core);
+        Assert.False(runtime.IsCoreAttached);
+        Assert.False(runtime.IsAvailable);
+    }
+
+    [Fact]
+    public void SetCoreAttached_false_retains_core_reference_as_intended_for_deferred_disposal()
+    {
+        // After early host-close detach, the control marks itself as not attached but intentionally
+        // keeps the Core reference alive so DestroyAttachedCore() can later call core.Dispose().
+        // ClearCore() is the operation that both clears the reference and resets attachment state.
+        var runtime = new WebViewControlRuntime();
+        var core = new WebViewCore(MockWebViewAdapter.Create(), _dispatcher);
+
+        runtime.AttachCore(core);
+        runtime.SetCoreAttached(true);
+        runtime.SetCoreAttached(false);
+
+        Assert.False(runtime.IsCoreAttached);
+        Assert.NotNull(runtime.Core);
+        Assert.False(runtime.IsAvailable);
+    }
 }
