@@ -62,7 +62,6 @@ public class WebView : NativeControlHost, ISpaHostingWebView
     //  Internal state
     // ---------------------------------------------------------------------------
 
-    private WebViewCore? _core;
     private ILoggerFactory? _loggerFactory;
     private readonly WebViewControlRuntime _controlRuntime = new();
     private readonly WebViewControlStateRuntime _stateRuntime;
@@ -129,7 +128,7 @@ public class WebView : NativeControlHost, ISpaHostingWebView
             getLoggerFactory: () => _loggerFactory,
             getEnvironmentOptions: () => EnvironmentOptions,
             getPendingSource: () => Source,
-            setCore: core => _core = core,
+            setCore: _ => { },
             setCoreAttached: attached => _controlRuntime.SetCoreAttached(attached),
             setAdapterUnavailable: _ => { },
             createDispatcher: static () => new SynchronizationContextWebViewDispatcher());
@@ -399,36 +398,36 @@ public class WebView : NativeControlHost, ISpaHostingWebView
     /// </summary>
     public event EventHandler<ContextMenuRequestedEventArgs>? ContextMenuRequested
     {
-        add => _interactionRuntime.AddContextMenuRequestedHandler(_core, value!);
-        remove => _interactionRuntime.RemoveContextMenuRequestedHandler(_core, value!);
+        add => _interactionRuntime.AddContextMenuRequestedHandler(_controlRuntime.Core, value!);
+        remove => _interactionRuntime.RemoveContextMenuRequestedHandler(_controlRuntime.Core, value!);
     }
 
     /// <summary>Raised when a drag operation enters the WebView bounds.</summary>
     public event EventHandler<DragEventArgs>? DragEntered
     {
-        add => _interactionRuntime.AddDragEnteredHandler(_core, value!);
-        remove => _interactionRuntime.RemoveDragEnteredHandler(_core, value!);
+        add => _interactionRuntime.AddDragEnteredHandler(_controlRuntime.Core, value!);
+        remove => _interactionRuntime.RemoveDragEnteredHandler(_controlRuntime.Core, value!);
     }
 
     /// <summary>Raised when a drag operation moves over the WebView.</summary>
     public event EventHandler<DragEventArgs>? DragOver
     {
-        add => _interactionRuntime.AddDragOverHandler(_core, value!);
-        remove => _interactionRuntime.RemoveDragOverHandler(_core, value!);
+        add => _interactionRuntime.AddDragOverHandler(_controlRuntime.Core, value!);
+        remove => _interactionRuntime.RemoveDragOverHandler(_controlRuntime.Core, value!);
     }
 
     /// <summary>Raised when a drag operation leaves the WebView bounds.</summary>
     public event EventHandler<EventArgs>? DragLeft
     {
-        add => _interactionRuntime.AddDragLeftHandler(_core, value!);
-        remove => _interactionRuntime.RemoveDragLeftHandler(_core, value!);
+        add => _interactionRuntime.AddDragLeftHandler(_controlRuntime.Core, value!);
+        remove => _interactionRuntime.RemoveDragLeftHandler(_controlRuntime.Core, value!);
     }
 
     /// <summary>Raised when a drop operation completes on the WebView.</summary>
     public event EventHandler<DropEventArgs>? DropCompleted
     {
-        add => _interactionRuntime.AddDropCompletedHandler(_core, value!);
-        remove => _interactionRuntime.RemoveDropCompletedHandler(_core, value!);
+        add => _interactionRuntime.AddDropCompletedHandler(_controlRuntime.Core, value!);
+        remove => _interactionRuntime.RemoveDropCompletedHandler(_controlRuntime.Core, value!);
     }
 
     /// <summary>
@@ -584,7 +583,7 @@ public class WebView : NativeControlHost, ISpaHostingWebView
         _hostClosingRuntime.Unhook();
 
         _overlayRuntime.DisposeOverlayHost();
-        _lifecycleRuntime.DestroyAttachedCore(_core, _controlRuntime.IsCoreAttached);
+        _lifecycleRuntime.DestroyAttachedCore(_controlRuntime.Core, _controlRuntime.IsCoreAttached);
 
         base.DestroyNativeControlCore(control);
     }
@@ -606,7 +605,6 @@ public class WebView : NativeControlHost, ISpaHostingWebView
     internal void TestOnlyAttachCore(WebViewCore core)
     {
         ArgumentNullException.ThrowIfNull(core);
-        _core = core;
         _controlRuntime.AttachCore(core);
     }
 
@@ -614,11 +612,11 @@ public class WebView : NativeControlHost, ISpaHostingWebView
 
     internal void TestOnlySubscribeCoreEvents()
     {
-        if (_core is not null)
-            _eventRuntime.Attach(_core);
+        if (_controlRuntime.Core is not null)
+            _eventRuntime.Attach(_controlRuntime.Core);
     }
 
-    internal void TestOnlyUnsubscribeCoreEvents() => _eventRuntime.Detach(_core);
+    internal void TestOnlyUnsubscribeCoreEvents() => _eventRuntime.Detach(_controlRuntime.Core);
 
     private void OnCoreNewWindowRequested(NewWindowRequestedEventArgs e)
         => NewWindowRequested?.Invoke(this, e);
@@ -631,7 +629,7 @@ public class WebView : NativeControlHost, ISpaHostingWebView
         GC.SuppressFinalize(this);
         _hostClosingRuntime.Unhook();
         _overlayRuntime.Dispose();
-        _lifecycleRuntime.DestroyAttachedCore(_core, _controlRuntime.IsCoreAttached);
+        _lifecycleRuntime.DestroyAttachedCore(_controlRuntime.Core, _controlRuntime.IsCoreAttached);
     }
 
     // Close events can be user-triggered, app-triggered, or OS-triggered.
@@ -646,7 +644,7 @@ public class WebView : NativeControlHost, ISpaHostingWebView
     {
         try
         {
-            _core?.Detach();
+            _controlRuntime.Core?.Detach();
             _controlRuntime.SetCoreAttached(false);
             return true;
         }
