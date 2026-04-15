@@ -23,6 +23,27 @@ public sealed class WebViewControlRuntimeTests
     }
 
     [Fact]
+    public void Status_properties_reflect_attached_core()
+    {
+        var runtime = new WebViewControlRuntime();
+        var adapter = new MockWebViewAdapter
+        {
+            CanGoBack = true,
+            CanGoForward = false
+        };
+        var core = new WebViewCore(adapter, _dispatcher);
+
+        runtime.AttachCore(core);
+        runtime.SetCoreAttached(true);
+
+        Assert.True(runtime.IsAvailable);
+        Assert.True(runtime.IsCoreAttached);
+        Assert.True(runtime.CanGoBack);
+        Assert.False(runtime.CanGoForward);
+        Assert.Equal(core.ChannelId, runtime.ChannelId);
+    }
+
+    [Fact]
     public async Task CaptureScreenshotAsync_delegates_to_attached_core()
     {
         var runtime = new WebViewControlRuntime();
@@ -79,5 +100,8 @@ public sealed class WebViewControlRuntimeTests
         runtime.MarkAdapterUnavailable();
 
         Assert.Throws<PlatformNotSupportedException>(() => { _ = runtime.Bridge; });
+        Assert.False(runtime.IsAvailable);
+        Assert.False(runtime.IsCoreAttached);
+        Assert.Equal(Guid.Empty, runtime.ChannelId);
     }
 }

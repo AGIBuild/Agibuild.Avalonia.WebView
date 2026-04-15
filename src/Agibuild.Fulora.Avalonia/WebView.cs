@@ -64,7 +64,6 @@ public class WebView : NativeControlHost, ISpaHostingWebView
 
     private WebViewCore? _core;
     private bool _coreAttached;
-    private bool _adapterUnavailable;
     private ILoggerFactory? _loggerFactory;
     private readonly WebViewControlRuntime _controlRuntime = new();
     private readonly WebViewControlStateRuntime _stateRuntime;
@@ -91,13 +90,13 @@ public class WebView : NativeControlHost, ISpaHostingWebView
     public WebView()
     {
         _stateRuntime = new WebViewControlStateRuntime(
-            isCoreAttached: () => _core is not null && _coreAttached,
-            navigateAsync: uri => _core!.NavigateAsync(uri),
-            setZoomFactorAsync: zoom => _core!.SetZoomFactorAsync(zoom),
+            isCoreAttached: () => _controlRuntime.IsAvailable,
+            navigateAsync: uri => _controlRuntime.NavigateAsync(uri),
+            setZoomFactorAsync: zoom => _controlRuntime.SetZoomFactorAsync(zoom),
             raiseNavigationStarted: args => NavigationStarted?.Invoke(this, args),
             raiseNavigationCompleted: args => NavigationCompleted?.Invoke(this, args),
-            getCanGoBack: () => CanGoBack,
-            getCanGoForward: () => CanGoForward,
+            getCanGoBack: () => _controlRuntime.CanGoBack,
+            getCanGoForward: () => _controlRuntime.CanGoForward,
             raiseIsLoadingChanged: (oldValue, newValue) => RaisePropertyChanged(IsLoadingProperty, oldValue, newValue),
             raiseCanGoBackChanged: (oldValue, newValue) => RaisePropertyChanged(CanGoBackProperty, oldValue, newValue),
             raiseCanGoForwardChanged: (oldValue, newValue) => RaisePropertyChanged(CanGoForwardProperty, oldValue, newValue),
@@ -132,8 +131,12 @@ public class WebView : NativeControlHost, ISpaHostingWebView
             getEnvironmentOptions: () => EnvironmentOptions,
             getPendingSource: () => Source,
             setCore: core => _core = core,
-            setCoreAttached: attached => _coreAttached = attached,
-            setAdapterUnavailable: unavailable => _adapterUnavailable = unavailable,
+            setCoreAttached: attached =>
+            {
+                _coreAttached = attached;
+                _controlRuntime.SetCoreAttached(attached);
+            },
+            setAdapterUnavailable: _ => { },
             createDispatcher: static () => new SynchronizationContextWebViewDispatcher());
 
         _hostClosingRuntime = new WebViewHostClosingRuntime(
@@ -215,27 +218,27 @@ public class WebView : NativeControlHost, ISpaHostingWebView
     }
 
     /// <inheritdoc />
-    public bool CanGoBack => _core?.CanGoBack ?? false;
+    public bool CanGoBack => _controlRuntime.CanGoBack;
 
     /// <inheritdoc />
-    public bool CanGoForward => _core?.CanGoForward ?? false;
+    public bool CanGoForward => _controlRuntime.CanGoForward;
 
     /// <summary>
     /// <c>true</c> while a navigation is in progress.
     /// </summary>
-    public bool IsLoading => _core?.IsLoading ?? false;
+    public bool IsLoading => _controlRuntime.IsLoading;
 
     /// <summary>
     /// <c>true</c> when a platform adapter is available and the WebView is functional.
     /// <c>false</c> on platforms without a registered adapter (e.g. Android before the adapter is implemented).
     /// </summary>
-    public bool IsAvailable => _core is not null && _coreAttached;
+    public bool IsAvailable => _controlRuntime.IsAvailable;
 
     /// <summary>
     /// The channel id for web message bridge isolation.
     /// Only valid after the control is attached to the visual tree.
     /// </summary>
-    public Guid ChannelId => _core?.ChannelId ?? Guid.Empty;
+    public Guid ChannelId => _controlRuntime.ChannelId;
 
     /// <summary>
     /// Gets or sets the zoom factor (1.0 = 100%). Clamped to [0.25, 5.0].
@@ -610,7 +613,6 @@ public class WebView : NativeControlHost, ISpaHostingWebView
         ArgumentNullException.ThrowIfNull(core);
         _core = core;
         _controlRuntime.AttachCore(core);
-        _adapterUnavailable = false;
     }
 
     internal void TestOnlySubscribeCoreEvents()
@@ -649,6 +651,7 @@ public class WebView : NativeControlHost, ISpaHostingWebView
         {
             _core?.Detach();
             _coreAttached = false;
+            _controlRuntime.SetCoreAttached(false);
             return true;
         }
         catch

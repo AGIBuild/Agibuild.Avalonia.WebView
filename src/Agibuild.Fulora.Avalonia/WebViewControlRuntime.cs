@@ -3,10 +3,17 @@ namespace Agibuild.Fulora;
 internal sealed class WebViewControlRuntime
 {
     private WebViewCore? _core;
+    private bool _coreAttached;
     private bool _adapterUnavailable;
     private IBridgeTracer? _pendingBridgeTracer;
 
     public WebViewCore? Core => _core;
+    public bool IsCoreAttached => _coreAttached;
+    public bool IsAvailable => _core is not null && _coreAttached;
+    public bool CanGoBack => _core?.CanGoBack ?? false;
+    public bool CanGoForward => _core?.CanGoForward ?? false;
+    public bool IsLoading => _core?.IsLoading ?? false;
+    public Guid ChannelId => _core?.ChannelId ?? Guid.Empty;
 
     public IWebViewRpcService? Rpc => _core?.Rpc;
 
@@ -38,15 +45,19 @@ internal sealed class WebViewControlRuntime
         }
     }
 
+    public void SetCoreAttached(bool attached) => _coreAttached = attached;
+
     public void MarkAdapterUnavailable()
     {
         _core = null;
+        _coreAttached = false;
         _adapterUnavailable = true;
     }
 
     public void ClearCore()
     {
         _core = null;
+        _coreAttached = false;
     }
 
     public ICookieManager? TryGetCookieManager() => _core?.TryGetCookieManager();
