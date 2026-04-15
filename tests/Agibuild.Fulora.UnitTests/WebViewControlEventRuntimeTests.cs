@@ -9,30 +9,14 @@ public sealed class WebViewControlEventRuntimeTests
     {
         var navigatedTo = default(Uri);
         var raised = default(NewWindowRequestedEventArgs);
-        var runtime = new WebViewControlEventRuntime(
-            _ => { },
-            _ => { },
-            args => raised = args,
-            _ => { },
-            _ => { },
-            _ => { },
-            _ => { },
-            _ => { },
-            _ => { },
-            () => { },
-            _ => { },
-            () => null,
-            () => null,
-            () => null,
-            () => null,
-            () => null,
-            uri =>
+        var runtime = CreateRuntime(
+            raiseNewWindowRequested: args => raised = args,
+            navigateInPlaceAsync: uri =>
             {
                 navigatedTo = uri;
                 return Task.CompletedTask;
             },
-            () => 1.0,
-            _ => { });
+            getInitialZoomFactor: () => 1.0);
 
         var core = new StubCoreEvents();
         runtime.Attach(core);
@@ -50,26 +34,11 @@ public sealed class WebViewControlEventRuntimeTests
     {
         var zoomApplied = 1.0;
         var contextMenuCalls = 0;
-        var runtime = new WebViewControlEventRuntime(
-            _ => { },
-            _ => { },
-            _ => { },
-            _ => { },
-            _ => { },
-            _ => { },
-            _ => { },
-            _ => { },
-            _ => { },
-            () => { },
-            _ => { },
-            () => (_, _) => contextMenuCalls++,
-            () => null,
-            () => null,
-            () => null,
-            () => null,
-            _ => Task.CompletedTask,
-            () => 1.5,
-            zoom => zoomApplied = zoom);
+        var runtime = CreateRuntime(
+            getContextMenuHandlers: () => (_, _) => contextMenuCalls++,
+            navigateInPlaceAsync: _ => Task.CompletedTask,
+            getInitialZoomFactor: () => 1.5,
+            applyInitialZoomFactor: zoom => zoomApplied = zoom);
 
         var core = new StubCoreEvents();
         runtime.Attach(core);
@@ -84,26 +53,11 @@ public sealed class WebViewControlEventRuntimeTests
     public void Detach_unhooks_forwarders_and_control_handlers()
     {
         var messages = 0;
-        var runtime = new WebViewControlEventRuntime(
-            _ => { },
-            _ => { },
-            _ => { },
-            _ => messages++,
-            _ => { },
-            _ => { },
-            _ => { },
-            _ => { },
-            _ => { },
-            () => { },
-            _ => { },
-            () => (_, _) => messages++,
-            () => null,
-            () => null,
-            () => null,
-            () => null,
-            _ => Task.CompletedTask,
-            () => 1.0,
-            _ => { });
+        var runtime = CreateRuntime(
+            raiseWebMessageReceived: _ => messages++,
+            getContextMenuHandlers: () => (_, _) => messages++,
+            navigateInPlaceAsync: _ => Task.CompletedTask,
+            getInitialZoomFactor: () => 1.0);
 
         var core = new StubCoreEvents();
         runtime.Attach(core);
@@ -119,26 +73,10 @@ public sealed class WebViewControlEventRuntimeTests
     public void Attach_to_new_core_detaches_previous_core_handlers()
     {
         var messages = 0;
-        var runtime = new WebViewControlEventRuntime(
-            _ => { },
-            _ => { },
-            _ => { },
-            _ => messages++,
-            _ => { },
-            _ => { },
-            _ => { },
-            _ => { },
-            _ => { },
-            () => { },
-            _ => { },
-            () => null,
-            () => null,
-            () => null,
-            () => null,
-            () => null,
-            _ => Task.CompletedTask,
-            () => 1.0,
-            _ => { });
+        var runtime = CreateRuntime(
+            raiseWebMessageReceived: _ => messages++,
+            navigateInPlaceAsync: _ => Task.CompletedTask,
+            getInitialZoomFactor: () => 1.0);
 
         var firstCore = new StubCoreEvents();
         var secondCore = new StubCoreEvents();
@@ -153,6 +91,37 @@ public sealed class WebViewControlEventRuntimeTests
     }
 
 #pragma warning disable CS0067
+    private static WebViewControlEventRuntime CreateRuntime(
+        Action<NewWindowRequestedEventArgs>? raiseNewWindowRequested = null,
+        Action<WebMessageReceivedEventArgs>? raiseWebMessageReceived = null,
+        Func<EventHandler<ContextMenuRequestedEventArgs>?>? getContextMenuHandlers = null,
+        Func<Uri, Task>? navigateInPlaceAsync = null,
+        Func<double>? getInitialZoomFactor = null,
+        Action<double>? applyInitialZoomFactor = null)
+        => new(
+            callbacks: new WebViewControlEventCallbacks(
+                raiseNavigationStarted: _ => { },
+                raiseNavigationCompleted: _ => { },
+                raiseNewWindowRequested: raiseNewWindowRequested ?? (_ => { }),
+                raiseWebMessageReceived: raiseWebMessageReceived ?? (_ => { }),
+                raiseWebResourceRequested: _ => { },
+                raiseEnvironmentRequested: _ => { },
+                raiseDownloadRequested: _ => { },
+                raisePermissionRequested: _ => { },
+                raiseAdapterCreated: _ => { },
+                raiseAdapterDestroyed: () => { },
+                raiseZoomFactorChanged: _ => { }),
+            interactionHandlers: new WebViewControlInteractionAccessors(
+                getContextMenuHandlers: getContextMenuHandlers ?? (() => null),
+                getDragEnteredHandlers: () => null,
+                getDragOverHandlers: () => null,
+                getDragLeftHandlers: () => null,
+                getDropCompletedHandlers: () => null),
+            navigationHooks: new WebViewControlNavigationHooks(
+                navigateInPlaceAsync: navigateInPlaceAsync ?? (_ => Task.CompletedTask),
+                getInitialZoomFactor: getInitialZoomFactor ?? (() => 1.0),
+                applyInitialZoomFactor: applyInitialZoomFactor ?? (_ => { })));
+
     private sealed class StubCoreEvents : IWebViewCoreControlEvents
     {
         public event EventHandler<NavigationStartingEventArgs>? NavigationStarted;

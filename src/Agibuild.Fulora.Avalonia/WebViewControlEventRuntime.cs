@@ -36,45 +36,33 @@ internal sealed class WebViewControlEventRuntime
     private IWebViewCoreControlEvents? _attachedCore;
 
     public WebViewControlEventRuntime(
-        Action<NavigationStartingEventArgs> raiseNavigationStarted,
-        Action<NavigationCompletedEventArgs> raiseNavigationCompleted,
-        Action<NewWindowRequestedEventArgs> raiseNewWindowRequested,
-        Action<WebMessageReceivedEventArgs> raiseWebMessageReceived,
-        Action<WebResourceRequestedEventArgs> raiseWebResourceRequested,
-        Action<EnvironmentRequestedEventArgs> raiseEnvironmentRequested,
-        Action<DownloadRequestedEventArgs> raiseDownloadRequested,
-        Action<PermissionRequestedEventArgs> raisePermissionRequested,
-        Action<AdapterCreatedEventArgs> raiseAdapterCreated,
-        Action raiseAdapterDestroyed,
-        Action<double> raiseZoomFactorChanged,
-        Func<EventHandler<ContextMenuRequestedEventArgs>?> getContextMenuHandlers,
-        Func<EventHandler<DragEventArgs>?> getDragEnteredHandlers,
-        Func<EventHandler<DragEventArgs>?> getDragOverHandlers,
-        Func<EventHandler<EventArgs>?> getDragLeftHandlers,
-        Func<EventHandler<DropEventArgs>?> getDropCompletedHandlers,
-        Func<Uri, Task> navigateInPlaceAsync,
-        Func<double> getInitialZoomFactor,
-        Action<double> applyInitialZoomFactor)
+        WebViewControlEventCallbacks callbacks,
+        WebViewControlInteractionAccessors interactionHandlers,
+        WebViewControlNavigationHooks navigationHooks)
     {
-        _raiseNavigationStarted = raiseNavigationStarted;
-        _raiseNavigationCompleted = raiseNavigationCompleted;
-        _raiseNewWindowRequested = raiseNewWindowRequested;
-        _raiseWebMessageReceived = raiseWebMessageReceived;
-        _raiseWebResourceRequested = raiseWebResourceRequested;
-        _raiseEnvironmentRequested = raiseEnvironmentRequested;
-        _raiseDownloadRequested = raiseDownloadRequested;
-        _raisePermissionRequested = raisePermissionRequested;
-        _raiseAdapterCreated = raiseAdapterCreated;
-        _raiseAdapterDestroyed = raiseAdapterDestroyed;
-        _raiseZoomFactorChanged = raiseZoomFactorChanged;
-        _getContextMenuHandlers = getContextMenuHandlers;
-        _getDragEnteredHandlers = getDragEnteredHandlers;
-        _getDragOverHandlers = getDragOverHandlers;
-        _getDragLeftHandlers = getDragLeftHandlers;
-        _getDropCompletedHandlers = getDropCompletedHandlers;
-        _navigateInPlaceAsync = navigateInPlaceAsync;
-        _getInitialZoomFactor = getInitialZoomFactor;
-        _applyInitialZoomFactor = applyInitialZoomFactor;
+        ArgumentNullException.ThrowIfNull(callbacks);
+        ArgumentNullException.ThrowIfNull(interactionHandlers);
+        ArgumentNullException.ThrowIfNull(navigationHooks);
+
+        _raiseNavigationStarted = callbacks.RaiseNavigationStarted;
+        _raiseNavigationCompleted = callbacks.RaiseNavigationCompleted;
+        _raiseNewWindowRequested = callbacks.RaiseNewWindowRequested;
+        _raiseWebMessageReceived = callbacks.RaiseWebMessageReceived;
+        _raiseWebResourceRequested = callbacks.RaiseWebResourceRequested;
+        _raiseEnvironmentRequested = callbacks.RaiseEnvironmentRequested;
+        _raiseDownloadRequested = callbacks.RaiseDownloadRequested;
+        _raisePermissionRequested = callbacks.RaisePermissionRequested;
+        _raiseAdapterCreated = callbacks.RaiseAdapterCreated;
+        _raiseAdapterDestroyed = callbacks.RaiseAdapterDestroyed;
+        _raiseZoomFactorChanged = callbacks.RaiseZoomFactorChanged;
+        _getContextMenuHandlers = interactionHandlers.GetContextMenuHandlers;
+        _getDragEnteredHandlers = interactionHandlers.GetDragEnteredHandlers;
+        _getDragOverHandlers = interactionHandlers.GetDragOverHandlers;
+        _getDragLeftHandlers = interactionHandlers.GetDragLeftHandlers;
+        _getDropCompletedHandlers = interactionHandlers.GetDropCompletedHandlers;
+        _navigateInPlaceAsync = navigationHooks.NavigateInPlaceAsync;
+        _getInitialZoomFactor = navigationHooks.GetInitialZoomFactor;
+        _applyInitialZoomFactor = navigationHooks.ApplyInitialZoomFactor;
     }
 
     public void Attach(IWebViewCoreControlEvents core)

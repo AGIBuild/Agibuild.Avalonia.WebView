@@ -15,10 +15,7 @@ public sealed class WebViewControlLifecycleRuntimeTests
     {
         var adapter = MockWebViewAdapter.Create();
         var controlRuntime = new WebViewControlRuntime();
-        var eventRuntime = new WebViewControlEventRuntime(
-            _ => { }, _ => { }, _ => { }, _ => { }, _ => { }, _ => { }, _ => { }, _ => { }, _ => { }, () => { }, _ => { },
-            () => null, () => null, () => null, () => null, () => null,
-            _ => Task.CompletedTask, () => 1.0, _ => { });
+        var eventRuntime = CreateEventRuntime();
 
         var lifecycle = new WebViewControlLifecycleRuntime(
             controlRuntime,
@@ -43,10 +40,7 @@ public sealed class WebViewControlLifecycleRuntimeTests
     {
         var adapter = MockWebViewAdapter.Create();
         var controlRuntime = new WebViewControlRuntime();
-        var eventRuntime = new WebViewControlEventRuntime(
-            _ => { }, _ => { }, _ => { }, _ => { }, _ => { }, _ => { }, _ => { }, _ => { }, _ => { }, () => { }, _ => { },
-            () => null, () => null, () => null, () => null, () => null,
-            _ => Task.CompletedTask, () => 1.0, _ => { });
+        var eventRuntime = CreateEventRuntime();
 
         var lifecycle = new WebViewControlLifecycleRuntime(
             controlRuntime,
@@ -70,10 +64,7 @@ public sealed class WebViewControlLifecycleRuntimeTests
     public void AttachToNativeControl_platform_not_supported_marks_runtime_unavailable_without_a_shell_adapter_callback()
     {
         var controlRuntime = new WebViewControlRuntime();
-        var eventRuntime = new WebViewControlEventRuntime(
-            _ => { }, _ => { }, _ => { }, _ => { }, _ => { }, _ => { }, _ => { }, _ => { }, _ => { }, () => { }, _ => { },
-            () => null, () => null, () => null, () => null, () => null,
-            _ => Task.CompletedTask, () => 1.0, _ => { });
+        var eventRuntime = CreateEventRuntime();
 
         var lifecycle = new WebViewControlLifecycleRuntime(
             controlRuntime,
@@ -96,10 +87,7 @@ public sealed class WebViewControlLifecycleRuntimeTests
     public void AttachToNativeControl_rethrows_non_platform_failures_and_clears_runtime_state()
     {
         var controlRuntime = new WebViewControlRuntime();
-        var eventRuntime = new WebViewControlEventRuntime(
-            _ => { }, _ => { }, _ => { }, _ => { }, _ => { }, _ => { }, _ => { }, _ => { }, _ => { }, () => { }, _ => { },
-            () => null, () => null, () => null, () => null, () => null,
-            _ => Task.CompletedTask, () => 1.0, _ => { });
+        var eventRuntime = CreateEventRuntime();
         var lifecycle = new WebViewControlLifecycleRuntime(
             controlRuntime,
             eventRuntime,
@@ -123,10 +111,7 @@ public sealed class WebViewControlLifecycleRuntimeTests
     {
         var adapter = MockWebViewAdapter.Create();
         var controlRuntime = new WebViewControlRuntime();
-        var eventRuntime = new WebViewControlEventRuntime(
-            _ => { }, _ => { }, _ => { }, _ => { }, _ => { }, _ => { }, _ => { }, _ => { }, _ => { }, () => { }, _ => { },
-            () => null, () => null, () => null, () => null, () => null,
-            _ => Task.CompletedTask, () => 1.0, _ => { });
+        var eventRuntime = CreateEventRuntime();
         var lifecycle = new WebViewControlLifecycleRuntime(
             controlRuntime, eventRuntime,
             () => NullLoggerFactory.Instance, () => null, () => null, _ => { }, () => _dispatcher,
@@ -144,6 +129,31 @@ public sealed class WebViewControlLifecycleRuntimeTests
         Assert.Null(controlRuntime.Core);
         Assert.False(controlRuntime.IsCoreAttached);
     }
+
+    private static WebViewControlEventRuntime CreateEventRuntime()
+        => new(
+            callbacks: new WebViewControlEventCallbacks(
+                raiseNavigationStarted: _ => { },
+                raiseNavigationCompleted: _ => { },
+                raiseNewWindowRequested: _ => { },
+                raiseWebMessageReceived: _ => { },
+                raiseWebResourceRequested: _ => { },
+                raiseEnvironmentRequested: _ => { },
+                raiseDownloadRequested: _ => { },
+                raisePermissionRequested: _ => { },
+                raiseAdapterCreated: _ => { },
+                raiseAdapterDestroyed: () => { },
+                raiseZoomFactorChanged: _ => { }),
+            interactionHandlers: new WebViewControlInteractionAccessors(
+                getContextMenuHandlers: () => null,
+                getDragEnteredHandlers: () => null,
+                getDragOverHandlers: () => null,
+                getDragLeftHandlers: () => null,
+                getDropCompletedHandlers: () => null),
+            navigationHooks: new WebViewControlNavigationHooks(
+                navigateInPlaceAsync: _ => Task.CompletedTask,
+                getInitialZoomFactor: () => 1.0,
+                applyInitialZoomFactor: _ => { }));
 
     private sealed class TestNativeHandle(nint handle, string descriptor) : INativeHandle
     {

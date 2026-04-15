@@ -102,25 +102,28 @@ public class WebView : NativeControlHost, ISpaHostingWebView
             raiseZoomFactorChanged: zoom => ZoomFactorChanged?.Invoke(this, zoom));
 
         _eventRuntime = new WebViewControlEventRuntime(
-            raiseNavigationStarted: args => _stateRuntime.HandleCoreNavigationStarted(args),
-            raiseNavigationCompleted: args => _stateRuntime.HandleCoreNavigationCompleted(args),
-            raiseNewWindowRequested: args => OnCoreNewWindowRequested(args),
-            raiseWebMessageReceived: args => WebMessageReceived?.Invoke(this, args),
-            raiseWebResourceRequested: args => WebResourceRequested?.Invoke(this, args),
-            raiseEnvironmentRequested: args => EnvironmentRequested?.Invoke(this, args),
-            raiseDownloadRequested: args => DownloadRequested?.Invoke(this, args),
-            raisePermissionRequested: args => PermissionRequested?.Invoke(this, args),
-            raiseAdapterCreated: args => AdapterCreated?.Invoke(this, args),
-            raiseAdapterDestroyed: () => AdapterDestroyed?.Invoke(this, EventArgs.Empty),
-            raiseZoomFactorChanged: newZoom => _stateRuntime.HandleCoreZoomFactorChanged(newZoom),
-            getContextMenuHandlers: () => _interactionRuntime.ContextMenuRequestedHandlers,
-            getDragEnteredHandlers: () => _interactionRuntime.DragEnteredHandlers,
-            getDragOverHandlers: () => _interactionRuntime.DragOverHandlers,
-            getDragLeftHandlers: () => _interactionRuntime.DragLeftHandlers,
-            getDropCompletedHandlers: () => _interactionRuntime.DropCompletedHandlers,
-            navigateInPlaceAsync: uri => _controlRuntime.NavigateAsync(uri),
-            getInitialZoomFactor: () => ZoomFactor,
-            applyInitialZoomFactor: zoom => _ = _controlRuntime.SetZoomFactorAsync(zoom));
+            callbacks: new WebViewControlEventCallbacks(
+                raiseNavigationStarted: args => _stateRuntime.HandleCoreNavigationStarted(args),
+                raiseNavigationCompleted: args => _stateRuntime.HandleCoreNavigationCompleted(args),
+                raiseNewWindowRequested: args => OnCoreNewWindowRequested(args),
+                raiseWebMessageReceived: args => WebMessageReceived?.Invoke(this, args),
+                raiseWebResourceRequested: args => WebResourceRequested?.Invoke(this, args),
+                raiseEnvironmentRequested: args => EnvironmentRequested?.Invoke(this, args),
+                raiseDownloadRequested: args => DownloadRequested?.Invoke(this, args),
+                raisePermissionRequested: args => PermissionRequested?.Invoke(this, args),
+                raiseAdapterCreated: args => AdapterCreated?.Invoke(this, args),
+                raiseAdapterDestroyed: () => AdapterDestroyed?.Invoke(this, EventArgs.Empty),
+                raiseZoomFactorChanged: newZoom => _stateRuntime.HandleCoreZoomFactorChanged(newZoom)),
+            interactionHandlers: new WebViewControlInteractionAccessors(
+                getContextMenuHandlers: () => _interactionRuntime.ContextMenuRequestedHandlers,
+                getDragEnteredHandlers: () => _interactionRuntime.DragEnteredHandlers,
+                getDragOverHandlers: () => _interactionRuntime.DragOverHandlers,
+                getDragLeftHandlers: () => _interactionRuntime.DragLeftHandlers,
+                getDropCompletedHandlers: () => _interactionRuntime.DropCompletedHandlers),
+            navigationHooks: new WebViewControlNavigationHooks(
+                navigateInPlaceAsync: uri => _controlRuntime.NavigateAsync(uri),
+                getInitialZoomFactor: () => ZoomFactor,
+                applyInitialZoomFactor: zoom => _ = _controlRuntime.SetZoomFactorAsync(zoom)));
 
         _lifecycleRuntime = new WebViewControlLifecycleRuntime(
             _controlRuntime,
