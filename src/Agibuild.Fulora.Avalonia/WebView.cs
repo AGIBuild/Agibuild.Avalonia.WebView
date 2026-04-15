@@ -259,20 +259,10 @@ public class WebView : NativeControlHost, ISpaHostingWebView
     }
 
     /// <inheritdoc />
-    public Task<double> GetZoomFactorAsync()
-    {
-        if (_core is null)
-            throw new InvalidOperationException("WebView is not initialized.");
-        return _core.GetZoomFactorAsync();
-    }
+    public Task<double> GetZoomFactorAsync() => _controlRuntime.GetZoomFactorAsync();
 
     /// <inheritdoc />
-    public Task SetZoomFactorAsync(double zoomFactor)
-    {
-        if (_core is null)
-            throw new InvalidOperationException("WebView is not initialized.");
-        return _core.SetZoomFactorAsync(zoomFactor);
-    }
+    public Task SetZoomFactorAsync(double zoomFactor) => _controlRuntime.SetZoomFactorAsync(zoomFactor);
 
     /// <summary>Raised when the zoom factor changes.</summary>
     public event EventHandler<double>? ZoomFactorChanged;
@@ -280,28 +270,13 @@ public class WebView : NativeControlHost, ISpaHostingWebView
     // --- Navigation ---
 
     /// <inheritdoc />
-    public Task NavigateAsync(Uri uri)
-    {
-        ArgumentNullException.ThrowIfNull(uri);
-        EnsureCore();
-        return _core!.NavigateAsync(uri);
-    }
+    public Task NavigateAsync(Uri uri) => _controlRuntime.NavigateAsync(uri);
 
     /// <inheritdoc />
-    public Task NavigateToStringAsync(string html)
-    {
-        ArgumentNullException.ThrowIfNull(html);
-        EnsureCore();
-        return _core!.NavigateToStringAsync(html);
-    }
+    public Task NavigateToStringAsync(string html) => _controlRuntime.NavigateToStringAsync(html);
 
     /// <inheritdoc />
-    public Task NavigateToStringAsync(string html, Uri? baseUrl)
-    {
-        ArgumentNullException.ThrowIfNull(html);
-        EnsureCore();
-        return _core!.NavigateToStringAsync(html, baseUrl);
-    }
+    public Task NavigateToStringAsync(string html, Uri? baseUrl) => _controlRuntime.NavigateToStringAsync(html, baseUrl);
 
     /// <summary>
     /// Returns a cookie manager if the underlying adapter supports it; otherwise <c>null</c>.
@@ -628,23 +603,6 @@ public class WebView : NativeControlHost, ISpaHostingWebView
 
     private void OnOverlayContentChanged(AvaloniaPropertyChangedEventArgs e)
         => _overlayRuntime.UpdateOverlayContent(e.NewValue);
-
-    private void EnsureCore()
-    {
-        if (_controlRuntime.Core is null)
-        {
-            if (_adapterUnavailable)
-            {
-                throw new PlatformNotSupportedException(
-                    "No WebView adapter is available for the current platform. " +
-                    "WebView functionality is not supported.");
-            }
-
-            throw new InvalidOperationException(
-                "WebView is not yet attached to the visual tree. " +
-                "Wait until the control is loaded before calling navigation methods.");
-        }
-    }
 
     // Internal test seam for lifecycle wiring assertions without private reflection.
     internal void TestOnlyAttachCore(WebViewCore core)

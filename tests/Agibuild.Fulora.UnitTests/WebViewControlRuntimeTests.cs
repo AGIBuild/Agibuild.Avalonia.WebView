@@ -36,6 +36,20 @@ public sealed class WebViewControlRuntimeTests
     }
 
     [Fact]
+    public async Task GetZoomFactorAsync_delegates_to_attached_core()
+    {
+        var runtime = new WebViewControlRuntime();
+        var core = new WebViewCore(MockWebViewAdapter.CreateWithZoom(), _dispatcher);
+
+        runtime.AttachCore(core);
+        await runtime.SetZoomFactorAsync(1.5);
+
+        var zoom = await runtime.GetZoomFactorAsync();
+
+        Assert.Equal(1.5, zoom);
+    }
+
+    [Fact]
     public void SetCustomUserAgent_delegates_to_attached_core()
     {
         var runtime = new WebViewControlRuntime();
