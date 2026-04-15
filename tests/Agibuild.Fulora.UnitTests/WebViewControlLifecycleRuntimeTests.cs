@@ -23,7 +23,6 @@ public sealed class WebViewControlLifecycleRuntimeTests
             getLoggerFactory: () => NullLoggerFactory.Instance,
             getEnvironmentOptions: () => null,
             getPendingSource: () => new Uri("https://example.test/replayed"),
-            setCoreAttached: _ => { },
             createDispatcher: () => _dispatcher,
             createCore: (_, _, _) => new WebViewCore(adapter, _dispatcher),
             wrapPlatformHandle: handle => new TestNativeHandle(handle.Handle, handle.HandleDescriptor ?? string.Empty));
@@ -48,7 +47,6 @@ public sealed class WebViewControlLifecycleRuntimeTests
             getLoggerFactory: () => NullLoggerFactory.Instance,
             getEnvironmentOptions: () => null,
             getPendingSource: () => null,
-            setCoreAttached: attached => controlRuntime.SetCoreAttached(attached),
             createDispatcher: () => _dispatcher,
             createCore: (_, _, _) => new WebViewCore(adapter, _dispatcher),
             wrapPlatformHandle: handle => new TestNativeHandle(handle.Handle, handle.HandleDescriptor ?? string.Empty));
@@ -72,7 +70,6 @@ public sealed class WebViewControlLifecycleRuntimeTests
             () => NullLoggerFactory.Instance,
             () => null,
             () => null,
-            attached => controlRuntime.SetCoreAttached(attached),
             () => _dispatcher,
             createCore: (_, _, _) => throw new PlatformNotSupportedException());
 
@@ -94,7 +91,6 @@ public sealed class WebViewControlLifecycleRuntimeTests
             () => NullLoggerFactory.Instance,
             () => null,
             () => null,
-            _ => { },
             () => _dispatcher,
             createCore: (_, _, _) => throw new InvalidOperationException("boom"));
 
@@ -114,7 +110,7 @@ public sealed class WebViewControlLifecycleRuntimeTests
         var eventRuntime = CreateEventRuntime();
         var lifecycle = new WebViewControlLifecycleRuntime(
             controlRuntime, eventRuntime,
-            () => NullLoggerFactory.Instance, () => null, () => null, _ => { }, () => _dispatcher,
+            () => NullLoggerFactory.Instance, () => null, () => null, () => _dispatcher,
             createCore: (_, _, _) => new WebViewCore(adapter, _dispatcher),
             wrapPlatformHandle: handle => new TestNativeHandle(handle.Handle, handle.HandleDescriptor ?? string.Empty));
         var core = new WebViewCore(adapter, _dispatcher);

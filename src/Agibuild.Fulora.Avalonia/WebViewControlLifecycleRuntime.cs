@@ -11,7 +11,6 @@ internal sealed class WebViewControlLifecycleRuntime
     private readonly Func<ILoggerFactory?> _getLoggerFactory;
     private readonly Func<IWebViewEnvironmentOptions?> _getEnvironmentOptions;
     private readonly Func<Uri?> _getPendingSource;
-    private readonly Action<bool> _setCoreAttached;
     private readonly Func<IWebViewDispatcher> _createDispatcher;
     private readonly Func<IWebViewDispatcher, ILogger<WebViewCore>, IWebViewEnvironmentOptions?, WebViewCore> _createCore;
     private readonly Func<IPlatformHandle, INativeHandle> _wrapPlatformHandle;
@@ -22,7 +21,6 @@ internal sealed class WebViewControlLifecycleRuntime
         Func<ILoggerFactory?> getLoggerFactory,
         Func<IWebViewEnvironmentOptions?> getEnvironmentOptions,
         Func<Uri?> getPendingSource,
-        Action<bool> setCoreAttached,
         Func<IWebViewDispatcher> createDispatcher,
         Func<IWebViewDispatcher, ILogger<WebViewCore>, IWebViewEnvironmentOptions?, WebViewCore>? createCore = null,
         Func<IPlatformHandle, INativeHandle>? wrapPlatformHandle = null)
@@ -32,7 +30,6 @@ internal sealed class WebViewControlLifecycleRuntime
         _getLoggerFactory = getLoggerFactory ?? throw new ArgumentNullException(nameof(getLoggerFactory));
         _getEnvironmentOptions = getEnvironmentOptions ?? throw new ArgumentNullException(nameof(getEnvironmentOptions));
         _getPendingSource = getPendingSource ?? throw new ArgumentNullException(nameof(getPendingSource));
-        _setCoreAttached = setCoreAttached ?? throw new ArgumentNullException(nameof(setCoreAttached));
         _createDispatcher = createDispatcher ?? throw new ArgumentNullException(nameof(createDispatcher));
         _createCore = createCore ?? WebViewCore.CreateForControl;
         _wrapPlatformHandle = wrapPlatformHandle ?? (handle => new AvaloniaNativeHandle(handle));
@@ -55,7 +52,7 @@ internal sealed class WebViewControlLifecycleRuntime
             _eventRuntime.Attach(core);
 
             core.Attach(_wrapPlatformHandle(parentHandle));
-            _setCoreAttached(true);
+            _controlRuntime.SetCoreAttached(true);
 
             var pendingSource = _getPendingSource();
             if (pendingSource is not null)
@@ -65,14 +62,14 @@ internal sealed class WebViewControlLifecycleRuntime
         {
             _eventRuntime.Detach();
             core?.Dispose();
-            _setCoreAttached(false);
+            _controlRuntime.SetCoreAttached(false);
             _controlRuntime.MarkAdapterUnavailable();
         }
         catch
         {
             _eventRuntime.Detach();
             core?.Dispose();
-            _setCoreAttached(false);
+            _controlRuntime.SetCoreAttached(false);
             _controlRuntime.ClearCore();
             throw;
         }
@@ -89,7 +86,7 @@ internal sealed class WebViewControlLifecycleRuntime
         if (coreAttached)
         {
             core?.Detach();
-            _setCoreAttached(false);
+            _controlRuntime.SetCoreAttached(false);
         }
 
         core?.Dispose();

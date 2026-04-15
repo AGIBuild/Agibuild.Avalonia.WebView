@@ -131,7 +131,6 @@ public class WebView : NativeControlHost, ISpaHostingWebView
             getLoggerFactory: () => _loggerFactory,
             getEnvironmentOptions: () => EnvironmentOptions,
             getPendingSource: () => Source,
-            setCoreAttached: attached => _controlRuntime.SetCoreAttached(attached),
             createDispatcher: static () => new SynchronizationContextWebViewDispatcher());
 
         _hostClosingRuntime = new WebViewHostClosingRuntime(
