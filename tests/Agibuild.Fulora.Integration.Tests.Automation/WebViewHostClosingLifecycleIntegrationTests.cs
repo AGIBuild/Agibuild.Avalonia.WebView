@@ -45,7 +45,7 @@ public sealed class WebViewHostClosingLifecycleIntegrationTests
 
             var control = new WebView();
             control.TestOnlyAttachCore(core);
-            SetCoreAttached(control, value: true);
+            control.TestOnlySetCoreAttached(true);
 
             var detached = control.HandleHostWindowClosing(
                 isProgrammatic: false,
@@ -120,18 +120,15 @@ public sealed class WebViewHostClosingLifecycleIntegrationTests
         });
     }
 
-    private static void SetCoreAttached(WebView control, bool value)
-    {
-        var field = typeof(WebView).GetField("_coreAttached", BindingFlags.Instance | BindingFlags.NonPublic);
-        Assert.NotNull(field);
-        field!.SetValue(control, value);
-    }
-
     private static bool GetCoreAttached(WebView control)
     {
-        var field = typeof(WebView).GetField("_coreAttached", BindingFlags.Instance | BindingFlags.NonPublic);
+        var property = typeof(WebViewControlRuntime).GetProperty("IsCoreAttached", BindingFlags.Instance | BindingFlags.Public);
+        var field = typeof(WebView).GetField("_controlRuntime", BindingFlags.Instance | BindingFlags.NonPublic);
+        Assert.NotNull(property);
         Assert.NotNull(field);
-        return Assert.IsType<bool>(field!.GetValue(control));
+        var runtime = field!.GetValue(control);
+        Assert.NotNull(runtime);
+        return Assert.IsType<bool>(property!.GetValue(runtime));
     }
 
     private static void SetPrivateField(object target, string fieldName, object? value)

@@ -63,7 +63,6 @@ public class WebView : NativeControlHost, ISpaHostingWebView
     // ---------------------------------------------------------------------------
 
     private WebViewCore? _core;
-    private bool _coreAttached;
     private ILoggerFactory? _loggerFactory;
     private readonly WebViewControlRuntime _controlRuntime = new();
     private readonly WebViewControlStateRuntime _stateRuntime;
@@ -131,11 +130,7 @@ public class WebView : NativeControlHost, ISpaHostingWebView
             getEnvironmentOptions: () => EnvironmentOptions,
             getPendingSource: () => Source,
             setCore: core => _core = core,
-            setCoreAttached: attached =>
-            {
-                _coreAttached = attached;
-                _controlRuntime.SetCoreAttached(attached);
-            },
+            setCoreAttached: attached => _controlRuntime.SetCoreAttached(attached),
             setAdapterUnavailable: _ => { },
             createDispatcher: static () => new SynchronizationContextWebViewDispatcher());
 
@@ -157,7 +152,7 @@ public class WebView : NativeControlHost, ISpaHostingWebView
                 if (window is Window avaloniaWindow && subscriptionToken is EventHandler<WindowClosingEventArgs> wrapped)
                     avaloniaWindow.Closing -= wrapped;
             },
-            isCoreAttached: () => _coreAttached,
+            isCoreAttached: () => _controlRuntime.IsCoreAttached,
             detachForClosing: (isProgrammatic, closeReason) => DetachForHostWindowClosing(isProgrammatic, closeReason));
 
         _overlayRuntime = new WebViewOverlayRuntime(
@@ -575,7 +570,7 @@ public class WebView : NativeControlHost, ISpaHostingWebView
 
         _lifecycleRuntime.AttachToNativeControl(handle);
 
-        if (_coreAttached)
+        if (_controlRuntime.IsCoreAttached)
             _hostClosingRuntime.RefreshHook();
 
         return handle;
@@ -589,7 +584,7 @@ public class WebView : NativeControlHost, ISpaHostingWebView
         _hostClosingRuntime.Unhook();
 
         _overlayRuntime.DisposeOverlayHost();
-        _lifecycleRuntime.DestroyAttachedCore(_core, _coreAttached);
+        _lifecycleRuntime.DestroyAttachedCore(_core, _controlRuntime.IsCoreAttached);
 
         base.DestroyNativeControlCore(control);
     }
@@ -615,6 +610,8 @@ public class WebView : NativeControlHost, ISpaHostingWebView
         _controlRuntime.AttachCore(core);
     }
 
+    internal void TestOnlySetCoreAttached(bool attached) => _controlRuntime.SetCoreAttached(attached);
+
     internal void TestOnlySubscribeCoreEvents()
     {
         if (_core is not null)
@@ -634,7 +631,7 @@ public class WebView : NativeControlHost, ISpaHostingWebView
         GC.SuppressFinalize(this);
         _hostClosingRuntime.Unhook();
         _overlayRuntime.Dispose();
-        _lifecycleRuntime.DestroyAttachedCore(_core, _coreAttached);
+        _lifecycleRuntime.DestroyAttachedCore(_core, _controlRuntime.IsCoreAttached);
     }
 
     // Close events can be user-triggered, app-triggered, or OS-triggered.
@@ -650,7 +647,6 @@ public class WebView : NativeControlHost, ISpaHostingWebView
         try
         {
             _core?.Detach();
-            _coreAttached = false;
             _controlRuntime.SetCoreAttached(false);
             return true;
         }
