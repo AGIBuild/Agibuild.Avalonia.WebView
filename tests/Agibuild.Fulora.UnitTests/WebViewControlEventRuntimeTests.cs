@@ -365,6 +365,67 @@ public sealed class WebViewControlEventRuntimeTests
         Assert.Equal(1, secondHandlerCalls);
     }
 
+    [Fact]
+    public void Detach_unhooks_drag_over_handlers_after_handler_set_changes_while_attached()
+    {
+        var firstHandlerCalls = 0;
+        var secondHandlerCalls = 0;
+        var interactionRuntime = new WebViewControlInteractionRuntime();
+        EventHandler<DragEventArgs> firstHandler = (_, _) => firstHandlerCalls++;
+        EventHandler<DragEventArgs> secondHandler = (_, _) => secondHandlerCalls++;
+
+        interactionRuntime.AddDragOverHandler(core: null, firstHandler);
+
+        var runtime = new WebViewControlEventRuntime(
+            callbacks: new WebViewControlEventCallbacks(
+                raiseNavigationStarted: _ => { },
+                raiseNavigationCompleted: _ => { },
+                raiseNewWindowRequested: _ => { },
+                raiseWebMessageReceived: _ => { },
+                raiseWebResourceRequested: _ => { },
+                raiseEnvironmentRequested: _ => { },
+                raiseDownloadRequested: _ => { },
+                raisePermissionRequested: _ => { },
+                raiseAdapterCreated: _ => { },
+                raiseAdapterDestroyed: () => { },
+                raiseZoomFactorChanged: _ => { }),
+            interactionHandlers: new WebViewControlInteractionAccessors(
+                getContextMenuHandlers: () => interactionRuntime.ContextMenuRequestedHandlers,
+                getDragEnteredHandlers: () => interactionRuntime.DragEnteredHandlers,
+                getDragOverHandlers: () => interactionRuntime.DragOverHandlers,
+                getDragLeftHandlers: () => interactionRuntime.DragLeftHandlers,
+                getDropCompletedHandlers: () => interactionRuntime.DropCompletedHandlers),
+            navigationHooks: new WebViewControlNavigationHooks(
+                navigateInPlaceAsync: _ => Task.CompletedTask,
+                getInitialZoomFactor: () => 1.0,
+                applyInitialZoomFactor: _ => { }));
+
+        var core = new StubCoreEvents();
+        runtime.Attach(core);
+
+        interactionRuntime.AddDragOverHandler(core, secondHandler);
+        interactionRuntime.RemoveDragOverHandler(core, firstHandler);
+
+        core.RaiseDragOver(new DragEventArgs
+        {
+            Payload = new DragDropPayload(),
+            AllowedEffects = DragDropEffects.Copy
+        });
+
+        Assert.Equal(0, firstHandlerCalls);
+        Assert.Equal(1, secondHandlerCalls);
+
+        runtime.Detach();
+        core.RaiseDragOver(new DragEventArgs
+        {
+            Payload = new DragDropPayload(),
+            AllowedEffects = DragDropEffects.Copy
+        });
+
+        Assert.Equal(0, firstHandlerCalls);
+        Assert.Equal(1, secondHandlerCalls);
+    }
+
 #pragma warning disable CS0067
     private static WebViewControlEventRuntime CreateRuntime(
         Action<NewWindowRequestedEventArgs>? raiseNewWindowRequested = null,
@@ -433,6 +494,9 @@ public sealed class WebViewControlEventRuntimeTests
 
         public void RaiseDragEntered(DragEventArgs args)
             => DragEntered?.Invoke(this, args);
+
+        public void RaiseDragOver(DragEventArgs args)
+            => DragOver?.Invoke(this, args);
     }
 #pragma warning restore CS0067
 }
