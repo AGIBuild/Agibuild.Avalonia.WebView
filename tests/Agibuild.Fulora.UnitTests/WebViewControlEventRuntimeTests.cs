@@ -139,6 +139,59 @@ public sealed class WebViewControlEventRuntimeTests
         Assert.Equal(1, contextMenuCalls);
     }
 
+    [Fact]
+    public void Detach_unhooks_interaction_handlers_after_handler_set_changes_while_attached()
+    {
+        var firstHandlerCalls = 0;
+        var secondHandlerCalls = 0;
+        var interactionRuntime = new WebViewControlInteractionRuntime();
+        EventHandler<ContextMenuRequestedEventArgs> firstHandler = (_, _) => firstHandlerCalls++;
+        EventHandler<ContextMenuRequestedEventArgs> secondHandler = (_, _) => secondHandlerCalls++;
+
+        interactionRuntime.AddContextMenuRequestedHandler(core: null, firstHandler);
+
+        var runtime = new WebViewControlEventRuntime(
+            callbacks: new WebViewControlEventCallbacks(
+                raiseNavigationStarted: _ => { },
+                raiseNavigationCompleted: _ => { },
+                raiseNewWindowRequested: _ => { },
+                raiseWebMessageReceived: _ => { },
+                raiseWebResourceRequested: _ => { },
+                raiseEnvironmentRequested: _ => { },
+                raiseDownloadRequested: _ => { },
+                raisePermissionRequested: _ => { },
+                raiseAdapterCreated: _ => { },
+                raiseAdapterDestroyed: () => { },
+                raiseZoomFactorChanged: _ => { }),
+            interactionHandlers: new WebViewControlInteractionAccessors(
+                getContextMenuHandlers: () => interactionRuntime.ContextMenuRequestedHandlers,
+                getDragEnteredHandlers: () => interactionRuntime.DragEnteredHandlers,
+                getDragOverHandlers: () => interactionRuntime.DragOverHandlers,
+                getDragLeftHandlers: () => interactionRuntime.DragLeftHandlers,
+                getDropCompletedHandlers: () => interactionRuntime.DropCompletedHandlers),
+            navigationHooks: new WebViewControlNavigationHooks(
+                navigateInPlaceAsync: _ => Task.CompletedTask,
+                getInitialZoomFactor: () => 1.0,
+                applyInitialZoomFactor: _ => { }));
+
+        var core = new StubCoreEvents();
+        runtime.Attach(core);
+
+        interactionRuntime.AddContextMenuRequestedHandler(core, secondHandler);
+        interactionRuntime.RemoveContextMenuRequestedHandler(core, firstHandler);
+
+        core.RaiseContextMenuRequested(new ContextMenuRequestedEventArgs());
+
+        Assert.Equal(0, firstHandlerCalls);
+        Assert.Equal(1, secondHandlerCalls);
+
+        runtime.Detach();
+        core.RaiseContextMenuRequested(new ContextMenuRequestedEventArgs());
+
+        Assert.Equal(0, firstHandlerCalls);
+        Assert.Equal(1, secondHandlerCalls);
+    }
+
 #pragma warning disable CS0067
     private static WebViewControlEventRuntime CreateRuntime(
         Action<NewWindowRequestedEventArgs>? raiseNewWindowRequested = null,
