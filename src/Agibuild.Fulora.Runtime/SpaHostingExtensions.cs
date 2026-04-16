@@ -1,5 +1,3 @@
-using System.Reflection;
-
 namespace Agibuild.Fulora;
 
 /// <summary>
@@ -8,25 +6,18 @@ namespace Agibuild.Fulora;
 public static class SpaHostingExtensions
 {
     /// <summary>
-    /// Configures the WebView environment for embedded SPA hosting (production mode).
-    /// Call this at startup; all WebView controls that enable SPA hosting will serve from embedded resources.
+    /// Registers a custom scheme with the WebView environment for SPA hosting (production mode).
+    /// Per-control resource serving is configured separately via <see cref="ISpaHostingWebView.EnableSpaHosting"/>.
     /// </summary>
     /// <param name="options">The environment options to configure.</param>
-    /// <param name="schemeName">The custom scheme name (e.g. "app"). Default: "app".</param>
-    /// <param name="resourceAssembly">Assembly containing embedded resources.</param>
-    /// <param name="resourcePrefix">Embedded resource path prefix (e.g. "wwwroot").</param>
+    /// <param name="schemeName">The custom scheme name (e.g. "app").</param>
     public static WebViewEnvironmentOptions AddEmbeddedFileProvider(
         this WebViewEnvironmentOptions options,
-        string schemeName,
-        Assembly resourceAssembly,
-        string resourcePrefix)
+        string schemeName)
     {
         ArgumentNullException.ThrowIfNull(options);
         ArgumentException.ThrowIfNullOrEmpty(schemeName);
-        ArgumentNullException.ThrowIfNull(resourceAssembly);
-        ArgumentException.ThrowIfNullOrEmpty(resourcePrefix);
 
-        // Ensure the custom scheme is registered.
         var existing = options.CustomSchemes.ToList();
         if (!existing.Any(s => s.SchemeName.Equals(schemeName, StringComparison.OrdinalIgnoreCase)))
         {

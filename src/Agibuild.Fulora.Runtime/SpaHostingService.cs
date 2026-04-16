@@ -104,8 +104,15 @@ internal sealed class SpaHostingService : IDisposable
         var uri = e.RequestUri;
         if (uri is null) return false;
         if (!uri.Scheme.Equals(_options.Scheme, StringComparison.OrdinalIgnoreCase)) return false;
+        if (!uri.Host.Equals(_options.Host, StringComparison.OrdinalIgnoreCase)) return false;
 
         var path = uri.AbsolutePath.TrimStart('/');
+
+        if (_options.ServiceWorker is { } sw &&
+            path.Equals(sw.ScriptPath.TrimStart('/'), StringComparison.OrdinalIgnoreCase))
+        {
+            return ServeServiceWorkerScript(e, sw);
+        }
 
         // SPA fallback: if path has no file extension, serve the fallback document.
         if (string.IsNullOrEmpty(path) || !Path.HasExtension(path))
@@ -311,6 +318,20 @@ internal sealed class SpaHostingService : IDisposable
 
         _logger.LogDebug("SPA: proxied '{Path}' → {Status} ({ContentType})",
             response.RequestMessage?.RequestUri?.PathAndQuery, e.ResponseStatusCode, e.ResponseContentType);
+        return true;
+    }
+
+    // ==================== Service worker serving ====================
+
+    private static bool ServeServiceWorkerScript(WebResourceRequestedEventArgs e, ServiceWorkerOptions sw)
+    {
+        var script = ServiceWorkerRegistrar.GenerateServiceWorkerScript(sw);
+        e.ResponseBody = new MemoryStream(Encoding.UTF8.GetBytes(script));
+        e.ResponseContentType = "application/javascript";
+        e.ResponseStatusCode = 200;
+        e.Handled = true;
+        e.ResponseHeaders ??= new Dictionary<string, string>();
+        e.ResponseHeaders["Cache-Control"] = "no-cache";
         return true;
     }
 

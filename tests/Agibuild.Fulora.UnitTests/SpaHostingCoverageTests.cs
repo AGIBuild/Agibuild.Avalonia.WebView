@@ -16,48 +16,21 @@ public sealed partial class RuntimeCoverageTests
     public void AddEmbeddedFileProvider_null_options_throws()
     {
         Assert.Throws<ArgumentNullException>(() =>
-            SpaHostingExtensions.AddEmbeddedFileProvider(null!, "app",
-                typeof(RuntimeCoverageTests).Assembly, "wwwroot"));
+            SpaHostingExtensions.AddEmbeddedFileProvider(null!, "app"));
     }
 
     [Fact]
     public void AddEmbeddedFileProvider_empty_scheme_throws()
     {
         var opts = new WebViewEnvironmentOptions();
-        Assert.Throws<ArgumentException>(() =>
-            opts.AddEmbeddedFileProvider("", typeof(RuntimeCoverageTests).Assembly, "wwwroot"));
+        Assert.Throws<ArgumentException>(() => opts.AddEmbeddedFileProvider(""));
     }
 
     [Fact]
     public void AddEmbeddedFileProvider_null_scheme_throws()
     {
         var opts = new WebViewEnvironmentOptions();
-        Assert.Throws<ArgumentNullException>(() =>
-            opts.AddEmbeddedFileProvider(null!, typeof(RuntimeCoverageTests).Assembly, "wwwroot"));
-    }
-
-    [Fact]
-    public void AddEmbeddedFileProvider_null_assembly_throws()
-    {
-        var opts = new WebViewEnvironmentOptions();
-        Assert.Throws<ArgumentNullException>(() =>
-            opts.AddEmbeddedFileProvider("app", null!, "wwwroot"));
-    }
-
-    [Fact]
-    public void AddEmbeddedFileProvider_empty_prefix_throws()
-    {
-        var opts = new WebViewEnvironmentOptions();
-        Assert.Throws<ArgumentException>(() =>
-            opts.AddEmbeddedFileProvider("app", typeof(RuntimeCoverageTests).Assembly, ""));
-    }
-
-    [Fact]
-    public void AddEmbeddedFileProvider_null_prefix_throws()
-    {
-        var opts = new WebViewEnvironmentOptions();
-        Assert.Throws<ArgumentNullException>(() =>
-            opts.AddEmbeddedFileProvider("app", typeof(RuntimeCoverageTests).Assembly, null!));
+        Assert.Throws<ArgumentNullException>(() => opts.AddEmbeddedFileProvider(null!));
     }
 
     [Fact]
@@ -65,8 +38,7 @@ public sealed partial class RuntimeCoverageTests
     {
         var opts = new WebViewEnvironmentOptions();
 
-        var result = opts.AddEmbeddedFileProvider("myscheme",
-            typeof(RuntimeCoverageTests).Assembly, "wwwroot");
+        var result = opts.AddEmbeddedFileProvider("myscheme");
 
         Assert.Same(opts, result);
         Assert.Single(opts.CustomSchemes);
@@ -79,8 +51,8 @@ public sealed partial class RuntimeCoverageTests
     public void AddEmbeddedFileProvider_does_not_duplicate_scheme()
     {
         var opts = new WebViewEnvironmentOptions();
-        opts.AddEmbeddedFileProvider("app", typeof(RuntimeCoverageTests).Assembly, "wwwroot");
-        opts.AddEmbeddedFileProvider("app", typeof(RuntimeCoverageTests).Assembly, "other");
+        opts.AddEmbeddedFileProvider("app");
+        opts.AddEmbeddedFileProvider("app");
 
         Assert.Single(opts.CustomSchemes);
     }
@@ -243,6 +215,22 @@ public sealed partial class RuntimeCoverageTests
     }
 
     [Fact]
+    public void TryHandle_returns_false_for_non_matching_host()
+    {
+        using var svc = new SpaHostingService(new SpaHostingOptions
+        {
+            Scheme = "app",
+            Host = "myapp",
+            EmbeddedResourcePrefix = "TestResources",
+            ResourceAssembly = typeof(SpaHostingTests).Assembly,
+        }, NullTestLogger.Instance);
+
+        var e = MakeSpaArgs("app://other-host/index.html");
+
+        Assert.False(svc.TryHandle(e));
+    }
+
+    [Fact]
     public void TryHandle_applies_default_headers()
     {
         using var svc = new SpaHostingService(new SpaHostingOptions
@@ -274,6 +262,41 @@ public sealed partial class RuntimeCoverageTests
         Assert.True(SpaHostingService.IsHashedFilename("chunk-ABCDEF1234.css"));
         Assert.False(SpaHostingService.IsHashedFilename("app.js"));
         Assert.False(SpaHostingService.IsHashedFilename(""));
+    }
+
+    [Fact]
+    public void TryHandle_serves_service_worker_script_when_configured()
+    {
+        using var svc = new SpaHostingService(new SpaHostingOptions
+        {
+            EmbeddedResourcePrefix = "TestResources",
+            ResourceAssembly = typeof(SpaHostingTests).Assembly,
+            ServiceWorker = new ServiceWorkerOptions { ScriptPath = "/sw.js" }
+        }, NullTestLogger.Instance);
+
+        var e = MakeSpaArgs("app://localhost/sw.js");
+        var handled = svc.TryHandle(e);
+
+        Assert.True(handled);
+        Assert.Equal(200, e.ResponseStatusCode);
+        Assert.Equal("application/javascript", e.ResponseContentType);
+        Assert.NotNull(e.ResponseBody);
+        using var reader = new StreamReader(e.ResponseBody!);
+        var content = reader.ReadToEnd();
+        Assert.Contains("self.addEventListener", content);
+    }
+
+    [Fact]
+    public void TryHandle_does_not_serve_sw_script_path_when_not_configured()
+    {
+        using var svc = CreateEmbeddedSpaService();
+
+        var e = MakeSpaArgs("app://localhost/sw.js");
+        var handled = svc.TryHandle(e);
+
+        // Without ServiceWorker config, /sw.js falls through to normal resource lookup (404 from embedded).
+        Assert.True(handled);
+        Assert.Equal(404, e.ResponseStatusCode);
     }
 
     [Fact]
