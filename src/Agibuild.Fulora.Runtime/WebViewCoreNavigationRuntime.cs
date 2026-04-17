@@ -28,6 +28,16 @@ internal interface IWebViewCoreNavigationHost
     void UpdateActiveNavigationRequestUri(Uri requestUri);
 }
 
+/// <summary>
+/// Navigation coordinator that marshals navigation start / completion onto the UI thread and
+/// funnels state through the <see cref="IWebViewCoreNavigationHost"/> (<see cref="WebViewCore"/>).
+/// </summary>
+/// <remarks>
+/// Intentionally not <see cref="IDisposable"/>: the active-navigation <see cref="TaskCompletionSource"/>
+/// lives on the host (<see cref="WebViewCore"/>), which faults it during <see cref="WebViewCore.Dispose"/>.
+/// This runtime holds only injected references (host, dispatcher, logger) and never allocates handles,
+/// background tasks, or subscriptions. Dropping it with the owning <see cref="WebViewCore"/> leaks nothing.
+/// </remarks>
 internal sealed class WebViewCoreNavigationRuntime
 {
     private static readonly Uri AboutBlank = new("about:blank");

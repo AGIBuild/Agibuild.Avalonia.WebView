@@ -3,6 +3,17 @@ using Microsoft.Extensions.Logging;
 
 namespace Agibuild.Fulora;
 
+/// <summary>
+/// One-shot capability detector and factory for <see cref="ICookieManager"/> / <see cref="ICommandManager"/>
+/// wrappers. All work happens during <see cref="WebViewCore"/> construction; afterwards this runtime is a
+/// pure reference holder.
+/// </summary>
+/// <remarks>
+/// Intentionally not <see cref="IDisposable"/>: the instance holds only injected references
+/// (platform adapter, options, logger) which are owned by <see cref="WebViewCore"/> and the caller —
+/// never allocates unmanaged handles, timers, subscriptions, or background tasks. Safe to drop with
+/// the owning <see cref="WebViewCore"/> at GC time.
+/// </remarks>
 internal sealed class WebViewCoreCapabilityDetectionRuntime
 {
     private readonly IWebViewAdapter _adapter;
@@ -44,22 +55,22 @@ internal sealed class WebViewCoreCapabilityDetectionRuntime
         _logger.LogDebug("Custom schemes registered: {Count}", schemes.Count);
     }
 
-    public ICookieManager? CreateCookieManager(WebViewCore owner)
+    public ICookieManager? CreateCookieManager(IWebViewCoreOperationHost host)
     {
         if (_adapter is not ICookieAdapter cookieAdapter)
             return null;
 
-        var manager = new WebViewCore.RuntimeCookieManager(cookieAdapter, owner, _logger);
+        var manager = new RuntimeCookieManager(cookieAdapter, host, _logger);
         _logger.LogDebug("Cookie support: enabled");
         return manager;
     }
 
-    public ICommandManager? CreateCommandManager(WebViewCore owner)
+    public ICommandManager? CreateCommandManager(IWebViewCoreOperationHost host)
     {
         if (_adapter is not ICommandAdapter commandAdapter)
             return null;
 
-        var manager = new WebViewCore.RuntimeCommandManager(commandAdapter, owner);
+        var manager = new RuntimeCommandManager(commandAdapter, host);
         _logger.LogDebug("Command support: enabled");
         return manager;
     }

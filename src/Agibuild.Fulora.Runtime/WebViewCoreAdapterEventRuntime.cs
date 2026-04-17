@@ -21,6 +21,17 @@ internal interface IWebViewCoreAdapterEventHost
     void RaisePermissionRequested(PermissionRequestedEventArgs args);
 }
 
+/// <summary>
+/// Stateless translator that forwards adapter-originated events onto the dispatcher and into the
+/// <see cref="IWebViewCoreAdapterEventHost"/> (<see cref="WebViewCore"/>).
+/// </summary>
+/// <remarks>
+/// Intentionally not <see cref="IDisposable"/>: subscription to the underlying platform adapter
+/// (<c>IWebViewAdapter</c>) events is owned by <see cref="WebViewCoreEventWiringRuntime"/>, which
+/// implements <see cref="IDisposable"/> and is disposed by <see cref="WebViewCore.Dispose"/>. This
+/// runtime holds no timers, handles, or subscriptions of its own; every call is a pass-through into
+/// the host.
+/// </remarks>
 internal sealed class WebViewCoreAdapterEventRuntime
 {
     private readonly IWebViewCoreAdapterEventHost _host;

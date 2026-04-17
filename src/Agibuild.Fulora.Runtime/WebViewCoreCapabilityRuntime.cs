@@ -27,6 +27,18 @@ internal interface IWebViewCoreBridgeOperations
     void ReinjectBridgeStubsIfEnabled();
 }
 
+/// <summary>
+/// Delegation-only facade that routes feature / bridge / cookie / command calls from <see cref="WebViewCore"/>
+/// to the actual owners (<see cref="WebViewCoreFeatureRuntime"/>, <see cref="WebViewCoreBridgeRuntime"/>,
+/// <see cref="RuntimeCookieManager"/>, <see cref="RuntimeCommandManager"/>).
+/// </summary>
+/// <remarks>
+/// Intentionally not <see cref="IDisposable"/>: this runtime holds no disposable state of its own. The
+/// <see cref="IWebViewCoreFeatureOperations"/> and <see cref="IWebViewCoreBridgeOperations"/> targets it
+/// delegates to are themselves <see cref="IDisposable"/> and are disposed directly by
+/// <see cref="WebViewCore.Dispose"/>; the cookie / command wrappers are pure command forwarders with no
+/// resources. Duplicating a Dispose() here would only create ambiguous ownership.
+/// </remarks>
 internal sealed class WebViewCoreCapabilityRuntime
 {
     private readonly IWebViewCoreFeatureOperations _feature;

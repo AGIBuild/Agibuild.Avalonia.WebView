@@ -57,6 +57,18 @@ public sealed class WebViewCoreSpaHostingRuntimeTests
     }
 
     [Fact]
+    public void HandleWebResourceRequested_without_service_is_noop()
+    {
+        var host = new StubSpaHostingHost();
+        var runtime = new WebViewCoreSpaHostingRuntime(host, NullLogger.Instance);
+        var args = new WebResourceRequestedEventArgs(new Uri("app://localhost/no-service"), "GET");
+
+        runtime.HandleWebResourceRequested(args);
+
+        Assert.False(args.Handled);
+    }
+
+    [Fact]
     public void Dispose_unhooks_web_resource_handler()
     {
         var host = new StubSpaHostingHost();

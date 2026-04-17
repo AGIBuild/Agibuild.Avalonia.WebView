@@ -7,7 +7,7 @@ namespace Agibuild.Fulora;
 /// <summary>
 /// Core runtime implementation of <see cref="IWebView"/> over a platform adapter.
 /// </summary>
-public sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvents, IWebViewAdapterHost, IWebViewCoreFeatureHost, IWebViewCoreBridgeHost, IWebViewCoreAdapterEventHost, IWebViewCoreNavigationHost, IWebViewCoreSpaHostingHost, IDisposable
+public sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvents, IWebViewAdapterHost, IWebViewCoreFeatureHost, IWebViewCoreBridgeHost, IWebViewCoreAdapterEventHost, IWebViewCoreNavigationHost, IWebViewCoreSpaHostingHost, IWebViewCoreOperationHost, IDisposable
 {
     private static readonly Uri AboutBlank = new("about:blank");
 
@@ -164,7 +164,7 @@ public sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvents,
             SetSourceInternal(value);
 
             // Source is a sync API surface; we still start navigation to keep semantics consistent.
-            var navigationTask = StartNavigationCoreAsync(
+            var navigationTask = _navigationRuntime.StartNavigationCoreAsync(
                 requestUri: value,
                 adapterInvoke: navigationId => _adapter.NavigateAsync(navigationId, value),
                 updateSource: false);
@@ -221,7 +221,11 @@ public sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvents,
         _disposed = true;
         _lifecycleState = WebViewLifecycleState.Disposed;
 
+        // --- Owned IDisposable runtimes (disposed in reverse dependency order) ---
+        // 1) EventWiring first: detaches adapter event handlers so no late callbacks can observe
+        //    partially-torn-down runtimes.
         _eventWiringRuntime.Dispose();
+
         if (_activeNavigation is not null)
         {
             _logger.LogDebug("Dispose: faulting active navigation id={NavigationId}", _activeNavigation.NavigationId);
@@ -230,11 +234,17 @@ public sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvents,
             _activeNavigation = null;
         }
 
+        // 2) Feature / Bridge / SpaHosting each own native handles, bridge subscriptions, or
+        //    service-worker state that must be torn down explicitly.
         _featureRuntime.Dispose();
-
         _bridgeRuntime.Dispose();
-
         _spaHostingRuntime.Dispose();
+
+        // --- Non-IDisposable runtimes (intentionally NOT disposed) ---
+        // _capabilityDetectionRuntime / _capabilityRuntime / _adapterEventRuntime / _navigationRuntime
+        // hold only injected references (adapter, dispatcher, logger, host); their own types document
+        // why Dispose() is absent. All state they care about is either (a) already released above, or
+        // (b) owned by the caller. Do not add "defensive" disposal here — it would invert ownership.
 
         _logger.LogDebug("Dispose: completed");
     }
@@ -417,9 +427,6 @@ public sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvents,
     ValueTask<NativeNavigationStartingDecision> IWebViewAdapterHost.OnNativeNavigationStartingAsync(NativeNavigationStartingInfo info)
         => _navigationRuntime.OnNativeNavigationStartingAsync(info);
 
-    private NativeNavigationStartingDecision OnNativeNavigationStartingOnUiThread(NativeNavigationStartingInfo info)
-        => _navigationRuntime.OnNativeNavigationStartingOnUiThread(info);
-
     /// <inheritdoc />
     public ICookieManager? TryGetCookieManager() => _capabilityRuntime.TryGetCookieManager();
 
@@ -588,10 +595,6 @@ public sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvents,
     public void EnableSpaHosting(SpaHostingOptions options)
         => _spaHostingRuntime.EnableSpaHosting(options);
 
-    // Compatibility shim for focused tests and incremental refactors.
-    private void OnSpaWebResourceRequested(object? sender, WebResourceRequestedEventArgs e)
-        => _spaHostingRuntime.HandleWebResourceRequested(e);
-
     private Task<object?> EnqueueOperationAsync(string operationType, Func<Task> func)
         => EnqueueOperationAsync<object?>(operationType, async () =>
         {
@@ -686,19 +689,24 @@ public sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvents,
         return InvokeWithDispatchFailureMappingAsync(func);
     }
 
-    private async Task<T> InvokeWithDispatchFailureMappingAsync<T>(Func<Task<T>> func)
+    // Non-async by design: try/return + catch/return makes both code paths return a Task<T>,
+    // which eliminates the CS0165 fragility of the previous `async` version (where the compiler
+    // could not prove that `dispatchedTask` was assigned before `await` unless the catch block
+    // always threw). A future edit that accidentally removes the throw (e.g. replaces with log +
+    // return) now fails to compile instead of leaking an unassigned local.
+    private Task<T> InvokeWithDispatchFailureMappingAsync<T>(Func<Task<T>> func)
     {
-        Task<T> dispatchedTask;
         try
         {
-            dispatchedTask = _dispatcher.InvokeAsync(func);
+            return _dispatcher.InvokeAsync(func);
         }
         catch (Exception ex)
         {
-            throw ClassifyFailure(ex, operationType: "Dispatch", defaultCategory: WebViewOperationFailureCategory.DispatchFailed);
+            return Task.FromException<T>(ClassifyFailure(
+                ex,
+                operationType: "Dispatch",
+                defaultCategory: WebViewOperationFailureCategory.DispatchFailed));
         }
-
-        return await dispatchedTask.ConfigureAwait(false);
     }
 
     private static Exception ClassifyFailure(
@@ -725,23 +733,8 @@ public sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvents,
         return exception;
     }
 
-    private Task StartNavigationCoreAsync(Uri requestUri, Func<Guid, Task> adapterInvoke)
-        => _navigationRuntime.StartNavigationCoreAsync(requestUri, adapterInvoke, updateSource: true);
-
-    private async Task StartNavigationCoreAsync(Uri requestUri, Func<Guid, Task> adapterInvoke, bool updateSource)
-        => await _navigationRuntime.StartNavigationCoreAsync(requestUri, adapterInvoke, updateSource).ConfigureAwait(false);
-
-    private Task<Task> StartNavigationRequestCoreAsync(Uri requestUri, Func<Guid, Task> adapterInvoke)
-        => _navigationRuntime.StartNavigationRequestCoreAsync(requestUri, adapterInvoke, updateSource: true);
-
-    private async Task<Task> StartNavigationRequestCoreAsync(Uri requestUri, Func<Guid, Task> adapterInvoke, bool updateSource)
-        => await _navigationRuntime.StartNavigationRequestCoreAsync(requestUri, adapterInvoke, updateSource).ConfigureAwait(false);
-
     private void OnAdapterNavigationCompleted(object? sender, NavigationCompletedEventArgs e)
         => _navigationRuntime.HandleAdapterNavigationCompleted(e);
-
-    private void OnAdapterNavigationCompletedOnUiThread(NavigationCompletedEventArgs e)
-        => _navigationRuntime.HandleAdapterNavigationCompletedOnUiThread(e);
 
     private void OnAdapterNewWindowRequested(object? sender, NewWindowRequestedEventArgs e)
         => _adapterEventRuntime.HandleAdapterNewWindowRequested(e);
@@ -990,100 +983,15 @@ public sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvents,
         _source = uri;
     }
 
-    /// <summary>
-    /// Runtime wrapper around <see cref="ICookieAdapter"/> that adds lifecycle guards and dispatcher marshaling.
-    /// </summary>
-    internal sealed class RuntimeCookieManager : ICookieManager
-    {
-        private readonly ICookieAdapter _cookieAdapter;
-        private readonly WebViewCore _owner;
-        private readonly ILogger _logger;
+    // ==================== IWebViewCoreOperationHost (for RuntimeCookieManager / RuntimeCommandManager) ====================
 
-        public RuntimeCookieManager(ICookieAdapter cookieAdapter, WebViewCore owner, ILogger logger)
-        {
-            _cookieAdapter = cookieAdapter;
-            _owner = owner;
-            _logger = logger;
-        }
+    void IWebViewCoreOperationHost.ThrowIfDisposed() => ThrowIfDisposed();
 
-        public Task<IReadOnlyList<WebViewCookie>> GetCookiesAsync(Uri uri)
-        {
-            ArgumentNullException.ThrowIfNull(uri);
-            ThrowIfOwnerDisposed();
-            _logger.LogDebug("CookieManager.GetCookiesAsync: {Uri}", uri);
-            return _owner.EnqueueOperationAsync("Cookie.GetCookiesAsync", () => _cookieAdapter.GetCookiesAsync(uri));
-        }
+    Task<T> IWebViewCoreOperationHost.EnqueueOperationAsync<T>(string operationType, Func<Task<T>> func)
+        => EnqueueOperationAsync(operationType, func);
 
-        public Task SetCookieAsync(WebViewCookie cookie)
-        {
-            ArgumentNullException.ThrowIfNull(cookie);
-            ThrowIfOwnerDisposed();
-            _logger.LogDebug("CookieManager.SetCookieAsync: {Name}@{Domain}", cookie.Name, cookie.Domain);
-            return _owner.EnqueueOperationAsync("Cookie.SetCookieAsync", () => _cookieAdapter.SetCookieAsync(cookie));
-        }
-
-        public Task DeleteCookieAsync(WebViewCookie cookie)
-        {
-            ArgumentNullException.ThrowIfNull(cookie);
-            ThrowIfOwnerDisposed();
-            _logger.LogDebug("CookieManager.DeleteCookieAsync: {Name}@{Domain}", cookie.Name, cookie.Domain);
-            return _owner.EnqueueOperationAsync("Cookie.DeleteCookieAsync", () => _cookieAdapter.DeleteCookieAsync(cookie));
-        }
-
-        public Task ClearAllCookiesAsync()
-        {
-            ThrowIfOwnerDisposed();
-            _logger.LogDebug("CookieManager.ClearAllCookiesAsync");
-            return _owner.EnqueueOperationAsync("Cookie.ClearAllCookiesAsync", () => _cookieAdapter.ClearAllCookiesAsync());
-        }
-
-        private void ThrowIfOwnerDisposed()
-        {
-            ObjectDisposedException.ThrowIf(_owner._disposed, nameof(WebViewCore));
-        }
-    }
-
-    /// <summary>
-    /// Runtime wrapper around <see cref="ICommandAdapter"/> that delegates editing commands.
-    /// </summary>
-    internal sealed class RuntimeCommandManager : ICommandManager
-    {
-        private readonly ICommandAdapter _commandAdapter;
-        private readonly WebViewCore _owner;
-
-        public RuntimeCommandManager(ICommandAdapter commandAdapter, WebViewCore owner)
-        {
-            _commandAdapter = commandAdapter;
-            _owner = owner;
-        }
-
-        public Task CopyAsync() => ToVoidTask(ExecuteAsync(WebViewCommand.Copy));
-
-        public Task CutAsync() => ToVoidTask(ExecuteAsync(WebViewCommand.Cut));
-
-        public Task PasteAsync() => ToVoidTask(ExecuteAsync(WebViewCommand.Paste));
-
-        public Task SelectAllAsync() => ToVoidTask(ExecuteAsync(WebViewCommand.SelectAll));
-
-        public Task UndoAsync() => ToVoidTask(ExecuteAsync(WebViewCommand.Undo));
-
-        public Task RedoAsync() => ToVoidTask(ExecuteAsync(WebViewCommand.Redo));
-
-        private static Task ToVoidTask(Task<object?> task) => task.ContinueWith(t =>
-        {
-            if (t.IsFaulted)
-                throw t.Exception!.GetBaseException();
-        }, TaskContinuationOptions.ExecuteSynchronously);
-
-        private Task<object?> ExecuteAsync(WebViewCommand command)
-        {
-            return _owner.EnqueueOperationAsync($"Command.{command}", () =>
-            {
-                _commandAdapter.ExecuteCommand(command);
-                return Task.CompletedTask;
-            });
-        }
-    }
+    Task<object?> IWebViewCoreOperationHost.EnqueueOperationAsync(string operationType, Func<Task> func)
+        => EnqueueOperationAsync(operationType, func);
 
     private enum WebViewLifecycleState
     {

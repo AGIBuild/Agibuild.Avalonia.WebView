@@ -2,15 +2,6 @@
   "version": 1,
   "hotspots": [
     {
-      "id": "native-nav-ui-thread-disposed-guard",
-      "runtimeMethod": "WebViewCore.OnNativeNavigationStartingOnUiThread",
-      "branchIntent": "Disposed guard on UI-thread native navigation denies request immediately.",
-      "owner": "webview-runtime",
-      "lane": "ContractAutomation",
-      "testFile": "tests/Agibuild.Fulora.UnitTests/WebViewCoreHotspotCoverageTests.cs",
-      "testMethod": "OnNativeNavigationStartingOnUiThread_disposed_denies_navigation"
-    },
-    {
       "id": "invoke-ui-disposed-generic",
       "runtimeMethod": "WebViewCore.InvokeAsyncOnUiThread(Func<Task<T>>)",
       "branchIntent": "Generic dispatcher path enforces disposed guard deterministically.",
@@ -18,15 +9,6 @@
       "lane": "ContractAutomation",
       "testFile": "tests/Agibuild.Fulora.UnitTests/WebViewCoreHotspotCoverageTests.cs",
       "testMethod": "InvokeAsyncOnUiThread_generic_disposed_returns_disposed_error"
-    },
-    {
-      "id": "start-navigation-wrapper-overload",
-      "runtimeMethod": "WebViewCore.StartNavigationCoreAsync(Uri, Func<Guid, Task>)",
-      "branchIntent": "Two-parameter wrapper overload executes and awaits completion path.",
-      "owner": "webview-runtime",
-      "lane": "ContractAutomation",
-      "testFile": "tests/Agibuild.Fulora.UnitTests/WebViewCoreHotspotCoverageTests.cs",
-      "testMethod": "StartNavigationCoreAsync_wrapper_overload_completes_when_adapter_finishes"
     },
     {
       "id": "spa-custom-scheme-registration",
@@ -93,12 +75,12 @@
     },
     {
       "id": "spa-resource-handler-null-safe-path",
-      "runtimeMethod": "WebViewCore.OnSpaWebResourceRequested",
+      "runtimeMethod": "WebViewCoreSpaHostingRuntime.HandleWebResourceRequested",
       "branchIntent": "Null-safe handler path does not throw when SPA hosting service is absent.",
       "owner": "webview-runtime",
       "lane": "ContractAutomation",
-      "testFile": "tests/Agibuild.Fulora.UnitTests/WebViewCoreHotspotCoverageTests.cs",
-      "testMethod": "OnSpaWebResourceRequested_without_service_is_noop"
+      "testFile": "tests/Agibuild.Fulora.UnitTests/WebViewCoreSpaHostingRuntimeTests.cs",
+      "testMethod": "HandleWebResourceRequested_without_service_is_noop"
     }
   ]
 }

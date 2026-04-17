@@ -69,6 +69,35 @@ public sealed class OperationFailureTaxonomyTests
     }
 
     [Fact]
+    public async Task Dispatch_failure_tags_operationType_as_Dispatch()
+    {
+        var dispatcher = new ThrowingDispatcher();
+        var adapter = new MockWebViewAdapter();
+        using var webView = new WebViewCore(adapter, dispatcher);
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => webView.StopAsync());
+
+        Assert.Equal("Dispatch", ex.Data["operationType"]);
+    }
+
+    [Fact]
+    public async Task Dispatch_failure_with_ObjectDisposedException_is_classified_as_Disposed()
+    {
+        // Validates the ClassifyFailure switch: when the dispatcher throws ObjectDisposedException
+        // synchronously (e.g. after shutdown), the result must be re-categorized as Disposed rather
+        // than the default DispatchFailed bucket.
+        var dispatcher = new ThrowingDispatcher(
+            () => new ObjectDisposedException("TestDispatcher"));
+        var adapter = new MockWebViewAdapter();
+        using var webView = new WebViewCore(adapter, dispatcher);
+
+        var ex = await Assert.ThrowsAsync<ObjectDisposedException>(() => webView.StopAsync());
+
+        Assert.True(WebViewOperationFailure.TryGetCategory(ex, out var category));
+        Assert.Equal(WebViewOperationFailureCategory.Disposed, category);
+    }
+
+    [Fact]
     public async Task Adapter_failure_has_AdapterFailed_category()
     {
         var dispatcher = new TestDispatcher();
@@ -92,12 +121,22 @@ public sealed class OperationFailureTaxonomyTests
 
     private sealed class ThrowingDispatcher : IWebViewDispatcher
     {
+        private readonly Func<Exception> _exceptionFactory;
+
+        public ThrowingDispatcher()
+            : this(() => new InvalidOperationException("dispatch failure")) { }
+
+        public ThrowingDispatcher(Func<Exception> exceptionFactory)
+        {
+            _exceptionFactory = exceptionFactory;
+        }
+
         public bool CheckAccess() => false;
 
-        public Task InvokeAsync(Action action) => throw new InvalidOperationException("dispatch failure");
-        public Task<T> InvokeAsync<T>(Func<T> func) => throw new InvalidOperationException("dispatch failure");
-        public Task InvokeAsync(Func<Task> func) => throw new InvalidOperationException("dispatch failure");
-        public Task<T> InvokeAsync<T>(Func<Task<T>> func) => throw new InvalidOperationException("dispatch failure");
+        public Task InvokeAsync(Action action) => throw _exceptionFactory();
+        public Task<T> InvokeAsync<T>(Func<T> func) => throw _exceptionFactory();
+        public Task InvokeAsync(Func<Task> func) => throw _exceptionFactory();
+        public Task<T> InvokeAsync<T>(Func<Task<T>> func) => throw _exceptionFactory();
     }
 
     private static string GetCategoryDataKey()

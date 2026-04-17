@@ -9,28 +9,6 @@ public sealed class WebViewCoreHotspotCoverageTests
     private readonly TestDispatcher _dispatcher = new();
 
     [Fact]
-    public void OnNativeNavigationStartingOnUiThread_disposed_denies_navigation()
-    {
-        var adapter = MockWebViewAdapter.Create();
-        using var core = new WebViewCore(adapter, _dispatcher);
-        core.Dispose();
-
-        var info = new NativeNavigationStartingInfo(
-            Guid.NewGuid(),
-            new Uri("https://hotspot.test/native"),
-            IsMainFrame: true);
-
-        var method = RequireInstanceMethod(
-            nameof(OnNativeNavigationStartingOnUiThread_disposed_denies_navigation),
-            "OnNativeNavigationStartingOnUiThread",
-            typeof(NativeNavigationStartingInfo));
-        var result = Assert.IsType<NativeNavigationStartingDecision>(method.Invoke(core, [info]));
-
-        Assert.False(result.IsAllowed);
-        Assert.Equal(Guid.Empty, result.NavigationId);
-    }
-
-    [Fact]
     public async Task InvokeAsyncOnUiThread_generic_disposed_returns_disposed_error()
     {
         var adapter = MockWebViewAdapter.Create();
@@ -48,27 +26,6 @@ public sealed class WebViewCoreHotspotCoverageTests
         var ex = await Assert.ThrowsAsync<ObjectDisposedException>(async () => await task);
         Assert.True(WebViewOperationFailure.TryGetCategory(ex, out var category));
         Assert.Equal(WebViewOperationFailureCategory.Disposed, category);
-    }
-
-    [Fact]
-    public async Task StartNavigationCoreAsync_wrapper_overload_completes_when_adapter_finishes()
-    {
-        var adapter = MockWebViewAdapter.Create();
-        using var core = new WebViewCore(adapter, _dispatcher);
-        var requestUri = new Uri("https://hotspot.test/wrapper");
-
-        var method = RequireInstanceMethod(
-            nameof(StartNavigationCoreAsync_wrapper_overload_completes_when_adapter_finishes),
-            "StartNavigationCoreAsync",
-            typeof(Uri),
-            typeof(Func<Guid, Task>));
-        var task = Assert.IsAssignableFrom<Task>(method.Invoke(core, [requestUri, (Func<Guid, Task>)(id =>
-        {
-            adapter.RaiseNavigationCompleted(id, requestUri, NavigationCompletedStatus.Success);
-            return Task.CompletedTask;
-        })]));
-
-        await task.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
     }
 
     [Fact]
@@ -197,24 +154,6 @@ public sealed class WebViewCoreHotspotCoverageTests
         adapter.RaiseWebMessage("""{"type":"policy-null"}""", "*", core.ChannelId);
 
         Assert.Null(args);
-    }
-
-    [Fact]
-    public void OnSpaWebResourceRequested_without_service_is_noop()
-    {
-        var adapter = MockWebViewAdapter.Create();
-        using var core = new WebViewCore(adapter, _dispatcher);
-
-        var method = RequireInstanceMethod(
-            nameof(OnSpaWebResourceRequested_without_service_is_noop),
-            "OnSpaWebResourceRequested",
-            typeof(object),
-            typeof(WebResourceRequestedEventArgs));
-        var args = new WebResourceRequestedEventArgs(new Uri("app://localhost/no-service"), "GET");
-
-        _ = method.Invoke(core, [this, args]);
-
-        Assert.False(args.Handled);
     }
 
     private static MethodInfo RequireInstanceMethod(
