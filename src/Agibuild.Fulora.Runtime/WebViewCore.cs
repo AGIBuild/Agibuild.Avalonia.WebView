@@ -83,7 +83,6 @@ public sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvents,
     private bool _adapterDestroyed;
 
     // Only accessed on the UI thread (all paths go through _dispatcher).
-    private NavigationOperation? _activeNavigation;
     private Uri _source;
     private volatile WebViewLifecycleState _lifecycleState = WebViewLifecycleState.Created;
 
@@ -179,7 +178,7 @@ public sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvents,
     public bool CanGoForward => _adapter.CanGoForward;
 
     /// <inheritdoc />
-    public bool IsLoading => _activeNavigation is not null;
+    public bool IsLoading => _navigationRuntime.IsLoading;
 
     /// <inheritdoc />
     public Guid ChannelId { get; }
@@ -226,13 +225,10 @@ public sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvents,
         //    partially-torn-down runtimes.
         _eventWiringRuntime.Dispose();
 
-        if (_activeNavigation is not null)
-        {
-            _logger.LogDebug("Dispose: faulting active navigation id={NavigationId}", _activeNavigation.NavigationId);
-            // After disposal, async APIs must not hang. No events must be raised.
-            _activeNavigation.TrySetFault(new ObjectDisposedException(nameof(WebViewCore)));
-            _activeNavigation = null;
-        }
+        // After adapter events are unhooked, the NavigationRuntime owns any active navigation — fault
+        // it silently so async callers do not hang. No events are raised (FaultActiveForDispose is
+        // explicitly event-free, since observers are no longer welcome post-dispose).
+        _navigationRuntime.FaultActiveForDispose(new ObjectDisposedException(nameof(WebViewCore)));
 
         // 2) Feature / Bridge / SpaHosting each own native handles, bridge subscriptions, or
         //    service-worker state that must be torn down explicitly.
@@ -242,9 +238,9 @@ public sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvents,
 
         // --- Non-IDisposable runtimes (intentionally NOT disposed) ---
         // _capabilityDetectionRuntime / _capabilityRuntime / _adapterEventRuntime / _navigationRuntime
-        // hold only injected references (adapter, dispatcher, logger, host); their own types document
-        // why Dispose() is absent. All state they care about is either (a) already released above, or
-        // (b) owned by the caller. Do not add "defensive" disposal here — it would invert ownership.
+        // hold only injected references (and NavigationRuntime's active-op is already faulted above);
+        // their own types document why Dispose() is absent. Do not add "defensive" disposal here —
+        // it would invert ownership.
 
         _logger.LogDebug("Dispose: completed");
     }
@@ -333,7 +329,7 @@ public sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvents,
         if (!accepted)
         {
             _logger.LogDebug("GoBack: adapter rejected, id={NavigationId}", navigationId);
-            CompleteActiveNavigation(NavigationCompletedStatus.Canceled, error: null);
+            _navigationRuntime.CompleteActiveNavigation(NavigationCompletedStatus.Canceled, error: null);
             return false;
         }
 
@@ -367,7 +363,7 @@ public sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvents,
         if (!accepted)
         {
             _logger.LogDebug("GoForward: adapter rejected, id={NavigationId}", navigationId);
-            CompleteActiveNavigation(NavigationCompletedStatus.Canceled, error: null);
+            _navigationRuntime.CompleteActiveNavigation(NavigationCompletedStatus.Canceled, error: null);
             return false;
         }
 
@@ -395,7 +391,7 @@ public sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvents,
         if (!accepted)
         {
             _logger.LogDebug("Refresh: adapter rejected, id={NavigationId}", navigationId);
-            CompleteActiveNavigation(NavigationCompletedStatus.Canceled, error: null);
+            _navigationRuntime.CompleteActiveNavigation(NavigationCompletedStatus.Canceled, error: null);
             return false;
         }
 
@@ -412,15 +408,19 @@ public sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvents,
         ThrowIfDisposed();
         ThrowIfNotOnUiThread(nameof(StopAsync));
 
-        if (_activeNavigation is null)
+        if (!_navigationRuntime.IsLoading)
         {
             _logger.LogDebug("Stop: no active navigation");
             return false;
         }
 
-        _logger.LogDebug("Stop: canceling active navigation id={NavigationId}", _activeNavigation.NavigationId);
+        // The return value reflects the state on entry — "Stop accepted because there was an
+        // active navigation". _adapter.Stop() may itself synchronously raise NavigationCompleted
+        // (which drains the runtime's active-op via HandleAdapterNavigationCompleted); in that
+        // case TryStopActiveNavigation returns false because there is nothing left to cancel.
+        // Either way, the caller learns "yes, a stop was honored for an in-flight navigation".
         _adapter.Stop();
-        CompleteActiveNavigation(NavigationCompletedStatus.Canceled, error: null);
+        _navigationRuntime.TryStopActiveNavigation();
         return true;
     }
 
@@ -754,58 +754,6 @@ public sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvents,
     private void OnAdapterPermissionRequested(object? sender, PermissionRequestedEventArgs e)
         => _adapterEventRuntime.HandleAdapterPermissionRequested(e);
 
-    private void CompleteActiveNavigation(NavigationCompletedStatus status, Exception? error)
-    {
-        var operation = _activeNavigation;
-        if (operation is null)
-        {
-            return;
-        }
-
-        _activeNavigation = null;
-
-        _logger.LogDebug("Event NavigationCompleted: id={NavigationId}, status={Status}, uri={Uri}, error={Error}",
-            operation.NavigationId, status, operation.RequestUri, error?.Message);
-
-        NavigationCompletedEventArgs completedArgs;
-        try
-        {
-            completedArgs = new NavigationCompletedEventArgs(
-                operation.NavigationId,
-                operation.RequestUri,
-                status,
-                status == NavigationCompletedStatus.Failure ? error : null);
-        }
-        catch (Exception ex)
-        {
-            completedArgs = new NavigationCompletedEventArgs(operation.NavigationId, operation.RequestUri, NavigationCompletedStatus.Failure, ex);
-            status = NavigationCompletedStatus.Failure;
-            error = ex;
-        }
-
-        NavigationCompleted?.Invoke(this, completedArgs);
-
-        if (status == NavigationCompletedStatus.Failure)
-        {
-            // Preserve categorized exception subclasses from the adapter (Network, SSL, Timeout).
-            var faultException = error is WebViewNavigationException navEx
-                ? navEx
-                : new WebViewNavigationException(
-                    message: "Navigation failed.",
-                    navigationId: operation.NavigationId,
-                    requestUri: operation.RequestUri,
-                    innerException: error);
-            operation.TrySetFault(faultException);
-        }
-        else
-        {
-            if (status == NavigationCompletedStatus.Success)
-                ReinjectBridgeStubsIfEnabled();
-
-            operation.TrySetSuccess();
-        }
-    }
-
     private void RaiseAdapterDestroyedOnce()
     {
         if (_adapterDestroyed)
@@ -930,42 +878,20 @@ public sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvents,
 
     bool IWebViewCoreNavigationHost.IsAdapterDestroyed => _adapterDestroyed;
 
-    void IWebViewCoreNavigationHost.CompleteActiveNavigation(NavigationCompletedStatus status, Exception? error)
-        => CompleteActiveNavigation(status, error);
-
     void IWebViewCoreNavigationHost.RaiseNavigationStarting(NavigationStartingEventArgs args)
         => NavigationStarted?.Invoke(this, args);
 
-    Task IWebViewCoreNavigationHost.SetActiveNavigation(Guid navigationId, Guid correlationId, Uri requestUri)
-    {
-        var operation = new NavigationOperation(navigationId, correlationId, requestUri);
-        _activeNavigation = operation;
-        return operation.Task;
-    }
+    void IWebViewCoreNavigationHost.RaiseNavigationCompleted(NavigationCompletedEventArgs args)
+        => NavigationCompleted?.Invoke(this, args);
+
+    void IWebViewCoreNavigationHost.ReinjectBridgeStubsIfEnabled()
+        => ReinjectBridgeStubsIfEnabled();
 
     void IWebViewCoreNavigationHost.SetSource(Uri uri)
         => SetSourceInternal(uri);
 
     void IWebViewCoreNavigationHost.ThrowIfNotOnUiThread(string apiName)
         => ThrowIfNotOnUiThread(apiName);
-
-    bool IWebViewCoreNavigationHost.TryGetActiveNavigation(out WebViewCoreNavigationState state)
-    {
-        if (_activeNavigation is { } operation)
-        {
-            state = new WebViewCoreNavigationState(
-                operation.NavigationId,
-                operation.CorrelationId,
-                operation.RequestUri);
-            return true;
-        }
-
-        state = default;
-        return false;
-    }
-
-    void IWebViewCoreNavigationHost.UpdateActiveNavigationRequestUri(Uri requestUri)
-        => _activeNavigation?.UpdateRequestUri(requestUri);
 
     private void SetSourceInternal(Uri uri)
     {
@@ -989,29 +915,5 @@ public sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvents,
         Ready,
         Detaching,
         Disposed
-    }
-
-    private sealed class NavigationOperation
-    {
-        private readonly TaskCompletionSource _tcs = new(TaskCreationOptions.RunContinuationsAsynchronously);
-
-        public NavigationOperation(Guid navigationId, Guid correlationId, Uri requestUri)
-        {
-            NavigationId = navigationId;
-            CorrelationId = correlationId;
-            RequestUri = requestUri;
-        }
-
-        public Guid NavigationId { get; }
-        public Guid CorrelationId { get; }
-        public Uri RequestUri { get; private set; }
-
-        public Task Task => _tcs.Task;
-
-        public void UpdateRequestUri(Uri requestUri) => RequestUri = requestUri;
-
-        public void TrySetSuccess() => _tcs.TrySetResult();
-
-        public void TrySetFault(Exception ex) => _tcs.TrySetException(ex);
     }
 }

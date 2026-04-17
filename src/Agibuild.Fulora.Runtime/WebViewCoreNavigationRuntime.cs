@@ -13,30 +13,28 @@ internal interface IWebViewCoreNavigationHost
 
     bool IsAdapterDestroyed { get; }
 
-    void CompleteActiveNavigation(NavigationCompletedStatus status, Exception? error);
-
     void RaiseNavigationStarting(NavigationStartingEventArgs args);
 
-    Task SetActiveNavigation(Guid navigationId, Guid correlationId, Uri requestUri);
+    void RaiseNavigationCompleted(NavigationCompletedEventArgs args);
+
+    void ReinjectBridgeStubsIfEnabled();
 
     void SetSource(Uri uri);
 
     void ThrowIfNotOnUiThread(string apiName);
-
-    bool TryGetActiveNavigation(out WebViewCoreNavigationState state);
-
-    void UpdateActiveNavigationRequestUri(Uri requestUri);
 }
 
 /// <summary>
-/// Navigation coordinator that marshals navigation start / completion onto the UI thread and
-/// funnels state through the <see cref="IWebViewCoreNavigationHost"/> (<see cref="WebViewCore"/>).
+/// Navigation coordinator that owns the single active <see cref="NavigationOperation"/> (if any),
+/// marshals navigation start / completion onto the UI thread, and funnels observable events through
+/// the <see cref="IWebViewCoreNavigationHost"/> (<see cref="WebViewCore"/>).
 /// </summary>
 /// <remarks>
 /// Intentionally not <see cref="IDisposable"/>: the active-navigation <see cref="TaskCompletionSource"/>
-/// lives on the host (<see cref="WebViewCore"/>), which faults it during <see cref="WebViewCore.Dispose"/>.
-/// This runtime holds only injected references (host, dispatcher, logger) and never allocates handles,
-/// background tasks, or subscriptions. Dropping it with the owning <see cref="WebViewCore"/> leaks nothing.
+/// stored inside <see cref="NavigationOperation"/> is released either when the adapter raises
+/// <c>NavigationCompleted</c> or when the host calls <see cref="FaultActiveForDispose"/> from
+/// <see cref="WebViewCore.Dispose"/>. This runtime holds only injected references plus the optional
+/// active operation — no unmanaged handles, timers, or background tasks.
 /// </remarks>
 internal sealed class WebViewCoreNavigationRuntime
 {
@@ -46,6 +44,8 @@ internal sealed class WebViewCoreNavigationRuntime
     private readonly IWebViewDispatcher _dispatcher;
     private readonly ILogger _logger;
 
+    private NavigationOperation? _activeNavigation;
+
     public WebViewCoreNavigationRuntime(
         IWebViewCoreNavigationHost host,
         IWebViewDispatcher dispatcher,
@@ -54,6 +54,126 @@ internal sealed class WebViewCoreNavigationRuntime
         _host = host ?? throw new ArgumentNullException(nameof(host));
         _dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    }
+
+    /// <summary>
+    /// Whether a navigation is currently in flight.
+    /// </summary>
+    public bool IsLoading => _activeNavigation is not null;
+
+    /// <summary>
+    /// Creates a new active navigation, overwriting any previous one (callers are expected to have
+    /// already handled supersession / cancellation of the prior navigation).
+    /// </summary>
+    public Task SetActiveNavigation(Guid navigationId, Guid correlationId, Uri requestUri)
+    {
+        var operation = new NavigationOperation(navigationId, correlationId, requestUri);
+        _activeNavigation = operation;
+        return operation.Task;
+    }
+
+    public bool TryGetActiveNavigation(out WebViewCoreNavigationState state)
+    {
+        if (_activeNavigation is { } operation)
+        {
+            state = new WebViewCoreNavigationState(operation.NavigationId, operation.CorrelationId, operation.RequestUri);
+            return true;
+        }
+
+        state = default;
+        return false;
+    }
+
+    public void UpdateActiveNavigationRequestUri(Uri requestUri)
+        => _activeNavigation?.UpdateRequestUri(requestUri);
+
+    /// <summary>
+    /// Cancels the active navigation, if any, and returns whether a navigation was actually stopped.
+    /// </summary>
+    public bool TryStopActiveNavigation()
+    {
+        if (_activeNavigation is null)
+        {
+            return false;
+        }
+
+        _logger.LogDebug("Stop: canceling active navigation id={NavigationId}", _activeNavigation.NavigationId);
+        CompleteActiveNavigation(NavigationCompletedStatus.Canceled, error: null);
+        return true;
+    }
+
+    /// <summary>
+    /// Faults the active navigation (if any) with the given exception without raising any events.
+    /// Used by <see cref="WebViewCore.Dispose"/>, where observers are no longer welcome.
+    /// </summary>
+    public void FaultActiveForDispose(Exception exception)
+    {
+        var operation = _activeNavigation;
+        if (operation is null)
+        {
+            return;
+        }
+
+        _logger.LogDebug("Dispose: faulting active navigation id={NavigationId}", operation.NavigationId);
+        operation.TrySetFault(exception);
+        _activeNavigation = null;
+    }
+
+    /// <summary>
+    /// Completes the active navigation with the given status, raises <c>NavigationCompleted</c>,
+    /// and resolves / faults the corresponding <see cref="NavigationOperation"/> task.
+    /// Idempotent when there is no active navigation.
+    /// </summary>
+    public void CompleteActiveNavigation(NavigationCompletedStatus status, Exception? error)
+    {
+        var operation = _activeNavigation;
+        if (operation is null)
+        {
+            return;
+        }
+
+        _activeNavigation = null;
+
+        _logger.LogDebug("Event NavigationCompleted: id={NavigationId}, status={Status}, uri={Uri}, error={Error}",
+            operation.NavigationId, status, operation.RequestUri, error?.Message);
+
+        NavigationCompletedEventArgs completedArgs;
+        try
+        {
+            completedArgs = new NavigationCompletedEventArgs(
+                operation.NavigationId,
+                operation.RequestUri,
+                status,
+                status == NavigationCompletedStatus.Failure ? error : null);
+        }
+        catch (Exception ex)
+        {
+            completedArgs = new NavigationCompletedEventArgs(operation.NavigationId, operation.RequestUri, NavigationCompletedStatus.Failure, ex);
+            status = NavigationCompletedStatus.Failure;
+            error = ex;
+        }
+
+        _host.RaiseNavigationCompleted(completedArgs);
+
+        if (status == NavigationCompletedStatus.Failure)
+        {
+            // Preserve categorized exception subclasses from the adapter (Network, SSL, Timeout).
+            var faultException = error is WebViewNavigationException navEx
+                ? navEx
+                : new WebViewNavigationException(
+                    message: "Navigation failed.",
+                    navigationId: operation.NavigationId,
+                    requestUri: operation.RequestUri,
+                    innerException: error);
+            operation.TrySetFault(faultException);
+        }
+        else
+        {
+            if (status == NavigationCompletedStatus.Success)
+                _host.ReinjectBridgeStubsIfEnabled();
+
+            operation.TrySetSuccess();
+        }
     }
 
     public ValueTask<NativeNavigationStartingDecision> OnNativeNavigationStartingAsync(NativeNavigationStartingInfo info)
@@ -103,7 +223,7 @@ internal sealed class WebViewCoreNavigationRuntime
         _host.SetSource(requestUri);
 
         var navigationId = Guid.NewGuid();
-        _ = _host.SetActiveNavigation(navigationId, info.CorrelationId, requestUri);
+        _ = SetActiveNavigation(navigationId, info.CorrelationId, requestUri);
 
         var startingArgs = new NavigationStartingEventArgs(navigationId, requestUri);
         _logger.LogDebug("Event NavigationStarted (native): id={NavigationId}, uri={Uri}", navigationId, requestUri);
@@ -112,7 +232,7 @@ internal sealed class WebViewCoreNavigationRuntime
         if (startingArgs.Cancel)
         {
             _logger.LogDebug("OnNativeNavigationStarting: canceled by handler, id={NavigationId}", navigationId);
-            _host.CompleteActiveNavigation(NavigationCompletedStatus.Canceled, error: null);
+            CompleteActiveNavigation(NavigationCompletedStatus.Canceled, error: null);
             return new NativeNavigationStartingDecision(IsAllowed: false, NavigationId: navigationId);
         }
 
@@ -142,7 +262,7 @@ internal sealed class WebViewCoreNavigationRuntime
             return;
         }
 
-        if (!_host.TryGetActiveNavigation(out var activeNavigation))
+        if (!TryGetActiveNavigation(out var activeNavigation))
         {
             _logger.LogDebug("Adapter.NavigationCompleted: no active navigation, ignoring id={NavigationId}", args.NavigationId);
             return;
@@ -163,8 +283,8 @@ internal sealed class WebViewCoreNavigationRuntime
             error = new InvalidOperationException("Navigation failed.");
         }
 
-        _host.UpdateActiveNavigationRequestUri(args.RequestUri);
-        _host.CompleteActiveNavigation(status, error);
+        UpdateActiveNavigationRequestUri(args.RequestUri);
+        CompleteActiveNavigation(status, error);
     }
 
     public Task StartNavigationCoreAsync(Uri requestUri, Func<Guid, Task> adapterInvoke)
@@ -189,14 +309,14 @@ internal sealed class WebViewCoreNavigationRuntime
             _host.SetSource(requestUri.AbsoluteUri != AboutBlank.AbsoluteUri ? requestUri : AboutBlank);
         }
 
-        if (_host.TryGetActiveNavigation(out var activeNavigation))
+        if (TryGetActiveNavigation(out var activeNavigation))
         {
             _logger.LogDebug("StartNavigation: superseding active navigation id={NavigationId}", activeNavigation.NavigationId);
-            _host.CompleteActiveNavigation(NavigationCompletedStatus.Superseded, error: null);
+            CompleteActiveNavigation(NavigationCompletedStatus.Superseded, error: null);
         }
 
         var navigationId = Guid.NewGuid();
-        var operationTask = _host.SetActiveNavigation(navigationId, navigationId, requestUri);
+        var operationTask = SetActiveNavigation(navigationId, navigationId, requestUri);
 
         var startingArgs = new NavigationStartingEventArgs(navigationId, requestUri);
         _logger.LogDebug("Event NavigationStarted (API): id={NavigationId}, uri={Uri}", navigationId, requestUri);
@@ -205,7 +325,7 @@ internal sealed class WebViewCoreNavigationRuntime
         if (startingArgs.Cancel)
         {
             _logger.LogDebug("StartNavigation: canceled by handler, id={NavigationId}", navigationId);
-            _host.CompleteActiveNavigation(NavigationCompletedStatus.Canceled, error: null);
+            CompleteActiveNavigation(NavigationCompletedStatus.Canceled, error: null);
             return operationTask;
         }
 
@@ -215,14 +335,14 @@ internal sealed class WebViewCoreNavigationRuntime
 
     public Guid StartCommandNavigation(Uri requestUri)
     {
-        if (_host.TryGetActiveNavigation(out var activeNavigation))
+        if (TryGetActiveNavigation(out var activeNavigation))
         {
             _logger.LogDebug("StartCommandNavigation: superseding active navigation id={NavigationId}", activeNavigation.NavigationId);
-            _host.CompleteActiveNavigation(NavigationCompletedStatus.Superseded, error: null);
+            CompleteActiveNavigation(NavigationCompletedStatus.Superseded, error: null);
         }
 
         var navigationId = Guid.NewGuid();
-        _ = _host.SetActiveNavigation(navigationId, navigationId, requestUri);
+        _ = SetActiveNavigation(navigationId, navigationId, requestUri);
 
         var args = new NavigationStartingEventArgs(navigationId, requestUri);
         _logger.LogDebug("Event NavigationStarted (command): id={NavigationId}, uri={Uri}", navigationId, requestUri);
@@ -231,7 +351,7 @@ internal sealed class WebViewCoreNavigationRuntime
         if (args.Cancel)
         {
             _logger.LogDebug("StartCommandNavigation: canceled by handler, id={NavigationId}", navigationId);
-            _host.CompleteActiveNavigation(NavigationCompletedStatus.Canceled, error: null);
+            CompleteActiveNavigation(NavigationCompletedStatus.Canceled, error: null);
             return Guid.Empty;
         }
 
@@ -243,7 +363,7 @@ internal sealed class WebViewCoreNavigationRuntime
         Uri requestUri,
         out NativeNavigationStartingDecision decision)
     {
-        if (!_host.TryGetActiveNavigation(out var activeNavigation) || activeNavigation.CorrelationId != info.CorrelationId)
+        if (!TryGetActiveNavigation(out var activeNavigation) || activeNavigation.CorrelationId != info.CorrelationId)
         {
             decision = default;
             return false;
@@ -256,7 +376,7 @@ internal sealed class WebViewCoreNavigationRuntime
             return true;
         }
 
-        _host.UpdateActiveNavigationRequestUri(requestUri);
+        UpdateActiveNavigationRequestUri(requestUri);
         _host.SetSource(requestUri);
 
         var redirectArgs = new NavigationStartingEventArgs(activeNavigation.NavigationId, requestUri);
@@ -267,7 +387,7 @@ internal sealed class WebViewCoreNavigationRuntime
         {
             _logger.LogDebug("OnNativeNavigationStarting: redirect canceled by handler, id={NavigationId}", activeNavigation.NavigationId);
             var activeNavigationId = activeNavigation.NavigationId;
-            _host.CompleteActiveNavigation(NavigationCompletedStatus.Canceled, error: null);
+            CompleteActiveNavigation(NavigationCompletedStatus.Canceled, error: null);
             decision = new NativeNavigationStartingDecision(IsAllowed: false, NavigationId: activeNavigationId);
             return true;
         }
@@ -278,13 +398,13 @@ internal sealed class WebViewCoreNavigationRuntime
 
     private void HandleNavigationSupersession()
     {
-        if (!_host.TryGetActiveNavigation(out var activeNavigation))
+        if (!TryGetActiveNavigation(out var activeNavigation))
         {
             return;
         }
 
         _logger.LogDebug("OnNativeNavigationStarting: superseding active navigation id={NavigationId}", activeNavigation.NavigationId);
-        _host.CompleteActiveNavigation(NavigationCompletedStatus.Superseded, error: null);
+        CompleteActiveNavigation(NavigationCompletedStatus.Superseded, error: null);
     }
 
     private async Task AwaitNavigationCompletion(Guid navigationId, Func<Guid, Task> adapterInvoke)
@@ -296,7 +416,31 @@ internal sealed class WebViewCoreNavigationRuntime
         catch (Exception ex)
         {
             _logger.LogDebug(ex, "StartNavigation: adapter invocation failed, id={NavigationId}", navigationId);
-            _host.CompleteActiveNavigation(NavigationCompletedStatus.Failure, ex);
+            CompleteActiveNavigation(NavigationCompletedStatus.Failure, ex);
         }
+    }
+
+    private sealed class NavigationOperation
+    {
+        private readonly TaskCompletionSource _tcs = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        public NavigationOperation(Guid navigationId, Guid correlationId, Uri requestUri)
+        {
+            NavigationId = navigationId;
+            CorrelationId = correlationId;
+            RequestUri = requestUri;
+        }
+
+        public Guid NavigationId { get; }
+        public Guid CorrelationId { get; }
+        public Uri RequestUri { get; private set; }
+
+        public Task Task => _tcs.Task;
+
+        public void UpdateRequestUri(Uri requestUri) => RequestUri = requestUri;
+
+        public void TrySetSuccess() => _tcs.TrySetResult();
+
+        public void TrySetFault(Exception ex) => _tcs.TrySetException(ex);
     }
 }
