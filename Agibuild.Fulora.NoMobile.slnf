@@ -1,0 +1,40 @@
+{
+  "solution": {
+    "path": "Agibuild.Fulora.sln",
+    "projects": [
+      "benchmarks\\Agibuild.Fulora.Benchmarks\\Agibuild.Fulora.Benchmarks.csproj",
+      "plugins\\Agibuild.Fulora.Plugin.AuthToken\\Agibuild.Fulora.Plugin.AuthToken.csproj",
+      "plugins\\Agibuild.Fulora.Plugin.Biometric\\Agibuild.Fulora.Plugin.Biometric.csproj",
+      "plugins\\Agibuild.Fulora.Plugin.Database\\Agibuild.Fulora.Plugin.Database.csproj",
+      "plugins\\Agibuild.Fulora.Plugin.FileSystem\\Agibuild.Fulora.Plugin.FileSystem.csproj",
+      "plugins\\Agibuild.Fulora.Plugin.HttpClient\\Agibuild.Fulora.Plugin.HttpClient.csproj",
+      "plugins\\Agibuild.Fulora.Plugin.LocalStorage\\Agibuild.Fulora.Plugin.LocalStorage.csproj",
+      "plugins\\Agibuild.Fulora.Plugin.Notifications\\Agibuild.Fulora.Plugin.Notifications.csproj",
+      "src\\Agibuild.Fulora.Adapters.Abstractions\\Agibuild.Fulora.Adapters.Abstractions.csproj",
+      "src\\Agibuild.Fulora.AI.Ollama\\Agibuild.Fulora.AI.Ollama.csproj",
+      "src\\Agibuild.Fulora.AI.OpenAI\\Agibuild.Fulora.AI.OpenAI.csproj",
+      "src\\Agibuild.Fulora.AI\\Agibuild.Fulora.AI.csproj",
+      "src\\Agibuild.Fulora.Auth.OAuth\\Agibuild.Fulora.Auth.OAuth.csproj",
+      "src\\Agibuild.Fulora.Avalonia\\Agibuild.Fulora.Avalonia.csproj",
+      "src\\Agibuild.Fulora.Bridge.Generator\\Agibuild.Fulora.Bridge.Generator.csproj",
+      "src\\Agibuild.Fulora.Cli\\Agibuild.Fulora.Cli.csproj",
+      "src\\Agibuild.Fulora.Core\\Agibuild.Fulora.Core.csproj",
+      "src\\Agibuild.Fulora.DependencyInjection\\Agibuild.Fulora.DependencyInjection.csproj",
+      "src\\Agibuild.Fulora.Platforms\\Agibuild.Fulora.Platforms.csproj",
+      "src\\Agibuild.Fulora.Runtime\\Agibuild.Fulora.Runtime.csproj",
+      "src\\Agibuild.Fulora.Telemetry.OpenTelemetry\\Agibuild.Fulora.Telemetry.OpenTelemetry.csproj",
+      "src\\Agibuild.Fulora.Telemetry.Sentry\\Agibuild.Fulora.Telemetry.Sentry.csproj",
+      "tests\\Agibuild.Fulora.Auth.OAuth.Tests\\Agibuild.Fulora.Auth.OAuth.Tests.csproj",
+      "tests\\Agibuild.Fulora.Cli.UnitTests\\Agibuild.Fulora.Cli.UnitTests.csproj",
+      "tests\\Agibuild.Fulora.Integration.NugetPackageTests\\Agibuild.Fulora.Integration.NugetPackageTests.csproj",
+      "tests\\Agibuild.Fulora.Integration.Tests.Automation\\Agibuild.Fulora.Integration.Tests.Automation.csproj",
+      "tests\\Agibuild.Fulora.Integration.Tests\\Agibuild.Fulora.Integration.Tests.Browser\\Agibuild.Fulora.Integration.Tests.Browser.csproj",
+      "tests\\Agibuild.Fulora.Integration.Tests\\Agibuild.Fulora.Integration.Tests.Desktop\\Agibuild.Fulora.Integration.Tests.Desktop.csproj",
+      "tests\\Agibuild.Fulora.Integration.Tests\\Agibuild.Fulora.Integration.Tests\\Agibuild.Fulora.Integration.Tests.csproj",
+      "tests\\Agibuild.Fulora.Telemetry.OpenTelemetry.Tests\\Agibuild.Fulora.Telemetry.OpenTelemetry.Tests.csproj",
+      "tests\\Agibuild.Fulora.Telemetry.Sentry.Tests\\Agibuild.Fulora.Telemetry.Sentry.Tests.csproj",
+      "tests\\Agibuild.Fulora.Testing\\Agibuild.Fulora.Testing.csproj",
+      "tests\\Agibuild.Fulora.UnitTests\\Agibuild.Fulora.UnitTests.csproj"
+    ]
+  }
+}
