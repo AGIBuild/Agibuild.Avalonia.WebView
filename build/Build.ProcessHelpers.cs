@@ -9,26 +9,11 @@ using Nuke.Common.IO;
 internal partial class BuildTask
 {
     private static readonly JsonSerializerOptions WriteIndentedJsonOptions = new() { WriteIndented = true };
-
-    private static readonly JsonSerializerOptions GovernanceCamelCaseJsonOptions = new()
-    {
-        WriteIndented = true,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-    };
     private static readonly ProcessRunner Runner = new();
 
     private static void WriteJsonReport(AbsolutePath path, object payload)
     {
         File.WriteAllText(path, JsonSerializer.Serialize(payload, WriteIndentedJsonOptions));
-    }
-
-    private static void WriteGovernanceReport(AbsolutePath path, object payload)
-    {
-        var directory = System.IO.Path.GetDirectoryName(path);
-        if (!string.IsNullOrWhiteSpace(directory))
-            Directory.CreateDirectory(directory);
-
-        File.WriteAllText(path, JsonSerializer.Serialize(payload, GovernanceCamelCaseJsonOptions));
     }
 
     private sealed class TempDirectoryScope : IDisposable

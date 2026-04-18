@@ -17,7 +17,7 @@ Fulora governs four platform layers: `Kernel`, `Bridge`, `Framework`, and `Plugi
 - `Framework` may depend on `Kernel` and `Bridge`, but never on `Plugin`.
 - `Plugin` may depend on `Kernel` and `Bridge`, but never on `Framework` or other plugins.
 - Reverse dependencies from lower layers into higher layers are forbidden.
-- `build/Build.LayeringGovernance.cs` is the first automated check for these boundaries and must point reviewers back to this document when it fails.
+- Boundary enforcement is delegated to code review and analyzer-based checks rather than a dedicated build-time gate.
 
 ## Allowed Public API Categories
 
@@ -45,4 +45,4 @@ Fulora governs four platform layers: `Kernel`, `Bridge`, `Framework`, and `Plugi
   - dependency-boundary impact statement,
   - compatibility plan,
   - rollback/fallback plan,
-  - linked governance evidence for release gates.
+  - release-readiness evidence.

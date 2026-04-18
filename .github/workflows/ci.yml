@@ -209,53 +209,11 @@ jobs:
           path: artifacts/test-results/**/*.trx
           reporter: dotnet-trx
 
-  governance-feedback:
-    name: Governance Feedback
-    runs-on: ubuntu-latest
-    timeout-minutes: 12
-    needs: version
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          fetch-depth: 0
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5.2.0
-        with:
-          dotnet-version: "10.0.x"
-          dotnet-quality: "preview"
-
-      - name: Cache NuGet packages
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
-        with:
-          path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
-          restore-keys: ${{ runner.os }}-nuget-
-
-      - name: Run governance tests
-        run: ./build.sh --target GovernanceUnitTests --configuration Release
-
-      - name: Upload governance test results
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
-        if: always()
-        with:
-          name: test-results-governance-feedback
-          path: artifacts/test-results/
-          if-no-files-found: ignore
-
-      - name: Report governance test results
-        if: always() && !cancelled()
-        uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2 # v3.0.0
-        with:
-          name: Tests (Governance Feedback)
-          path: artifacts/test-results/**/*.trx
-          reporter: dotnet-trx
-
   build-macos:
     name: Build and Test (macOS)
     runs-on: macos-latest
     timeout-minutes: 45
-    needs: [version, fast-feedback, governance-feedback]
+    needs: [version, fast-feedback]
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -361,7 +319,7 @@ jobs:
     name: Build and Test (Windows)
     runs-on: windows-latest
     timeout-minutes: 45
-    needs: [version, fast-feedback, governance-feedback]
+    needs: [version, fast-feedback]
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -402,7 +360,7 @@ jobs:
     name: Build and Test (Linux)
     runs-on: ubuntu-latest
     timeout-minutes: 45
-    needs: [version, fast-feedback, governance-feedback]
+    needs: [version, fast-feedback]
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:

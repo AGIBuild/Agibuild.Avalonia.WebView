@@ -289,14 +289,11 @@ internal partial class BuildTask
 
             TestResultsDirectory.CreateDirectory();
             var laneManifestExists = File.Exists(AutomationLaneManifestFile);
-            var criticalPathManifestExists = File.Exists(RuntimeCriticalPathManifestFile);
             var reportPayload = new
             {
                 generatedAtUtc = DateTime.UtcNow,
                 laneManifestPath = AutomationLaneManifestFile.ToString(),
-                runtimeCriticalPathManifestPath = RuntimeCriticalPathManifestFile.ToString(),
                 laneManifestExists,
-                runtimeCriticalPathManifestExists = criticalPathManifestExists,
                 lanes
             };
 

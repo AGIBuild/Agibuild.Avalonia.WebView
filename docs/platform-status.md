@@ -38,5 +38,5 @@ Tier C captures optional extension lanes and ecosystem add-ons.
 
 ## Notes
 
-- Replace `TBD` values through the release governance process.
-- Keep this document aligned with `release-governance.md` and capability registry updates in `framework-capabilities.json`.
+- Replace `TBD` values through the regular release process.
+- Keep this document aligned with capability registry updates in `framework-capabilities.json`.

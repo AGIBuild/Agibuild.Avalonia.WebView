@@ -37,8 +37,7 @@ If you want a working sample after the main path, continue with [Demo: Avalonia 
 |---|---|
 | [Product Platform Roadmap](product-platform-roadmap.md) | Positioning, strategy, layering model, capability contract, and P0-P5 roadmap |
 | [Architecture Layering](architecture-layering.md) | Dependency boundaries, API category rules, and kernel approval policy |
-| [Platform Status](platform-status.md) | Governed status page and published release-line snapshot location |
-| [Release Governance](release-governance.md) | Stable release rules, gates, and promotion flow |
+| [Platform Status](platform-status.md) | Platform status page and published release-line snapshot location |
 | [Framework Capabilities](framework-capabilities.md) | Capability registry entry (wrapper) with machine-readable source |
 
 Key entry points: [Product Platform Roadmap](product-platform-roadmap.md) · [Platform Status](platform-status.md)

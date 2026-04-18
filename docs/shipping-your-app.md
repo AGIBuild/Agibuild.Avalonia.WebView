@@ -210,4 +210,4 @@ Target Package => _ => _
 ## See Also
 
 - [Velopack documentation](https://docs.velopack.io/)
-- [Release Governance](release-governance.md)
+- [Release Checklist](release-checklist.md)

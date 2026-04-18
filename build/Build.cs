@@ -63,9 +63,6 @@ internal sealed partial class BuildTask : NukeBuild
     [Parameter("Android SDK root path. Default: ~/Library/Android/sdk (macOS) or ANDROID_HOME env var.")]
     private readonly string AndroidSdkRoot = ResolveAndroidSdkRoot();
 
-    [Parameter("Optional warning scanner input file path. If set, scanner consumes this file instead of live build output.")]
-    private readonly string? WarningGovernanceInput = null;
-
     [Parameter("Project to package (path to .csproj)")]
     private readonly string? PackageProject = null;
 
@@ -103,22 +100,7 @@ internal sealed partial class BuildTask : NukeBuild
     private static AbsolutePath TestResultsDirectory => ArtifactsDirectory / "test-results";
     private static AbsolutePath AutomationLaneReportFile => TestResultsDirectory / "automation-lane-report.json";
     private static AbsolutePath NugetSmokeTelemetryFile => TestResultsDirectory / "nuget-smoke-retry-telemetry.json";
-    private static AbsolutePath WarningGovernanceReportFile => TestResultsDirectory / "warning-governance-report.json";
-    private static AbsolutePath LayeringGovernanceReportFile => TestResultsDirectory / "layering-governance-report.json";
-    private static AbsolutePath DependencyGovernanceReportFile => TestResultsDirectory / "dependency-governance-report.json";
-    private static AbsolutePath TypeScriptGovernanceReportFile => TestResultsDirectory / "typescript-governance-report.json";
-    private static AbsolutePath SampleTemplatePackageReferenceGovernanceReportFile => TestResultsDirectory / "sample-template-package-reference-governance-report.json";
-    private static AbsolutePath RuntimeCriticalPathGovernanceReportFile => TestResultsDirectory / "runtime-critical-path-governance-report.json";
-    private static AbsolutePath CloseoutSnapshotFile => TestResultsDirectory / "closeout-snapshot.json";
-    private static AbsolutePath BridgeDistributionGovernanceReportFile => TestResultsDirectory / "bridge-distribution-governance-report.json";
-    private static AbsolutePath TransitionGateGovernanceReportFile => TestResultsDirectory / "transition-gate-governance-report.json";
-    private static AbsolutePath ReleaseOrchestrationDecisionReportFile => TestResultsDirectory / "release-orchestration-decision-report.json";
-    private static AbsolutePath DistributionReadinessGovernanceReportFile => TestResultsDirectory / "distribution-readiness-governance-report.json";
-    private static AbsolutePath AdoptionReadinessGovernanceReportFile => TestResultsDirectory / "adoption-readiness-governance-report.json";
-    private static AbsolutePath SolutionConsistencyGovernanceReportFile => TestResultsDirectory / "solution-consistency-governance-report.json";
     private static AbsolutePath AutomationLaneManifestFile => TestsDirectory / "automation-lanes.json";
-    private static AbsolutePath RuntimeCriticalPathManifestFile => TestsDirectory / "runtime-critical-path.manifest.json";
-    private static AbsolutePath WarningGovernanceBaselineFile => TestsDirectory / "warning-governance.baseline.json";
 
     private static AbsolutePath SolutionFile => RootDirectory / "Agibuild.Fulora.sln";
     private static AbsolutePath CoverageDirectory => ArtifactsDirectory / "coverage";
@@ -275,12 +257,12 @@ internal sealed partial class BuildTask : NukeBuild
     // ──────────────────────────────── CI Targets ─────────────────────────────
 
     internal Target Ci => _ => _
-        .Description("Full CI pipeline: compile → coverage → lane automation → pack → validate.")
-        .DependsOn(LayeringGovernance, ReleaseOrchestrationGovernance, SolutionConsistencyGovernance, NugetPackageTest, PackTemplate);
+        .Description("Full CI pipeline: compile → coverage → lane automation → validate package → pack.")
+        .DependsOn(Coverage, AutomationLaneReport, ValidatePackage, NugetPackageTest, PackTemplate);
 
     internal Target CiMatrix => _ => _
         .Description("Cross-platform CI validation without package smoke/template packing.")
-        .DependsOn(LayeringGovernance, ReleaseOrchestrationGovernance, SolutionConsistencyGovernance);
+        .DependsOn(Coverage, AutomationLaneReport, ValidatePackage);
 
     internal Target CiPublish => _ => _
         .Description("Full release pipeline: Ci + publish.")

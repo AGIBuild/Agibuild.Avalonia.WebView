@@ -47,17 +47,16 @@ Fulora is a product platform for shipping web-first applications as native deskt
 - Release candidates must include machine-readable evidence for health, regression, and fallback readiness.
 - Observability artifacts are part of release governance, not optional diagnostics.
 
-## Release Governance
+## Release Policy
 
-- Stable channel changes require passing release gates defined in `release-governance.md`.
-- Kernel API and support-tier changes require architecture review sign-off.
+- Stable channel changes require passing CI checks and architecture review sign-off for kernel API and support-tier changes.
 - Regression or policy gate failures block promotion until evidence is updated.
 
 ## Developer Defaults
 
 - Safe-by-default templates and policy presets.
 - Stable APIs first; extension APIs are opt-in and explicitly marked.
-- New capabilities start as provisional until governance evidence is complete.
+- New capabilities start as provisional until readiness evidence is complete.
 
 ## P0-P5 Roadmap
 
@@ -70,8 +69,7 @@ Fulora is a product platform for shipping web-first applications as native deskt
 | P4 | Release automation | Stable release gates fully automated in CI |
 | P5 | Ecosystem scale-out | Extension lanes expand without core contract drift |
 
-## Documentation Governance
+## Documentation Policy
 
-- Platform docs are first-class governance artifacts and must stay DocFX-discoverable.
+- Platform docs must stay DocFX-discoverable.
 - `docs/index.md` and `docs/toc.yml` must expose platform documents as top-level navigation.
-- Governance tests enforce presence and linkage for required platform pages.
