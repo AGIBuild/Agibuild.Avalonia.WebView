@@ -135,8 +135,8 @@ internal sealed class WebViewCoreBridgeRuntime : IDisposable
 
         UiThreadHelper.SafeDispatch(
             _context.Dispatcher,
-            _context.Lifecycle.IsDisposed,
-            _context.Lifecycle.IsAdapterDestroyed,
+            _context.IsDisposed,
+            _context.IsAdapterDestroyed,
             () => HandleAdapterWebMessageReceivedOnUiThread(args),
             _context.Logger,
             "WebMessageReceived: ignored (disposed or destroyed)");
@@ -144,7 +144,7 @@ internal sealed class WebViewCoreBridgeRuntime : IDisposable
 
     internal void HandleAdapterWebMessageReceivedOnUiThread(WebMessageReceivedEventArgs args)
     {
-        if (_context.Lifecycle.IsDisposed)
+        if (_context.IsDisposed)
         {
             return;
         }

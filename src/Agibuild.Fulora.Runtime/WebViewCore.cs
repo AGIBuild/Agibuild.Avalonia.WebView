@@ -25,10 +25,11 @@ internal sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvent
 {
     private static readonly Uri AboutBlank = new("about:blank");
 
-    // Centralised lifecycle state (disposal latch, adapter-destroyed at-most-once flag, phase marker).
-    // All three flags used to live on WebViewCore directly; the machine owns them so the admission
-    // rule and at-most-once semantics exist in exactly one place.
-    private readonly WebViewLifecycleStateMachine _lifecycle = new();
+    // All lifecycle state (disposal latch, adapter-destroyed at-most-once flag, phase marker) lives
+    // on a single WebViewLifecycleStateMachine owned by _context. WebViewCore no longer holds its
+    // own field: the state machine is created locally in the constructor, handed to the context,
+    // and thereafter reached exclusively through _context.Lifecycle (transitions) or
+    // _context.IsDisposed / IsAdapterDestroyed (reads). This gives lifecycle a single access path.
 
     private readonly IWebViewAdapter _adapter;
     private readonly ILogger<WebViewCore> _logger;
@@ -102,15 +103,16 @@ internal sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvent
         // No other site in the codebase should perform `adapter as IXxxAdapter` tests.
         var capabilities = AdapterCapabilities.From(_adapter);
 
+        var lifecycle = new WebViewLifecycleStateMachine();
         _events = new WebViewCoreEventHub(this);
-        _operationQueue = new WebViewCoreOperationQueue(_lifecycle, dispatcher, _logger);
+        _operationQueue = new WebViewCoreOperationQueue(lifecycle, dispatcher, _logger);
         _context = new WebViewCoreContext(
             adapter: _adapter,
             capabilities: capabilities,
             dispatcher: dispatcher,
             logger: _logger,
             environmentOptions: envOptions,
-            lifecycle: _lifecycle,
+            lifecycle: lifecycle,
             events: _events,
             operations: _operationQueue,
             channelId: ChannelId);
@@ -142,10 +144,10 @@ internal sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvent
     [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     internal void Attach(INativeHandle parentHandle)
     {
-        _lifecycle.TransitionToAttaching();
+        _context.Lifecycle.TransitionToAttaching();
         _logger.LogDebug("Attach: parentHandle.HandleDescriptor={Descriptor}", parentHandle.HandleDescriptor);
         _adapter.Attach(parentHandle);
-        _lifecycle.TransitionToReady();
+        _context.Lifecycle.TransitionToReady();
         _logger.LogDebug("Attach: completed");
 
         // Raise AdapterCreated after successful attach, before any pending navigation.
@@ -157,7 +159,7 @@ internal sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvent
     [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     internal void Detach()
     {
-        _lifecycle.TransitionToDetaching();
+        _context.Lifecycle.TransitionToDetaching();
         _logger.LogDebug("Detach: begin");
         RaiseAdapterDestroyedOnce();
         _adapter.Detach();
@@ -330,14 +332,14 @@ internal sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvent
     {
         // Raise AdapterDestroyed before flipping the disposed latch so that observers still see a
         // "live" core during the callback; MarkAdapterDestroyedOnce itself is idempotent.
-        if (_lifecycle.IsDisposed)
+        if (_context.IsDisposed)
         {
             return;
         }
 
         _logger.LogDebug("Dispose: begin");
         RaiseAdapterDestroyedOnce();
-        _lifecycle.TryTransitionToDisposed();
+        _context.Lifecycle.TryTransitionToDisposed();
 
         // --- Owned IDisposable runtimes (disposed in reverse dependency order) ---
         // 1) EventWiring first: detaches adapter event handlers so no late callbacks can observe
@@ -396,7 +398,7 @@ internal sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvent
         ArgumentNullException.ThrowIfNull(script);
         _logger.LogDebug("InvokeScriptAsync: script length={Length}", script.Length);
 
-        if (_lifecycle.IsDisposed)
+        if (_context.IsDisposed)
         {
             return Task.FromException<string?>(new ObjectDisposedException(nameof(WebViewCore)));
         }
@@ -671,7 +673,7 @@ internal sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvent
         => _spaHostingRuntime.EnableSpaHosting(options);
 
     private void RaiseAdapterDestroyedOnce()
-        => _lifecycle.MarkAdapterDestroyedOnce(() =>
+        => _context.Lifecycle.MarkAdapterDestroyedOnce(() =>
         {
             _logger.LogDebug("AdapterDestroyed: raising");
             _events.RaiseAdapterDestroyed();

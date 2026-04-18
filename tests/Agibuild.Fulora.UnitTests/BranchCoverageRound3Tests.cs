@@ -1383,14 +1383,19 @@ public sealed class BranchCoverageRound3Tests
     #endregion
 
     // Reflection shim: previously these tests poked _disposed / _adapterDestroyed fields directly
-    // on WebViewCore. After the lifecycle flags were moved into WebViewLifecycleStateMachine, the
-    // same simulation needs to hop through the machine. Kept here rather than in a shared helper
-    // because no other test needs this seam.
+    // on WebViewCore. After the lifecycle flags moved into WebViewLifecycleStateMachine (owned by
+    // WebViewCoreContext), the simulation hops through _context.Lifecycle. Kept here rather than
+    // in a shared helper because no other test needs this seam.
     private static void SetLifecycleFlag(WebViewCore core, string flagFieldName, bool value)
     {
-        var machineField = typeof(WebViewCore).GetField("_lifecycle", BindingFlags.NonPublic | BindingFlags.Instance);
-        Assert.NotNull(machineField);
-        var machine = machineField!.GetValue(core);
+        var contextField = typeof(WebViewCore).GetField("_context", BindingFlags.NonPublic | BindingFlags.Instance);
+        Assert.NotNull(contextField);
+        var context = contextField!.GetValue(core);
+        Assert.NotNull(context);
+
+        var lifecycleProp = context!.GetType().GetProperty("Lifecycle", BindingFlags.Public | BindingFlags.Instance);
+        Assert.NotNull(lifecycleProp);
+        var machine = lifecycleProp!.GetValue(context);
         Assert.NotNull(machine);
 
         var innerField = machine!.GetType().GetField(flagFieldName, BindingFlags.NonPublic | BindingFlags.Instance);

@@ -33,8 +33,8 @@ internal sealed class WebViewCoreAdapterEventRuntime
 
         UiThreadHelper.SafeDispatch(
             _context.Dispatcher,
-            _context.Lifecycle.IsDisposed,
-            _context.Lifecycle.IsAdapterDestroyed,
+            _context.IsDisposed,
+            _context.IsAdapterDestroyed,
             () => HandleAdapterNewWindowRequestedOnUiThread(args),
             _context.Logger,
             "NewWindowRequested: ignored (disposed or destroyed)");
@@ -47,8 +47,8 @@ internal sealed class WebViewCoreAdapterEventRuntime
 
         UiThreadHelper.SafeDispatch(
             _context.Dispatcher,
-            _context.Lifecycle.IsDisposed,
-            _context.Lifecycle.IsAdapterDestroyed,
+            _context.IsDisposed,
+            _context.IsAdapterDestroyed,
             () => _context.Events.RaiseWebResourceRequested(args));
     }
 
@@ -59,8 +59,8 @@ internal sealed class WebViewCoreAdapterEventRuntime
 
         UiThreadHelper.SafeDispatch(
             _context.Dispatcher,
-            _context.Lifecycle.IsDisposed,
-            _context.Lifecycle.IsAdapterDestroyed,
+            _context.IsDisposed,
+            _context.IsAdapterDestroyed,
             () => _context.Events.RaiseEnvironmentRequested(args));
     }
 
@@ -71,8 +71,8 @@ internal sealed class WebViewCoreAdapterEventRuntime
 
         UiThreadHelper.SafeDispatch(
             _context.Dispatcher,
-            _context.Lifecycle.IsDisposed,
-            _context.Lifecycle.IsAdapterDestroyed,
+            _context.IsDisposed,
+            _context.IsAdapterDestroyed,
             () => _context.Events.RaiseDownloadRequested(args));
     }
 
@@ -83,14 +83,14 @@ internal sealed class WebViewCoreAdapterEventRuntime
 
         UiThreadHelper.SafeDispatch(
             _context.Dispatcher,
-            _context.Lifecycle.IsDisposed,
-            _context.Lifecycle.IsAdapterDestroyed,
+            _context.IsDisposed,
+            _context.IsAdapterDestroyed,
             () => _context.Events.RaisePermissionRequested(args));
     }
 
     private void HandleAdapterNewWindowRequestedOnUiThread(NewWindowRequestedEventArgs args)
     {
-        if (_context.Lifecycle.IsDisposed)
+        if (_context.IsDisposed)
         {
             return;
         }

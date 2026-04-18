@@ -175,7 +175,7 @@ internal sealed class WebViewCoreNavigationRuntime
         _context.Logger.LogDebug("OnNativeNavigationStarting: correlationId={CorrelationId}, uri={Uri}, isMainFrame={IsMainFrame}",
             info.CorrelationId, info.RequestUri, info.IsMainFrame);
 
-        if (_context.Lifecycle.IsDisposed)
+        if (_context.IsDisposed)
         {
             _context.Logger.LogDebug("OnNativeNavigationStarting: disposed, denying");
             return ValueTask.FromResult(new NativeNavigationStartingDecision(IsAllowed: false, NavigationId: Guid.Empty));
@@ -192,7 +192,7 @@ internal sealed class WebViewCoreNavigationRuntime
 
     public NativeNavigationStartingDecision OnNativeNavigationStartingOnUiThread(NativeNavigationStartingInfo info)
     {
-        if (_context.Lifecycle.IsDisposed)
+        if (_context.IsDisposed)
         {
             return new NativeNavigationStartingDecision(IsAllowed: false, NavigationId: Guid.Empty);
         }
@@ -242,8 +242,8 @@ internal sealed class WebViewCoreNavigationRuntime
 
         UiThreadHelper.SafeDispatch(
             _context.Dispatcher,
-            _context.Lifecycle.IsDisposed,
-            _context.Lifecycle.IsAdapterDestroyed,
+            _context.IsDisposed,
+            _context.IsAdapterDestroyed,
             () => HandleAdapterNavigationCompletedOnUiThread(args),
             _context.Logger,
             "Adapter.NavigationCompleted: ignored (disposed or destroyed)");
@@ -251,7 +251,7 @@ internal sealed class WebViewCoreNavigationRuntime
 
     public void HandleAdapterNavigationCompletedOnUiThread(NavigationCompletedEventArgs args)
     {
-        if (_context.Lifecycle.IsDisposed)
+        if (_context.IsDisposed)
         {
             return;
         }
@@ -295,7 +295,7 @@ internal sealed class WebViewCoreNavigationRuntime
 
     public async Task<Task> StartNavigationRequestCoreAsync(Uri requestUri, Func<Guid, Task> adapterInvoke, bool updateSource)
     {
-        ObjectDisposedException.ThrowIf(_context.Lifecycle.IsDisposed, nameof(WebViewCore));
+        ObjectDisposedException.ThrowIf(_context.IsDisposed, nameof(WebViewCore));
         _context.ThrowIfNotOnUiThread("async navigation");
 
         if (updateSource)

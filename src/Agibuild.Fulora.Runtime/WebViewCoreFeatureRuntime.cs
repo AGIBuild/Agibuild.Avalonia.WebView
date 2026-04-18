@@ -170,7 +170,7 @@ internal sealed class WebViewCoreFeatureRuntime : IDisposable
 
     public Task<INativeHandle?> TryGetWebViewHandleAsync()
     {
-        if (_context.Lifecycle.IsAdapterDestroyed)
+        if (_context.IsAdapterDestroyed)
         {
             return Task.FromResult<INativeHandle?>(null);
         }
@@ -216,7 +216,7 @@ internal sealed class WebViewCoreFeatureRuntime : IDisposable
 
     private void OnAdapterZoomFactorChanged(object? sender, double newZoom)
     {
-        if (_context.Lifecycle.IsDisposed)
+        if (_context.IsDisposed)
         {
             return;
         }
@@ -230,7 +230,7 @@ internal sealed class WebViewCoreFeatureRuntime : IDisposable
 
     private void OnAdapterContextMenuRequested(object? sender, ContextMenuRequestedEventArgs args)
     {
-        if (_context.Lifecycle.IsDisposed)
+        if (_context.IsDisposed)
         {
             return;
         }

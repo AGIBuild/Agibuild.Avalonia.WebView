@@ -70,6 +70,22 @@ internal sealed class WebViewCoreContext
     public Guid ChannelId { get; }
 
     /// <summary>
+    /// Single read-only accessor for the "have we been disposed?" observation. Exists so runtimes
+    /// can write <c>_context.IsDisposed</c> instead of chaining through <see cref="Lifecycle"/>,
+    /// enforcing Law of Demeter and keeping the state-machine surface one level behind the context.
+    /// State transitions still go through <see cref="Lifecycle"/> directly — only the boolean reads
+    /// are hoisted to the context.
+    /// </summary>
+    public bool IsDisposed => Lifecycle.IsDisposed;
+
+    /// <summary>
+    /// Single read-only accessor for the "has the adapter-destroyed latch fired?" observation.
+    /// Mirrors <see cref="IsDisposed"/> — runtimes must observe via the context, not chase the
+    /// state machine directly.
+    /// </summary>
+    public bool IsAdapterDestroyed => Lifecycle.IsAdapterDestroyed;
+
+    /// <summary>
     /// Forwards to <see cref="WebViewLifecycleStateMachine.ThrowIfDisposed"/>. Kept here so runtimes
     /// can write <c>_context.ThrowIfDisposed()</c> without pulling in the state machine explicitly.
     /// </summary>
