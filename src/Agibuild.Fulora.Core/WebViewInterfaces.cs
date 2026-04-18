@@ -26,12 +26,15 @@ public interface IWebViewNavigation : IDisposable
     event EventHandler<NavigationCompletedEventArgs>? NavigationCompleted;
 }
 
-/// <summary>JavaScript execution and preload script management.</summary>
-public interface IWebViewScript
+/// <summary>
+/// JavaScript execution plus the preload-script capability
+/// (<see cref="IWebViewPreloadScripts"/>). Kept as a composite for source-level
+/// compatibility — existing consumers of <c>IWebViewScript</c> continue to see
+/// all three members unchanged.
+/// </summary>
+public interface IWebViewScript : IWebViewPreloadScripts
 {
     Task<string?> InvokeScriptAsync(string script);
-    Task<string> AddPreloadScriptAsync(string javaScript);
-    Task RemovePreloadScriptAsync(string scriptId);
 }
 
 /// <summary>RPC, bridge, cookies, commands, and messaging.</summary>
@@ -46,27 +49,26 @@ public interface IWebViewBridge
     event EventHandler<WebMessageReceivedEventArgs>? WebMessageReceived;
 }
 
-/// <summary>DevTools, screenshot, print, zoom, find, native handle, and extended events.</summary>
-public interface IWebViewFeatures
+/// <summary>
+/// Composite "extended capabilities" interface. Derives every member from a
+/// single-responsibility capability interface so new code can depend on the
+/// narrowest contract (e.g. <see cref="IWebViewDevTools"/>) while legacy code
+/// keeps depending on <see cref="IWebViewFeatures"/> unchanged.
+/// </summary>
+public interface IWebViewFeatures :
+    IWebViewDevTools,
+    IWebViewScreenshot,
+    IWebViewPrinting,
+    IWebViewZoom,
+    IWebViewFindInPage,
+    IWebViewNativeHandle,
+    IWebViewDownloads,
+    IWebViewPermissions,
+    IWebViewContextMenu,
+    IWebViewPopupWindows,
+    IWebViewResourceInterception,
+    IWebViewLifecycleEvents
 {
-    Task<INativeHandle?> TryGetWebViewHandleAsync();
-    Task OpenDevToolsAsync();
-    Task CloseDevToolsAsync();
-    Task<bool> IsDevToolsOpenAsync();
-    Task<byte[]> CaptureScreenshotAsync();
-    Task<byte[]> PrintToPdfAsync(PdfPrintOptions? options = null);
-    Task<double> GetZoomFactorAsync();
-    Task SetZoomFactorAsync(double zoomFactor);
-    Task<FindInPageEventArgs> FindInPageAsync(string text, FindInPageOptions? options = null);
-    Task StopFindInPageAsync(bool clearHighlights = true);
-    event EventHandler<NewWindowRequestedEventArgs>? NewWindowRequested;
-    event EventHandler<WebResourceRequestedEventArgs>? WebResourceRequested;
-    event EventHandler<EnvironmentRequestedEventArgs>? EnvironmentRequested;
-    event EventHandler<DownloadRequestedEventArgs>? DownloadRequested;
-    event EventHandler<PermissionRequestedEventArgs>? PermissionRequested;
-    event EventHandler<AdapterCreatedEventArgs>? AdapterCreated;
-    event EventHandler? AdapterDestroyed;
-    event EventHandler<ContextMenuRequestedEventArgs>? ContextMenuRequested;
 }
 
 /// <summary>Composite interface combining all WebView capabilities.</summary>

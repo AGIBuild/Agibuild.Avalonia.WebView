@@ -253,17 +253,17 @@ public sealed class AvaloniaWebDialog : IWebDialog, ISpaHostingWebView
     /// <inheritdoc />
     public Task SetZoomFactorAsync(double zoomFactor) => _webView.SetZoomFactorAsync(zoomFactor);
 
-    /// <inheritdoc cref="IWebViewFeatures.FindInPageAsync"/>
+    /// <inheritdoc cref="IWebViewFindInPage.FindInPageAsync"/>
     public Task<FindInPageEventArgs> FindInPageAsync(string text, FindInPageOptions? options = null) => _webView.FindInPageAsync(text, options);
-    /// <inheritdoc cref="IWebViewFeatures.StopFindInPageAsync"/>
+    /// <inheritdoc cref="IWebViewFindInPage.StopFindInPageAsync"/>
     public Task StopFindInPageAsync(bool clearHighlights = true) => _webView.StopFindInPageAsync(clearHighlights);
 
-    /// <inheritdoc cref="IWebViewScript.AddPreloadScriptAsync"/>
+    /// <inheritdoc cref="IWebViewPreloadScripts.AddPreloadScriptAsync"/>
     public Task<string> AddPreloadScriptAsync(string javaScript) => _webView.AddPreloadScriptAsync(javaScript);
-    /// <inheritdoc cref="IWebViewScript.RemovePreloadScriptAsync"/>
+    /// <inheritdoc cref="IWebViewPreloadScripts.RemovePreloadScriptAsync"/>
     public Task RemovePreloadScriptAsync(string scriptId) => _webView.RemovePreloadScriptAsync(scriptId);
 
-    /// <inheritdoc cref="IWebViewFeatures.ContextMenuRequested"/>
+    /// <inheritdoc cref="IWebViewContextMenu.ContextMenuRequested"/>
     public event EventHandler<ContextMenuRequestedEventArgs>? ContextMenuRequested
     {
         add => _webView.ContextMenuRequested += value;

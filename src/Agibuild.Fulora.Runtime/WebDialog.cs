@@ -135,17 +135,17 @@ internal sealed class WebDialog : IWebDialog, ISpaHostingWebView
     /// <inheritdoc />
     public Task SetZoomFactorAsync(double zoomFactor) => _core.SetZoomFactorAsync(zoomFactor);
 
-    /// <inheritdoc cref="IWebViewFeatures.FindInPageAsync"/>
+    /// <inheritdoc cref="IWebViewFindInPage.FindInPageAsync"/>
     public Task<FindInPageEventArgs> FindInPageAsync(string text, FindInPageOptions? options = null) => _core.FindInPageAsync(text, options);
-    /// <inheritdoc cref="IWebViewFeatures.StopFindInPageAsync"/>
+    /// <inheritdoc cref="IWebViewFindInPage.StopFindInPageAsync"/>
     public Task StopFindInPageAsync(bool clearHighlights = true) => _core.StopFindInPageAsync(clearHighlights);
 
-    /// <inheritdoc cref="IWebViewScript.AddPreloadScriptAsync"/>
+    /// <inheritdoc cref="IWebViewPreloadScripts.AddPreloadScriptAsync"/>
     public Task<string> AddPreloadScriptAsync(string javaScript) => _core.AddPreloadScriptAsync(javaScript);
-    /// <inheritdoc cref="IWebViewScript.RemovePreloadScriptAsync"/>
+    /// <inheritdoc cref="IWebViewPreloadScripts.RemovePreloadScriptAsync"/>
     public Task RemovePreloadScriptAsync(string scriptId) => _core.RemovePreloadScriptAsync(scriptId);
 
-    /// <inheritdoc cref="IWebViewFeatures.ContextMenuRequested"/>
+    /// <inheritdoc cref="IWebViewContextMenu.ContextMenuRequested"/>
     public event EventHandler<ContextMenuRequestedEventArgs>? ContextMenuRequested
     {
         add => _core.ContextMenuRequested += value;

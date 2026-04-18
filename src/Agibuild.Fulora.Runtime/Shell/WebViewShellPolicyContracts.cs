@@ -313,7 +313,7 @@ public sealed class WebViewShellPolicyErrorEventArgs : EventArgs
 /// </summary>
 public sealed class WebViewShellExperienceOptions
 {
-    /// <summary>Optional policy for handling <see cref="IWebViewFeatures.NewWindowRequested"/>.</summary>
+    /// <summary>Optional policy for handling <see cref="IWebViewPopupWindows.NewWindowRequested"/>.</summary>
     public IWebViewNewWindowPolicy? NewWindowPolicy { get; init; }
     /// <summary>Optional typed host capability bridge.</summary>
     public WebViewHostCapabilityBridge? HostCapabilityBridge { get; init; }
@@ -352,7 +352,7 @@ public sealed class WebViewShellExperienceOptions
 }
 
 /// <summary>
-/// Policy for handling <see cref="IWebViewFeatures.NewWindowRequested"/> in a host-controlled way.
+/// Policy for handling <see cref="IWebViewPopupWindows.NewWindowRequested"/> in a host-controlled way.
 /// </summary>
 public interface IWebViewNewWindowPolicy
 {
@@ -361,7 +361,7 @@ public interface IWebViewNewWindowPolicy
 }
 
 /// <summary>
-/// Policy for handling <see cref="IWebViewFeatures.DownloadRequested"/>.
+/// Policy for handling <see cref="IWebViewDownloads.DownloadRequested"/>.
 /// </summary>
 public interface IWebViewDownloadPolicy
 {
@@ -370,7 +370,7 @@ public interface IWebViewDownloadPolicy
 }
 
 /// <summary>
-/// Policy for handling <see cref="IWebViewFeatures.PermissionRequested"/>.
+/// Policy for handling <see cref="IWebViewPermissions.PermissionRequested"/>.
 /// </summary>
 public interface IWebViewPermissionPolicy
 {
