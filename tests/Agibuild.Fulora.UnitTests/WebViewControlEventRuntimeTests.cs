@@ -70,6 +70,78 @@ public sealed class WebViewControlEventRuntimeTests
     }
 
     [Fact]
+    public void Detach_unhooks_all_adapter_plane_forwarders()
+    {
+        // Guards the symmetry contract of `WebViewControlEventRuntime.Detach()` for every
+        // adapter-plane forwarder wired up in `Attach()`. If any `-=` line is removed or
+        // misrouted, the corresponding counter below stops being zero and this test fails
+        // with a precise diagnostic on exactly which forwarder leaked.
+        var navigationStarted = 0;
+        var navigationCompleted = 0;
+        var newWindowRequested = 0;
+        var webMessageReceived = 0;
+        var webResourceRequested = 0;
+        var environmentRequested = 0;
+        var downloadRequested = 0;
+        var permissionRequested = 0;
+        var adapterCreated = 0;
+        var adapterDestroyed = 0;
+        var zoomFactorChanged = 0;
+
+        var runtime = new WebViewControlEventRuntime(
+            callbacks: new WebViewControlEventCallbacks(
+                raiseNavigationStarted: _ => navigationStarted++,
+                raiseNavigationCompleted: _ => navigationCompleted++,
+                raiseNewWindowRequested: _ => newWindowRequested++,
+                raiseWebMessageReceived: _ => webMessageReceived++,
+                raiseWebResourceRequested: _ => webResourceRequested++,
+                raiseEnvironmentRequested: _ => environmentRequested++,
+                raiseDownloadRequested: _ => downloadRequested++,
+                raisePermissionRequested: _ => permissionRequested++,
+                raiseAdapterCreated: _ => adapterCreated++,
+                raiseAdapterDestroyed: () => adapterDestroyed++,
+                raiseZoomFactorChanged: _ => zoomFactorChanged++),
+            interactionHandlers: new WebViewControlInteractionAccessors(
+                getContextMenuHandlers: () => null,
+                getDragEnteredHandlers: () => null,
+                getDragOverHandlers: () => null,
+                getDragLeftHandlers: () => null,
+                getDropCompletedHandlers: () => null),
+            navigationHooks: new WebViewControlNavigationHooks(
+                navigateInPlaceAsync: _ => Task.CompletedTask,
+                getInitialZoomFactor: () => 1.0,
+                applyInitialZoomFactor: _ => { }));
+
+        var core = new StubCoreEvents();
+        runtime.Attach(core);
+        runtime.Detach();
+
+        core.RaiseNavigationStarted(new NavigationStartingEventArgs(new Uri("https://example.test/")));
+        core.RaiseNavigationCompleted(new NavigationCompletedEventArgs());
+        core.RaiseNewWindowRequested(new NewWindowRequestedEventArgs(new Uri("https://example.test/popup")));
+        core.RaiseWebMessageReceived(new WebMessageReceivedEventArgs());
+        core.RaiseWebResourceRequested(new WebResourceRequestedEventArgs());
+        core.RaiseEnvironmentRequested(new EnvironmentRequestedEventArgs());
+        core.RaiseDownloadRequested(new DownloadRequestedEventArgs(new Uri("https://example.test/file")));
+        core.RaisePermissionRequested(new PermissionRequestedEventArgs(WebViewPermissionKind.Geolocation));
+        core.RaiseAdapterCreated(new AdapterCreatedEventArgs(null));
+        core.RaiseAdapterDestroyed();
+        core.RaiseZoomFactorChanged(1.5);
+
+        Assert.Equal(0, navigationStarted);
+        Assert.Equal(0, navigationCompleted);
+        Assert.Equal(0, newWindowRequested);
+        Assert.Equal(0, webMessageReceived);
+        Assert.Equal(0, webResourceRequested);
+        Assert.Equal(0, environmentRequested);
+        Assert.Equal(0, downloadRequested);
+        Assert.Equal(0, permissionRequested);
+        Assert.Equal(0, adapterCreated);
+        Assert.Equal(0, adapterDestroyed);
+        Assert.Equal(0, zoomFactorChanged);
+    }
+
+    [Fact]
     public void Attach_to_new_core_detaches_previous_core_handlers()
     {
         var messages = 0;
@@ -547,6 +619,33 @@ public sealed class WebViewControlEventRuntimeTests
 
         public void RaiseDragOver(DragEventArgs args)
             => DragOver?.Invoke(this, args);
+
+        public void RaiseNavigationStarted(NavigationStartingEventArgs args)
+            => NavigationStarted?.Invoke(this, args);
+
+        public void RaiseNavigationCompleted(NavigationCompletedEventArgs args)
+            => NavigationCompleted?.Invoke(this, args);
+
+        public void RaiseWebResourceRequested(WebResourceRequestedEventArgs args)
+            => WebResourceRequested?.Invoke(this, args);
+
+        public void RaiseEnvironmentRequested(EnvironmentRequestedEventArgs args)
+            => EnvironmentRequested?.Invoke(this, args);
+
+        public void RaiseDownloadRequested(DownloadRequestedEventArgs args)
+            => DownloadRequested?.Invoke(this, args);
+
+        public void RaisePermissionRequested(PermissionRequestedEventArgs args)
+            => PermissionRequested?.Invoke(this, args);
+
+        public void RaiseAdapterCreated(AdapterCreatedEventArgs args)
+            => AdapterCreated?.Invoke(this, args);
+
+        public void RaiseAdapterDestroyed()
+            => AdapterDestroyed?.Invoke(this, EventArgs.Empty);
+
+        public void RaiseZoomFactorChanged(double zoom)
+            => ZoomFactorChanged?.Invoke(this, zoom);
     }
 #pragma warning restore CS0067
 }
