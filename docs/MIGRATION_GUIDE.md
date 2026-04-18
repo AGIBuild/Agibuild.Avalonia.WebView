@@ -203,3 +203,47 @@ dotnet publish -c Release
 4. **Native modules**: Electron native modules (`.node` files) must be replaced with .NET P/Invoke or NuGet packages.
 
 5. **Multi-window**: Electron creates separate `BrowserWindow` instances. Fulora uses `IWebDialog` for additional windows or multiple `WebView` controls within Avalonia windows.
+
+## 1.5.x → 1.6.0 (P5: Capability Split)
+
+**Nothing is required.** All changes are additive.
+
+### What's new
+
+You can now depend on a single WebView capability instead of the whole `IWebView` composite. This is especially useful for:
+
+- **Testing**: stub only the interface you consume, e.g. `Mock<IWebViewZoom>` instead of full `IWebView`
+- **Dependency injection**: register components against narrow contracts (`IWebViewDevTools`, `IWebViewScreenshot`, ...) so substitution works per-capability
+- **Library authors**: expose capabilities on downstream types without implying they own the whole WebView surface
+
+### Example
+
+Before:
+
+```csharp
+public sealed class PdfExporter
+{
+    private readonly IWebView _webView; // overfits — we only need printing
+    public PdfExporter(IWebView webView) => _webView = webView;
+    public Task<byte[]> ExportAsync() => _webView.PrintToPdfAsync();
+}
+```
+
+After (recommended for new code):
+
+```csharp
+public sealed class PdfExporter
+{
+    private readonly IWebViewPrinting _printing;
+    public PdfExporter(IWebViewPrinting printing) => _printing = printing;
+    public Task<byte[]> ExportAsync() => _printing.PrintToPdfAsync();
+}
+```
+
+Both forms compile against the same `WebViewCore` / `WebDialog` / `WebView` instances — no implementation change is needed downstream.
+
+### Full list of new capability interfaces
+
+`IWebViewDevTools`, `IWebViewScreenshot`, `IWebViewPrinting`, `IWebViewZoom`, `IWebViewFindInPage`, `IWebViewPreloadScripts`, `IWebViewNativeHandle`, `IWebViewDownloads`, `IWebViewPermissions`, `IWebViewContextMenu`, `IWebViewPopupWindows`, `IWebViewResourceInterception`, `IWebViewLifecycleEvents`.
+
+See `docs/API_SURFACE_REVIEW.md` for the full member mapping.
