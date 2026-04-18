@@ -105,3 +105,39 @@ See `docs/API_SURFACE_INVENTORY.release.txt`.
 ```
 
 </details>
+
+---
+
+## 1.6 Capability Split (P5, Additive)
+
+**Date**: 2026-04-15
+**Status**: Additive, source-compatible. No existing members removed or renamed.
+
+### New Capability Interfaces (13 total — 12 composed into `IWebViewFeatures`, 1 into `IWebViewScript`)
+
+| Interface | Members | Replaces / Extracted from |
+|---|---|---|
+| `IWebViewDevTools` | `OpenDevToolsAsync`, `CloseDevToolsAsync`, `IsDevToolsOpenAsync` | `IWebViewFeatures` |
+| `IWebViewScreenshot` | `CaptureScreenshotAsync` | `IWebViewFeatures` |
+| `IWebViewPrinting` | `PrintToPdfAsync` | `IWebViewFeatures` |
+| `IWebViewZoom` | `GetZoomFactorAsync`, `SetZoomFactorAsync` | `IWebViewFeatures` |
+| `IWebViewFindInPage` | `FindInPageAsync`, `StopFindInPageAsync` | `IWebViewFeatures` |
+| `IWebViewPreloadScripts` | `AddPreloadScriptAsync`, `RemovePreloadScriptAsync` | `IWebViewScript` |
+| `IWebViewNativeHandle` | `TryGetWebViewHandleAsync` | `IWebViewFeatures` |
+| `IWebViewDownloads` | `DownloadRequested` event | `IWebViewFeatures` |
+| `IWebViewPermissions` | `PermissionRequested` event | `IWebViewFeatures` |
+| `IWebViewContextMenu` | `ContextMenuRequested` event | `IWebViewFeatures` |
+| `IWebViewPopupWindows` | `NewWindowRequested` event | `IWebViewFeatures` |
+| `IWebViewResourceInterception` | `WebResourceRequested`, `EnvironmentRequested` events | `IWebViewFeatures` |
+| `IWebViewLifecycleEvents` | `AdapterCreated`, `AdapterDestroyed` events | `IWebViewFeatures` |
+
+### Unchanged Surface
+
+- `IWebView` still derives from `IWebViewNavigation + IWebViewScript + IWebViewBridge + IWebViewFeatures` — no member visible to consumers moves or changes.
+- `IWebViewFeatures` is kept as an empty interface that inherits the 12 capability interfaces. Every member signature is identical.
+- `IWebViewScript` keeps `InvokeScriptAsync` plus, via inheritance from `IWebViewPreloadScripts`, the two preload methods.
+- `IWebViewBridge` is **not** modified in this change — its `TryGet*Manager` and `ChannelId` cleanup is tracked separately for v2.0.
+
+### Migration
+
+No action required. Existing code compiles unchanged. New code can now declare dependencies on a single capability (e.g. `ctor(IWebViewDevTools dt)`) instead of `IWebView`, enabling narrower unit-test doubles and cleaner Dependency Injection registrations.
