@@ -29,7 +29,7 @@ internal sealed class WebViewCoreAdapterEventRuntime
     public void HandleAdapterNewWindowRequested(NewWindowRequestedEventArgs args)
     {
         ArgumentNullException.ThrowIfNull(args);
-        _context.Logger.LogDebug("Event NewWindowRequested: uri={Uri}", args.Uri);
+        _context.Logger.LogEventNewWindowRequested(args.Uri);
 
         UiThreadHelper.SafeDispatch(
             _context.Dispatcher,
@@ -43,7 +43,7 @@ internal sealed class WebViewCoreAdapterEventRuntime
     public void HandleAdapterWebResourceRequested(WebResourceRequestedEventArgs args)
     {
         ArgumentNullException.ThrowIfNull(args);
-        _context.Logger.LogDebug("Event WebResourceRequested");
+        _context.Logger.LogEventWebResourceRequested();
 
         UiThreadHelper.SafeDispatch(
             _context.Dispatcher,
@@ -55,7 +55,7 @@ internal sealed class WebViewCoreAdapterEventRuntime
     public void HandleAdapterEnvironmentRequested(EnvironmentRequestedEventArgs args)
     {
         ArgumentNullException.ThrowIfNull(args);
-        _context.Logger.LogDebug("Event EnvironmentRequested");
+        _context.Logger.LogEventEnvironmentRequested();
 
         UiThreadHelper.SafeDispatch(
             _context.Dispatcher,
@@ -67,7 +67,7 @@ internal sealed class WebViewCoreAdapterEventRuntime
     public void HandleAdapterDownloadRequested(DownloadRequestedEventArgs args)
     {
         ArgumentNullException.ThrowIfNull(args);
-        _context.Logger.LogDebug("Event DownloadRequested: uri={Uri}, file={File}", args.DownloadUri, args.SuggestedFileName);
+        _context.Logger.LogEventDownloadRequested(args.DownloadUri, args.SuggestedFileName);
 
         UiThreadHelper.SafeDispatch(
             _context.Dispatcher,
@@ -79,7 +79,7 @@ internal sealed class WebViewCoreAdapterEventRuntime
     public void HandleAdapterPermissionRequested(PermissionRequestedEventArgs args)
     {
         ArgumentNullException.ThrowIfNull(args);
-        _context.Logger.LogDebug("Event PermissionRequested: kind={Kind}, origin={Origin}", args.PermissionKind, args.Origin);
+        _context.Logger.LogEventPermissionRequested(args.PermissionKind, args.Origin);
 
         UiThreadHelper.SafeDispatch(
             _context.Dispatcher,
@@ -99,7 +99,7 @@ internal sealed class WebViewCoreAdapterEventRuntime
 
         if (!args.Handled && args.Uri is not null)
         {
-            _context.Logger.LogDebug("NewWindowRequested: unhandled, navigating in-view to {Uri}", args.Uri);
+            _context.Logger.LogNewWindowUnhandled(args.Uri);
             _ = _navigateAsync(args.Uri);
         }
     }

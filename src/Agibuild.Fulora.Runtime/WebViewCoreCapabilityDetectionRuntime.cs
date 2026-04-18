@@ -34,8 +34,7 @@ internal sealed class WebViewCoreCapabilityDetectionRuntime
     {
         var options = _context.EnvironmentOptions;
         _context.Adapter.ApplyEnvironmentOptions(options);
-        _context.Logger.LogDebug(
-            "Environment options applied: DevTools={DevTools}, Ephemeral={Ephemeral}, UA={UA}",
+        _context.Logger.LogEnvironmentOptionsApplied(
             options.EnableDevTools,
             options.UseEphemeralSession,
             options.CustomUserAgent ?? "(default)");
@@ -48,20 +47,20 @@ internal sealed class WebViewCoreCapabilityDetectionRuntime
             return;
 
         _context.Adapter.RegisterCustomSchemes(schemes);
-        _context.Logger.LogDebug("Custom schemes registered: {Count}", schemes.Count);
+        _context.Logger.LogCustomSchemesRegistered(schemes.Count);
     }
 
     public ICookieManager CreateCookieManager()
     {
         var manager = new RuntimeCookieManager(_context.Adapter, _context);
-        _context.Logger.LogDebug("Cookie support: enabled");
+        _context.Logger.LogCookieSupportEnabled();
         return manager;
     }
 
     public ICommandManager CreateCommandManager()
     {
         var manager = new RuntimeCommandManager(_context.Adapter, _context);
-        _context.Logger.LogDebug("Command support: enabled");
+        _context.Logger.LogCommandSupportEnabled();
         return manager;
     }
 }

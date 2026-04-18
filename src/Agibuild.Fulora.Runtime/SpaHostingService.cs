@@ -65,16 +65,15 @@ internal sealed class SpaHostingService : IDisposable
         if (options.DevServerUrl is not null)
         {
             _devProxy = new HttpClient { BaseAddress = new Uri(options.DevServerUrl.TrimEnd('/') + "/") };
-            _logger.LogDebug("SPA: dev proxy mode → {DevServer}", options.DevServerUrl);
+            _logger.LogDevProxyMode(options.DevServerUrl);
         }
         else if (hasEmbedded)
         {
-            _logger.LogDebug("SPA: embedded mode, prefix={Prefix}, assembly={Assembly}",
-                options.EmbeddedResourcePrefix, options.ResourceAssembly!.GetName().Name);
+            _logger.LogEmbeddedMode(options.EmbeddedResourcePrefix!, options.ResourceAssembly!.GetName().Name);
         }
         else if (hasExternalAssets)
         {
-            _logger.LogDebug("SPA: external active-asset mode enabled");
+            _logger.LogExternalAssetsMode();
         }
         else
         {
@@ -118,7 +117,7 @@ internal sealed class SpaHostingService : IDisposable
         if (string.IsNullOrEmpty(path) || !Path.HasExtension(path))
         {
             path = _options.FallbackDocument;
-            _logger.LogDebug("SPA: fallback → {Path}", path);
+            _logger.LogFallback(path);
         }
 
         bool served;
@@ -230,13 +229,12 @@ internal sealed class SpaHostingService : IDisposable
             {
                 var fallbackName = $"{assembly.GetName().Name}.{prefix}.{_options.FallbackDocument}";
                 stream = assembly.GetManifestResourceStream(fallbackName);
-                _logger.LogDebug("SPA: resource not found '{Resource}', fallback to '{Fallback}'",
-                    fullResourceName, fallbackName);
+                _logger.LogResourceNotFoundWithFallback(fullResourceName, fallbackName);
             }
 
             if (stream is null)
             {
-                _logger.LogDebug("SPA: resource not found '{Resource}'", fullResourceName);
+                _logger.LogResourceNotFound(fullResourceName);
                 e.ResponseStatusCode = 404;
                 e.ResponseBody = new MemoryStream(Encoding.UTF8.GetBytes("Not Found"));
                 e.ResponseContentType = "text/plain";
@@ -264,7 +262,7 @@ internal sealed class SpaHostingService : IDisposable
 
         ApplyDefaultHeaders(e);
 
-        _logger.LogDebug("SPA: served embedded '{Path}' ({ContentType})", path, contentType);
+        _logger.LogServedEmbedded(path, contentType);
         return true;
     }
 
@@ -303,7 +301,7 @@ internal sealed class SpaHostingService : IDisposable
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "SPA: dev proxy failed for '{Path}'", path);
+            _logger.LogDevProxyFailed(ex, path);
             e.ResponseStatusCode = 502;
             e.ResponseBody = new MemoryStream(Encoding.UTF8.GetBytes($"Dev proxy error: {ex.Message}"));
             e.ResponseContentType = "text/plain";
@@ -326,8 +324,10 @@ internal sealed class SpaHostingService : IDisposable
 
         ApplyDefaultHeaders(e);
 
-        _logger.LogDebug("SPA: proxied '{Path}' → {Status} ({ContentType})",
-            response.RequestMessage?.RequestUri?.PathAndQuery, e.ResponseStatusCode, e.ResponseContentType);
+        _logger.LogProxied(
+            response.RequestMessage?.RequestUri?.PathAndQuery,
+            e.ResponseStatusCode,
+            e.ResponseContentType);
         return true;
     }
 

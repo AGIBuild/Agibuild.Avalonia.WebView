@@ -121,7 +121,7 @@ internal sealed class WebViewCoreContext
                 }
 
                 var error = t.Exception.InnerException ?? t.Exception;
-                Logger.LogDebug(error, "Background operation faulted: {OperationType}", operationType);
+                Logger.LogBackgroundOperationFaulted(error, operationType);
             },
             CancellationToken.None,
             TaskContinuationOptions.OnlyOnFaulted,

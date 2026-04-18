@@ -29,12 +29,10 @@ internal sealed class WebViewCoreFeatureRuntime : IDisposable
 
         if (globalScripts.Count > 0)
         {
-            _context.Logger.LogDebug("Global preload scripts applied: {Count}", globalScripts.Count);
+            _context.Logger.LogPreloadScriptsApplied(globalScripts.Count);
         }
 
-        _context.Logger.LogDebug(
-            "Async preload support: {Supported}",
-            _context.Capabilities.AsyncPreloadScript is not null);
+        _context.Logger.LogAsyncPreloadSupport(_context.Capabilities.AsyncPreloadScript is not null);
 
         if (_context.Capabilities.DragDrop is { } dragDrop)
         {
@@ -44,7 +42,7 @@ internal sealed class WebViewCoreFeatureRuntime : IDisposable
             dragDrop.DropCompleted += OnAdapterDropCompleted;
         }
 
-        _context.Logger.LogDebug("Drag-drop support: {Supported}", _context.Capabilities.DragDrop is not null);
+        _context.Logger.LogDragDropSupport(_context.Capabilities.DragDrop is not null);
     }
 
     public bool HasDragDropSupport => _context.Capabilities.DragDrop is not null;
@@ -197,7 +195,7 @@ internal sealed class WebViewCoreFeatureRuntime : IDisposable
             _context.ObserveBackgroundTask(dispatchTask, nameof(SetCustomUserAgent));
         }
 
-        _context.Logger.LogDebug("CustomUserAgent set to: {UA}", userAgent ?? "(default)");
+        _context.Logger.LogCustomUserAgentSet(userAgent ?? "(default)");
     }
 
     public void Dispose()

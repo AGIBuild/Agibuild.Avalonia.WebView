@@ -29,8 +29,7 @@ internal sealed class WebViewCoreSpaHostingRuntime : IDisposable
         if (options.AutoInjectBridgeScript && !_bridgeRuntime.IsBridgeEnabled)
             _bridgeRuntime.EnableWebMessageBridge(new WebMessageBridgeOptions());
 
-        _context.Logger.LogDebug("SPA hosting enabled: scheme={Scheme}, devServer={DevServer}",
-            options.Scheme, options.DevServerUrl ?? "(embedded)");
+        _context.Logger.LogSpaHostingEnabled(options.Scheme, options.DevServerUrl ?? "(embedded)");
     }
 
     public void Dispose()

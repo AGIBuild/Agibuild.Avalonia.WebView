@@ -106,19 +106,14 @@ internal sealed class WebViewCoreOperationQueue
         {
             var result = await InvokeAsyncOnUiThread(func).ConfigureAwait(false);
             var endTs = DateTimeOffset.UtcNow;
-            _logger.LogDebug(
-                "Operation success: id={OperationId}, type={OperationType}, enqueueTs={EnqueueTs}, startTs={StartTs}, endTs={EndTs}, threadId={ThreadId}",
-                operationId, operationType, enqueueTs, startTs, endTs, startThread);
+            _logger.LogOperationSuccess(operationId, operationType, enqueueTs, startTs, endTs, startThread);
             tcs.TrySetResult(result);
         }
         catch (Exception ex)
         {
             var classified = ClassifyFailure(ex, operationType, WebViewOperationFailureCategory.AdapterFailed);
             var endTs = DateTimeOffset.UtcNow;
-            _logger.LogDebug(
-                classified,
-                "Operation failed: id={OperationId}, type={OperationType}, enqueueTs={EnqueueTs}, startTs={StartTs}, endTs={EndTs}, threadId={ThreadId}",
-                operationId, operationType, enqueueTs, startTs, endTs, startThread);
+            _logger.LogOperationFailed(classified, operationId, operationType, enqueueTs, startTs, endTs, startThread);
             tcs.TrySetException(classified);
         }
     }

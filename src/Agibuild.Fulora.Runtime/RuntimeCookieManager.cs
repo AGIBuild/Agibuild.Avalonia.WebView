@@ -21,7 +21,7 @@ internal sealed class RuntimeCookieManager : ICookieManager
     {
         ArgumentNullException.ThrowIfNull(uri);
         _context.ThrowIfDisposed();
-        _context.Logger.LogDebug("CookieManager.GetCookiesAsync: {Uri}", uri);
+        _context.Logger.LogGetCookies(uri);
         return _context.Operations.EnqueueAsync("Cookie.GetCookiesAsync", () => _cookieAdapter.GetCookiesAsync(uri));
     }
 
@@ -29,7 +29,7 @@ internal sealed class RuntimeCookieManager : ICookieManager
     {
         ArgumentNullException.ThrowIfNull(cookie);
         _context.ThrowIfDisposed();
-        _context.Logger.LogDebug("CookieManager.SetCookieAsync: {Name}@{Domain}", cookie.Name, cookie.Domain);
+        _context.Logger.LogSetCookie(cookie.Name, cookie.Domain);
         return _context.Operations.EnqueueAsync("Cookie.SetCookieAsync", () => _cookieAdapter.SetCookieAsync(cookie));
     }
 
@@ -37,14 +37,14 @@ internal sealed class RuntimeCookieManager : ICookieManager
     {
         ArgumentNullException.ThrowIfNull(cookie);
         _context.ThrowIfDisposed();
-        _context.Logger.LogDebug("CookieManager.DeleteCookieAsync: {Name}@{Domain}", cookie.Name, cookie.Domain);
+        _context.Logger.LogDeleteCookie(cookie.Name, cookie.Domain);
         return _context.Operations.EnqueueAsync("Cookie.DeleteCookieAsync", () => _cookieAdapter.DeleteCookieAsync(cookie));
     }
 
     public Task ClearAllCookiesAsync()
     {
         _context.ThrowIfDisposed();
-        _context.Logger.LogDebug("CookieManager.ClearAllCookiesAsync");
+        _context.Logger.LogClearAllCookies();
         return _context.Operations.EnqueueAsync("Cookie.ClearAllCookiesAsync", () => _cookieAdapter.ClearAllCookiesAsync());
     }
 }

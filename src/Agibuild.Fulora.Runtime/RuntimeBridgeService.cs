@@ -138,7 +138,7 @@ internal sealed class RuntimeBridgeService : IBridgeService, IDisposable
             DisposeImplementation(service);
 
             _tracer.OnServiceRemoved(service.ServiceName);
-            _logger.LogDebug("Bridge: removed {Service}", service.ServiceName);
+            _logger.LogBridgeServiceRemoved(service.ServiceName);
         }
     }
 
@@ -152,7 +152,7 @@ internal sealed class RuntimeBridgeService : IBridgeService, IDisposable
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Bridge: failed to async-dispose implementation for {Service}", service.ServiceName);
+                _logger.LogAsyncDisposeFailed(ex, service.ServiceName);
             }
         }
         else if (service.Implementation is IDisposable disposable)
@@ -163,7 +163,7 @@ internal sealed class RuntimeBridgeService : IBridgeService, IDisposable
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Bridge: failed to dispose implementation for {Service}", service.ServiceName);
+                _logger.LogDisposeFailed(ex, service.ServiceName);
             }
         }
     }
@@ -176,7 +176,7 @@ internal sealed class RuntimeBridgeService : IBridgeService, IDisposable
         }
         catch (Exception ex)
         {
-            _logger.LogDebug(ex, "Bridge: failed to clean up JS stub for {Service}", serviceName);
+            _logger.LogJsStubCleanupFailed(ex, serviceName);
         }
     }
 
@@ -197,7 +197,7 @@ internal sealed class RuntimeBridgeService : IBridgeService, IDisposable
         _exportedServices.Clear();
         _importProxies.Clear();
 
-        _logger.LogDebug("Bridge: disposed");
+        _logger.LogBridgeDisposed();
     }
 
     // ==================== Private helpers ====================
@@ -308,7 +308,7 @@ internal sealed class RuntimeBridgeService : IBridgeService, IDisposable
         {
             var svc = kvp.Value;
             _ = _invokeScript(svc.JsStub);
-            _logger.LogDebug("Bridge: re-injected JS stub for {Service}", svc.ServiceName);
+            _logger.LogJsStubReInjected(svc.ServiceName);
         }
     }
 

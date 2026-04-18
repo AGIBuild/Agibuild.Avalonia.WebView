@@ -34,7 +34,7 @@ internal sealed class WebViewCoreBridgeRuntime : IDisposable
         {
             if (_bridgeService is not null)
             {
-                _context.Logger.LogWarning("BridgeTracer set after Bridge was already created — change ignored.");
+                _context.Logger.LogBridgeTracerSetTooLate();
                 return;
             }
 
@@ -68,7 +68,7 @@ internal sealed class WebViewCoreBridgeRuntime : IDisposable
                 enableDevTools: _enableDevToolsByDefault,
                 tracer: _bridgeTracer);
 
-            _context.Logger.LogDebug("Bridge: auto-created RuntimeBridgeService");
+            _context.Logger.LogBridgeAutoCreated();
             return _bridgeService;
         }
     }
@@ -89,8 +89,7 @@ internal sealed class WebViewCoreBridgeRuntime : IDisposable
             InvokeScriptAsync(WebViewRpcService.JsStub),
             $"{nameof(EnableWebMessageBridge)}.{nameof(WebViewRpcService.JsStub)}");
 
-        _context.Logger.LogDebug(
-            "WebMessageBridge enabled: originCount={Count}, protocol={Protocol}",
+        _context.Logger.LogWebMessageBridgeEnabled(
             options.AllowedOrigins?.Count ?? 0,
             options.ProtocolVersion);
     }
@@ -106,7 +105,7 @@ internal sealed class WebViewCoreBridgeRuntime : IDisposable
         _fuloraDiagnosticsSink = null;
         _rpcService = null;
 
-        _context.Logger.LogDebug("WebMessageBridge disabled");
+        _context.Logger.LogWebMessageBridgeDisabled();
     }
 
     public void ReinjectBridgeStubsIfEnabled()
@@ -119,7 +118,7 @@ internal sealed class WebViewCoreBridgeRuntime : IDisposable
         _context.ObserveBackgroundTask(InvokeScriptAsync(WebViewRpcService.JsStub), "ReinjectBridgeStubs.RpcStub");
         _bridgeService?.ReinjectServiceStubs();
 
-        _context.Logger.LogDebug("Bridge: re-injected JS stubs after navigation");
+        _context.Logger.LogBridgeReInjected();
     }
 
     /// <summary>
@@ -131,7 +130,7 @@ internal sealed class WebViewCoreBridgeRuntime : IDisposable
     public void HandleAdapterWebMessageReceived(WebMessageReceivedEventArgs args)
     {
         ArgumentNullException.ThrowIfNull(args);
-        _context.Logger.LogDebug("Event WebMessageReceived: origin={Origin}, channelId={ChannelId}", args.Origin, args.ChannelId);
+        _context.Logger.LogEventWebMessageReceived(args.Origin, args.ChannelId);
 
         UiThreadHelper.SafeDispatch(
             _context.Dispatcher,
@@ -151,14 +150,14 @@ internal sealed class WebViewCoreBridgeRuntime : IDisposable
 
         if (!_webMessageBridgeEnabled)
         {
-            _context.Logger.LogDebug("WebMessageReceived: bridge not enabled, dropping");
+            _context.Logger.LogWebMessageDroppedBridgeDisabled();
             return;
         }
 
         var policy = _webMessagePolicy;
         if (policy is null)
         {
-            _context.Logger.LogDebug("WebMessageReceived: no policy, dropping");
+            _context.Logger.LogWebMessageDroppedNoPolicy();
             return;
         }
 
@@ -173,17 +172,17 @@ internal sealed class WebViewCoreBridgeRuntime : IDisposable
         {
             if (_rpcService is not null && _rpcService.TryProcessMessage(args.Body))
             {
-                _context.Logger.LogDebug("WebMessageReceived: handled as RPC message");
+                _context.Logger.LogWebMessageHandledAsRpc();
                 return;
             }
 
-            _context.Logger.LogDebug("WebMessageReceived: policy allowed, forwarding");
+            _context.Logger.LogWebMessagePolicyAllowed();
             _context.Events.RaiseWebMessageReceived(args);
             return;
         }
 
         var reason = decision.DropReason ?? WebMessageDropReason.OriginNotAllowed;
-        _context.Logger.LogDebug("WebMessageReceived: policy denied, reason={Reason}", reason);
+        _context.Logger.LogWebMessagePolicyDenied(reason);
         _webMessageDropDiagnosticsSink?.OnMessageDropped(new WebMessageDropDiagnostic(reason, args.Origin, args.ChannelId));
         _fuloraDiagnosticsSink?.OnEvent(new FuloraDiagnosticsEvent
         {

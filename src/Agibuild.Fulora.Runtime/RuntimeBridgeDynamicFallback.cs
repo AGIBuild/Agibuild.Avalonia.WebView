@@ -81,8 +81,7 @@ internal sealed class RuntimeBridgeDynamicFallback
             _ = _invokeScript(jsStub);
 
             _tracer.OnServiceExposed(serviceName, registeredMethods.Count, isSourceGenerated: false);
-            _logger.LogDebug("Bridge: exposed {Service} with {Count} methods (reflection)",
-                serviceName, registeredMethods.Count);
+            _logger.LogServiceExposedReflection(serviceName, registeredMethods.Count);
 
             exposedService = new ExposedService(serviceName, registeredMethods, jsStub, Implementation: implementation);
             return true;
@@ -119,7 +118,7 @@ internal sealed class RuntimeBridgeDynamicFallback
         var bridgeProxy = (BridgeImportProxy)(object)proxy;
         bridgeProxy.Initialize(rpcForProxy, serviceName);
 
-        _logger.LogDebug("Bridge: created import proxy for {Service}", serviceName);
+        _logger.LogImportProxyCreated(serviceName);
         return true;
     }
 

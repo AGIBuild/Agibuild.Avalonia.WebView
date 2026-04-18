@@ -28,8 +28,7 @@ public sealed class LoggingBridgeTracer : IBridgeTracer
             methodName: methodName,
             status: "started",
             attributes: CreatePayloadAttributes(paramsJson)));
-        _logger.LogTrace("Bridge → {Service}.{Method} params={Params}",
-            serviceName, methodName, Truncate(paramsJson));
+        _logger.LogExportStart(serviceName, methodName, Truncate(paramsJson));
     }
 
     /// <inheritdoc />
@@ -43,8 +42,7 @@ public sealed class LoggingBridgeTracer : IBridgeTracer
             status: "success",
             durationMs: elapsedMs,
             attributes: CreateResultAttributes(resultType)));
-        _logger.LogTrace("Bridge ← {Service}.{Method} {Elapsed}ms result={ResultType}",
-            serviceName, methodName, elapsedMs, resultType ?? "void");
+        _logger.LogExportEnd(serviceName, methodName, elapsedMs, resultType ?? "void");
     }
 
     /// <inheritdoc />
@@ -62,8 +60,7 @@ public sealed class LoggingBridgeTracer : IBridgeTracer
             {
                 ["message"] = exception.Message
             }));
-        _logger.LogWarning(exception, "Bridge ✗ {Service}.{Method} {Elapsed}ms",
-            serviceName, methodName, elapsedMs);
+        _logger.LogExportError(exception, serviceName, methodName, elapsedMs);
     }
 
     /// <inheritdoc />
@@ -76,8 +73,7 @@ public sealed class LoggingBridgeTracer : IBridgeTracer
             methodName: methodName,
             status: "started",
             attributes: CreatePayloadAttributes(paramsJson)));
-        _logger.LogTrace("Bridge ⇒ JS {Service}.{Method} params={Params}",
-            serviceName, methodName, Truncate(paramsJson));
+        _logger.LogImportStart(serviceName, methodName, Truncate(paramsJson));
     }
 
     /// <inheritdoc />
@@ -90,8 +86,7 @@ public sealed class LoggingBridgeTracer : IBridgeTracer
             methodName: methodName,
             status: "success",
             durationMs: elapsedMs));
-        _logger.LogTrace("Bridge ⇐ JS {Service}.{Method} {Elapsed}ms",
-            serviceName, methodName, elapsedMs);
+        _logger.LogImportEnd(serviceName, methodName, elapsedMs);
     }
 
     /// <inheritdoc />
@@ -108,8 +103,7 @@ public sealed class LoggingBridgeTracer : IBridgeTracer
                 ["methodCount"] = methodCount.ToString(System.Globalization.CultureInfo.InvariantCulture),
                 ["registrationMode"] = isSourceGenerated ? "source-generated" : "reflection"
             }));
-        _logger.LogInformation("Bridge: exposed {Service} ({Count} methods, {Mode})",
-            serviceName, methodCount, isSourceGenerated ? "source-generated" : "reflection");
+        _logger.LogServiceExposed(serviceName, methodCount, isSourceGenerated ? "source-generated" : "reflection");
     }
 
     /// <inheritdoc />
@@ -121,7 +115,7 @@ public sealed class LoggingBridgeTracer : IBridgeTracer
             serviceName: serviceName,
             methodName: null,
             status: "removed"));
-        _logger.LogInformation("Bridge: removed {Service}", serviceName);
+        _logger.LogServiceRemoved(serviceName);
     }
 
     private static string? Truncate(string? s, int maxLen = 200)

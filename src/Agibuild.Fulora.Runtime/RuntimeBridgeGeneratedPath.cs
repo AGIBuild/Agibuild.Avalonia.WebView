@@ -54,8 +54,7 @@ internal sealed class RuntimeBridgeGeneratedPath
         _ = _invokeScript(jsStub);
 
         _tracer.OnServiceExposed(generated.ServiceName, generated.MethodNames.Count, isSourceGenerated: true);
-        _logger.LogDebug("Bridge: exposed {Service} with {Count} methods (source-generated)",
-            generated.ServiceName, generated.MethodNames.Count);
+        _logger.LogServiceExposedGenerated(generated.ServiceName, generated.MethodNames.Count);
 
         exposedService = new ExposedService(
             generated.ServiceName,

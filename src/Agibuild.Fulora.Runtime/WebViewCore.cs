@@ -91,11 +91,10 @@ internal sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvent
 
         ChannelId = Guid.NewGuid();
 
-        _logger.LogDebug("WebViewCore created: channelId={ChannelId}, adapter={AdapterType}",
-            ChannelId, adapter.GetType().FullName);
+        _logger.LogCreated(ChannelId, adapter.GetType().FullName);
 
         _adapter.Initialize(this);
-        _logger.LogDebug("Adapter initialized");
+        _logger.LogAdapterInitialized();
 
         // Mandatory capabilities (cookies, commands, zoom, preload, etc.) are inherited by
         // IWebViewAdapter itself — no negotiation needed. Only the two truly-optional facets
@@ -145,14 +144,14 @@ internal sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvent
     internal void Attach(INativeHandle parentHandle)
     {
         _context.Lifecycle.TransitionToAttaching();
-        _logger.LogDebug("Attach: parentHandle.HandleDescriptor={Descriptor}", parentHandle.HandleDescriptor);
+        _logger.LogAttachBegin(parentHandle.HandleDescriptor);
         _adapter.Attach(parentHandle);
         _context.Lifecycle.TransitionToReady();
-        _logger.LogDebug("Attach: completed");
+        _logger.LogAttachCompleted();
 
         // Raise AdapterCreated after successful attach, before any pending navigation.
         var handle = TryGetWebViewHandle();
-        _logger.LogDebug("AdapterCreated: raising with handle={HasHandle}", handle is not null);
+        _logger.LogAdapterCreatedRaising(handle is not null);
         _events.RaiseAdapterCreated(new AdapterCreatedEventArgs(handle));
     }
 
@@ -160,10 +159,10 @@ internal sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvent
     internal void Detach()
     {
         _context.Lifecycle.TransitionToDetaching();
-        _logger.LogDebug("Detach: begin");
+        _logger.LogDetachBegin();
         RaiseAdapterDestroyedOnce();
         _adapter.Detach();
-        _logger.LogDebug("Detach: completed");
+        _logger.LogDetachCompleted();
     }
 
     /// <inheritdoc />
@@ -176,7 +175,7 @@ internal sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvent
             _context.ThrowIfDisposed();
             _context.ThrowIfNotOnUiThread(nameof(Source));
 
-            _logger.LogDebug("Source set: {Uri}", value);
+            _logger.LogSourceSet(value);
 
             // The navigation runtime owns the observable source state. Source-set semantics keep
             // the sync public surface while starting a background navigation; the navigation task
@@ -337,7 +336,7 @@ internal sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvent
             return;
         }
 
-        _logger.LogDebug("Dispose: begin");
+        _logger.LogDisposeBegin();
         RaiseAdapterDestroyedOnce();
         _context.Lifecycle.TryTransitionToDisposed();
 
@@ -362,14 +361,14 @@ internal sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvent
         // NavigationRuntime's active-op is already faulted above); their own types document why
         // Dispose() is absent. Do not add "defensive" disposal here — it would invert ownership.
 
-        _logger.LogDebug("Dispose: completed");
+        _logger.LogDisposeCompleted();
     }
 
     /// <inheritdoc />
     public Task NavigateAsync(Uri uri)
     {
         ArgumentNullException.ThrowIfNull(uri);
-        _logger.LogDebug("NavigateAsync: {Uri}", uri);
+        _logger.LogNavigateAsync(uri);
 
         return _operationQueue.EnqueueAsync(nameof(NavigateAsync), () => _navigationRuntime.StartNavigationRequestCoreAsync(
             requestUri: uri,
@@ -385,7 +384,7 @@ internal sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvent
     {
         ArgumentNullException.ThrowIfNull(html);
         var requestUri = baseUrl ?? AboutBlank;
-        _logger.LogDebug("NavigateToStringAsync: html length={Length}, baseUrl={BaseUrl}", html.Length, baseUrl);
+        _logger.LogNavigateToString(html.Length, baseUrl);
 
         return _operationQueue.EnqueueAsync(nameof(NavigateToStringAsync), () => _navigationRuntime.StartNavigationRequestCoreAsync(
             requestUri: requestUri,
@@ -396,7 +395,7 @@ internal sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvent
     public Task<string?> InvokeScriptAsync(string script)
     {
         ArgumentNullException.ThrowIfNull(script);
-        _logger.LogDebug("InvokeScriptAsync: script length={Length}", script.Length);
+        _logger.LogInvokeScript(script.Length);
 
         if (_context.IsDisposed)
         {
@@ -412,12 +411,12 @@ internal sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvent
             try
             {
                 var result = await _adapter.InvokeScriptAsync(s).ConfigureAwait(false);
-                _logger.LogDebug("InvokeScriptAsync: result length={Length}", result?.Length ?? 0);
+                _logger.LogInvokeScriptResult(result?.Length ?? 0);
                 return result;
             }
             catch (Exception ex)
             {
-                _logger.LogDebug(ex, "InvokeScriptAsync: failed");
+                _logger.LogInvokeScriptFailed(ex);
                 throw new WebViewScriptException("Script execution failed.", ex);
             }
         }
@@ -434,26 +433,26 @@ internal sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvent
 
         if (!_adapter.CanGoBack)
         {
-            _logger.LogDebug("GoBack: no history, skipped");
+            _logger.LogGoBackNoHistory();
             return false;
         }
 
         var navigationId = _navigationRuntime.StartCommandNavigation(requestUri: Source);
         if (navigationId == Guid.Empty)
         {
-            _logger.LogDebug("GoBack: canceled by NavigationStarted handler");
+            _logger.LogGoBackCanceled();
             return false;
         }
 
         var accepted = _adapter.GoBack(navigationId);
         if (!accepted)
         {
-            _logger.LogDebug("GoBack: adapter rejected, id={NavigationId}", navigationId);
+            _logger.LogGoBackRejected(navigationId);
             _navigationRuntime.CompleteActiveNavigation(NavigationCompletedStatus.Canceled, error: null);
             return false;
         }
 
-        _logger.LogDebug("GoBack: started, id={NavigationId}", navigationId);
+        _logger.LogGoBackStarted(navigationId);
         return true;
     }
 
@@ -468,26 +467,26 @@ internal sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvent
 
         if (!_adapter.CanGoForward)
         {
-            _logger.LogDebug("GoForward: no forward history, skipped");
+            _logger.LogGoForwardNoHistory();
             return false;
         }
 
         var navigationId = _navigationRuntime.StartCommandNavigation(requestUri: Source);
         if (navigationId == Guid.Empty)
         {
-            _logger.LogDebug("GoForward: canceled by NavigationStarted handler");
+            _logger.LogGoForwardCanceled();
             return false;
         }
 
         var accepted = _adapter.GoForward(navigationId);
         if (!accepted)
         {
-            _logger.LogDebug("GoForward: adapter rejected, id={NavigationId}", navigationId);
+            _logger.LogGoForwardRejected(navigationId);
             _navigationRuntime.CompleteActiveNavigation(NavigationCompletedStatus.Canceled, error: null);
             return false;
         }
 
-        _logger.LogDebug("GoForward: started, id={NavigationId}", navigationId);
+        _logger.LogGoForwardStarted(navigationId);
         return true;
     }
 
@@ -503,19 +502,19 @@ internal sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvent
         var navigationId = _navigationRuntime.StartCommandNavigation(requestUri: Source);
         if (navigationId == Guid.Empty)
         {
-            _logger.LogDebug("Refresh: canceled by NavigationStarted handler");
+            _logger.LogRefreshCanceled();
             return false;
         }
 
         var accepted = _adapter.Refresh(navigationId);
         if (!accepted)
         {
-            _logger.LogDebug("Refresh: adapter rejected, id={NavigationId}", navigationId);
+            _logger.LogRefreshRejected(navigationId);
             _navigationRuntime.CompleteActiveNavigation(NavigationCompletedStatus.Canceled, error: null);
             return false;
         }
 
-        _logger.LogDebug("Refresh: started, id={NavigationId}", navigationId);
+        _logger.LogRefreshStarted(navigationId);
         return true;
     }
 
@@ -530,7 +529,7 @@ internal sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvent
 
         if (!_navigationRuntime.IsLoading)
         {
-            _logger.LogDebug("Stop: no active navigation");
+            _logger.LogStopNoActive();
             return false;
         }
 
@@ -675,7 +674,7 @@ internal sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvent
     private void RaiseAdapterDestroyedOnce()
         => _context.Lifecycle.MarkAdapterDestroyedOnce(() =>
         {
-            _logger.LogDebug("AdapterDestroyed: raising");
+            _logger.LogAdapterDestroyedRaising();
             _events.RaiseAdapterDestroyed();
         });
 }
