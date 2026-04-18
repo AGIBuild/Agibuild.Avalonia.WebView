@@ -3,7 +3,7 @@
   "hotspots": [
     {
       "id": "invoke-ui-disposed-generic",
-      "runtimeMethod": "WebViewCore.InvokeAsyncOnUiThread(Func<Task<T>>)",
+      "runtimeMethod": "WebViewCoreOperationQueue.InvokeAsyncOnUiThread(Func<Task<T>>)",
       "branchIntent": "Generic dispatcher path enforces disposed guard deterministically.",
       "owner": "webview-runtime",
       "lane": "ContractAutomation",

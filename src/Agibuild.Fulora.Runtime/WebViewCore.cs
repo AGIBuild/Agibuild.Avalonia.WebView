@@ -14,7 +14,7 @@ namespace Agibuild.Fulora;
 /// without breaking downstream callers.
 /// </para>
 /// </summary>
-internal sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvents, IWebViewAdapterHost, IWebViewCoreFeatureHost, IWebViewCoreBridgeHost, IWebViewCoreAdapterEventHost, IWebViewCoreNavigationHost, IWebViewCoreSpaHostingHost, IWebViewCoreOperationHost, IDisposable
+internal sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvents, IWebViewAdapterHost, IWebViewCoreFeatureHost, IWebViewCoreBridgeHost, IWebViewCoreAdapterEventHost, IWebViewCoreNavigationHost, IWebViewCoreSpaHostingHost, IWebViewCoreOperationHost, IWebViewCoreOperationQueueHost, IDisposable
 {
     private static readonly Uri AboutBlank = new("about:blank");
 
@@ -24,9 +24,7 @@ internal sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvent
     private readonly ILogger<WebViewCore> _logger;
     private readonly IWebViewEnvironmentOptions _environmentOptions;
     private readonly WebViewCoreCapabilityDetectionRuntime _capabilityDetectionRuntime;
-    private readonly object _operationQueueLock = new();
-    private Task _operationQueueTail = Task.CompletedTask;
-    private long _operationSequence;
+    private readonly WebViewCoreOperationQueue _operationQueue;
 
     /// <summary>
     /// Internal default-adapter factory entry used by <see cref="WebViewFactory.CreateDefault(IWebViewDispatcher, ILoggerFactory?)"/>
@@ -128,6 +126,8 @@ internal sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvent
 
         _adapter.Initialize(this);
         _logger.LogDebug("Adapter initialized");
+
+        _operationQueue = new WebViewCoreOperationQueue(this, _dispatcher, _logger);
 
         // One-shot capability negotiation: probe every optional adapter interface exactly once
         // here, then pass the resulting value object to every runtime that needs feature gating.
@@ -606,142 +606,17 @@ internal sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvent
         => _spaHostingRuntime.EnableSpaHosting(options);
 
     private Task<object?> EnqueueOperationAsync(string operationType, Func<Task> func)
-        => EnqueueOperationAsync<object?>(operationType, async () =>
-        {
-            await func().ConfigureAwait(false);
-            return null;
-        });
+        => _operationQueue.EnqueueAsync(operationType, func);
 
     private Task<T> EnqueueOperationAsync<T>(string operationType, Func<Task<T>> func)
-    {
-        if (_disposed)
-        {
-            return Task.FromException<T>(ClassifyFailure(
-                new ObjectDisposedException(nameof(WebViewCore)),
-                operationType,
-                defaultCategory: WebViewOperationFailureCategory.Disposed));
-        }
+        => _operationQueue.EnqueueAsync(operationType, func);
 
-        if (!IsOperationAcceptedInCurrentState())
-        {
-            return Task.FromException<T>(ClassifyFailure(
-                new InvalidOperationException($"Operation '{operationType}' is not allowed in state '{_lifecycleState}'."),
-                operationType,
-                defaultCategory: WebViewOperationFailureCategory.NotReady));
-        }
-
-        var operationId = Interlocked.Increment(ref _operationSequence);
-        var enqueueTs = DateTimeOffset.UtcNow;
-        var tcs = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
-
-        lock (_operationQueueLock)
-        {
-            _operationQueueTail = _operationQueueTail.ContinueWith(
-                _ => RunQueuedOperationAsync(operationId, operationType, enqueueTs, func, tcs),
-                CancellationToken.None,
-                TaskContinuationOptions.ExecuteSynchronously,
-                TaskScheduler.Default).Unwrap();
-        }
-
-        return tcs.Task;
-    }
-
-    private bool IsOperationAcceptedInCurrentState()
+    bool IWebViewCoreOperationQueueHost.IsOperationAcceptedInCurrentState()
         => _lifecycleState is WebViewLifecycleState.Created
             or WebViewLifecycleState.Attaching
             or WebViewLifecycleState.Ready;
 
-    private async Task RunQueuedOperationAsync<T>(
-        long operationId,
-        string operationType,
-        DateTimeOffset enqueueTs,
-        Func<Task<T>> func,
-        TaskCompletionSource<T> tcs)
-    {
-        var startTs = DateTimeOffset.UtcNow;
-        var startThread = Environment.CurrentManagedThreadId;
-        try
-        {
-            var result = await InvokeAsyncOnUiThread(func).ConfigureAwait(false);
-            var endTs = DateTimeOffset.UtcNow;
-            _logger.LogDebug(
-                "Operation success: id={OperationId}, type={OperationType}, enqueueTs={EnqueueTs}, startTs={StartTs}, endTs={EndTs}, threadId={ThreadId}, lifecycleState={LifecycleState}",
-                operationId, operationType, enqueueTs, startTs, endTs, startThread, _lifecycleState);
-            tcs.TrySetResult(result);
-        }
-        catch (Exception ex)
-        {
-            var classified = ClassifyFailure(ex, operationType, WebViewOperationFailureCategory.AdapterFailed);
-            var endTs = DateTimeOffset.UtcNow;
-            _logger.LogDebug(
-                classified,
-                "Operation failed: id={OperationId}, type={OperationType}, enqueueTs={EnqueueTs}, startTs={StartTs}, endTs={EndTs}, threadId={ThreadId}, lifecycleState={LifecycleState}",
-                operationId, operationType, enqueueTs, startTs, endTs, startThread, _lifecycleState);
-            tcs.TrySetException(classified);
-        }
-    }
-
-    private Task<T> InvokeAsyncOnUiThread<T>(Func<Task<T>> func)
-    {
-        if (_disposed)
-        {
-            return Task.FromException<T>(ClassifyFailure(
-                new ObjectDisposedException(nameof(WebViewCore)),
-                operationType: "Dispatch",
-                defaultCategory: WebViewOperationFailureCategory.Disposed));
-        }
-
-        if (_dispatcher.CheckAccess())
-        {
-            return func();
-        }
-
-        return InvokeWithDispatchFailureMappingAsync(func);
-    }
-
-    // Non-async by design: try/return + catch/return makes both code paths return a Task<T>,
-    // which eliminates the CS0165 fragility of the previous `async` version (where the compiler
-    // could not prove that `dispatchedTask` was assigned before `await` unless the catch block
-    // always threw). A future edit that accidentally removes the throw (e.g. replaces with log +
-    // return) now fails to compile instead of leaking an unassigned local.
-    private Task<T> InvokeWithDispatchFailureMappingAsync<T>(Func<Task<T>> func)
-    {
-        try
-        {
-            return _dispatcher.InvokeAsync(func);
-        }
-        catch (Exception ex)
-        {
-            return Task.FromException<T>(ClassifyFailure(
-                ex,
-                operationType: "Dispatch",
-                defaultCategory: WebViewOperationFailureCategory.DispatchFailed));
-        }
-    }
-
-    private static Exception ClassifyFailure(
-        Exception exception,
-        string operationType,
-        WebViewOperationFailureCategory defaultCategory)
-    {
-        if (WebViewOperationFailure.TryGetCategory(exception, out _))
-        {
-            return exception;
-        }
-
-        var category = exception switch
-        {
-            ObjectDisposedException => WebViewOperationFailureCategory.Disposed,
-            InvalidOperationException invalidOp when
-                invalidOp.Message.Contains("not allowed in state", StringComparison.OrdinalIgnoreCase)
-                => WebViewOperationFailureCategory.NotReady,
-            _ => defaultCategory
-        };
-
-        WebViewOperationFailure.SetCategory(exception, category);
-        exception.Data["operationType"] = operationType;
-        return exception;
-    }
+    string IWebViewCoreOperationQueueHost.LifecycleStateName => _lifecycleState.ToString();
 
     private void RaiseAdapterDestroyedOnce()
     {

@@ -15,13 +15,16 @@ public sealed class WebViewCoreHotspotCoverageTests
         using var core = new WebViewCore(adapter, _dispatcher);
         core.Dispose();
 
-        var genericMethod = typeof(WebViewCore)
+        // After P2-β the queue owns the dispatcher hop; reach into the core's operation queue
+        // instead of WebViewCore so the hotspot keeps asserting the same disposed-guard branch.
+        var queue = GetPrivateField<WebViewCoreOperationQueue>(core, "_operationQueue");
+        var genericMethod = typeof(WebViewCoreOperationQueue)
             .GetMethods(BindingFlags.Instance | BindingFlags.NonPublic)
             .Single(m => m.Name == "InvokeAsyncOnUiThread"
                          && m.IsGenericMethodDefinition
                          && m.GetParameters().Length == 1);
         var closedMethod = genericMethod.MakeGenericMethod(typeof(int));
-        var task = Assert.IsType<Task<int>>(closedMethod.Invoke(core, [(Func<Task<int>>)(() => Task.FromResult(7))]));
+        var task = Assert.IsType<Task<int>>(closedMethod.Invoke(queue, [(Func<Task<int>>)(() => Task.FromResult(7))]));
 
         var ex = await Assert.ThrowsAsync<ObjectDisposedException>(async () => await task);
         Assert.True(WebViewOperationFailure.TryGetCategory(ex, out var category));
