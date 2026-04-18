@@ -5,7 +5,7 @@ namespace Agibuild.Fulora;
 /// <summary>
 /// Logger-backed diagnostics sink for unified event envelopes.
 /// </summary>
-public sealed class LoggingFuloraDiagnosticsSink : IFuloraDiagnosticsSink
+public sealed partial class LoggingFuloraDiagnosticsSink : IFuloraDiagnosticsSink
 {
     private readonly ILogger _logger;
 
@@ -20,25 +20,39 @@ public sealed class LoggingFuloraDiagnosticsSink : IFuloraDiagnosticsSink
     {
         ArgumentNullException.ThrowIfNull(diagnosticEvent);
 
-        var level = string.Equals(diagnosticEvent.Status, "error", StringComparison.OrdinalIgnoreCase)
+        var isWarningStatus =
+            string.Equals(diagnosticEvent.Status, "error", StringComparison.OrdinalIgnoreCase)
             || string.Equals(diagnosticEvent.Status, "failed", StringComparison.OrdinalIgnoreCase)
             || string.Equals(diagnosticEvent.Status, "denied", StringComparison.OrdinalIgnoreCase)
-            || string.Equals(diagnosticEvent.Status, "dropped", StringComparison.OrdinalIgnoreCase)
-            ? LogLevel.Warning
-            : LogLevel.Information;
+            || string.Equals(diagnosticEvent.Status, "dropped", StringComparison.OrdinalIgnoreCase);
 
-        _logger.Log(
-            level,
-            "Fulora diagnostics {EventName} layer={Layer} component={Component} capabilityId={CapabilityId} operation={Operation} service={Service} method={Method} status={Status} durationMs={DurationMs} errorType={ErrorType}",
-            diagnosticEvent.EventName,
-            diagnosticEvent.Layer,
-            diagnosticEvent.Component,
-            diagnosticEvent.CapabilityId,
-            diagnosticEvent.Operation,
-            diagnosticEvent.Service,
-            diagnosticEvent.Method,
-            diagnosticEvent.Status,
-            diagnosticEvent.DurationMs,
-            diagnosticEvent.ErrorType);
+        if (isWarningStatus)
+        {
+            LogDiagnosticsWarning(
+                diagnosticEvent.EventName,
+                diagnosticEvent.Layer,
+                diagnosticEvent.Component,
+                diagnosticEvent.CapabilityId,
+                diagnosticEvent.Operation,
+                diagnosticEvent.Service,
+                diagnosticEvent.Method,
+                diagnosticEvent.Status,
+                diagnosticEvent.DurationMs,
+                diagnosticEvent.ErrorType);
+        }
+        else
+        {
+            LogDiagnosticsInformation(
+                diagnosticEvent.EventName,
+                diagnosticEvent.Layer,
+                diagnosticEvent.Component,
+                diagnosticEvent.CapabilityId,
+                diagnosticEvent.Operation,
+                diagnosticEvent.Service,
+                diagnosticEvent.Method,
+                diagnosticEvent.Status,
+                diagnosticEvent.DurationMs,
+                diagnosticEvent.ErrorType);
+        }
     }
 }
