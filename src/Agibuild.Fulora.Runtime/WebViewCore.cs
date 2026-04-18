@@ -140,13 +140,14 @@ public sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvents,
         _eventWiringRuntime = new WebViewCoreEventWiringRuntime(
             _adapter,
             _logger,
-            OnAdapterNavigationCompleted,
-            OnAdapterNewWindowRequested,
-            OnAdapterWebMessageReceived,
-            OnAdapterWebResourceRequested,
-            OnAdapterEnvironmentRequested,
-            OnAdapterDownloadRequested,
-            OnAdapterPermissionRequested);
+            new WebViewAdapterEventRouter(
+                OnNavigationCompleted: _navigationRuntime.HandleAdapterNavigationCompleted,
+                OnNewWindowRequested: _adapterEventRuntime.HandleAdapterNewWindowRequested,
+                OnWebMessageReceived: _bridgeRuntime.HandleAdapterWebMessageReceived,
+                OnWebResourceRequested: _adapterEventRuntime.HandleAdapterWebResourceRequested,
+                OnEnvironmentRequested: _adapterEventRuntime.HandleAdapterEnvironmentRequested,
+                OnDownloadRequested: _adapterEventRuntime.HandleAdapterDownloadRequested,
+                OnPermissionRequested: _adapterEventRuntime.HandleAdapterPermissionRequested));
     }
 
     /// <inheritdoc />
@@ -732,27 +733,6 @@ public sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvents,
         exception.Data["operationType"] = operationType;
         return exception;
     }
-
-    private void OnAdapterNavigationCompleted(object? sender, NavigationCompletedEventArgs e)
-        => _navigationRuntime.HandleAdapterNavigationCompleted(e);
-
-    private void OnAdapterNewWindowRequested(object? sender, NewWindowRequestedEventArgs e)
-        => _adapterEventRuntime.HandleAdapterNewWindowRequested(e);
-
-    private void OnAdapterWebMessageReceived(object? sender, WebMessageReceivedEventArgs e)
-        => _bridgeRuntime.HandleAdapterWebMessageReceived(e);
-
-    private void OnAdapterWebResourceRequested(object? sender, WebResourceRequestedEventArgs e)
-        => _adapterEventRuntime.HandleAdapterWebResourceRequested(e);
-
-    private void OnAdapterEnvironmentRequested(object? sender, EnvironmentRequestedEventArgs e)
-        => _adapterEventRuntime.HandleAdapterEnvironmentRequested(e);
-
-    private void OnAdapterDownloadRequested(object? sender, DownloadRequestedEventArgs e)
-        => _adapterEventRuntime.HandleAdapterDownloadRequested(e);
-
-    private void OnAdapterPermissionRequested(object? sender, PermissionRequestedEventArgs e)
-        => _adapterEventRuntime.HandleAdapterPermissionRequested(e);
 
     private void RaiseAdapterDestroyedOnce()
     {

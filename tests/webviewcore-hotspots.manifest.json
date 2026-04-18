@@ -21,7 +21,7 @@
     },
     {
       "id": "adapter-destroyed-navigation-completed-short-circuit",
-      "runtimeMethod": "WebViewCore.OnAdapterNavigationCompleted",
+      "runtimeMethod": "WebViewCoreNavigationRuntime.HandleAdapterNavigationCompleted",
       "branchIntent": "Event short-circuits when adapter is marked destroyed.",
       "owner": "webview-runtime",
       "lane": "ContractAutomation",
@@ -30,7 +30,7 @@
     },
     {
       "id": "adapter-destroyed-new-window-short-circuit",
-      "runtimeMethod": "WebViewCore.OnAdapterNewWindowRequested",
+      "runtimeMethod": "WebViewCoreAdapterEventRuntime.HandleAdapterNewWindowRequested",
       "branchIntent": "NewWindowRequested short-circuits when adapter is marked destroyed.",
       "owner": "webview-runtime",
       "lane": "ContractAutomation",
@@ -39,7 +39,7 @@
     },
     {
       "id": "adapter-destroyed-webmessage-short-circuit",
-      "runtimeMethod": "WebViewCore.OnAdapterWebMessageReceived",
+      "runtimeMethod": "WebViewCoreBridgeRuntime.HandleAdapterWebMessageReceived",
       "branchIntent": "WebMessage short-circuits when adapter is marked destroyed.",
       "owner": "webview-runtime",
       "lane": "ContractAutomation",
@@ -48,7 +48,7 @@
     },
     {
       "id": "adapter-destroyed-resource-short-circuit",
-      "runtimeMethod": "WebViewCore.OnAdapterWebResourceRequested",
+      "runtimeMethod": "WebViewCoreAdapterEventRuntime.HandleAdapterWebResourceRequested",
       "branchIntent": "WebResourceRequested short-circuits when adapter is marked destroyed.",
       "owner": "webview-runtime",
       "lane": "ContractAutomation",
@@ -57,7 +57,7 @@
     },
     {
       "id": "adapter-destroyed-environment-short-circuit",
-      "runtimeMethod": "WebViewCore.OnAdapterEnvironmentRequested",
+      "runtimeMethod": "WebViewCoreAdapterEventRuntime.HandleAdapterEnvironmentRequested",
       "branchIntent": "EnvironmentRequested short-circuits when adapter is marked destroyed.",
       "owner": "webview-runtime",
       "lane": "ContractAutomation",
@@ -66,7 +66,7 @@
     },
     {
       "id": "webmessage-policy-null-drop-path",
-      "runtimeMethod": "WebViewCore.OnAdapterWebMessageReceivedOnUiThread",
+      "runtimeMethod": "WebViewCoreBridgeRuntime.HandleAdapterWebMessageReceivedOnUiThread",
       "branchIntent": "Message is dropped when bridge policy is null.",
       "owner": "webview-runtime",
       "lane": "ContractAutomation",
