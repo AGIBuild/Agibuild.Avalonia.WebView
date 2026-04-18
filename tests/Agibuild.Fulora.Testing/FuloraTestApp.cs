@@ -67,9 +67,11 @@ public sealed class FuloraTestApp : IAsyncDisposable
     public TestDispatcher Dispatcher => _dispatcher;
 
     /// <summary>
-    /// The underlying WebViewCore (for advanced scenarios).
+    /// The underlying WebViewCore (for advanced scenarios). Exposed as <see langword="internal"/>
+    /// because <c>WebViewCore</c> is an internal runtime type; downstream test assemblies see it
+    /// via <c>InternalsVisibleTo</c>.
     /// </summary>
-    public WebViewCore? Core => _core;
+    internal WebViewCore? Core => _core;
 
     /// <summary>
     /// The underlying mock adapter (for simulating native events).

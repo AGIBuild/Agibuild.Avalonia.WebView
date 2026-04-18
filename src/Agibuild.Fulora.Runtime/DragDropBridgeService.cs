@@ -2,8 +2,13 @@ namespace Agibuild.Fulora;
 
 /// <summary>
 /// Bridge service implementation that exposes drag-and-drop events to JavaScript.
+/// <para>
+/// Consumers interact with this service via the <see cref="IDragDropBridgeService"/> contract;
+/// the concrete type is <see langword="internal"/> because it intentionally couples to the
+/// internal <c>WebViewCore</c> drop event surface.
+/// </para>
 /// </summary>
-public sealed class DragDropBridgeService : IDragDropBridgeService
+internal sealed class DragDropBridgeService : IDragDropBridgeService
 {
     private DragDropPayload? _lastPayload;
     private readonly bool _isSupported;
@@ -11,7 +16,7 @@ public sealed class DragDropBridgeService : IDragDropBridgeService
     /// <summary>
     /// Creates a new <see cref="DragDropBridgeService"/> that subscribes to the given core's drop events.
     /// </summary>
-    public DragDropBridgeService(WebViewCore core)
+    internal DragDropBridgeService(WebViewCore core)
     {
         ArgumentNullException.ThrowIfNull(core);
         _isSupported = core.HasDragDropSupport;

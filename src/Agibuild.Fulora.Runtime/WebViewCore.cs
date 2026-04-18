@@ -5,9 +5,16 @@ using Microsoft.Extensions.Logging.Abstractions;
 namespace Agibuild.Fulora;
 
 /// <summary>
-/// Core runtime implementation of <see cref="IWebView"/> over a platform adapter.
+/// Internal runtime implementation of <see cref="IWebView"/> over a platform adapter.
+/// <para>
+/// Consumers must construct instances via <see cref="WebViewFactory"/> (non-DI scenarios) or the
+/// DI-registered <c>Func&lt;IWebViewDispatcher, IWebView&gt;</c> delegate and interact only with
+/// <see cref="IWebView"/> and its capability interfaces. This class is intentionally
+/// <see langword="internal"/> to keep the public surface minimal and let the coordinator evolve
+/// without breaking downstream callers.
+/// </para>
 /// </summary>
-public sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvents, IWebViewAdapterHost, IWebViewCoreFeatureHost, IWebViewCoreBridgeHost, IWebViewCoreAdapterEventHost, IWebViewCoreNavigationHost, IWebViewCoreSpaHostingHost, IWebViewCoreOperationHost, IDisposable
+internal sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvents, IWebViewAdapterHost, IWebViewCoreFeatureHost, IWebViewCoreBridgeHost, IWebViewCoreAdapterEventHost, IWebViewCoreNavigationHost, IWebViewCoreSpaHostingHost, IWebViewCoreOperationHost, IDisposable
 {
     private static readonly Uri AboutBlank = new("about:blank");
 
@@ -21,16 +28,12 @@ public sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvents,
     private long _operationSequence;
 
     /// <summary>
-    /// Creates a new <see cref="IWebView"/> using the default platform adapter for the current OS.
-    /// This is the recommended entry-point; callers never need to reference the internal adapter types.
+    /// Internal default-adapter factory entry used by <see cref="WebViewFactory.CreateDefault(IWebViewDispatcher, ILoggerFactory?)"/>
+    /// and the DI registrations in <c>AddFulora</c>. Consumers should go through those
+    /// entry points rather than referencing this type directly.
     /// </summary>
     [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-    public static IWebView CreateDefault(IWebViewDispatcher dispatcher)
-        => CreateDefault(dispatcher, NullLogger<WebViewCore>.Instance);
-
-    /// <inheritdoc />
-    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-    public static IWebView CreateDefault(IWebViewDispatcher dispatcher, ILogger<WebViewCore> logger)
+    internal static IWebView CreateDefault(IWebViewDispatcher dispatcher, ILogger<WebViewCore> logger)
     {
         ArgumentNullException.ThrowIfNull(dispatcher);
         ArgumentNullException.ThrowIfNull(logger);

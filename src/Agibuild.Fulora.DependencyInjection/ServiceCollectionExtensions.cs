@@ -1,6 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Agibuild.Fulora.DependencyInjection;
 
@@ -41,10 +40,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<Func<IWebViewDispatcher, IWebView>>(sp =>
         {
             var loggerFactory = sp.GetService<ILoggerFactory>();
-            var logger = loggerFactory?.CreateLogger<WebViewCore>()
-                         ?? (ILogger<WebViewCore>)NullLogger<WebViewCore>.Instance;
-
-            return dispatcher => WebViewCore.CreateDefault(dispatcher, logger);
+            return dispatcher => WebViewFactory.CreateDefault(dispatcher, loggerFactory);
         });
 
         return services;

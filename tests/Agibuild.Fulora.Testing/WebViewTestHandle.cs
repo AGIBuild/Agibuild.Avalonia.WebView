@@ -6,6 +6,11 @@ namespace Agibuild.Fulora.Testing;
 /// <summary>
 /// Test handle for interacting with a WebView in hybrid E2E tests.
 /// Provides JS execution, DOM waiting, and bridge call observation.
+/// <para>
+/// The handle keeps a <see langword="public"/> surface so that downstream test assemblies can
+/// store references to it, but it is constructed with the internal <c>WebViewCore</c>; call
+/// the constructor from test assemblies that have <c>InternalsVisibleTo</c> access.
+/// </para>
 /// </summary>
 public sealed class WebViewTestHandle
 {
@@ -17,7 +22,7 @@ public sealed class WebViewTestHandle
     /// <summary>
     /// Creates a new handle for the given core and tracer.
     /// </summary>
-    public WebViewTestHandle(WebViewCore core, BridgeTestTracer tracer)
+    internal WebViewTestHandle(WebViewCore core, BridgeTestTracer tracer)
     {
         _core = core ?? throw new ArgumentNullException(nameof(core));
         _tracer = tracer ?? throw new ArgumentNullException(nameof(tracer));

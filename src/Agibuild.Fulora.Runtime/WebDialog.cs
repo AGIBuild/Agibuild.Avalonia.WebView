@@ -6,9 +6,14 @@ namespace Agibuild.Fulora;
 
 /// <summary>
 /// Runtime implementation of <see cref="IWebDialog"/>.
-/// Wraps a <see cref="WebViewCore"/> and delegates window management to a <see cref="IDialogHost"/>.
+/// Wraps an internal <c>WebViewCore</c> and delegates window management to an <see cref="IDialogHost"/>.
+/// <para>
+/// Consumers must construct instances via <see cref="IWebDialogFactory"/> and interact only
+/// with the <see cref="IWebDialog"/> contract; this type is intentionally
+/// <see langword="internal"/> so the composition can evolve without breaking downstream callers.
+/// </para>
 /// </summary>
-public sealed class WebDialog : IWebDialog, ISpaHostingWebView
+internal sealed class WebDialog : IWebDialog, ISpaHostingWebView
 {
     private readonly IDialogHost _host;
     private readonly WebViewCore _core;
@@ -130,17 +135,17 @@ public sealed class WebDialog : IWebDialog, ISpaHostingWebView
     /// <inheritdoc />
     public Task SetZoomFactorAsync(double zoomFactor) => _core.SetZoomFactorAsync(zoomFactor);
 
-    /// <inheritdoc cref="WebViewCore.FindInPageAsync"/>
+    /// <inheritdoc cref="IWebViewFeatures.FindInPageAsync"/>
     public Task<FindInPageEventArgs> FindInPageAsync(string text, FindInPageOptions? options = null) => _core.FindInPageAsync(text, options);
-    /// <inheritdoc cref="WebViewCore.StopFindInPageAsync"/>
+    /// <inheritdoc cref="IWebViewFeatures.StopFindInPageAsync"/>
     public Task StopFindInPageAsync(bool clearHighlights = true) => _core.StopFindInPageAsync(clearHighlights);
 
-    /// <inheritdoc cref="WebViewCore.AddPreloadScriptAsync"/>
+    /// <inheritdoc cref="IWebViewScript.AddPreloadScriptAsync"/>
     public Task<string> AddPreloadScriptAsync(string javaScript) => _core.AddPreloadScriptAsync(javaScript);
-    /// <inheritdoc cref="WebViewCore.RemovePreloadScriptAsync"/>
+    /// <inheritdoc cref="IWebViewScript.RemovePreloadScriptAsync"/>
     public Task RemovePreloadScriptAsync(string scriptId) => _core.RemovePreloadScriptAsync(scriptId);
 
-    /// <inheritdoc cref="WebViewCore.ContextMenuRequested"/>
+    /// <inheritdoc cref="IWebViewFeatures.ContextMenuRequested"/>
     public event EventHandler<ContextMenuRequestedEventArgs>? ContextMenuRequested
     {
         add => _core.ContextMenuRequested += value;
