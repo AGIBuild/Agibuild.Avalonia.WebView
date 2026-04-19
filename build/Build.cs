@@ -218,9 +218,13 @@ internal sealed partial class BuildTask : NukeBuild
             ArtifactsDirectory.CreateOrCleanDirectory();
         });
 
+    // Restore is intentionally NOT dependent on Clean. `dotnet restore` is incremental, CI runners
+    // start from a clean checkout, and chaining Clean here causes any subsequent Nuke invocation in
+    // the same job (e.g. Format → CiMatrix → ValidateLinuxNativeAotNugetPackagePublish on Linux CI)
+    // to wipe `artifacts/test-results/` before the workflow can upload it. Clean is a lifecycle
+    // target — invoke it explicitly when a full rebuild is wanted.
     internal Target Restore => _ => _
         .Description("Restores NuGet packages for buildable projects (avoids failing on missing workloads).")
-        .DependsOn(Clean)
         .Executes(async () =>
         {
             // Mirror the Build target's android-slice gating so restore on hosts without the

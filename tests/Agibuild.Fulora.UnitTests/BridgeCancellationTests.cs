@@ -168,10 +168,13 @@ public sealed class BridgeCancellationTests
             """{"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":"cancel-1"}}""",
             "*", core.ChannelId);
 
+        // Use the pump's default (60s) — this test asserts that cancellation is propagated, not how
+        // fast it propagates. On stressed CI runners (macOS with parallel xunit collections), the
+        // Task.Delay → cts.Cancel → continuation → dispatch round-trip can occasionally exceed an
+        // arbitrarily-tight bound even though the contract holds and locally it completes in ms.
         DispatcherTestPump.WaitUntil(
             _dispatcher,
-            () => capturedScripts.Any(s => s.Contains("_onResponse") && s.Contains("-32800")),
-            timeout: TimeSpan.FromSeconds(5));
+            () => capturedScripts.Any(s => s.Contains("_onResponse") && s.Contains("-32800")));
 
         var lastResponse = capturedScripts.LastOrDefault(s => s.Contains("_onResponse"));
         Assert.NotNull(lastResponse);
