@@ -189,11 +189,21 @@ public sealed partial class CoverageGapTests
 
     // ========================= Branch coverage — RPC uncovered branches =========================
 
-    private static void WaitUntil(Func<bool> condition, int timeoutMilliseconds = 3000)
+    private static void WaitUntil(Func<bool> condition, int timeoutMilliseconds = 30000)
     {
-        Assert.True(
-            SpinWait.SpinUntil(condition, TimeSpan.FromMilliseconds(timeoutMilliseconds)),
-            "Timed out while waiting for asynchronous RPC processing.");
+        // SpinWait.SpinUntil pegs a CPU core under heavy parallel test load, which on stressed
+        // CI runners caused multi-second waits to time out. Use cooperative polling with a
+        // generous default timeout so liveness depends on real progress, not CPU availability.
+        var deadline = Environment.TickCount64 + timeoutMilliseconds;
+        while (!condition())
+        {
+            if (Environment.TickCount64 > deadline)
+            {
+                Assert.Fail("Timed out while waiting for asynchronous RPC processing.");
+            }
+
+            Thread.Sleep(10);
+        }
     }
 
     private static string ExtractRpcId(string script)

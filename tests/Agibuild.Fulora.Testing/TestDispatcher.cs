@@ -7,6 +7,11 @@ public sealed class TestDispatcher : IWebViewDispatcher
     private readonly int _uiThreadId;
     private readonly ConcurrentQueue<WorkItemBase> _queue = new();
 
+    // Signalled whenever a work item is enqueued OR a continuation may have completed a task
+    // the pump is waiting on. Replaces the prior Thread.Sleep(1) busy-polling, which on stressed
+    // CI runners caused massive context-switch contention and made multi-second tests time out.
+    private readonly ManualResetEventSlim _workSignal = new(initialState: false);
+
     public TestDispatcher()
     {
         _uiThreadId = Environment.CurrentManagedThreadId;
@@ -31,7 +36,7 @@ public sealed class TestDispatcher : IWebViewDispatcher
             action();
             return Task.CompletedTask;
         });
-        _queue.Enqueue(item);
+        EnqueueAndSignal(item);
         return item.Task;
     }
 
@@ -45,7 +50,7 @@ public sealed class TestDispatcher : IWebViewDispatcher
         }
 
         var item = new WorkItemT<T>(() => Task.FromResult(func()));
-        _queue.Enqueue(item);
+        EnqueueAndSignal(item);
         return item.TaskTyped;
     }
 
@@ -59,7 +64,7 @@ public sealed class TestDispatcher : IWebViewDispatcher
         }
 
         var item = new WorkItemVoid(func);
-        _queue.Enqueue(item);
+        EnqueueAndSignal(item);
         return item.Task;
     }
 
@@ -73,7 +78,7 @@ public sealed class TestDispatcher : IWebViewDispatcher
         }
 
         var item = new WorkItemT<T>(func);
-        _queue.Enqueue(item);
+        EnqueueAndSignal(item);
         return item.TaskTyped;
     }
 
@@ -84,13 +89,39 @@ public sealed class TestDispatcher : IWebViewDispatcher
     {
         EnsureUiThread();
 
+        // Drain any pending signal because we are about to consume the queue. New enqueues
+        // arriving after the drain will set it again, which is exactly what the pump needs.
+        _workSignal.Reset();
+
         while (_queue.TryDequeue(out var item))
         {
             item.Execute();
         }
     }
 
+    /// <summary>
+    /// Blocks the calling (UI) thread until either work arrives in the queue or the timeout
+    /// elapses. Returns true if signalled (caller should call <see cref="RunAll"/>) or false
+    /// on timeout. The pump uses this in place of busy-polling.
+    /// </summary>
+    public bool WaitForWork(TimeSpan timeout)
+    {
+        return _workSignal.Wait(timeout);
+    }
+
+    /// <summary>
+    /// Manually signals the pump — used by external callers (e.g. waiters that observed a
+    /// task completing on a worker thread) to nudge the pump out of <see cref="WaitForWork"/>.
+    /// </summary>
+    public void Signal() => _workSignal.Set();
+
     public int QueuedCount => _queue.Count;
+
+    private void EnqueueAndSignal(WorkItemBase item)
+    {
+        _queue.Enqueue(item);
+        _workSignal.Set();
+    }
 
     private void EnsureUiThread()
     {

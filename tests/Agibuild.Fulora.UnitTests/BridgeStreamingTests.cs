@@ -344,7 +344,13 @@ public sealed class BridgeStreamingTests
         adapter.RaiseWebMessage(
             """{"jsonrpc":"2.0","id":"v-1","method":"StreamingService.streamMessages","params":{"topic":"hello"}}""",
             "*", core.ChannelId);
-        DrainDispatcher(2000);
+        DrainDispatcherUntil(() =>
+        {
+            lock (capturedScripts)
+            {
+                return capturedScripts.Any(s => s.Contains("token") && s.Contains("_onResponse"));
+            }
+        });
 
         string? tokenResponse;
         lock (capturedScripts) tokenResponse = capturedScripts.FirstOrDefault(s => s.Contains("token") && s.Contains("_onResponse"));
@@ -355,7 +361,13 @@ public sealed class BridgeStreamingTests
         adapter.RaiseWebMessage(
             $$$"""{"jsonrpc":"2.0","id":"v-next-1","method":"$/enumerator/next/{{{token}}}","params":{}}""",
             "*", core.ChannelId);
-        DrainDispatcher(2000);
+        DrainDispatcherUntil(() =>
+        {
+            lock (capturedScripts)
+            {
+                return capturedScripts.Any(s => s.Contains("_onResponse") && s.Contains("v-next-1"));
+            }
+        });
 
         string? nextResp;
         string allResp;
@@ -370,11 +382,32 @@ public sealed class BridgeStreamingTests
 
     private void DrainDispatcher(int totalMs)
     {
+        // Pump dispatcher work for the full window using event-driven waits instead of
+        // Thread.Sleep(20). The previous busy-loop variant burned CPU while parallel tests
+        // were also pumping their own dispatchers, which on stressed CI caused enough
+        // context-switch contention to deadline async continuations. WaitForWork sleeps
+        // until the dispatcher actually has something to do (or the slice elapses, so the
+        // outer deadline is still honoured).
         var deadline = Environment.TickCount64 + totalMs;
         while (Environment.TickCount64 < deadline)
         {
             _dispatcher.RunAll();
-            Thread.Sleep(20);
+            _dispatcher.WaitForWork(TimeSpan.FromMilliseconds(20));
+        }
+        _dispatcher.RunAll();
+    }
+
+    private void DrainDispatcherUntil(Func<bool> condition, int totalMs = 10000)
+    {
+        var deadline = Environment.TickCount64 + totalMs;
+        while (!condition() && Environment.TickCount64 < deadline)
+        {
+            _dispatcher.RunAll();
+            if (condition())
+            {
+                break;
+            }
+            _dispatcher.WaitForWork(TimeSpan.FromMilliseconds(50));
         }
         _dispatcher.RunAll();
     }
