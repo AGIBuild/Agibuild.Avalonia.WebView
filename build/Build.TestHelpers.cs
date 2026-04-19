@@ -184,6 +184,44 @@ internal partial class BuildTask
         }
     }
 
+    /// <summary>
+    /// Records a lane result by reading a TRX file produced by an earlier target (e.g. Coverage)
+    /// instead of re-executing the same test project. This avoids running an identical 2k-test
+    /// suite twice in CI, which on slower runners (macOS) made the AutomationLaneReport target
+    /// blow past its own dotnet-test timeout even though the underlying lane already passed in
+    /// Coverage. The lane status reflects whatever the upstream TRX recorded.
+    /// </summary>
+    private static void RecordLaneFromTrx(
+        string lane,
+        AbsolutePath project,
+        AbsolutePath trxFile,
+        IList<AutomationLaneResult> lanes,
+        IList<string> failures)
+    {
+        if (!File.Exists(trxFile))
+        {
+            const string Message = "Upstream TRX not found; lane status cannot be derived.";
+            lanes.Add(new AutomationLaneResult(lane, "failed", project.ToString(), Message));
+            failures.Add($"{lane}: {Message} ({trxFile})");
+            return;
+        }
+
+        var counters = ReadTrxCounters(trxFile);
+        var summary =
+            $"derived from {trxFile.Name}: total={counters.Total}, passed={counters.Passed}, " +
+            $"failed={counters.Failed}, skipped={counters.Skipped}";
+
+        if (counters.Failed > 0 || counters.Total == 0)
+        {
+            lanes.Add(new AutomationLaneResult(lane, "failed", project.ToString(), summary));
+            failures.Add($"{lane}: {summary}");
+        }
+        else
+        {
+            lanes.Add(new AutomationLaneResult(lane, "passed", project.ToString(), summary));
+        }
+    }
+
     private static (int Total, int Passed, int Failed, int Skipped) ReadTrxCounters(AbsolutePath trxPath)
     {
         var doc = XDocument.Load(trxPath);

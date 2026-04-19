@@ -61,7 +61,7 @@ public sealed class BridgeCancellationIntegrationTests
 
         DispatcherTestPump.WaitUntil(_dispatcher,
             () => capturedScripts.Any(s => s.Contains("_onResponse") && s.Contains("-32800")),
-            timeout: TimeSpan.FromSeconds(30));
+            timeout: TimeSpan.FromSeconds(5));
 
         Assert.Contains(capturedScripts, s => s.Contains("-32800"));
         core.Dispose();

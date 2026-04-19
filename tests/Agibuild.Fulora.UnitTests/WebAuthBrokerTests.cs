@@ -38,7 +38,7 @@ public sealed class WebAuthBrokerTests
             };
         };
 
-        var result = DispatcherTestPump.Run(_dispatcher, () => broker.AuthenticateAsync(owner, options), TimeSpan.FromSeconds(30));
+        var result = DispatcherTestPump.Run(_dispatcher, () => broker.AuthenticateAsync(owner, options), TimeSpan.FromSeconds(20));
 
         Assert.Equal(WebAuthStatus.Success, result.Status);
         Assert.NotNull(result.CallbackUri);
@@ -60,7 +60,7 @@ public sealed class WebAuthBrokerTests
         // Keep adapter behavior safe if navigation falls through unexpectedly.
         factory.OnDialogCreated = (_, adapter) => adapter.AutoCompleteNavigation = true;
 
-        var result = DispatcherTestPump.Run(_dispatcher, () => broker.AuthenticateAsync(owner, options), TimeSpan.FromSeconds(30));
+        var result = DispatcherTestPump.Run(_dispatcher, () => broker.AuthenticateAsync(owner, options), TimeSpan.FromSeconds(10));
 
         Assert.Equal(WebAuthStatus.Success, result.Status);
         Assert.NotNull(result.CallbackUri);
@@ -89,7 +89,7 @@ public sealed class WebAuthBrokerTests
             };
         };
 
-        var result = DispatcherTestPump.Run(_dispatcher, () => broker.AuthenticateAsync(owner, options), TimeSpan.FromSeconds(30));
+        var result = DispatcherTestPump.Run(_dispatcher, () => broker.AuthenticateAsync(owner, options), TimeSpan.FromSeconds(10));
 
         Assert.Equal(WebAuthStatus.UserCancel, result.Status);
     }
@@ -113,7 +113,7 @@ public sealed class WebAuthBrokerTests
             adapter.AutoCompleteNavigation = true;
         };
 
-        var result = DispatcherTestPump.Run(_dispatcher, () => broker.AuthenticateAsync(owner, options), TimeSpan.FromSeconds(30));
+        var result = DispatcherTestPump.Run(_dispatcher, () => broker.AuthenticateAsync(owner, options), TimeSpan.FromSeconds(10));
 
         Assert.Equal(WebAuthStatus.Timeout, result.Status);
         Assert.NotNull(result.Error);

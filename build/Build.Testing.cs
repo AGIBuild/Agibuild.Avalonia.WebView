@@ -88,8 +88,18 @@ internal partial class BuildTask
         {
             CoverageDirectory.CreateOrCleanDirectory();
             CoverageReportDirectory.CreateOrCleanDirectory();
+            TestResultsDirectory.CreateDirectory();
 
             await RunCoverageUnitTestsAsync(CoverageDirectory, "unit-tests.trx");
+
+            // Mirror coverage TRX files into the canonical test-results directory so downstream
+            // GitHub Actions reporters (dorny/test-reporter, upload-artifact) and the per-OS
+            // workflow steps all see results in the same location regardless of host. Previously
+            // only macOS had an OS-specific copy step; Linux silently produced zero TRX matches.
+            foreach (var trx in CoverageDirectory.GlobFiles("**/*.trx"))
+            {
+                File.Copy(trx, TestResultsDirectory / trx.Name, overwrite: true);
+            }
 
             var coverageFiles = CoverageDirectory.GlobFiles("**/coverage.cobertura.xml");
             if (coverageFiles.Count == 0)
@@ -213,17 +223,29 @@ internal partial class BuildTask
 
     internal Target AutomationLaneReport => _ => _
         .Description("Runs automation lanes and writes pass/fail/skip report.")
-        .DependsOn(Build)
-        .After(Coverage)
+        .DependsOn(Build, Coverage)
         .Executes(async () =>
         {
             var lanes = new List<AutomationLaneResult>();
             var failures = new List<string>();
 
-            await RunLaneWithReportingAsync(
+            // ContractAutomation == the unit-test suite that Coverage already ran. Re-running the
+            // same ~2k tests a second time turned every macOS CI run into an 8-minute timeout
+            // marathon (4-min default × 2 attempts) without adding any signal: if Coverage passed,
+            // contract automation passed by definition. Derive the lane status from Coverage's TRX
+            // so the report stays accurate while CI does the work exactly once.
+            var coverageTrx = CoverageDirectory.GlobFiles("**/unit-tests.trx").FirstOrDefault();
+            if (coverageTrx is null)
+            {
+                Assert.Fail(
+                    $"ContractAutomation lane requires Coverage to have produced unit-tests.trx in " +
+                    $"{CoverageDirectory}. Ensure the Coverage target ran successfully before this target.");
+            }
+
+            RecordLaneFromTrx(
                 lane: ContractAutomationLane,
                 project: UnitTestsProject,
-                run: () => RunContractAutomationTests("contract-automation.trx"),
+                trxFile: coverageTrx!,
                 lanes,
                 failures);
 

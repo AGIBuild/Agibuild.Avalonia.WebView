@@ -76,7 +76,7 @@ public sealed class BridgeBinaryPayloadIntegrationTests
 
         DispatcherTestPump.WaitUntil(_dispatcher,
             () => capturedScripts.Any(s => s.Contains("_onResponse") && s.Contains("bin-1")),
-            timeout: TimeSpan.FromSeconds(30));
+            timeout: TimeSpan.FromSeconds(5));
 
         var response = capturedScripts.First(s => s.Contains("bin-1"));
         Assert.Contains(testData, response);
@@ -99,7 +99,7 @@ public sealed class BridgeBinaryPayloadIntegrationTests
 
         DispatcherTestPump.WaitUntil(_dispatcher,
             () => capturedScripts.Any(s => s.Contains("_onResponse") && s.Contains("bin-gen-1")),
-            timeout: TimeSpan.FromSeconds(30));
+            timeout: TimeSpan.FromSeconds(5));
 
         var response = capturedScripts.First(s => s.Contains("bin-gen-1"));
         var expected = Convert.ToBase64String(new byte[] { 0, 1, 2, 3 });
