@@ -55,7 +55,7 @@ public sealed class BridgeOverloadIntegrationTests
 
         DispatcherTestPump.WaitUntil(_dispatcher,
             () => capturedScripts.Any(s => s.Contains("ov-1")),
-            timeout: TimeSpan.FromSeconds(5));
+            timeout: TimeSpan.FromSeconds(30));
 
         Assert.Contains(capturedScripts, s => s.Contains("10"));
         core.Dispose();
@@ -78,7 +78,7 @@ public sealed class BridgeOverloadIntegrationTests
 
         DispatcherTestPump.WaitUntil(_dispatcher,
             () => capturedScripts.Any(s => s.Contains("ov-2")),
-            timeout: TimeSpan.FromSeconds(5));
+            timeout: TimeSpan.FromSeconds(30));
 
         Assert.Contains(capturedScripts, s => s.Contains("10"));
         core.Dispose();

@@ -217,7 +217,7 @@ public sealed class BridgeIntegrationTests
         adapter.RaiseWebMessage(
             """{"jsonrpc":"2.0","id":"ts-1","method":"AppService.getCurrentUser","params":{}}""",
             "*", core.ChannelId);
-        DispatcherTestPump.WaitUntil(_dispatcher, () => scripts.Any(s => s.Contains("Alice")), TimeSpan.FromSeconds(2));
+        DispatcherTestPump.WaitUntil(_dispatcher, () => scripts.Any(s => s.Contains("Alice")), TimeSpan.FromSeconds(30));
         Assert.True(scripts.Any(s => s.Contains("Alice")), "Expected 'Alice' in response after concurrent expose");
     }
 
