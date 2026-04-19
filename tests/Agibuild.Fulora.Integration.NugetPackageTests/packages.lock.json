@@ -271,9 +271,9 @@
       },
       "Microsoft.Web.WebView2": {
         "type": "CentralTransitive",
-        "requested": "[1.0.3856.49, )",
-        "resolved": "1.0.3856.49",
-        "contentHash": "OOBKvFgK0pUKcndvTK6/jUsbrPRwce62Wt/0hkJWDsK2AcsJ2ylOS/mLa4xAcNUTOs96YIjpPN4AHMADXJcrgQ=="
+        "requested": "[1.0.3912.50, )",
+        "resolved": "1.0.3912.50",
+        "contentHash": "mEIKZDSmb6CxGWKoxaxTSJ0yi0DD2zp29TA7kJY2GdanuH3c5aYruwfqsm3OsYn/h2hUhybQZvfbxyZe4O+X4Q=="
       },
       "SharpHook": {
         "type": "CentralTransitive",
