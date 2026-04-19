@@ -235,12 +235,31 @@ internal sealed partial class BuildTask : NukeBuild
         .DependsOn(Restore)
         .Executes(async () =>
         {
+            // Multi-TFM Platforms.csproj exposes net10.0 + net10.0-android. When the Android workload
+            // is missing, force-build only the net10.0 slice so the missing workload doesn't fail the build.
+            var skipAndroidSlice = !await HasDotNetWorkloadAsync("android") || !HasAndroidSdkInstalled();
+
             foreach (var project in await GetProjectsToBuildAsync())
             {
-                DotNetBuild(s => s
-                    .SetProjectFile(project)
-                    .SetConfiguration(Configuration)
-                    .EnableNoRestore());
+                var isPlatforms = string.Equals(
+                    Path.GetFileName(project),
+                    "Agibuild.Fulora.Platforms.csproj",
+                    StringComparison.OrdinalIgnoreCase);
+
+                DotNetBuild(s =>
+                {
+                    var settings = s
+                        .SetProjectFile(project)
+                        .SetConfiguration(Configuration)
+                        .EnableNoRestore();
+
+                    if (isPlatforms && skipAndroidSlice)
+                    {
+                        settings = settings.SetProperty("TargetFrameworks", "net10.0");
+                    }
+
+                    return settings;
+                });
             }
         });
 

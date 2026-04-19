@@ -26,11 +26,12 @@ internal static class WebViewAdapterFactory
 
     private static readonly string[] CandidateAssemblyNames =
     [
-        // Unified desktop platforms assembly (Windows/WebView2, macOS/WKWebView, Linux/WebKitGTK).
+        // Unified platforms assembly (multi-TFM): hosts Windows/WebView2, macOS/WKWebView,
+        // Linux/WebKitGTK adapters under net10.0 and the Android/WebView adapter under net10.0-android.
+        // .NET runtime resolves the right TFM slice from lib/{tfm}/ by RID.
         "Agibuild.Fulora.Platforms",
-        // Mobile adapters remain as separate TFM-specific assemblies.
-        "Agibuild.Fulora.Adapters.iOS",
-        "Agibuild.Fulora.Adapters.Android"
+        // iOS adapter remains a separate TFM-specific assembly (depends on .NET for iOS workload).
+        "Agibuild.Fulora.Adapters.iOS"
     ];
 
     private static void EnsurePlatformAdaptersLoaded()

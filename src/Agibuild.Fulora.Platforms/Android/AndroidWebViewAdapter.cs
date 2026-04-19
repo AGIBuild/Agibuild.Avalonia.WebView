@@ -11,7 +11,7 @@ using Java.Interop;
 using AWebView = Android.Webkit.WebView;
 using JavaObject = Java.Lang.Object;
 
-namespace Agibuild.Fulora.Adapters.Android;
+namespace Agibuild.Fulora.Platforms.Android;
 
 [SupportedOSPlatform("android")]
 internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHandleProvider, ICookieAdapter, IWebViewAdapterOptions,

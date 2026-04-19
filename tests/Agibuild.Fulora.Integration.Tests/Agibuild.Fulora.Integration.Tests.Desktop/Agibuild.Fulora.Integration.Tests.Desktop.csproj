@@ -26,50 +26,32 @@
   </ItemGroup>
 
   <!-- Unified desktop platforms assembly. The same DLL is needed on Windows/macOS/Linux smoke hosts
-       so its ModuleInitializer registers the active-OS provider at runtime. -->
-  <!-- Windows: use project reference so NuGet deps (WebView2) are in deps.json. -->
-  <ItemGroup Condition="$([MSBuild]::IsOSPlatform('windows'))">
+       so its ModuleInitializer registers the active-OS provider at runtime.
+       ProjectReference on the multi-TFM Platforms project auto-selects the net10.0 desktop slice
+       and triggers the native shim build via BuildWkShim/BuildGtkShim targets. -->
+  <ItemGroup>
     <ProjectReference Include="..\..\..\src\Agibuild.Fulora.Platforms\Agibuild.Fulora.Platforms.csproj" />
   </ItemGroup>
 
-  <!-- Linux: copy Platforms assembly + GTK native shim so the adapter auto-registers at runtime. -->
-  <Target Name="CopyLinuxPlatformsAdapterForSmoke"
+  <!-- Copy native shims produced by the referenced Platforms project into runtimes/{rid}/native/.
+       The build was already triggered by the ProjectReference above, so no extra Exec is required. -->
+  <Target Name="CopyDesktopNativeShimsForSmoke"
           AfterTargets="Build"
-          Condition="$([MSBuild]::IsOSPlatform('linux'))">
-    <ItemGroup>
-      <_PlatformsAdapter Include="..\..\..\src\Agibuild.Fulora.Platforms\bin\$(Configuration)\net10.0\Agibuild.Fulora.Platforms.dll" />
-      <_GtkShim Include="..\..\..\src\Agibuild.Fulora.Platforms\bin\$(Configuration)\net10.0\runtimes\linux-x64\native\libAgibuildWebViewGtk.so" />
+          Condition="!$([MSBuild]::IsOSPlatform('windows'))">
+    <ItemGroup Condition="$([MSBuild]::IsOSPlatform('linux'))">
+      <_NativeShim Include="..\..\..\src\Agibuild.Fulora.Platforms\bin\$(Configuration)\net10.0\runtimes\linux-x64\native\libAgibuildWebViewGtk.so">
+        <RidSubdir>linux-x64</RidSubdir>
+      </_NativeShim>
+    </ItemGroup>
+    <ItemGroup Condition="$([MSBuild]::IsOSPlatform('osx'))">
+      <_NativeShim Include="..\..\..\src\Agibuild.Fulora.Platforms\bin\$(Configuration)\net10.0\runtimes\osx\native\libAgibuildWebViewWk.dylib">
+        <RidSubdir>osx</RidSubdir>
+      </_NativeShim>
     </ItemGroup>
 
-    <Exec Command="dotnet build &quot;..\..\..\src\Agibuild.Fulora.Platforms\Agibuild.Fulora.Platforms.csproj&quot; -c $(Configuration)" />
-
-    <Copy SourceFiles="@(_PlatformsAdapter)"
-          DestinationFolder="$(OutDir)"
-          SkipUnchangedFiles="true" />
-
-    <MakeDir Directories="$(OutDir)runtimes/linux-x64/native/" />
-    <Copy SourceFiles="@(_GtkShim)"
-          DestinationFolder="$(OutDir)runtimes/linux-x64/native/"
-          SkipUnchangedFiles="true" />
-  </Target>
-
-  <Target Name="CopyMacOSPlatformsAdapterForSmoke"
-          AfterTargets="Build"
-          Condition="$([MSBuild]::IsOSPlatform('osx'))">
-    <ItemGroup>
-      <_PlatformsAdapter Include="..\..\..\src\Agibuild.Fulora.Platforms\bin\$(Configuration)\net10.0\Agibuild.Fulora.Platforms.dll" />
-      <_MacShim Include="..\..\..\src\Agibuild.Fulora.Platforms\bin\$(Configuration)\net10.0\runtimes\osx\native\libAgibuildWebViewWk.dylib" />
-    </ItemGroup>
-
-    <Exec Command="dotnet build &quot;..\..\..\src\Agibuild.Fulora.Platforms\Agibuild.Fulora.Platforms.csproj&quot; -c $(Configuration)" />
-
-    <Copy SourceFiles="@(_PlatformsAdapter)"
-          DestinationFolder="$(OutDir)"
-          SkipUnchangedFiles="true" />
-
-    <MakeDir Directories="$(OutDir)runtimes/osx/native/" />
-    <Copy SourceFiles="@(_MacShim)"
-          DestinationFolder="$(OutDir)runtimes/osx/native/"
+    <MakeDir Directories="$(OutDir)runtimes/%(_NativeShim.RidSubdir)/native/" />
+    <Copy SourceFiles="@(_NativeShim)"
+          DestinationFolder="$(OutDir)runtimes/%(_NativeShim.RidSubdir)/native/"
           SkipUnchangedFiles="true" />
   </Target>
 </Project>

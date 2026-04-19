@@ -50,15 +50,46 @@ dotnet format Agibuild.Fulora.NoMobile.slnf
 
 ---
 
+## Platform Adapter Layout
+
+Inspired by [`Avalonia.Controls.WebView`](https://github.com/AvaloniaUI/Avalonia.Controls.WebView),
+the platform adapters are organized so the workload boundary is explicit and
+narrowly scoped:
+
+| Project | Target frameworks | Workload required |
+|---|---|---|
+| `Agibuild.Fulora.Platforms` | `net10.0;net10.0-android` | Android workload (only for the `net10.0-android` slice) |
+| `Agibuild.Fulora.Adapters.iOS` | `net10.0-ios` | iOS workload (Xcode + macOS host) |
+
+Source layout inside `Agibuild.Fulora.Platforms`:
+
+```
+src/Agibuild.Fulora.Platforms/
+├── Desktop/    # PlatformsBootstrap (compiled for net10.0 only)
+├── Windows/    # WebView2 adapter (compiled for net10.0 only)
+├── MacOS/      # WKWebView adapter (compiled for net10.0 only)
+├── Gtk/        # WebKitGTK adapter (compiled for net10.0 only)
+└── Android/    # AndroidX WebView adapter (compiled for net10.0-android only)
+```
+
+Per-TFM source slicing is controlled by `Compile Remove` rules driven off
+`$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)'))`, mirroring the
+Avalonia convention. There are no `#if` preprocessor directives.
+
+iOS is the **only** project bound to a workload SDK — keeping it on its own
+csproj prevents the iOS workload from leaking into the rest of the build graph
+and lets every contributor without Xcode build everything else cleanly.
+
 ## Building Without Mobile SDKs
 
 The default solution `Agibuild.Fulora.slnx` includes `Agibuild.Fulora.Adapters.iOS`
-and `Agibuild.Fulora.Adapters.Android`, which require Xcode and the Android
-workload respectively. On hosts without those, opening the `.slnx` in an IDE or
-running `dotnet build Agibuild.Fulora.slnx` fails with cryptic SDK errors.
+and the `net10.0-android` slice of `Agibuild.Fulora.Platforms`, which require Xcode
+and the Android workload respectively. On hosts without those, opening the `.slnx`
+in an IDE or running `dotnet build Agibuild.Fulora.slnx` fails with cryptic SDK
+errors.
 
 Use the platform-stripped solution filter instead — same projects minus the
-four mobile-only ones:
+mobile-only ones:
 
 ```bash
 dotnet build  Agibuild.Fulora.NoMobile.slnf

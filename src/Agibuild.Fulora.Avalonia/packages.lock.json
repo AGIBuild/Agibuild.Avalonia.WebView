@@ -150,7 +150,7 @@
       "agibuild.fulora.adapters.abstractions": {
         "type": "Project",
         "dependencies": {
-          "Agibuild.Fulora.Core": "[1.5.10-local, )"
+          "Agibuild.Fulora.Core": "[1.6.0-local, )"
         }
       },
       "agibuild.fulora.core": {
@@ -159,18 +159,26 @@
       "agibuild.fulora.dependencyinjection": {
         "type": "Project",
         "dependencies": {
-          "Agibuild.Fulora.Core": "[1.5.10-local, )",
-          "Agibuild.Fulora.Runtime": "[1.5.10-local, )",
+          "Agibuild.Fulora.Core": "[1.6.0-local, )",
+          "Agibuild.Fulora.Runtime": "[1.6.0-local, )",
           "Microsoft.Extensions.DependencyInjection.Abstractions": "[11.0.0-preview.2.26159.112, )",
           "Microsoft.Extensions.Http": "[11.0.0-preview.2.26159.112, )",
           "Microsoft.Extensions.Logging.Abstractions": "[11.0.0-preview.2.26159.112, )"
         }
       },
+      "agibuild.fulora.platforms": {
+        "type": "Project",
+        "dependencies": {
+          "Agibuild.Fulora.Adapters.Abstractions": "[1.6.0-local, )",
+          "Agibuild.Fulora.Core": "[1.6.0-local, )",
+          "Microsoft.Web.WebView2": "[1.0.3856.49, )"
+        }
+      },
       "agibuild.fulora.runtime": {
         "type": "Project",
         "dependencies": {
-          "Agibuild.Fulora.Adapters.Abstractions": "[1.5.10-local, )",
-          "Agibuild.Fulora.Core": "[1.5.10-local, )",
+          "Agibuild.Fulora.Adapters.Abstractions": "[1.6.0-local, )",
+          "Agibuild.Fulora.Core": "[1.6.0-local, )",
           "Microsoft.Extensions.Logging.Abstractions": "[11.0.0-preview.2.26159.112, )"
         }
       },

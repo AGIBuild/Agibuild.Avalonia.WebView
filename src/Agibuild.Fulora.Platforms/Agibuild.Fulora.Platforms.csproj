@@ -1,6 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <!--
+      Multi-TFM: net10.0 hosts all desktop adapters (Win/macOS/Gtk).
+      net10.0-android hosts the Android adapter so the same physical project
+      delivers all platform implementations through SDK-native lib/{tfm}/ packing.
+      Mirrors Avalonia.Controls.WebView's project organization.
+    -->
+    <TargetFrameworks>net10.0;net10.0-android</TargetFrameworks>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -8,36 +14,78 @@
     <NoWarn>$(NoWarn);CA2255</NoWarn>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android' ">
+    <SupportedOSPlatformVersion>23</SupportedOSPlatformVersion>
+    <!-- CA1416: Android adapter is gated by [SupportedOSPlatform] + module initializer; analyser cannot see runtime gate. -->
+    <NoWarn>$(NoWarn);CA1416</NoWarn>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Agibuild.Fulora.Core\Agibuild.Fulora.Core.csproj" />
     <ProjectReference Include="..\Agibuild.Fulora.Adapters.Abstractions\Agibuild.Fulora.Adapters.Abstractions.csproj" />
   </ItemGroup>
 
-  <!-- Windows (WebView2) compile surface.
-       Keep package restore graph, but avoid WebView2 build-target auto-injection
-       (which would pull in WPF/WinForms references). A manual Reference/HintPath
-       below binds the compile-time API to Core only. -->
-  <ItemGroup>
+  <!-- ============================================================
+       net10.0 (desktop) only: Windows WebView2 + native shim sources
+       ============================================================ -->
+  <ItemGroup Condition=" $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == '' ">
+    <!-- Windows (WebView2) compile surface.
+         Keep package restore graph, but avoid WebView2 build-target auto-injection
+         (which would pull in WPF/WinForms references). A manual Reference/HintPath
+         below binds the compile-time API to Core only. -->
     <PackageReference Include="Microsoft.Web.WebView2" GeneratePathProperty="true" ExcludeAssets="compile;build;buildTransitive" />
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup Condition=" $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == '' ">
     <Reference Include="Microsoft.Web.WebView2.Core">
       <HintPath>$(PkgMicrosoft_Web_WebView2)\lib_manual\netcoreapp3.0\Microsoft.Web.WebView2.Core.dll</HintPath>
     </Reference>
   </ItemGroup>
 
   <!-- Native shim sources tracked (not compiled by the C# SDK). -->
-  <ItemGroup>
+  <ItemGroup Condition=" $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == '' ">
     <None Include="MacOS\Native\WkWebViewShim.mm" />
     <None Include="Gtk\Native\WebKitGtkShim.c" />
   </ItemGroup>
 
+  <!-- ============================================================
+       net10.0-android only: AndroidX runtime packages
+       ============================================================ -->
+  <ItemGroup Condition=" $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android' ">
+    <PackageReference Include="Xamarin.AndroidX.Activity" />
+    <!-- Exclude JVM variant to resolve duplicate class conflict with the Android variant -->
+    <PackageReference Include="Xamarin.AndroidX.Compose.Runtime.Annotation.Jvm" ExcludeAssets="all" PrivateAssets="all">
+      <IncludeAssets>none</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <!-- Per-TFM source slicing (mirrors Avalonia.Controls.WebView convention):
+       net10.0 (TPI = '')      compiles Windows/, MacOS/, Gtk/ subdirs; gated at runtime by [SupportedOSPlatform]
+       net10.0-android (android) compiles Android/ subdir only -->
+  <ItemGroup Condition=" $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != 'android' ">
+    <Compile Remove="Android\**" />
+    <None Remove="Android\**" />
+  </ItemGroup>
+  <ItemGroup Condition=" $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android' ">
+    <Compile Remove="Windows\**" />
+    <Compile Remove="MacOS\**" />
+    <Compile Remove="Gtk\**" />
+    <Compile Remove="Desktop\**" />
+    <None Remove="Windows\**" />
+    <None Remove="MacOS\**" />
+    <None Remove="Gtk\**" />
+    <None Remove="Desktop\**" />
+  </ItemGroup>
+
+  <!-- ============================================================
+       Native shim build targets — only run for desktop net10.0 TFM
+       ============================================================ -->
+
   <!-- macOS WKWebView native shim (Obj-C++). Produces libAgibuildWebViewWk.dylib. -->
-  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('osx'))">
+  <PropertyGroup Condition=" $([MSBuild]::IsOSPlatform('osx')) And $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == '' ">
     <AgWkShimLibName>libAgibuildWebViewWk.dylib</AgWkShimLibName>
   </PropertyGroup>
   <Target Name="BuildWkShim" BeforeTargets="Build"
-          Condition="$([MSBuild]::IsOSPlatform('osx'))">
+          Condition=" $([MSBuild]::IsOSPlatform('osx')) And $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == '' ">
     <PropertyGroup>
       <_AgWkShimOutDir>$(TargetDir)runtimes/osx/native/</_AgWkShimOutDir>
       <_AgWkShimOutPath>$(_AgWkShimOutDir)$(AgWkShimLibName)</_AgWkShimOutPath>
@@ -51,11 +99,11 @@
 
   <!-- Linux WebKitGTK native shim (C). Produces libAgibuildWebViewGtk.so.
        Requires libwebkit2gtk-4.1-dev and pkg-config on Linux build hosts. -->
-  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('linux'))">
+  <PropertyGroup Condition=" $([MSBuild]::IsOSPlatform('linux')) And $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == '' ">
     <AgGtkShimLibName>libAgibuildWebViewGtk.so</AgGtkShimLibName>
   </PropertyGroup>
   <Target Name="BuildGtkShim" BeforeTargets="Build"
-          Condition="$([MSBuild]::IsOSPlatform('linux'))">
+          Condition=" $([MSBuild]::IsOSPlatform('linux')) And $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == '' ">
     <PropertyGroup>
       <_AgGtkShimOutDir>$(TargetDir)runtimes/linux-x64/native/</_AgGtkShimOutDir>
       <_AgGtkShimOutPath>$(_AgGtkShimOutDir)$(AgGtkShimLibName)</_AgGtkShimOutPath>

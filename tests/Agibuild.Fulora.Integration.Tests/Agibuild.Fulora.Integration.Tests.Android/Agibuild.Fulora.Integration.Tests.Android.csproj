@@ -27,6 +27,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Agibuild.Fulora.Integration.Tests\Agibuild.Fulora.Integration.Tests.csproj" />
-    <ProjectReference Include="..\..\..\src\Agibuild.Fulora.Adapters.Android\Agibuild.Fulora.Adapters.Android.csproj" />
+    <!-- Pull in the Android TFM slice of the unified Platforms project. -->
+    <ProjectReference Include="..\..\..\src\Agibuild.Fulora.Platforms\Agibuild.Fulora.Platforms.csproj" />
   </ItemGroup>
 </Project>

@@ -205,20 +205,20 @@ internal partial class BuildTask
             SrcDirectory / "Agibuild.Fulora.Runtime" / "Agibuild.Fulora.Runtime.csproj",
             SrcDirectory / "Agibuild.Fulora.DependencyInjection" / "Agibuild.Fulora.DependencyInjection.csproj",
 
-            // Unified desktop platforms assembly (Windows/WebView2, macOS/WKWebView, Linux/WebKitGTK).
+            // Unified multi-TFM platforms assembly:
+            //   net10.0          → Windows/WebView2, macOS/WKWebView, Linux/WebKitGTK adapters
+            //   net10.0-android  → Android/WebView adapter
             // Native shims for macOS (dylib) and Linux (so) are built conditionally by MSBuild targets
             // inside the project, driven by OS detection at build time.
+            // The Android TFM slice requires the Android workload + SDK; missing workload is handled
+            // by passing -p:TargetFrameworks=net10.0 below to skip that slice.
             SrcDirectory / "Agibuild.Fulora.Platforms" / "Agibuild.Fulora.Platforms.csproj",
         };
 
-        // Android adapter (requires workload + Android SDK)
-        if (await HasDotNetWorkloadAsync("android") && HasAndroidSdkInstalled())
+        // Track whether Android slice will be built — used to switch TFM list when missing.
+        if (!await HasDotNetWorkloadAsync("android") || !HasAndroidSdkInstalled())
         {
-            projects.Add(SrcDirectory / "Agibuild.Fulora.Adapters.Android" / "Agibuild.Fulora.Adapters.Android.csproj");
-        }
-        else
-        {
-            Serilog.Log.Warning("Android workload or SDK not detected — skipping Android adapter build.");
+            Serilog.Log.Warning("Android workload or SDK not detected — Platforms.csproj will build only its net10.0 slice.");
         }
 
         // iOS adapter (requires macOS host + workload + Xcode iOS SDK)

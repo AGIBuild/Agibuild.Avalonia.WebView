@@ -254,9 +254,10 @@ internal partial class BuildTask
             };
 
             // ── Conditionally expected assemblies ─────────────────────────────────
-            var androidAdapterPath = SrcDirectory
-                / "Agibuild.Fulora.Adapters.Android" / "bin" / Configuration
-                / "net10.0-android" / "Agibuild.Fulora.Adapters.Android.dll";
+            // Android adapter is now the net10.0-android TFM slice of the unified Platforms project.
+            var androidPlatformsPath = SrcDirectory
+                / "Agibuild.Fulora.Platforms" / "bin" / Configuration
+                / "net10.0-android" / "Agibuild.Fulora.Platforms.dll";
 
             var iosAdapterPath = SrcDirectory
                 / "Agibuild.Fulora.Adapters.iOS" / "bin" / Configuration
@@ -266,8 +267,8 @@ internal partial class BuildTask
             {
                 ["runtimes/osx/native/libAgibuildWebViewWk.dylib"] =
                     ("macOS native shim", OperatingSystem.IsMacOS()),
-                ["runtimes/android/lib/net10.0-android36.0/Agibuild.Fulora.Adapters.Android.dll"] =
-                    ("Android adapter", File.Exists(androidAdapterPath)),
+                ["runtimes/android/lib/net10.0-android36.0/Agibuild.Fulora.Platforms.dll"] =
+                    ("Android adapter (Platforms net10.0-android slice)", File.Exists(androidPlatformsPath)),
                 ["runtimes/ios/lib/net10.0-ios18.0/Agibuild.Fulora.Adapters.iOS.dll"] =
                     ("iOS adapter", File.Exists(iosAdapterPath)),
             };

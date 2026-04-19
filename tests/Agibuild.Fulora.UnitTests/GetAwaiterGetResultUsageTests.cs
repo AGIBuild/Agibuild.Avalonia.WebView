@@ -34,7 +34,7 @@ public sealed class GetAwaiterGetResultUsageTests
                     "WindowsWebViewAdapter",
                     "Legacy sync preload API bridges to async implementation for compatibility.")
             ],
-            ["src/Agibuild.Fulora.Adapters.Android/AndroidWebViewAdapter.cs"] =
+            ["src/Agibuild.Fulora.Platforms/Android/AndroidWebViewAdapter.cs"] =
             [
                 new(
                     "decisionTask.AsTask().GetAwaiter().GetResult()",

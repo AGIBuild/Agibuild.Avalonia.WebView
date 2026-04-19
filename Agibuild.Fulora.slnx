@@ -50,7 +50,6 @@
     <Project Path="tests/Agibuild.Fulora.UnitTests/Agibuild.Fulora.UnitTests.csproj" />
   </Folder>
   <Project Path="src/Agibuild.Fulora.Adapters.Abstractions/Agibuild.Fulora.Adapters.Abstractions.csproj" />
-  <Project Path="src/Agibuild.Fulora.Adapters.Android/Agibuild.Fulora.Adapters.Android.csproj" />
   <Project Path="src/Agibuild.Fulora.Core/Agibuild.Fulora.Core.csproj" />
   <Project Path="src/Agibuild.Fulora.DependencyInjection/Agibuild.Fulora.DependencyInjection.csproj" />
 </Solution>

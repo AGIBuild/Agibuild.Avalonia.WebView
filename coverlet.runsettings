@@ -15,7 +15,6 @@
             [Agibuild.Fulora.Testing]*,
             [Agibuild.Fulora.UnitTests]*,
             [Agibuild.Fulora.Platforms]*,
-            [Agibuild.Fulora.Adapters.Android]*,
             [Agibuild.Fulora]*
           </Exclude>
           <ExcludeByAttribute>

@@ -2,7 +2,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.Versioning;
 using Agibuild.Fulora.Adapters.Abstractions;
 
-namespace Agibuild.Fulora.Adapters.Android;
+namespace Agibuild.Fulora.Platforms.Android;
 
 internal static class AndroidAdapterModule
 {
