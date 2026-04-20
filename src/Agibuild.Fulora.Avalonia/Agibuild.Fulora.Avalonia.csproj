@@ -1,6 +1,20 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <!--
+      Multi-TFM mirrors Agibuild.Fulora.Platforms so the ProjectReference graph automatically
+      produces one lib/{tfm}/ slice per platform group:
+        net10.0          → Windows/WebView2 + macOS/WKWebView + Linux/WebKitGTK adapters
+        net10.0-android  → Android WebView adapter
+      iOS lives in the separate Agibuild.Fulora.Adapters.iOS project because its TFM (net10.0-ios)
+      requires a macOS host + iOS workload; hosting it here would break CI on Linux/Windows runners.
+
+      Android TFM gate: EnableAndroidTfm=false opts out on hosts without the .NET Android workload
+      (NETSDK1147). The Nuke Build target detects the workload and forwards the property; raw
+      dotnet build/format callers must pass it explicitly.
+    -->
+    <EnableAndroidTfm Condition="'$(EnableAndroidTfm)' == ''">true</EnableAndroidTfm>
+    <TargetFrameworks Condition="'$(EnableAndroidTfm)' == 'true'">net10.0;net10.0-android</TargetFrameworks>
+    <TargetFrameworks Condition="'$(EnableAndroidTfm)' != 'true'">net10.0</TargetFrameworks>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Agibuild.Fulora</RootNamespace>
@@ -11,25 +25,45 @@
     <Description>Cross-platform WebView control for Avalonia UI with native platform adapters (WKWebView on macOS/iOS, WebView2 on Windows, WebKitGTK on Linux, Android WebView). Provides embedded WebView, popup dialog, and OAuth authentication flows.</Description>
     <PackageTags>avalonia;webview;wkwebview;webview2;android;ios;cross-platform;macos;windows;linux</PackageTags>
 
-    <!-- Build output (Agibuild.Fulora.dll) is included in lib/net10.0/ automatically. -->
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+
+    <!--
+      Auto-include ProjectReference build outputs (Core/Abstractions/Runtime/DI/Platforms) in the
+      per-TFM lib/ folder. Replaces the hand-maintained <None Include="../*/bin/.../*.dll"/> entries.
+      PrivateAssets=all on the ProjectReferences keeps those projects out of nuspec <dependency/>,
+      and BuildOutputInPackage places their DLLs into lib/{tfm}/ with SDK-native semantics.
+    -->
+    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);IncludeProjectReferenceOutputsInPack</TargetsForTfmSpecificBuildOutput>
   </PropertyGroup>
 
-  <!-- Build-time references — PrivateAssets=all keeps them out of NuGet dependency metadata. -->
+  <!-- Android TFM: use Platforms' SupportedOSPlatformVersion floor; suppress CA1416 since runtime gate
+       is enforced by module initializers + [SupportedOSPlatform] on the adapters themselves. -->
+  <PropertyGroup Condition=" $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android' ">
+    <SupportedOSPlatformVersion>23</SupportedOSPlatformVersion>
+    <NoWarn>$(NoWarn);CA1416</NoWarn>
+  </PropertyGroup>
+
+  <!-- Common (all TFMs) references. PrivateAssets=all hides these projects from consumer nuspec. -->
   <ItemGroup>
+    <PackageReference Include="Avalonia" />
     <PackageReference Include="SharpHook" />
+    <!-- Transitive dependency from Runtime/DI (which use PrivateAssets=all). -->
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+
     <ProjectReference Include="..\Agibuild.Fulora.Core\Agibuild.Fulora.Core.csproj" PrivateAssets="all" />
     <ProjectReference Include="..\Agibuild.Fulora.Adapters.Abstractions\Agibuild.Fulora.Adapters.Abstractions.csproj" PrivateAssets="all" />
     <ProjectReference Include="..\Agibuild.Fulora.Runtime\Agibuild.Fulora.Runtime.csproj" PrivateAssets="all" />
     <ProjectReference Include="..\Agibuild.Fulora.DependencyInjection\Agibuild.Fulora.DependencyInjection.csproj" PrivateAssets="all" />
-    <!-- Multi-TFM platforms project: ProjectReference auto-selects the net10.0 desktop slice
-         and triggers BuildWkShim/BuildGtkShim native shim builds. The net10.0-android slice is
-         driven explicitly via the BuildPackInputs target below. -->
+    <!-- Multi-TFM Platforms project — nearest-TFM-match automatically selects:
+           main net10.0 build         → Platforms/net10.0 (desktop adapters + native shims)
+           main net10.0-android build → Platforms/net10.0-android (Android adapter). -->
     <ProjectReference Include="..\Agibuild.Fulora.Platforms\Agibuild.Fulora.Platforms.csproj" PrivateAssets="all" />
-    <PackageReference Include="Avalonia" />
-    <!-- Transitive dependency from Runtime and DI projects (which use PrivateAssets=all). -->
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
-    <!-- Keep package dependency metadata for consumers, but do not import WebView2 build targets into this pack project. -->
+  </ItemGroup>
+
+  <!-- net10.0 (desktop) only: expose Microsoft.Web.WebView2 as a runtime dependency so consumers on
+       Windows get the NuGet restore for the native loader, but keep its build targets out of this
+       pack project. Android slice routes through AndroidX via Platforms' ProjectReference. -->
+  <ItemGroup Condition=" $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == '' ">
     <PackageReference Include="Microsoft.Web.WebView2" ExcludeAssets="build;buildTransitive" />
   </ItemGroup>
 
@@ -39,57 +73,57 @@
     <InternalsVisibleTo Include="Agibuild.Fulora.Integration.Tests.Automation" />
   </ItemGroup>
 
+  <!-- Package-level assets: README + buildTransitive targets. -->
   <ItemGroup>
-    <!-- Compile-time assets (dependency DLLs manually packed). -->
     <None Include="..\..\README.md" Pack="true" PackagePath="/" Visible="false" />
-    <None Include="..\Agibuild.Fulora.Core\bin\$(Configuration)\net10.0\Agibuild.Fulora.Core.dll" Pack="true" PackagePath="lib/net10.0/" />
-    <None Include="..\Agibuild.Fulora.Adapters.Abstractions\bin\$(Configuration)\net10.0\Agibuild.Fulora.Adapters.Abstractions.dll" Pack="true" PackagePath="lib/net10.0/" />
-    <None Include="..\Agibuild.Fulora.Runtime\bin\$(Configuration)\net10.0\Agibuild.Fulora.Runtime.dll" Pack="true" PackagePath="lib/net10.0/" />
-    <None Include="..\Agibuild.Fulora.DependencyInjection\bin\$(Configuration)\net10.0\Agibuild.Fulora.DependencyInjection.dll" Pack="true" PackagePath="lib/net10.0/" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Include="buildTransitive/Agibuild.Fulora.Avalonia.targets" Pack="true" PackagePath="buildTransitive/Agibuild.Fulora.Avalonia.targets" />
   </ItemGroup>
 
+  <!-- iOS adapter: kept as a separate net10.0-ios single-TFM project because the iOS TFM requires a
+       macOS host with the iOS workload and cannot participate in this project's TargetFrameworks
+       dispatch. Packed manually; the BuildPackInputs target below drives its build on macOS. -->
+  <ItemGroup>
+    <None Include="..\Agibuild.Fulora.Adapters.iOS\bin\$(Configuration)\net10.0-ios\Agibuild.Fulora.Adapters.iOS.dll"
+          Pack="true"
+          PackagePath="runtimes/ios/lib/net10.0-ios18.0/"
+          Condition="Exists('..\Agibuild.Fulora.Adapters.iOS\bin\$(Configuration)\net10.0-ios\Agibuild.Fulora.Adapters.iOS.dll')" />
+  </ItemGroup>
+
+  <!-- Native shims (NOT managed DLLs — SDK does not auto-transfer them across ProjectReference).
+       Source paths are Platforms/bin/$(Configuration)/net10.0/runtimes/{rid}/native/, produced by
+       Platforms' BuildWkShim (macOS) / BuildGtkShim (Linux) targets on the net10.0 slice. -->
+  <ItemGroup>
+    <None Include="..\Agibuild.Fulora.Platforms\bin\$(Configuration)\net10.0\runtimes\osx\native\libAgibuildWebViewWk.dylib"
+          Pack="true" PackagePath="runtimes/osx/native/"
+          Condition="Exists('..\Agibuild.Fulora.Platforms\bin\$(Configuration)\net10.0\runtimes\osx\native\libAgibuildWebViewWk.dylib')" />
+    <None Include="..\Agibuild.Fulora.Platforms\bin\$(Configuration)\net10.0\runtimes\linux-x64\native\libAgibuildWebViewGtk.so"
+          Pack="true" PackagePath="runtimes/linux-x64/native/"
+          Condition="Exists('..\Agibuild.Fulora.Platforms\bin\$(Configuration)\net10.0\runtimes\linux-x64\native\libAgibuildWebViewGtk.so')" />
+  </ItemGroup>
+
   <!--
-    Platform adapters: ALL managed DLLs go in lib/net10.0/ so the .NET runtime
-    resolves them alongside the core assemblies. Module initializers handle
-    platform detection — adapters on unsupported OSes simply skip registration.
-
-    IMPORTANT: Do NOT put managed DLLs in runtimes/{rid}/lib/ alongside lib/{tfm}/ entries —
-    the .NET host replaces lib/ runtime assets with runtimeTargets when RID matches,
-    which would drop the core assemblies from the TPA list.
+    IncludeProjectReferenceOutputsInPack — runs once per inner TFM build (when $(TargetFramework) is
+    populated). Adds managed DLLs/PDBs from PrivateAssets=all ProjectReferences to the pack
+    lib/{tfm}/ folder. Filters down to repo-owned assemblies (Agibuild.Fulora.*) because
+    ProjectReference copy-local chains transitively surface Platforms' <Reference Include=...> items
+    (e.g. Microsoft.Web.WebView2.Core.dll), which are consumer responsibilities via PackageReference
+    rather than assets we ship inside the pack.
+    Depends on ResolveReferences so ReferenceCopyLocalPaths is populated.
   -->
-  <ItemGroup>
-    <!-- Unified multi-TFM platforms assembly:
-         net10.0 slice         → Windows/WebView2, macOS/WKWebView, Linux/WebKitGTK adapters
-         net10.0-android slice → Android WebView adapter
-         Provider registration runs via ModuleInitializers and picks the right adapter at runtime. -->
-    <None Include="..\Agibuild.Fulora.Platforms\bin\$(Configuration)\net10.0\Agibuild.Fulora.Platforms.dll" Pack="true" PackagePath="lib/net10.0/" Condition="Exists('..\Agibuild.Fulora.Platforms\bin\$(Configuration)\net10.0\Agibuild.Fulora.Platforms.dll')" />
-    <None Include="..\Agibuild.Fulora.Platforms\bin\$(Configuration)\net10.0-android\Agibuild.Fulora.Platforms.dll" Pack="true" PackagePath="runtimes/android/lib/net10.0-android36.0/" Condition="Exists('..\Agibuild.Fulora.Platforms\bin\$(Configuration)\net10.0-android\Agibuild.Fulora.Platforms.dll')" />
+  <Target Name="IncludeProjectReferenceOutputsInPack" DependsOnTargets="BuildOnlySettings;ResolveReferences">
+    <ItemGroup>
+      <BuildOutputInPackage
+        Include="@(ReferenceCopyLocalPaths)"
+        Condition=" '%(ReferenceCopyLocalPaths.ReferenceSourceTarget)' == 'ProjectReference' And ('%(ReferenceCopyLocalPaths.Extension)' == '.dll' Or '%(ReferenceCopyLocalPaths.Extension)' == '.pdb') And $([System.String]::Copy('%(ReferenceCopyLocalPaths.Filename)').StartsWith('Agibuild.Fulora.')) " />
+    </ItemGroup>
+  </Target>
 
-    <!-- iOS adapter (different TFM — stays in runtimes/; requires macOS host + iOS workload) -->
-    <None Include="..\Agibuild.Fulora.Adapters.iOS\bin\$(Configuration)\net10.0-ios\Agibuild.Fulora.Adapters.iOS.dll" Pack="true" PackagePath="runtimes/ios/lib/net10.0-ios18.0/" Condition="Exists('..\Agibuild.Fulora.Adapters.iOS\bin\$(Configuration)\net10.0-ios\Agibuild.Fulora.Adapters.iOS.dll')" />
-  </ItemGroup>
-
-  <!-- Native assets stay in runtimes/ (these are NOT managed DLLs). -->
-  <ItemGroup>
-    <None Include="..\Agibuild.Fulora.Platforms\bin\$(Configuration)\net10.0\runtimes\osx\native\libAgibuildWebViewWk.dylib" Pack="true" PackagePath="runtimes/osx/native/" Condition="Exists('..\Agibuild.Fulora.Platforms\bin\$(Configuration)\net10.0\runtimes\osx\native\libAgibuildWebViewWk.dylib')" />
-
-    <!-- Linux native WebKitGTK shim -->
-    <None Include="..\Agibuild.Fulora.Platforms\bin\$(Configuration)\net10.0\runtimes\linux-x64\native\libAgibuildWebViewGtk.so" Pack="true" PackagePath="runtimes/linux-x64/native/" Condition="Exists('..\Agibuild.Fulora.Platforms\bin\$(Configuration)\net10.0\runtimes\linux-x64\native\libAgibuildWebViewGtk.so')" />
-  </ItemGroup>
-
-  <!-- Build the multi-TFM Platforms project and the iOS adapter before packing.
-       Core/Abstractions/Runtime/DependencyInjection are already built via the ProjectReference graph above
-       and emit their DLLs into the bin/ paths consumed by the <None Include=".../bin/.../*.dll" Pack="true" /> items.
-       Platforms is referenced through ProjectReference (net10.0 slice) but its net10.0-android slice still needs
-       an explicit dotnet build, mirroring Avalonia.Controls.WebView's multi-TFM packaging convention. -->
+  <!-- Build inputs for pack: drive only the iOS adapter (separate single-TFM project) on macOS.
+       Platforms' Android slice is now produced by the multi-TFM ProjectReference dispatch above,
+       so no manual `dotnet build -f net10.0-android` is needed. -->
   <Target Name="BuildPackInputs" BeforeTargets="GenerateNuspec" Condition="'$(SkipPackInputBuilds)' != 'true'">
-    <!-- Drive the Android TFM slice; the net10.0 slice is already produced by the ProjectReference build. -->
-    <Exec Command="dotnet build &quot;../Agibuild.Fulora.Platforms/Agibuild.Fulora.Platforms.csproj&quot; -c $(Configuration) -f net10.0-android" IgnoreExitCode="true" />
-    <!-- iOS: requires macOS host + iOS workload; IgnoreExitCode allows pack without the workload installed. -->
-    <Exec Command="dotnet build &quot;../Agibuild.Fulora.Adapters.iOS/Agibuild.Fulora.Adapters.iOS.csproj&quot; -c $(Configuration)" Condition="$([MSBuild]::IsOSPlatform('osx'))" IgnoreExitCode="true" />
+    <Exec Command="dotnet build &quot;../Agibuild.Fulora.Adapters.iOS/Agibuild.Fulora.Adapters.iOS.csproj&quot; -c $(Configuration)"
+          Condition="$([MSBuild]::IsOSPlatform('osx'))"
+          IgnoreExitCode="true" />
   </Target>
 </Project>

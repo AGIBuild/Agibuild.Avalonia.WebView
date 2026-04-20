@@ -11,6 +11,11 @@ using Avalonia.Media;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 
+// Disambiguate Avalonia types that clash with Android widget types on the net10.0-android TFM.
+using Application = Avalonia.Application;
+using Button = Avalonia.Controls.Button;
+using ToggleButton = Avalonia.Controls.Primitives.ToggleButton;
+
 namespace Agibuild.Fulora.Shell;
 
 /// <summary>

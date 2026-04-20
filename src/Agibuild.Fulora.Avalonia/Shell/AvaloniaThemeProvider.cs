@@ -3,6 +3,9 @@ using System.Runtime.InteropServices;
 using Avalonia;
 using Avalonia.Styling;
 
+// Disambiguate Application symbol — Android SDK defines Android.App.Application on the net10.0-android TFM.
+using Application = Avalonia.Application;
+
 namespace Agibuild.Fulora.Shell;
 
 /// <summary>
