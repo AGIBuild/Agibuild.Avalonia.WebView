@@ -104,17 +104,23 @@
   <!--
     IncludeProjectReferenceOutputsInPack — runs once per inner TFM build (when $(TargetFramework) is
     populated). Adds managed DLLs/PDBs from PrivateAssets=all ProjectReferences to the pack
-    lib/{tfm}/ folder. Filters down to repo-owned assemblies (Agibuild.Fulora.*) because
-    ProjectReference copy-local chains transitively surface Platforms' <Reference Include=...> items
-    (e.g. Microsoft.Web.WebView2.Core.dll), which are consumer responsibilities via PackageReference
-    rather than assets we ship inside the pack.
-    Depends on ResolveReferences so ReferenceCopyLocalPaths is populated.
+    lib/{tfm}/ folder. Reads directly from $(OutputPath), which at pack time already contains the
+    copy-local outputs of every ProjectReference (dotnet build having run in a prior step; `dotnet
+    pack` with NoBuild=true then packages them). Filters to repo-owned assemblies (Agibuild.Fulora.*) and
+    excludes this project's own primary assembly (SDK handles it via BuiltProjectOutputGroup) and
+    Plugin assemblies (plugins are standalone deliverables, not shipped inside this pack).
+
+    Intentionally does NOT DependsOnTargets="ResolveReferences": that combination with BuildOnlySettings
+    sets BuildingProject=true and triggers $(ProjectReferenceBuildTargets)=Build on every P2P reference,
+    which under `dotnet pack` with NoBuild=true produces NETSDK1085.
   -->
-  <Target Name="IncludeProjectReferenceOutputsInPack" DependsOnTargets="BuildOnlySettings;ResolveReferences">
+  <Target Name="IncludeProjectReferenceOutputsInPack">
     <ItemGroup>
-      <BuildOutputInPackage
-        Include="@(ReferenceCopyLocalPaths)"
-        Condition=" '%(ReferenceCopyLocalPaths.ReferenceSourceTarget)' == 'ProjectReference' And ('%(ReferenceCopyLocalPaths.Extension)' == '.dll' Or '%(ReferenceCopyLocalPaths.Extension)' == '.pdb') And $([System.String]::Copy('%(ReferenceCopyLocalPaths.Filename)').StartsWith('Agibuild.Fulora.')) " />
+      <_FuloraInternalPackDll Include="$(OutputPath)Agibuild.Fulora.*.dll"
+                              Exclude="$(OutputPath)$(AssemblyName).dll;$(OutputPath)Agibuild.Fulora.Plugin.*.dll" />
+      <_FuloraInternalPackPdb Include="$(OutputPath)Agibuild.Fulora.*.pdb"
+                              Exclude="$(OutputPath)$(AssemblyName).pdb;$(OutputPath)Agibuild.Fulora.Plugin.*.pdb" />
+      <BuildOutputInPackage Include="@(_FuloraInternalPackDll);@(_FuloraInternalPackPdb)" />
     </ItemGroup>
   </Target>
 
