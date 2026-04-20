@@ -333,6 +333,58 @@ internal partial class BuildTask
                 Serilog.Log.Warning("  UNEXPECTED: {Path}", dll);
             }
 
+            // ── buildTransitive/*.targets WebView2 version parity ─────────────────
+            // The main nupkg ships a generated buildTransitive/Agibuild.Fulora.Avalonia.targets that
+            // binds Microsoft.Web.WebView2.Core.dll's HintPath to a specific package version. That
+            // version MUST equal $(AgibuildFuloraWebView2Version) in Directory.Packages.props (which
+            // also drives the CPM PackageVersion consumers restore). If the two drift, the HintPath
+            // points at a cache directory the restore never populated and the Windows build silently
+            // drops the Reference. A shipped 1.6.0 had exactly this drift; this gate blocks its return.
+            var cpmProps = XDocument.Load(RootDirectory / "Directory.Packages.props");
+            var cpmWebView2Version = cpmProps
+                .Descendants()
+                .Where(e => e.Name.LocalName == "AgibuildFuloraWebView2Version")
+                .Select(e => e.Value.Trim())
+                .FirstOrDefault();
+            if (string.IsNullOrWhiteSpace(cpmWebView2Version))
+            {
+                errors.Add("CPM: AgibuildFuloraWebView2Version not found in Directory.Packages.props — required as the single source of truth for Microsoft.Web.WebView2 across PackageVersion and buildTransitive/*.targets.");
+            }
+            else
+            {
+                const string buildTransitiveTargetsPath = "buildTransitive/Agibuild.Fulora.Avalonia.targets";
+                var buildTransitiveEntry = archive.Entries.FirstOrDefault(e =>
+                    string.Equals(e.FullName.Replace('\\', '/'), buildTransitiveTargetsPath, StringComparison.OrdinalIgnoreCase));
+                if (buildTransitiveEntry is null)
+                {
+                    errors.Add($"BUILDTRANSITIVE: {buildTransitiveTargetsPath} entry not found in nupkg — GeneratePackBuildTransitive target did not run or did not emit the file.");
+                }
+                else
+                {
+                    using var btReader = new StreamReader(buildTransitiveEntry.Open());
+                    var buildTransitiveContents = btReader.ReadToEnd();
+
+                    if (buildTransitiveContents.Contains("@WEBVIEW2_VERSION@", StringComparison.Ordinal))
+                    {
+                        errors.Add($"BUILDTRANSITIVE: {buildTransitiveTargetsPath} still contains the unresolved token '@WEBVIEW2_VERSION@' — pack-time token replacement failed.");
+                    }
+
+                    var expectedFragment = $"<AgibuildWebView_WebView2PackageVersion>{cpmWebView2Version}</AgibuildWebView_WebView2PackageVersion>";
+                    if (!buildTransitiveContents.Contains(expectedFragment, StringComparison.Ordinal))
+                    {
+                        errors.Add(
+                            $"BUILDTRANSITIVE: {buildTransitiveTargetsPath} does not declare WebView2 version {cpmWebView2Version} " +
+                            $"(expected substring '{expectedFragment}'). This is the drift bug that shipped in 1.6.0 and must not ship again.");
+                    }
+                    else
+                    {
+                        Serilog.Log.Information("  OK: {Path} declares AgibuildWebView_WebView2PackageVersion={Version} (matches CPM)",
+                            buildTransitiveTargetsPath,
+                            cpmWebView2Version);
+                    }
+                }
+            }
+
             var nuspecEntry = archive.Entries.FirstOrDefault(e =>
                 e.FullName.EndsWith(".nuspec", StringComparison.OrdinalIgnoreCase));
             if (nuspecEntry is not null)

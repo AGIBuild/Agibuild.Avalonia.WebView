@@ -81,10 +81,14 @@
     <InternalsVisibleTo Include="Agibuild.Fulora.Integration.Tests.Automation" />
   </ItemGroup>
 
-  <!-- Package-level assets: README + buildTransitive targets. -->
+  <!-- Package-level assets: README. The buildTransitive/*.targets file is generated at pack time
+       by GeneratePackBuildTransitive (below) — see that target for why it is token-replaced rather
+       than a static file. -->
   <ItemGroup>
     <None Include="..\..\README.md" Pack="true" PackagePath="/" Visible="false" />
-    <None Include="buildTransitive/Agibuild.Fulora.Avalonia.targets" Pack="true" PackagePath="buildTransitive/Agibuild.Fulora.Avalonia.targets" />
+    <!-- Track the template for incremental build input hashing; Pack=false so the .in file itself
+         does not ship in the nupkg. -->
+    <None Include="buildTransitive/Agibuild.Fulora.Avalonia.targets.in" Pack="false" />
   </ItemGroup>
 
   <!-- iOS adapter: kept as a separate net10.0-ios single-TFM project because the iOS TFM requires a
@@ -149,4 +153,53 @@
     the <None Include> entry above with a file-exists guard. Raw `dotnet pack` callers that
     skip Nuke must invoke `dotnet build Agibuild.Fulora.Adapters.iOS.csproj` first.
   -->
+
+  <!--
+    GeneratePackBuildTransitive performs pack-time token replacement of @WEBVIEW2_VERSION@
+    in buildTransitive/Agibuild.Fulora.Avalonia.targets.in using $(AgibuildFuloraWebView2Version)
+    from Directory.Packages.props, writes the result to $(BaseIntermediateOutputPath)buildTransitive/
+    and injects a <None Pack="true"> so the generated file lands at buildTransitive/ in the nupkg.
+
+    Why a template instead of a static .targets?
+      Before this refactor the .targets hardcoded "1.0.3719.77" while CPM had moved on to
+      "1.0.3856.49". Consumers restored the current version but our buildTransitive HintPath
+      pointed at a package cache directory that did not exist, so the Reference was silently
+      dropped and Microsoft.Web.WebView2.Core.dll failed to resolve on Windows.
+
+    BeforeTargets:
+      _GetPackageFiles is the NuGet SDK target that collects <None Pack="true"> items into the
+      pack set, so we must add the generated file to Items before it runs. GenerateNuspec is
+      listed as a safety net if a SDK version reorders the inner pack pipeline.
+  -->
+  <Target Name="GeneratePackBuildTransitive"
+          BeforeTargets="_GetPackageFiles;GenerateNuspec"
+          Inputs="buildTransitive/Agibuild.Fulora.Avalonia.targets.in;$(MSBuildThisFileFullPath);$(MSBuildThisFileDirectory)../../Directory.Packages.props"
+          Outputs="$(BaseIntermediateOutputPath)buildTransitive/Agibuild.Fulora.Avalonia.targets">
+    <PropertyGroup>
+      <_AgibuildFuloraBuildTransitiveTemplate>$(MSBuildProjectDirectory)/buildTransitive/Agibuild.Fulora.Avalonia.targets.in</_AgibuildFuloraBuildTransitiveTemplate>
+      <_AgibuildFuloraBuildTransitiveGenerated>$(BaseIntermediateOutputPath)buildTransitive/Agibuild.Fulora.Avalonia.targets</_AgibuildFuloraBuildTransitiveGenerated>
+    </PropertyGroup>
+    <Error Condition=" '$(AgibuildFuloraWebView2Version)' == '' "
+           Text="AgibuildFuloraWebView2Version is empty. It must be defined in Directory.Packages.props and kept as the single source of truth for both the CPM PackageVersion and buildTransitive/Agibuild.Fulora.Avalonia.targets." />
+    <Error Condition=" !Exists('$(_AgibuildFuloraBuildTransitiveTemplate)') "
+           Text="Template not found at '$(_AgibuildFuloraBuildTransitiveTemplate)'. Expected the template to live next to this csproj under buildTransitive/." />
+    <PropertyGroup>
+      <_AgibuildFuloraBuildTransitiveContents>$([System.IO.File]::ReadAllText($(_AgibuildFuloraBuildTransitiveTemplate)))</_AgibuildFuloraBuildTransitiveContents>
+      <_AgibuildFuloraBuildTransitiveContents>$(_AgibuildFuloraBuildTransitiveContents.Replace('@WEBVIEW2_VERSION@', '$(AgibuildFuloraWebView2Version)'))</_AgibuildFuloraBuildTransitiveContents>
+    </PropertyGroup>
+    <Error Condition=" $(_AgibuildFuloraBuildTransitiveContents.Contains('@WEBVIEW2_VERSION@')) "
+           Text="Generated buildTransitive/*.targets still contains the @WEBVIEW2_VERSION@ token after replacement. The token replacement pipeline is broken." />
+    <MakeDir Directories="$(BaseIntermediateOutputPath)buildTransitive" />
+    <WriteLinesToFile File="$(_AgibuildFuloraBuildTransitiveGenerated)"
+                      Lines="$(_AgibuildFuloraBuildTransitiveContents)"
+                      Overwrite="true"
+                      WriteOnlyWhenDifferent="true" />
+    <ItemGroup>
+      <None Include="$(_AgibuildFuloraBuildTransitiveGenerated)"
+            Pack="true"
+            PackagePath="buildTransitive/Agibuild.Fulora.Avalonia.targets"
+            Visible="false" />
+      <FileWrites Include="$(_AgibuildFuloraBuildTransitiveGenerated)" />
+    </ItemGroup>
+  </Target>
 </Project>

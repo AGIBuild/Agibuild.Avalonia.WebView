@@ -1,4 +1,20 @@
 <Project>
+  <!--
+    ======================================================================================
+    GENERATED FILE. Do not edit the shipped .targets directly.
+
+    Source lives at buildTransitive/Agibuild.Fulora.Avalonia.targets.in in the repository.
+    GeneratePackBuildTransitive (Agibuild.Fulora.Avalonia.csproj) substitutes the WebView2
+    version placeholder with $(AgibuildFuloraWebView2Version) from Directory.Packages.props
+    at pack time. That property also drives the PackageVersion entry for Microsoft.Web.WebView2
+    on our nupkg, so the HintPath below always resolves to the same directory NuGet restored
+    into the consumer's packages folder.
+
+    ValidatePackage (build/Build.Packaging.cs) fails the CI gate if the shipped .targets still
+    contains an unreplaced placeholder or a WebView2 version that diverges from CPM. This
+    guards against the buildTransitive version drift that shipped in 1.6.0.
+    ======================================================================================
+  -->
   <PropertyGroup>
     <!--
       WebView2 dependency resolution:
@@ -7,7 +23,7 @@
       - To keep host projects free from WebView2 build/buildTransitive injection while still ensuring the required
         runtime assembly is present, we add an explicit reference to WebView2.Core on Windows.
     -->
-    <AgibuildWebView_WebView2PackageVersion>1.0.3719.77</AgibuildWebView_WebView2PackageVersion>
+    <AgibuildWebView_WebView2PackageVersion>@WEBVIEW2_VERSION@</AgibuildWebView_WebView2PackageVersion>
     <AgibuildFuloraTargetRuntimeIdentifier>$([System.String]::Copy('$(RuntimeIdentifier)').ToLowerInvariant())</AgibuildFuloraTargetRuntimeIdentifier>
     <AgibuildFuloraTargetRuntimeIdentifier Condition="'$(AgibuildFuloraTargetRuntimeIdentifier)' == '' and $([MSBuild]::IsOSPlatform(`windows`))">win-host</AgibuildFuloraTargetRuntimeIdentifier>
     <AgibuildFuloraTargetRuntimeIdentifier Condition="'$(AgibuildFuloraTargetRuntimeIdentifier)' == '' and $([MSBuild]::IsOSPlatform(`osx`))">osx-host</AgibuildFuloraTargetRuntimeIdentifier>
