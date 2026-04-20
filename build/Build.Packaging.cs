@@ -254,10 +254,13 @@ internal partial class BuildTask
             };
 
             // ── Conditionally expected assemblies ─────────────────────────────────
-            // Android adapter is now the net10.0-android TFM slice of the unified Platforms project.
+            // Android slice: unified Platforms project now multi-targets net10.0-android and ships via
+            // the standard NuGet TFM dispatch at lib/net10.0-android36.0/. Presence is driven by the
+            // EnableAndroidTfm gate (true when the .NET Android workload is installed on the host).
             var androidPlatformsPath = SrcDirectory
                 / "Agibuild.Fulora.Platforms" / "bin" / Configuration
                 / "net10.0-android" / "Agibuild.Fulora.Platforms.dll";
+            var androidTfmEnabled = File.Exists(androidPlatformsPath);
 
             var iosAdapterPath = SrcDirectory
                 / "Agibuild.Fulora.Adapters.iOS" / "bin" / Configuration
@@ -267,8 +270,18 @@ internal partial class BuildTask
             {
                 ["runtimes/osx/native/libAgibuildWebViewWk.dylib"] =
                     ("macOS native shim", OperatingSystem.IsMacOS()),
-                ["runtimes/android/lib/net10.0-android36.0/Agibuild.Fulora.Platforms.dll"] =
-                    ("Android adapter (Platforms net10.0-android slice)", File.Exists(androidPlatformsPath)),
+                ["lib/net10.0-android36.0/Agibuild.Fulora.dll"] =
+                    ("Android main assembly", androidTfmEnabled),
+                ["lib/net10.0-android36.0/Agibuild.Fulora.Core.dll"] =
+                    ("Android Core contracts", androidTfmEnabled),
+                ["lib/net10.0-android36.0/Agibuild.Fulora.Adapters.Abstractions.dll"] =
+                    ("Android adapter abstractions", androidTfmEnabled),
+                ["lib/net10.0-android36.0/Agibuild.Fulora.Runtime.dll"] =
+                    ("Android Runtime host", androidTfmEnabled),
+                ["lib/net10.0-android36.0/Agibuild.Fulora.DependencyInjection.dll"] =
+                    ("Android DI extensions", androidTfmEnabled),
+                ["lib/net10.0-android36.0/Agibuild.Fulora.Platforms.dll"] =
+                    ("Android adapter (Platforms net10.0-android slice)", androidTfmEnabled),
                 ["runtimes/ios/lib/net10.0-ios18.0/Agibuild.Fulora.Adapters.iOS.dll"] =
                     ("iOS adapter", File.Exists(iosAdapterPath)),
             };
