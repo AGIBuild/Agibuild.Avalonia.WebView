@@ -32,14 +32,22 @@
       per-TFM lib/ folder. Replaces the hand-maintained <None Include="../*/bin/.../*.dll"/> entries.
       PrivateAssets=all on the ProjectReferences keeps those projects out of nuspec <dependency/>,
       and BuildOutputInPackage places their DLLs into lib/{tfm}/ with SDK-native semantics.
+
+      Platforms native shims (libAgibuildWebViewWk.dylib / libAgibuildWebViewGtk.so) flow here
+      via the standard SDK copy-local pipeline: Platforms advertises them as
+      <None CopyToOutputDirectory="PreserveNewest" Link="runtimes/{rid}/native/..."> inside its
+      AdvertiseWkShim / AdvertiseGtkShim targets, so the build drops them into
+      $(OutputPath)/runtimes/{rid}/native/. IncludePlatformNativeShimsInPack then packs them via
+      TfmSpecificPackageFile without any hardcoded ../Agibuild.Fulora.Platforms/bin/... source path.
     -->
     <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);IncludeProjectReferenceOutputsInPack</TargetsForTfmSpecificBuildOutput>
+    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);IncludePlatformNativeShimsInPack</TargetsForTfmSpecificContentInPackage>
   </PropertyGroup>
 
-  <!-- Android TFM: use Platforms' SupportedOSPlatformVersion floor; suppress CA1416 since runtime gate
-       is enforced by module initializers + [SupportedOSPlatform] on the adapters themselves. -->
+  <!-- Android TFM: SupportedOSPlatformVersion comes from Directory.Build.props (Android baseline = 23).
+       Suppress CA1416 since the runtime gate is enforced by module initializers + [SupportedOSPlatform]
+       on the adapters themselves; the analyser cannot see that gate from this project. -->
   <PropertyGroup Condition=" $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android' ">
-    <SupportedOSPlatformVersion>23</SupportedOSPlatformVersion>
     <NoWarn>$(NoWarn);CA1416</NoWarn>
   </PropertyGroup>
 
@@ -89,18 +97,6 @@
           Condition="Exists('..\Agibuild.Fulora.Adapters.iOS\bin\$(Configuration)\net10.0-ios\Agibuild.Fulora.Adapters.iOS.dll')" />
   </ItemGroup>
 
-  <!-- Native shims (NOT managed DLLs — SDK does not auto-transfer them across ProjectReference).
-       Source paths are Platforms/bin/$(Configuration)/net10.0/runtimes/{rid}/native/, produced by
-       Platforms' BuildWkShim (macOS) / BuildGtkShim (Linux) targets on the net10.0 slice. -->
-  <ItemGroup>
-    <None Include="..\Agibuild.Fulora.Platforms\bin\$(Configuration)\net10.0\runtimes\osx\native\libAgibuildWebViewWk.dylib"
-          Pack="true" PackagePath="runtimes/osx/native/"
-          Condition="Exists('..\Agibuild.Fulora.Platforms\bin\$(Configuration)\net10.0\runtimes\osx\native\libAgibuildWebViewWk.dylib')" />
-    <None Include="..\Agibuild.Fulora.Platforms\bin\$(Configuration)\net10.0\runtimes\linux-x64\native\libAgibuildWebViewGtk.so"
-          Pack="true" PackagePath="runtimes/linux-x64/native/"
-          Condition="Exists('..\Agibuild.Fulora.Platforms\bin\$(Configuration)\net10.0\runtimes\linux-x64\native\libAgibuildWebViewGtk.so')" />
-  </ItemGroup>
-
   <!--
     IncludeProjectReferenceOutputsInPack — runs once per inner TFM build (when $(TargetFramework) is
     populated). Adds managed DLLs/PDBs from PrivateAssets=all ProjectReferences to the pack
@@ -124,12 +120,33 @@
     </ItemGroup>
   </Target>
 
-  <!-- Build inputs for pack: drive only the iOS adapter (separate single-TFM project) on macOS.
-       Platforms' Android slice is now produced by the multi-TFM ProjectReference dispatch above,
-       so no manual `dotnet build -f net10.0-android` is needed. -->
-  <Target Name="BuildPackInputs" BeforeTargets="GenerateNuspec" Condition="'$(SkipPackInputBuilds)' != 'true'">
-    <Exec Command="dotnet build &quot;../Agibuild.Fulora.Adapters.iOS/Agibuild.Fulora.Adapters.iOS.csproj&quot; -c $(Configuration)"
-          Condition="$([MSBuild]::IsOSPlatform('osx'))"
-          IgnoreExitCode="true" />
+  <!--
+    IncludePlatformNativeShimsInPack — runs once per inner TFM via TargetsForTfmSpecificContentInPackage.
+    On the net10.0 (desktop) slice only, scans this project's own $(OutputPath)runtimes/ directory for
+    files that flowed in from Agibuild.Fulora.Platforms' Advertise{Wk,Gtk}Shim targets (which expose
+    the shims as <None CopyToOutputDirectory="PreserveNewest"> for the ProjectReference copy-local
+    pipeline). Each discovered file is mapped 1:1 into the nupkg at runtimes/{rid}/native/ using the
+    relative subpath below $(OutputPath)runtimes/ — so we never hardcode the sibling project's bin/ path.
+
+    Android slice ($(TargetPlatformIdentifier) == 'android') has no native shims; the condition below
+    keeps the outer pass + Android slice silent.
+  -->
+  <Target Name="IncludePlatformNativeShimsInPack">
+    <ItemGroup Condition=" $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == '' ">
+      <_FuloraNativeShim Include="$(OutputPath)runtimes\**\*" />
+      <TfmSpecificPackageFile Include="@(_FuloraNativeShim)">
+        <PackagePath>runtimes/%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
+      </TfmSpecificPackageFile>
+    </ItemGroup>
   </Target>
+
+  <!--
+    The iOS adapter (net10.0-ios, single-TFM project) cannot participate in this project's
+    multi-TFM ProjectReference dispatch. Nuke's Build target is the sole build orchestrator
+    and builds Agibuild.Fulora.Adapters.iOS.csproj explicitly on macOS hosts that have the
+    iOS workload + Xcode (see build/Build.Helpers.cs:GetProjectsToBuildAsync). The resulting
+    bin/$(Configuration)/net10.0-ios/Agibuild.Fulora.Adapters.iOS.dll is then picked up by
+    the <None Include> entry above with a file-exists guard. Raw `dotnet pack` callers that
+    skip Nuke must invoke `dotnet build Agibuild.Fulora.Adapters.iOS.csproj` first.
+  -->
 </Project>

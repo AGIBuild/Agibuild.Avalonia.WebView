@@ -63,6 +63,22 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
+  <!--
+    Solution-wide minimum platform baselines. Individual csproj files may still override by
+    declaring their own <SupportedOSPlatformVersion> inside a PropertyGroup that runs AFTER
+    this file (MSBuild "last write wins" semantics), but by default every TPI gets its floor
+    from here so new adapters don't drift from the rest of the solution.
+
+      Android 23 (Lollipop 5.0+): matches WebView auto-update floor + Xamarin.AndroidX minimum.
+      iOS 15.0: floor required by our WKWebView adapter (uses WKWebView API extensions added in iOS 15).
+  -->
+  <PropertyGroup Condition=" $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android' And '$(SupportedOSPlatformVersion)' == '' ">
+    <SupportedOSPlatformVersion>23</SupportedOSPlatformVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios' And '$(SupportedOSPlatformVersion)' == '' ">
+    <SupportedOSPlatformVersion>15.0</SupportedOSPlatformVersion>
+  </PropertyGroup>
+
   <!-- Local builds default to prerelease to avoid confusion with stable releases.
        CI passes its own VersionSuffix (e.g., ci.158); release builds omit it. -->
   <PropertyGroup Condition="'$(CI)' != 'true' AND '$(VersionSuffix)' == ''">

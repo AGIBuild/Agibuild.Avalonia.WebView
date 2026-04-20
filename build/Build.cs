@@ -263,9 +263,19 @@ internal sealed partial class BuildTask : NukeBuild
 
             foreach (var project in await GetProjectsToBuildAsync())
             {
+                var projectFileName = Path.GetFileName(project);
                 var isPlatforms = string.Equals(
-                    Path.GetFileName(project),
+                    projectFileName,
                     "Agibuild.Fulora.Platforms.csproj",
+                    StringComparison.OrdinalIgnoreCase);
+                // Adapters.iOS is present in GetProjectsToBuildAsync()'s list only after it has already
+                // probed macOS + iOS workload + Apple iOS SDK. So when we do build it, require the
+                // native xcframework to actually be produced — the csproj's _AssertIosShimProduced
+                // target fails loudly when this flag is set but the xcframework is missing, which
+                // prevents a silent managed-only nupkg from shipping to NuGet.
+                var isIosAdapter = string.Equals(
+                    projectFileName,
+                    "Agibuild.Fulora.Adapters.iOS.csproj",
                     StringComparison.OrdinalIgnoreCase);
 
                 DotNetBuild(s =>
@@ -278,6 +288,11 @@ internal sealed partial class BuildTask : NukeBuild
                     if (isPlatforms && skipAndroidSlice)
                     {
                         settings = settings.SetProperty("EnableAndroidTfm", "false");
+                    }
+
+                    if (isIosAdapter)
+                    {
+                        settings = settings.SetProperty("RequireIosShim", "true");
                     }
 
                     return settings;

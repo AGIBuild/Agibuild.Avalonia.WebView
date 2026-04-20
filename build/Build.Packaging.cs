@@ -134,8 +134,7 @@ internal partial class BuildTask
                     .SetConfiguration(Configuration)
                     .EnableNoRestore()
                     .EnableNoBuild()
-                    .SetOutputDirectory(PackageOutputDirectory)
-                    .SetProperty("SkipPackInputBuilds", "true");
+                    .SetOutputDirectory(PackageOutputDirectory);
 
                 if (!string.IsNullOrEmpty(VersionSuffix))
                     settings = settings.SetVersionSuffix(VersionSuffix);
