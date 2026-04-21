@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using Agibuild.Fulora;
@@ -8,7 +9,7 @@ using ObjCRuntime;
 namespace Agibuild.Fulora.Adapters.iOS;
 
 [SupportedOSPlatform("ios")]
-internal sealed class iOSWebViewAdapter : IWebViewAdapter, INativeWebViewHandleProvider, ICookieAdapter, IWebViewAdapterOptions,
+internal sealed partial class iOSWebViewAdapter : IWebViewAdapter, INativeWebViewHandleProvider, ICookieAdapter, IWebViewAdapterOptions,
     ICustomSchemeAdapter, IDownloadAdapter, IPermissionAdapter, ICommandAdapter, IScreenshotAdapter, IPrintAdapter,
     IFindInPageAdapter, IZoomAdapter, IPreloadScriptAdapter, IContextMenuAdapter, IDevToolsAdapter, IDragDropAdapter
 {
@@ -963,7 +964,7 @@ internal sealed class iOSWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
     // ==== Native interop ====
     // On iOS, the native shim is statically linked; use DllImport("__Internal").
 
-    private static class NativeMethods
+    private static partial class NativeMethods
     {
         internal static iOSWebViewAdapter? FromUserData(IntPtr userData)
         {
@@ -1053,60 +1054,81 @@ internal sealed class iOSWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         internal delegate void CookieOpCb(IntPtr context, [MarshalAs(UnmanagedType.I1)] bool success, IntPtr errorUtf8);
 
-        [DllImport("__Internal", EntryPoint = "ag_wk_create", CallingConvention = CallingConvention.Cdecl)]
-        internal static extern IntPtr Create(ref AgWkCallbacks callbacks, IntPtr userData);
+        [LibraryImport("__Internal", EntryPoint = "ag_wk_create")]
+        [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+        internal static partial IntPtr Create(ref AgWkCallbacks callbacks, IntPtr userData);
 
-        [DllImport("__Internal", EntryPoint = "ag_wk_destroy", CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void Destroy(IntPtr handle);
+        [LibraryImport("__Internal", EntryPoint = "ag_wk_destroy")]
+        [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+        internal static partial void Destroy(IntPtr handle);
 
-        [DllImport("__Internal", EntryPoint = "ag_wk_register_custom_scheme", CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void RegisterCustomScheme(IntPtr handle, [MarshalAs(UnmanagedType.LPUTF8Str)] string schemeUtf8);
+        [LibraryImport("__Internal", EntryPoint = "ag_wk_register_custom_scheme", StringMarshalling = StringMarshalling.Utf8)]
+        [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+        internal static partial void RegisterCustomScheme(IntPtr handle, string schemeUtf8);
 
-        [DllImport("__Internal", EntryPoint = "ag_wk_attach", CallingConvention = CallingConvention.Cdecl)]
+        [LibraryImport("__Internal", EntryPoint = "ag_wk_attach")]
+        [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
         [return: MarshalAs(UnmanagedType.I1)]
-        internal static extern bool Attach(IntPtr handle, IntPtr uiViewPtr);
+        internal static partial bool Attach(IntPtr handle, IntPtr uiViewPtr);
 
-        [DllImport("__Internal", EntryPoint = "ag_wk_detach", CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void Detach(IntPtr handle);
+        [LibraryImport("__Internal", EntryPoint = "ag_wk_detach")]
+        [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+        internal static partial void Detach(IntPtr handle);
 
-        [DllImport("__Internal", EntryPoint = "ag_wk_policy_decide", CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void PolicyDecide(IntPtr handle, ulong requestId, [MarshalAs(UnmanagedType.I1)] bool allow);
+        [LibraryImport("__Internal", EntryPoint = "ag_wk_policy_decide")]
+        [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+        internal static partial void PolicyDecide(IntPtr handle, ulong requestId, [MarshalAs(UnmanagedType.I1)] bool allow);
 
-        [DllImport("__Internal", EntryPoint = "ag_wk_navigate", CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void Navigate(IntPtr handle, [MarshalAs(UnmanagedType.LPUTF8Str)] string url);
+        [LibraryImport("__Internal", EntryPoint = "ag_wk_navigate", StringMarshalling = StringMarshalling.Utf8)]
+        [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+        internal static partial void Navigate(IntPtr handle, string url);
 
-        [DllImport("__Internal", EntryPoint = "ag_wk_load_html", CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void LoadHtml(IntPtr handle, [MarshalAs(UnmanagedType.LPUTF8Str)] string html, [MarshalAs(UnmanagedType.LPUTF8Str)] string? baseUrl);
+        [LibraryImport("__Internal", EntryPoint = "ag_wk_load_html", StringMarshalling = StringMarshalling.Utf8)]
+        [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+        internal static partial void LoadHtml(IntPtr handle, string html, string? baseUrl);
 
-        [DllImport("__Internal", EntryPoint = "ag_wk_eval_js", CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void EvalJs(IntPtr handle, ulong requestId, [MarshalAs(UnmanagedType.LPUTF8Str)] string script);
+        [LibraryImport("__Internal", EntryPoint = "ag_wk_eval_js", StringMarshalling = StringMarshalling.Utf8)]
+        [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+        internal static partial void EvalJs(IntPtr handle, ulong requestId, string script);
 
-        [DllImport("__Internal", EntryPoint = "ag_wk_go_back", CallingConvention = CallingConvention.Cdecl)]
+        [LibraryImport("__Internal", EntryPoint = "ag_wk_go_back")]
+        [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
         [return: MarshalAs(UnmanagedType.I1)]
-        internal static extern bool GoBack(IntPtr handle);
+        internal static partial bool GoBack(IntPtr handle);
 
-        [DllImport("__Internal", EntryPoint = "ag_wk_go_forward", CallingConvention = CallingConvention.Cdecl)]
+        [LibraryImport("__Internal", EntryPoint = "ag_wk_go_forward")]
+        [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
         [return: MarshalAs(UnmanagedType.I1)]
-        internal static extern bool GoForward(IntPtr handle);
+        internal static partial bool GoForward(IntPtr handle);
 
-        [DllImport("__Internal", EntryPoint = "ag_wk_reload", CallingConvention = CallingConvention.Cdecl)]
+        [LibraryImport("__Internal", EntryPoint = "ag_wk_reload")]
+        [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
         [return: MarshalAs(UnmanagedType.I1)]
-        internal static extern bool Reload(IntPtr handle);
+        internal static partial bool Reload(IntPtr handle);
 
-        [DllImport("__Internal", EntryPoint = "ag_wk_stop", CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void Stop(IntPtr handle);
+        [LibraryImport("__Internal", EntryPoint = "ag_wk_stop")]
+        [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+        internal static partial void Stop(IntPtr handle);
 
-        [DllImport("__Internal", EntryPoint = "ag_wk_can_go_back", CallingConvention = CallingConvention.Cdecl)]
+        [LibraryImport("__Internal", EntryPoint = "ag_wk_can_go_back")]
+        [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
         [return: MarshalAs(UnmanagedType.I1)]
-        internal static extern bool CanGoBack(IntPtr handle);
+        internal static partial bool CanGoBack(IntPtr handle);
 
-        [DllImport("__Internal", EntryPoint = "ag_wk_can_go_forward", CallingConvention = CallingConvention.Cdecl)]
+        [LibraryImport("__Internal", EntryPoint = "ag_wk_can_go_forward")]
+        [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
         [return: MarshalAs(UnmanagedType.I1)]
-        internal static extern bool CanGoForward(IntPtr handle);
+        internal static partial bool CanGoForward(IntPtr handle);
 
-        [DllImport("__Internal", EntryPoint = "ag_wk_get_webview_handle", CallingConvention = CallingConvention.Cdecl)]
-        internal static extern IntPtr GetWebViewHandle(IntPtr handle);
+        [LibraryImport("__Internal", EntryPoint = "ag_wk_get_webview_handle")]
+        [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+        internal static partial IntPtr GetWebViewHandle(IntPtr handle);
 
+        // NOTE: Managed-delegate P/Invokes below intentionally retain DllImport. LibraryImport does not
+        // support marshalling Delegate types (SYSLIB1051). Migrating would require converting the
+        // UnmanagedFunctionPointer delegates into `delegate* unmanaged<>` function pointers throughout the
+        // call sites and GCHandle lifetime management logic. That rework is scheduled for Phase 3 and has
+        // no AOT benefit at this stage because the delegate-based stubs already flow through runtime marshalling.
         [DllImport("__Internal", EntryPoint = "ag_wk_cookies_get", CallingConvention = CallingConvention.Cdecl)]
         internal static extern void CookiesGet(IntPtr handle, [MarshalAs(UnmanagedType.LPUTF8Str)] string url, CookiesGetCb callback, IntPtr context);
 
@@ -1129,30 +1151,36 @@ internal sealed class iOSWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
         [DllImport("__Internal", EntryPoint = "ag_wk_cookies_clear_all", CallingConvention = CallingConvention.Cdecl)]
         internal static extern void CookiesClearAll(IntPtr handle, CookieOpCb callback, IntPtr context);
 
-        [DllImport("__Internal", EntryPoint = "ag_wk_set_enable_dev_tools", CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void SetEnableDevTools(IntPtr handle, [MarshalAs(UnmanagedType.I1)] bool enable);
+        [LibraryImport("__Internal", EntryPoint = "ag_wk_set_enable_dev_tools")]
+        [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+        internal static partial void SetEnableDevTools(IntPtr handle, [MarshalAs(UnmanagedType.I1)] bool enable);
 
-        [DllImport("__Internal", EntryPoint = "ag_wk_set_ephemeral", CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void SetEphemeral(IntPtr handle, [MarshalAs(UnmanagedType.I1)] bool ephemeral);
+        [LibraryImport("__Internal", EntryPoint = "ag_wk_set_ephemeral")]
+        [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+        internal static partial void SetEphemeral(IntPtr handle, [MarshalAs(UnmanagedType.I1)] bool ephemeral);
 
-        [DllImport("__Internal", EntryPoint = "ag_wk_set_user_agent", CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void SetUserAgent(IntPtr handle, [MarshalAs(UnmanagedType.LPUTF8Str)] string? userAgent);
+        [LibraryImport("__Internal", EntryPoint = "ag_wk_set_user_agent", StringMarshalling = StringMarshalling.Utf8)]
+        [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+        internal static partial void SetUserAgent(IntPtr handle, string? userAgent);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         internal delegate void ScreenshotCb(IntPtr context, IntPtr pngData, uint pngLen);
 
+        // Managed-delegate P/Invoke — retained as DllImport (see cookies note above).
         [DllImport("__Internal", EntryPoint = "ag_wk_capture_screenshot", CallingConvention = CallingConvention.Cdecl)]
         internal static extern void CaptureScreenshot(IntPtr handle, ScreenshotCb callback, IntPtr context);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         internal delegate void PdfCb(IntPtr context, IntPtr pdfData, uint pdfLen);
 
+        // Managed-delegate P/Invoke — retained as DllImport (see cookies note above).
         [DllImport("__Internal", EntryPoint = "ag_wk_print_to_pdf", CallingConvention = CallingConvention.Cdecl)]
         internal static extern void PrintToPdf(IntPtr handle, PdfCb callback, IntPtr context);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         internal delegate void FindCb(IntPtr context, int activeMatchIndex, int totalMatches);
 
+        // Managed-delegate P/Invoke — retained as DllImport (see cookies note above).
         [DllImport("__Internal", EntryPoint = "ag_wk_find_text", CallingConvention = CallingConvention.Cdecl)]
         internal static extern void FindText(IntPtr handle,
             [MarshalAs(UnmanagedType.LPUTF8Str)] string text,
@@ -1160,20 +1188,25 @@ internal sealed class iOSWebViewAdapter : IWebViewAdapter, INativeWebViewHandleP
             [MarshalAs(UnmanagedType.I1)] bool forward,
             FindCb callback, IntPtr context);
 
-        [DllImport("__Internal", EntryPoint = "ag_wk_stop_find", CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void StopFind(IntPtr handle);
+        [LibraryImport("__Internal", EntryPoint = "ag_wk_stop_find")]
+        [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+        internal static partial void StopFind(IntPtr handle);
 
-        [DllImport("__Internal", EntryPoint = "ag_wk_get_zoom", CallingConvention = CallingConvention.Cdecl)]
-        internal static extern double GetZoom(IntPtr handle);
+        [LibraryImport("__Internal", EntryPoint = "ag_wk_get_zoom")]
+        [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+        internal static partial double GetZoom(IntPtr handle);
 
-        [DllImport("__Internal", EntryPoint = "ag_wk_set_zoom", CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void SetZoom(IntPtr handle, double zoomFactor);
+        [LibraryImport("__Internal", EntryPoint = "ag_wk_set_zoom")]
+        [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+        internal static partial void SetZoom(IntPtr handle, double zoomFactor);
 
-        [DllImport("__Internal", EntryPoint = "ag_wk_add_user_script", CallingConvention = CallingConvention.Cdecl)]
-        internal static extern IntPtr AddUserScript(IntPtr handle, [MarshalAs(UnmanagedType.LPUTF8Str)] string js);
+        [LibraryImport("__Internal", EntryPoint = "ag_wk_add_user_script", StringMarshalling = StringMarshalling.Utf8)]
+        [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+        internal static partial IntPtr AddUserScript(IntPtr handle, string js);
 
-        [DllImport("__Internal", EntryPoint = "ag_wk_remove_all_user_scripts", CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void RemoveAllUserScripts(IntPtr handle);
+        [LibraryImport("__Internal", EntryPoint = "ag_wk_remove_all_user_scripts")]
+        [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+        internal static partial void RemoveAllUserScripts(IntPtr handle);
     }
 
     // ==================== ICommandAdapter ====================
