@@ -4,7 +4,6 @@ using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using Agibuild.Fulora;
 using Agibuild.Fulora.Adapters.Abstractions;
-using ObjCRuntime;
 
 namespace Agibuild.Fulora.Adapters.iOS;
 
@@ -22,21 +21,12 @@ internal sealed partial class iOSWebViewAdapter : IWebViewAdapter, INativeWebVie
     private bool _attached;
     private bool _detached;
 
-    // Native shim state
+    // Native shim state. The callback table (AgWkCallbacks) holds unmanaged function
+    // pointers into [UnmanagedCallersOnly] static methods (see trampoline section below),
+    // so no per-instance delegate fields are required to keep the callbacks alive.
     private IntPtr _native;
     private GCHandle _selfHandle;
     private NativeMethods.AgWkCallbacks _callbacks;
-    private NativeMethods.PolicyRequestCb? _policyCb;
-    private NativeMethods.NavigationCompletedCb? _navCompletedCb;
-    private NativeMethods.ScriptResultCb? _scriptResultCb;
-    private NativeMethods.MessageCb? _messageCb;
-    private NativeMethods.DownloadCb? _downloadCb;
-    private NativeMethods.PermissionCb? _permissionCb;
-    private NativeMethods.SchemeRequestCb? _schemeRequestCb;
-    private NativeMethods.DragEnteredCb? _dragEnteredCb;
-    private NativeMethods.DragUpdatedCb? _dragUpdatedCb;
-    private NativeMethods.DragExitedCb? _dragExitedCb;
-    private NativeMethods.DropPerformedCb? _dropPerformedCb;
 
     // Pinned buffers for scheme responses
     private byte[]? _schemeResponseData;
@@ -113,36 +103,26 @@ internal sealed partial class iOSWebViewAdapter : IWebViewAdapter, INativeWebVie
 
         _selfHandle = GCHandle.Alloc(this);
 
-        // Use pre-created static delegates (AOT-compatible via [MonoPInvokeCallback]).
-        _policyCb = PolicyRequestTrampoline;
-        _navCompletedCb = NavigationCompletedTrampoline;
-        _scriptResultCb = ScriptResultTrampoline;
-        _messageCb = MessageTrampoline;
-        _downloadCb = DownloadTrampoline;
+        // Callbacks are [UnmanagedCallersOnly] static methods resolved at compile time.
+        // Taking &Trampoline yields a stable function pointer with no managed state and
+        // no reverse-P/Invoke wrapper, which the AOT compiler can verify statically.
         unsafe
         {
-            _permissionCb = PermissionTrampoline;
-            _schemeRequestCb = SchemeRequestTrampoline;
+            _callbacks = new NativeMethods.AgWkCallbacks
+            {
+                on_policy_request = (IntPtr)(delegate* unmanaged[Cdecl]<IntPtr, ulong, IntPtr, byte, byte, int, void>)&PolicyRequestTrampoline,
+                on_navigation_completed = (IntPtr)(delegate* unmanaged[Cdecl]<IntPtr, IntPtr, int, long, IntPtr, void>)&NavigationCompletedTrampoline,
+                on_script_result = (IntPtr)(delegate* unmanaged[Cdecl]<IntPtr, ulong, IntPtr, IntPtr, void>)&ScriptResultTrampoline,
+                on_message = (IntPtr)(delegate* unmanaged[Cdecl]<IntPtr, IntPtr, IntPtr, void>)&MessageTrampoline,
+                on_download = (IntPtr)(delegate* unmanaged[Cdecl]<IntPtr, IntPtr, IntPtr, IntPtr, long, void>)&DownloadTrampoline,
+                on_permission = (IntPtr)(delegate* unmanaged[Cdecl]<IntPtr, int, IntPtr, int*, void>)&PermissionTrampoline,
+                on_scheme_request = (IntPtr)(delegate* unmanaged[Cdecl]<IntPtr, IntPtr, IntPtr, IntPtr*, long*, IntPtr*, int*, byte>)&SchemeRequestTrampoline,
+                on_drag_entered = (IntPtr)(delegate* unmanaged[Cdecl]<IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, double, double, void>)&DragEnteredTrampoline,
+                on_drag_updated = (IntPtr)(delegate* unmanaged[Cdecl]<IntPtr, double, double, void>)&DragUpdatedTrampoline,
+                on_drag_exited = (IntPtr)(delegate* unmanaged[Cdecl]<IntPtr, void>)&DragExitedTrampoline,
+                on_drop_performed = (IntPtr)(delegate* unmanaged[Cdecl]<IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, double, double, void>)&DropPerformedTrampoline,
+            };
         }
-        _dragEnteredCb = DragEnteredTrampoline;
-        _dragUpdatedCb = DragUpdatedTrampoline;
-        _dragExitedCb = DragExitedTrampoline;
-        _dropPerformedCb = DropPerformedTrampoline;
-
-        _callbacks = new NativeMethods.AgWkCallbacks
-        {
-            on_policy_request = Marshal.GetFunctionPointerForDelegate(_policyCb),
-            on_navigation_completed = Marshal.GetFunctionPointerForDelegate(_navCompletedCb),
-            on_script_result = Marshal.GetFunctionPointerForDelegate(_scriptResultCb),
-            on_message = Marshal.GetFunctionPointerForDelegate(_messageCb),
-            on_download = Marshal.GetFunctionPointerForDelegate(_downloadCb),
-            on_permission = Marshal.GetFunctionPointerForDelegate(_permissionCb),
-            on_scheme_request = Marshal.GetFunctionPointerForDelegate(_schemeRequestCb),
-            on_drag_entered = Marshal.GetFunctionPointerForDelegate(_dragEnteredCb),
-            on_drag_updated = Marshal.GetFunctionPointerForDelegate(_dragUpdatedCb),
-            on_drag_exited = Marshal.GetFunctionPointerForDelegate(_dragExitedCb),
-            on_drop_performed = Marshal.GetFunctionPointerForDelegate(_dropPerformedCb),
-        };
 
         _native = NativeMethods.Create(ref _callbacks, GCHandle.ToIntPtr(_selfHandle));
         if (_native == IntPtr.Zero)
@@ -340,7 +320,11 @@ internal sealed partial class iOSWebViewAdapter : IWebViewAdapter, INativeWebVie
         var tcs = new TaskCompletionSource<IReadOnlyList<WebViewCookie>>();
         var tcsHandle = GCHandle.Alloc(tcs);
 
-        NativeMethods.CookiesGet(_native, uri.AbsoluteUri, CookiesGetTrampoline, GCHandle.ToIntPtr(tcsHandle));
+        unsafe
+        {
+            NativeMethods.CookiesGet(_native, uri.AbsoluteUri,
+                &CookiesGetTrampoline, GCHandle.ToIntPtr(tcsHandle));
+        }
         return tcs.Task;
     }
 
@@ -351,10 +335,13 @@ internal sealed partial class iOSWebViewAdapter : IWebViewAdapter, INativeWebVie
         var tcsHandle = GCHandle.Alloc(tcs);
         var expiresUnix = cookie.Expires.HasValue ? cookie.Expires.Value.ToUnixTimeSeconds() : -1.0;
 
-        NativeMethods.CookieSet(_native,
-            cookie.Name, cookie.Value, cookie.Domain, cookie.Path,
-            expiresUnix, cookie.IsSecure, cookie.IsHttpOnly,
-            CookieOpTrampoline, GCHandle.ToIntPtr(tcsHandle));
+        unsafe
+        {
+            NativeMethods.CookieSet(_native,
+                cookie.Name, cookie.Value, cookie.Domain, cookie.Path,
+                expiresUnix, cookie.IsSecure, cookie.IsHttpOnly,
+                &CookieOpTrampoline, GCHandle.ToIntPtr(tcsHandle));
+        }
         return tcs.Task;
     }
 
@@ -364,9 +351,12 @@ internal sealed partial class iOSWebViewAdapter : IWebViewAdapter, INativeWebVie
         var tcs = new TaskCompletionSource();
         var tcsHandle = GCHandle.Alloc(tcs);
 
-        NativeMethods.CookieDelete(_native,
-            cookie.Name, cookie.Domain, cookie.Path,
-            CookieOpTrampoline, GCHandle.ToIntPtr(tcsHandle));
+        unsafe
+        {
+            NativeMethods.CookieDelete(_native,
+                cookie.Name, cookie.Domain, cookie.Path,
+                &CookieOpTrampoline, GCHandle.ToIntPtr(tcsHandle));
+        }
         return tcs.Task;
     }
 
@@ -376,7 +366,10 @@ internal sealed partial class iOSWebViewAdapter : IWebViewAdapter, INativeWebVie
         var tcs = new TaskCompletionSource();
         var tcsHandle = GCHandle.Alloc(tcs);
 
-        NativeMethods.CookiesClearAll(_native, CookieOpTrampoline, GCHandle.ToIntPtr(tcsHandle));
+        unsafe
+        {
+            NativeMethods.CookiesClearAll(_native, &CookieOpTrampoline, GCHandle.ToIntPtr(tcsHandle));
+        }
         return tcs.Task;
     }
 
@@ -536,39 +529,39 @@ internal sealed partial class iOSWebViewAdapter : IWebViewAdapter, INativeWebVie
     }
 
     // ==== AOT-safe static trampolines for native callbacks ====
-    // iOS does not allow JIT. All delegates passed to native code must be
-    // static methods with [MonoPInvokeCallback] so the AOT compiler can
-    // generate the native-to-managed wrappers at build time.
+    // [UnmanagedCallersOnly] lets the AOT compiler emit a stable, verifiably-safe
+    // unmanaged entry point without runtime delegate marshalling. All iOS/macOS
+    // P/Invoke callbacks use this pattern in the .NET 8+ / 9+ source-generated form.
 
-    [MonoPInvokeCallback(typeof(NativeMethods.PolicyRequestCb))]
+    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
     private static void PolicyRequestTrampoline(IntPtr userData, ulong requestId, IntPtr urlUtf8, byte isMainFrame, byte isNewWindow, int navigationType)
     {
         var self = NativeMethods.FromUserData(userData);
         self?.OnPolicyRequest(requestId, NativeMethods.PtrToString(urlUtf8), isMainFrame != 0, isNewWindow != 0, navigationType);
     }
 
-    [MonoPInvokeCallback(typeof(NativeMethods.NavigationCompletedCb))]
+    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
     private static void NavigationCompletedTrampoline(IntPtr userData, IntPtr urlUtf8, int status, long errorCode, IntPtr errorMessageUtf8)
     {
         var self = NativeMethods.FromUserData(userData);
         self?.OnNavigationCompletedNative(NativeMethods.PtrToString(urlUtf8), status, errorCode, NativeMethods.PtrToString(errorMessageUtf8));
     }
 
-    [MonoPInvokeCallback(typeof(NativeMethods.ScriptResultCb))]
+    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
     private static void ScriptResultTrampoline(IntPtr userData, ulong requestId, IntPtr resultUtf8, IntPtr errorMessageUtf8)
     {
         var self = NativeMethods.FromUserData(userData);
         self?.OnScriptResultNative(requestId, NativeMethods.PtrToStringNullable(resultUtf8), NativeMethods.PtrToStringNullable(errorMessageUtf8));
     }
 
-    [MonoPInvokeCallback(typeof(NativeMethods.MessageCb))]
+    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
     private static void MessageTrampoline(IntPtr userData, IntPtr bodyUtf8, IntPtr originUtf8)
     {
         var self = NativeMethods.FromUserData(userData);
         self?.OnMessageNative(NativeMethods.PtrToString(bodyUtf8), NativeMethods.PtrToString(originUtf8));
     }
 
-    [MonoPInvokeCallback(typeof(NativeMethods.DownloadCb))]
+    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
     private static void DownloadTrampoline(IntPtr userData, IntPtr urlUtf8, IntPtr suggestedFileNameUtf8, IntPtr mimeTypeUtf8, long contentLength)
     {
         var self = NativeMethods.FromUserData(userData);
@@ -579,7 +572,7 @@ internal sealed partial class iOSWebViewAdapter : IWebViewAdapter, INativeWebVie
             contentLength);
     }
 
-    [MonoPInvokeCallback(typeof(NativeMethods.PermissionCb))]
+    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
     private static unsafe void PermissionTrampoline(IntPtr userData, int permissionKind, IntPtr originUtf8, int* outState)
     {
         var self = NativeMethods.FromUserData(userData);
@@ -589,22 +582,23 @@ internal sealed partial class iOSWebViewAdapter : IWebViewAdapter, INativeWebVie
         }
     }
 
-    [MonoPInvokeCallback(typeof(NativeMethods.SchemeRequestCb))]
-    private static unsafe bool SchemeRequestTrampoline(
+    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
+    private static unsafe byte SchemeRequestTrampoline(
         IntPtr userData, IntPtr urlUtf8, IntPtr methodUtf8,
         IntPtr* outResponseData, long* outResponseLength, IntPtr* outMimeTypeUtf8, int* outStatusCode)
     {
         var self = NativeMethods.FromUserData(userData);
-        if (self is null) return false;
+        if (self is null) return 0;
         return self.OnSchemeRequestNative(
             NativeMethods.PtrToString(urlUtf8),
             NativeMethods.PtrToString(methodUtf8),
-            outResponseData, outResponseLength, outMimeTypeUtf8, outStatusCode);
+            outResponseData, outResponseLength, outMimeTypeUtf8, outStatusCode)
+            ? (byte)1 : (byte)0;
     }
 
     // ==================== IDragDropAdapter trampolines ====================
 
-    [MonoPInvokeCallback(typeof(NativeMethods.DragEnteredCb))]
+    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
     private static void DragEnteredTrampoline(IntPtr userData, IntPtr filesJsonUtf8, IntPtr textUtf8, IntPtr htmlUtf8, IntPtr uriUtf8, double x, double y)
     {
         var self = NativeMethods.FromUserData(userData);
@@ -620,7 +614,7 @@ internal sealed partial class iOSWebViewAdapter : IWebViewAdapter, INativeWebVie
         });
     }
 
-    [MonoPInvokeCallback(typeof(NativeMethods.DragUpdatedCb))]
+    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
     private static void DragUpdatedTrampoline(IntPtr userData, double x, double y)
     {
         var self = NativeMethods.FromUserData(userData);
@@ -635,14 +629,14 @@ internal sealed partial class iOSWebViewAdapter : IWebViewAdapter, INativeWebVie
         });
     }
 
-    [MonoPInvokeCallback(typeof(NativeMethods.DragExitedCb))]
+    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
     private static void DragExitedTrampoline(IntPtr userData)
     {
         var self = NativeMethods.FromUserData(userData);
         self?.DragLeft?.Invoke(self, EventArgs.Empty);
     }
 
-    [MonoPInvokeCallback(typeof(NativeMethods.DropPerformedCb))]
+    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
     private static void DropPerformedTrampoline(IntPtr userData, IntPtr filesJsonUtf8, IntPtr textUtf8, IntPtr htmlUtf8, IntPtr uriUtf8, double x, double y)
     {
         var self = NativeMethods.FromUserData(userData);
@@ -687,7 +681,7 @@ internal sealed partial class iOSWebViewAdapter : IWebViewAdapter, INativeWebVie
         return payload;
     }
 
-    [MonoPInvokeCallback(typeof(NativeMethods.CookiesGetCb))]
+    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
     private static void CookiesGetTrampoline(IntPtr context, IntPtr jsonUtf8)
     {
         var h = GCHandle.FromIntPtr(context);
@@ -706,14 +700,14 @@ internal sealed partial class iOSWebViewAdapter : IWebViewAdapter, INativeWebVie
         }
     }
 
-    [MonoPInvokeCallback(typeof(NativeMethods.CookieOpCb))]
-    private static void CookieOpTrampoline(IntPtr context, bool success, IntPtr errorUtf8)
+    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
+    private static void CookieOpTrampoline(IntPtr context, byte success, IntPtr errorUtf8)
     {
         var h = GCHandle.FromIntPtr(context);
         var t = (TaskCompletionSource)h.Target!;
         h.Free();
 
-        if (success)
+        if (success != 0)
             t.TrySetResult();
         else
             t.TrySetException(new InvalidOperationException(NativeMethods.PtrToString(errorUtf8)));
@@ -990,47 +984,9 @@ internal sealed partial class iOSWebViewAdapter : IWebViewAdapter, INativeWebVie
         internal static string? PtrToStringNullable(IntPtr ptr)
             => ptr == IntPtr.Zero ? null : Marshal.PtrToStringUTF8(ptr);
 
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        internal delegate void PolicyRequestCb(IntPtr userData, ulong requestId, IntPtr urlUtf8, byte isMainFrame, byte isNewWindow, int navigationType);
-
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        internal delegate void NavigationCompletedCb(IntPtr userData, IntPtr urlUtf8, int status, long errorCode, IntPtr errorMessageUtf8);
-
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        internal delegate void ScriptResultCb(IntPtr userData, ulong requestId, IntPtr resultUtf8, IntPtr errorMessageUtf8);
-
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        internal delegate void MessageCb(IntPtr userData, IntPtr bodyUtf8, IntPtr originUtf8);
-
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        internal delegate void DownloadCb(IntPtr userData, IntPtr urlUtf8, IntPtr suggestedFileNameUtf8, IntPtr mimeTypeUtf8, long contentLength);
-
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        internal unsafe delegate void PermissionCb(IntPtr userData, int permissionKind, IntPtr originUtf8, int* outState);
-
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        [return: MarshalAs(UnmanagedType.I1)]
-        internal unsafe delegate bool SchemeRequestCb(
-            IntPtr userData,
-            IntPtr urlUtf8,
-            IntPtr methodUtf8,
-            IntPtr* outResponseData,
-            long* outResponseLength,
-            IntPtr* outMimeTypeUtf8,
-            int* outStatusCode);
-
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        internal delegate void DragEnteredCb(IntPtr userData, IntPtr filesJsonUtf8, IntPtr textUtf8, IntPtr htmlUtf8, IntPtr uriUtf8, double x, double y);
-
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        internal delegate void DragUpdatedCb(IntPtr userData, double x, double y);
-
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        internal delegate void DragExitedCb(IntPtr userData);
-
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        internal delegate void DropPerformedCb(IntPtr userData, IntPtr filesJsonUtf8, IntPtr textUtf8, IntPtr htmlUtf8, IntPtr uriUtf8, double x, double y);
-
+        // Native callback signatures are expressed directly as `delegate* unmanaged[Cdecl]<>`
+        // function pointer types where needed. No managed delegate declarations are required
+        // because all trampolines are [UnmanagedCallersOnly] static methods (see adapter).
         [StructLayout(LayoutKind.Sequential)]
         internal struct AgWkCallbacks
         {
@@ -1046,13 +1002,6 @@ internal sealed partial class iOSWebViewAdapter : IWebViewAdapter, INativeWebVie
             public IntPtr on_drag_exited;
             public IntPtr on_drop_performed;
         }
-
-        // Cookie management
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        internal delegate void CookiesGetCb(IntPtr context, IntPtr jsonUtf8);
-
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        internal delegate void CookieOpCb(IntPtr context, [MarshalAs(UnmanagedType.I1)] bool success, IntPtr errorUtf8);
 
         [LibraryImport("__Internal", EntryPoint = "ag_wk_create")]
         [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
@@ -1124,32 +1073,39 @@ internal sealed partial class iOSWebViewAdapter : IWebViewAdapter, INativeWebVie
         [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
         internal static partial IntPtr GetWebViewHandle(IntPtr handle);
 
-        // NOTE: Managed-delegate P/Invokes below intentionally retain DllImport. LibraryImport does not
-        // support marshalling Delegate types (SYSLIB1051). Migrating would require converting the
-        // UnmanagedFunctionPointer delegates into `delegate* unmanaged<>` function pointers throughout the
-        // call sites and GCHandle lifetime management logic. That rework is scheduled for Phase 3 and has
-        // no AOT benefit at this stage because the delegate-based stubs already flow through runtime marshalling.
-        [DllImport("__Internal", EntryPoint = "ag_wk_cookies_get", CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void CookiesGet(IntPtr handle, [MarshalAs(UnmanagedType.LPUTF8Str)] string url, CookiesGetCb callback, IntPtr context);
+        // Async callbacks below use `delegate* unmanaged[Cdecl]<>` so LibraryImport (source-
+        // generated P/Invoke) can statically validate the signatures. Paired trampolines are
+        // defined on iOSWebViewAdapter with [UnmanagedCallersOnly(CallConvs = [CallConvCdecl])].
+        [LibraryImport("__Internal", EntryPoint = "ag_wk_cookies_get", StringMarshalling = StringMarshalling.Utf8)]
+        [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+        internal static unsafe partial void CookiesGet(
+            IntPtr handle, string url,
+            delegate* unmanaged[Cdecl]<IntPtr, IntPtr, void> callback,
+            IntPtr context);
 
-        [DllImport("__Internal", EntryPoint = "ag_wk_cookie_set", CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void CookieSet(IntPtr handle,
-            [MarshalAs(UnmanagedType.LPUTF8Str)] string name,
-            [MarshalAs(UnmanagedType.LPUTF8Str)] string value,
-            [MarshalAs(UnmanagedType.LPUTF8Str)] string domain,
-            [MarshalAs(UnmanagedType.LPUTF8Str)] string path,
-            double expiresUnix, [MarshalAs(UnmanagedType.I1)] bool isSecure, [MarshalAs(UnmanagedType.I1)] bool isHttpOnly,
-            CookieOpCb callback, IntPtr context);
+        [LibraryImport("__Internal", EntryPoint = "ag_wk_cookie_set", StringMarshalling = StringMarshalling.Utf8)]
+        [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+        internal static unsafe partial void CookieSet(IntPtr handle,
+            string name, string value, string domain, string path,
+            double expiresUnix,
+            [MarshalAs(UnmanagedType.I1)] bool isSecure,
+            [MarshalAs(UnmanagedType.I1)] bool isHttpOnly,
+            delegate* unmanaged[Cdecl]<IntPtr, byte, IntPtr, void> callback,
+            IntPtr context);
 
-        [DllImport("__Internal", EntryPoint = "ag_wk_cookie_delete", CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void CookieDelete(IntPtr handle,
-            [MarshalAs(UnmanagedType.LPUTF8Str)] string name,
-            [MarshalAs(UnmanagedType.LPUTF8Str)] string domain,
-            [MarshalAs(UnmanagedType.LPUTF8Str)] string path,
-            CookieOpCb callback, IntPtr context);
+        [LibraryImport("__Internal", EntryPoint = "ag_wk_cookie_delete", StringMarshalling = StringMarshalling.Utf8)]
+        [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+        internal static unsafe partial void CookieDelete(IntPtr handle,
+            string name, string domain, string path,
+            delegate* unmanaged[Cdecl]<IntPtr, byte, IntPtr, void> callback,
+            IntPtr context);
 
-        [DllImport("__Internal", EntryPoint = "ag_wk_cookies_clear_all", CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void CookiesClearAll(IntPtr handle, CookieOpCb callback, IntPtr context);
+        [LibraryImport("__Internal", EntryPoint = "ag_wk_cookies_clear_all")]
+        [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+        internal static unsafe partial void CookiesClearAll(
+            IntPtr handle,
+            delegate* unmanaged[Cdecl]<IntPtr, byte, IntPtr, void> callback,
+            IntPtr context);
 
         [LibraryImport("__Internal", EntryPoint = "ag_wk_set_enable_dev_tools")]
         [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
@@ -1163,30 +1119,28 @@ internal sealed partial class iOSWebViewAdapter : IWebViewAdapter, INativeWebVie
         [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
         internal static partial void SetUserAgent(IntPtr handle, string? userAgent);
 
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        internal delegate void ScreenshotCb(IntPtr context, IntPtr pngData, uint pngLen);
+        [LibraryImport("__Internal", EntryPoint = "ag_wk_capture_screenshot")]
+        [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+        internal static unsafe partial void CaptureScreenshot(
+            IntPtr handle,
+            delegate* unmanaged[Cdecl]<IntPtr, IntPtr, uint, void> callback,
+            IntPtr context);
 
-        // Managed-delegate P/Invoke — retained as DllImport (see cookies note above).
-        [DllImport("__Internal", EntryPoint = "ag_wk_capture_screenshot", CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void CaptureScreenshot(IntPtr handle, ScreenshotCb callback, IntPtr context);
+        [LibraryImport("__Internal", EntryPoint = "ag_wk_print_to_pdf")]
+        [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+        internal static unsafe partial void PrintToPdf(
+            IntPtr handle,
+            delegate* unmanaged[Cdecl]<IntPtr, IntPtr, uint, void> callback,
+            IntPtr context);
 
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        internal delegate void PdfCb(IntPtr context, IntPtr pdfData, uint pdfLen);
-
-        // Managed-delegate P/Invoke — retained as DllImport (see cookies note above).
-        [DllImport("__Internal", EntryPoint = "ag_wk_print_to_pdf", CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void PrintToPdf(IntPtr handle, PdfCb callback, IntPtr context);
-
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        internal delegate void FindCb(IntPtr context, int activeMatchIndex, int totalMatches);
-
-        // Managed-delegate P/Invoke — retained as DllImport (see cookies note above).
-        [DllImport("__Internal", EntryPoint = "ag_wk_find_text", CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void FindText(IntPtr handle,
-            [MarshalAs(UnmanagedType.LPUTF8Str)] string text,
+        [LibraryImport("__Internal", EntryPoint = "ag_wk_find_text", StringMarshalling = StringMarshalling.Utf8)]
+        [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+        internal static unsafe partial void FindText(IntPtr handle,
+            string text,
             [MarshalAs(UnmanagedType.I1)] bool caseSensitive,
             [MarshalAs(UnmanagedType.I1)] bool forward,
-            FindCb callback, IntPtr context);
+            delegate* unmanaged[Cdecl]<IntPtr, int, int, void> callback,
+            IntPtr context);
 
         [LibraryImport("__Internal", EntryPoint = "ag_wk_stop_find")]
         [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
@@ -1236,11 +1190,14 @@ internal sealed partial class iOSWebViewAdapter : IWebViewAdapter, INativeWebVie
         var tcs = new TaskCompletionSource<byte[]>(TaskCreationOptions.RunContinuationsAsynchronously);
         var handle = GCHandle.Alloc(tcs);
 
-        NativeMethods.CaptureScreenshot(_native, OnScreenshotComplete, GCHandle.ToIntPtr(handle));
+        unsafe
+        {
+            NativeMethods.CaptureScreenshot(_native, &OnScreenshotComplete, GCHandle.ToIntPtr(handle));
+        }
         return tcs.Task;
     }
 
-    [MonoPInvokeCallback(typeof(NativeMethods.ScreenshotCb))]
+    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
     private static void OnScreenshotComplete(IntPtr context, IntPtr pngData, uint pngLen)
     {
         var handle = GCHandle.FromIntPtr(context);
@@ -1266,11 +1223,14 @@ internal sealed partial class iOSWebViewAdapter : IWebViewAdapter, INativeWebVie
         var tcs = new TaskCompletionSource<byte[]>(TaskCreationOptions.RunContinuationsAsynchronously);
         var handle = GCHandle.Alloc(tcs);
 
-        NativeMethods.PrintToPdf(_native, OnPdfComplete, GCHandle.ToIntPtr(handle));
+        unsafe
+        {
+            NativeMethods.PrintToPdf(_native, &OnPdfComplete, GCHandle.ToIntPtr(handle));
+        }
         return tcs.Task;
     }
 
-    [MonoPInvokeCallback(typeof(NativeMethods.PdfCb))]
+    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
     private static void OnPdfComplete(IntPtr context, IntPtr pdfData, uint pdfLen)
     {
         var handle = GCHandle.FromIntPtr(context);
@@ -1299,11 +1259,14 @@ internal sealed partial class iOSWebViewAdapter : IWebViewAdapter, INativeWebVie
         var caseSensitive = options?.CaseSensitive ?? false;
         var forward = options?.Forward ?? true;
 
-        NativeMethods.FindText(_native, text, caseSensitive, forward, OnFindComplete, GCHandle.ToIntPtr(handle));
+        unsafe
+        {
+            NativeMethods.FindText(_native, text, caseSensitive, forward, &OnFindComplete, GCHandle.ToIntPtr(handle));
+        }
         return tcs.Task;
     }
 
-    [MonoPInvokeCallback(typeof(NativeMethods.FindCb))]
+    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
     private static void OnFindComplete(IntPtr context, int activeMatchIndex, int totalMatches)
     {
         var handle = GCHandle.FromIntPtr(context);
