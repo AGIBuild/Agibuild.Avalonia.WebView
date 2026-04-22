@@ -23,16 +23,16 @@
     <AgibuildFuloraWebView2Version>1.0.3856.49</AgibuildFuloraWebView2Version>
   </PropertyGroup>
   <ItemGroup Label="Avalonia">
-    <PackageVersion Include="Avalonia" Version="12.0.0-rc1" />
-    <PackageVersion Include="Avalonia.Android" Version="12.0.0-preview2" />
-    <PackageVersion Include="Avalonia.Browser" Version="12.0.0-preview2" />
-    <PackageVersion Include="Avalonia.Desktop" Version="12.0.0-rc1" />
-    <PackageVersion Include="Avalonia.Diagnostics" Version="12.0.0-rc1" />
-    <PackageVersion Include="Avalonia.Fonts.Inter" Version="12.0.0-rc1" />
-    <PackageVersion Include="Avalonia.HarfBuzz" Version="12.0.0-rc1" />
-    <PackageVersion Include="Avalonia.Headless" Version="12.0.0-rc1" />
-    <PackageVersion Include="Avalonia.iOS" Version="12.0.0-preview2" />
-    <PackageVersion Include="Avalonia.Themes.Fluent" Version="12.0.0-rc1" />
+    <PackageVersion Include="Avalonia" Version="12.0.1" />
+    <PackageVersion Include="Avalonia.Android" Version="12.0.1" />
+    <PackageVersion Include="Avalonia.Browser" Version="12.0.1" />
+    <PackageVersion Include="Avalonia.Desktop" Version="12.0.1" />
+    <PackageVersion Include="Avalonia.Diagnostics" Version="12.0.1" />
+    <PackageVersion Include="Avalonia.Fonts.Inter" Version="12.0.1" />
+    <PackageVersion Include="Avalonia.HarfBuzz" Version="12.0.1" />
+    <PackageVersion Include="Avalonia.Headless" Version="12.0.1" />
+    <PackageVersion Include="Avalonia.iOS" Version="12.0.1" />
+    <PackageVersion Include="Avalonia.Themes.Fluent" Version="12.0.1" />
   </ItemGroup>
   <ItemGroup Label="MVVM and logging">
     <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.0" />
@@ -40,17 +40,17 @@
     <PackageVersion Include="Serilog.Sinks.File" Version="8.0.0-nblumhardt-02322" />
   </ItemGroup>
   <ItemGroup Label="Microsoft.Extensions">
-    <PackageVersion Include="Microsoft.Extensions.AI" Version="10.4.1" />
-    <PackageVersion Include="Microsoft.Extensions.AI.Abstractions" Version="10.4.1" />
-    <PackageVersion Include="Microsoft.Extensions.AI.OpenAI" Version="10.4.1" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="11.0.0-preview.2.26159.112" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="11.0.0-preview.2.26159.112" />
-    <PackageVersion Include="Microsoft.Extensions.Http" Version="11.0.0-preview.2.26159.112" />
-    <PackageVersion Include="Microsoft.Extensions.Logging" Version="11.0.0-preview.2.26159.112" />
-    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="11.0.0-preview.2.26159.112" />
-    <PackageVersion Include="Microsoft.Extensions.Options" Version="11.0.0-preview.2.26159.112" />
-    <PackageVersion Include="Microsoft.Extensions.Options.DataAnnotations" Version="11.0.0-preview.2.26159.112" />
-    <PackageVersion Include="Microsoft.Extensions.Resilience" Version="10.4.0" />
+    <PackageVersion Include="Microsoft.Extensions.AI" Version="10.5.0" />
+    <PackageVersion Include="Microsoft.Extensions.AI.Abstractions" Version="10.5.0" />
+    <PackageVersion Include="Microsoft.Extensions.AI.OpenAI" Version="10.5.0" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="11.0.0-preview.3.26207.106" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="11.0.0-preview.3.26207.106" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="11.0.0-preview.3.26207.106" />
+    <PackageVersion Include="Microsoft.Extensions.Logging" Version="11.0.0-preview.3.26207.106" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="11.0.0-preview.3.26207.106" />
+    <PackageVersion Include="Microsoft.Extensions.Options" Version="11.0.0-preview.3.26207.106" />
+    <PackageVersion Include="Microsoft.Extensions.Options.DataAnnotations" Version="11.0.0-preview.3.26207.106" />
+    <PackageVersion Include="Microsoft.Extensions.Resilience" Version="10.5.0" />
   </ItemGroup>
   <ItemGroup Label="Roslyn and code analysis">
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.3.0" />
@@ -63,17 +63,17 @@
     <PackageVersion Include="Xamarin.AndroidX.Compose.Runtime.Annotation.Jvm" Version="1.10.4.1" />
     <PackageVersion Include="Xamarin.AndroidX.Core.SplashScreen" Version="1.2.0.2" />
     <PackageVersion Include="Xamarin.AndroidX.Lifecycle.Process" Version="2.10.0.2" />
-    <PackageVersion Include="System.CommandLine" Version="3.0.0-preview.2.26159.112" />
+    <PackageVersion Include="System.CommandLine" Version="3.0.0-preview.3.26207.106" />
   </ItemGroup>
   <ItemGroup Label="AI providers">
-    <PackageVersion Include="OllamaSharp" Version="5.4.23" />
+    <PackageVersion Include="OllamaSharp" Version="5.4.25" />
   </ItemGroup>
   <ItemGroup Label="Telemetry">
     <PackageVersion Include="OpenTelemetry.Api" Version="1.15.0" />
     <PackageVersion Include="Sentry" Version="6.2.0" />
   </ItemGroup>
   <ItemGroup Label="Data">
-    <PackageVersion Include="Microsoft.Data.Sqlite" Version="10.0.5" />
+    <PackageVersion Include="Microsoft.Data.Sqlite" Version="10.0.6" />
   </ItemGroup>
   <ItemGroup Label="Testing">
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.3.0" />
@@ -91,7 +91,7 @@
   </ItemGroup>
   <ItemGroup Label="Build tooling">
     <PackageVersion Include="Nuke.Common" Version="10.1.0" />
-    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="11.0.100-preview.2.26159.112" />
+    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="11.0.100-preview.3.26207.106" />
   </ItemGroup>
   <ItemGroup Label="Transitive security pins">
     <!--
