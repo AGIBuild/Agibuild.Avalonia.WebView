@@ -247,6 +247,20 @@ Any spike fails → **stop**, do not start Phase 1, escalate to human with spike
 
 ## Phase 1 — Macios Interop Foundation (vendor + adapt)
 
+> **Vendoring policy (applies to ALL Phase 1, 2, 3 vendor tasks — added 2026-04-25 after T2 dry-run):**
+>
+> The repo enforces `EnforceCodeStyleInBuild=true` + `TreatWarningsAsErrors=true` (set in `Directory.Build.props`). Upstream Avalonia.Controls.WebView is style-permissive (e.g., omits explicit `private` on members where it is the implicit default), which collides with our enforced style rules. Fixing this at the repo level (suppressing IDE0040 for `Macios/**`) would violate the project's "禁止不解决root cause 而掩盖警告" rule and ship code that's stylistically worse than the rest of the repo.
+>
+> **Authorized vendor modifications (in addition to SPDX header + namespace rename):**
+>
+> 1. **Explicit access modifiers** to satisfy IDE0040 (`Accessibility modifiers required`). The implementer MAY add `private` (or whichever modifier is the C# implicit default for that declaration site) to fields, methods, properties, nested types, and operators. The added modifier MUST match what C# would default to implicitly — i.e., this is a no-behavior-change normalization, not a visibility change.
+> 2. **No other style fixes.** Do NOT reorder usings, do NOT change formatting, do NOT rename identifiers, do NOT remove unused usings, do NOT split or merge files. Each style normalization must be the minimum required to satisfy a specific build-error analyser rule.
+> 3. **Discovery procedure:** Each implementer MUST first run the build smoke and let the compiler enumerate the exact lines that fail. Patch only those lines. No speculative or repo-wide changes.
+> 4. **Tracking:** No per-file modification log is required (the SPDX header already declares "Vendored from Avalonia.Controls.WebView; see Macios/ATTRIBUTION.md"). The vendoring SHA in ATTRIBUTION.md is sufficient — anyone re-vendoring at a future SHA will re-run the build smoke and re-apply identical normalizations.
+> 5. **Unauthorized fallbacks (forbidden):** Do NOT add `<NoWarn>IDE0040</NoWarn>`. Do NOT edit `.editorconfig` to relax `dotnet_diagnostic.IDE0040.severity` for `Macios/**`. Do NOT disable `EnforceCodeStyleInBuild` or `TreatWarningsAsErrors` for the project.
+>
+> If a different analyser rule (other than IDE0040) blocks build smoke during a vendor task, the implementer MUST report `BLOCKED` with the exact rule ID and lines, NOT silently apply a fix outside the authorized list above. The plan owner will then either expand this authorization list or reject the rule.
+
 ### Task 1: Create `Macios/` directory tree and Avalonia attribution
 
 **Files:**
