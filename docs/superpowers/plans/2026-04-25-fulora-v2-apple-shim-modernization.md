@@ -880,7 +880,62 @@ git commit -m "test(apple): macOS-host sanity tests for Macios.Interop foundatio
 >
 > 6. **BlockLiteral trampoline pattern documented** (IMPORTANT I4): T9's "implemented via BlockLiteral callbacks bridged to TaskCompletionSource<T>" oversimplifies — the vendored `BlockLiteral` only exposes `GetBlockForFunctionPointer(IntPtr callback, IntPtr state)` / `GetStackBlockForFunctionPointer(...)`. Implementers must supply `[UnmanagedCallersOnly]` trampoline functions + a `GCHandle` to keep the `TaskCompletionSource<T>` alive across the native boundary. **New Step 1.5 added to T9** referencing the canonical pattern (existing `MacOSWebViewAdapter.PInvoke.cs` cookie trampolines).
 >
-> **Deferred (NOT amended now):** Main-thread dispatch (IMPORTANT I2 — WebKit UI types must be instantiated on main thread): xUnit smoke tests may flake; if they do, add the main-thread dispatch helper in a follow-up commit. Documented as a known watch-item rather than a pre-emptive change to keep the diff focused.
+> **Superseded by AMENDMENT #9:** Main-thread dispatch (IMPORTANT I2) was originally deferred. T6/T8 implementation proved WebKit object initialization can deadlock from xUnit worker threads. AMENDMENT #9 replaces in-process WebKit smoke tests with a child-process smoke harness whose `Main` method owns the process main thread.
+
+> ### AMENDMENT #9 — WebKit smoke harness after T8 main-thread deadlock (2026-04-25)
+>
+> T8 implementation empirically proved that `WKUserScript` initialization hangs under xUnit's worker-thread execution model. A secondary "fake main" thread with an AppKit/CFRunLoop pump is insufficient because WebKit synchronizes with the **process main GCD queue**. xUnit v3 runner configuration can serialize tests but does not move test bodies onto the process main thread. Therefore:
+>
+> 1. **Add a Phase 2 prerequisite smoke harness** before T8: `tests/Agibuild.Fulora.Platforms.WebKitSmokeHarness/Agibuild.Fulora.Platforms.WebKitSmokeHarness.csproj` + `Program.cs`. The harness is a small `net10.0` console app. WebKit smoke cases run in `Program.Main`, so WebKit initialization happens on the process main thread by construction.
+> 2. **xUnit WebKit tests become process orchestrators only**: they must not directly construct `WKWebView`, `WKUserScript`, `WKUserContentController`, `WKWebsiteDataStore`, `WKHTTPCookieStore`, `WKURLSchemeTask`, or delegate runtime classes. They launch the harness with `dotnet <harness>.dll --case <case-id>`, enforce a timeout, and assert on exit code + structured stdout.
+> 3. **T6 follow-up**: replace the selector-only `WKWebViewSmokeTests` with a harness-backed e2e case that constructs `WKWebViewConfiguration` + `WKWebView` on the harness main thread.
+> 4. **T8/T9/T10**: all WebKit object-construction and async callback smoke tests use harness cases. Pure class/protocol/selector checks may remain in xUnit only when they do not initialize WebKit objects.
+> 5. **Phase 3 Prerequisite from AMENDMENT #8 is superseded**: do NOT implement the secondary-thread `MainThreadFixture` as written. Delegate e2e tests in T12/T13/T14 also use the same child-process harness. Selector-presence-only tests that do not instantiate WebKit UI objects may stay in xUnit.
+> 6. **InternalsVisibleTo**: add `Agibuild.Fulora.Platforms.WebKitSmokeHarness` to `Agibuild.Fulora.Platforms.csproj` so the harness can exercise internal Macios interop wrappers without making them public package API.
+>
+> Harness contract:
+>
+> ```bash
+> dotnet tests/Agibuild.Fulora.Platforms.WebKitSmokeHarness/bin/Release/net10.0/Agibuild.Fulora.Platforms.WebKitSmokeHarness.dll --case t8-user-content-controller
+> ```
+>
+> Expected stdout is a single structured line:
+>
+> ```text
+> {"case":"t8-user-content-controller","ok":true}
+> ```
+>
+> Exit code `0` means success. Non-zero exit codes fail CI and must print exception details to stderr. Tests must kill the child process on timeout instead of letting WebKit hangs stall the test host.
+
+### Phase 2 Prerequisite (AMENDMENT #9): WebKit smoke harness
+
+**Files:**
+- Create: `tests/Agibuild.Fulora.Platforms.WebKitSmokeHarness/Agibuild.Fulora.Platforms.WebKitSmokeHarness.csproj`
+- Create: `tests/Agibuild.Fulora.Platforms.WebKitSmokeHarness/Program.cs`
+- Modify: `src/Agibuild.Fulora.Platforms/Agibuild.Fulora.Platforms.csproj` (`InternalsVisibleTo`)
+- Modify: `Agibuild.Fulora.slnx`
+
+Harness rules:
+
+- WebKit cases run only from `Program.Main`; do not dispatch initial WebKit object construction to thread-pool threads.
+- Cases are selected by `--case <id>`.
+- Success prints `{"case":"<id>","ok":true}` and returns `0`.
+- Failure prints exception details to stderr and returns non-zero.
+- The xUnit project may reference the harness project with `ReferenceOutputAssembly="false"` so normal restore/build includes it, but xUnit assertions must interact with it only through `Process.Start`.
+
+Initial cases:
+
+- `t6-webview-init`: constructs `WKWebViewConfiguration.Create()` and `new WKWebView(config)`.
+- `t8-user-content-controller`: constructs `WKUserContentController`, constructs a `WKUserScript`, calls `AddUserScript` and `RemoveAllUserScripts`.
+
+Commit:
+
+```bash
+git add tests/Agibuild.Fulora.Platforms.WebKitSmokeHarness/ \
+        src/Agibuild.Fulora.Platforms/Agibuild.Fulora.Platforms.csproj \
+        Agibuild.Fulora.slnx
+git commit -m "test(apple): add WebKit smoke harness for main-thread scenarios"
+```
 
 ### Task 6 (AMENDMENT #7 — merged with old T7): WKWebView + Configuration + Preferences vendoring + smoke test
 
