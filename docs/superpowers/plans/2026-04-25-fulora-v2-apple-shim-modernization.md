@@ -312,13 +312,21 @@ git commit -m "chore(apple): scaffold Macios/ namespace with Avalonia MIT attrib
 
 ---
 
-### Task 2: Vendor `Libobjc.cs`, `NSObject.cs`, `NSManagedObjectBase.cs`
+> **AMENDMENT (2026-04-25, applied during Phase 1 execution):** The original T2/T3 split (T2 = Libobjc + NSObject + NSManagedObjectBase; T3 = BlockLiteral) is **infeasible** because `Libobjc.cs` declares
+> `[LibraryImport(libobjc)] public static partial IntPtr _Block_copy(BlockLiteral* block);` (line 15 in upstream `4e16564`), which references `BlockLiteral`. T2's Step 5 build smoke would fail with `CS0246: BlockLiteral`. Suppressing or commenting the `_Block_copy` line during T2 would be a defensive temporary-broken-state hack that violates the project's "no defensive compatibility hacks" rule.
+>
+> **Re-grouping (preserves task numbers, swaps file ownership):**
+> - **T2 (low-level interop bedrock)** = `Libobjc.cs` + `BlockLiteral.cs` — the coupled pair that bottoms out the unmanaged surface.
+> - **T3 (managed object base classes)** = `NSObject.cs` + `NSManagedObjectBase.cs` — depend on Libobjc but not on BlockLiteral; can compile after T2 lands.
+>
+> Both tasks remain independent build-clean checkpoints. ATTRIBUTION.md row order is unchanged (Libobjc, NSObject, NSManagedObjectBase, BlockLiteral) for upstream-path stability — T2 fills 2 SHA rows (Libobjc + BlockLiteral, the latter despite being row 4), T3 fills the other 2 (NSObject, NSManagedObjectBase).
+
+### Task 2: Vendor `Libobjc.cs` + `BlockLiteral.cs` (low-level interop bedrock)
 
 **Files:**
 - Copy from: `https://github.com/AvaloniaUI/Avalonia.Controls.WebView` `main` branch (record commit SHA)
 - Create: `src/Agibuild.Fulora.Platforms/Macios/Interop/Libobjc.cs`
-- Create: `src/Agibuild.Fulora.Platforms/Macios/Interop/NSObject.cs`
-- Create: `src/Agibuild.Fulora.Platforms/Macios/Interop/NSManagedObjectBase.cs`
+- Create: `src/Agibuild.Fulora.Platforms/Macios/Interop/BlockLiteral.cs`
 
 - [ ] **Step 1: Clone Avalonia.Controls.WebView at pinned SHA**
 
@@ -331,20 +339,18 @@ git rev-parse HEAD > /tmp/avalonia-vendor-sha.txt
 cat /tmp/avalonia-vendor-sha.txt
 ```
 
-- [ ] **Step 2: Copy three files into `Macios/Interop/`**
+- [ ] **Step 2: Copy two files into `Macios/Interop/`**
 
 ```bash
 cp /tmp/avalonia-webview/src/Avalonia.Controls.WebView.Core/Macios/Interop/Libobjc.cs \
    src/Agibuild.Fulora.Platforms/Macios/Interop/Libobjc.cs
-cp /tmp/avalonia-webview/src/Avalonia.Controls.WebView.Core/Macios/Interop/NSObject.cs \
-   src/Agibuild.Fulora.Platforms/Macios/Interop/NSObject.cs
-cp /tmp/avalonia-webview/src/Avalonia.Controls.WebView.Core/Macios/Interop/NSManagedObjectBase.cs \
-   src/Agibuild.Fulora.Platforms/Macios/Interop/NSManagedObjectBase.cs
+cp /tmp/avalonia-webview/src/Avalonia.Controls.WebView.Core/Macios/Interop/BlockLiteral.cs \
+   src/Agibuild.Fulora.Platforms/Macios/Interop/BlockLiteral.cs
 ```
 
 - [ ] **Step 3: Rename namespace + add SPDX header in each file**
 
-For each of the three files, replace:
+For each of the two files, replace:
 
 ```csharp
 namespace Avalonia.Controls.Macios.Interop;
@@ -365,7 +371,7 @@ Update any internal `using` of `Avalonia.Controls.Macios.*` to `Agibuild.Fulora.
 
 - [ ] **Step 4: Update ATTRIBUTION.md with vendor SHA**
 
-Replace `TBD` rows in `Macios/ATTRIBUTION.md` for these three files with the actual commit SHA from `/tmp/avalonia-vendor-sha.txt`.
+Replace `TBD` (and `TBD (filled in Task 2)`) cells in `Macios/ATTRIBUTION.md` for `Interop/Libobjc.cs` and `Interop/BlockLiteral.cs` with the commit SHA from `/tmp/avalonia-vendor-sha.txt`. Use the bare SHA (no parenthetical). Leave `NSObject.cs`, `NSManagedObjectBase.cs`, and Foundation/WebKit rows as `TBD` for later tasks.
 
 - [ ] **Step 5: Build smoke**
 
@@ -377,28 +383,31 @@ Expected: `Build succeeded. 0 Warning(s) 0 Error(s)`. (Files compile but are not
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src/Agibuild.Fulora.Platforms/Macios/Interop/{Libobjc,NSObject,NSManagedObjectBase}.cs \
+git add src/Agibuild.Fulora.Platforms/Macios/Interop/{Libobjc,BlockLiteral}.cs \
         src/Agibuild.Fulora.Platforms/Macios/ATTRIBUTION.md
-git commit -m "chore(apple): vendor Avalonia Libobjc/NSObject/NSManagedObjectBase"
+git commit -m "chore(apple): vendor Avalonia Libobjc + BlockLiteral interop bedrock"
 ```
 
 ---
 
-### Task 3: Vendor `BlockLiteral.cs`
+### Task 3: Vendor `NSObject.cs` + `NSManagedObjectBase.cs` (managed object base classes)
 
 **Files:**
-- Create: `src/Agibuild.Fulora.Platforms/Macios/Interop/BlockLiteral.cs`
+- Create: `src/Agibuild.Fulora.Platforms/Macios/Interop/NSObject.cs`
+- Create: `src/Agibuild.Fulora.Platforms/Macios/Interop/NSManagedObjectBase.cs`
 
-- [ ] **Step 1: Copy from upstream**
+- [ ] **Step 1: Copy two files from the T2-pinned upstream clone**
 
 ```bash
-cp /tmp/avalonia-webview/src/Avalonia.Controls.WebView.Core/Macios/Interop/BlockLiteral.cs \
-   src/Agibuild.Fulora.Platforms/Macios/Interop/BlockLiteral.cs
+cp /tmp/avalonia-webview/src/Avalonia.Controls.WebView.Core/Macios/Interop/NSObject.cs \
+   src/Agibuild.Fulora.Platforms/Macios/Interop/NSObject.cs
+cp /tmp/avalonia-webview/src/Avalonia.Controls.WebView.Core/Macios/Interop/NSManagedObjectBase.cs \
+   src/Agibuild.Fulora.Platforms/Macios/Interop/NSManagedObjectBase.cs
 ```
 
 - [ ] **Step 2: Apply same SPDX header + namespace rename pattern as Task 2 Step 3.**
 
-- [ ] **Step 3: Update ATTRIBUTION.md row** for `BlockLiteral.cs`.
+- [ ] **Step 3: Update ATTRIBUTION.md** — replace `TBD` for `Interop/NSObject.cs` and `Interop/NSManagedObjectBase.cs` with the same SHA (`cat /tmp/avalonia-vendor-sha.txt`).
 
 - [ ] **Step 4: Build smoke**
 
@@ -410,9 +419,9 @@ Expected: 0 errors / 0 warnings.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/Agibuild.Fulora.Platforms/Macios/Interop/BlockLiteral.cs \
+git add src/Agibuild.Fulora.Platforms/Macios/Interop/{NSObject,NSManagedObjectBase}.cs \
         src/Agibuild.Fulora.Platforms/Macios/ATTRIBUTION.md
-git commit -m "chore(apple): vendor Avalonia BlockLiteral"
+git commit -m "chore(apple): vendor Avalonia NSObject + NSManagedObjectBase managed wrappers"
 ```
 
 ---
