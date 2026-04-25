@@ -115,6 +115,9 @@ internal sealed partial class BuildTask : NukeBuild
     private static AbsolutePath CliUnitTestsProject =>
         TestsDirectory / "Agibuild.Fulora.Cli.UnitTests" / "Agibuild.Fulora.Cli.UnitTests.csproj";
 
+    private static AbsolutePath PlatformsUnitTestsProject =>
+        TestsDirectory / "Agibuild.Fulora.Platforms.UnitTests" / "Agibuild.Fulora.Platforms.UnitTests.csproj";
+
     private static AbsolutePath IntegrationTestsProject =>
         TestsDirectory / "Agibuild.Fulora.Integration.Tests.Automation"
         / "Agibuild.Fulora.Integration.Tests.Automation.csproj";
@@ -314,7 +317,7 @@ internal sealed partial class BuildTask : NukeBuild
 
     internal Target Ci => _ => _
         .Description("Full CI pipeline: compile → coverage → lane automation → validate package → pack.")
-        .DependsOn(Coverage, AutomationLaneReport, ValidatePackage, NugetPackageTest, PackTemplate);
+        .DependsOn(Coverage, MaciosUnitTests, AutomationLaneReport, ValidatePackage, NugetPackageTest, PackTemplate);
 
     internal Target CiMatrix => _ => _
         .Description("Cross-platform CI validation without package smoke/template packing.")

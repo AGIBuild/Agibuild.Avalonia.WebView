@@ -38,6 +38,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="Agibuild.Fulora.UnitTests" />
+    <InternalsVisibleTo Include="Agibuild.Fulora.Platforms.UnitTests" />
   </ItemGroup>
 
   <!-- ============================================================
