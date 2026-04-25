@@ -20,7 +20,7 @@ with their upstream paths so future upstream patches can be re-applied.
 | `Interop/Foundation/NSURLRequest.cs` | `src/Avalonia.Controls.WebView.Core/Macios/Interop/NSURLRequest.cs` | 4e16564d5c0d1c6b4ccc0ab35f69be75fe673a2e |
 | `Interop/Foundation/NSMutableURLRequest.cs` | `src/Avalonia.Controls.WebView.Core/Macios/Interop/NSMutableURLRequest.cs` | 4e16564d5c0d1c6b4ccc0ab35f69be75fe673a2e |
 | `Interop/Foundation/NSData.cs` | n/a | n/a (newly authored — see Foundation/NSData.cs SPDX header) |
-| `Interop/Foundation/NSDictionary.cs` | `src/Avalonia.Controls.WebView.Core/Macios/Interop/NSDictionary.cs` | 4e16564d5c0d1c6b4ccc0ab35f69be75fe673a2e |
+| `Interop/Foundation/NSDictionary.cs` | `src/Avalonia.Controls.WebView.Core/Macios/Interop/NSDictionary.cs` | 4e16564d5c0d1c6b4ccc0ab35f69be75fe673a2e (modified — see file header) |
 | `Interop/Foundation/NSArray.cs` | `src/Avalonia.Controls.WebView.Core/Macios/Interop/NSArray.cs` | 4e16564d5c0d1c6b4ccc0ab35f69be75fe673a2e |
 | `Interop/Foundation/NSDate.cs` | `src/Avalonia.Controls.WebView.Core/Macios/Interop/NSDate.cs` | 4e16564d5c0d1c6b4ccc0ab35f69be75fe673a2e |
 | `Interop/Foundation/NSNumber.cs` | `src/Avalonia.Controls.WebView.Core/Macios/Interop/NSNumber.cs` | 4e16564d5c0d1c6b4ccc0ab35f69be75fe673a2e |

@@ -12,7 +12,15 @@ namespace Agibuild.Fulora.Platforms.Macios.Interop.Foundation;
 internal class NSDictionary : NSObject
 {
     private static readonly IntPtr s_class = Libobjc.objc_getClass("NSDictionary");
-    private static readonly IntPtr s_count = Libobjc.objc_getClass("count");
+    // VENDOR REMOVAL (Fulora @ Avalonia SHA 4e16564): the upstream `s_count` field and the
+    // `Count` IntPtr property were dead code with a latent ABI bug. Upstream initialised
+    // `s_count = Libobjc.objc_getClass("count")` (a Class*) and then sent it as the SEL arg to
+    // `objc_msgSend`, which is undefined behaviour at runtime. The only upstream caller was
+    // `WKWebKitNativeHttpRequestHeaders.cs`, which Fulora does NOT vendor (we use the count via
+    // `CFDictionaryGetCount` in `AsStringDictionary` instead). Removing both members eliminates
+    // a footgun without changing observed behaviour. If a future upstream revision fixes the
+    // binding (e.g. switches to `sel_getUid("count")` + `nuint_objc_msgSend`), restore the
+    // member at re-vendor time and add a Phase 2 wrapper that uses it.
     private static readonly IntPtr s_dictionaryWithObjects = Libobjc.sel_getUid("dictionaryWithObjects:forKeys:count:");
     private static readonly nint s_ObjectForKey = Libobjc.sel_getUid("objectForKey:");
 
@@ -24,8 +32,6 @@ internal class NSDictionary : NSObject
     {
         return new NSDictionary(handle, false);
     }
-
-    public IntPtr Count => Libobjc.intptr_objc_msgSend(Handle, s_count);
 
     public nint ObjectForKey(nint key)
     {
