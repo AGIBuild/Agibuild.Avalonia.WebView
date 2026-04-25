@@ -3,6 +3,7 @@ using System.Runtime.Versioning;
 using System.Threading;
 using Agibuild.Fulora;
 using Agibuild.Fulora.Adapters.Abstractions;
+using Agibuild.Fulora.Security;
 using Microsoft.Web.WebView2.Core;
 
 namespace Agibuild.Fulora.Adapters.Windows;
@@ -95,6 +96,23 @@ internal sealed partial class WindowsWebViewAdapter : IWebViewAdapter, INativeWe
 
     // Custom scheme registrations (stored before Attach, applied during env creation)
     private IReadOnlyList<CustomSchemeRegistration>? _customSchemes;
+
+    private readonly INavigationSecurityHooks _securityHooks;
+
+    // WebView2 documents NavigationCompleted(SSL failure) before ServerCertificateErrorDetected; defer host-visible failure until cert metadata arrives, with a posted fallback if the cert event never follows.
+    private readonly Dictionary<string, (Guid NavigationId, CoreWebView2WebErrorStatus Status)> _deferredSslNavigationByUri =
+        new(StringComparer.OrdinalIgnoreCase);
+
+    public WindowsWebViewAdapter()
+        : this(DefaultNavigationSecurityHooks.Instance)
+    {
+    }
+
+    internal WindowsWebViewAdapter(INavigationSecurityHooks securityHooks)
+    {
+        ArgumentNullException.ThrowIfNull(securityHooks);
+        _securityHooks = securityHooks;
+    }
 
     public bool CanGoBack => _webView?.CanGoBack ?? false;
     public bool CanGoForward => _webView?.CanGoForward ?? false;
@@ -222,6 +240,7 @@ internal sealed partial class WindowsWebViewAdapter : IWebViewAdapter, INativeWe
                 _apiNavIds.Clear();
                 _completedNavIds.Clear();
                 _requestUriMap.Clear();
+                _deferredSslNavigationByUri.Clear();
                 _pendingApiNavigation = false;
             }
 
@@ -282,6 +301,7 @@ internal sealed partial class WindowsWebViewAdapter : IWebViewAdapter, INativeWe
             // Subscribe to events
             _webView.NavigationStarting += OnNavigationStarting;
             _webView.NavigationCompleted += OnNavigationCompleted;
+            _webView.ServerCertificateErrorDetected += OnServerCertificateErrorDetected;
             _webView.NewWindowRequested += OnNewWindowRequested;
             _webView.WebMessageReceived += OnWebMessageReceived;
             _webView.WebResourceRequested += OnWebResourceRequested;
@@ -421,6 +441,7 @@ internal sealed partial class WindowsWebViewAdapter : IWebViewAdapter, INativeWe
             {
                 _webView.NavigationStarting -= OnNavigationStarting;
                 _webView.NavigationCompleted -= OnNavigationCompleted;
+                _webView.ServerCertificateErrorDetected -= OnServerCertificateErrorDetected;
                 _webView.NewWindowRequested -= OnNewWindowRequested;
                 _webView.WebMessageReceived -= OnWebMessageReceived;
                 _webView.WebResourceRequested -= OnWebResourceRequested;
@@ -816,6 +837,11 @@ internal sealed partial class WindowsWebViewAdapter : IWebViewAdapter, INativeWe
 
             if (deferConnectionAbortedCompletion)
             {
+                if (trackedUri is not null)
+                {
+                    _deferredSslNavigationByUri.Remove(trackedUri.AbsoluteUri);
+                }
+
                 return;
             }
 
@@ -830,6 +856,11 @@ internal sealed partial class WindowsWebViewAdapter : IWebViewAdapter, INativeWe
 
         if (e.IsSuccess)
         {
+            lock (_navLock)
+            {
+                _deferredSslNavigationByUri.Remove(requestUri.AbsoluteUri);
+            }
+
             RaiseNavigationCompleted(navigationId, requestUri, NavigationCompletedStatus.Success, error: null);
             return;
         }
@@ -838,6 +869,11 @@ internal sealed partial class WindowsWebViewAdapter : IWebViewAdapter, INativeWe
 
         if (status == CoreWebView2WebErrorStatus.OperationCanceled)
         {
+            lock (_navLock)
+            {
+                _deferredSslNavigationByUri.Remove(requestUri.AbsoluteUri);
+            }
+
             RaiseNavigationCompleted(navigationId, requestUri, NavigationCompletedStatus.Canceled, error: null);
             return;
         }
@@ -848,15 +884,173 @@ internal sealed partial class WindowsWebViewAdapter : IWebViewAdapter, INativeWe
             // WebView2 may report an intermediate about:blank navigation as aborted
             // while transitioning into the final document (e.g., NavigateToString/baseUrl flows).
             // Do not surface this as a hard failure to callers.
+            lock (_navLock)
+            {
+                _deferredSslNavigationByUri.Remove(requestUri.AbsoluteUri);
+            }
+
             RaiseNavigationCompleted(navigationId, requestUri, NavigationCompletedStatus.Canceled, error: null);
             return;
         }
 
+        if (IsSslWebErrorStatus(status))
+        {
+            lock (_navLock)
+            {
+                _deferredSslNavigationByUri[requestUri.AbsoluteUri] = (navigationId, status);
+            }
+
+            QueueDeferredSslFallbackFlush(requestUri);
+            return;
+        }
+
         var errorMessage = $"Navigation failed: {status}";
-        Exception error = MapWebErrorStatus(status, errorMessage, navigationId, requestUri);
+        var error = MapWebErrorStatus(status, errorMessage, navigationId, requestUri);
 
         RaiseNavigationCompleted(navigationId, requestUri, NavigationCompletedStatus.Failure, error);
     }
+
+    private void OnServerCertificateErrorDetected(object? sender, CoreWebView2ServerCertificateErrorDetectedEventArgs e)
+    {
+        if (_detached) return;
+
+        if (string.IsNullOrWhiteSpace(e.RequestUri) ||
+            !Uri.TryCreate(e.RequestUri, UriKind.Absolute, out var requestUri))
+        {
+            return;
+        }
+
+        var host = requestUri.Host;
+        var summary = e.ErrorStatus.ToString();
+        var raw = (int)e.ErrorStatus;
+
+        string? subject = null;
+        string? issuer = null;
+        DateTimeOffset? validFrom = null;
+        DateTimeOffset? validTo = null;
+        var cert = e.ServerCertificate;
+        if (cert is not null)
+        {
+            if (!string.IsNullOrEmpty(cert.Subject))
+            {
+                subject = cert.Subject;
+            }
+
+            if (!string.IsNullOrEmpty(cert.Issuer))
+            {
+                issuer = cert.Issuer;
+            }
+
+            if (cert.ValidFrom != default)
+            {
+                validFrom = new DateTimeOffset(cert.ValidFrom);
+            }
+
+            if (cert.ValidTo != default)
+            {
+                validTo = new DateTimeOffset(cert.ValidTo);
+            }
+        }
+
+        var ctx = new ServerCertificateErrorContext(requestUri, host, summary, raw, subject, issuer, validFrom, validTo);
+        e.Action = CoreWebView2ServerCertificateErrorAction.Cancel;
+        ProcessServerCertificateError(ctx, requestUri);
+    }
+
+    private void ProcessServerCertificateError(ServerCertificateErrorContext ctx, Uri requestUri)
+    {
+        _ = _securityHooks.OnServerCertificateError(ctx);
+
+        (Guid NavigationId, CoreWebView2WebErrorStatus Status) deferred = default;
+        var consumed = false;
+        lock (_navLock)
+        {
+            if (_deferredSslNavigationByUri.Remove(requestUri.AbsoluteUri, out deferred))
+            {
+                consumed = true;
+            }
+        }
+
+        if (consumed)
+        {
+            RaiseNavigationCompleted(deferred.NavigationId, requestUri, NavigationCompletedStatus.Failure, new WebViewSslException(ctx, deferred.NavigationId));
+        }
+    }
+
+    /// <summary>Shared fallback used by the production posted-flush and the synchronous test-flush seam.</summary>
+    private void FlushDeferredSslFallbackWithSyntheticContext(
+        Uri requestUri,
+        Guid navigationId,
+        CoreWebView2WebErrorStatus status)
+    {
+        var ctx = new ServerCertificateErrorContext(
+            requestUri,
+            requestUri.Host,
+            status.ToString(),
+            (int)status,
+            null,
+            null,
+            null,
+            null);
+        _ = _securityHooks.OnServerCertificateError(ctx);
+        RaiseNavigationCompleted(navigationId, requestUri, NavigationCompletedStatus.Failure, new WebViewSslException(ctx, navigationId));
+    }
+
+    private void QueueDeferredSslFallbackFlush(Uri requestUri)
+    {
+        void FallbackFlush()
+        {
+            if (_detached) return;
+            (Guid NavigationId, CoreWebView2WebErrorStatus Status) deferred;
+            lock (_navLock)
+            {
+                if (!_deferredSslNavigationByUri.Remove(requestUri.AbsoluteUri, out deferred)) return;
+            }
+
+            FlushDeferredSslFallbackWithSyntheticContext(requestUri, deferred.NavigationId, deferred.Status);
+        }
+
+        if (_uiSyncContext is not null)
+        {
+            _uiSyncContext.Post(_ => FallbackFlush(), null);
+        }
+        else
+        {
+            FallbackFlush();
+        }
+    }
+
+    internal void TestOnly_EnqueueDeferredSslNavigation(Guid navigationId, Uri requestUri, CoreWebView2WebErrorStatus status)
+    {
+        lock (_navLock)
+        {
+            _deferredSslNavigationByUri[requestUri.AbsoluteUri] = (navigationId, status);
+        }
+    }
+
+    internal void TestOnly_ApplyServerCertificateContext(ServerCertificateErrorContext ctx)
+    {
+        ProcessServerCertificateError(ctx, ctx.RequestUri);
+    }
+
+    internal void TestOnly_FlushDeferredSslFallbackSynchronously(Uri requestUri)
+    {
+        if (_detached) return;
+        (Guid NavigationId, CoreWebView2WebErrorStatus Status) deferred;
+        lock (_navLock)
+        {
+            if (!_deferredSslNavigationByUri.Remove(requestUri.AbsoluteUri, out deferred)) return;
+        }
+
+        FlushDeferredSslFallbackWithSyntheticContext(requestUri, deferred.NavigationId, deferred.Status);
+    }
+
+    private static bool IsSslWebErrorStatus(CoreWebView2WebErrorStatus status) =>
+        status is CoreWebView2WebErrorStatus.CertificateCommonNameIsIncorrect or
+            CoreWebView2WebErrorStatus.CertificateExpired or
+            CoreWebView2WebErrorStatus.ClientCertificateContainsErrors or
+            CoreWebView2WebErrorStatus.CertificateRevoked or
+            CoreWebView2WebErrorStatus.CertificateIsInvalid;
 
     private bool HasSiblingNavigationMappingLocked(Guid navigationId, ulong excludeWv2NavigationId)
     {

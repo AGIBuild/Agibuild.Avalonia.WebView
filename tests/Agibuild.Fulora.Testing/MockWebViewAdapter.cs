@@ -1,10 +1,13 @@
 using Agibuild.Fulora;
 using Agibuild.Fulora.Adapters.Abstractions;
+using Agibuild.Fulora.Security;
 
 namespace Agibuild.Fulora.Testing;
 
 internal class MockWebViewAdapter : IWebViewAdapter
 {
+    private readonly INavigationSecurityHooks _securityHooks;
+
     private IWebViewAdapterHost? _host;
     private bool _initialized;
     private bool _attached;
@@ -16,8 +19,26 @@ internal class MockWebViewAdapter : IWebViewAdapter
     /// <summary>Creates a mock without cookie support. Use <see cref="CreateWithCookies"/> for cookie-enabled mock.</summary>
     public static MockWebViewAdapter Create() => new();
 
+    /// <summary>Creates a mock that routes certificate errors through <paramref name="hook"/>.</summary>
+    public static MockWebViewAdapter CreateWithSecurityHook(INavigationSecurityHooks hook)
+    {
+        ArgumentNullException.ThrowIfNull(hook);
+        return new MockWebViewAdapter(hook);
+    }
+
     /// <summary>Creates a mock that also implements <see cref="ICookieAdapter"/>.</summary>
     public static MockWebViewAdapterWithCookies CreateWithCookies() => new();
+
+    internal MockWebViewAdapter()
+        : this(DefaultNavigationSecurityHooks.Instance)
+    {
+    }
+
+    internal MockWebViewAdapter(INavigationSecurityHooks securityHooks)
+    {
+        ArgumentNullException.ThrowIfNull(securityHooks);
+        _securityHooks = securityHooks;
+    }
 
     public Guid? LastNavigationId { get; private set; }
     public Uri? LastNavigationUri { get; private set; }
@@ -303,6 +324,40 @@ internal class MockWebViewAdapter : IWebViewAdapter
     {
         if (_detached) return;
         EnvironmentRequested?.Invoke(this, new EnvironmentRequestedEventArgs());
+    }
+
+    /// <summary>Simulates a server-certificate failure for SSL rejection and contract tests.</summary>
+    public void TriggerServerCertificateError(
+        Uri uri,
+        string? subject = null,
+        string? issuer = null,
+        DateTimeOffset? validFrom = null,
+        DateTimeOffset? validTo = null,
+        string? errorSummary = null,
+        int platformRawCode = 0)
+    {
+        ArgumentNullException.ThrowIfNull(uri);
+
+        if (_detached)
+        {
+            return;
+        }
+
+        var ctx = new ServerCertificateErrorContext(
+            RequestUri: uri,
+            Host: uri.Host,
+            ErrorSummary: errorSummary ?? "MockSslError",
+            PlatformRawCode: platformRawCode,
+            CertificateSubject: subject,
+            CertificateIssuer: issuer,
+            ValidFrom: validFrom,
+            ValidTo: validTo);
+
+        _ = _securityHooks.OnServerCertificateError(ctx);
+
+        var navigationId = LastNavigationId ?? Guid.Empty;
+        var ex = new WebViewSslException(ctx, navigationId);
+        RaiseNavigationCompleted(navigationId, uri, NavigationCompletedStatus.Failure, ex);
     }
 
     protected static string CookieKey(string name, string domain, string path) => $"{name}|{domain}|{path}";
