@@ -89,6 +89,12 @@
           "System.IO.Hashing": "11.0.0-preview.3.26207.106"
         }
       },
+      "Microsoft.Web.WebView2": {
+        "type": "Direct",
+        "requested": "[1.0.3856.49, )",
+        "resolved": "1.0.3856.49",
+        "contentHash": "OOBKvFgK0pUKcndvTK6/jUsbrPRwce62Wt/0hkJWDsK2AcsJ2ylOS/mLa4xAcNUTOs96YIjpPN4AHMADXJcrgQ=="
+      },
       "xunit.runner.visualstudio": {
         "type": "Direct",
         "requested": "[3.1.5, )",
@@ -571,6 +577,14 @@
           "Microsoft.Extensions.Logging.Abstractions": "[11.0.0-preview.3.26207.106, )"
         }
       },
+      "agibuild.fulora.platforms": {
+        "type": "Project",
+        "dependencies": {
+          "Agibuild.Fulora.Adapters.Abstractions": "[1.6.7-local, )",
+          "Agibuild.Fulora.Core": "[1.6.7-local, )",
+          "Microsoft.Web.WebView2": "[1.0.3856.49, )"
+        }
+      },
       "agibuild.fulora.plugin.authtoken": {
         "type": "Project",
         "dependencies": {
@@ -721,12 +735,6 @@
           "Microsoft.Extensions.DependencyInjection.Abstractions": "11.0.0-preview.3.26207.106",
           "Microsoft.Extensions.Options": "11.0.0-preview.3.26207.106"
         }
-      },
-      "Microsoft.Web.WebView2": {
-        "type": "CentralTransitive",
-        "requested": "[1.0.3856.49, )",
-        "resolved": "1.0.3856.49",
-        "contentHash": "OOBKvFgK0pUKcndvTK6/jUsbrPRwce62Wt/0hkJWDsK2AcsJ2ylOS/mLa4xAcNUTOs96YIjpPN4AHMADXJcrgQ=="
       },
       "OllamaSharp": {
         "type": "CentralTransitive",
