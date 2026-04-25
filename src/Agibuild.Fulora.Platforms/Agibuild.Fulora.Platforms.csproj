@@ -39,6 +39,7 @@
   <ItemGroup>
     <InternalsVisibleTo Include="Agibuild.Fulora.UnitTests" />
     <InternalsVisibleTo Include="Agibuild.Fulora.Platforms.UnitTests" />
+    <InternalsVisibleTo Include="Agibuild.Fulora.Platforms.WebKitSmokeHarness" />
   </ItemGroup>
 
   <!-- ============================================================

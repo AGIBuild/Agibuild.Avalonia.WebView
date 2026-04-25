@@ -15,11 +15,15 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <IsTestProject>true</IsTestProject>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Agibuild.Fulora.Platforms\Agibuild.Fulora.Platforms.csproj" />
+    <ProjectReference Include="..\Agibuild.Fulora.Platforms.WebKitSmokeHarness\Agibuild.Fulora.Platforms.WebKitSmokeHarness.csproj"
+                      ReferenceOutputAssembly="false"
+                      PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>
     <None Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
