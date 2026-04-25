@@ -617,25 +617,49 @@ git commit -m "chore(apple): vendor Avalonia Foundation framework + NS* types + 
 
 ### Task 5: Foundation interop sanity tests (host: macOS)
 
-> **Why a new `Agibuild.Fulora.Platforms.UnitTests` project (vs reusing `Agibuild.Fulora.UnitTests`):** Existing `Agibuild.Fulora.UnitTests` runs cross-platform on every CI matrix slot. Loading `Macios/Interop/*` into that project would (a) drag macOS-only dependencies into Linux/Windows test runs, (b) need `if (OperatingSystem.IsMacOS()) return;` early-return on every test (illusory coverage on non-macOS hosts — see Step 6 warning), and (c) inflate restore times for everyone. A dedicated project that runs **only** on the macOS CI job is the cleanest separation. Document this rationale in the new csproj's header comment.
+> **AMENDMENT #6 (added 2026-04-25 after T5 dry-run): T5 plan vs repo reality reconciliation.** Four discoveries during T5 pre-scan forced changes to Steps 1, 4 (NEW), 5 (formerly 4), 6 (formerly 5), 7 (formerly 6, rewritten):
+> 1. **Test framework alignment:** the repo standardises on `xunit.v3` (3.2.2) + `xunit.runner.visualstudio` (3.1.5) + `Microsoft.NET.Test.Sdk` (18.3.0) + `coverlet.collector` (8.0.1) + a `xunit.runner.json` config (see `tests/Agibuild.Fulora.UnitTests/Agibuild.Fulora.UnitTests.csproj` for the canonical layout). The original Step 1 csproj used legacy `xunit` v2 packages.
+> 2. **InternalsVisibleTo gap:** `src/Agibuild.Fulora.Platforms/Agibuild.Fulora.Platforms.csproj:40` only IVTs to `Agibuild.Fulora.UnitTests`. The new `Agibuild.Fulora.Platforms.UnitTests` test project will need access to `internal Libobjc`, `internal NSString`, `internal NSData`, etc. New **Step 4** below adds the IVT entry.
+> 3. **Stale API reference:** the original Step 5 (renumbered) `NSObjectLifecycleTests` used `NSString.From("x")`. The vendored API has only `Create(string?)`. Fixed.
+> 4. **CI integration mechanism:** the original Step 6 said "modify `.github/workflows/ci.yml` to exclude". Reality: the repo drives CI through NUKE (`build/Build.Testing.cs`); `build-macos` invokes `--target Ci`, `build-linux`/`build-windows` invoke `--target CiMatrix`. Cleanest solution is a NUKE target gated by `OperatingSystem.IsMacOS()`, hooked into `Ci` only — `CiMatrix` does not include it, so Linux/Windows are not affected. New **Step 6** documents this. Coverage assembly filter also gains an exclusion for the new test assembly (mirrors how `Agibuild.Fulora.UnitTests` is excluded today).
+
+> **Why a new `Agibuild.Fulora.Platforms.UnitTests` project (vs reusing `Agibuild.Fulora.UnitTests`):** Existing `Agibuild.Fulora.UnitTests` runs cross-platform on every CI matrix slot. Loading `Macios/Interop/*` into that project would (a) drag macOS-only dependencies into Linux/Windows test runs, (b) need `if (OperatingSystem.IsMacOS()) return;` early-return on every test (illusory coverage on non-macOS hosts), and (c) inflate restore times for everyone. A dedicated project that runs **only** on the macOS CI job (via NUKE `Ci` target gated by `OperatingSystem.IsMacOS()`) is the cleanest separation. Document this rationale in the new csproj's header comment.
 
 **Files:**
 - Create: `tests/Agibuild.Fulora.Platforms.UnitTests/` (new test project)
 - Create: `tests/Agibuild.Fulora.Platforms.UnitTests/Agibuild.Fulora.Platforms.UnitTests.csproj`
+- Create: `tests/Agibuild.Fulora.Platforms.UnitTests/xunit.runner.json`
 - Create: `tests/Agibuild.Fulora.Platforms.UnitTests/Macios/Interop/LibobjcSmokeTests.cs`
-- Create: `tests/Agibuild.Fulora.Platforms.UnitTests/Macios/Interop/NSObjectLifecycleTests.cs`
 - Create: `tests/Agibuild.Fulora.Platforms.UnitTests/Macios/Interop/NSStringRoundtripTests.cs`
+- Create: `tests/Agibuild.Fulora.Platforms.UnitTests/Macios/Interop/NSObjectLifecycleTests.cs`
+- Modify: `src/Agibuild.Fulora.Platforms/Agibuild.Fulora.Platforms.csproj` (extend `InternalsVisibleTo`)
+- Modify: `Agibuild.Fulora.slnx` (add new test project)
+- Modify: `build/Build.cs` (add `PlatformsUnitTestsProject` constant)
+- Modify: `build/Build.Testing.cs` (add `MaciosUnitTests` target + chain into `Ci`; exclude new assembly from Coverage `-assemblyfilters`)
 
 (No `BlockLiteralInvokeTests.cs` here — block invocation is exercised end-to-end by T9 `WKHTTPCookieStoreTests` and validated by Phase 0b spike. A synthetic block test would only re-prove what those cover.)
 
-- [ ] **Step 1: Create test csproj (macOS host gated)**
+- [ ] **Step 1: Create test csproj (macOS host gated, repo-standard test framework)**
 
 ```xml
+<!--
+  Agibuild.Fulora.Platforms.UnitTests
+  ===================================
+  macOS-host-only sanity tests for Macios/Interop primitives. Runs only on the macOS
+  CI job via the NUKE `MaciosUnitTests` target chained into `Ci` (which build-macos
+  invokes). Linux/Windows CI invokes `CiMatrix`, which does NOT depend on this target,
+  so the test project is not built or run on those hosts.
+
+  DO NOT add this project to the cross-platform unit-test list. Tests use early-return
+  guards on non-macOS hosts and would silently pass — illusory coverage. The NUKE-target
+  gate is the supported way to opt in.
+-->
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <IsTestProject>true</IsTestProject>
     <IsPackable>false</IsPackable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
@@ -643,18 +667,43 @@ git commit -m "chore(apple): vendor Avalonia Foundation framework + NS* types + 
     <ProjectReference Include="..\..\src\Agibuild.Fulora.Platforms\Agibuild.Fulora.Platforms.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="xunit" />
-    <PackageReference Include="xunit.runner.visualstudio" />
+    <None Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit.v3" />
+    <PackageReference Include="xunit.runner.visualstudio">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="coverlet.collector">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
   </ItemGroup>
 </Project>
 ```
 
-- [ ] **Step 2: Add to solution + Directory.Packages.props (if package versions missing).**
+`xunit.runner.json` (mirror of `tests/Agibuild.Fulora.UnitTests/xunit.runner.json`):
+```json
+{
+  "$schema": "https://xunit.net/schema/v3/xunit.runner.schema.json",
+  "parallelizeAssembly": true,
+  "parallelizeTestCollections": true,
+  "maxParallelThreads": -1,
+  "parallelAlgorithm": "conservative",
+  "longRunningTestSeconds": 30,
+  "diagnosticMessages": false
+}
+```
+
+- [ ] **Step 2: Add to solution.**
 
 ```bash
-dotnet sln add tests/Agibuild.Fulora.Platforms.UnitTests/Agibuild.Fulora.Platforms.UnitTests.csproj
+dotnet sln Agibuild.Fulora.slnx add tests/Agibuild.Fulora.Platforms.UnitTests/Agibuild.Fulora.Platforms.UnitTests.csproj
 ```
+
+(All required PackageVersions — `xunit.v3 3.2.2`, `xunit.runner.visualstudio 3.1.5`, `Microsoft.NET.Test.Sdk 18.3.0`, `coverlet.collector 8.0.1` — are already in `Directory.Packages.props`. No CPM update needed.)
 
 - [ ] **Step 3: Write `LibobjcSmokeTests.cs`** (gates the rest):
 
@@ -685,7 +734,18 @@ public class LibobjcSmokeTests
 }
 ```
 
-- [ ] **Step 4: Write `NSStringRoundtripTests.cs`** (proves NSString init + UTF8String):
+- [ ] **Step 4: Extend `Agibuild.Fulora.Platforms.csproj` `InternalsVisibleTo`**
+
+In `src/Agibuild.Fulora.Platforms/Agibuild.Fulora.Platforms.csproj`, add a sibling entry next to the existing `Agibuild.Fulora.UnitTests` row:
+
+```xml
+<InternalsVisibleTo Include="Agibuild.Fulora.UnitTests" />
+<InternalsVisibleTo Include="Agibuild.Fulora.Platforms.UnitTests" />
+```
+
+(Required because `Libobjc`, `NSString`, `NSData`, `NSObject` etc. are `internal`. Without IVT the test assembly cannot reference them.)
+
+- [ ] **Step 5: Write `NSStringRoundtripTests.cs`** (proves NSString init + UTF8String):
 
 > **API note (per amendment #5):** `NSString` is vendored from Avalonia in T3 with the upstream API `NSString.Create(string?)` (factory) and `NSString.GetString(IntPtr handle)` (static reader); the `NSString` instance also has `GetString()` returning `string?`. There is no `From(string)` or instance `ToString` returning the original UTF-8. The test below uses the vendored API.
 
@@ -711,7 +771,7 @@ public class NSStringRoundtripTests
 }
 ```
 
-- [ ] **Step 5: Write `NSObjectLifecycleTests.cs`** (no managed-self leaks):
+Then `NSObjectLifecycleTests.cs` (no managed-self leaks):
 
 ```csharp
 using Agibuild.Fulora.Platforms.Macios.Interop;
@@ -727,7 +787,7 @@ public class NSObjectLifecycleTests
     {
         if (!OperatingSystem.IsMacOS()) return;
         IntPtr handleSeen;
-        using (var s = NSString.From("x"))
+        using (var s = NSString.Create("x")!)
         {
             handleSeen = s.Handle;
             Assert.NotEqual(IntPtr.Zero, handleSeen);
@@ -741,22 +801,62 @@ public class NSObjectLifecycleTests
 
 > **Note on `BlockLiteralInvokeTests`:** Block invocation is the highest-risk interop primitive (ABI varies by arch). It is tested end-to-end in Task 9 (`WKHTTPCookieStoreTests` — async API uses blocks heavily) and in the Phase 0 spike (see "Phase 0 — Spikes" before Phase 1). Do not author a synthetic block test here; either use a real WebKit async API or skip.
 
-- [ ] **Step 6: Run tests on macOS**
+- [ ] **Step 6: NUKE integration (macOS-only via `Ci` target chain)**
+
+In `build/Build.cs`, after the `CliUnitTestsProject` constant (~line 116), add:
+
+```csharp
+private static AbsolutePath PlatformsUnitTestsProject =>
+    TestsDirectory / "Agibuild.Fulora.Platforms.UnitTests" / "Agibuild.Fulora.Platforms.UnitTests.csproj";
+```
+
+In `build/Build.Testing.cs`, after the `UnitTests` target, add:
+
+```csharp
+internal Target MaciosUnitTests => _ => _
+    .Description("Runs macOS-host Macios.Interop sanity tests (Apple platforms only).")
+    .DependsOn(Build)
+    .OnlyWhenDynamic(() => OperatingSystem.IsMacOS())
+    .Executes(() =>
+    {
+        RunUnitTestProject(PlatformsUnitTestsProject, "macios-unit-tests.trx");
+    });
+```
+
+In the same file, extend the existing `Ci` target (currently at the end of `Build.cs` ~line 315) so that **only** macOS pulls these tests (Linux/Windows invoke `CiMatrix`, which is unaffected):
+
+```csharp
+// In Build.cs:
+internal Target Ci => _ => _
+    .Description("Full CI pipeline: compile → coverage → lane automation → validate package → pack.")
+    .DependsOn(Coverage, MaciosUnitTests, AutomationLaneReport, ValidatePackage, NugetPackageTest, PackTemplate);
+```
+
+In `build/Build.Testing.cs`, extend Coverage's `-assemblyfilters` to exclude the new test assembly (mirrors the existing `Agibuild.Fulora.UnitTests` exclusion):
+
+```csharp
+// Existing line in Coverage target (~line 117):
+$"\"-assemblyfilters:+Agibuild.Fulora.*;-Agibuild.Fulora.Testing;-Agibuild.Fulora.UnitTests;-Agibuild.Fulora.Platforms.UnitTests\"",
+```
+
+(Coverage threshold is computed over Fulora *production* assemblies; including a test assembly inflates LoC and breaks the gate.)
+
+- [ ] **Step 7: Run tests on macOS**
 
 ```bash
 dotnet test tests/Agibuild.Fulora.Platforms.UnitTests/Agibuild.Fulora.Platforms.UnitTests.csproj -c Release --nologo
 ```
-Expected: All tests pass on macOS host.
+Expected: All tests pass on macOS host. CI verification: macOS job picks up `MaciosUnitTests` via `Ci`; Linux/Windows jobs run `CiMatrix` and skip it entirely.
 
-> **⚠ CI configuration requirement:** the `if (!OperatingSystem.IsMacOS()) return;` early-return pattern means tests **silently pass** on non-macOS hosts (they don't appear as "skipped" in xUnit). To prevent illusory coverage:
->
-> **Adopt option (3): CI runs `Agibuild.Fulora.Platforms.UnitTests` only on the `build-macos` job.** This is the only option that prevents silent passes on Linux/Windows hosts without fragile `--filter` syntax or MSBuild conditional `TargetFrameworks` (which has its own foot-guns around restore/lock files). Concretely: in `.github/workflows/ci.yml`, the Linux + Windows test steps use a project list that excludes `Agibuild.Fulora.Platforms.UnitTests`; the `build-macos` step explicitly includes it. Document this choice in the test csproj's header comment so a future maintainer doesn't add it to a cross-platform matrix expecting it to work.
-
-- [ ] **Step 7: Commit**
+- [ ] **Step 8: Commit**
 
 ```bash
-git add tests/Agibuild.Fulora.Platforms.UnitTests/ Agibuild.Fulora.slnx
-git commit -m "test(apple): macOS-host sanity tests for Macios.Interop foundation"
+git add tests/Agibuild.Fulora.Platforms.UnitTests/ \
+        Agibuild.Fulora.slnx \
+        src/Agibuild.Fulora.Platforms/Agibuild.Fulora.Platforms.csproj \
+        build/Build.cs \
+        build/Build.Testing.cs
+git commit -m "test(apple): macOS-host sanity tests for Macios.Interop foundation (NUKE-gated)"
 ```
 
 ---
