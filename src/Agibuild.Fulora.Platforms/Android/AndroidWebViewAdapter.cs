@@ -1,6 +1,7 @@
 using System.Runtime.Versioning;
 using Agibuild.Fulora;
 using Agibuild.Fulora.Adapters.Abstractions;
+using Agibuild.Fulora.Security;
 using Android.Graphics;
 using Android.OS;
 using Android.Runtime;
@@ -21,6 +22,8 @@ internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHan
     private static bool DiagnosticsEnabled
         => string.Equals(System.Environment.GetEnvironmentVariable("AGIBUILD_WEBVIEW_DIAG"), "1", StringComparison.Ordinal);
 
+    private readonly INavigationSecurityHooks _securityHooks;
+
     private IWebViewAdapterHost? _host;
 
     private bool _initialized;
@@ -37,6 +40,22 @@ internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHan
 
     // Signals when InitializeWebView has completed on the UI thread.
     private readonly TaskCompletionSource _webViewReady = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+    public AndroidWebViewAdapter()
+        : this(DefaultNavigationSecurityHooks.Instance)
+    {
+    }
+
+    /// <summary>
+    /// Test seam: lets the adapter be constructed with a custom
+    /// <see cref="INavigationSecurityHooks"/> implementation. Production code
+    /// always uses <see cref="DefaultNavigationSecurityHooks.Instance"/> via
+    /// the parameterless constructor.
+    /// </summary>
+    internal AndroidWebViewAdapter(INavigationSecurityHooks securityHooks)
+    {
+        _securityHooks = securityHooks ?? throw new ArgumentNullException(nameof(securityHooks));
+    }
 
     // Navigation state
     private readonly object _navLock = new();
@@ -880,12 +899,47 @@ internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHan
 
         var requestUri = Uri.TryCreate(url, UriKind.Absolute, out var parsed) ? parsed : new Uri("about:blank");
         var errorMessage = $"Navigation failed: {errorCode} - {error.Description}";
-        var exception = MapErrorCode(errorCode, errorMessage, navigationId, requestUri);
+        var exception = IsSslErrorCode(errorCode)
+            ? CreateSslExceptionViaHook(errorCode, navigationId, requestUri)
+            : MapErrorCode(errorCode, errorMessage, navigationId, requestUri);
 
         // Store the error — it will be consumed in OnPageFinished (Android calls both).
         _navigationErrorOccurred = true;
         _navigationError = exception;
         _navigationErrorNavId = navigationId;
+    }
+
+    private static bool IsSslErrorCode(ClientError errorCode)
+        => errorCode is ClientError.FailedSslHandshake or ClientError.Authentication;
+
+    /// <summary>
+    /// Routes an Android <see cref="ClientError.FailedSslHandshake"/> /
+    /// <see cref="ClientError.Authentication"/> through
+    /// <see cref="INavigationSecurityHooks"/> and constructs the resulting
+    /// <see cref="WebViewSslException"/>. Aligned with Avalonia.Controls.WebView,
+    /// we do <strong>not</strong> override <c>OnReceivedSslError</c>; the Android
+    /// system already cancels and surfaces the error through this path. The hook
+    /// call is the audit/decision point — in 1.x the only outcome is
+    /// <see cref="NavigationSecurityDecision.Reject"/>; future versions add
+    /// per-domain decisions here without touching the adapter.
+    /// </summary>
+    /// <remarks>
+    /// Android's <see cref="WebResourceError"/> does not expose the leaf
+    /// certificate, so <see cref="ServerCertificateErrorContext.CertificateSubject"/>
+    /// / Issuer / ValidFrom / ValidTo remain <see langword="null"/> on this
+    /// platform. <see cref="ServerCertificateErrorContext.PlatformRawCode"/>
+    /// carries the underlying <see cref="ClientError"/> integer for telemetry.
+    /// </remarks>
+    private WebViewSslException CreateSslExceptionViaHook(ClientError errorCode, Guid navigationId, Uri requestUri)
+    {
+        var context = new ServerCertificateErrorContext(
+            RequestUri: requestUri,
+            Host: requestUri.Host,
+            ErrorSummary: errorCode.ToString(),
+            PlatformRawCode: (int)errorCode);
+
+        _ = _securityHooks.OnServerCertificateError(context);
+        return new WebViewSslException(context, navigationId);
     }
 
     internal void OnNewWindowRequested(AWebView? view, string? url)
@@ -964,6 +1018,12 @@ internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHan
         }
     }
 
+    /// <summary>
+    /// Maps non-SSL <see cref="ClientError"/> values to a navigation exception.
+    /// SSL errors are handled separately via
+    /// <see cref="CreateSslExceptionViaHook"/> so the security decision goes
+    /// through <see cref="INavigationSecurityHooks"/>.
+    /// </summary>
     private static Exception MapErrorCode(ClientError errorCode, string message, Guid navigationId, Uri requestUri)
     {
         var category = errorCode switch
@@ -976,10 +1036,6 @@ internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHan
             ClientError.Io or
             ClientError.Unknown
                 => NavigationErrorCategory.Network,
-
-            ClientError.FailedSslHandshake or
-            ClientError.Authentication
-                => NavigationErrorCategory.Ssl,
 
             _ => NavigationErrorCategory.Other,
         };
