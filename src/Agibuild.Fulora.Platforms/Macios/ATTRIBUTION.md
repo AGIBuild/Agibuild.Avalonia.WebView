@@ -8,8 +8,9 @@ with their upstream paths so future upstream patches can be re-applied.
 | Local file | Upstream file | Vendored at commit |
 |---|---|---|
 | `Interop/Libobjc.cs` | `src/Avalonia.Controls.WebView.Core/Macios/Interop/Libobjc.cs` | 4e16564d5c0d1c6b4ccc0ab35f69be75fe673a2e |
-| `Interop/NSObject.cs` | `src/Avalonia.Controls.WebView.Core/Macios/Interop/NSObject.cs` | TBD |
-| `Interop/NSManagedObjectBase.cs` | `src/Avalonia.Controls.WebView.Core/Macios/Interop/NSManagedObjectBase.cs` | TBD |
+| `Interop/NSObject.cs` | `src/Avalonia.Controls.WebView.Core/Macios/Interop/NSObject.cs` | 4e16564d5c0d1c6b4ccc0ab35f69be75fe673a2e |
+| `Interop/NSManagedObjectBase.cs` | `src/Avalonia.Controls.WebView.Core/Macios/Interop/NSManagedObjectBase.cs` | 4e16564d5c0d1c6b4ccc0ab35f69be75fe673a2e |
+| `Interop/NSString.cs` | `src/Avalonia.Controls.WebView.Core/Macios/Interop/NSString.cs` | 4e16564d5c0d1c6b4ccc0ab35f69be75fe673a2e |
 | `Interop/BlockLiteral.cs` | `src/Avalonia.Controls.WebView.Core/Macios/Interop/BlockLiteral.cs` | 4e16564d5c0d1c6b4ccc0ab35f69be75fe673a2e |
 | `Interop/CGRect.cs` | `src/Avalonia.Controls.WebView.Core/Macios/Interop/CGRect.cs` | 4e16564d5c0d1c6b4ccc0ab35f69be75fe673a2e |
 | `Interop/Foundation/*` | `src/Avalonia.Controls.WebView.Core/Macios/Interop/{NS*}.cs` | TBD |
