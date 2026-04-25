@@ -7,10 +7,11 @@ with their upstream paths so future upstream patches can be re-applied.
 
 | Local file | Upstream file | Vendored at commit |
 |---|---|---|
-| `Interop/Libobjc.cs` | `src/Avalonia.Controls.WebView.Core/Macios/Interop/Libobjc.cs` | TBD (filled in Task 2) |
+| `Interop/Libobjc.cs` | `src/Avalonia.Controls.WebView.Core/Macios/Interop/Libobjc.cs` | 4e16564d5c0d1c6b4ccc0ab35f69be75fe673a2e |
 | `Interop/NSObject.cs` | `src/Avalonia.Controls.WebView.Core/Macios/Interop/NSObject.cs` | TBD |
 | `Interop/NSManagedObjectBase.cs` | `src/Avalonia.Controls.WebView.Core/Macios/Interop/NSManagedObjectBase.cs` | TBD |
-| `Interop/BlockLiteral.cs` | `src/Avalonia.Controls.WebView.Core/Macios/Interop/BlockLiteral.cs` | TBD |
+| `Interop/BlockLiteral.cs` | `src/Avalonia.Controls.WebView.Core/Macios/Interop/BlockLiteral.cs` | 4e16564d5c0d1c6b4ccc0ab35f69be75fe673a2e |
+| `Interop/CGRect.cs` | `src/Avalonia.Controls.WebView.Core/Macios/Interop/CGRect.cs` | 4e16564d5c0d1c6b4ccc0ab35f69be75fe673a2e |
 | `Interop/Foundation/*` | `src/Avalonia.Controls.WebView.Core/Macios/Interop/{NS*}.cs` | TBD |
 | `Interop/WebKit/WKWebView.cs` | `src/Avalonia.Controls.WebView.Core/Macios/Interop/WebKit/WKWebView.cs` | TBD |
 | `Interop/WebKit/WKNavigationDelegate.cs` | `src/Avalonia.Controls.WebView.Core/Macios/Interop/WebKit/WKNavigationDelegate.cs` | TBD |
