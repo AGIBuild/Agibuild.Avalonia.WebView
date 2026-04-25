@@ -69,7 +69,7 @@
     <PackageVersion Include="OllamaSharp" Version="5.4.25" />
   </ItemGroup>
   <ItemGroup Label="Telemetry">
-    <PackageVersion Include="OpenTelemetry.Api" Version="1.15.0" />
+    <PackageVersion Include="OpenTelemetry.Api" Version="1.15.3" />
     <PackageVersion Include="Sentry" Version="6.2.0" />
   </ItemGroup>
   <ItemGroup Label="Data">
