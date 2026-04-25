@@ -49,7 +49,7 @@ Both v2 plans land into `release/v2` and both touch shared metadata files. Enfor
 ## Scope Guardrails
 
 - **Do** vendor Avalonia interop files **as-is** with namespace rename + attribution comment; do **not** rewrite for "style" — diff drift breaks future upstream patch absorption.
-- **Do** keep `src/Agibuild.Fulora.Platforms/Macios/` as a single namespace shared by the macOS slice (`net10.0-macos` TFM, added in Task 19) and consumed by `src/Agibuild.Fulora.Adapters.iOS` via `<Compile Include="..\Agibuild.Fulora.Platforms\Macios\**\*.cs" />` link items, so the Apple managed surface is single-source.
+- **Do** keep `src/Agibuild.Fulora.Platforms/Macios/` as a single namespace shared by the macOS slice (**`net10.0` + `[SupportedOSPlatform("macos")]` runtime gate** — see Spike 0a result; no `net10.0-macos` TFM is added) and consumed by `src/Agibuild.Fulora.Adapters.iOS` (`net10.0-ios` TFM) via `<Compile Include="..\Agibuild.Fulora.Platforms\Macios\**\*.cs" />` link items, so the Apple managed surface is single-source.
 - **Do not** merge `Agibuild.Fulora.Adapters.iOS` into `Agibuild.Fulora.Platforms` in this plan; iOS workload requires its own SDK targets that fight Multi-TFM in the same csproj. That consolidation is a follow-up plan after this lands stable.
 - **Do not** change adapter public surface (`IWebView`, `IWebViewBridge`, `ICookieAdapter`, etc.). All changes are internal implementation. Public-API breakage is owned by the sibling v2 plan.
 - **Do not** cut over macOS and iOS in the same commit. Each adapter cuts over independently with its own integration regression. macOS first (lower-risk, full host control), iOS second.
@@ -191,6 +191,8 @@ These three spikes resolve the design decisions that, if punted, could invalidat
 
 **Time budget:** 0.5 day. **Hard stop:** if more than 1 day, escalate.
 
+**RESOLVED 2026-04-25 — PASS.** `net10.0` + `[SupportedOSPlatform("macos")]` runtime gate is sufficient. All 6 probes (`dlopen libobjc`, `objc_getClass(NSObject)`, `sel_registerName`, `dlopen WebKit.framework`, `objc_getClass(WKWebView)`, `dlopen Security.framework`) succeeded under `net10.0` on macOS 26.4.1 / .NET 10.0.5 / Arm64. **Task 19 Step 1 (`net10.0-macos` TFM addition) is REMOVED below.** See [`2026-04-25-spike-results.md`](./2026-04-25-spike-results.md) § Spike 0a for full evidence.
+
 ---
 
 ### Spike 0b — `BlockLiteral` ABI on iOS arm64
@@ -233,6 +235,13 @@ These three spikes resolve the design decisions that, if punted, could invalidat
 All three spikes pass → tag spike results commit + update Open Questions in this plan with concrete answers → proceed to Phase 1.
 
 Any spike fails → **stop**, do not start Phase 1, escalate to human with spike results + suggested plan revision.
+
+> **STATUS 2026-04-25 — SATISFIED. Phase 1 cleared to begin.** All three spikes PASS:
+> - Spike 0a: `net10.0` sufficient (commit `bcf728d`)
+> - Spike 0b: `BlockLiteral` works on iOS Simulator arm64 (commit `9e2d0aa`)
+> - Spike 0c: AOT viable for `AllocateClassPair` + `class_addMethod` (commit `d9d5838`, with simulator-RID caveat captured at Task 30)
+>
+> Aggregate result + plan amendments landed in [`2026-04-25-spike-results.md`](./2026-04-25-spike-results.md) § Phase 0 GO/NO-GO Aggregate.
 
 ---
 
@@ -1078,12 +1087,15 @@ After T11–T15 all delegate runtime classes are registered. **Before** continui
 
 - [ ] **Step 1: Run AOT publish**
 
+> **AMENDED 2026-04-25 (Spike 0c finding):** `dotnet publish` rejects `iossimulator-*` RIDs in `Microsoft.iOS` SDK ≥ `26.2.10233` (`Xamarin.Shared.Sdk.Publish.targets` requires a device architecture). For **simulator AOT smoke**, use `dotnet build` instead — it invokes the same `mono-aot-cross` toolchain and produces a launchable `.app` containing `*.aotdata.arm64`:
+
 ```bash
-dotnet publish src/Agibuild.Fulora.Adapters.iOS/Agibuild.Fulora.Adapters.iOS.csproj \
+# Simulator AOT smoke (use dotnet build, not dotnet publish — see caveat above):
+dotnet build src/Agibuild.Fulora.Adapters.iOS/Agibuild.Fulora.Adapters.iOS.csproj \
   -c Release -f net10.0-ios -p:PublishAot=true -p:RuntimeIdentifier=iossimulator-arm64
 ```
 
-Expected: succeeds with at most existing IL warnings already present in the repo's baseline. New IL3xxx / IL2xxx warnings introduced by `Macios/` MUST be fixed in this gate, not deferred to Task 30.
+Expected: succeeds with at most existing IL warnings already present in the repo's baseline. New IL3xxx / IL2xxx warnings introduced by `Macios/` MUST be fixed in this gate, not deferred to Task 30. (Spike 0c verified: 0 IL warnings, AOT toolchain green, dynamic class registration via `objc_allocateClassPair` + `class_addMethod` survives AOT.)
 
 - [ ] **Step 2: Smoke run on Simulator**
 
@@ -1394,14 +1406,10 @@ Commit: `test(security): apple slice asserts full server cert metadata under SSL
 **Files:**
 - Modify: `src/Agibuild.Fulora.Platforms/MacOS/MacOSWebViewAdapter.cs` (rewrite body — keep public surface)
 - Modify: `src/Agibuild.Fulora.Platforms/MacOS/MacOSWebViewAdapter.PInvoke.cs` (delete file in this commit)
-- Modify: `src/Agibuild.Fulora.Platforms/Agibuild.Fulora.Platforms.csproj` (add `net10.0-macos` TFM if not present)
 
-- [ ] **Step 1: Add `net10.0-macos` TFM** to Platforms csproj (gate behind `EnableMacOSTfm` like Android):
+> **AMENDED 2026-04-25 (Spike 0a PASS):** Step 1 below is REMOVED. macOS managed code stays on the existing `net10.0` TFM with `[SupportedOSPlatform("macos")]` runtime gating, mirroring the current `MacOSWebViewAdapter` pattern. No `EnableMacOSTfm` flag, no `net10.0-macos` TFM, no Platforms csproj edit needed in this task. Renumber the surviving steps accordingly when implementing.
 
-```xml
-<EnableMacOSTfm Condition="'$(EnableMacOSTfm)' == ''">true</EnableMacOSTfm>
-<TargetFrameworks Condition="'$(EnableMacOSTfm)' == 'true'">$(TargetFrameworks);net10.0-macos</TargetFrameworks>
-```
+- [~] ~~**Step 1: Add `net10.0-macos` TFM**~~ — **REMOVED per Spike 0a (2026-04-25)**. `net10.0` + runtime gate is sufficient; Apple slice does not need a dedicated macOS TFM. See [`2026-04-25-spike-results.md`](../plans/2026-04-25-spike-results.md) § Spike 0a for evidence (6/6 probes including `dlopen libobjc`, `objc_getClass(WKWebView)`, `dlopen Security.framework` succeeded under `net10.0`).
 
 - [ ] **Step 2: Rewrite `MacOSWebViewAdapter.cs`** body to use the new `Macios/` namespace types instead of P/Invoke into `libAgibuildWebViewWk`. Adapter public methods (`InitializeAsync`, `NavigateAsync`, `EvaluateScriptAsync`, etc.) stay byte-identical; only the implementation changes.
 
@@ -1743,9 +1751,12 @@ git commit -m "test(security): stryker mutation gate ≥80% on Macios.Interop.Se
 
 - [ ] **Step 1: Add AOT publish job to CI** (or run locally):
 
+> **AMENDED 2026-04-25 (Spike 0c hard checkpoint):** `dotnet publish` requires a **device** RID (`ios-arm64`). Spike 0c verified the AOT toolchain on `iossimulator-arm64` via `dotnet build` (since SDK rejects publish for simulator RIDs). **Device-targeted `dotnet publish` + code signing was NOT end-to-end verified by the spike** (no physical device available). This task is therefore the **hard checkpoint** for the device publish + signing pipeline. If `dotnet publish` for `ios-arm64` fails here for reasons beyond IL warnings (signing / provisioning / runtimepack mismatches), Phase 1 must escalate immediately — do not work around with `dotnet build` for the device target.
+
 ```bash
+# Device AOT publish (requires Apple Developer signing identity in keychain):
 dotnet publish src/Agibuild.Fulora.Adapters.iOS/Agibuild.Fulora.Adapters.iOS.csproj \
-  -c Release -f net10.0-ios -p:PublishAot=true
+  -c Release -f net10.0-ios -p:PublishAot=true -p:RuntimeIdentifier=ios-arm64
 ```
 Expected: succeeds without IL3xxx / IL2xxx errors. If trim warnings appear, address with `[DynamicDependency]` annotations on managed-self callback sites — this is the AOT acceptance gate.
 
@@ -1868,9 +1879,9 @@ If any condition fails, postpone Phase 6 by another preview cycle. Do not "soft-
 
 | # | Question | Resolved by | Resolution recorded in |
 |---|---|---|---|
-| 1 | `net10.0-macos` TFM addition (Task 19) — needed or not? | **Spike 0a** | `docs/superpowers/plans/2026-04-25-spike-results.md` (created in Spike 0a) |
+| 1 | `net10.0-macos` TFM addition (Task 19) — needed or not? | **Spike 0a — PASS (2026-04-25)** | [`2026-04-25-spike-results.md`](./2026-04-25-spike-results.md) § Spike 0a. **Answer: not needed.** Task 19 Step 1 removed; macOS slice stays on `net10.0` + runtime gate. |
 | 2 | iOS device cert pinning for SSL test (Task 17) | **Task 17 Step 3** — handled inline; test classified as integration (macOS host first, iOS Simulator second with `xcrun simctl keychain add-root-cert`). | Task 17 Step 3 commentary |
-| 3 | Block invocation ABI on iOS arm64 vs macOS arm64 | **Spike 0b** | `docs/superpowers/plans/2026-04-25-spike-results.md` |
-| 4 | AOT viability for `AllocateClassPair` + `class_addMethod` from C# | **Spike 0c** | `docs/superpowers/plans/2026-04-25-spike-results.md` |
+| 3 | Block invocation ABI on iOS arm64 vs macOS arm64 | **Spike 0b — PASS (2026-04-25)** | [`2026-04-25-spike-results.md`](./2026-04-25-spike-results.md) § Spike 0b. **Answer:** Avalonia `BlockLiteral` works on iOS Simulator arm64 (iOS 26.4); no iOS-specific descriptor variant needed for this probe. Physical device validation deferred to Phase 7. |
+| 4 | AOT viability for `AllocateClassPair` + `class_addMethod` from C# | **Spike 0c — PASS (2026-04-25, with simulator-RID caveat)** | [`2026-04-25-spike-results.md`](./2026-04-25-spike-results.md) § Spike 0c. **Answer:** AOT toolchain (`mono-aot-cross`) green; dynamic class registration + `[UnmanagedCallersOnly]` trampoline + selector dispatch survives AOT. **Caveat:** SDK ≥ `26.2.10233` rejects `iossimulator-*` for `dotnet publish` (use `dotnet build` for sim AOT smoke); device-RID publish + signing untested in spike — hard checkpoint at Task 30. |
 | 5 | `release/v2` branch carving — already done by sibling plan? | Resolved before Task 1 by checking `git branch --list release/v2`. If branch missing, Task 1 must carve it. | Task 1 commit message notes branch state. |
 | 6 | Predecessor SSL P-1 branch (A vs B above) | "Predecessor Branch Decision" section above (decided **before** Task 1). Recommended: **Branch B**. | Update predecessor plan task list with `cancelled` markers if Branch B chosen. |

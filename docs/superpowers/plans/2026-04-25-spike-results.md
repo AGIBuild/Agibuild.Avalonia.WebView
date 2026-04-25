@@ -8,7 +8,7 @@
 |---|---|---|---|
 | 0a — `net10.0-macos` TFM decision | Is `net10.0` + `[SupportedOSPlatform("macos")]` runtime gating sufficient? | **PASS** | 2026-04-25 |
 | 0b — `BlockLiteral` ABI on iOS arm64 | Does Avalonia's `BlockLiteral` work on iOS arm64 (sim + device)? | **PASS** | 2026-04-25 |
-| 0c — AOT publish smoke for `AllocateClassPair` + `class_addMethod` | Does the runtime ObjC class registration approach survive `PublishAot=true` on `net10.0-ios`? | **TBD** | — |
+| 0c — AOT publish smoke for `AllocateClassPair` + `class_addMethod` | Does the runtime ObjC class registration approach survive `PublishAot=true` on `net10.0-ios`? | **PASS** *(with simulator-RID caveat)* | 2026-04-25 |
 
 **Phase 0 exit criterion:** all three PASS → tag spike commit + update plan Open Questions → proceed to Phase 1.
 
@@ -130,12 +130,36 @@ internal static class Program
 
 ---
 
-## Spike 0c — AOT publish smoke for `AllocateClassPair` + `class_addMethod` (TBD)
+## Spike 0c — AOT publish smoke for `AllocateClassPair` + `class_addMethod` (PASS, with caveat)
 
-_Pending parallel subagent dispatch — see plan L213–L227. **Single largest "kill switch" for the whole plan.**_
+**Self-contained report:** [`2026-04-25-spike-0c-results.md`](./2026-04-25-spike-0c-results.md)
+
+**Summary:** `objc_allocateClassPair` + `class_addMethod` with a `delegate*` to `[UnmanagedCallersOnly(CallConvs = [CallConvCdecl])]` static method **survives AOT compilation** on `net10.0-ios` / `iossimulator-arm64`. AOT-built `.app` (containing `Spike0cIos.aotdata.arm64`) was launched on **iOS 26.4 Simulator (iPhone 17 Pro arm64)** and the dynamically-registered `webView:didFinishNavigation:` selector trampoline fired (`STATUS=1`, PID 90511). **Zero IL2xxx / IL3xxx warnings.** Wiring used `class_createInstance` → `objc_retain` (because `WKWebView.navigationDelegate` is a weak property) → `objc_msgSend("setNavigationDelegate:")` → `WKWebView.LoadRequest("about:blank")`.
+
+**Critical caveat — must be reflected in the plan:** The literal command in the plan body — `dotnet publish -p:PublishAot=true -f net10.0-ios -p:RuntimeIdentifier=iossimulator-arm64` — **fails** under `Microsoft.iOS` SDK `26.2.10233` because `Xamarin.Shared.Sdk.Publish.targets` rejects all `iossimulator-*` / `tvossimulator-*` RIDs for the `Publish` target ("device architecture must be specified"). The kill-switch question was answered with the **same AOT toolchain** (`mono-aot-cross`, cross-pack `Microsoft.NETCore.App.Runtime.AOT.osx-arm64.Cross.iossimulator-arm64`) via `dotnet build -c Release -f net10.0-ios -p:PublishAot=true -p:RuntimeIdentifier=iossimulator-arm64`. **Device-targeted `dotnet publish` + signing** was NOT end-to-end verified in this spike (no physical device available). The risk is now scoped to: SDK simulator-publish gating may shift in future workloads, and the first device-targeted Task in Phase 1 (currently Task 30 — AOT acceptance gate) MUST do the device-RID `dotnet publish` end-to-end as its hard checkpoint.
 
 ---
 
 ## Phase 0 GO/NO-GO Aggregate
 
-_Will be filled after 0b and 0c report._
+**Decision: GO** — all three Phase 0 spikes PASS. Phase 1 may begin.
+
+| Spike | Decision | Confidence | Risk carried forward |
+|---|---|---|---|
+| 0a | PASS | Very high (independent corroboration from existing `MacOSWebViewAdapter`) | None |
+| 0b | PASS | High (real simulator dispatch verified) | Physical iOS device validation deferred — recommend Phase 7 hardware lab pass before 2.0.0 GA |
+| 0c | PASS | High for AOT toolchain viability; medium for ship-pipeline | `dotnet publish` + simulator RID gated by SDK; device-RID publish + signing untested. **Hard checkpoint at Task 30.** |
+
+### Plan amendments landed alongside this aggregate (this commit)
+
+1. **Open Questions table (L1867+):** Q1, Q3, Q4 marked answered with PASS pointers.
+2. **Architectural Invariants (L52):** "single namespace shared by the macOS slice (`net10.0-macos` TFM, added in Task 19)" → corrected to `net10.0` + runtime gate.
+3. **Spike 0a Gate body (L186–L188):** marked RESOLVED (net10.0 sufficient).
+4. **Task 19 Step 1 (L1399–L1404):** `net10.0-macos` TFM addition step REMOVED — macOS managed code stays on `net10.0` with `[SupportedOSPlatform("macos")]` runtime gating, mirroring existing `MacOSWebViewAdapter` pattern.
+5. **AOT publish bash blocks (L1082–L1083 + L1747–L1748):** Annotated with the SDK simulator-RID caveat from Spike 0c. Simulator AOT smoke uses `dotnet build -p:PublishAot=true`; device AOT acceptance still uses `dotnet publish` (untested in spike, hard-checkpointed at Task 30).
+6. **Phase 0 Exit Criteria (L231–L235):** marked SATISFIED.
+
+### Spike branches retained for traceability
+
+- `spike/0b-blockliteral-ios-arm64` — local-only branch with original spike commit (`e5b34a6`); cherry-picked into `release/v2` as `9e2d0aa`. Worktree at `../Fulora-spike-0b/` — may be deleted once `release/v2` is pushed.
+- `spike/0c-aot-classpair` — local-only branch with original spike commit (`063b807`); cherry-picked into `release/v2` as `d9d5838`. Worktree at `../Fulora-spike-0c/` — may be deleted once `release/v2` is pushed.
