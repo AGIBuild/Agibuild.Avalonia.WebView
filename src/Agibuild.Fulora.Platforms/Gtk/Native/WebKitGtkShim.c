@@ -13,6 +13,7 @@
 
 #include <gtk/gtk.h>
 #include <gtk/gtkx.h>
+#include <gio/gio.h>
 #include <webkit2/webkit2.h>
 #include <string.h>
 #include <stdlib.h>
@@ -30,12 +31,21 @@ typedef void (*ag_gtk_policy_request_cb)(
     bool is_new_window,
     int navigation_type);
 
+/* ag_gtk_nav_completed_cb: optional cert-detail args (host, summary, subject, issuer, validity)
+ * are owned by the shim; pointers are valid only for the duration of the callback and are
+ * freed (g_free) immediately after it returns. The managed callback must copy any data it retains. */
 typedef void (*ag_gtk_nav_completed_cb)(
     void* user_data,
     const char* url_utf8,
     int status, /* 0=Success, 1=Failure, 2=Canceled, 3=Timeout, 4=Network, 5=Ssl */
     int64_t error_code,
-    const char* error_message_utf8);
+    const char* error_message_utf8,
+    const char* host_utf8_or_null,
+    const char* summary_utf8_or_null,
+    const char* subject_dn_utf8_or_null,
+    const char* issuer_dn_utf8_or_null,
+    int64_t valid_from_unix_or_zero,
+    int64_t valid_to_unix_or_zero);
 
 typedef void (*ag_gtk_script_result_cb)(
     void* user_data,
@@ -224,6 +234,77 @@ static void run_on_gtk_thread(void (*func)(void*), void* data)
 
 /* ========== Error status mapping ========== */
 
+static char* ag_extract_host_from_uri_string(const char* uri)
+{
+    if (uri == NULL)
+        return NULL;
+#if GLIB_CHECK_VERSION(2, 66, 0)
+    GUri* parsed = g_uri_parse(uri, G_URI_FLAGS_NONE, NULL, NULL, NULL);
+    if (parsed != NULL)
+    {
+        const char* h = g_uri_get_host(parsed);
+        char* dup = h != NULL ? g_strdup(h) : NULL;
+        g_uri_unref(parsed);
+        return dup;
+    }
+#endif
+    const char* scheme_end = strstr(uri, "://");
+    if (scheme_end == NULL)
+        return NULL;
+    const char* host_start = scheme_end + 3;
+    const char* path_or_end = strchr(host_start, '/');
+    const char* host_end = path_or_end != NULL ? path_or_end : host_start + strlen(host_start);
+    const char* colon = strchr(host_start, ':');
+    if (colon != NULL && colon < host_end)
+        host_end = colon;
+    if (host_end <= host_start)
+        return NULL;
+    return g_strndup(host_start, (gsize)(host_end - host_start));
+}
+
+static char* ag_format_tls_certificate_errors(GTlsCertificateFlags errors)
+{
+    GString* s = g_string_new(NULL);
+    if ((errors & G_TLS_CERTIFICATE_UNKNOWN_CA) != 0)
+    {
+        if (s->len) g_string_append(s, ", ");
+        g_string_append(s, "UNKNOWN_CA");
+    }
+    if ((errors & G_TLS_CERTIFICATE_BAD_IDENTITY) != 0)
+    {
+        if (s->len) g_string_append(s, ", ");
+        g_string_append(s, "BAD_IDENTITY");
+    }
+    if ((errors & G_TLS_CERTIFICATE_NOT_ACTIVATED) != 0)
+    {
+        if (s->len) g_string_append(s, ", ");
+        g_string_append(s, "NOT_ACTIVATED");
+    }
+    if ((errors & G_TLS_CERTIFICATE_EXPIRED) != 0)
+    {
+        if (s->len) g_string_append(s, ", ");
+        g_string_append(s, "EXPIRED");
+    }
+    if ((errors & G_TLS_CERTIFICATE_REVOKED) != 0)
+    {
+        if (s->len) g_string_append(s, ", ");
+        g_string_append(s, "REVOKED");
+    }
+    if ((errors & G_TLS_CERTIFICATE_INSECURE) != 0)
+    {
+        if (s->len) g_string_append(s, ", ");
+        g_string_append(s, "INSECURE");
+    }
+    if ((errors & G_TLS_CERTIFICATE_GENERIC_ERROR) != 0)
+    {
+        if (s->len) g_string_append(s, ", ");
+        g_string_append(s, "GENERIC_ERROR");
+    }
+    if (s->len == 0)
+        g_string_append(s, "GENERIC_ERROR");
+    return g_string_free(s, FALSE);
+}
+
 /* Map WebKitGTK error codes to our status codes:
  * 0=Success, 1=Failure, 2=Canceled, 3=Timeout, 4=Network, 5=Ssl */
 static int map_webkit_error(GError* error)
@@ -323,7 +404,8 @@ static void on_load_changed(WebKitWebView* web_view, WebKitLoadEvent event, gpoi
         if (s->callbacks.on_navigation_completed)
         {
             const char* url = webkit_web_view_get_uri(web_view);
-            s->callbacks.on_navigation_completed(s->user_data, url ? url : "about:blank", 0, 0, "");
+            s->callbacks.on_navigation_completed(s->user_data, url ? url : "about:blank", 0, 0, "",
+                NULL, NULL, NULL, NULL, 0, 0);
         }
     }
 }
@@ -340,7 +422,8 @@ static gboolean on_load_failed(WebKitWebView* web_view, WebKitLoadEvent event,
         int status = map_webkit_error(error);
         int64_t code = error ? (int64_t)error->code : 0;
         const char* msg = error ? error->message : "Unknown error";
-        s->callbacks.on_navigation_completed(s->user_data, failing_uri ? failing_uri : "about:blank", status, code, msg);
+        s->callbacks.on_navigation_completed(s->user_data, failing_uri ? failing_uri : "about:blank", status, code, msg,
+            NULL, NULL, NULL, NULL, 0, 0);
     }
 
     return TRUE; /* We handled it */
@@ -356,9 +439,43 @@ static gboolean on_load_failed_tls(WebKitWebView* web_view, const char* failing_
 
     if (s->callbacks.on_navigation_completed)
     {
+        char* host = ag_extract_host_from_uri_string(failing_uri);
+        char* summary = ag_format_tls_certificate_errors(errors);
+        char* subject = NULL;
+        char* issuer = NULL;
+        int64_t valid_from = 0;
+        int64_t valid_to = 0;
+
+        if (certificate != NULL)
+        {
+#if GLIB_CHECK_VERSION(2, 70, 0)
+            subject = g_tls_certificate_get_subject_name(certificate);
+            issuer = g_tls_certificate_get_issuer_name(certificate);
+            GDateTime* nb = g_tls_certificate_get_not_valid_before(certificate);
+            GDateTime* na = g_tls_certificate_get_not_valid_after(certificate);
+            if (nb != NULL)
+            {
+                valid_from = g_date_time_to_unix(nb);
+                g_date_time_unref(nb);
+            }
+            if (na != NULL)
+            {
+                valid_to = g_date_time_to_unix(na);
+                g_date_time_unref(na);
+            }
+#endif
+        }
+
+        /* load-failed (via map_webkit_error TLS) and load-failed-with-tls-errors both emit status 5 (SSL), while error_code is the WebKit GError code in the former and the GTlsCertificateFlags bitmask in the latter. */
         s->callbacks.on_navigation_completed(s->user_data,
             failing_uri ? failing_uri : "about:blank",
-            5 /* SSL */, (int64_t)errors, "TLS certificate error");
+            5 /* SSL */, (int64_t)errors, "",
+            host, summary, subject, issuer, valid_from, valid_to);
+
+        g_free(host);
+        g_free(summary);
+        g_free(subject);
+        g_free(issuer);
     }
 
     return TRUE;

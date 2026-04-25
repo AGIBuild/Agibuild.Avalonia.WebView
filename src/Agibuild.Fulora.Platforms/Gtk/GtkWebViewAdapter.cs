@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Agibuild.Fulora;
 using Agibuild.Fulora.Adapters.Abstractions;
+using Agibuild.Fulora.Security;
 
 namespace Agibuild.Fulora.Adapters.Gtk;
 
@@ -16,6 +17,8 @@ internal sealed partial class GtkWebViewAdapter : IWebViewAdapter, INativeWebVie
         => string.Equals(Environment.GetEnvironmentVariable("AGIBUILD_WEBVIEW_DIAG"), "1", StringComparison.Ordinal);
 
     private IWebViewAdapterHost? _host;
+
+    private readonly INavigationSecurityHooks _securityHooks;
 
     private bool _initialized;
     private bool _attached;
@@ -47,6 +50,8 @@ internal sealed partial class GtkWebViewAdapter : IWebViewAdapter, INativeWebVie
     // Script completion
     private long _nextScriptRequestId;
     private readonly ConcurrentDictionary<ulong, TaskCompletionSource<string?>> _scriptTcsById = new();
+
+    private const int SslStatusCode = 5;
 
     public bool CanGoBack => _attached && !_detached && NativeMethods.CanGoBack(_native);
     public bool CanGoForward => _attached && !_detached && NativeMethods.CanGoForward(_native);
@@ -84,6 +89,17 @@ internal sealed partial class GtkWebViewAdapter : IWebViewAdapter, INativeWebVie
         remove { }
     }
 
+    public GtkWebViewAdapter()
+        : this(DefaultNavigationSecurityHooks.Instance)
+    {
+    }
+
+    internal GtkWebViewAdapter(INavigationSecurityHooks securityHooks)
+    {
+        ArgumentNullException.ThrowIfNull(securityHooks);
+        _securityHooks = securityHooks;
+    }
+
     public void Initialize(IWebViewAdapterHost host)
     {
         ArgumentNullException.ThrowIfNull(host);
@@ -106,7 +122,7 @@ internal sealed partial class GtkWebViewAdapter : IWebViewAdapter, INativeWebVie
             _callbacks = new NativeMethods.AgGtkCallbacks
             {
                 on_policy_request = (IntPtr)(delegate* unmanaged[Cdecl]<IntPtr, ulong, IntPtr, byte, byte, int, void>)&PolicyRequestTrampoline,
-                on_navigation_completed = (IntPtr)(delegate* unmanaged[Cdecl]<IntPtr, IntPtr, int, long, IntPtr, void>)&NavigationCompletedTrampoline,
+                on_navigation_completed = (IntPtr)(delegate* unmanaged[Cdecl]<IntPtr, IntPtr, int, long, IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, long, long, void>)&NavigationCompletedTrampoline,
                 on_script_result = (IntPtr)(delegate* unmanaged[Cdecl]<IntPtr, ulong, IntPtr, IntPtr, void>)&ScriptResultTrampoline,
                 on_message = (IntPtr)(delegate* unmanaged[Cdecl]<IntPtr, IntPtr, IntPtr, void>)&MessageTrampoline,
                 on_download = (IntPtr)(delegate* unmanaged[Cdecl]<IntPtr, IntPtr, IntPtr, IntPtr, long, void>)&DownloadTrampoline,
@@ -139,10 +155,31 @@ internal sealed partial class GtkWebViewAdapter : IWebViewAdapter, INativeWebVie
     }
 
     [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
-    private static void NavigationCompletedTrampoline(IntPtr userData, IntPtr urlUtf8, int status, long errorCode, IntPtr errorMessageUtf8)
+    private static void NavigationCompletedTrampoline(
+        IntPtr userData,
+        IntPtr urlUtf8,
+        int status,
+        long errorCode,
+        IntPtr errorMessageUtf8,
+        IntPtr hostUtf8,
+        IntPtr summaryUtf8,
+        IntPtr subjectUtf8,
+        IntPtr issuerUtf8,
+        long validFromUnix,
+        long validToUnix)
     {
         var self = NativeMethods.FromUserData(userData);
-        self?.OnNavigationCompletedNative(NativeMethods.PtrToString(urlUtf8), status, errorCode, NativeMethods.PtrToString(errorMessageUtf8));
+        self?.OnNavigationCompletedNative(
+            NativeMethods.PtrToStringNullable(urlUtf8),
+            status,
+            errorCode,
+            NativeMethods.PtrToStringNullable(errorMessageUtf8),
+            NativeMethods.PtrToStringNullable(hostUtf8),
+            NativeMethods.PtrToStringNullable(summaryUtf8),
+            NativeMethods.PtrToStringNullable(subjectUtf8),
+            NativeMethods.PtrToStringNullable(issuerUtf8),
+            validFromUnix,
+            validToUnix);
     }
 
     [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
@@ -741,7 +778,17 @@ internal sealed partial class GtkWebViewAdapter : IWebViewAdapter, INativeWebVie
         }
     }
 
-    private void OnNavigationCompletedNative(string? url, int status, long errorCode, string? errorMessage)
+    private void OnNavigationCompletedNative(
+        string? url,
+        int status,
+        long errorCode,
+        string? errorMessage,
+        string? host,
+        string? summary,
+        string? subject,
+        string? issuer,
+        long validFromUnix,
+        long validToUnix)
     {
         var requestUri = (url is not null && Uri.TryCreate(url, UriKind.Absolute, out var parsed))
             ? parsed
@@ -759,20 +806,68 @@ internal sealed partial class GtkWebViewAdapter : IWebViewAdapter, INativeWebVie
             return;
         }
 
+        if (status == SslStatusCode)
+        {
+            var navUri = requestUri ?? _activeRequestUri ?? new Uri("about:blank");
+            var hostStr = host ?? navUri.Host;
+            var summaryStr = summary ?? "TLS certificate error";
+            DateTimeOffset? validFrom = validFromUnix == 0 ? null : DateTimeOffset.FromUnixTimeSeconds(validFromUnix);
+            DateTimeOffset? validTo = validToUnix == 0 ? null : DateTimeOffset.FromUnixTimeSeconds(validToUnix);
+            var ctx = new ServerCertificateErrorContext(
+                navUri,
+                hostStr,
+                summaryStr,
+                (int)errorCode,
+                subject,
+                issuer,
+                validFrom,
+                validTo);
+            _ = _securityHooks.OnServerCertificateError(ctx);
+            var sslException = new WebViewSslException(ctx, _activeNavigationId);
+            OnNavigationTerminal(NavigationCompletedStatus.Failure, error: sslException, requestUriOverride: requestUri);
+            return;
+        }
+
         var msg = string.IsNullOrWhiteSpace(errorMessage) ? $"Navigation failed (code={errorCode})." : errorMessage!;
         var navId = _activeNavigationId;
-        var navUri = requestUri ?? _activeRequestUri ?? new Uri("about:blank");
+        var navUriFailure = requestUri ?? _activeRequestUri ?? new Uri("about:blank");
 
         var category = status switch
         {
             3 => NavigationErrorCategory.Timeout,
             4 => NavigationErrorCategory.Network,
-            5 => NavigationErrorCategory.Ssl,
             _ => NavigationErrorCategory.Other,
         };
-        Exception error = NavigationErrorFactory.Create(category, msg, navId, navUri);
+        Exception error = NavigationErrorFactory.Create(category, msg, navId, navUriFailure);
 
         OnNavigationTerminal(NavigationCompletedStatus.Failure, error: error, requestUriOverride: requestUri);
+    }
+
+    internal void TestOnly_SetActiveNavigationForSslTest(Guid navigationId, Uri requestUri)
+    {
+        ArgumentNullException.ThrowIfNull(requestUri);
+        lock (_navLock)
+        {
+            _activeNavigationId = navigationId;
+            _activeRequestUri = requestUri;
+            _activeNavigationCompleted = false;
+        }
+    }
+
+    internal void TestOnly_RaiseNavigationCompletedFromNative(
+        string? url,
+        int status,
+        long errorCode,
+        string? errorMessage,
+        string? host,
+        string? summary,
+        string? subject,
+        string? issuer,
+        long validFromUnix,
+        long validToUnix)
+    {
+        OnNavigationCompletedNative(
+            url, status, errorCode, errorMessage, host, summary, subject, issuer, validFromUnix, validToUnix);
     }
 
     private void OnScriptResultNative(ulong requestId, string? result, string? errorMessage)
