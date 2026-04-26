@@ -1,7 +1,6 @@
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Versioning;
-using System.Text.Json;
 using Agibuild.Fulora;
 using Agibuild.Fulora.Adapters.Abstractions;
 using Agibuild.Fulora.Platforms.Macios.Interop;
@@ -492,9 +491,9 @@ internal sealed class MacOSWebViewAdapter : IWebViewAdapter
     public async Task<FindInPageEventArgs> FindAsync(string text, FindInPageOptions? options)
     {
         ThrowIfNotAttached();
-        var literal = JsonSerializer.Serialize(text);
-        var caseSensitive = JsonSerializer.Serialize(options?.CaseSensitive ?? false);
-        var forward = JsonSerializer.Serialize(options?.Forward ?? true);
+        var literal = JsStringLiteral(text);
+        var caseSensitive = (options?.CaseSensitive ?? false) ? "true" : "false";
+        var forward = (options?.Forward ?? true) ? "true" : "false";
         var countScript = """
             (function(text, cs) {
               var re = new RegExp(text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), cs ? 'g' : 'gi');
@@ -929,6 +928,13 @@ internal sealed class MacOSWebViewAdapter : IWebViewAdapter
 
     private static Uri? TryGetUri(NSUrl? url)
         => url?.AbsoluteString is { } text && Uri.TryCreate(text, UriKind.Absolute, out var uri) ? uri : null;
+
+    private static string JsStringLiteral(string value)
+        => "'" + value
+            .Replace("\\", "\\\\", StringComparison.Ordinal)
+            .Replace("'", "\\'", StringComparison.Ordinal)
+            .Replace("\r", "\\r", StringComparison.Ordinal)
+            .Replace("\n", "\\n", StringComparison.Ordinal) + "'";
 
     private static bool IsLikelyDownload(string? mimeType)
         => string.IsNullOrWhiteSpace(mimeType) ||
