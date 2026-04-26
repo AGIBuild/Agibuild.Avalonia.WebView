@@ -2,10 +2,10 @@
 // Copyright (c) 2026 Agibuild
 // Newly authored — Fulora-original UIDropInteractionDelegate runtime class.
 
+using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
-using System.Collections.Concurrent;
 using Agibuild.Fulora;
 using Agibuild.Fulora.Platforms.Macios.Interop.Foundation;
 using Agibuild.Fulora.Platforms.Macios.Interop.WebKit;
@@ -390,15 +390,15 @@ internal sealed unsafe class WKDropInteractionDelegate : WkDelegateBase
             switch (kind)
             {
                 case DropPayloadItemKind.FileUrl:
-                {
-                    var path = TryGetUrlPath(item) ?? TryGetString(item);
-                    if (!string.IsNullOrEmpty(path))
                     {
-                        _files.Add(new FileDropInfo(path));
-                    }
+                        var path = TryGetUrlPath(item) ?? TryGetString(item);
+                        if (!string.IsNullOrEmpty(path))
+                        {
+                            _files.Add(new FileDropInfo(path));
+                        }
 
-                    break;
-                }
+                        break;
+                    }
                 case DropPayloadItemKind.Url:
                     _uri ??= TryGetUrlAbsoluteString(item) ?? TryGetString(item);
                     break;
