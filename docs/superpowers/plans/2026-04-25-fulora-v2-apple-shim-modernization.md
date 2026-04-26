@@ -1988,12 +1988,14 @@ After T11–T15 all delegate runtime classes are registered. **Before** continui
 
 - [ ] **Step 1: Run AOT publish**
 
-> **AMENDED 2026-04-25 (Spike 0c finding):** `dotnet publish` rejects `iossimulator-*` RIDs in `Microsoft.iOS` SDK ≥ `26.2.10233` (`Xamarin.Shared.Sdk.Publish.targets` requires a device architecture). For **simulator AOT smoke**, use `dotnet build` instead — it invokes the same `mono-aot-cross` toolchain and produces a launchable `.app` containing `*.aotdata.arm64`:
+> **AMENDED 2026-04-25 (Spike 0c finding):** `dotnet publish` rejects `iossimulator-*` RIDs in `Microsoft.iOS` SDK ≥ `26.2.10233` (`Xamarin.Shared.Sdk.Publish.targets` requires a device architecture). For **simulator AOT smoke**, use `dotnet build` instead.
+>
+> **AMENDMENT #10 (2026-04-26 Phase 3 Exit Gate finding):** The previous `dotnet build ... -p:PublishAot=true -p:RuntimeIdentifier=iossimulator-arm64` form now fails with `NETSDK1203` because the global `PublishAot=true` property flows into referenced `net10.0` library projects (`Agibuild.Fulora.Core`, `Agibuild.Fulora.Adapters.Abstractions`), where native AOT is not supported for `iossimulator-arm64`. The simulator gate must use the iOS Mono AOT build property `RunAOTCompilation=true` instead.
 
 ```bash
-# Simulator AOT smoke (use dotnet build, not dotnet publish — see caveat above):
+# Simulator AOT smoke (use dotnet build, not dotnet publish — see caveats above):
 dotnet build src/Agibuild.Fulora.Adapters.iOS/Agibuild.Fulora.Adapters.iOS.csproj \
-  -c Release -f net10.0-ios -p:PublishAot=true -p:RuntimeIdentifier=iossimulator-arm64
+  -c Release -f net10.0-ios -p:RuntimeIdentifier=iossimulator-arm64 -p:RunAOTCompilation=true
 ```
 
 Expected: succeeds with at most existing IL warnings already present in the repo's baseline. New IL3xxx / IL2xxx warnings introduced by `Macios/` MUST be fixed in this gate, not deferred to Task 30. (Spike 0c verified: 0 IL warnings, AOT toolchain green, dynamic class registration via `objc_allocateClassPair` + `class_addMethod` survives AOT.)
