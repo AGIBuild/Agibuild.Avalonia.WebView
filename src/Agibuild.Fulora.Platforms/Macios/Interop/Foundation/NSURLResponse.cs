@@ -13,7 +13,7 @@ internal sealed class NSURLResponse : NSObject
     private static readonly IntPtr s_initWithUrlMimeTypeExpectedContentLengthTextEncodingName =
         Libobjc.sel_getUid("initWithURL:MIMEType:expectedContentLength:textEncodingName:");
 
-    private NSURLResponse(IntPtr handle, bool owns) : base(handle, owns)
+    internal NSURLResponse(IntPtr handle, bool owns) : base(handle, owns)
     {
     }
 

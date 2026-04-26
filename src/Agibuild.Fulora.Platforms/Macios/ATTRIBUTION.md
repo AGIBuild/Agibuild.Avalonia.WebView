@@ -38,7 +38,8 @@ with their upstream paths so future upstream patches can be re-applied.
 | `Interop/Foundation/NSHTTPCookie.cs` | `src/Avalonia.Controls.WebView.Core/Macios/Interop/NSHTTPCookie.cs` | 4e16564d5c0d1c6b4ccc0ab35f69be75fe673a2e (modified — WebViewCookie conversions + property getters; Fulora Task 9) |
 | `Interop/WebKit/WKURLSchemeHandler.cs` | n/a | n/a (newly authored — Fulora-original) |
 | `Interop/WebKit/WKURLSchemeTask.cs` | n/a | n/a (newly authored — Fulora-original) |
-| `Interop/WebKit/WKNavigationDelegate.cs` | `src/Avalonia.Controls.WebView.Core/Macios/Interop/WebKit/WKNavigationDelegate.cs` | TBD |
+| `Interop/WebKit/WkDelegateBase.cs` | n/a | n/a (newly authored — Fulora-original shared runtime delegate helper) |
+| `Interop/WebKit/WKNavigationDelegate.cs` | n/a | n/a (newly authored — Fulora-original; 5-selector runtime class per Task 11) |
 
 ## License
 
