@@ -97,6 +97,7 @@ internal static unsafe partial class Libobjc
     public static extern IntPtr intptr_objc_msgSend(IntPtr basePtr, IntPtr selector, IntPtr param1, IntPtr param2, IntPtr param3);
     [DllImport(libobjc, EntryPoint = "objc_msgSend")]
     public static extern IntPtr intptr_objc_msgSend(IntPtr basePtr, IntPtr selector, IntPtr param1, IntPtr param2, UIntPtr param3);
+    /// <summary><c>NSURLResponse initWithURL:MIMEType:expectedContentLength:textEncodingName:</c> takes <c>NSInteger</c> for expected length.</summary>
     [DllImport(libobjc, EntryPoint = "objc_msgSend")]
     public static extern IntPtr intptr_objc_msgSend(IntPtr basePtr, IntPtr selector, IntPtr param1, IntPtr param2, long param3, IntPtr param4);
     [DllImport(libobjc, EntryPoint = "objc_msgSend")]

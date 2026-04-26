@@ -9,6 +9,7 @@ internal sealed class NSURLResponse : NSObject
 {
     private static readonly IntPtr s_class = Libobjc.objc_getClass("NSURLResponse");
     private static readonly IntPtr s_alloc = Libobjc.sel_getUid("alloc");
+    private static readonly IntPtr s_autorelease = Libobjc.sel_getUid("autorelease");
     private static readonly IntPtr s_initWithUrlMimeTypeExpectedContentLengthTextEncodingName =
         Libobjc.sel_getUid("initWithURL:MIMEType:expectedContentLength:textEncodingName:");
 
@@ -24,7 +25,7 @@ internal sealed class NSURLResponse : NSObject
         using var mimeTypeString = NSString.Create(mimeType)!;
         using var encodingString = textEncodingName is null ? null : NSString.Create(textEncodingName);
         var allocated = Libobjc.intptr_objc_msgSend(s_class, s_alloc);
-        var handle = Libobjc.intptr_objc_msgSend(
+        var initialized = Libobjc.intptr_objc_msgSend(
             allocated,
             s_initWithUrlMimeTypeExpectedContentLengthTextEncodingName,
             url.Handle,
@@ -32,6 +33,9 @@ internal sealed class NSURLResponse : NSObject
             expectedContentLength,
             encodingString?.Handle ?? IntPtr.Zero);
 
-        return new NSURLResponse(handle, owns: true);
+        // NSObject(owns: true) retains on construction and releases on Dispose. Convert the
+        // alloc/init +1 into an autoreleased object first so managed ownership balances to zero.
+        var autoreleased = Libobjc.intptr_objc_msgSend(initialized, s_autorelease);
+        return new NSURLResponse(autoreleased, owns: true);
     }
 }
