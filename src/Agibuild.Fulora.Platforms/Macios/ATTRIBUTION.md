@@ -40,6 +40,7 @@ with their upstream paths so future upstream patches can be re-applied.
 | `Interop/WebKit/WKURLSchemeTask.cs` | n/a | n/a (newly authored — Fulora-original) |
 | `Interop/WebKit/WkDelegateBase.cs` | n/a | n/a (newly authored — Fulora-original shared runtime delegate helper) |
 | `Interop/WebKit/WKNavigationDelegate.cs` | n/a | n/a (newly authored — Fulora-original; 5-selector runtime class per Task 11) |
+| `Interop/WebKit/WKUIDelegate.cs` | n/a | n/a (newly authored — Fulora-original; media permission + JavaScript panel runtime class per Task 12) |
 
 ## License
 

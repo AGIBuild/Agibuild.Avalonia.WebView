@@ -51,6 +51,9 @@ internal static class WebKitSmokeHarness
                 case "t9-cookie-store-roundtrip":
                     RunCookieStoreRoundtrip();
                     break;
+                case "t12-ui-delegate-confirm":
+                    RunUIDelegateConfirm();
+                    break;
                 default:
                     Console.Error.WriteLine($"Unknown WebKit smoke case: {caseId}");
                     return 65;
@@ -158,6 +161,41 @@ internal static class WebKitSmokeHarness
         }
 
         await cookies.DeleteCookieAsync(c).ConfigureAwait(false);
+    }
+
+    private static void RunUIDelegateConfirm()
+    {
+        var op = RunUIDelegateConfirmAsync();
+        while (!op.IsCompleted)
+        {
+            PumpMainRunLoop(TimeSpan.FromMilliseconds(100));
+        }
+
+        op.GetAwaiter().GetResult();
+    }
+
+    private static async Task RunUIDelegateConfirmAsync()
+    {
+        using var config = WKWebViewConfiguration.Create();
+        using var webView = new WKWebView(config);
+        using var ui = new WKUIDelegate();
+
+        var messageTask = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
+        ui.JavaScriptConfirmPanel += (_, args) =>
+        {
+            messageTask.TrySetResult(args.Message);
+            args.Decide(true);
+        };
+        webView.UIDelegate = ui;
+
+        var evalTask = webView.EvaluateJavaScriptAsync("confirm('hello-from-test');");
+        var message = await messageTask.Task.WaitAsync(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
+        await evalTask.ConfigureAwait(false);
+
+        if (message != "hello-from-test")
+        {
+            throw new InvalidOperationException($"Unexpected confirm message: {message}");
+        }
     }
 
     private static string? ParseCaseId(string[] args)

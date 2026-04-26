@@ -25,6 +25,7 @@ internal sealed class WKWebView : NSObject
     private static readonly IntPtr s_reload = Libobjc.sel_getUid("reload");
     private static readonly IntPtr s_stopLoading = Libobjc.sel_getUid("stopLoading");
     private static readonly IntPtr s_evaluateJavaScript = Libobjc.sel_getUid("evaluateJavaScript:completionHandler:");
+    private static readonly IntPtr s_setUIDelegate = Libobjc.sel_getUid("setUIDelegate:");
     private static readonly IntPtr s_isKindOfClass = Libobjc.sel_getUid("isKindOfClass:");
     private static readonly unsafe IntPtr s_evaluateScriptCallback = new((delegate* unmanaged[Cdecl]<IntPtr, IntPtr, IntPtr, void>)&EvaluateJavaScriptTrampoline);
 
@@ -51,6 +52,11 @@ internal sealed class WKWebView : NSObject
     public bool CanGoBack => Libobjc.int_objc_msgSend(Handle, s_canGoBack) == 1;
 
     public bool CanGoForward => Libobjc.int_objc_msgSend(Handle, s_canGoForward) == 1;
+
+    public WKUIDelegate? UIDelegate
+    {
+        set => Libobjc.void_objc_msgSend(Handle, s_setUIDelegate, value?.Handle ?? IntPtr.Zero);
+    }
 
     public void GoBack() => _ = Libobjc.intptr_objc_msgSend(Handle, s_goBack);
 
