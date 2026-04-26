@@ -101,7 +101,7 @@ internal class NSDictionary : NSObject
                     dictionary.Add(key, dateVal);
                 else if (NSNumber.TryAsStringValue(values[i]) is { } numberVal)
                     dictionary.Add(key, numberVal);
-                else 
+                else
                     dictionary.Add(key, GetDescription(values[i]));
             }
         }

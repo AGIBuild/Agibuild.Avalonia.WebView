@@ -87,7 +87,7 @@ internal partial class BuildTask
         .OnlyWhenDynamic(() => OperatingSystem.IsMacOS())
         .Executes(() =>
         {
-            RunUnitTestProject(PlatformsUnitTestsProject, "macios-unit-tests.trx");
+            RunFastTestProject(PlatformsUnitTestsProject, "macios-unit-tests.trx");
         });
 
     internal Target Coverage => _ => _

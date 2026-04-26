@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 Agibuild
 
+using System.Threading;
 using Agibuild.Fulora.Platforms.Macios.Interop;
 using Agibuild.Fulora.Platforms.Macios.Interop.Foundation;
-using System.Threading;
 
 namespace Agibuild.Fulora.Platforms.Macios.Interop.WebKit;
 

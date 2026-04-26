@@ -208,8 +208,9 @@ internal abstract class NSObject : IDisposable, IEquatable<NSObject>
         return new IntPtr(_superRef);
     }
 
-    [StructLayout (LayoutKind.Sequential)]
-    private struct ObjcSuper {
+    [StructLayout(LayoutKind.Sequential)]
+    private struct ObjcSuper
+    {
         public IntPtr Handle;
         public IntPtr ClassHandle;
     }

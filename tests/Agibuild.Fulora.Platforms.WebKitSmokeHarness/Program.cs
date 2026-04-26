@@ -122,7 +122,7 @@ internal static class WebKitSmokeHarness
             PumpMainRunLoop(TimeSpan.FromMilliseconds(100));
         }
 
-        op.GetAwaiter().GetResult();
+        ThrowIfFaulted(op);
     }
 
     /// <summary>
@@ -186,7 +186,7 @@ internal static class WebKitSmokeHarness
             PumpMainRunLoop(TimeSpan.FromMilliseconds(100));
         }
 
-        op.GetAwaiter().GetResult();
+        ThrowIfFaulted(op);
     }
 
     private static async Task RunUIDelegateConfirmAsync()
@@ -221,7 +221,7 @@ internal static class WebKitSmokeHarness
             PumpMainRunLoop(TimeSpan.FromMilliseconds(100));
         }
 
-        op.GetAwaiter().GetResult();
+        ThrowIfFaulted(op);
     }
 
     private static async Task RunScriptMessageAsync()
@@ -260,7 +260,7 @@ internal static class WebKitSmokeHarness
             PumpMainRunLoop(TimeSpan.FromMilliseconds(100));
         }
 
-        op.GetAwaiter().GetResult();
+        ThrowIfFaulted(op);
     }
 
     private static async Task RunUrlSchemeAsync()
@@ -296,7 +296,20 @@ internal static class WebKitSmokeHarness
             PumpMainRunLoop(TimeSpan.FromMilliseconds(100));
         }
 
-        op.GetAwaiter().GetResult();
+        ThrowIfFaulted(op);
+    }
+
+    private static void ThrowIfFaulted(Task task)
+    {
+        if (!task.Wait(TimeSpan.Zero))
+        {
+            throw new InvalidOperationException("The WebKit smoke operation did not complete after run-loop pumping.");
+        }
+
+        if (task.Exception is { } exception)
+        {
+            throw exception.InnerException ?? exception;
+        }
     }
 
     private static async Task RunServerTrustChallengeAsync()

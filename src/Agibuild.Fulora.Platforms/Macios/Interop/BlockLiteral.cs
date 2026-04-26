@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 
 namespace Agibuild.Fulora.Platforms.Macios.Interop;
 
-[StructLayout (LayoutKind.Sequential)]
+[StructLayout(LayoutKind.Sequential)]
 internal unsafe ref struct BlockDescriptor
 {
     public static IntPtr GlobalDescriptor { get; }
@@ -25,7 +25,7 @@ internal unsafe ref struct BlockDescriptor
     private delegate* unmanaged[Cdecl]<void*, void> dispose_helper;
 }
 
-[StructLayout (LayoutKind.Sequential)]
+[StructLayout(LayoutKind.Sequential)]
 internal ref struct BlockLiteral(IntPtr invoke)
 {
     private static IntPtr stackBlock_class, globalBlock_class;
@@ -35,7 +35,7 @@ internal ref struct BlockLiteral(IntPtr invoke)
         {
             if (stackBlock_class == IntPtr.Zero)
             {
-                stackBlock_class = Libobjc.dlsym (Libobjc.LinkLibSystem(), "_NSConcreteStackBlock");
+                stackBlock_class = Libobjc.dlsym(Libobjc.LinkLibSystem(), "_NSConcreteStackBlock");
             }
             return stackBlock_class;
         }
@@ -46,7 +46,7 @@ internal ref struct BlockLiteral(IntPtr invoke)
         {
             if (globalBlock_class == IntPtr.Zero)
             {
-                globalBlock_class = Libobjc.dlsym (Libobjc.LinkLibSystem(), "_NSConcreteGlobalBlock");
+                globalBlock_class = Libobjc.dlsym(Libobjc.LinkLibSystem(), "_NSConcreteGlobalBlock");
             }
             return globalBlock_class;
         }
