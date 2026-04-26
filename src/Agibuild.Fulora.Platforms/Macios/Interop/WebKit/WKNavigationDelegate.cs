@@ -8,6 +8,10 @@ using Agibuild.Fulora.Platforms.Macios.Interop.Foundation;
 
 namespace Agibuild.Fulora.Platforms.Macios.Interop.WebKit;
 
+/// <remarks>
+/// Callers must keep a strong managed reference for as long as the native <c>WKWebView</c>
+/// references this delegate; the Objective-C instance stores only a weak managed handle.
+/// </remarks>
 internal sealed unsafe class WKNavigationDelegate : WkDelegateBase
 {
     private static readonly void* s_didFinish =
@@ -74,7 +78,15 @@ internal sealed unsafe class WKNavigationDelegate : WkDelegateBase
     {
         var managed = ReadManagedSelf<WKNavigationDelegate>(self);
         var args = new DecidePolicyForNavigationActionEventArgs(navigationAction, decisionHandler);
-        managed?.DecidePolicyForNavigationAction?.Invoke(managed, args);
+        try
+        {
+            managed?.DecidePolicyForNavigationAction?.Invoke(managed, args);
+        }
+        catch
+        {
+            args.Policy = WKNavigationActionPolicy.Cancel;
+        }
+
         args.Complete();
     }
 
@@ -102,7 +114,15 @@ internal sealed unsafe class WKNavigationDelegate : WkDelegateBase
     {
         var managed = ReadManagedSelf<WKNavigationDelegate>(self);
         var args = new DecidePolicyForNavigationResponseEventArgs(navigationResponse, decisionHandler);
-        managed?.DecidePolicyForNavigationResponse?.Invoke(managed, args);
+        try
+        {
+            managed?.DecidePolicyForNavigationResponse?.Invoke(managed, args);
+        }
+        catch
+        {
+            args.Policy = WKNavigationResponsePolicy.Cancel;
+        }
+
         args.Complete();
     }
 }
