@@ -129,22 +129,32 @@ internal static class WebKitSmokeHarness
     {
         using var store = WKWebsiteDataStore.NonPersistentDataStore();
         var cookies = store.HttpCookieStore;
-        var c = NSHTTPCookie.From(new WebViewCookie("name", "value", "example.invalid", "/", null, false, false));
+        using var c = NSHTTPCookie.From(new WebViewCookie("name", "value", "example.invalid", "/", null, false, false));
         await cookies.SetCookieAsync(c).ConfigureAwait(false);
         var all = await cookies.GetAllCookiesAsync().ConfigureAwait(false);
-        var found = false;
-        foreach (var native in all)
+        try
         {
-            if (native.Name == "name" && native.Value == "value")
+            var found = false;
+            foreach (var native in all)
             {
-                found = true;
-                break;
+                if (native.Name == "name" && native.Value == "value")
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found)
+            {
+                throw new InvalidOperationException("Round-trip cookie was not observed in WKHTTPCookieStore.");
             }
         }
-
-        if (!found)
+        finally
         {
-            throw new InvalidOperationException("Round-trip cookie was not observed in WKHTTPCookieStore.");
+            foreach (var native in all)
+            {
+                native.Dispose();
+            }
         }
 
         await cookies.DeleteCookieAsync(c).ConfigureAwait(false);

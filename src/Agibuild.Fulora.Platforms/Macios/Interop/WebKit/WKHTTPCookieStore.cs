@@ -87,20 +87,25 @@ internal sealed class WKHTTPCookieStore : NSObject
         }
     }
 
-    private sealed record CookiesState(TaskCompletionSource<IReadOnlyList<NSHTTPCookie>> Tcs);
+    private abstract record CookieStoreCallbackState
+    {
+        public abstract void TrySetException(Exception exception);
+    }
 
-    private sealed record VoidCompletionState(TaskCompletionSource Tcs);
+    private sealed record CookiesState(TaskCompletionSource<IReadOnlyList<NSHTTPCookie>> Tcs) : CookieStoreCallbackState
+    {
+        public override void TrySetException(Exception exception) => _ = Tcs.TrySetException(exception);
+    }
+
+    private sealed record VoidCompletionState(TaskCompletionSource Tcs) : CookieStoreCallbackState
+    {
+        public override void TrySetException(Exception exception) => _ = Tcs.TrySetException(exception);
+    }
 
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     private static void OnAllCookies(IntPtr block, IntPtr arrayHandle)
     {
-        var statePtr = BlockLiteral.TryGetBlockState(block);
-        if (statePtr == IntPtr.Zero)
-        {
-            return;
-        }
-
-        if (GCHandle.FromIntPtr(statePtr).Target is not CookiesState state)
+        if (!TryGetExpectedState<CookiesState>(block, out var state))
         {
             return;
         }
@@ -143,17 +148,41 @@ internal sealed class WKHTTPCookieStore : NSObject
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     private static void OnVoidCompletion(IntPtr block)
     {
-        var statePtr = BlockLiteral.TryGetBlockState(block);
-        if (statePtr == IntPtr.Zero)
-        {
-            return;
-        }
-
-        if (GCHandle.FromIntPtr(statePtr).Target is not VoidCompletionState state)
+        if (!TryGetExpectedState<VoidCompletionState>(block, out var state))
         {
             return;
         }
 
         _ = state.Tcs.TrySetResult();
+    }
+
+    private static bool TryGetExpectedState<T>(IntPtr block, out T state)
+        where T : CookieStoreCallbackState
+    {
+        state = null!;
+
+        var statePtr = BlockLiteral.TryGetBlockState(block);
+        if (statePtr == IntPtr.Zero)
+        {
+            Environment.FailFast($"Missing {nameof(WKHTTPCookieStore)} block callback state.");
+        }
+
+        var target = GCHandle.FromIntPtr(statePtr).Target;
+        if (target is T typedState)
+        {
+            state = typedState;
+            return true;
+        }
+
+        var exception = new InvalidOperationException(
+            $"Unexpected {nameof(WKHTTPCookieStore)} block callback state: expected {typeof(T).Name}, got {target?.GetType().Name ?? "null"}.");
+        if (target is CookieStoreCallbackState callbackState)
+        {
+            callbackState.TrySetException(exception);
+            return false;
+        }
+
+        Environment.FailFast(exception.Message);
+        return false;
     }
 }

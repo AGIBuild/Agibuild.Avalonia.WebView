@@ -63,20 +63,22 @@ internal sealed class NSHTTPCookie : NSObject
         objects.Add(vPath);
         keys.Add(pathKey);
 
+        NSString? secureValue = null;
+        NSString? httpOnlyValue = null;
         NSDate? expiresValue = null;
         try
         {
             if (cookie.IsSecure)
             {
-                var vSecure = NSString.Create("TRUE")!;
-                objects.Add(vSecure);
+                secureValue = NSString.Create("TRUE")!;
+                objects.Add(secureValue);
                 keys.Add(secureKey);
             }
 
             if (cookie.IsHttpOnly)
             {
-                var vHttpOnly = NSString.Create("TRUE")!;
-                objects.Add(vHttpOnly);
+                httpOnlyValue = NSString.Create("TRUE")!;
+                objects.Add(httpOnlyValue);
                 keys.Add(httpOnlyKey);
             }
 
@@ -96,6 +98,8 @@ internal sealed class NSHTTPCookie : NSObject
         }
         finally
         {
+            secureValue?.Dispose();
+            httpOnlyValue?.Dispose();
             expiresValue?.Dispose();
         }
     }
