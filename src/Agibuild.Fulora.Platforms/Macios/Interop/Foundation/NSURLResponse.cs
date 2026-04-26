@@ -12,6 +12,10 @@ internal sealed class NSURLResponse : NSObject
     private static readonly IntPtr s_autorelease = Libobjc.sel_getUid("autorelease");
     private static readonly IntPtr s_initWithUrlMimeTypeExpectedContentLengthTextEncodingName =
         Libobjc.sel_getUid("initWithURL:MIMEType:expectedContentLength:textEncodingName:");
+    private static readonly IntPtr s_url = Libobjc.sel_getUid("URL");
+    private static readonly IntPtr s_mimeType = Libobjc.sel_getUid("MIMEType");
+    private static readonly IntPtr s_expectedContentLength = Libobjc.sel_getUid("expectedContentLength");
+    private static readonly IntPtr s_suggestedFilename = Libobjc.sel_getUid("suggestedFilename");
 
     internal NSURLResponse(IntPtr handle, bool owns) : base(handle, owns)
     {
@@ -38,4 +42,19 @@ internal sealed class NSURLResponse : NSObject
         var autoreleased = Libobjc.intptr_objc_msgSend(initialized, s_autorelease);
         return new NSURLResponse(autoreleased, owns: true);
     }
+
+    public NSUrl? Url
+    {
+        get
+        {
+            var handle = Libobjc.intptr_objc_msgSend(Handle, s_url);
+            return handle == IntPtr.Zero ? null : new NSUrl(handle, owns: false);
+        }
+    }
+
+    public string? MimeType => NSString.GetString(Libobjc.intptr_objc_msgSend(Handle, s_mimeType));
+
+    public long ExpectedContentLength => Libobjc.long_objc_msgSend(Handle, s_expectedContentLength);
+
+    public string? SuggestedFilename => NSString.GetString(Libobjc.intptr_objc_msgSend(Handle, s_suggestedFilename));
 }
