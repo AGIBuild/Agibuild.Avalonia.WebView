@@ -33,10 +33,16 @@ internal sealed class WKWebView : NSObject
     private static readonly IntPtr s_setPageZoom = Libobjc.sel_getUid("setPageZoom:");
     private static readonly IntPtr s_setInspectable = Libobjc.sel_getUid("setInspectable:");
     private static readonly IntPtr s_setUnderPageBackgroundColor = Libobjc.sel_getUid("setUnderPageBackgroundColor:");
+    private static readonly IntPtr s_takeSnapshotWithConfiguration =
+        Libobjc.sel_getUid("takeSnapshotWithConfiguration:completionHandler:");
+    private static readonly IntPtr s_createPdfWithConfiguration =
+        Libobjc.sel_getUid("createPDFWithConfiguration:completionHandler:");
     private static readonly IntPtr s_setNavigationDelegate = Libobjc.sel_getUid("setNavigationDelegate:");
     private static readonly IntPtr s_setUIDelegate = Libobjc.sel_getUid("setUIDelegate:");
     private static readonly IntPtr s_isKindOfClass = Libobjc.sel_getUid("isKindOfClass:");
     private static readonly unsafe IntPtr s_evaluateScriptCallback = new((delegate* unmanaged[Cdecl]<IntPtr, IntPtr, IntPtr, void>)&EvaluateJavaScriptTrampoline);
+    private static readonly unsafe IntPtr s_snapshotCallback = new((delegate* unmanaged[Cdecl]<IntPtr, IntPtr, IntPtr, void>)&SnapshotTrampoline);
+    private static readonly unsafe IntPtr s_pdfCallback = new((delegate* unmanaged[Cdecl]<IntPtr, IntPtr, IntPtr, void>)&PdfTrampoline);
 
     public WKWebView(WKWebViewConfiguration configuration) : base(NewInstance(configuration), owns: true)
     {
@@ -155,7 +161,55 @@ internal sealed class WKWebView : NSObject
         }
     }
 
+    public async Task<byte[]> CaptureScreenshotPngAsync()
+    {
+        var tcs = new TaskCompletionSource<byte[]>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var state = new BytesCompletionState(tcs);
+        var stateHandle = GCHandle.Alloc(state);
+        try
+        {
+            using var config = new WKSnapshotConfiguration();
+            var block = BlockLiteral.GetBlockForFunctionPointer(s_snapshotCallback, GCHandle.ToIntPtr(stateHandle));
+            Libobjc.void_objc_msgSend(Handle, s_takeSnapshotWithConfiguration, config.Handle, block);
+            return await tcs.Task.ConfigureAwait(false);
+        }
+        finally
+        {
+            if (stateHandle.IsAllocated)
+            {
+                stateHandle.Free();
+            }
+        }
+    }
+
+    public async Task<byte[]> CreatePdfAsync()
+    {
+        if (!OperatingSystem.IsMacOSVersionAtLeast(11, 3))
+        {
+            throw new PlatformNotSupportedException("WKWebView PDF export requires macOS 11.3 or later.");
+        }
+
+        var tcs = new TaskCompletionSource<byte[]>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var state = new BytesCompletionState(tcs);
+        var stateHandle = GCHandle.Alloc(state);
+        try
+        {
+            var block = BlockLiteral.GetBlockForFunctionPointer(s_pdfCallback, GCHandle.ToIntPtr(stateHandle));
+            Libobjc.void_objc_msgSend(Handle, s_createPdfWithConfiguration, IntPtr.Zero, block);
+            return await tcs.Task.ConfigureAwait(false);
+        }
+        finally
+        {
+            if (stateHandle.IsAllocated)
+            {
+                stateHandle.Free();
+            }
+        }
+    }
+
     private sealed record JSEvalState(TaskCompletionSource<NSObject?> Tcs);
+
+    private sealed record BytesCompletionState(TaskCompletionSource<byte[]> Tcs);
 
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     private static void EvaluateJavaScriptTrampoline(IntPtr block, IntPtr value, IntPtr nsError)
@@ -178,6 +232,82 @@ internal sealed class WKWebView : NSObject
         }
 
         _ = state.Tcs.TrySetResult(WrapJsResult(value));
+    }
+
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
+    private static void SnapshotTrampoline(IntPtr block, IntPtr imageHandle, IntPtr nsError)
+    {
+        var state = TryGetBytesCompletionState(block);
+        if (state is null)
+        {
+            return;
+        }
+
+        if (nsError != IntPtr.Zero)
+        {
+            _ = state.Tcs.TrySetException(NSError.ToException(nsError));
+            return;
+        }
+
+        if (imageHandle == IntPtr.Zero)
+        {
+            _ = state.Tcs.TrySetException(new InvalidOperationException("Screenshot capture failed."));
+            return;
+        }
+
+        var image = new NSImage(imageHandle, owns: false);
+        var tiff = image.TiffRepresentation;
+        if (tiff is null)
+        {
+            _ = state.Tcs.TrySetException(new InvalidOperationException("Screenshot TIFF conversion failed."));
+            return;
+        }
+
+        using var bitmap = NSBitmapImageRep.FromTiff(tiff);
+        var png = bitmap?.ToPng();
+        if (png is null)
+        {
+            _ = state.Tcs.TrySetException(new InvalidOperationException("Screenshot PNG conversion failed."));
+            return;
+        }
+
+        _ = state.Tcs.TrySetResult(png.ToArray());
+    }
+
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
+    private static void PdfTrampoline(IntPtr block, IntPtr dataHandle, IntPtr nsError)
+    {
+        var state = TryGetBytesCompletionState(block);
+        if (state is null)
+        {
+            return;
+        }
+
+        if (nsError != IntPtr.Zero)
+        {
+            _ = state.Tcs.TrySetException(NSError.ToException(nsError));
+            return;
+        }
+
+        if (dataHandle == IntPtr.Zero)
+        {
+            _ = state.Tcs.TrySetException(new InvalidOperationException("PDF printing failed."));
+            return;
+        }
+
+        var data = new NSData(dataHandle, owns: false);
+        _ = state.Tcs.TrySetResult(data.ToArray());
+    }
+
+    private static BytesCompletionState? TryGetBytesCompletionState(IntPtr block)
+    {
+        var statePtr = BlockLiteral.TryGetBlockState(block);
+        if (statePtr == IntPtr.Zero)
+        {
+            return null;
+        }
+
+        return GCHandle.FromIntPtr(statePtr).Target as BytesCompletionState;
     }
 
     private static NSObject? WrapJsResult(IntPtr value)

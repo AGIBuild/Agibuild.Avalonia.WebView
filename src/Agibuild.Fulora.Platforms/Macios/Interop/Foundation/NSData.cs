@@ -28,7 +28,7 @@ internal sealed class NSData : NSObject
     private static readonly IntPtr s_bytes = Libobjc.sel_getUid("bytes");
     private static readonly IntPtr s_length = Libobjc.sel_getUid("length");
 
-    private NSData(IntPtr handle) : base(handle, true) { }
+    internal NSData(IntPtr handle, bool owns) : base(handle, owns) { }
 
     /// <summary>
     /// Creates a new <see cref="NSData"/> by copying <paramref name="data"/> into an
@@ -47,7 +47,7 @@ internal sealed class NSData : NSObject
             {
                 var handle = Libobjc.intptr_objc_msgSend_intptr_nuint(
                     s_class, s_dataWithBytes, (IntPtr)p, (nuint)data.Length);
-                return new NSData(handle);
+                return new NSData(handle, owns: true);
             }
         }
     }

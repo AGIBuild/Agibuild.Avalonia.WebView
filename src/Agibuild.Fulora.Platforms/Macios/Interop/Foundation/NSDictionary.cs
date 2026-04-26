@@ -22,6 +22,7 @@ internal class NSDictionary : NSObject
     // binding (e.g. switches to `sel_getUid("count")` + `nuint_objc_msgSend`), restore the
     // member at re-vendor time and add a Phase 2 wrapper that uses it.
     private static readonly IntPtr s_dictionaryWithObjects = Libobjc.sel_getUid("dictionaryWithObjects:forKeys:count:");
+    private static readonly IntPtr s_dictionary = Libobjc.sel_getUid("dictionary");
     private static readonly nint s_ObjectForKey = Libobjc.sel_getUid("objectForKey:");
 
     private NSDictionary(IntPtr handle, bool owns) : base(handle, owns)
@@ -32,6 +33,8 @@ internal class NSDictionary : NSObject
     {
         return new NSDictionary(handle, false);
     }
+
+    public static NSDictionary Empty => new(Libobjc.intptr_objc_msgSend(s_class, s_dictionary), owns: true);
 
     public nint ObjectForKey(nint key)
     {
