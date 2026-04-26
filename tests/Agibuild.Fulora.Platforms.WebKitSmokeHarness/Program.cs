@@ -54,6 +54,9 @@ internal static class WebKitSmokeHarness
                 case "t12-ui-delegate-confirm":
                     RunUIDelegateConfirm();
                     break;
+                case "t13-script-message":
+                    RunScriptMessage();
+                    break;
                 default:
                     Console.Error.WriteLine($"Unknown WebKit smoke case: {caseId}");
                     return 65;
@@ -195,6 +198,45 @@ internal static class WebKitSmokeHarness
         if (message != "hello-from-test")
         {
             throw new InvalidOperationException($"Unexpected confirm message: {message}");
+        }
+    }
+
+    private static void RunScriptMessage()
+    {
+        var op = RunScriptMessageAsync();
+        while (!op.IsCompleted)
+        {
+            PumpMainRunLoop(TimeSpan.FromMilliseconds(100));
+        }
+
+        op.GetAwaiter().GetResult();
+    }
+
+    private static async Task RunScriptMessageAsync()
+    {
+        using var config = WKWebViewConfiguration.Create();
+        using var ucc = new WKUserContentController();
+        using var handler = new WKScriptMessageHandler();
+        using var name = NSString.Create("agibuild_test")!;
+
+        var messageTask = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
+        handler.DidReceiveScriptMessage += (_, args) =>
+        {
+            messageTask.TrySetResult(args.Message.Name ?? string.Empty);
+        };
+
+        ucc.AddScriptMessageHandler(handler.Handle, name);
+        config.UserContentController = ucc.Handle;
+
+        using var webView = new WKWebView(config);
+        var evalTask = webView.EvaluateJavaScriptAsync(
+            "window.webkit.messageHandlers.agibuild_test.postMessage({hello: 'from-js'}); true;");
+        var messageName = await messageTask.Task.WaitAsync(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
+        await evalTask.ConfigureAwait(false);
+
+        if (messageName != "agibuild_test")
+        {
+            throw new InvalidOperationException($"Unexpected script message handler name: {messageName}");
         }
     }
 
