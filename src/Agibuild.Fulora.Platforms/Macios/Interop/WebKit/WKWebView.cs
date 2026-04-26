@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Agibuild.Fulora.Platforms.Macios.Interop;
 using Agibuild.Fulora.Platforms.Macios.Interop.AppKit;
 using Agibuild.Fulora.Platforms.Macios.Interop.Foundation;
+using Agibuild.Fulora.Platforms.Macios.Interop.UIKit;
 
 namespace Agibuild.Fulora.Platforms.Macios.Interop.WebKit;
 
@@ -88,7 +89,8 @@ internal sealed class WKWebView : NSObject
 
     public void SetInspectable(bool enabled)
     {
-        if (OperatingSystem.IsMacOSVersionAtLeast(13, 3))
+        if (OperatingSystem.IsMacOSVersionAtLeast(13, 3) ||
+            OperatingSystem.IsIOSVersionAtLeast(16, 4))
         {
             Libobjc.void_objc_msgSend(Handle, s_setInspectable, enabled ? 1 : 0);
         }
@@ -184,9 +186,10 @@ internal sealed class WKWebView : NSObject
 
     public async Task<byte[]> CreatePdfAsync()
     {
-        if (!OperatingSystem.IsMacOSVersionAtLeast(11, 3))
+        if (!OperatingSystem.IsMacOSVersionAtLeast(11, 3) &&
+            !OperatingSystem.IsIOSVersionAtLeast(14))
         {
-            throw new PlatformNotSupportedException("WKWebView PDF export requires macOS 11.3 or later.");
+            throw new PlatformNotSupportedException("WKWebView PDF export requires macOS 11.3 or iOS 14.0 or later.");
         }
 
         var tcs = new TaskCompletionSource<byte[]>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -255,16 +258,9 @@ internal sealed class WKWebView : NSObject
             return;
         }
 
-        var image = new NSImage(imageHandle, owns: false);
-        var tiff = image.TiffRepresentation;
-        if (tiff is null)
-        {
-            _ = state.Tcs.TrySetException(new InvalidOperationException("Screenshot TIFF conversion failed."));
-            return;
-        }
-
-        using var bitmap = NSBitmapImageRep.FromTiff(tiff);
-        var png = bitmap?.ToPng();
+        var png = OperatingSystem.IsIOS()
+            ? new UIImage(imageHandle, owns: false).ToPng()
+            : ToMacPng(imageHandle);
         if (png is null)
         {
             _ = state.Tcs.TrySetException(new InvalidOperationException("Screenshot PNG conversion failed."));
@@ -272,6 +268,19 @@ internal sealed class WKWebView : NSObject
         }
 
         _ = state.Tcs.TrySetResult(png.ToArray());
+    }
+
+    private static NSData? ToMacPng(IntPtr imageHandle)
+    {
+        var image = new NSImage(imageHandle, owns: false);
+        var tiff = image.TiffRepresentation;
+        if (tiff is null)
+        {
+            return null;
+        }
+
+        using var bitmap = NSBitmapImageRep.FromTiff(tiff);
+        return bitmap?.ToPng();
     }
 
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
