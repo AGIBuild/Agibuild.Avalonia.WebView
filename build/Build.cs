@@ -231,21 +231,17 @@ internal sealed partial class BuildTask : NukeBuild
         .Executes(async () =>
         {
             // Mirror the Build target's android-slice gating so restore on hosts without the
-            // Android workload doesn't fail at NETSDK1147 when restoring Platforms.csproj.
+            // Android workload doesn't fail at NETSDK1147. Both Platforms.csproj and
+            // Avalonia.csproj (and any project that restores them) honor EnableAndroidTfm.
             var skipAndroidSlice = !await HasDotNetWorkloadAsync("android") || !HasAndroidSdkInstalled();
 
             foreach (var project in await GetProjectsToBuildAsync())
             {
-                var isPlatforms = string.Equals(
-                    Path.GetFileName(project),
-                    "Agibuild.Fulora.Platforms.csproj",
-                    StringComparison.OrdinalIgnoreCase);
-
                 DotNetRestore(s =>
                 {
                     var settings = s.SetProjectFile(project);
 
-                    if (isPlatforms && skipAndroidSlice)
+                    if (skipAndroidSlice)
                     {
                         settings = settings.SetProperty("EnableAndroidTfm", "false");
                     }
@@ -266,11 +262,6 @@ internal sealed partial class BuildTask : NukeBuild
 
             foreach (var project in await GetProjectsToBuildAsync())
             {
-                var projectFileName = Path.GetFileName(project);
-                var isPlatforms = string.Equals(
-                    projectFileName,
-                    "Agibuild.Fulora.Platforms.csproj",
-                    StringComparison.OrdinalIgnoreCase);
                 DotNetBuild(s =>
                 {
                     var settings = s
@@ -278,7 +269,7 @@ internal sealed partial class BuildTask : NukeBuild
                         .SetConfiguration(Configuration)
                         .EnableNoRestore();
 
-                    if (isPlatforms && skipAndroidSlice)
+                    if (skipAndroidSlice)
                     {
                         settings = settings.SetProperty("EnableAndroidTfm", "false");
                     }

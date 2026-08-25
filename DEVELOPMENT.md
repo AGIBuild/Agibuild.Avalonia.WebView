@@ -152,9 +152,6 @@ only — provider integration projects (`Agibuild.Fulora.AI.Ollama` /
 
 ## Workflow Conventions
 
-* **OpenSpec first.** Non-trivial changes start as a proposal under `openspec/`,
-  then a spec, then implementation. Hotfixes and typo-level fixes are exempt.
-  See `.cursor/rules/development-workflow.mdc` for the full rule.
 * **Tests with every functional change.** No "I'll add tests later" PRs.
 * **Commits in English; conversation/review can be Chinese.** Commit messages,
   comments, and code identifiers stay English; chat may be in either language.

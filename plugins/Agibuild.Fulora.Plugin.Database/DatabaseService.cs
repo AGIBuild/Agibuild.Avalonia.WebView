@@ -111,6 +111,8 @@ public sealed class DatabaseService : IDatabaseService, IDisposable
         if (_connection != null)
             return;
 
+        SqliteProviderInitializer.EnsureInitialized();
+
         var dataSource = new SqliteConnectionStringBuilder(_connectionString).DataSource;
         var dir = Path.GetDirectoryName(dataSource);
         if (dir is not null && !string.IsNullOrEmpty(dir) && dir != ":memory:" && !Directory.Exists(dir))

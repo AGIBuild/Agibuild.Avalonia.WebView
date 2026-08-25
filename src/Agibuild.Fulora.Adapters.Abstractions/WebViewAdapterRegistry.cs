@@ -57,7 +57,7 @@ internal static class WebViewAdapterRegistry
     public static bool HasAnyForCurrentPlatform()
     {
         return WebViewAdapterCandidateResolver.HasCandidates(
-            Providers.Values.Where(static provider => provider.CanHandleCurrentPlatform()),
+            Providers.Values,
             WebViewLegacyAdapterCompatibility.GetCurrentPlatformRegistrations(Registrations.Values));
     }
 
@@ -66,7 +66,7 @@ internal static class WebViewAdapterRegistry
         var platform = WebViewLegacyAdapterCompatibility.GetCurrentPlatform();
 
         if (WebViewAdapterCandidateResolver.TryCreateAdapter(
-                Providers.Values.Where(static provider => provider.CanHandleCurrentPlatform()),
+                Providers.Values,
                 WebViewLegacyAdapterCompatibility.GetCurrentPlatformRegistrations(Registrations.Values),
                 $"No WebView adapter registered for platform '{platform}'.",
                 out var resolvedAdapter,

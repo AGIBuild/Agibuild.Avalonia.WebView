@@ -14,7 +14,7 @@ When a change introduces new external tool dependencies into the build chain (e.
 
 3. **Verification scope**: Local `nuke Test` passing + CI passing does NOT guarantee Release will pass. Release has a different Nuke target chain (`CiPublish`) and may build projects that CI skips. Always mentally trace which solutions/projects each workflow builds.
 
-4. **Task checklist**: When creating OpenSpec tasks for changes that affect build tooling, explicitly include a task: "Update all CI/CD workflows to install required tools."
+4. **Task checklist**: For changes that affect build tooling, include a task: "Update all CI/CD workflows to install required tools."
 
 ## Known workflow differences
 

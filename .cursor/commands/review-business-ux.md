@@ -11,14 +11,10 @@ Review the provided business goal or design proposal as a senior Business Analys
 - `<input>` can be:
   - A file path (preferred): e.g. `docs/agibuild_webview_design_doc.md`
   - A short description pasted in chat
-  - A change name (OpenSpec): e.g. `init-project-structure` (then infer relevant design/spec files)
 
 **Steps**
 1. **Collect the target content**
    - If `<input>` looks like a file path, read it.
-   - If `<input>` is a change name:
-     - Read `openspec/changes/<name>/design.md` if present.
-     - Also read any referenced proposal/specs if they exist in that change folder.
    - If content is pasted inline, use it directly.
 
 2. **If input is empty, ask the user to paste the content**

@@ -35,14 +35,50 @@ public sealed class WebViewAdapterRegistryTests
     {
         WebViewAdapterRegistry.ResetForTests();
 
-        WebViewAdapterRegistry.RegisterProvider(new StubPlatformProvider("off", canHandle: false, priority: int.MaxValue, () => new MarkerAdapter("off")));
-        WebViewAdapterRegistry.RegisterProvider(new StubPlatformProvider("on", canHandle: true, priority: 0, () => new MarkerAdapter("on")));
+        var off = new StubPlatformProvider("off", canHandle: false, priority: int.MaxValue, () => new MarkerAdapter("off"));
+        var on = new StubPlatformProvider("on", canHandle: true, priority: 0, () => new MarkerAdapter("on"));
+
+        WebViewAdapterRegistry.RegisterProvider(off);
+        WebViewAdapterRegistry.RegisterProvider(on);
 
         var result = WebViewAdapterRegistry.TryCreateForCurrentPlatform(out var adapter, out var reason);
 
         Assert.True(result);
         Assert.Null(reason);
         Assert.Equal("on", Assert.IsType<MarkerAdapter>(adapter).Id);
+        Assert.Equal(0, off.FactoryCount);
+        Assert.Equal(1, on.FactoryCount);
+    }
+
+    [Fact]
+    public void HasAnyForCurrentPlatform_returns_false_when_only_unavailable_providers_are_registered()
+    {
+        WebViewAdapterRegistry.ResetForTests();
+
+        WebViewAdapterRegistry.RegisterProvider(
+            new StubPlatformProvider("off", canHandle: false, priority: int.MaxValue, () => new MarkerAdapter("off")));
+
+        Assert.False(WebViewAdapterRegistry.HasAnyForCurrentPlatform());
+    }
+
+    [Fact]
+    public void TryCreateForCurrentPlatform_keeps_legacy_registration_when_provider_cannot_handle_platform()
+    {
+        WebViewAdapterRegistry.ResetForTests();
+
+        WebViewAdapterRegistry.RegisterProvider(
+            new StubPlatformProvider("off", canHandle: false, priority: int.MaxValue, () => new MarkerAdapter("off")));
+        WebViewAdapterRegistry.Register(new WebViewAdapterRegistration(
+            WebViewLegacyAdapterCompatibility.GetCurrentPlatform(),
+            "legacy",
+            () => new MarkerAdapter("legacy"),
+            Priority: 0));
+
+        var result = WebViewAdapterRegistry.TryCreateForCurrentPlatform(out var adapter, out var reason);
+
+        Assert.True(result);
+        Assert.Null(reason);
+        Assert.Equal("legacy", Assert.IsType<MarkerAdapter>(adapter).Id);
     }
 
     [Fact]
@@ -225,7 +261,13 @@ public sealed class WebViewAdapterRegistryTests
         public string Id => id;
         public int Priority => priority;
         public bool CanHandleCurrentPlatform() => canHandle;
-        public IWebViewAdapter CreateAdapter() => factory();
+        public int FactoryCount { get; private set; }
+
+        public IWebViewAdapter CreateAdapter()
+        {
+            FactoryCount++;
+            return factory();
+        }
     }
 
     private sealed class MarkerAdapter(string id) : MockWebViewAdapter

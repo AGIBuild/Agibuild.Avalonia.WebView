@@ -9,4 +9,10 @@ internal interface IWebViewPlatformProvider
     bool CanHandleCurrentPlatform();
 
     IWebViewAdapter CreateAdapter();
+
+    WebViewPlatformProbeResult ProbeCurrentPlatform()
+        => CanHandleCurrentPlatform()
+            ? WebViewPlatformProbeResult.Available()
+            : WebViewPlatformProbeResult.UnsupportedPlatform(
+                $"Provider '{Id}' cannot handle the current platform.");
 }
