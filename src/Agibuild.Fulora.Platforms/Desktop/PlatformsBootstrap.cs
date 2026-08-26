@@ -50,6 +50,7 @@ internal static class PlatformsBootstrap
         public string Id => "windows.webview2";
         public int Priority => 100;
         public bool CanHandleCurrentPlatform() => OperatingSystem.IsWindows();
+        public WebViewPlatformProbeResult ProbeCurrentPlatform() => WindowsWebView2RuntimeProbe.Probe();
         public IWebViewAdapter CreateAdapter() => new Agibuild.Fulora.Adapters.Windows.WindowsWebViewAdapter();
     }
 
