@@ -239,7 +239,7 @@ static char* ag_extract_host_from_uri_string(const char* uri)
     if (uri == NULL)
         return NULL;
 #if GLIB_CHECK_VERSION(2, 66, 0)
-    GUri* parsed = g_uri_parse(uri, G_URI_FLAGS_NONE, NULL, NULL, NULL);
+    GUri* parsed = g_uri_parse(uri, G_URI_FLAGS_NONE, NULL);
     if (parsed != NULL)
     {
         const char* h = g_uri_get_host(parsed);
