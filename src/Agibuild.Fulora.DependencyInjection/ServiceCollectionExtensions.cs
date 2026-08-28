@@ -35,7 +35,7 @@ public static class ServiceCollectionExtensions
     {
         ArgumentNullException.ThrowIfNull(services);
 
-        services.AddTransient<IWebViewDispatcher>(_ => new SynchronizationContextWebViewDispatcher());
+        services.AddTransient<IWebViewDispatcher>(_ => new CallingThreadWebViewDispatcher());
 
         services.AddSingleton<Func<IWebViewDispatcher, IWebView>>(sp =>
         {

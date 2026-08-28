@@ -237,7 +237,7 @@ internal sealed class WebViewCoreNavigationRuntime
         ArgumentNullException.ThrowIfNull(args);
         _context.Logger.LogAdapterNavCompletedReceived(args.NavigationId, args.Status, args.RequestUri);
 
-        UiThreadHelper.SafeDispatch(
+        UiThreadHelper.ObserveDispatch(
             _context.Dispatcher,
             _context.IsDisposed,
             _context.IsAdapterDestroyed,

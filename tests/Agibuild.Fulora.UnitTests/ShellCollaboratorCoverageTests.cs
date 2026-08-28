@@ -247,7 +247,7 @@ public sealed class ShellCollaboratorCoverageTests
     }
 
     [Fact]
-    public void ShellMenuGovernanceRuntime_effective_model_snapshot_is_cloned()
+    public async Task ShellMenuGovernanceRuntime_effective_model_snapshot_is_cloned()
     {
         using var webView = CreateCore();
         var runtime = new ShellMenuGovernanceRuntime(
@@ -292,7 +292,7 @@ public sealed class ShellCollaboratorCoverageTests
     }
 
     [Fact]
-    public void WebViewManagedWindowManager_IsTransitionAllowed_branch_matrix()
+    public async Task WebViewManagedWindowManager_IsTransitionAllowed_branch_matrix()
     {
         var method = typeof(WebViewManagedWindowManager)
             .GetMethod("IsTransitionAllowed", BindingFlags.NonPublic | BindingFlags.Static);
@@ -319,7 +319,7 @@ public sealed class ShellCollaboratorCoverageTests
     }
 
     [Fact]
-    public void WebViewManagedWindowManager_TryTransitionManagedWindowState_invalid_transition_reports_failure()
+    public async Task WebViewManagedWindowManager_TryTransitionManagedWindowState_invalid_transition_reports_failure()
     {
         using var webView = CreateCore();
         var options = new WebViewShellExperienceOptions();
@@ -360,7 +360,12 @@ public sealed class ShellCollaboratorCoverageTests
         var dispatcher = new TestDispatcher();
         var adapter = MockWebViewAdapter.CreateFull();
         var core = new WebViewCore(adapter, dispatcher);
-        core.Attach(new TestPlatformHandle(IntPtr.Zero, "test-parent"));
+        var attach = core.AttachAsync(new TestPlatformHandle(IntPtr.Zero, "test-parent"), CancellationToken.None);
+        if (!attach.IsCompletedSuccessfully)
+        {
+            throw new InvalidOperationException("Expected mock attach to complete synchronously.");
+        }
+
         return core;
     }
 

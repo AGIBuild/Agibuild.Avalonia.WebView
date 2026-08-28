@@ -124,7 +124,7 @@ internal sealed class WebViewCoreBridgeRuntime : IDisposable
     /// <summary>
     /// Adapter-thread entry point: logs + dispatches to UI thread, filtering disposed / destroyed hosts.
     /// Mirrors the pattern used by <see cref="WebViewCoreAdapterEventRuntime"/> so all adapter events
-    /// go through <see cref="UiThreadHelper.SafeDispatch"/> at the runtime layer rather than scattered
+    /// go through <see cref="UiThreadHelper.ObserveDispatch"/> at the runtime layer rather than scattered
     /// across <see cref="WebViewCore"/>.
     /// </summary>
     public void HandleAdapterWebMessageReceived(WebMessageReceivedEventArgs args)
@@ -132,7 +132,7 @@ internal sealed class WebViewCoreBridgeRuntime : IDisposable
         ArgumentNullException.ThrowIfNull(args);
         _context.Logger.LogEventWebMessageReceived(args.Origin, args.ChannelId);
 
-        UiThreadHelper.SafeDispatch(
+        UiThreadHelper.ObserveDispatch(
             _context.Dispatcher,
             _context.IsDisposed,
             _context.IsAdapterDestroyed,

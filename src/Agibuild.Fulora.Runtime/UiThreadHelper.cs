@@ -3,21 +3,12 @@ using Microsoft.Extensions.Logging;
 namespace Agibuild.Fulora;
 
 /// <summary>
-/// Shared helpers for UI-thread dispatch in adapter event handlers.
+/// Observes dispatcher work that originates at synchronous native-event boundaries.
+/// Failures are logged; the Task is never discarded unobserved.
 /// </summary>
 internal static class UiThreadHelper
 {
-    /// <summary>
-    /// Safely dispatches an action to the UI thread if the host is not disposed or destroyed.
-    /// If already on the UI thread, runs the action directly; otherwise invokes via the dispatcher.
-    /// </summary>
-    /// <param name="dispatcher">The UI thread dispatcher.</param>
-    /// <param name="disposed">Whether the host has been disposed.</param>
-    /// <param name="adapterDestroyed">Whether the adapter has been destroyed.</param>
-    /// <param name="action">The action to run on the UI thread.</param>
-    /// <param name="logger">Optional logger for ignored-events diagnostics.</param>
-    /// <param name="logMessageWhenIgnored">When set and the call is ignored (disposed/destroyed), logs this message.</param>
-    public static void SafeDispatch(
+    public static void ObserveDispatch(
         IWebViewDispatcher dispatcher,
         bool disposed,
         bool adapterDestroyed,
@@ -25,12 +16,16 @@ internal static class UiThreadHelper
         ILogger? logger = null,
         string? logMessageWhenIgnored = null)
     {
+        ArgumentNullException.ThrowIfNull(dispatcher);
+        ArgumentNullException.ThrowIfNull(action);
+
         if (disposed || adapterDestroyed)
         {
             if (logger is not null && logMessageWhenIgnored is not null)
             {
                 logger.LogDebug(logMessageWhenIgnored);
             }
+
             return;
         }
 
@@ -40,6 +35,26 @@ internal static class UiThreadHelper
             return;
         }
 
-        _ = dispatcher.InvokeAsync(action);
+        Observe(dispatcher.InvokeAsync(action), logger);
+    }
+
+    public static void Observe(Task task, ILogger? logger = null)
+    {
+        ArgumentNullException.ThrowIfNull(task);
+
+        _ = task.ContinueWith(
+            t =>
+            {
+                var error = t.Exception?.GetBaseException();
+                if (error is null)
+                {
+                    return;
+                }
+
+                logger?.LogError(error, "UI dispatch failed.");
+            },
+            CancellationToken.None,
+            TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+            TaskScheduler.Default);
     }
 }

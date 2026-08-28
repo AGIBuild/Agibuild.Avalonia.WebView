@@ -85,6 +85,7 @@ internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHan
 
     public bool CanGoBack => _webView?.CanGoBack() ?? false;
     public bool CanGoForward => _webView?.CanGoForward() ?? false;
+    public WebViewBackendCapabilities BackendCapabilities => WebViewBackendCapabilities.None;
 
     public event EventHandler<NavigationCompletedEventArgs>? NavigationCompleted;
     public event EventHandler<NewWindowRequestedEventArgs>? NewWindowRequested;
@@ -125,25 +126,27 @@ internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHan
         _host = host;
     }
 
-    public void Attach(INativeHandle parentHandle)
+    public Task AttachAsync(INativeHandle parentHandle, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(parentHandle);
         ThrowIfNotInitialized();
 
         if (_detached)
         {
-            throw new InvalidOperationException($"{nameof(Attach)} cannot be called after {nameof(Detach)}.");
+            throw new InvalidOperationException($"{nameof(AttachAsync)} cannot be called after {nameof(Detach)}.");
         }
 
         if (_attached)
         {
-            throw new InvalidOperationException($"{nameof(Attach)} can only be called once.");
+            throw new InvalidOperationException($"{nameof(AttachAsync)} can only be called once.");
         }
 
         if (!OperatingSystem.IsAndroid())
         {
             throw new PlatformNotSupportedException("Android WebView adapter can only be used on Android.");
         }
+
+        cancellationToken.ThrowIfCancellationRequested();
 
         _attached = true;
         _mainHandler = new Handler(Looper.MainLooper!);
@@ -152,8 +155,14 @@ internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHan
         // On Avalonia Android, the IPlatformHandle.Handle is a GCHandle pointer to the native View.
         var parentView = ResolveParentView(parentHandle);
 
+        if (cancellationToken.CanBeCanceled)
+        {
+            cancellationToken.Register(() => _webViewReady.TrySetCanceled(cancellationToken));
+        }
+
         // Create WebView on the UI thread.
         PostOnUiThread(() => InitializeWebView(parentView));
+        return _webViewReady.Task;
     }
 
     private void InitializeWebView(ViewGroup parentView)
@@ -379,13 +388,10 @@ internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHan
 
     // ==================== Navigation — API-initiated ====================
 
-    public async Task NavigateAsync(Guid navigationId, Uri uri)
+    public Task NavigateAsync(Guid navigationId, Uri uri)
     {
         ArgumentNullException.ThrowIfNull(uri);
         ThrowIfNotAttached();
-
-        // Wait for the native WebView to be created (Attach posts asynchronously).
-        await _webViewReady.Task.ConfigureAwait(false);
 
         // Bundle BeginApiNavigation + LoadUrl into a single UI-thread action.
         // After the await above we may be on a thread-pool thread. If we arm the
@@ -399,18 +405,17 @@ internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHan
             lock (_navLock) { BeginApiNavigation(navigationId, absoluteUri); }
             _webView?.LoadUrl(absoluteUri);
         });
+
+        return Task.CompletedTask;
     }
 
     public Task NavigateToStringAsync(Guid navigationId, string html)
         => NavigateToStringAsync(navigationId, html, baseUrl: null);
 
-    public async Task NavigateToStringAsync(Guid navigationId, string html, Uri? baseUrl)
+    public Task NavigateToStringAsync(Guid navigationId, string html, Uri? baseUrl)
     {
         ArgumentNullException.ThrowIfNull(html);
         ThrowIfNotAttached();
-
-        // Wait for the native WebView to be created (Attach posts asynchronously).
-        await _webViewReady.Task.ConfigureAwait(false);
 
         // Always use LoadDataWithBaseURL — Android's LoadData has known encoding bugs
         // with '%', '#', non-ASCII characters, and emoji in HTML content.
@@ -426,6 +431,8 @@ internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHan
             lock (_navLock) { BeginApiNavigation(navigationId, navKey); }
             _webView?.LoadDataWithBaseURL(baseUrlStr, html, "text/html", "UTF-8", null);
         });
+
+        return Task.CompletedTask;
     }
 
     // ==================== Navigation — commands ====================
@@ -470,9 +477,6 @@ internal sealed class AndroidWebViewAdapter : IWebViewAdapter, INativeWebViewHan
     {
         ArgumentNullException.ThrowIfNull(script);
         ThrowIfNotAttached();
-
-        // Wait for the native WebView to be created (Attach posts asynchronously).
-        await _webViewReady.Task.ConfigureAwait(false);
 
         if (_webView is null)
         {

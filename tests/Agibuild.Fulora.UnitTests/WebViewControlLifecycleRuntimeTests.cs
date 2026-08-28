@@ -11,7 +11,7 @@ public sealed class WebViewControlLifecycleRuntimeTests
     private readonly TestDispatcher _dispatcher = new();
 
     [Fact]
-    public void AttachToNativeControl_creates_core_attaches_and_replays_pending_source()
+    public async Task AttachToNativeControl_creates_core_attaches_and_replays_pending_source()
     {
         var adapter = MockWebViewAdapter.Create();
         var controlRuntime = new WebViewControlRuntime();
@@ -35,7 +35,7 @@ public sealed class WebViewControlLifecycleRuntimeTests
     }
 
     [Fact]
-    public void AttachToNativeControl_success_does_not_depend_on_a_shell_adapter_callback()
+    public async Task AttachToNativeControl_success_does_not_depend_on_a_shell_adapter_callback()
     {
         var adapter = MockWebViewAdapter.Create();
         var controlRuntime = new WebViewControlRuntime();
@@ -59,7 +59,7 @@ public sealed class WebViewControlLifecycleRuntimeTests
     }
 
     [Fact]
-    public void AttachToNativeControl_platform_not_supported_marks_runtime_unavailable_without_a_shell_adapter_callback()
+    public async Task AttachToNativeControl_platform_not_supported_marks_runtime_unavailable_without_a_shell_adapter_callback()
     {
         var controlRuntime = new WebViewControlRuntime();
         var eventRuntime = CreateEventRuntime();
@@ -81,7 +81,7 @@ public sealed class WebViewControlLifecycleRuntimeTests
     }
 
     [Fact]
-    public void AttachToNativeControl_rethrows_non_platform_failures_and_clears_runtime_state()
+    public async Task AttachToNativeControl_rethrows_non_platform_failures_and_clears_runtime_state()
     {
         var controlRuntime = new WebViewControlRuntime();
         var eventRuntime = CreateEventRuntime();
@@ -103,7 +103,7 @@ public sealed class WebViewControlLifecycleRuntimeTests
     }
 
     [Fact]
-    public void DestroyAttachedCore_detaches_events_and_disposes_core()
+    public async Task DestroyAttachedCore_detaches_events_and_disposes_core()
     {
         var adapter = MockWebViewAdapter.Create();
         var controlRuntime = new WebViewControlRuntime();
@@ -117,7 +117,7 @@ public sealed class WebViewControlLifecycleRuntimeTests
         controlRuntime.AttachCore(core);
         controlRuntime.SetCoreAttached(true);
         eventRuntime.Attach(core);
-        core.Attach(new TestNativeHandle(IntPtr.Zero, "test-parent"));
+        await core.AttachAsync(new TestNativeHandle(IntPtr.Zero, "test-parent"), CancellationToken.None);
 
         lifecycle.DestroyAttachedCore();
 

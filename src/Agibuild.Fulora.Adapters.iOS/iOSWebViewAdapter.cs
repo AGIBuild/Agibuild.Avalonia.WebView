@@ -67,6 +67,8 @@ internal sealed class iOSWebViewAdapter : IWebViewAdapter, IDragDropAdapter
 
     public bool CanGoForward => _attached && !_detached && _webView?.CanGoForward == true;
 
+    public WebViewBackendCapabilities BackendCapabilities => new(this, null);
+
     public event EventHandler<NavigationCompletedEventArgs>? NavigationCompleted;
     public event EventHandler<NewWindowRequestedEventArgs>? NewWindowRequested;
     public event EventHandler<WebMessageReceivedEventArgs>? WebMessageReceived;
@@ -127,24 +129,26 @@ internal sealed class iOSWebViewAdapter : IWebViewAdapter, IDragDropAdapter
         _host = host;
     }
 
-    public void Attach(INativeHandle parentHandle)
+    public Task AttachAsync(INativeHandle parentHandle, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(parentHandle);
         ThrowIfNotInitialized();
         if (_detached)
         {
-            throw new InvalidOperationException($"{nameof(Attach)} cannot be called after {nameof(Detach)}.");
+            throw new InvalidOperationException($"{nameof(AttachAsync)} cannot be called after {nameof(Detach)}.");
         }
 
         if (_attached)
         {
-            throw new InvalidOperationException($"{nameof(Attach)} can only be called once.");
+            throw new InvalidOperationException($"{nameof(AttachAsync)} can only be called once.");
         }
 
         if (parentHandle.Handle == IntPtr.Zero)
         {
             throw new ArgumentException("Parent handle must be non-zero.", nameof(parentHandle));
         }
+
+        cancellationToken.ThrowIfCancellationRequested();
 
         _parentView = UIView.FromHandle(parentHandle.Handle);
         _configuration = WKWebViewConfiguration.Create();
@@ -212,6 +216,7 @@ internal sealed class iOSWebViewAdapter : IWebViewAdapter, IDragDropAdapter
         _webViewAsView.AddInteraction(_dropInteraction);
         _parentView.AddSubview(_webView);
         _attached = true;
+        return Task.CompletedTask;
     }
 
     public void Detach()

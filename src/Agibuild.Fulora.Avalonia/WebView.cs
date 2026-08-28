@@ -132,7 +132,7 @@ public class WebView : NativeControlHost, ISpaHostingWebView
             getLoggerFactory: () => _loggerFactory,
             getEnvironmentOptions: () => EnvironmentOptions,
             getPendingSource: () => Source,
-            createDispatcher: static () => new SynchronizationContextWebViewDispatcher());
+            createDispatcher: static () => new AvaloniaWebViewDispatcher());
 
         _hostClosingRuntime = new WebViewHostClosingRuntime(
             resolveHostWindow: () => TopLevel.GetTopLevel(this) as Window,

@@ -15,12 +15,12 @@ public sealed partial class BranchCoverageRound3Tests
     #region Medium: WebViewCore adapterDestroyed paths
 
     [Fact]
-    public void Events_ignored_when_adapterDestroyed_but_not_disposed()
+    public async Task Events_ignored_when_adapterDestroyed_but_not_disposed()
     {
         var dispatcher = new TestDispatcher();
         var adapter = MockWebViewAdapter.CreateFull();
         using var core = new WebViewCore(adapter, dispatcher);
-        core.Attach(new TestPlatformHandle(IntPtr.Zero, "test-parent"));
+        await core.AttachAsync(new TestPlatformHandle(IntPtr.Zero, "test-parent"), CancellationToken.None);
 
         var events = new List<string>();
         core.NavigationCompleted += (_, _) => events.Add("NavigationCompleted");
@@ -60,7 +60,7 @@ public sealed partial class BranchCoverageRound3Tests
         var dispatcher = new TestDispatcher();
         var adapter = MockWebViewAdapter.CreateWithCommands();
         var core = new WebViewCore(adapter, dispatcher);
-        core.Attach(new TestPlatformHandle(IntPtr.Zero, "test-parent"));
+        await core.AttachAsync(new TestPlatformHandle(IntPtr.Zero, "test-parent"), CancellationToken.None);
 
         core.Dispose();
 
@@ -73,13 +73,13 @@ public sealed partial class BranchCoverageRound3Tests
     #region Medium: WebViewCore WebMessageReceived with rpc null + no subscriber
 
     [Fact]
-    public void WebMessageReceived_allowed_without_subscriber_does_not_throw()
+    public async Task WebMessageReceived_allowed_without_subscriber_does_not_throw()
     {
         // Line 1350: WebMessageReceived?.Invoke — null-conditional with no subscriber
         var dispatcher = new TestDispatcher();
         var adapter = new MockWebViewAdapter();
         using var core = new WebViewCore(adapter, dispatcher);
-        core.Attach(new TestPlatformHandle(IntPtr.Zero, "test-parent"));
+        await core.AttachAsync(new TestPlatformHandle(IntPtr.Zero, "test-parent"), CancellationToken.None);
 
         core.EnableWebMessageBridge(new WebMessageBridgeOptions
         {
@@ -106,7 +106,7 @@ public sealed partial class BranchCoverageRound3Tests
         var dispatcher = new TestDispatcher();
         var adapter = MockWebViewAdapter.CreateWithCommands();
         using var core = new WebViewCore(adapter, dispatcher);
-        core.Attach(new TestPlatformHandle(IntPtr.Zero, "test-parent"));
+        await core.AttachAsync(new TestPlatformHandle(IntPtr.Zero, "test-parent"), CancellationToken.None);
 
         var cmdMgr = core.TryGetCommandManager();
         Assert.NotNull(cmdMgr);
@@ -120,13 +120,13 @@ public sealed partial class BranchCoverageRound3Tests
     #region Medium: WebViewCore EnableWebMessageBridge with null AllowedOrigins
 
     [Fact]
-    public void EnableWebMessageBridge_null_origins_covers_coalesce()
+    public async Task EnableWebMessageBridge_null_origins_covers_coalesce()
     {
         // Line 900: options.AllowedOrigins?.Count ?? 0
         var dispatcher = new TestDispatcher();
         var adapter = new MockWebViewAdapter();
         using var core = new WebViewCore(adapter, dispatcher);
-        core.Attach(new TestPlatformHandle(IntPtr.Zero, "test-parent"));
+        await core.AttachAsync(new TestPlatformHandle(IntPtr.Zero, "test-parent"), CancellationToken.None);
 
         var options = new WebMessageBridgeOptions { AllowedOrigins = null! };
         core.EnableWebMessageBridge(options);
@@ -137,12 +137,12 @@ public sealed partial class BranchCoverageRound3Tests
     #region Round 4: WebViewCore _disposed=true via reflection for event handlers
 
     [Fact]
-    public void Events_ignored_when_disposed_but_not_detached_from_adapter()
+    public async Task Events_ignored_when_disposed_but_not_detached_from_adapter()
     {
         var dispatcher = new TestDispatcher();
         var adapter = MockWebViewAdapter.CreateFull();
         using var core = new WebViewCore(adapter, dispatcher);
-        core.Attach(new TestPlatformHandle(IntPtr.Zero, "test-parent"));
+        await core.AttachAsync(new TestPlatformHandle(IntPtr.Zero, "test-parent"), CancellationToken.None);
 
         var events = new List<string>();
         core.NavigationCompleted += (_, _) => events.Add("NavigationCompleted");
@@ -177,12 +177,12 @@ public sealed partial class BranchCoverageRound3Tests
     #region Round 4: WebResourceRequested/EnvironmentRequested with subscriber
 
     [Fact]
-    public void WebResourceRequested_with_subscriber_invokes_handler()
+    public async Task WebResourceRequested_with_subscriber_invokes_handler()
     {
         var dispatcher = new TestDispatcher();
         var adapter = new MockWebViewAdapter();
         using var core = new WebViewCore(adapter, dispatcher);
-        core.Attach(new TestPlatformHandle(IntPtr.Zero, "test-parent"));
+        await core.AttachAsync(new TestPlatformHandle(IntPtr.Zero, "test-parent"), CancellationToken.None);
 
         var invoked = false;
         core.WebResourceRequested += (_, _) => invoked = true;
@@ -191,12 +191,12 @@ public sealed partial class BranchCoverageRound3Tests
     }
 
     [Fact]
-    public void EnvironmentRequested_with_subscriber_invokes_handler()
+    public async Task EnvironmentRequested_with_subscriber_invokes_handler()
     {
         var dispatcher = new TestDispatcher();
         var adapter = new MockWebViewAdapter();
         using var core = new WebViewCore(adapter, dispatcher);
-        core.Attach(new TestPlatformHandle(IntPtr.Zero, "test-parent"));
+        await core.AttachAsync(new TestPlatformHandle(IntPtr.Zero, "test-parent"), CancellationToken.None);
 
         var invoked = false;
         core.EnvironmentRequested += (_, _) => invoked = true;
@@ -205,12 +205,12 @@ public sealed partial class BranchCoverageRound3Tests
     }
 
     [Fact]
-    public void WebResourceRequested_without_subscriber_does_not_throw()
+    public async Task WebResourceRequested_without_subscriber_does_not_throw()
     {
         var dispatcher = new TestDispatcher();
         var adapter = new MockWebViewAdapter();
         using var core = new WebViewCore(adapter, dispatcher);
-        core.Attach(new TestPlatformHandle(IntPtr.Zero, "test-parent"));
+        await core.AttachAsync(new TestPlatformHandle(IntPtr.Zero, "test-parent"), CancellationToken.None);
 
         // No subscriber attached — covers the null-delegate branch of ?.Invoke
         adapter.RaiseWebResourceRequested();
@@ -221,7 +221,7 @@ public sealed partial class BranchCoverageRound3Tests
     #region Round 4: NormalizeProfileHash char < '0'
 
     [Fact]
-    public void NormalizeProfileHash_char_below_zero_covers_false_branch()
+    public async Task NormalizeProfileHash_char_below_zero_covers_false_branch()
     {
         // Line 126: c is >= '0' → false branch (never tested because all hex chars are >= '0')
         // Use a char that is < '0' in ASCII (e.g., '/' = 0x2F, space = 0x20)
@@ -246,7 +246,7 @@ public sealed partial class BranchCoverageRound3Tests
         var dispatcher = new TestDispatcher();
         var adapter = new MockWebViewAdapter { AutoCompleteNavigation = true };
         using var core = new WebViewCore(adapter, dispatcher);
-        core.Attach(new TestPlatformHandle(IntPtr.Zero, "test-parent"));
+        await core.AttachAsync(new TestPlatformHandle(IntPtr.Zero, "test-parent"), CancellationToken.None);
 
         await core.NavigateAsync(new Uri("about:blank"));
     }
@@ -256,23 +256,23 @@ public sealed partial class BranchCoverageRound3Tests
     #region Round 5 Tier 1: WebViewCore remaining branches
 
     [Fact]
-    public void EnvironmentRequested_without_subscriber_does_not_throw()
+    public async Task EnvironmentRequested_without_subscriber_does_not_throw()
     {
         var dispatcher = new TestDispatcher();
         var adapter = new MockWebViewAdapter();
         using var core = new WebViewCore(adapter, dispatcher);
-        core.Attach(new TestPlatformHandle(IntPtr.Zero, "test-parent"));
+        await core.AttachAsync(new TestPlatformHandle(IntPtr.Zero, "test-parent"), CancellationToken.None);
 
         adapter.RaiseEnvironmentRequested();
     }
 
     [Fact]
-    public void WebMessageReceived_non_rpc_body_falls_through_to_event()
+    public async Task WebMessageReceived_non_rpc_body_falls_through_to_event()
     {
         var dispatcher = new TestDispatcher();
         var adapter = new MockWebViewAdapter();
         using var core = new WebViewCore(adapter, dispatcher);
-        core.Attach(new TestPlatformHandle(IntPtr.Zero, "test-parent"));
+        await core.AttachAsync(new TestPlatformHandle(IntPtr.Zero, "test-parent"), CancellationToken.None);
 
         core.EnableWebMessageBridge(new WebMessageBridgeOptions());
         var received = false;
@@ -288,12 +288,12 @@ public sealed partial class BranchCoverageRound3Tests
     }
 
     [Fact]
-    public void ThrowIfNotOnUiThread_from_background_thread_throws()
+    public async Task ThrowIfNotOnUiThread_from_background_thread_throws()
     {
         var dispatcher = new TestDispatcher();
         var adapter = new MockWebViewAdapter();
         using var core = new WebViewCore(adapter, dispatcher);
-        core.Attach(new TestPlatformHandle(IntPtr.Zero, "test-parent"));
+        await core.AttachAsync(new TestPlatformHandle(IntPtr.Zero, "test-parent"), CancellationToken.None);
 
         InvalidOperationException? caught = null;
         var thread = new Thread(() =>
@@ -318,7 +318,7 @@ public sealed partial class BranchCoverageRound3Tests
         var dispatcher = new TestDispatcher();
         var adapter = new MockWebViewAdapter();
         using var core = new WebViewCore(adapter, dispatcher);
-        core.Attach(new TestPlatformHandle(IntPtr.Zero, "test-parent"));
+        await core.AttachAsync(new TestPlatformHandle(IntPtr.Zero, "test-parent"), CancellationToken.None);
 
         var decision = await adapter.SimulateNativeNavigationStartingAsync(new Uri("about:blank"));
         Assert.True(decision.IsAllowed);
@@ -330,7 +330,7 @@ public sealed partial class BranchCoverageRound3Tests
         var dispatcher = new TestDispatcher();
         var adapter = new MockWebViewAdapter();
         using var core = new WebViewCore(adapter, dispatcher);
-        core.Attach(new TestPlatformHandle(IntPtr.Zero, "test-parent"));
+        await core.AttachAsync(new TestPlatformHandle(IntPtr.Zero, "test-parent"), CancellationToken.None);
 
         var decision = await adapter.SimulateNativeNavigationStartingAsync(new Uri("https://example.com"));
         Assert.True(decision.IsAllowed);

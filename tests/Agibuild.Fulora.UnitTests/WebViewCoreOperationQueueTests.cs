@@ -186,4 +186,43 @@ public sealed class WebViewCoreOperationQueueTests
         gate.SetResult(0);
         Assert.Equal(1, await first);
     }
+
+    [Fact]
+    public async Task Terminate_faults_active_and_queued_callers_without_waiting_for_adapter_completion()
+    {
+        var queue = CreateQueue(out _);
+        var neverCompletes = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        var first = queue.EnqueueAsync("first", () => neverCompletes.Task);
+        var second = queue.EnqueueAsync("second", () => Task.FromResult(2));
+
+        queue.Terminate(new ObjectDisposedException(nameof(WebViewCore)));
+
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => first);
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => second);
+    }
+
+    [Fact]
+    public async Task Attaching_queue_waits_for_ready_signal()
+    {
+        var lifecycle = new WebViewLifecycleStateMachine();
+        lifecycle.TransitionToAttaching();
+        var queue = new WebViewCoreOperationQueue(lifecycle, new InlineDispatcher(), NullLogger.Instance);
+        var invoked = false;
+
+        var operation = queue.EnqueueAsync("Op", () =>
+        {
+            invoked = true;
+            return Task.FromResult(1);
+        });
+
+        await Task.Yield();
+        Assert.False(invoked);
+
+        lifecycle.TransitionToReady();
+        queue.SignalReady();
+
+        Assert.Equal(1, await operation);
+        Assert.True(invoked);
+    }
 }

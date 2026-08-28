@@ -20,7 +20,7 @@ internal enum WebViewLifecycleState
     /// <summary>Constructed but not yet attached to a native parent.</summary>
     Created,
 
-    /// <summary><see cref="WebViewCore.Attach(INativeHandle)"/> is in progress.</summary>
+    /// <summary>Adapter attachment is in progress.</summary>
     Attaching,
 
     /// <summary>Attached and ready to accept operations.</summary>
@@ -28,6 +28,12 @@ internal enum WebViewLifecycleState
 
     /// <summary><see cref="WebViewCore.Detach"/> is in progress.</summary>
     Detaching,
+
+    /// <summary>Native detach completed; further operations are rejected.</summary>
+    Detached,
+
+    /// <summary>Attach failed before Ready; further operations are rejected.</summary>
+    Faulted,
 
     /// <summary>Terminal state after <see cref="WebViewCore.Dispose"/>.</summary>
     Disposed,

@@ -219,11 +219,11 @@ internal sealed class WebViewCoreFeatureRuntime : IDisposable
             return;
         }
 
-        _ = _context.Dispatcher.InvokeAsync(() =>
-        {
-            _context.Events.RaiseZoomFactorChanged(newZoom);
-            return Task.CompletedTask;
-        });
+        UiThreadHelper.ObserveDispatch(
+            _context.Dispatcher,
+            _context.IsDisposed,
+            _context.IsAdapterDestroyed,
+            () => _context.Events.RaiseZoomFactorChanged(newZoom));
     }
 
     private void OnAdapterContextMenuRequested(object? sender, ContextMenuRequestedEventArgs args)
@@ -233,11 +233,11 @@ internal sealed class WebViewCoreFeatureRuntime : IDisposable
             return;
         }
 
-        _ = _context.Dispatcher.InvokeAsync(() =>
-        {
-            _context.Events.RaiseContextMenuRequested(args);
-            return Task.CompletedTask;
-        });
+        UiThreadHelper.ObserveDispatch(
+            _context.Dispatcher,
+            _context.IsDisposed,
+            _context.IsAdapterDestroyed,
+            () => _context.Events.RaiseContextMenuRequested(args));
     }
 
     private void OnAdapterDragEntered(object? sender, DragEventArgs args)

@@ -15,7 +15,7 @@ public sealed partial class BranchCoverageRound3Tests
     #region Medium: WebViewShellExperience null-coalescing branches
 
     [Fact]
-    public void ApplyMenuModel_null_effectiveMenuModel_uses_normalizedRequest()
+    public async Task ApplyMenuModel_null_effectiveMenuModel_uses_normalizedRequest()
     {
         var provider = new MinimalHostCapabilityProvider();
         var bridge = new WebViewHostCapabilityBridge(provider);
@@ -31,12 +31,12 @@ public sealed partial class BranchCoverageRound3Tests
     }
 
     [Fact]
-    public void TryApplyProfilePermission_sessionDecision_null_ScopeIdentity()
+    public async Task TryApplyProfilePermission_sessionDecision_null_ScopeIdentity()
     {
         var dispatcher = new TestDispatcher();
         var adapter = MockWebViewAdapter.CreateWithPermission();
         using var core = new WebViewCore(adapter, dispatcher);
-        core.Attach(new TestPlatformHandle(IntPtr.Zero, "test-parent"));
+        await core.AttachAsync(new TestPlatformHandle(IntPtr.Zero, "test-parent"), CancellationToken.None);
 
         // No SessionPolicy set → _sessionDecision is null
         // SessionPermissionProfileResolver is set → TryApplyProfilePermissionDecision runs
@@ -240,7 +240,7 @@ public sealed partial class BranchCoverageRound3Tests
     #region Round 5 Tier 1: WebViewShellExperience managed window lifecycle
 
     [Fact]
-    public void IsTransitionAllowed_created_to_closing_returns_true()
+    public async Task IsTransitionAllowed_created_to_closing_returns_true()
     {
         var method = typeof(WebViewShellExperience)
             .GetMethod("IsTransitionAllowed", BindingFlags.NonPublic | BindingFlags.Static)!;
@@ -254,7 +254,7 @@ public sealed partial class BranchCoverageRound3Tests
     }
 
     [Fact]
-    public void IsTransitionAllowed_attached_to_closing_returns_true()
+    public async Task IsTransitionAllowed_attached_to_closing_returns_true()
     {
         var method = typeof(WebViewShellExperience)
             .GetMethod("IsTransitionAllowed", BindingFlags.NonPublic | BindingFlags.Static)!;
@@ -268,7 +268,7 @@ public sealed partial class BranchCoverageRound3Tests
     }
 
     [Fact]
-    public void IsTransitionAllowed_closed_to_created_returns_false()
+    public async Task IsTransitionAllowed_closed_to_created_returns_false()
     {
         var method = typeof(WebViewShellExperience)
             .GetMethod("IsTransitionAllowed", BindingFlags.NonPublic | BindingFlags.Static)!;
@@ -286,7 +286,7 @@ public sealed partial class BranchCoverageRound3Tests
     #region Round 5 Tier 2: Menu pruning EffectiveMenuModel not null
 
     [Fact]
-    public void MenuPruning_allow_with_effective_menu_covers_non_null_branch()
+    public async Task MenuPruning_allow_with_effective_menu_covers_non_null_branch()
     {
         var provider = new MinimalHostCapabilityProvider();
         var bridge = new WebViewHostCapabilityBridge(provider);
@@ -309,7 +309,7 @@ public sealed partial class BranchCoverageRound3Tests
     #region Round 5 Tier 2: SessionDecision non-null covers ?. path
 
     [Fact]
-    public void MenuPruning_profile_scope_uses_session_decision_when_not_null()
+    public async Task MenuPruning_profile_scope_uses_session_decision_when_not_null()
     {
         var provider = new MinimalHostCapabilityProvider();
         var bridge = new WebViewHostCapabilityBridge(provider);
@@ -334,12 +334,12 @@ public sealed partial class BranchCoverageRound3Tests
     }
 
     [Fact]
-    public void PermissionRequested_with_session_decision_covers_non_null_path()
+    public async Task PermissionRequested_with_session_decision_covers_non_null_path()
     {
         var dispatcher = new TestDispatcher();
         var adapter = MockWebViewAdapter.CreateFull();
         using var core = new WebViewCore(adapter, dispatcher);
-        core.Attach(new TestPlatformHandle(IntPtr.Zero, "test-parent"));
+        await core.AttachAsync(new TestPlatformHandle(IntPtr.Zero, "test-parent"), CancellationToken.None);
 
         using var shell = new WebViewShellExperience(core, new WebViewShellExperienceOptions
         {

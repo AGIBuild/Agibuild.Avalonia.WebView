@@ -1,3 +1,4 @@
+using System.Runtime.ExceptionServices;
 using Avalonia.Platform;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -14,6 +15,7 @@ internal sealed class WebViewControlLifecycleRuntime
     private readonly Func<IWebViewDispatcher> _createDispatcher;
     private readonly Func<IWebViewDispatcher, ILogger<WebViewCore>, IWebViewEnvironmentOptions?, WebViewCore> _createCore;
     private readonly Func<IPlatformHandle, INativeHandle> _wrapPlatformHandle;
+    private CancellationTokenSource? _attachCts;
 
     public WebViewControlLifecycleRuntime(
         WebViewControlRuntime controlRuntime,
@@ -39,6 +41,39 @@ internal sealed class WebViewControlLifecycleRuntime
     {
         ArgumentNullException.ThrowIfNull(parentHandle);
 
+        CancelAttach();
+        _attachCts = new CancellationTokenSource();
+        var attachTask = AttachToNativeControlAsync(parentHandle, _attachCts.Token);
+        if (attachTask.IsFaulted)
+        {
+            ExceptionDispatchInfo.Capture(attachTask.Exception!.GetBaseException()).Throw();
+        }
+
+        UiThreadHelper.Observe(attachTask);
+    }
+
+    public void DestroyAttachedCore()
+    {
+        CancelAttach();
+
+        var coreAttached = _controlRuntime.IsCoreAttached;
+
+        _eventRuntime.Detach();
+
+        var core = _controlRuntime.Core;
+
+        if (coreAttached)
+        {
+            core?.Detach();
+            _controlRuntime.SetCoreAttached(false);
+        }
+
+        core?.Dispose();
+        _controlRuntime.ClearCore();
+    }
+
+    private async Task AttachToNativeControlAsync(IPlatformHandle parentHandle, CancellationToken cancellationToken)
+    {
         WebViewCore? core = null;
         try
         {
@@ -51,12 +86,23 @@ internal sealed class WebViewControlLifecycleRuntime
             _controlRuntime.AttachCore(core);
             _eventRuntime.Attach(core);
 
-            core.Attach(_wrapPlatformHandle(parentHandle));
+            await core.AttachAsync(_wrapPlatformHandle(parentHandle), cancellationToken).ConfigureAwait(true);
+            cancellationToken.ThrowIfCancellationRequested();
+
             _controlRuntime.SetCoreAttached(true);
 
             var pendingSource = _getPendingSource();
             if (pendingSource is not null)
+            {
                 _ = core.NavigateAsync(pendingSource);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            _eventRuntime.Detach();
+            core?.Dispose();
+            _controlRuntime.SetCoreAttached(false);
+            _controlRuntime.ClearCore();
         }
         catch (PlatformNotSupportedException)
         {
@@ -75,22 +121,18 @@ internal sealed class WebViewControlLifecycleRuntime
         }
     }
 
-    public void DestroyAttachedCore()
+    private void CancelAttach()
     {
-        var coreAttached = _controlRuntime.IsCoreAttached;
-
-        _eventRuntime.Detach();
-
-        var core = _controlRuntime.Core;
-
-        if (coreAttached)
+        try
         {
-            core?.Detach();
-            _controlRuntime.SetCoreAttached(false);
+            _attachCts?.Cancel();
+        }
+        catch (ObjectDisposedException)
+        {
         }
 
-        core?.Dispose();
-        _controlRuntime.ClearCore();
+        _attachCts?.Dispose();
+        _attachCts = null;
     }
 
     private sealed class AvaloniaNativeHandle(IPlatformHandle inner) : INativeHandle

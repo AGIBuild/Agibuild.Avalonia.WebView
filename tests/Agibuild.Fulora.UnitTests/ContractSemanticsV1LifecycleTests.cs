@@ -35,7 +35,7 @@ public sealed class ContractSemanticsV1LifecycleTests
     }
 
     [Fact]
-    public void No_events_are_raised_after_dispose()
+    public async Task No_events_are_raised_after_dispose()
     {
         var dispatcher = new TestDispatcher();
         var adapter = new MockWebViewAdapter();
@@ -59,7 +59,7 @@ public sealed class ContractSemanticsV1LifecycleTests
         var dispatcher = new TestDispatcher();
         var adapter = new MockWebViewAdapter();
         var webView = new WebViewCore(adapter, dispatcher);
-        webView.Attach(new TestPlatformHandle(IntPtr.Zero, "test-parent"));
+        await webView.AttachAsync(new TestPlatformHandle(IntPtr.Zero, "test-parent"), CancellationToken.None);
         webView.Detach();
 
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => webView.InvokeScriptAsync("1+1"));

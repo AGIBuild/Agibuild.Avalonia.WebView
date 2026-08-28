@@ -233,7 +233,7 @@ internal sealed partial class BuildTask : NukeBuild
             // Mirror the Build target's android-slice gating so restore on hosts without the
             // Android workload doesn't fail at NETSDK1147. Both Platforms.csproj and
             // Avalonia.csproj (and any project that restores them) honor EnableAndroidTfm.
-            var skipAndroidSlice = !await HasDotNetWorkloadAsync("android") || !HasAndroidSdkInstalled();
+            var skipAndroidSlice = await ShouldSkipAndroidTfmAsync();
 
             foreach (var project in await GetProjectsToBuildAsync())
             {
@@ -258,7 +258,7 @@ internal sealed partial class BuildTask : NukeBuild
         {
             // Multi-TFM Platforms.csproj exposes net10.0 + net10.0-android. When the Android workload
             // is missing, force-build only the net10.0 slice so the missing workload doesn't fail the build.
-            var skipAndroidSlice = !await HasDotNetWorkloadAsync("android") || !HasAndroidSdkInstalled();
+            var skipAndroidSlice = await ShouldSkipAndroidTfmAsync();
 
             foreach (var project in await GetProjectsToBuildAsync())
             {
@@ -285,7 +285,13 @@ internal sealed partial class BuildTask : NukeBuild
         .Executes(async () =>
         {
             var filterPath = await BuildPlatformAwareSolutionFilterAsync("build-all");
-            DotNet($"build {filterPath} --configuration {Configuration}",
+            var androidTfmArgs = await GetSkippedAndroidTfmCliArgsAsync();
+            if (!string.IsNullOrEmpty(androidTfmArgs))
+            {
+                Serilog.Log.Information("Android workload or SDK not detected — building with EnableAndroidTfm=false.");
+            }
+
+            DotNet($"build {filterPath} --configuration {Configuration}{androidTfmArgs}",
                    workingDirectory: RootDirectory);
         });
 

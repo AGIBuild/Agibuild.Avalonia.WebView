@@ -231,12 +231,14 @@ public sealed class ContractSemanticsV1AnyThreadAsyncApiTests
             _initialized = true;
         }
 
-        public override void Attach(INativeHandle parentHandle)
+        public override Task AttachAsync(INativeHandle parentHandle, CancellationToken cancellationToken)
         {
             if (!_initialized)
             {
                 throw new InvalidOperationException("Adapter must be initialized before attach.");
             }
+
+            return Task.CompletedTask;
         }
 
         public override void Detach()

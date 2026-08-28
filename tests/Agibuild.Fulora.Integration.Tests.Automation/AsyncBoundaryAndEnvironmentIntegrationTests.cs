@@ -32,7 +32,7 @@ public sealed class AsyncBoundaryAndEnvironmentIntegrationTests
             using var core = new WebViewCore(adapter, dispatcher, NullLogger<WebViewCore>.Instance);
             var webView = new WebView();
 
-            core.Attach(new TestPlatformHandle(IntPtr.Zero, "test-parent"));
+            await core.AttachAsync(new TestPlatformHandle(IntPtr.Zero, "test-parent"), CancellationToken.None);
             webView.TestOnlyAttachCore(core);
             webView.TestOnlySubscribeCoreEvents();
 

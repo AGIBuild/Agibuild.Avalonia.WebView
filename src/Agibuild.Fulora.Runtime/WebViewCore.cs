@@ -36,6 +36,9 @@ internal sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvent
     private readonly WebViewCoreContext _context;
     private readonly WebViewCoreEventHub _events;
     private readonly WebViewCoreOperationQueue _operationQueue;
+    private Task? _attachTask;
+    private CancellationTokenSource? _attachCts;
+    private int _adapterDetached;
 
     private readonly ICookieManager _cookieManager;
     private readonly ICommandManager _commandManager;
@@ -96,11 +99,9 @@ internal sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvent
         _adapter.Initialize(this);
         _logger.LogAdapterInitialized();
 
-        // Mandatory capabilities (cookies, commands, zoom, preload, etc.) are inherited by
-        // IWebViewAdapter itself — no negotiation needed. Only the two truly-optional facets
-        // (drag-drop, async-preload) are probed into AdapterCapabilities, exactly once.
-        // No other site in the codebase should perform `adapter as IXxxAdapter` tests.
-        var capabilities = AdapterCapabilities.From(_adapter);
+        // Mandatory capabilities are inherited by IWebViewAdapter. Optional facets
+        // are captured once from the adapter's explicit backend snapshot.
+        var capabilities = _adapter.BackendCapabilities;
 
         var lifecycle = new WebViewLifecycleStateMachine();
         _events = new WebViewCoreEventHub(this);
@@ -141,15 +142,75 @@ internal sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvent
     }
 
     [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-    internal void Attach(INativeHandle parentHandle)
+    internal Task AttachAsync(INativeHandle parentHandle, CancellationToken cancellationToken)
     {
-        _context.Lifecycle.TransitionToAttaching();
+        ArgumentNullException.ThrowIfNull(parentHandle);
+
+        if (_context.IsDisposed)
+        {
+            return Task.FromException(new ObjectDisposedException(nameof(WebViewCore)));
+        }
+
+        if (!_context.Lifecycle.TryTransitionToAttaching())
+        {
+            return _attachTask ?? Task.CompletedTask;
+        }
+
+        if (_attachTask is { IsCompleted: false })
+        {
+            return _attachTask;
+        }
+
+        var generation = _context.Lifecycle.Generation;
+        _attachCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        _attachTask = AttachCoreAsync(parentHandle, generation, _attachCts.Token);
+        _ = _attachTask.ContinueWith(
+            _ => _attachCts?.Dispose(),
+            CancellationToken.None,
+            TaskContinuationOptions.ExecuteSynchronously,
+            TaskScheduler.Default);
+        return _attachTask;
+    }
+
+    private async Task AttachCoreAsync(
+        INativeHandle parentHandle,
+        int generation,
+        CancellationToken cancellationToken)
+    {
         _logger.LogAttachBegin(parentHandle.HandleDescriptor);
-        _adapter.Attach(parentHandle);
-        _context.Lifecycle.TransitionToReady();
+        try
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            await _adapter.AttachAsync(parentHandle, cancellationToken).ConfigureAwait(true);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch
+        {
+            _ = _context.Lifecycle.TryTransitionToFaulted();
+            throw;
+        }
+
+        if (generation != _context.Lifecycle.Generation)
+        {
+            return;
+        }
+
+        if (cancellationToken.IsCancellationRequested)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+        }
+
+        if (!_context.Lifecycle.TryTransitionToReady())
+        {
+            return;
+        }
+
+        _operationQueue.SignalReady();
         _logger.LogAttachCompleted();
 
-        // Raise AdapterCreated after successful attach, before any pending navigation.
         var handle = TryGetWebViewHandle();
         _logger.LogAdapterCreatedRaising(handle is not null);
         _events.RaiseAdapterCreated(new AdapterCreatedEventArgs(handle));
@@ -158,11 +219,54 @@ internal sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvent
     [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     internal void Detach()
     {
-        _context.Lifecycle.TransitionToDetaching();
+        var prior = _context.Lifecycle.CurrentState;
+        if (!_context.Lifecycle.TryTransitionToDetaching())
+        {
+            return;
+        }
+
+        if (prior is WebViewLifecycleState.Detaching or WebViewLifecycleState.Detached)
+        {
+            return;
+        }
+
         _logger.LogDetachBegin();
         RaiseAdapterDestroyedOnce();
-        _adapter.Detach();
+        CancelAttach();
+        _operationQueue.Terminate(ClassifyNotReadyOnDetach());
+        DetachAdapterOnce();
+        _ = _context.Lifecycle.TryTransitionToDetached();
         _logger.LogDetachCompleted();
+    }
+
+    private static InvalidOperationException ClassifyNotReadyOnDetach()
+    {
+        var error = new InvalidOperationException("Operation is not allowed in state 'Detaching'.");
+        WebViewOperationFailure.SetCategory(error, WebViewOperationFailureCategory.NotReady);
+        return error;
+    }
+
+    private void DetachAdapterOnce()
+    {
+        if (Interlocked.Exchange(ref _adapterDetached, 1) != 0)
+        {
+            return;
+        }
+
+        _eventWiringRuntime.Dispose();
+        _adapter.Detach();
+    }
+
+    private void CancelAttach()
+    {
+        try
+        {
+            _attachCts?.Cancel();
+        }
+        catch (ObjectDisposedException)
+        {
+            // The completed attachment has already released its cancellation source.
+        }
     }
 
     /// <inheritdoc />
@@ -336,8 +440,11 @@ internal sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvent
             return;
         }
 
+        var priorState = _context.Lifecycle.CurrentState;
         _logger.LogDisposeBegin();
         RaiseAdapterDestroyedOnce();
+        CancelAttach();
+        _operationQueue.Terminate(new ObjectDisposedException(nameof(WebViewCore)));
         _context.Lifecycle.TryTransitionToDisposed();
 
         // --- Owned IDisposable runtimes (disposed in reverse dependency order) ---
@@ -355,6 +462,14 @@ internal sealed class WebViewCore : ISpaHostingWebView, IWebViewCoreControlEvent
         _featureRuntime.Dispose();
         _bridgeRuntime.Dispose();
         _spaHostingRuntime.Dispose();
+
+        if (priorState is WebViewLifecycleState.Attaching
+            or WebViewLifecycleState.Ready
+            or WebViewLifecycleState.Detaching
+            or WebViewLifecycleState.Detached)
+        {
+            DetachAdapterOnce();
+        }
 
         // --- Non-IDisposable runtimes (intentionally NOT disposed) ---
         // _adapterEventRuntime / _navigationRuntime hold only injected references (and

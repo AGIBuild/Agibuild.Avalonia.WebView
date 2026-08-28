@@ -34,7 +34,9 @@ public sealed partial class BranchCoverageRound3Tests
 
         var innerField = machine!.GetType().GetField(flagFieldName, BindingFlags.NonPublic | BindingFlags.Instance);
         Assert.NotNull(innerField);
-        innerField!.SetValue(machine, value);
+        innerField!.SetValue(
+            machine,
+            innerField.FieldType == typeof(int) ? (value ? 1 : 0) : value);
     }
 
     private sealed class FullWebView : IWebView

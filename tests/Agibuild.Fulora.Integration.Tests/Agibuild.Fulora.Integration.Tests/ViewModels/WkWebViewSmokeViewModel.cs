@@ -53,7 +53,7 @@ public partial class WkWebViewSmokeViewModel : ViewModelBase, IWebViewAdapterHos
     private string _status = string.Empty;
 
     [RelayCommand]
-    private Task InitializeAsync()
+    private async Task InitializeAsync()
     {
         try
         {
@@ -62,7 +62,7 @@ public partial class WkWebViewSmokeViewModel : ViewModelBase, IWebViewAdapterHos
             if (_hostHandle is null)
             {
                 Status = "Waiting for native host handle...";
-                return Task.CompletedTask;
+                return;
             }
 
             EnsureServerStarted();
@@ -71,12 +71,12 @@ public partial class WkWebViewSmokeViewModel : ViewModelBase, IWebViewAdapterHos
             {
                 var adapter = global::Agibuild.Fulora.WebViewAdapterFactory.CreateDefaultAdapter();
                 adapter.Initialize(this);
-                adapter.Attach(_hostHandle);
+                await adapter.AttachAsync(_hostHandle, CancellationToken.None);
                 _adapter = adapter;
 
                 LogLine("WebView adapter attached.");
                 Status = "Ready.";
-                return Task.CompletedTask;
+                return;
             }
 
             Status = "Already initialized.";
@@ -87,7 +87,7 @@ public partial class WkWebViewSmokeViewModel : ViewModelBase, IWebViewAdapterHos
             LogLine(ex.ToString());
         }
 
-        return Task.CompletedTask;
+        return;
     }
 
     [RelayCommand]

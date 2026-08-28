@@ -74,7 +74,7 @@ public sealed partial class BranchCoverageRound3Tests
         var lifecycle = new WebViewLifecycleStateMachine();
         var events = new WebViewCoreEventHub(new object());
         var operations = new WebViewCoreOperationQueue(lifecycle, dispatcher, logger);
-        var capabilities = AdapterCapabilities.From(adapter);
+        var capabilities = adapter.BackendCapabilities;
 
         return new WebViewCoreContext(
             adapter: nullParamName == "adapter" ? null! : adapter,

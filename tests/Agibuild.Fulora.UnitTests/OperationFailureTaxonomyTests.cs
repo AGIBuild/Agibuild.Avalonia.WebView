@@ -6,7 +6,7 @@ namespace Agibuild.Fulora.UnitTests;
 public sealed class OperationFailureTaxonomyTests
 {
     [Fact]
-    public void TryGetCategory_parses_case_insensitive_string_payload()
+    public async Task TryGetCategory_parses_case_insensitive_string_payload()
     {
         var ex = new InvalidOperationException("payload");
         ex.Data[GetCategoryDataKey()] = "dispatchfailed";
@@ -18,7 +18,7 @@ public sealed class OperationFailureTaxonomyTests
     }
 
     [Fact]
-    public void TryGetCategory_rejects_invalid_string_payload()
+    public async Task TryGetCategory_rejects_invalid_string_payload()
     {
         var ex = new InvalidOperationException("payload");
         ex.Data[GetCategoryDataKey()] = "not-a-category";
@@ -48,7 +48,7 @@ public sealed class OperationFailureTaxonomyTests
         var dispatcher = new TestDispatcher();
         var adapter = new MockWebViewAdapter();
         using var webView = new WebViewCore(adapter, dispatcher);
-        webView.Attach(new TestPlatformHandle(IntPtr.Zero, "test-parent"));
+        await webView.AttachAsync(new TestPlatformHandle(IntPtr.Zero, "test-parent"), CancellationToken.None);
         webView.Detach();
 
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => webView.StopAsync());

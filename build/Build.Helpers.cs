@@ -117,7 +117,7 @@ internal partial class BuildTask
         if (!hasMacCatalyst)
             unavailable.Add("-maccatalyst");
 
-        if (!await HasDotNetWorkloadAsync("android") || !HasAndroidSdkInstalled())
+        if (await ShouldSkipAndroidTfmAsync())
             unavailable.Add("-android");
 
         return unavailable;
@@ -227,7 +227,7 @@ internal partial class BuildTask
         };
 
         // Track whether Android slice will be built — used to switch TFM list when missing.
-        if (!await HasDotNetWorkloadAsync("android") || !HasAndroidSdkInstalled())
+        if (await ShouldSkipAndroidTfmAsync())
         {
             Serilog.Log.Warning("Android workload or SDK not detected — Platforms.csproj will build only its net10.0 slice.");
         }
@@ -297,6 +297,12 @@ internal partial class BuildTask
             return false;
         }
     }
+
+    private async Task<bool> ShouldSkipAndroidTfmAsync() =>
+        !await HasDotNetWorkloadAsync("android") || !HasAndroidSdkInstalled();
+
+    private async Task<string> GetSkippedAndroidTfmCliArgsAsync() =>
+        await ShouldSkipAndroidTfmAsync() ? " -p:EnableAndroidTfm=false" : string.Empty;
 
     private bool HasAndroidSdkInstalled()
     {

@@ -19,7 +19,7 @@ namespace Agibuild.Fulora.Adapters.Abstractions;
 //                                  IPreloadScriptAdapter, only Windows offers it
 //                                  today because WebView2 exposes an async
 //                                  AddScriptToExecuteOnDocumentCreatedAsync.
-// Those two remain negotiated through AdapterCapabilities.
+// Those two remain declared through WebViewBackendCapabilities.
 // ---------------------------------------------------------------------------
 
 internal interface ICookieAdapter
@@ -32,7 +32,7 @@ internal interface ICookieAdapter
 
 /// <summary>
 /// Environment option application (DevTools, UserAgent, Ephemeral). Must be
-/// invoked before <see cref="IWebViewAdapter.Attach"/>.
+/// invoked before <see cref="IWebViewAdapter.AttachAsync"/>.
 /// </summary>
 internal interface IWebViewAdapterOptions
 {
@@ -54,7 +54,7 @@ internal interface IDevToolsAdapter
 }
 
 /// <summary>
-/// Custom URI scheme registration. Invoked before <see cref="IWebViewAdapter.Attach"/>.
+/// Custom URI scheme registration. Invoked before <see cref="IWebViewAdapter.AttachAsync"/>.
 /// </summary>
 internal interface ICustomSchemeAdapter
 {
@@ -99,7 +99,7 @@ internal interface IPreloadScriptAdapter
 /// <summary>
 /// Truly-optional async preload-script refinement. The runtime prefers this
 /// over <see cref="IPreloadScriptAdapter"/> when the adapter opts in. Absence
-/// is surfaced through <c>AdapterCapabilities.AsyncPreloadScript</c>.
+/// is surfaced through <c>WebViewBackendCapabilities.AsyncPreloadScript</c>.
 /// </summary>
 internal interface IAsyncPreloadScriptAdapter
 {
@@ -145,7 +145,7 @@ internal interface IPrintAdapter
 /// Primary adapter contract. <see cref="IWebViewAdapter"/> is the single source
 /// of truth for every mandatory capability — implementers must satisfy every
 /// inherited facet (cookies, commands, preload, zoom, …). Two facets remain
-/// opt-in and are negotiated via <c>AdapterCapabilities</c>:
+/// opt-in and are declared via <see cref="BackendCapabilities"/>:
 /// <see cref="IDragDropAdapter"/> and <see cref="IAsyncPreloadScriptAdapter"/>.
 /// </summary>
 internal interface IWebViewAdapter :
@@ -165,7 +165,7 @@ internal interface IWebViewAdapter :
     IDevToolsAdapter
 {
     void Initialize(IWebViewAdapterHost host);
-    void Attach(INativeHandle parentHandle);
+    Task AttachAsync(INativeHandle parentHandle, CancellationToken cancellationToken);
     void Detach();
 
     Task NavigateAsync(Guid navigationId, Uri uri);
@@ -181,6 +181,8 @@ internal interface IWebViewAdapter :
     bool CanGoBack { get; }
     bool CanGoForward { get; }
 
+    WebViewBackendCapabilities BackendCapabilities { get; }
+
     event EventHandler<NavigationCompletedEventArgs>? NavigationCompleted;
     event EventHandler<NewWindowRequestedEventArgs>? NewWindowRequested;
     event EventHandler<WebMessageReceivedEventArgs>? WebMessageReceived;
@@ -190,8 +192,8 @@ internal interface IWebViewAdapter :
 
 /// <summary>
 /// Truly-optional native ↔ web drag-and-drop. Android WebView exposes no
-/// native DnD APIs, so this remains opt-in and is negotiated via
-/// <c>AdapterCapabilities.DragDrop</c>.
+/// native DnD APIs, so this remains opt-in and is declared via
+/// <c>WebViewBackendCapabilities.DragDrop</c>.
 /// </summary>
 internal interface IDragDropAdapter
 {

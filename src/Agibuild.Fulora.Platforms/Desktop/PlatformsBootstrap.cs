@@ -68,6 +68,7 @@ internal static class PlatformsBootstrap
         public string Id => "gtk.webkitgtk";
         public int Priority => 100;
         public bool CanHandleCurrentPlatform() => OperatingSystem.IsLinux();
+        public WebViewPlatformProbeResult ProbeCurrentPlatform() => GtkWebViewRuntimeProbe.Probe();
         public IWebViewAdapter CreateAdapter() => new Agibuild.Fulora.Adapters.Gtk.GtkWebViewAdapter();
     }
 }

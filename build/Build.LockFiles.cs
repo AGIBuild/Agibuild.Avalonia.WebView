@@ -8,6 +8,7 @@ internal partial class BuildTask
         .Executes(async () =>
         {
             var filterPath = await BuildPlatformAwareSolutionFilterAsync("lock-files");
-            DotNet($"restore {filterPath} --force-evaluate");
+            var androidTfmArgs = await GetSkippedAndroidTfmCliArgsAsync();
+            DotNet($"restore {filterPath} --force-evaluate{androidTfmArgs}");
         });
 }

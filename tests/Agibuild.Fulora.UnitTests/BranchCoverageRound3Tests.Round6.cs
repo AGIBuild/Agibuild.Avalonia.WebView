@@ -88,40 +88,40 @@ public sealed partial class BranchCoverageRound3Tests
     }
 
     [Fact]
-    public void UiThreadHelper_SafeDispatch_dispatched_when_not_disposed()
+    public void UiThreadHelper_ObserveDispatch_dispatched_when_not_disposed()
     {
         var dispatcher = new TestDispatcher();
         var invoked = false;
-        UiThreadHelper.SafeDispatch(dispatcher, false, false, () => invoked = true);
+        UiThreadHelper.ObserveDispatch(dispatcher, false, false, () => invoked = true);
         Assert.True(invoked);
     }
 
     [Fact]
-    public void UiThreadHelper_SafeDispatch_ignored_when_disposed_with_logger()
+    public void UiThreadHelper_ObserveDispatch_ignored_when_disposed_with_logger()
     {
         var dispatcher = new TestDispatcher();
         var logger = NullLoggerFactory.Instance.CreateLogger("test");
         var invoked = false;
-        UiThreadHelper.SafeDispatch(dispatcher, true, false, () => invoked = true,
+        UiThreadHelper.ObserveDispatch(dispatcher, true, false, () => invoked = true,
             logger, "Event ignored: disposed");
         Assert.False(invoked);
     }
 
     [Fact]
-    public void UiThreadHelper_SafeDispatch_ignored_when_destroyed_without_logger()
+    public void UiThreadHelper_ObserveDispatch_ignored_when_destroyed_without_logger()
     {
         var dispatcher = new TestDispatcher();
         var invoked = false;
-        UiThreadHelper.SafeDispatch(dispatcher, false, true, () => invoked = true);
+        UiThreadHelper.ObserveDispatch(dispatcher, false, true, () => invoked = true);
         Assert.False(invoked);
     }
 
     [Fact]
-    public void UiThreadHelper_SafeDispatch_invokes_async_when_not_on_ui_thread()
+    public void UiThreadHelper_ObserveDispatch_invokes_async_when_not_on_ui_thread()
     {
         var dispatcher = new FakeOffThreadDispatcher();
         var invoked = false;
-        UiThreadHelper.SafeDispatch(dispatcher, false, false, () => invoked = true);
+        UiThreadHelper.ObserveDispatch(dispatcher, false, false, () => invoked = true);
         Assert.False(invoked);
         Assert.True(dispatcher.InvokeAsyncCalled);
     }

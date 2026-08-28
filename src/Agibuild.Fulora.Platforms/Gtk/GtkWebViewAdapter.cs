@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Agibuild.Fulora;
 using Agibuild.Fulora.Adapters.Abstractions;
+using Agibuild.Fulora.Platforms;
 using Agibuild.Fulora.Security;
 
 namespace Agibuild.Fulora.Adapters.Gtk;
@@ -55,6 +56,7 @@ internal sealed partial class GtkWebViewAdapter : IWebViewAdapter, INativeWebVie
 
     public bool CanGoBack => _attached && !_detached && NativeMethods.CanGoBack(_native);
     public bool CanGoForward => _attached && !_detached && NativeMethods.CanGoForward(_native);
+    public WebViewBackendCapabilities BackendCapabilities => new(this, null);
 
     public event EventHandler<NavigationCompletedEventArgs>? NavigationCompleted;
     public event EventHandler<NewWindowRequestedEventArgs>? NewWindowRequested;
@@ -277,25 +279,27 @@ internal sealed partial class GtkWebViewAdapter : IWebViewAdapter, INativeWebVie
             t.TrySetException(new InvalidOperationException(NativeMethods.PtrToString(errorUtf8)));
     }
 
-    public void Attach(INativeHandle parentHandle)
+    public Task AttachAsync(INativeHandle parentHandle, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(parentHandle);
         ThrowIfNotInitialized();
 
         if (_detached)
         {
-            throw new InvalidOperationException($"{nameof(Attach)} cannot be called after {nameof(Detach)}.");
+            throw new InvalidOperationException($"{nameof(AttachAsync)} cannot be called after {nameof(Detach)}.");
         }
 
         if (_attached)
         {
-            throw new InvalidOperationException($"{nameof(Attach)} can only be called once.");
+            throw new InvalidOperationException($"{nameof(AttachAsync)} can only be called once.");
         }
 
         if (parentHandle.Handle == IntPtr.Zero)
         {
             throw new ArgumentException("Parent handle must be non-zero.", nameof(parentHandle));
         }
+
+        cancellationToken.ThrowIfCancellationRequested();
 
         // On Linux/X11, Avalonia NativeControlHost provides an X11 Window ID (XID).
         var xid = (ulong)parentHandle.Handle;
@@ -306,6 +310,7 @@ internal sealed partial class GtkWebViewAdapter : IWebViewAdapter, INativeWebVie
         }
 
         _attached = true;
+        return Task.CompletedTask;
     }
 
     public void Detach()
@@ -1066,7 +1071,7 @@ internal sealed partial class GtkWebViewAdapter : IWebViewAdapter, INativeWebVie
 
     private static partial class NativeMethods
     {
-        private const string LibraryName = "AgibuildWebViewGtk";
+        private const string LibraryName = AgibuildWebViewGtkNativeLibrary.LogicalName;
 
         static NativeMethods()
         {
@@ -1080,23 +1085,7 @@ internal sealed partial class GtkWebViewAdapter : IWebViewAdapter, INativeWebVie
                 return IntPtr.Zero;
             }
 
-            var baseDir = AppContext.BaseDirectory;
-
-            // Probe runtimes/linux-x64/native/
-            var candidate = Path.Combine(baseDir, "runtimes", "linux-x64", "native", "libAgibuildWebViewGtk.so");
-            if (File.Exists(candidate))
-            {
-                return NativeLibrary.Load(candidate);
-            }
-
-            // Fallback: probe next to app.
-            var flat = Path.Combine(baseDir, "libAgibuildWebViewGtk.so");
-            if (File.Exists(flat))
-            {
-                return NativeLibrary.Load(flat);
-            }
-
-            return IntPtr.Zero;
+            return AgibuildWebViewGtkNativeLibrary.LoadResolvedOrZero();
         }
 
         internal static GtkWebViewAdapter? FromUserData(IntPtr userData)

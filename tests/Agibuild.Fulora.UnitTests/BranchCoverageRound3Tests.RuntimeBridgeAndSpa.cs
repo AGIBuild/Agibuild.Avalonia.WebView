@@ -15,7 +15,7 @@ public sealed partial class BranchCoverageRound3Tests
     #region Medium: RuntimeBridgeService ExtractMethodName no dot
 
     [Fact]
-    public void ExtractMethodName_no_dot_returns_full_string()
+    public async Task ExtractMethodName_no_dot_returns_full_string()
     {
         // ExtractMethodName is now in RpcMethodHelpers (internal, accessible via InternalsVisibleTo)
         var result = RpcMethodHelpers.ExtractMethodName("NoDotMethodName");
@@ -30,14 +30,14 @@ public sealed partial class BranchCoverageRound3Tests
     #region Round 4: SPA autoInject when bridge already enabled
 
     [Fact]
-    public void EnableSpaHosting_autoInject_skipped_when_bridge_already_enabled()
+    public async Task EnableSpaHosting_autoInject_skipped_when_bridge_already_enabled()
     {
         // Line 944: options.AutoInjectBridgeScript && !_webMessageBridgeEnabled
         // Cover the branch where AutoInjectBridgeScript=true but _webMessageBridgeEnabled=true
         var dispatcher = new TestDispatcher();
         var adapter = MockWebViewAdapter.CreateFull();
         using var core = new WebViewCore(adapter, dispatcher);
-        core.Attach(new TestPlatformHandle(IntPtr.Zero, "test-parent"));
+        await core.AttachAsync(new TestPlatformHandle(IntPtr.Zero, "test-parent"), CancellationToken.None);
 
         core.EnableWebMessageBridge(new WebMessageBridgeOptions());
 
@@ -48,13 +48,13 @@ public sealed partial class BranchCoverageRound3Tests
     }
 
     [Fact]
-    public void EnableSpaHosting_autoInject_disabled_covers_false_branch()
+    public async Task EnableSpaHosting_autoInject_disabled_covers_false_branch()
     {
         // Line 944: AutoInjectBridgeScript=false → short-circuit, skip auto-inject
         var dispatcher = new TestDispatcher();
         var adapter = MockWebViewAdapter.CreateFull();
         using var core = new WebViewCore(adapter, dispatcher);
-        core.Attach(new TestPlatformHandle(IntPtr.Zero, "test-parent"));
+        await core.AttachAsync(new TestPlatformHandle(IntPtr.Zero, "test-parent"), CancellationToken.None);
 
         core.EnableSpaHosting(new SpaHostingOptions
         {

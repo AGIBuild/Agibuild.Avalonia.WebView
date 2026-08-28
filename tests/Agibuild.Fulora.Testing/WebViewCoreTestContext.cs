@@ -34,7 +34,7 @@ internal static class WebViewCoreTestContext
         events ??= new WebViewCoreEventHub(new object());
 
         var operations = new WebViewCoreOperationQueue(lifecycle, dispatcher, logger);
-        var capabilities = AdapterCapabilities.From(adapter);
+        var capabilities = adapter.BackendCapabilities;
 
         return new WebViewCoreContext(
             adapter,

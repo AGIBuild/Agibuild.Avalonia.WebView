@@ -24,7 +24,7 @@ public sealed class AdapterLifecycleIntegrationTests
     // ──────────────────── Test 1: AdapterCreated fires with handle ────────────────────
 
     [AvaloniaFact]
-    public void AdapterCreated_fires_with_platform_handle()
+    public async Task AdapterCreated_fires_with_platform_handle()
     {
         var host = new MockDialogHost();
         var adapter = MockWebViewAdapter.CreateWithHandle();
@@ -45,7 +45,7 @@ public sealed class AdapterLifecycleIntegrationTests
         core.AdapterCreated += (_, e) => createdArgs = e;
 
         // Attach triggers AdapterCreated
-        core.Attach(new TestPlatformHandle(nint.Zero, "test"));
+        await core.AttachAsync(new TestPlatformHandle(nint.Zero, "test"), CancellationToken.None);
 
         Assert.NotNull(createdArgs);
         Assert.NotNull(createdArgs!.PlatformHandle);

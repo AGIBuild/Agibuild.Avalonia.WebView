@@ -14,10 +14,20 @@ internal partial class BuildTask
 {
     internal Target Start => _ => _
         .Description("Launches the E2E integration test desktop app.")
-        .Executes(() =>
+        .Executes(async () =>
         {
-            DotNetRestore(s => s
-                .SetProjectFile(E2EDesktopProject));
+            var skipAndroidSlice = await ShouldSkipAndroidTfmAsync();
+
+            DotNetRestore(s =>
+            {
+                var settings = s.SetProjectFile(E2EDesktopProject);
+                if (skipAndroidSlice)
+                {
+                    settings = settings.SetProperty("EnableAndroidTfm", "false");
+                }
+
+                return settings;
+            });
 
             if (OperatingSystem.IsMacOS())
             {
@@ -35,6 +45,10 @@ internal partial class BuildTask
                 appProcess.StartInfo.ArgumentList.Add(E2EDesktopProject);
                 appProcess.StartInfo.ArgumentList.Add("--configuration");
                 appProcess.StartInfo.ArgumentList.Add(Configuration);
+                if (skipAndroidSlice)
+                {
+                    appProcess.StartInfo.ArgumentList.Add("-p:EnableAndroidTfm=false");
+                }
 
                 if (!appProcess.Start())
                 {
@@ -45,9 +59,18 @@ internal partial class BuildTask
                 return;
             }
 
-            DotNetRun(s => s
-                .SetProjectFile(E2EDesktopProject)
-                .SetConfiguration(Configuration));
+            DotNetRun(s =>
+            {
+                var settings = s
+                    .SetProjectFile(E2EDesktopProject)
+                    .SetConfiguration(Configuration);
+                if (skipAndroidSlice)
+                {
+                    settings = settings.SetProperty("EnableAndroidTfm", "false");
+                }
+
+                return settings;
+            });
         });
 
     internal Target StartAndroid => _ => _

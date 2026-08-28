@@ -30,6 +30,9 @@ internal sealed class WebViewCoreOperationQueue
     private readonly object _tailLock = new();
     private Task _tail = Task.CompletedTask;
     private long _sequence;
+    private readonly TaskCompletionSource _ready = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    private readonly List<IPendingCompletion> _pendingCompletions = [];
+    private Exception? _termination;
 
     public WebViewCoreOperationQueue(
         WebViewLifecycleStateMachine lifecycle,
@@ -69,6 +72,17 @@ internal sealed class WebViewCoreOperationQueue
                 defaultCategory: WebViewOperationFailureCategory.Disposed));
         }
 
+        Exception? termination;
+        lock (_tailLock)
+        {
+            termination = _termination;
+        }
+
+        if (termination is not null)
+        {
+            return Task.FromException<T>(CloneTermination(termination, operationType));
+        }
+
         if (!_lifecycle.IsOperationAccepted)
         {
             return Task.FromException<T>(ClassifyFailure(
@@ -80,15 +94,35 @@ internal sealed class WebViewCoreOperationQueue
         var operationId = Interlocked.Increment(ref _sequence);
         var enqueueTs = DateTimeOffset.UtcNow;
         var tcs = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
+        PendingCompletion<T>? completion = null;
 
         lock (_tailLock)
         {
+            if (_termination is not null)
+            {
+                return Task.FromException<T>(CloneTermination(_termination, operationType));
+            }
+
+            completion = new PendingCompletion<T>(tcs, error => CloneTermination(error, operationType));
+            _pendingCompletions.Add(completion);
             _tail = _tail.ContinueWith(
                 _ => RunQueuedOperationAsync(operationId, operationType, enqueueTs, func, tcs),
                 CancellationToken.None,
                 TaskContinuationOptions.ExecuteSynchronously,
                 TaskScheduler.Default).Unwrap();
         }
+
+        _ = tcs.Task.ContinueWith(
+            _ =>
+            {
+                lock (_tailLock)
+                {
+                    _pendingCompletions.Remove(completion);
+                }
+            },
+            CancellationToken.None,
+            TaskContinuationOptions.ExecuteSynchronously,
+            TaskScheduler.Default);
 
         return tcs.Task;
     }
@@ -104,6 +138,22 @@ internal sealed class WebViewCoreOperationQueue
         var startThread = Environment.CurrentManagedThreadId;
         try
         {
+            if (_lifecycle.CurrentState is WebViewLifecycleState.Attaching)
+            {
+                await _ready.Task.ConfigureAwait(false);
+            }
+
+            Exception? termination;
+            lock (_tailLock)
+            {
+                termination = _termination;
+            }
+
+            if (termination is not null)
+            {
+                throw CloneTermination(termination, operationType);
+            }
+
             var result = await InvokeAsyncOnUiThread(func).ConfigureAwait(false);
             var endTs = DateTimeOffset.UtcNow;
             _logger.LogOperationSuccess(operationId, operationType, enqueueTs, startTs, endTs, startThread);
@@ -178,5 +228,50 @@ internal sealed class WebViewCoreOperationQueue
         WebViewOperationFailure.SetCategory(exception, category);
         exception.Data["operationType"] = operationType;
         return exception;
+    }
+
+    public void SignalReady() => _ready.TrySetResult();
+
+    public void Terminate(Exception error)
+    {
+        ArgumentNullException.ThrowIfNull(error);
+
+        lock (_tailLock)
+        {
+            _termination ??= error;
+            foreach (var complete in _pendingCompletions)
+            {
+                complete.Fail(_termination);
+            }
+
+            _pendingCompletions.Clear();
+        }
+
+        _ = _ready.TrySetResult();
+    }
+
+    private Exception CloneTermination(Exception termination, string operationType)
+    {
+        Exception clone = termination is ObjectDisposedException
+            ? new ObjectDisposedException(nameof(WebViewCore))
+            : new InvalidOperationException($"Operation '{operationType}' is not allowed in state '{_lifecycle.CurrentStateName}'.");
+        return ClassifyFailure(
+            clone,
+            operationType,
+            termination is ObjectDisposedException
+                ? WebViewOperationFailureCategory.Disposed
+                : WebViewOperationFailureCategory.NotReady);
+    }
+
+    private interface IPendingCompletion
+    {
+        void Fail(Exception error);
+    }
+
+    private sealed class PendingCompletion<T>(
+        TaskCompletionSource<T> completion,
+        Func<Exception, Exception> classify) : IPendingCompletion
+    {
+        public void Fail(Exception error) => completion.TrySetException(classify(error));
     }
 }

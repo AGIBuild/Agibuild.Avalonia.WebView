@@ -31,7 +31,8 @@ internal abstract class StubWebViewAdapter : IWebViewAdapter
 
     public virtual void Initialize(IWebViewAdapterHost host) { }
 
-    public virtual void Attach(INativeHandle parentHandle) { }
+    public virtual Task AttachAsync(INativeHandle parentHandle, CancellationToken cancellationToken)
+        => Task.CompletedTask;
 
     public virtual void Detach() { }
 
@@ -46,6 +47,8 @@ internal abstract class StubWebViewAdapter : IWebViewAdapter
     public virtual bool CanGoBack { get; set; }
 
     public virtual bool CanGoForward { get; set; }
+
+    public virtual WebViewBackendCapabilities BackendCapabilities => WebViewBackendCapabilities.None;
 
     public virtual bool GoBack(Guid navigationId) => false;
 

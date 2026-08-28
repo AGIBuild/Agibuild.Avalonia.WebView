@@ -6,12 +6,13 @@ namespace Agibuild.Fulora.UnitTests;
 public sealed class AdapterLifecycleTests
 {
     [Fact]
-    public void Attach_requires_initialize()
+    public async Task Attach_requires_initialize()
     {
         var adapter = new MockWebViewAdapter();
         var handle = new TestPlatformHandle(IntPtr.Zero, "test");
 
-        Assert.Throws<InvalidOperationException>(() => adapter.Attach(handle));
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => adapter.AttachAsync(handle, CancellationToken.None));
     }
 
     [Fact]
@@ -24,14 +25,14 @@ public sealed class AdapterLifecycleTests
     }
 
     [Fact]
-    public void No_events_are_raised_after_detach()
+    public async Task No_events_are_raised_after_detach()
     {
         var adapter = new MockWebViewAdapter();
         var handle = new TestPlatformHandle(IntPtr.Zero, "test");
         var raised = false;
 
         adapter.Initialize(new DummyAdapterHost());
-        adapter.Attach(handle);
+        await adapter.AttachAsync(handle, CancellationToken.None);
         adapter.Detach();
 
         adapter.NavigationCompleted += (_, _) => raised = true;

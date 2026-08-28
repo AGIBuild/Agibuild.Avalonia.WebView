@@ -281,6 +281,8 @@ internal partial class BuildTask
                     ("Android adapter (Platforms net10.0-android slice)", androidTfmEnabled),
                 ["runtimes/ios/lib/net10.0-ios18.0/Agibuild.Fulora.Adapters.iOS.dll"] =
                     ("iOS adapter", File.Exists(iosAdapterPath)),
+                ["runtimes/linux-x64/native/libAgibuildWebViewGtk.so"] =
+                    ("Linux WebKitGTK native shim", OperatingSystem.IsLinux()),
             };
 
             var errors = new List<string>();

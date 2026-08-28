@@ -69,7 +69,7 @@ public partial class WebView2SmokeViewModel : ViewModelBase, IWebViewAdapterHost
     private string _status = string.Empty;
 
     [RelayCommand]
-    private Task InitializeAsync()
+    private async Task InitializeAsync()
     {
         try
         {
@@ -78,7 +78,7 @@ public partial class WebView2SmokeViewModel : ViewModelBase, IWebViewAdapterHost
             if (_hostHandle is null)
             {
                 Status = "Waiting for native host handle...";
-                return Task.CompletedTask;
+                return;
             }
 
             EnsureServerStarted();
@@ -87,12 +87,12 @@ public partial class WebView2SmokeViewModel : ViewModelBase, IWebViewAdapterHost
             {
                 var adapter = global::Agibuild.Fulora.WebViewAdapterFactory.CreateDefaultAdapter();
                 adapter.Initialize(this);
-                adapter.Attach(_hostHandle);
+                await adapter.AttachAsync(_hostHandle, CancellationToken.None);
                 _adapter = adapter;
 
                 LogLine("WebView2 adapter attached.");
                 Status = "Ready.";
-                return Task.CompletedTask;
+                return;
             }
 
             Status = "Already initialized.";
@@ -103,7 +103,7 @@ public partial class WebView2SmokeViewModel : ViewModelBase, IWebViewAdapterHost
             LogLine(ex.ToString());
         }
 
-        return Task.CompletedTask;
+        return;
     }
 
     [RelayCommand]
@@ -206,11 +206,11 @@ public partial class WebView2SmokeViewModel : ViewModelBase, IWebViewAdapterHost
                 ClearNativeStarts();
 
                 IWebViewAdapter? adapter = null;
-                await Dispatcher.UIThread.InvokeAsync(() =>
+                await Dispatcher.UIThread.InvokeAsync(async () =>
                 {
                     adapter = global::Agibuild.Fulora.WebViewAdapterFactory.CreateDefaultAdapter();
                     adapter.Initialize(this);
-                    adapter.Attach(_hostHandle);
+                    await adapter.AttachAsync(_hostHandle, CancellationToken.None);
                     _adapter = adapter;
                 });
                 var adapterLocal = adapter!;

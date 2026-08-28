@@ -31,7 +31,7 @@ internal sealed class WebViewCoreAdapterEventRuntime
         ArgumentNullException.ThrowIfNull(args);
         _context.Logger.LogEventNewWindowRequested(args.Uri);
 
-        UiThreadHelper.SafeDispatch(
+        UiThreadHelper.ObserveDispatch(
             _context.Dispatcher,
             _context.IsDisposed,
             _context.IsAdapterDestroyed,
@@ -45,7 +45,7 @@ internal sealed class WebViewCoreAdapterEventRuntime
         ArgumentNullException.ThrowIfNull(args);
         _context.Logger.LogEventWebResourceRequested();
 
-        UiThreadHelper.SafeDispatch(
+        UiThreadHelper.ObserveDispatch(
             _context.Dispatcher,
             _context.IsDisposed,
             _context.IsAdapterDestroyed,
@@ -57,7 +57,7 @@ internal sealed class WebViewCoreAdapterEventRuntime
         ArgumentNullException.ThrowIfNull(args);
         _context.Logger.LogEventEnvironmentRequested();
 
-        UiThreadHelper.SafeDispatch(
+        UiThreadHelper.ObserveDispatch(
             _context.Dispatcher,
             _context.IsDisposed,
             _context.IsAdapterDestroyed,
@@ -69,7 +69,7 @@ internal sealed class WebViewCoreAdapterEventRuntime
         ArgumentNullException.ThrowIfNull(args);
         _context.Logger.LogEventDownloadRequested(args.DownloadUri, args.SuggestedFileName);
 
-        UiThreadHelper.SafeDispatch(
+        UiThreadHelper.ObserveDispatch(
             _context.Dispatcher,
             _context.IsDisposed,
             _context.IsAdapterDestroyed,
@@ -81,7 +81,7 @@ internal sealed class WebViewCoreAdapterEventRuntime
         ArgumentNullException.ThrowIfNull(args);
         _context.Logger.LogEventPermissionRequested(args.PermissionKind, args.Origin);
 
-        UiThreadHelper.SafeDispatch(
+        UiThreadHelper.ObserveDispatch(
             _context.Dispatcher,
             _context.IsDisposed,
             _context.IsAdapterDestroyed,

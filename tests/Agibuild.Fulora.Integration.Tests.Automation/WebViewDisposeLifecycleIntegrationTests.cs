@@ -23,7 +23,7 @@ public sealed class WebViewDisposeLifecycleIntegrationTests
             var dispatcher = new TestDispatcher();
             var adapter = MockWebViewAdapter.Create();
             var core = new WebViewCore(adapter, dispatcher);
-            core.Attach(new TestPlatformHandle(IntPtr.Zero, "test-parent"));
+            Assert.True(core.AttachAsync(new TestPlatformHandle(IntPtr.Zero, "test-parent"), CancellationToken.None).IsCompletedSuccessfully);
 
             var control = new WebView();
             var navigationCalls = 0;
@@ -51,7 +51,7 @@ public sealed class WebViewDisposeLifecycleIntegrationTests
             var dispatcher = new TestDispatcher();
             var adapter = MockWebViewAdapter.Create();
             var core = new WebViewCore(adapter, dispatcher);
-            core.Attach(new TestPlatformHandle(IntPtr.Zero, "test-parent"));
+            Assert.True(core.AttachAsync(new TestPlatformHandle(IntPtr.Zero, "test-parent"), CancellationToken.None).IsCompletedSuccessfully);
 
             var control = new WebView();
             control.TestOnlyAttachCore(core);
@@ -78,7 +78,7 @@ public sealed class WebViewDisposeLifecycleIntegrationTests
             var dispatcher = new TestDispatcher();
             var adapter = MockWebViewAdapter.Create();
             var core = new WebViewCore(adapter, dispatcher);
-            core.Attach(new TestPlatformHandle(IntPtr.Zero, "test-parent"));
+            Assert.True(core.AttachAsync(new TestPlatformHandle(IntPtr.Zero, "test-parent"), CancellationToken.None).IsCompletedSuccessfully);
 
             var control = new WebView();
             control.TestOnlyAttachCore(core);

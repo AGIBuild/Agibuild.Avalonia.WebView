@@ -138,9 +138,19 @@ internal partial class BuildTask
 
         try
         {
-            DotNetRun(s => s
-                .SetProjectFile(desktopProject)
-                .SetConfiguration(Configuration));
+            var skipAndroidSlice = await ShouldSkipAndroidTfmAsync();
+            DotNetRun(s =>
+            {
+                var settings = s
+                    .SetProjectFile(desktopProject)
+                    .SetConfiguration(Configuration);
+                if (skipAndroidSlice)
+                {
+                    settings = settings.SetProperty("EnableAndroidTfm", "false");
+                }
+
+                return settings;
+            });
         }
         finally
         {

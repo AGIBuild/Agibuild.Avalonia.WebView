@@ -7,36 +7,28 @@ namespace Agibuild.Fulora;
 /// transition methods and a single admission predicate.
 /// </summary>
 /// <remarks>
-/// <para>
-/// Callers interact with the state machine exclusively through named mutators
-/// (<see cref="TransitionToAttaching"/>, <see cref="TransitionToReady"/>,
-/// <see cref="TransitionToDetaching"/>, <see cref="TryTransitionToDisposed"/>,
-/// <see cref="MarkAdapterDestroyedOnce(System.Action)"/>). They must not branch on
-/// <see cref="CurrentState"/>; that property exists only for diagnostics. This keeps the admission
-/// rule (<see cref="IsOperationAccepted"/>) as a single source of truth — the same rule that
-/// <see cref="WebViewCoreOperationQueue"/> consults when deciding whether to admit new work.
-/// </para>
-/// <para>
-/// The two <see langword="volatile"/> fields (<c>_disposed</c> and <c>_state</c>) are read off the UI
-/// thread by adapter callbacks that pre-check disposal before dispatching; the non-volatile
-/// <c>_adapterDestroyed</c> flag is only touched on the UI thread, mirroring the previous invariant
-/// documented on <see cref="WebViewCore"/>.
-/// </para>
+/// Callers interact with the state machine exclusively through named mutators.
+/// They must not branch on <see cref="CurrentState"/>; that property exists only for diagnostics.
+/// Illegal transitions leave state unchanged. Repeated detach/dispose is idempotent.
 /// </remarks>
 internal sealed class WebViewLifecycleStateMachine
 {
-    private volatile bool _disposed;
+    private int _disposed;
     private bool _adapterDestroyed;
     private volatile WebViewLifecycleState _state = WebViewLifecycleState.Created;
+    private int _generation;
 
     /// <summary>Gets a value indicating whether <see cref="TryTransitionToDisposed"/> has succeeded.</summary>
-    public bool IsDisposed => _disposed;
+    public bool IsDisposed => Volatile.Read(ref _disposed) != 0;
 
     /// <summary>Gets a value indicating whether <see cref="MarkAdapterDestroyedOnce(System.Action)"/> has run.</summary>
     public bool IsAdapterDestroyed => _adapterDestroyed;
 
     /// <summary>Gets the current lifecycle phase. For diagnostics only — do not branch on this.</summary>
     public WebViewLifecycleState CurrentState => _state;
+
+    /// <summary>Monotonic attach-attempt identity. Incremented when entering <see cref="WebViewLifecycleState.Attaching"/> from Created.</summary>
+    public int Generation => _generation;
 
     /// <summary>Gets the diagnostic name of <see cref="CurrentState"/> for error messages and logs.</summary>
     public string CurrentStateName => _state.ToString();
@@ -50,42 +42,154 @@ internal sealed class WebViewLifecycleStateMachine
             or WebViewLifecycleState.Attaching
             or WebViewLifecycleState.Ready;
 
-    /// <summary>Transitions from <see cref="WebViewLifecycleState.Created"/> into the attaching phase.</summary>
-    public void TransitionToAttaching() => _state = WebViewLifecycleState.Attaching;
+    /// <summary>True only after a successful attach has published Ready.</summary>
+    public bool IsAttached => _state is WebViewLifecycleState.Ready;
 
-    /// <summary>Transitions into <see cref="WebViewLifecycleState.Ready"/> after a successful attach.</summary>
-    public void TransitionToReady() => _state = WebViewLifecycleState.Ready;
+    /// <summary>True when Dispose has completed the terminal transition.</summary>
+    public bool IsTerminal => _state is WebViewLifecycleState.Disposed;
 
-    /// <summary>Marks the machine as detaching. Disallows further operations from being accepted.</summary>
-    public void TransitionToDetaching() => _state = WebViewLifecycleState.Detaching;
+    /// <summary>True after attach failed without reaching Ready.</summary>
+    public bool IsFaulted => _state is WebViewLifecycleState.Faulted;
 
-    /// <summary>
-    /// Attempts to transition into the terminal <see cref="WebViewLifecycleState.Disposed"/> state.
-    /// Returns <see langword="false"/> when disposal has already occurred so that <c>Dispose()</c>
-    /// bodies can short-circuit idempotently without duplicating the <c>if (_disposed) return;</c>
-    /// pattern at every call site.
-    /// </summary>
-    public bool TryTransitionToDisposed()
+    public bool TryTransitionToAttaching()
     {
-        if (_disposed)
+        if (IsDisposed)
         {
             return false;
         }
 
-        _disposed = true;
-        _state = WebViewLifecycleState.Disposed;
+        if (_state is WebViewLifecycleState.Attaching)
+        {
+            return true;
+        }
+
+        if (_state is not WebViewLifecycleState.Created)
+        {
+            return false;
+        }
+
+        _generation++;
+        _state = WebViewLifecycleState.Attaching;
+        return true;
+    }
+
+    public bool TryTransitionToReady()
+    {
+        if (IsDisposed)
+        {
+            return false;
+        }
+
+        if (_state is WebViewLifecycleState.Ready)
+        {
+            return true;
+        }
+
+        if (_state is not WebViewLifecycleState.Attaching)
+        {
+            return false;
+        }
+
+        _state = WebViewLifecycleState.Ready;
+        return true;
+    }
+
+    public bool TryTransitionToFaulted()
+    {
+        if (IsDisposed)
+        {
+            return false;
+        }
+
+        if (_state is WebViewLifecycleState.Faulted)
+        {
+            return true;
+        }
+
+        if (_state is not WebViewLifecycleState.Attaching)
+        {
+            return false;
+        }
+
+        _state = WebViewLifecycleState.Faulted;
         return true;
     }
 
     /// <summary>
-    /// Invokes <paramref name="raise"/> exactly once across the lifetime of the machine, guarding the
-    /// <c>AdapterDestroyed</c> event's at-most-once contract. Subsequent calls are no-ops.
+    /// Begins detach. Returns <see langword="true"/> when the caller may proceed with native teardown
+    /// (first entry into Detaching). Returns <see langword="true"/> without implying a second teardown
+    /// when already Detaching or Detached — callers must snapshot <see cref="CurrentState"/> first.
     /// </summary>
-    /// <remarks>
-    /// The raise callback is supplied by <see cref="WebViewCore"/> so that the CLR event field
-    /// remains owned by the core (keeping event sourcing centralized) while the at-most-once latch
-    /// lives with the rest of the lifecycle state.
-    /// </remarks>
+    public bool TryTransitionToDetaching()
+    {
+        if (IsDisposed)
+        {
+            return false;
+        }
+
+        if (_state is WebViewLifecycleState.Detaching or WebViewLifecycleState.Detached)
+        {
+            return true;
+        }
+
+        if (_state is WebViewLifecycleState.Created
+            or WebViewLifecycleState.Attaching
+            or WebViewLifecycleState.Ready
+            or WebViewLifecycleState.Faulted)
+        {
+            _state = WebViewLifecycleState.Detaching;
+            return true;
+        }
+
+        return false;
+    }
+
+    public bool TryTransitionToDetached()
+    {
+        if (IsDisposed)
+        {
+            return false;
+        }
+
+        if (_state is WebViewLifecycleState.Detached)
+        {
+            return true;
+        }
+
+        if (_state is not WebViewLifecycleState.Detaching)
+        {
+            return false;
+        }
+
+        _state = WebViewLifecycleState.Detached;
+        return true;
+    }
+
+    /// <summary>
+    /// Attempts to transition into the terminal <see cref="WebViewLifecycleState.Disposed"/> state.
+    /// Returns <see langword="false"/> when disposal has already occurred.
+    /// </summary>
+    public bool TryTransitionToDisposed()
+    {
+        if (Interlocked.Exchange(ref _disposed, 1) != 0)
+        {
+            return false;
+        }
+
+        _state = WebViewLifecycleState.Disposed;
+        return true;
+    }
+
+    public void TransitionToAttaching() => ThrowIfIllegal(TryTransitionToAttaching(), WebViewLifecycleState.Attaching);
+
+    public void TransitionToReady() => ThrowIfIllegal(TryTransitionToReady(), WebViewLifecycleState.Ready);
+
+    public void TransitionToFaulted() => ThrowIfIllegal(TryTransitionToFaulted(), WebViewLifecycleState.Faulted);
+
+    public void TransitionToDetaching() => ThrowIfIllegal(TryTransitionToDetaching(), WebViewLifecycleState.Detaching);
+
+    public void TransitionToDetached() => ThrowIfIllegal(TryTransitionToDetached(), WebViewLifecycleState.Detached);
+
     public void MarkAdapterDestroyedOnce(System.Action raise)
     {
         ArgumentNullException.ThrowIfNull(raise);
@@ -99,7 +203,14 @@ internal sealed class WebViewLifecycleStateMachine
         raise();
     }
 
-    /// <summary>Throws <see cref="ObjectDisposedException"/> when <see cref="IsDisposed"/> is true.</summary>
     public void ThrowIfDisposed()
-        => ObjectDisposedException.ThrowIf(_disposed, nameof(WebViewCore));
+        => ObjectDisposedException.ThrowIf(IsDisposed, nameof(WebViewCore));
+
+    private void ThrowIfIllegal(bool succeeded, WebViewLifecycleState target)
+    {
+        if (!succeeded)
+        {
+            throw new InvalidOperationException($"Cannot transition to {target} from {CurrentStateName}.");
+        }
+    }
 }

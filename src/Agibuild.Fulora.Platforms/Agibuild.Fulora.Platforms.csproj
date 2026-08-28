@@ -104,12 +104,12 @@
           Inputs="Gtk/Native/WebKitGtkShim.c"
           Outputs="$(AgGtkShimOutPath)">
     <MakeDir Directories="$(AgGtkShimOutDir)" />
-    <!-- IgnoreStandardErrorWarningFormat: prevent MSBuild from parsing gcc output as errors.
-         IgnoreExitCode: allow build to continue if native compilation fails (e.g. missing dev libs). -->
+    <!-- IgnoreStandardErrorWarningFormat: prevent MSBuild from parsing gcc output as errors. -->
     <Exec Command="gcc -shared -fPIC -w &quot;$(MSBuildProjectDirectory)/Gtk/Native/WebKitGtkShim.c&quot; -o &quot;$(AgGtkShimOutPath)&quot; `pkg-config --cflags --libs webkit2gtk-4.1 gtk+-3.0`"
           WorkingDirectory="$(MSBuildProjectDirectory)"
-          IgnoreExitCode="true"
           IgnoreStandardErrorWarningFormat="true" />
+    <Error Text="Linux native shim was not produced at $(AgGtkShimOutPath). Ensure gcc, pkg-config, webkit2gtk-4.1, and gtk+-3.0 development files are installed."
+           Condition="!Exists('$(AgGtkShimOutPath)')" />
   </Target>
   <Target Name="AdvertiseGtkShim"
           BeforeTargets="AssignTargetPaths"

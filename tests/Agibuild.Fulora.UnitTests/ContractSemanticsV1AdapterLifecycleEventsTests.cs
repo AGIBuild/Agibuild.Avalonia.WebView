@@ -10,7 +10,7 @@ public sealed class ContractSemanticsV1AdapterLifecycleEventsTests
     // -----------------------------------------------------------------------
 
     [Fact]
-    public void AdapterCreated_fires_after_attach_with_platform_handle()
+    public async Task AdapterCreated_fires_after_attach_with_platform_handle()
     {
         var dispatcher = new TestDispatcher();
         var adapter = MockWebViewAdapter.CreateWithHandle();
@@ -23,14 +23,14 @@ public sealed class ContractSemanticsV1AdapterLifecycleEventsTests
         AdapterCreatedEventArgs? receivedArgs = null;
         core.AdapterCreated += (_, e) => receivedArgs = e;
 
-        core.Attach(new TestPlatformHandle(IntPtr.Zero, "test-parent"));
+        await core.AttachAsync(new TestPlatformHandle(IntPtr.Zero, "test-parent"), CancellationToken.None);
 
         Assert.NotNull(receivedArgs);
         Assert.Same(typedHandle, receivedArgs!.PlatformHandle);
     }
 
     [Fact]
-    public void AdapterCreated_fires_with_null_handle_when_adapter_does_not_support_handles()
+    public async Task AdapterCreated_fires_with_null_handle_when_adapter_does_not_support_handles()
     {
         var dispatcher = new TestDispatcher();
         var adapter = new MockWebViewAdapter(); // No INativeWebViewHandleProvider
@@ -40,14 +40,14 @@ public sealed class ContractSemanticsV1AdapterLifecycleEventsTests
         AdapterCreatedEventArgs? receivedArgs = null;
         core.AdapterCreated += (_, e) => receivedArgs = e;
 
-        core.Attach(new TestPlatformHandle(IntPtr.Zero, "test-parent"));
+        await core.AttachAsync(new TestPlatformHandle(IntPtr.Zero, "test-parent"), CancellationToken.None);
 
         Assert.NotNull(receivedArgs);
         Assert.Null(receivedArgs!.PlatformHandle);
     }
 
     [Fact]
-    public void AdapterCreated_fires_exactly_once_per_attach()
+    public async Task AdapterCreated_fires_exactly_once_per_attach()
     {
         var dispatcher = new TestDispatcher();
         var adapter = MockWebViewAdapter.CreateWithHandle();
@@ -58,13 +58,13 @@ public sealed class ContractSemanticsV1AdapterLifecycleEventsTests
         var fireCount = 0;
         core.AdapterCreated += (_, _) => fireCount++;
 
-        core.Attach(new TestPlatformHandle(IntPtr.Zero, "test-parent"));
+        await core.AttachAsync(new TestPlatformHandle(IntPtr.Zero, "test-parent"), CancellationToken.None);
 
         Assert.Equal(1, fireCount);
     }
 
     [Fact]
-    public void AdapterCreated_fires_before_pending_navigation()
+    public async Task AdapterCreated_fires_before_pending_navigation()
     {
         var dispatcher = new TestDispatcher();
         var adapter = MockWebViewAdapter.CreateWithHandle();
@@ -80,7 +80,7 @@ public sealed class ContractSemanticsV1AdapterLifecycleEventsTests
         // Set source before attach to create a pending navigation
         // (we can only do this via the WebView control, but for core-level test
         //  we verify the ordering within Attach itself)
-        core.Attach(new TestPlatformHandle(IntPtr.Zero, "test-parent"));
+        await core.AttachAsync(new TestPlatformHandle(IntPtr.Zero, "test-parent"), CancellationToken.None);
 
         // AdapterCreated should have fired
         Assert.Contains("AdapterCreated", events);
@@ -91,7 +91,7 @@ public sealed class ContractSemanticsV1AdapterLifecycleEventsTests
     // -----------------------------------------------------------------------
 
     [Fact]
-    public void AdapterDestroyed_fires_during_detach()
+    public async Task AdapterDestroyed_fires_during_detach()
     {
         var dispatcher = new TestDispatcher();
         var adapter = new MockWebViewAdapter();
@@ -100,14 +100,14 @@ public sealed class ContractSemanticsV1AdapterLifecycleEventsTests
         var fired = false;
         core.AdapterDestroyed += (_, _) => fired = true;
 
-        core.Attach(new TestPlatformHandle(IntPtr.Zero, "test-parent"));
+        await core.AttachAsync(new TestPlatformHandle(IntPtr.Zero, "test-parent"), CancellationToken.None);
         core.Detach();
 
         Assert.True(fired);
     }
 
     [Fact]
-    public void AdapterDestroyed_fires_during_dispose_if_not_detached()
+    public async Task AdapterDestroyed_fires_during_dispose_if_not_detached()
     {
         var dispatcher = new TestDispatcher();
         var adapter = new MockWebViewAdapter();
@@ -123,7 +123,7 @@ public sealed class ContractSemanticsV1AdapterLifecycleEventsTests
     }
 
     [Fact]
-    public void AdapterDestroyed_fires_at_most_once_when_both_detach_and_dispose()
+    public async Task AdapterDestroyed_fires_at_most_once_when_both_detach_and_dispose()
     {
         var dispatcher = new TestDispatcher();
         var adapter = new MockWebViewAdapter();
@@ -132,7 +132,7 @@ public sealed class ContractSemanticsV1AdapterLifecycleEventsTests
         var fireCount = 0;
         core.AdapterDestroyed += (_, _) => fireCount++;
 
-        core.Attach(new TestPlatformHandle(IntPtr.Zero, "test-parent"));
+        await core.AttachAsync(new TestPlatformHandle(IntPtr.Zero, "test-parent"), CancellationToken.None);
         core.Detach();
         core.Dispose();
 
@@ -144,14 +144,14 @@ public sealed class ContractSemanticsV1AdapterLifecycleEventsTests
     // -----------------------------------------------------------------------
 
     [Fact]
-    public void TryGetWebViewHandle_returns_null_after_adapter_destroyed()
+    public async Task TryGetWebViewHandle_returns_null_after_adapter_destroyed()
     {
         var dispatcher = new TestDispatcher();
         var adapter = MockWebViewAdapter.CreateWithHandle();
         adapter.HandleToReturn = new TestPlatformHandle(0x1234, "WebView2");
 
         var core = new WebViewCore(adapter, dispatcher);
-        core.Attach(new TestPlatformHandle(IntPtr.Zero, "test-parent"));
+        await core.AttachAsync(new TestPlatformHandle(IntPtr.Zero, "test-parent"), CancellationToken.None);
 
         // Before destroy — handle should be available
         Assert.NotNull(core.TryGetWebViewHandle());
@@ -170,7 +170,7 @@ public sealed class ContractSemanticsV1AdapterLifecycleEventsTests
         adapter.HandleToReturn = new TestPlatformHandle(0x1234, "WebView2");
 
         var core = new WebViewCore(adapter, dispatcher);
-        core.Attach(new TestPlatformHandle(IntPtr.Zero, "test-parent"));
+        await core.AttachAsync(new TestPlatformHandle(IntPtr.Zero, "test-parent"), CancellationToken.None);
 
         var beforeDetach = await core.TryGetWebViewHandleAsync();
         Assert.NotNull(beforeDetach);
@@ -186,13 +186,13 @@ public sealed class ContractSemanticsV1AdapterLifecycleEventsTests
     // -----------------------------------------------------------------------
 
     [Fact]
-    public void No_events_fire_after_adapter_destroyed()
+    public async Task No_events_fire_after_adapter_destroyed()
     {
         var dispatcher = new TestDispatcher();
         var adapter = new MockWebViewAdapter();
         var core = new WebViewCore(adapter, dispatcher);
 
-        core.Attach(new TestPlatformHandle(IntPtr.Zero, "test-parent"));
+        await core.AttachAsync(new TestPlatformHandle(IntPtr.Zero, "test-parent"), CancellationToken.None);
 
         var eventsAfterDestroy = new List<string>();
         core.NavigationCompleted += (_, _) => eventsAfterDestroy.Add("NavigationCompleted");
@@ -218,7 +218,7 @@ public sealed class ContractSemanticsV1AdapterLifecycleEventsTests
     // -----------------------------------------------------------------------
 
     [Fact]
-    public void Typed_handle_pattern_matching_windows()
+    public async Task Typed_handle_pattern_matching_windows()
     {
         var handle = new TestWindowsWebView2PlatformHandle(
             Handle: 0x1234, CoreWebView2Handle: 0xAAAA, CoreWebView2ControllerHandle: 0xBBBB);
@@ -232,7 +232,7 @@ public sealed class ContractSemanticsV1AdapterLifecycleEventsTests
     }
 
     [Fact]
-    public void Typed_handle_pattern_matching_apple()
+    public async Task Typed_handle_pattern_matching_apple()
     {
         var handle = new TestAppleWKWebViewPlatformHandle(WKWebViewHandle: 0x5678);
 
@@ -244,7 +244,7 @@ public sealed class ContractSemanticsV1AdapterLifecycleEventsTests
     }
 
     [Fact]
-    public void Typed_handle_pattern_matching_gtk()
+    public async Task Typed_handle_pattern_matching_gtk()
     {
         var handle = new TestGtkWebViewPlatformHandle(WebKitWebViewHandle: 0x9ABC);
 
@@ -256,7 +256,7 @@ public sealed class ContractSemanticsV1AdapterLifecycleEventsTests
     }
 
     [Fact]
-    public void Typed_handle_pattern_matching_android()
+    public async Task Typed_handle_pattern_matching_android()
     {
         var handle = new TestAndroidWebViewPlatformHandle(AndroidWebViewHandle: 0xDEF0);
 
@@ -268,7 +268,7 @@ public sealed class ContractSemanticsV1AdapterLifecycleEventsTests
     }
 
     [Fact]
-    public void AdapterCreated_event_args_allow_pattern_matching()
+    public async Task AdapterCreated_event_args_allow_pattern_matching()
     {
         var dispatcher = new TestDispatcher();
         var adapter = MockWebViewAdapter.CreateWithHandle();
@@ -287,7 +287,7 @@ public sealed class ContractSemanticsV1AdapterLifecycleEventsTests
             }
         };
 
-        core.Attach(new TestPlatformHandle(IntPtr.Zero, "test-parent"));
+        await core.AttachAsync(new TestPlatformHandle(IntPtr.Zero, "test-parent"), CancellationToken.None);
 
         Assert.NotNull(matchedHandle);
         Assert.Equal((nint)0xAAAA, matchedHandle!.CoreWebView2Handle);

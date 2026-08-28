@@ -50,8 +50,6 @@ internal sealed partial class WindowsWebViewAdapter : IWebViewAdapter, INativeWe
 
     // Readiness: Attach starts async init; operations queue until ready.
     private TaskCompletionSource? _readyTcs;
-    private readonly Queue<Action> _pendingOps = new();
-    private readonly object _pendingOpsLock = new();
     private CancellationTokenSource? _initCts;
     private int _teardownStarted;
     private int _teardownCompleted;
@@ -116,6 +114,7 @@ internal sealed partial class WindowsWebViewAdapter : IWebViewAdapter, INativeWe
 
     public bool CanGoBack => _webView?.CanGoBack ?? false;
     public bool CanGoForward => _webView?.CanGoForward ?? false;
+    public WebViewBackendCapabilities BackendCapabilities => new(this, this);
 
     public event EventHandler<NavigationCompletedEventArgs>? NavigationCompleted;
     public event EventHandler<NewWindowRequestedEventArgs>? NewWindowRequested;
@@ -159,19 +158,19 @@ internal sealed partial class WindowsWebViewAdapter : IWebViewAdapter, INativeWe
         _host = host;
     }
 
-    public void Attach(INativeHandle parentHandle)
+    public Task AttachAsync(INativeHandle parentHandle, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(parentHandle);
         ThrowIfNotInitialized();
 
         if (_detached)
         {
-            throw new InvalidOperationException($"{nameof(Attach)} cannot be called after {nameof(Detach)}.");
+            throw new InvalidOperationException($"{nameof(AttachAsync)} cannot be called after {nameof(Detach)}.");
         }
 
         if (_attached)
         {
-            throw new InvalidOperationException($"{nameof(Attach)} can only be called once.");
+            throw new InvalidOperationException($"{nameof(AttachAsync)} can only be called once.");
         }
 
         if (parentHandle.Handle == IntPtr.Zero)
@@ -184,14 +183,16 @@ internal sealed partial class WindowsWebViewAdapter : IWebViewAdapter, INativeWe
             throw new PlatformNotSupportedException("WebView2 adapter can only be used on Windows.");
         }
 
+        cancellationToken.ThrowIfCancellationRequested();
+
         _attached = true;
         _readyTcs = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-        _initCts = new CancellationTokenSource();
+        _initCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         _uiSyncContext ??= SynchronizationContext.Current;
         _uiThreadId = Environment.CurrentManagedThreadId;
         Diag("Attach: start", $"parentHwnd=0x{parentHandle.Handle.ToInt64():x}");
 
-        _ = InitializeWebView2Async(parentHandle.Handle, _initCts.Token);
+        return InitializeWebView2Async(parentHandle.Handle, _initCts.Token);
     }
 
     public void Detach()
@@ -244,10 +245,6 @@ internal sealed partial class WindowsWebViewAdapter : IWebViewAdapter, INativeWe
                 _pendingApiNavigation = false;
             }
 
-            lock (_pendingOpsLock)
-            {
-                _pendingOps.Clear();
-            }
             Diag("Detach: completed");
         }
     }
@@ -273,7 +270,7 @@ internal sealed partial class WindowsWebViewAdapter : IWebViewAdapter, INativeWe
                 // Detach requested while initializing: ensure we don't leak WebView2 objects.
                 TearDownWebView2OnInitThread();
                 _readyTcs?.TrySetCanceled(ct);
-                return;
+                throw new OperationCanceledException(ct);
             }
 
             _controller = await _environment.CreateCoreWebView2ControllerAsync(parentHwnd).ConfigureAwait(true);
@@ -286,7 +283,7 @@ internal sealed partial class WindowsWebViewAdapter : IWebViewAdapter, INativeWe
             {
                 TearDownWebView2OnInitThread();
                 _readyTcs?.TrySetCanceled(ct);
-                return;
+                throw new OperationCanceledException(ct);
             }
 
             // Size the controller to fill the parent window and track future resizes.
@@ -323,34 +320,6 @@ internal sealed partial class WindowsWebViewAdapter : IWebViewAdapter, INativeWe
             var bridgeScript = WebViewBridgeScriptFactory.CreateWindowsBridgeBootstrapScript(channelId);
             await _webView.AddScriptToExecuteOnDocumentCreatedAsync(bridgeScript).ConfigureAwait(true);
 
-            // Replay queued operations
-            if (_detached || ct.IsCancellationRequested)
-            {
-                TearDownWebView2OnInitThread();
-                _readyTcs?.TrySetCanceled(ct);
-                return;
-            }
-
-            List<Action>? opsToReplay = null;
-            lock (_pendingOpsLock)
-            {
-                if (_pendingOps.Count > 0)
-                {
-                    opsToReplay = new List<Action>(_pendingOps);
-                    _pendingOps.Clear();
-                }
-            }
-
-            if (opsToReplay is not null)
-            {
-                foreach (var op in opsToReplay)
-                {
-                    if (_detached || ct.IsCancellationRequested || Volatile.Read(ref _teardownStarted) == 1)
-                        break;
-                    op();
-                }
-            }
-
             if (DiagnosticsEnabled)
             {
                 Console.WriteLine("[Agibuild.WebView] WebView2 initialized successfully.");
@@ -364,7 +333,7 @@ internal sealed partial class WindowsWebViewAdapter : IWebViewAdapter, INativeWe
             {
                 TearDownWebView2OnInitThread();
                 _readyTcs?.TrySetCanceled(ct);
-                return;
+                throw new OperationCanceledException(ct);
             }
 
             if (DiagnosticsEnabled)
@@ -373,6 +342,7 @@ internal sealed partial class WindowsWebViewAdapter : IWebViewAdapter, INativeWe
             }
 
             _readyTcs?.TrySetException(ex);
+            throw;
         }
     }
 
@@ -508,7 +478,7 @@ internal sealed partial class WindowsWebViewAdapter : IWebViewAdapter, INativeWe
 
         lock (_navLock) { BeginApiNavigation(navigationId); }
 
-        ExecuteOrQueue(() => _webView!.Navigate(uri.AbsoluteUri));
+        ExecuteWhenReady(() => _webView!.Navigate(uri.AbsoluteUri));
         return Task.CompletedTask;
     }
 
@@ -524,7 +494,7 @@ internal sealed partial class WindowsWebViewAdapter : IWebViewAdapter, INativeWe
 
         if (baseUrl is null)
         {
-            ExecuteOrQueue(() => _webView!.NavigateToString(html));
+            ExecuteWhenReady(() => _webView!.NavigateToString(html));
         }
         else
         {
@@ -533,7 +503,7 @@ internal sealed partial class WindowsWebViewAdapter : IWebViewAdapter, INativeWe
             _pendingBaseUrl = baseUrl;
             _pendingBaseUrlNavId = navigationId;
 
-            ExecuteOrQueue(() =>
+            ExecuteWhenReady(() =>
             {
                 var uri = _pendingBaseUrl!.AbsoluteUri;
                 _webView!.AddWebResourceRequestedFilter(uri, CoreWebView2WebResourceContext.All);
@@ -1463,26 +1433,19 @@ internal sealed partial class WindowsWebViewAdapter : IWebViewAdapter, INativeWe
         _pendingApiNavigationId = navigationId;
     }
 
-    private void ExecuteOrQueue(Action action)
+    private void ExecuteWhenReady(Action action)
     {
         if (_detached || Volatile.Read(ref _teardownStarted) == 1)
         {
             return;
         }
 
-        if (_webView is not null)
+        if (_webView is null)
         {
-            RunOnUiThread(action);
+            throw new InvalidOperationException("WebView2 is not ready.");
         }
-        else
-        {
-            lock (_pendingOpsLock)
-            {
-                if (_detached || Volatile.Read(ref _teardownStarted) == 1)
-                    return;
-                _pendingOps.Enqueue(action);
-            }
-        }
+
+        RunOnUiThread(action);
     }
 
     /// <summary>

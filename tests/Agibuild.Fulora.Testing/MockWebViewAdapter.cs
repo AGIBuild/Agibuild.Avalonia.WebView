@@ -59,6 +59,8 @@ internal class MockWebViewAdapter : IWebViewAdapter
     public bool CanGoBack { get; set; }
     public bool CanGoForward { get; set; }
 
+    public virtual WebViewBackendCapabilities BackendCapabilities => WebViewBackendCapabilities.None;
+
     public event EventHandler<NavigationCompletedEventArgs>? NavigationCompleted;
     public event EventHandler<NewWindowRequestedEventArgs>? NewWindowRequested;
     public event EventHandler<WebMessageReceivedEventArgs>? WebMessageReceived;
@@ -76,7 +78,7 @@ internal class MockWebViewAdapter : IWebViewAdapter
         _initialized = true;
     }
 
-    public void Attach(INativeHandle parentHandle)
+    public Task AttachAsync(INativeHandle parentHandle, CancellationToken cancellationToken)
     {
         if (!_initialized)
         {
@@ -88,8 +90,11 @@ internal class MockWebViewAdapter : IWebViewAdapter
             throw new InvalidOperationException("Attach can only be called once.");
         }
 
+        cancellationToken.ThrowIfCancellationRequested();
+
         _attached = true;
         AttachCallCount++;
+        return AttachCompletion?.Task ?? Task.CompletedTask;
     }
 
     public void Detach()
@@ -172,6 +177,9 @@ internal class MockWebViewAdapter : IWebViewAdapter
     }
 
     public int AttachCallCount { get; private set; }
+
+    /// <summary>When set, <see cref="AttachAsync"/> waits on this source instead of completing immediately.</summary>
+    public TaskCompletionSource? AttachCompletion { get; set; }
     public int DetachCallCount { get; private set; }
     public int StopCallCount { get; private set; }
 
@@ -690,6 +698,7 @@ internal sealed class MockWebViewAdapterWithFind : MockWebViewAdapter, IFindInPa
 /// <summary>Mock adapter that also implements preload script adapters for preload script testing.</summary>
 internal sealed class MockWebViewAdapterWithPreload : MockWebViewAdapter, IPreloadScriptAdapter, IAsyncPreloadScriptAdapter
 {
+    public override WebViewBackendCapabilities BackendCapabilities => new(null, this);
     private int _nextId;
     public Dictionary<string, string> Scripts { get; } = new();
     public List<string> SyncAddedScripts { get; } = new();
@@ -773,6 +782,7 @@ internal sealed class MockWebViewAdapterWithContextMenu : MockWebViewAdapter, IC
 /// <summary>Mock adapter that also implements <see cref="IDragDropAdapter"/> for drag-and-drop testing.</summary>
 internal sealed class MockWebViewAdapterWithDragDrop : MockWebViewAdapter, IDragDropAdapter
 {
+    public override WebViewBackendCapabilities BackendCapabilities => new(this, null);
     public event EventHandler<DragEventArgs>? DragEntered;
     public event EventHandler<DragEventArgs>? DragOver;
     public event EventHandler<EventArgs>? DragLeft;

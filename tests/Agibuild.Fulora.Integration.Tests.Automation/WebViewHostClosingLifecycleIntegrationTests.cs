@@ -41,7 +41,7 @@ public sealed class WebViewHostClosingLifecycleIntegrationTests
             var dispatcher = new TestDispatcher();
             var adapter = MockWebViewAdapter.Create();
             var core = new WebViewCore(adapter, dispatcher);
-            core.Attach(new TestPlatformHandle(IntPtr.Zero, "test-parent"));
+            Assert.True(core.AttachAsync(new TestPlatformHandle(IntPtr.Zero, "test-parent"), CancellationToken.None).IsCompletedSuccessfully);
 
             var control = new WebView();
             control.TestOnlyAttachCore(core);
@@ -72,7 +72,7 @@ public sealed class WebViewHostClosingLifecycleIntegrationTests
             var dispatcher = new TestDispatcher();
             var adapter = MockWebViewAdapter.Create();
             var core = new WebViewCore(adapter, dispatcher);
-            core.Attach(new TestPlatformHandle(IntPtr.Zero, "test-parent"));
+            Assert.True(core.AttachAsync(new TestPlatformHandle(IntPtr.Zero, "test-parent"), CancellationToken.None).IsCompletedSuccessfully);
 
             var control = new WebView();
             var navigationStartedCalls = 0;
@@ -109,7 +109,7 @@ public sealed class WebViewHostClosingLifecycleIntegrationTests
             var dispatcher = new TestDispatcher();
             var adapter = MockWebViewAdapter.Create();
             var core = new WebViewCore(adapter, dispatcher);
-            core.Attach(new TestPlatformHandle(IntPtr.Zero, "test-parent"));
+            Assert.True(core.AttachAsync(new TestPlatformHandle(IntPtr.Zero, "test-parent"), CancellationToken.None).IsCompletedSuccessfully);
 
             var control = new WebView();
             var adapterDestroyedCalls = 0;
@@ -139,7 +139,7 @@ public sealed class WebViewHostClosingLifecycleIntegrationTests
             var vm = new WebView2SmokeViewModel(_ => { });
             var adapter = MockWebViewAdapter.Create();
             adapter.Initialize(vm);
-            adapter.Attach(new TestPlatformHandle(IntPtr.Zero, "test-parent"));
+            Assert.True(adapter.AttachAsync(new TestPlatformHandle(IntPtr.Zero, "test-parent"), CancellationToken.None).IsCompletedSuccessfully);
             SetPrivateField(vm, "_adapter", adapter);
 
             var view = new WebView2SmokeView { DataContext = vm };
@@ -172,7 +172,7 @@ public sealed class WebViewHostClosingLifecycleIntegrationTests
 
             var adapter = MockWebViewAdapter.Create();
             adapter.Initialize(smokeVm);
-            adapter.Attach(new TestPlatformHandle(IntPtr.Zero, "test-parent"));
+            Assert.True(adapter.AttachAsync(new TestPlatformHandle(IntPtr.Zero, "test-parent"), CancellationToken.None).IsCompletedSuccessfully);
             SetPrivateField(smokeVm, "_adapter", adapter);
 
             var view = new MainView

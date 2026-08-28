@@ -31,7 +31,7 @@ internal sealed class WebViewCoreContext
 
     public WebViewCoreContext(
         IWebViewAdapter adapter,
-        AdapterCapabilities capabilities,
+        WebViewBackendCapabilities capabilities,
         IWebViewDispatcher dispatcher,
         ILogger logger,
         IWebViewEnvironmentOptions environmentOptions,
@@ -53,7 +53,7 @@ internal sealed class WebViewCoreContext
 
     public IWebViewAdapter Adapter { get; }
 
-    public AdapterCapabilities Capabilities { get; }
+    public WebViewBackendCapabilities Capabilities { get; }
 
     public IWebViewDispatcher Dispatcher { get; }
 
