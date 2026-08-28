@@ -425,7 +425,13 @@ public sealed class BridgeStreamingTests
         adapter.RaiseWebMessage(
             """{"jsonrpc":"2.0","id":"cts-1","method":"CancellableStreamingService.streamTokens","params":{"text":"ABC"}}""",
             "*", core.ChannelId);
-        DrainDispatcher(2000);
+        DrainDispatcherUntil(() =>
+        {
+            lock (capturedScripts)
+            {
+                return capturedScripts.Any(s => s.Contains("token") && s.Contains("_onResponse"));
+            }
+        });
 
         string? initResponse;
         lock (capturedScripts) initResponse = capturedScripts.FirstOrDefault(s => s.Contains("token") && s.Contains("_onResponse"));
@@ -437,7 +443,13 @@ public sealed class BridgeStreamingTests
         adapter.RaiseWebMessage(
             $$$"""{"jsonrpc":"2.0","id":"cts-next-1","method":"$/enumerator/next/{{{token}}}","params":{}}""",
             "*", core.ChannelId);
-        DrainDispatcher(2000);
+        DrainDispatcherUntil(() =>
+        {
+            lock (capturedScripts)
+            {
+                return capturedScripts.Any(s => s.Contains("_onResponse") && s.Contains("cts-next-1"));
+            }
+        });
 
         string? nextResponse;
         string allResponses;
